@@ -1,0 +1,27 @@
+import type { ComponentProps } from "react";
+
+import { cn } from "@/lib/utils";
+
+interface AuthFieldProps extends ComponentProps<"input"> {
+  trailing?: React.ReactNode;
+}
+
+export function AuthField({ className, trailing, ...props }: AuthFieldProps) {
+  return (
+    <div className="relative">
+      <input
+        {...props}
+        className={cn(
+          "h-12 w-full rounded border border-[#e3dccf] bg-[#f7f4ef] px-4 text-base text-[#1c1a18] outline-none transition-colors placeholder:text-[#55423d]/50 focus:border-[#964025] focus:ring-2 focus:ring-[#964025]/15",
+          trailing && "pr-12",
+          className
+        )}
+      />
+      {trailing && (
+        <div className="absolute inset-y-0 right-3 flex items-center text-[#55423d]/60">
+          {trailing}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { CartProvider } from "@/components/shop/cart-provider";
-import { SiteFooter } from "@/components/shop/site-footer";
-import { SiteHeader } from "@/components/shop/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,11 +19,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <CartProvider>
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </CartProvider>
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );
