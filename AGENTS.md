@@ -1,0 +1,134 @@
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This project uses Next.js 16, which has breaking changes compared with older versions. Before changing framework-specific code, read the relevant local guide in `node_modules/next/dist/docs/` and follow any deprecation notices.
+
+<!-- END:nextjs-agent-rules -->
+
+# Project: Vela Wear Frontend
+
+## Product Context
+
+Vela Wear is a premium fashion ecommerce frontend prototype. The current app presents a polished shopping journey for a minimalist clothing brand:
+
+1. Homepage with brand story, seasonal hero, featured categories, and collection entry points.
+2. Collection browsing with category tabs, sorting, selected filters, and quick add behavior.
+3. Product detail with image gallery, product options, and add-to-cart flow.
+4. Cart review with quantity updates, item removal, promo flow, and checkout entry.
+5. Checkout with contact, shipping, payment, order summary, and success state.
+
+Keep the experience refined, editorial, and purchase-focused. The interface should feel like a premium fashion storefront, not a generic SaaS dashboard or QR food ordering app.
+
+## Current Stack
+
+Source of truth: `package.json` and `components.json`.
+
+| Technology | Version / Config | Notes |
+| :--- | :--- | :--- |
+| Next.js | `16.2.9` | App Router |
+| React | `19.2.4` | React Server Components capable |
+| React DOM | `19.2.4` | DOM renderer |
+| TypeScript | `^5` | Strict typed TS/TSX preferred |
+| Tailwind CSS | `^4` | Uses `@tailwindcss/postcss` |
+| shadcn CLI | `^4.11.0` | Components configured through `components.json` |
+| shadcn style | `base-nova` | Keep generated components consistent with this style |
+| Base UI | `@base-ui/react ^1.5.0` | Headless primitives when needed |
+| Icons | `lucide-react ^1.18.0` | Import only the icons used |
+| Animation | `motion ^12.40.0` | Existing app uses `motion/react` |
+| Package manager | `pnpm` | Lockfile is `pnpm-lock.yaml` |
+
+## Repository Shape
+
+- `app/page.tsx`: renders the main `VelaWearApp`.
+- `components/vela-wear-app.tsx`: current interactive ecommerce prototype.
+- `components/ui/`: shadcn UI primitives.
+- `lib/vela-data.ts`: product, cart, route, and demo data types.
+- `lib/utils.ts`: shared utilities such as `cn`.
+- `app/globals.css`: global Tailwind theme and CSS.
+- `artifacts/`: screenshots and visual verification outputs.
+
+## Code Conventions
+
+### Component Structure
+
+- Prefer one meaningful component per file when adding new reusable UI.
+- Do not keep growing `components/vela-wear-app.tsx` indefinitely. For non-trivial changes, extract focused components into separate files under `components/`.
+- Keep component responsibilities clear: product card, cart row, checkout form section, navigation, filters, and similar units should each own a narrow job.
+- Move reusable data or pure helpers into `lib/`; move stateful reusable logic into hooks only when it is actually shared or large enough to justify extraction.
+
+### Type Safety
+
+- Avoid `any`. Define explicit interfaces/types for props, data models, callback payloads, and server responses.
+- If `any` is unavoidable because of an external library or truly dynamic data, add a short comment directly above it explaining why and what would remove the need later.
+- Reuse existing `Product`, `CartItem`, `Screen`, and `TransitionType` types from `lib/vela-data.ts` when working in the current prototype.
+
+### Next.js 16 and React 19
+
+- Read the relevant guide in `node_modules/next/dist/docs/` before editing Next.js framework behavior such as routing, layouts, metadata, data fetching, caching, images, or server actions.
+- Treat dynamic APIs such as `params`, `searchParams`, `cookies`, and `headers` according to the local Next.js 16 docs.
+- Prefer Server Components by default. Add `"use client"` only for components that need browser state, effects, event handlers, animation, or direct DOM/browser APIs.
+- Use Server Actions and React form APIs when adding real mutations; keep mock-only UI behavior local when no backend exists yet.
+- Use Cache Components directives such as `"use cache"` only when the local docs and the data flow make the caching behavior clear.
+
+### Imports and Bundle Hygiene
+
+- Import only what is used.
+- Do not use wildcard imports for large libraries.
+- For `lucide-react`, import individual icons by name.
+- Keep client components as small as practical. Avoid pulling server-only code, large datasets, or unnecessary libraries into `"use client"` files.
+
+### UI/UX Direction
+
+- Preserve the premium fashion aesthetic: restrained typography, high-quality product imagery, intentional whitespace, subtle motion, and clear purchase affordances.
+- The app should remain responsive and pleasant on mobile, tablet, and desktop.
+- Do not add marketing boilerplate where the app needs a usable shopping workflow.
+- Use familiar controls: icon buttons for compact actions, tabs/segmented controls for category switching, selects/menus for option sets, and clear buttons for purchase actions.
+- Keep cards for actual product/order/form group surfaces. Avoid nested cards and decorative section cards.
+- Check that text fits within buttons, cards, nav, and checkout panels across viewport sizes.
+
+## Workflow Rules
+
+### Before Starting
+
+- Check the working tree with `git status --short` and avoid overwriting user changes.
+- If `docs/PROJECT-STATUS.md` exists, read it before making changes. If it does not exist, mention that and continue; do not invent blockers from a missing status file.
+- Inspect the existing implementation before editing. Prefer `rg`/`rg --files` for search.
+
+### During Changes
+
+- Keep edits scoped to the requested task.
+- Preserve existing behavior unless the task explicitly asks to change it.
+- Do not remove code broadly just to simplify a change.
+- Use `apply_patch` for manual file edits.
+- Follow the existing formatting style and Tailwind conventions.
+
+### Verification
+
+Run the relevant checks before finishing:
+
+- `pnpm lint` for syntax and linting.
+- `pnpm build` when changing app structure, Next.js behavior, or anything likely to affect production build output.
+- For visual/frontend changes, run the dev server and verify the affected screens in a browser. Capture or update artifacts when useful.
+
+If a required check cannot run because the repo lacks a script or dependency, state that clearly in the final note.
+
+### Processes
+
+- Stop dev servers or long-running test processes started for the task before finishing, unless the user explicitly asks to keep them running.
+
+### Project Status
+
+- If `docs/PROJECT-STATUS.md` exists, update it after completing a meaningful task with:
+  - date/time,
+  - summary of changes,
+  - verification performed,
+  - known follow-ups.
+- If the file does not exist, do not create it for small documentation-only edits unless the user asks for project status tracking.
+
+### Git
+
+- Commit completed work when the user asked for an implementation task and the repository is in a committable state.
+- Use a clear commit message, for example `docs: align agent instructions with vela wear app`.
+- Do not include unrelated user changes in the commit.
+- If only documentation instructions are changed, a documentation commit is appropriate after checks pass.
