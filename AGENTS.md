@@ -92,7 +92,7 @@ Source of truth: `package.json` and `components.json`.
 ### Before Starting
 
 - Check the working tree with `git status --short` and avoid overwriting user changes.
-- If `docs/PROJECT-STATUS.md` exists, read it before making changes. If it does not exist, mention that and continue; do not invent blockers from a missing status file.
+- Read `docs/PROJECT_STATUS.md` before making changes so the current project state, recent work, and known follow-ups are understood before editing.
 - Inspect the existing implementation before editing. Prefer `rg`/`rg --files` for search.
 
 ### During Changes
@@ -119,12 +119,12 @@ If a required check cannot run because the repo lacks a script or dependency, st
 
 ### Project Status
 
-- If `docs/PROJECT-STATUS.md` exists, update it after completing a meaningful task with:
+- Update `docs/PROJECT_STATUS.md` after completing each meaningful task with:
   - date/time,
   - summary of changes,
   - verification performed,
   - known follow-ups.
-- If the file does not exist, do not create it for small documentation-only edits unless the user asks for project status tracking.
+- Keep entries concise and newest-first so future agents can quickly recover context.
 
 ### Git
 
