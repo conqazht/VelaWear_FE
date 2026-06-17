@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, ShoppingBag, Heart, Search, X } from "lucide-react";
 
 import { BrandMark } from "@/components/shop/brand-mark";
@@ -14,6 +14,7 @@ export function SiteHeader() {
   const { favorites } = useFavorites();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // If path is /profile, simulate logged-in state to show member avatar
   const isLoggedIn = pathname === "/profile";
@@ -67,20 +68,32 @@ export function SiteHeader() {
           </Link>
 
           {/* Search Bar */}
-          <div className="hidden md:flex items-center bg-surface-card rounded-full px-4 py-2 gap-2.5 w-44 focus-within:w-60 transition-all duration-300 border border-transparent focus-within:border-hairline">
-            <Search className="size-4 text-[#55423d]/60" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = (e.currentTarget.elements.namedItem("q") as HTMLInputElement).value;
+              if (q.trim()) {
+                router.push(`/search?q=${encodeURIComponent(q.trim())}`);
+              }
+            }}
+            className="hidden md:flex items-center bg-surface-card rounded-full px-4 py-2 gap-2.5 w-44 focus-within:w-60 transition-all duration-300 border border-transparent focus-within:border-hairline"
+          >
+            <button type="submit" aria-label="Submit search" className="p-0 border-none bg-transparent">
+              <Search className="size-4 text-[#55423d]/60 cursor-pointer" />
+            </button>
             <input
               type="text"
+              name="q"
               placeholder="Search"
               className="bg-transparent border-none outline-none text-xs w-full text-ink placeholder-[#55423d]/50 focus:ring-0 p-0"
             />
-          </div>
+          </form>
 
           {/* Action Icons */}
           <div className="flex items-center gap-4">
             {/* Wishlist Button */}
             <Link
-              href="/profile?tab=favourites"
+              href="/favorites"
               aria-label="Favorites"
               className="relative inline-flex size-10 items-center justify-center rounded-full text-[#55423d] hover:bg-surface-card transition-colors"
             >
@@ -147,14 +160,27 @@ export function SiteHeader() {
         <div className="fixed inset-x-0 top-20 bottom-0 z-40 bg-canvas animate-in fade-in slide-in-from-top-4 duration-300 md:hidden border-t border-hairline/50">
           <div className="flex flex-col p-6 gap-8 h-full overflow-y-auto">
             {/* Mobile Search */}
-            <div className="flex items-center bg-surface-card rounded-md px-4 py-3 gap-3 w-full border border-hairline">
-              <Search className="size-5 text-[#55423d]/60" />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = (e.currentTarget.elements.namedItem("q") as HTMLInputElement).value;
+                if (q.trim()) {
+                  setIsMobileMenuOpen(false);
+                  router.push(`/search?q=${encodeURIComponent(q.trim())}`);
+                }
+              }}
+              className="flex items-center bg-surface-card rounded-md px-4 py-3 gap-3 w-full border border-hairline"
+            >
+              <button type="submit" aria-label="Submit search" className="p-0 border-none bg-transparent">
+                <Search className="size-5 text-[#55423d]/60 cursor-pointer" />
+              </button>
               <input
                 type="text"
+                name="q"
                 placeholder="Tìm kiếm sản phẩm..."
                 className="bg-transparent border-none outline-none text-sm w-full text-ink placeholder-[#55423d]/50 focus:ring-0 p-0"
               />
-            </div>
+            </form>
 
             {/* Navigation Links */}
             <div className="flex flex-col gap-6 text-lg font-serif">

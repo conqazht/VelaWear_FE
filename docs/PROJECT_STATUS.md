@@ -4,6 +4,18 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-06-18
 
+### Multi-Page Refinement, Footer Redesign & Search/Favorites Pages Completed
+
+- **Footer Redesign**: Modified [site-footer.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-footer.tsx) into a `"use client"` component to support custom newsletter forms. Redesigned layout to match the provided screenshot: a left-aligned serif "VELA WEAR" header, a newsletter signup form with a terracotta `#b5573a` button, columns for "Chính Sách" and "Hỗ Trợ", and a centered copyright text at the bottom.
+- **Standalone Favorites Page**: Created [favorites/page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/favorites/page.tsx) with a responsive editorial grid displaying wishlist items, supporting instant removals, and quick "Add to Bag" triggers that fire notifications.
+- **Search & Filters Page**: Created [search/page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/search/page.tsx) with dynamic client-side querying over the expanded `PRODUCTS` catalog, sidebar checkboxes for categories, size buttons, sorting options, and direct integration with `ProductCard`.
+- **Layout Synchronizations**:
+  - Updated container max-width to `max-w-[1800px] px-6 md:px-16 mx-auto` on the Cart page ([cart-page-client.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/cart-page-client.tsx)), Checkout page ([checkout-page-client.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/checkout-page-client.tsx)), and Collection page ([collection-page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/collection-page.tsx)).
+  - Wrapped search bar inputs in `<form>` tags in [site-header.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-header.tsx) to redirect query submissions to `/search?q=query`.
+  - Updated heart action icons in [site-header.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-header.tsx) and the favorites toast in [notification-provider.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/notification-provider.tsx) to link directly to `/favorites`.
+- **Expanded Products Database**: Added extra product items to the `PRODUCTS` list in [vela-data.ts](file:///d:/CANH/Java/side%20project/commercial-fe/lib/vela-data.ts) matching Stitch design screens (Signature Hemp Tee, Artisan Linen Over-Shirt, Chunky Wool Knit, Oversized Linen Shirt, Relaxed Trousers, Lightweight Jacket) to render beautiful results in search and favorites.
+- **Verification**: Successfully ran `pnpm build` ensuring clean compilation and route static generation.
+
 ### Product Detail Redesign & Enhanced Info Completed
 
 - Retrieved and downloaded Stitch HTML template for **Vela Wear - Synchronized Product Detail with Enhanced Previews & Info**.

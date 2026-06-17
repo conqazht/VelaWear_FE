@@ -1,0 +1,335 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VELA WEAR - Checkout</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffdeac",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#55423d",
+                    "surface-container-high": "#ede7e3",
+                    "inverse-on-surface": "#f6efec",
+                    "secondary": "#54634a",
+                    "on-surface": "#1d1b19",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#ffb59f",
+                    "surface-dark": "#1c1a18",
+                    "on-tertiary-fixed": "#281900",
+                    "on-tertiary-container": "#fff8f2",
+                    "secondary-fixed-dim": "#bbccae",
+                    "surface-card": "#efe7dc",
+                    "ink": "#1c1a18",
+                    "tertiary-container": "#916c29",
+                    "surface-container-low": "#f9f2ef",
+                    "secondary-fixed": "#d7e8c9",
+                    "outline": "#89726c",
+                    "inverse-surface": "#32302e",
+                    "error": "#ba1a1a",
+                    "background": "#fff8f4",
+                    "on-error-container": "#93000a",
+                    "on-dark": "#f7f4ef",
+                    "primary-fixed": "#ffdbd1",
+                    "surface-tint": "#9b4428",
+                    "on-primary-container": "#fff8f6",
+                    "surface-variant": "#e7e1de",
+                    "on-secondary-container": "#58674e",
+                    "inverse-primary": "#ffb59f",
+                    "hairline": "#e3dccf",
+                    "on-primary-fixed": "#3a0a00",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#121f0c",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#edbf74",
+                    "outline-variant": "#dcc1b9",
+                    "surface-container": "#f3ede9",
+                    "tertiary": "#765412",
+                    "surface": "#fff8f4",
+                    "surface-container-highest": "#e7e1de",
+                    "surface-bright": "#fff8f4",
+                    "on-secondary-fixed-variant": "#3c4b34",
+                    "primary": "#964025",
+                    "surface-dim": "#dfd9d5",
+                    "primary-container": "#b5573a",
+                    "secondary-container": "#d4e5c6",
+                    "on-tertiary-fixed-variant": "#604100",
+                    "on-background": "#1d1b19",
+                    "on-primary-fixed-variant": "#7c2d13",
+                    "canvas": "#f7f4ef"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section": "88px",
+                    "micro": "8px",
+                    "item-gap": "24px",
+                    "grid-margin": "16px",
+                    "card-internal": "32px"
+            },
+            "fontFamily": {
+                    "title-md": ["Inter"],
+                    "display-lg": ["Cormorant Garamond"],
+                    "display-xl-mobile": ["Cormorant Garamond"],
+                    "display-xl": ["Cormorant Garamond"],
+                    "button": ["Inter"],
+                    "body-md": ["Inter"],
+                    "display-md": ["Cormorant Garamond"],
+                    "caption-uc": ["Inter"]
+            },
+            "fontSize": {
+                    "title-md": ["16px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500"}],
+                    "display-lg": ["40px", {"lineHeight": "1.12", "letterSpacing": "-0.8px", "fontWeight": "400"}],
+                    "display-xl-mobile": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.5px", "fontWeight": "400"}],
+                    "display-xl": ["56px", {"lineHeight": "1.08", "letterSpacing": "-1.2px", "fontWeight": "400"}],
+                    "button": ["14px", {"lineHeight": "1.0", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.55", "letterSpacing": "0", "fontWeight": "400"}],
+                    "display-md": ["32px", {"lineHeight": "1.18", "letterSpacing": "-0.4px", "fontWeight": "400"}],
+                    "caption-uc": ["11px", {"lineHeight": "1.4", "letterSpacing": "1.8px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom form input resets to match design system */
+        input[type="text"], input[type="email"], input[type="tel"], select {
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-ink font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar Shared Component -->
+<nav class="w-full top-0 sticky bg-canvas dark:bg-surface-dark border-b border-hairline dark:border-on-surface-variant z-50"><div class="flex justify-between items-center h-20 px-grid-margin max-w-[1280px] mx-auto transition-all duration-300"><div class="flex-none"><a class="font-display-md text-display-md tracking-tight text-ink dark:text-on-dark uppercase" href="#"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD14gbxPwdll4LMQYqKjK2l0AIRVWRdABJeQEmFE0l2RFjH_wh8THgnXIhjCsr-6fslWMfZrpHDIv4IzfeQgRpMBQUEbchZLGNbCsBqrhHJj7z5W8_moATCZzFTU2XXijmEgjvH27yF_-n5Q8mZ3Zy82EYnCzlJvzv_nlkTCRbEq6Xuxla4ZzN3hlEW11Eb6BF0W-iZIjgjzH0c0-iS4ZMoYg_zPs96kcz2gIKn1HAGRlJP00JkNpdOCPz4XHfVGEvRlg9AgJ3Prxn5" alt="Vela Wear Logo" class="h-10 w-auto object-contain"></a></div><div class="flex items-center gap-item-gap"><div class="hidden md:flex gap-item-gap items-center"><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Collections</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Lookbook</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Story</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Journal</a></div><div class="hidden md:flex items-center bg-surface-container-high rounded-full px-4 py-2 gap-2 w-48 focus-within:w-64 transition-all duration-300"><span class="material-symbols-outlined text-xl text-on-surface-variant">search</span><input type="text" placeholder="Search" class="bg-transparent border-none focus:ring-0 p-0 text-body-md w-full placeholder-on-surface-variant"></div><div class="flex items-center gap-4"><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all"><span class="material-symbols-outlined text-2xl">favorite</span></button><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all"><span class="material-symbols-outlined text-2xl">shopping_bag</span></button></div></div></div></nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-grid-margin py-section">
+<div class="mb-12">
+<h1 class="font-display-lg text-display-lg md:font-display-xl md:text-display-xl text-ink">Checkout</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Complete your order securely.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-item-gap items-start">
+<!-- Left Column: Checkout Steps -->
+<div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-12">
+<!-- Contact Information -->
+<section class="border-b border-hairline pb-12">
+<h2 class="font-title-md text-title-md text-ink mb-6 flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-ink text-canvas font-caption-uc text-caption-uc">1</span>
+                        Contact Information
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="email">Email Address</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="email" placeholder="Enter your email" type="email">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="phone">Phone Number (Optional)</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="phone" placeholder="Enter your phone" type="tel">
+</div>
+</div>
+</section>
+<!-- Shipping Address -->
+<section class="border-b border-hairline pb-12">
+<h2 class="font-title-md text-title-md text-ink mb-6 flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-ink text-canvas font-caption-uc text-caption-uc">2</span>
+                        Shipping Address
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="firstName">First Name</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="firstName" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="lastName">Last Name</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="lastName" type="text">
+</div>
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="address">Address</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="address" placeholder="Street address or P.O. Box" type="text">
+</div>
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="apartment">Apartment, suite, etc. (Optional)</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="apartment" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="city">City</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="city" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="country">Country / Region</label>
+<div class="relative">
+<select class="w-full border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all appearance-none cursor-pointer" id="country">
+<option>United States</option>
+<option>United Kingdom</option>
+<option>Canada</option>
+<option>Australia</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="state">State / Province</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="state" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="zip">ZIP / Postal Code</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="zip" type="text">
+</div>
+</div>
+</section>
+<!-- Payment Details -->
+<section>
+<h2 class="font-title-md text-title-md text-ink mb-6 flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-ink text-canvas font-caption-uc text-caption-uc">3</span>
+                        Payment Details
+                    </h2>
+<div class="bg-canvas border border-hairline rounded p-6 flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="cardNumber">Card Number</label>
+<div class="relative">
+<input class="w-full border border-hairline bg-canvas rounded px-4 py-3 pl-12 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="cardNumber" placeholder="0000 0000 0000 0000" type="text">
+<span class="material-symbols-outlined absolute left-4 top-1/2 transform -translate-y-1/2 text-on-surface-variant">credit_card</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="expiry">Expiration Date</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="expiry" placeholder="MM / YY" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="cvc">Security Code</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="cvc" placeholder="CVC" type="text">
+</div>
+</div>
+<div class="flex flex-col gap-2 md:col-span-2 mt-2">
+<label class="font-body-md text-body-md text-on-surface-variant" for="nameOnCard">Name on Card</label>
+<input class="border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" id="nameOnCard" type="text">
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Order Summary (Sticky) -->
+<div class="lg:col-span-5 xl:col-span-4 relative">
+<div class="sticky top-28 bg-surface-card p-card-internal flex flex-col gap-8 rounded-none">
+<h3 class="font-display-md text-display-md text-ink border-b border-hairline pb-4">Order Summary</h3>
+<!-- Item List -->
+<div class="flex flex-col gap-6 border-b border-hairline pb-8">
+<!-- Item 1 -->
+<div class="flex gap-4 items-start">
+<div class="w-20 h-24 bg-canvas flex-shrink-0 rounded-none overflow-hidden relative">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A minimalist studio shot of a high-end, textured linen overcoat in a warm terracotta hue, draped elegantly on a wooden hanger against a clean, warm cream background. The lighting is soft, natural, and highly editorial, highlighting the natural weave of the fabric and casting a subtle, diffused shadow. The composition is stark and intentional, emphasizing the garment's organic luxury and timeless silhouette within a warm minimalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzEpbUN-shaEnhKgeaimhkIAE6cjKG7iXJTHIQapFSiaKBexvvIM11dgtI9eXyXCsnw_quIiCDjPp0T41DuGK2cZIP3wSTOO5NFi46mgfnCOUGkbiGqrnOn2Ij0L4dQxz7gg6sU0LLvDZFRUGLo4mt6amvE5mxaNWzsanoJFw7Y7o68lv4JA5Phlk7-V2RIv8LfHpXKN6hX2ooko8cq7ElUFUYKjY-Chgfnr_O5QpSPJ-wSE0LbgBHRKOtUQjD08l1ZJReQBxW7xWf">
+<span class="absolute top-0 right-0 bg-ink text-canvas font-caption-uc text-caption-uc w-5 h-5 flex items-center justify-center transform translate-x-1/2 -translate-y-1/2 rounded-full z-10 border border-canvas">1</span>
+</div>
+<div class="flex flex-col flex-grow">
+<div class="flex justify-between items-start">
+<h4 class="font-title-md text-title-md text-ink">The Linen Overcoat</h4>
+<span class="font-body-md text-body-md text-ink">$285</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant mt-1">Color: Terracotta</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Size: M</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4 items-start">
+<div class="w-20 h-24 bg-canvas flex-shrink-0 rounded-none overflow-hidden relative">
+<img alt="Product Image" class="w-full h-full object-cover" data-alt="A close-up, high-fashion detail shot of a crisp, white organic cotton poplin shirt, neatly folded and resting on a smooth, warm cream surface. The image focuses on the precise stitching of the collar and the subtle texture of the fabric under diffused, high-key studio lighting. The stark contrast between the white shirt and the warm background evokes a sophisticated, modern editorial aesthetic, devoid of harsh shadows or clutter." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMqphu9VlvWLNugHFT1iTILFBP6K-WM8Cb3e5pFFB8QsiCJxpEsmiFFZFM3_WpJFs1hqUHXizp3Vv7aVzzAWSGlsS8BMZW29JVxwngVK2x9YdAYK_0tRfAc4Uok-sNR0KhkzLWz6sFj2DTB89Pv6SqchyKZRotZHY8AXZoAJQYunICcwCvG1pju54IBP_DT6En5c9Ed1hXr_6rYqi2OzXe2XchKWdiLiZ-_kARufnSJw_DT-ddQf3HnEPoY0puM-r3IJSltpA72FV7">
+<span class="absolute top-0 right-0 bg-ink text-canvas font-caption-uc text-caption-uc w-5 h-5 flex items-center justify-center transform translate-x-1/2 -translate-y-1/2 rounded-full z-10 border border-canvas">1</span>
+</div>
+<div class="flex flex-col flex-grow">
+<div class="flex justify-between items-start">
+<h4 class="font-title-md text-title-md text-ink">Organic Poplin Shirt</h4>
+<span class="font-body-md text-body-md text-ink">$145</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant mt-1">Color: Bone White</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Size: L</span>
+</div>
+</div>
+</div>
+<!-- Promo Code -->
+<div class="flex gap-2">
+<input class="flex-grow border border-hairline bg-canvas rounded px-4 py-3 font-body-md text-body-md text-ink focus:outline-none focus:border-outline focus:ring-1 focus:ring-primary/15 transition-all" placeholder="Gift card or discount code" type="text">
+<button class="bg-surface-dark text-on-dark font-button text-button px-6 py-3 rounded hover:bg-ink transition-colors">Apply</button>
+</div>
+<!-- Price Breakdown -->
+<div class="flex flex-col gap-4 border-b border-hairline pb-6 pt-4">
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface-variant">
+<span class="">Subtotal</span>
+<span class="text-ink">$430.00</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface-variant">
+<span class="">Shipping</span>
+<span class="">Calculated at next step</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface-variant">
+<span class="">Taxes</span>
+<span class="text-ink">$34.40</span>
+</div>
+</div>
+<!-- Total & Action -->
+<div class="flex flex-col gap-6 pt-2">
+<div class="flex justify-between items-center">
+<span class="font-title-md text-title-md text-ink">Total</span>
+<div class="flex items-end gap-2">
+<span class="font-caption-uc text-caption-uc text-on-surface-variant pb-1">USD</span>
+<span class="font-display-md text-display-md text-ink">$464.40</span>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container font-button text-button py-4 rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+                            Complete Purchase
+                        </button>
+<p class="font-body-md text-body-md text-on-surface-variant text-center text-sm mt-2">
+                            By completing your purchase, you agree to our <a class="underline hover:text-ink" href="#">Terms of Service</a> and <a class="underline hover:text-ink" href="#">Privacy Policy</a>.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Shared Component -->
+<footer class="w-full py-section bg-surface-dark dark:bg-surface-dark mt-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-item-gap max-w-[1280px] mx-auto px-grid-margin">
+<!-- Brand & Copyright -->
+<div class="flex flex-col gap-4 md:col-span-1">
+<div class="font-display-md text-display-md text-on-dark mb-4">
+                    VELA WEAR
+                </div>
+<div class="font-caption-uc text-caption-uc text-surface-container-highest dark:text-surface-variant">
+                    © 2024 VELA WEAR. ALL RIGHTS RESERVED.
+                </div>
+</div>
+<!-- Links -->
+<div class="flex flex-col gap-3 md:col-span-3 md:flex-row md:justify-end md:gap-8">
+<a class="font-body-md text-body-md text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors transition-all duration-300" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors transition-all duration-300" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors transition-all duration-300" href="#">Shipping</a>
+<a class="font-body-md text-body-md text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors transition-all duration-300" href="#">Returns</a>
+<a class="font-body-md text-body-md text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors transition-all duration-300" href="#">Sustainability</a>
+</div>
+</div>
+</footer>
+
+
+
+
+</body></html>

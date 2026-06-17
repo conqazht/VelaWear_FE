@@ -208,7 +208,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 <button
                   onClick={() => {
                     closeNotification();
-                    router.push("/profile?tab=favourites");
+                    router.push("/favorites");
                   }}
                   className="w-full text-on-dark font-semibold text-xs tracking-wider uppercase py-4 hover:bg-surface-dark/95 transition-colors border-none cursor-pointer flex items-center justify-center gap-2 bg-primary-container rounded-sm"
                 >

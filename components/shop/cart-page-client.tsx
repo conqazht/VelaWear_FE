@@ -17,7 +17,7 @@ export function CartPageClient() {
   const total = subtotal + shipping + taxes;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:px-12">
+    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
       <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-4xl">

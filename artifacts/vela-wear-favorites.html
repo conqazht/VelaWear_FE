@@ -1,0 +1,221 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VELA WEAR - Favorites</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#dfd9d5",
+                        "on-primary-fixed-variant": "#7c2d13",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-dark": "#f7f4ef",
+                        "surface-container-high": "#ede7e3",
+                        "tertiary": "#765412",
+                        "on-tertiary-fixed": "#281900",
+                        "inverse-surface": "#32302e",
+                        "surface-bright": "#fff8f4",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "on-surface": "#1d1b19",
+                        "on-secondary-fixed-variant": "#3c4b34",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#fff8f2",
+                        "on-background": "#1d1b19",
+                        "tertiary-fixed-dim": "#edbf74",
+                        "surface-container": "#f3ede9",
+                        "on-primary-container": "#fff8f6",
+                        "surface-container-highest": "#e7e1de",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#916c29",
+                        "on-secondary-container": "#58674e",
+                        "on-primary": "#ffffff",
+                        "primary": "#964025",
+                        "on-primary-fixed": "#3a0a00",
+                        "surface-variant": "#e7e1de",
+                        "primary-fixed": "#ffdbd1",
+                        "outline-variant": "#dcc1b9",
+                        "surface-dark": "#1c1a18",
+                        "tertiary-fixed": "#ffdeac",
+                        "hairline": "#e3dccf",
+                        "secondary-container": "#d4e5c6",
+                        "on-error-container": "#93000a",
+                        "canvas": "#f7f4ef",
+                        "secondary-fixed": "#d7e8c9",
+                        "outline": "#89726c",
+                        "surface": "#fff8f4",
+                        "background": "#fff8f4",
+                        "surface-tint": "#9b4428",
+                        "error": "#ba1a1a",
+                        "surface-card": "#efe7dc",
+                        "secondary-fixed-dim": "#bbccae",
+                        "inverse-on-surface": "#f6efec",
+                        "primary-container": "#b5573a",
+                        "surface-container-low": "#f9f2ef",
+                        "on-secondary-fixed": "#121f0c",
+                        "secondary": "#54634a",
+                        "on-surface-variant": "#55423d",
+                        "primary-fixed-dim": "#ffb59f",
+                        "ink": "#1c1a18",
+                        "inverse-primary": "#ffb59f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "spacing": {
+                        "grid-margin": "16px",
+                        "card-internal": "32px",
+                        "item-gap": "24px",
+                        "micro": "8px",
+                        "section": "88px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "display-xl-mobile": ["Cormorant Garamond"],
+                        "caption-uc": ["Inter"],
+                        "button": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Cormorant Garamond"],
+                        "display-md": ["Cormorant Garamond"],
+                        "display-xl": ["Cormorant Garamond"]
+                    },
+                    "fontSize": {
+                        "title-md": ["16px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "display-xl-mobile": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.5px", "fontWeight": "400" }],
+                        "caption-uc": ["11px", { "lineHeight": "1.4", "letterSpacing": "1.8px", "fontWeight": "500" }],
+                        "button": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.55", "letterSpacing": "0", "fontWeight": "400" }],
+                        "display-lg": ["40px", { "lineHeight": "1.12", "letterSpacing": "-0.8px", "fontWeight": "400" }],
+                        "display-md": ["32px", { "lineHeight": "1.18", "letterSpacing": "-0.4px", "fontWeight": "400" }],
+                        "display-xl": ["56px", { "lineHeight": "1.08", "letterSpacing": "-1.2px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-ink antialiased min-h-screen flex flex-col">
+<!-- Top Navigation from JSON -->
+<nav class="bg-canvas dark:bg-surface-dark w-full top-0 sticky z-50 border-b border-hairline dark:border-on-surface-variant flex justify-between items-center h-20 px-grid-margin max-w-[1280px] mx-auto transition-all duration-300"><div class="flex-none"><a class="flex items-center" href="/"><img alt="Vela Wear Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr9P1noM9D1CupNK_w1iigH0wAo4aKmUa8lBc3COadta8Zi23z_nowZZYcdmiJnO4W0qKHGIsOHOLRFKuhj3woT2ovw_O5yxcZ7y6RJxBg6lfRr2ptWQhB5x2KrHTLOOB2-6cKo6Wk-s16Kg11G6aCms3FwYlLNQvvZcQDogmO7nPub9NIKd-Vdc5Fw_Z2FpoDUNpOswf3QfoUQuLI1_s_M8MSNI6WdJGwTO8o7GFjlBrZWJkyHRR3Bl0Ecd59_oTe2O3N-yal09qz"></a></div><div class="flex items-center gap-item-gap"><div class="hidden md:flex gap-item-gap items-center"><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Collections</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Lookbook</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Story</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Journal</a></div><div class="hidden md:flex items-center bg-surface-container-high rounded-full px-4 py-2 gap-2 w-48 focus-within:w-64 transition-all duration-300"><span class="material-symbols-outlined text-xl text-on-surface-variant">search</span><input class="bg-transparent border-none focus:ring-0 p-0 text-body-md w-full placeholder-on-surface-variant" placeholder="Search" type="text"></div><div class="flex items-center gap-4"><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all"><span class="material-symbols-outlined text-2xl">favorite</span></button><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all"><span class="material-symbols-outlined text-2xl" data-icon="shopping_bag">shopping_bag</span></button></div></div></nav>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-grid-margin py-section">
+<header class="mb-section">
+<h1 class="font-display-lg text-display-lg text-ink">Favorites</h1>
+</header>
+<!-- Product Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-item-gap">
+<!-- Item 1 -->
+<article class="flex flex-col group relative bg-surface-card hover:shadow-lg transition-shadow duration-300">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-dim">
+<img alt="A high-fashion shot of a male model wearing a minimalist, oversized grey t-shirt. The lighting is warm and directional, emphasizing the texture of the organic cotton fabric against a clean, light cream canvas background. The mood is relaxed, contemporary, and sophisticated, perfectly aligned with a luxury editorial aesthetic." class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A high-fashion shot of a male model wearing a minimalist, oversized grey t-shirt. The lighting is warm and directional, emphasizing the texture of the organic cotton fabric against a clean, light cream canvas background. The mood is relaxed, contemporary, and sophisticated, perfectly aligned with a luxury editorial aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfNYnfyjJqT5IK6-gECBXXaXH7OvMyrDVs0VDY1V2ugJ8EGaOI3QE6VHMt9FsgqadcUoGAHNPasTO1LUY3mT5X2-MxFdtSJMXEdQ4H6tYDuxJ1tMEg_j33_wvw7H4KCaD9Ugi9hbhwsc-wdmZKqyNs7W-zBAexhOEJPq_2O-C5NIqplH3fCe686i_B5zNOwUXCzhSdoOvmPTWUwKjXXlPeOBXkWCJIdS2Y1HmeIodoqCHpNvx0FPMn4s1hpPt2CYxTFbN--Uvdhsu4">
+<button aria-label="Remove from favorites" class="absolute top-4 right-4 bg-surface-lowest p-2 hover:bg-canvas transition-colors z-10">
+<span class="material-symbols-outlined filled text-ink">favorite</span>
+</button>
+</div>
+<div class="p-card-internal flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h2 class="font-title-md text-title-md text-ink pr-4">Signature Hemp Tee</h2>
+<span class="font-title-md text-title-md text-ink whitespace-nowrap">$110</span>
+</div>
+<p class="font-caption-uc text-caption-uc text-on-surface-variant uppercase tracking-widest mb-6">Men's Top</p>
+</div>
+<button class="w-full bg-surface-container border border-hairline py-3 px-4 font-button text-button text-ink hover:bg-primary hover:text-on-primary hover:border-primary transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">shopping_bag</span>
+<span class="">Add to Bag</span>
+</button>
+</div>
+</article>
+<!-- Item 2 -->
+<article class="flex flex-col group relative bg-surface-card hover:shadow-lg transition-shadow duration-300">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-dim">
+<img alt="A studio portrait of a woman modeling an unstructured, rich terracotta-colored linen shirt. The backdrop is a soft, warm beige, creating a cohesive, earthy tonal harmony. The lighting is soft and diffused, highlighting the garment's natural drape and the premium quality of the material in a warm minimalist style." class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A studio portrait of a woman modeling an unstructured, rich terracotta-colored linen shirt. The backdrop is a soft, warm beige, creating a cohesive, earthy tonal harmony. The lighting is soft and diffused, highlighting the garment's natural drape and the premium quality of the material in a warm minimalist style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSrgTdoRWZJbkKQzynjWGUgqd4EsHYX7DreGZITBty4xuDlf9gJsy3PWQB0NdIswRw4AuAUmKq8ZlVMrTFxg01FuRCizF37ctJit_hjK9z9xM-4KfO1hE78QpfMvQbZZJoHPO32FjLHZKfSNwVLOL4zeJ5-zppTV1MYVLVAleFQ-GSGMZYdvcuLHEMXwisK0pwBWT04_86wVnW7dn2-f5AJnzz3P0vQuC6Pi6t4RbDvX_h4RUXwH4BjI2YB-VA3SORr1xauomBk7gt">
+<button aria-label="Remove from favorites" class="absolute top-4 right-4 bg-surface-lowest p-2 hover:bg-canvas transition-colors z-10">
+<span class="material-symbols-outlined filled text-ink">favorite</span>
+</button>
+</div>
+<div class="p-card-internal flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h2 class="font-title-md text-title-md text-ink pr-4">Artisan Linen Over-Shirt</h2>
+<span class="font-title-md text-title-md text-ink whitespace-nowrap">$245</span>
+</div>
+<p class="font-caption-uc text-caption-uc text-on-surface-variant uppercase tracking-widest mb-6">Women's Outerwear</p>
+</div>
+<button class="w-full bg-surface-container border border-hairline py-3 px-4 font-button text-button text-ink hover:bg-primary hover:text-on-primary hover:border-primary transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">shopping_bag</span>
+<span class="">Add to Bag</span>
+</button>
+</div>
+</article>
+<!-- Item 3 -->
+<article class="flex flex-col group relative bg-surface-card hover:shadow-lg transition-shadow duration-300">
+<div class="relative w-full aspect-[3/4] overflow-hidden bg-surface-dim">
+<img alt="A close-up, highly textural shot of a folded, thick-knit wool sweater in a deep, natural olive green. The composition is graphic and abstract, focusing on the intricate stitch work and the luxurious weight of the fabric. The image sits within a minimalist, neutral-toned framing, suggesting high-end, sustainable fashion." class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A close-up, highly textural shot of a folded, thick-knit wool sweater in a deep, natural olive green. The composition is graphic and abstract, focusing on the intricate stitch work and the luxurious weight of the fabric. The image sits within a minimalist, neutral-toned framing, suggesting high-end, sustainable fashion." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDRYFHFXysaR5FJOzW-aWS0MVH9Q-MP935ID62flHLEnjqkOVAPkY4ew8gwKnKx26Rkf1V9AKdIqeUlTjM6gusKyvO4ddmZd8asBMOj71Bua4L6ZDiW0g6m-_wBMx48hL0JeUzXB4qNtdlDa4I1kCYeKQpcegyQ78tG7VzaeuBolJ4YAMAvQSWKrWQK-KPsX3uVK5yywmrkKv1e89oGtSKaYyON55ezjkQmai-i_w-6wFumVzJOx92kFlx7bALi6ZvXNJzr04coVM3">
+<button aria-label="Remove from favorites" class="absolute top-4 right-4 bg-surface-lowest p-2 hover:bg-canvas transition-colors z-10">
+<span class="material-symbols-outlined filled text-ink">favorite</span>
+</button>
+</div>
+<div class="p-card-internal flex flex-col flex-grow justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h2 class="font-title-md text-title-md text-ink pr-4">Chunky Wool Knit</h2>
+<span class="font-title-md text-title-md text-ink whitespace-nowrap">$320</span>
+</div>
+<p class="font-caption-uc text-caption-uc text-on-surface-variant uppercase tracking-widest mb-6">Unisex Layering</p>
+</div>
+<button class="w-full bg-surface-container border border-hairline py-3 px-4 font-button text-button text-ink hover:bg-primary hover:text-on-primary hover:border-primary transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">shopping_bag</span>
+<span class="">Add to Bag</span>
+</button>
+</div>
+</article>
+</div>
+</main>
+<!-- Footer from JSON -->
+<footer class="bg-surface-dark dark:bg-black full-width mt-section flat no shadows">
+<div class="w-full px-grid-margin py-section flex flex-col md:flex-row justify-between items-start max-w-[1280px] mx-auto text-on-dark">
+<div class="mb-8 md:mb-0">
+<span class="font-display-md text-display-md text-on-dark block mb-4">VELA WEAR</span>
+<p class="font-body-md text-body-md text-surface-variant opacity-70">
+                    © 2024 Vela Wear Editorial. All rights reserved.
+                </p>
+</div>
+<div class="flex flex-col md:flex-row gap-8 md:gap-16">
+<div class="flex flex-col gap-4">
+<a class="font-body-md text-body-md text-surface-variant opacity-70 hover:opacity-100 hover:text-primary transition-colors" href="#">Sustainability</a>
+<a class="font-body-md text-body-md text-surface-variant opacity-70 hover:opacity-100 hover:text-primary transition-colors" href="#">Shipping &amp; Returns</a>
+</div>
+<div class="flex flex-col gap-4">
+<a class="font-body-md text-body-md text-surface-variant opacity-70 hover:opacity-100 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-surface-variant opacity-70 hover:opacity-100 hover:text-primary transition-colors" href="#">Contact Us</a>
+</div>
+<div class="flex flex-col gap-4">
+<a class="font-body-md text-body-md text-surface-variant opacity-70 hover:opacity-100 hover:text-primary transition-colors" href="#">Journal</a>
+</div>
+</div>
+</div>
+</footer>
+
+
+</body></html>

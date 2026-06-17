@@ -89,6 +89,80 @@ export const PRODUCTS: Product[] = [
     description:
       "Sleek and robust day tote made of premium smooth vegetable-tanned leather. Fits your tablet, notebook and daily essentials with ease.",
   },
+  {
+    id: "signature-hemp-tee",
+    name: "Signature Hemp Tee",
+    price: 110,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDfNYnfyjJqT5IK6-gECBXXaXH7OvMyrDVs0VDY1V2ugJ8EGaOI3QE6VHMt9FsgqadcUoGAHNPasTO1LUY3mT5X2-MxFdtSJMXEdQ4H6tYDuxJ1tMEg_j33_wvw7H4KCaD9Ugi9hbhwsc-wdmZKqyNs7W-zBAexhOEJPq_2O-C5NIqplH3fCe686i_B5zNOwUXCzhSdoOvmPTWUwKjXXlPeOBXkWCJIdS2Y1HmeIodoqCHpNvx0FPMn4s1hpPt2CYxTFbN--Uvdhsu4",
+    category: "AO",
+    color: "Grey",
+    size: "M",
+    description:
+      "A minimalist, oversized grey t-shirt tailored from premium organic hemp and cotton blend. Offers exceptional breathability and structural weight.",
+  },
+  {
+    id: "artisan-linen-overshirt",
+    name: "Artisan Linen Over-Shirt",
+    price: 245,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCSrgTdoRWZJbkKQzynjWGUgqd4EsHYX7DreGZITBty4xuDlf9gJsy3PWQB0NdIswRw4AuAUmKq8ZlVMrTFxg01FuRCizF37ctJit_hjK9z9xM-4KfO1hE78QpfMvQbZZJoHPO32FjLHZKfSNwVLOL4zeJ5-zppTV1MYVLVAleFQ-GSGMZYdvcuLHEMXwisK0pwBWT04_86wVnW7dn2-f5AJnzz3P0vQuC6Pi6t4RbDvX_h4RUXwH4BjI2YB-VA3SORr1xauomBk7gt",
+    category: "AO",
+    color: "Terracotta",
+    size: "S",
+    description:
+      "An unstructured, rich terracotta-colored linen shirt. Features natural raw texture, relaxed collar, and elegant drape.",
+  },
+  {
+    id: "chunky-wool-knit",
+    name: "Chunky Wool Knit",
+    price: 320,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDDRYFHFXysaR5FJOzW-aWS0MVH9Q-MP935ID62flHLEnjqkOVAPkY4ew8gwKnKx26Rkf1V9AKdIqeUlTjM6gusKyvO4ddmZd8asBMOj71Bua4L6ZDiW0g6m-_wBMx48hL0JeUzXB4qNtdlDa4I1kCYeKQpcegyQ78tG7VzaeuBolJ4YAMAvQSWKrWQK-KPsX3uVK5yywmrkKv1e89oGtSKaYyON55ezjkQmai-i_w-6wFumVzJOx92kFlx7bALi6ZvXNJzr04coVM3",
+    category: "AO",
+    color: "Olive",
+    size: "L",
+    description:
+      "Folded, thick-knit wool sweater in a deep, natural olive green. Hand-stitched details and exceptionally warm fabric.",
+  },
+  {
+    id: "oversized-linen-shirt",
+    name: "Oversized Linen Shirt",
+    price: 185,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDvD6_O2WzakyO8IPnMGU6P_cM8Vw9NjrYur9jiYbhdx1w2UpuW5w6crh8Z6WS0E8ONEyQr1-Cg5PaIAUEe5ojxO_wL44wdNSDQUKoC8Mc8PtHpYSenjRZHw2WBtjfPI27qwMt6mcoqCQthoz_31wpBeh2Cz1icAqPBuzSVz0-Ao0TTckpd7BSXLeP5zDBAcH7oT-ZaJRLW9ZxPwcQN1vuBFaimbR982BG_YcS_liGaXAtoyAPaIEDpsbxM2wE2OAIMQEuPr6lj94GJ",
+    category: "AO",
+    badge: "New",
+    color: "Natural",
+    size: "S",
+    description:
+      "Off-white linen button-down shirt. The aesthetic is warm minimalism, highlighting the organic weave of flax fabric.",
+  },
+  {
+    id: "relaxed-trousers",
+    name: "Relaxed Trousers",
+    price: 210,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA1Ar8NwYBKgDLN-CUoceiU60_VaDlBu6uba0WJ4o3sZKL3PmtT0jy3BUJWVVrYe6c_hBzpPgt63jVyOhogA9ANIM5S0IgmktTyvBII5LosZ4JcZ9hSz6w9nMp8elA7AxTrE0qGrSR23Y-NaKfksmIAs39WkmopD4WEMj0lEtngMOv3I4RIot4w-ybtOaQZCH_yrPtlAxTvsFwlcFCKfcxTna_L5OcqMJYpExQBwuejMdwGaCyJl1VYDndtCQY_lg21tp2ZNAROvwgg",
+    category: "QUAN",
+    color: "Sand",
+    size: "M",
+    description:
+      "Relaxed-fit linen trousers in sand color. Long elegant drape designed for sophisticated campaigns.",
+  },
+  {
+    id: "lightweight-jacket",
+    name: "Lightweight Jacket",
+    price: 180,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAXhzUmIMa1Z-6qdYa4laL1bVCQkOVLP6JYCCHsIwkpuhkrmG-HjEOWxgbIZj7EFBmnpyT7QitLb1EzFH7yye_4JBjFjfk_E-igXsC75ceMaA1p6QjcIEPN3sBXe0NWDZaeps8GVkryB7SYmqbpcYLMHKMHvUU1wwL25rICYwM92YUtBv1wGBRFvG77ccK-3XbtNJYcXeVr78PcMdxphd7bIc4UioU-IjL-IUkkU2vVejUSGxtmiXMGNUm7onPjVgv5SETcIb-OZnLh",
+    category: "AO",
+    badge: "Sale",
+    color: "Olive",
+    size: "M",
+    description:
+      "Dark olive green linen jacket. Tactile, premium construction with single breasted buttons.",
+  },
 ];
 
 export const INITIAL_CART_ITEMS: CartItem[] = [
