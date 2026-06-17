@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { BrandMark } from "@/components/shop/brand-mark";
+
 interface AuthShellProps {
   children: ReactNode;
   includeHeader?: boolean;
@@ -18,9 +20,9 @@ export function AuthShell({
         <header className="flex h-[71px] items-center justify-center border-b border-[#e3dccf] bg-[#f7f4ef] px-4">
           <Link
             href="/"
-            className="font-serif text-[32px] leading-[1.18] tracking-[-0.025em] text-[#1c1a18]"
+            className="inline-block transition-opacity hover:opacity-90"
           >
-            Vela Wear
+            <BrandMark />
           </Link>
         </header>
       )}

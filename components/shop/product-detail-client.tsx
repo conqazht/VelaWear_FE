@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { RotateCcw, ShoppingBag, Truck } from "lucide-react";
+import { RotateCcw, ShoppingBag, Truck, Heart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { useCart } from "@/components/shop/cart-provider";
+import { useFavorites } from "@/components/shop/favorites-provider";
+import { useNotification } from "@/components/shop/notification-provider";
 import {
   categoryLabels,
   DETAIL_IMAGES,
@@ -23,6 +25,9 @@ const colorSwatches: Record<string, string> = {
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { showAddedToBag } = useNotification();
+  const favorited = isFavorite(product.id);
   const gallery =
     product.id === "linen-blazer"
       ? DETAIL_IMAGES
@@ -131,14 +136,32 @@ export function ProductDetailClient({ product }: { product: Product }) {
           </div>
         </div>
 
-        <Button
-          type="button"
-          onClick={() => addToCart(product, selectedColor, selectedSize)}
-          className="h-auto w-full rounded-sm bg-[#1c1a18] py-4 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c]"
-        >
-          <ShoppingBag className="size-4" />
-          Thêm vào giỏ
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            onClick={() => {
+              addToCart(product, selectedColor, selectedSize);
+              showAddedToBag(product, selectedSize, selectedColor);
+            }}
+            className="h-auto flex-grow rounded-sm bg-[#1c1a18] py-4 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c]"
+          >
+            <ShoppingBag className="size-4" />
+            Thêm vào giỏ
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => toggleFavorite(product, selectedSize)}
+            className={cn(
+              "h-auto px-6 rounded-sm border py-4 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 border-[#1c1a18]/15 bg-white text-[#1c1a18] hover:border-[#1c1a18]/40 hover:bg-[#1c1a18]/5",
+              favorited && "border-[#b5573a] text-[#b5573a] hover:bg-[#b5573a]/5 hover:border-[#b5573a]"
+            )}
+          >
+            <Heart className={cn("size-4.5 mr-1.5", favorited && "fill-[#b5573a] stroke-[#b5573a]")} />
+            {favorited ? "Yêu thích" : "Lưu"}
+          </Button>
+        </div>
 
         <div className="mt-8 flex flex-col gap-3 text-[10px] text-[#1c1a18]/60">
           <div className="flex items-center gap-2">

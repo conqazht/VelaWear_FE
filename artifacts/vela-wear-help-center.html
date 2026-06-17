@@ -1,0 +1,278 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Help Center - VELA WEAR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#54634a",
+                        "inverse-surface": "#32302e",
+                        "surface": "#fff8f4",
+                        "on-error-container": "#93000a",
+                        "background": "#fff8f4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#ffb59f",
+                        "on-primary-fixed-variant": "#7c2d13",
+                        "tertiary-container": "#916c29",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#b5573a",
+                        "on-secondary-container": "#58674e",
+                        "secondary-fixed": "#d7e8c9",
+                        "outline-variant": "#dcc1b9",
+                        "tertiary-fixed-dim": "#edbf74",
+                        "secondary-container": "#d4e5c6",
+                        "on-surface": "#1d1b19",
+                        "primary-fixed": "#ffdbd1",
+                        "surface-card": "#efe7dc",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "inverse-on-surface": "#f6efec",
+                        "surface-dark": "#1c1a18",
+                        "secondary-fixed-dim": "#bbccae",
+                        "on-secondary-fixed": "#121f0c",
+                        "surface-dim": "#dfd9d5",
+                        "on-tertiary-container": "#fff8f2",
+                        "on-background": "#1d1b19",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#3a0a00",
+                        "inverse-primary": "#ffb59f",
+                        "on-tertiary-fixed": "#281900",
+                        "canvas": "#f7f4ef",
+                        "ink": "#1c1a18",
+                        "hairline": "#e3dccf",
+                        "surface-container-high": "#ede7e3",
+                        "tertiary-fixed": "#ffdeac",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#3c4b34",
+                        "outline": "#89726c",
+                        "on-primary-container": "#fff8f6",
+                        "surface-tint": "#9b4428",
+                        "surface-container-low": "#f9f2ef",
+                        "on-surface-variant": "#55423d",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e7e1de",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#765412",
+                        "surface-bright": "#fff8f4",
+                        "primary": "#964025",
+                        "on-dark": "#f7f4ef",
+                        "surface-container-highest": "#e7e1de",
+                        "surface-container": "#f3ede9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section": "88px",
+                        "micro": "8px",
+                        "card-internal": "32px",
+                        "item-gap": "24px",
+                        "grid-margin": "16px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "display-lg": ["Cormorant Garamond"],
+                        "display-md": ["Cormorant Garamond"],
+                        "caption-uc": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-xl-mobile": ["Cormorant Garamond"],
+                        "button": ["Inter"],
+                        "display-xl": ["Cormorant Garamond"]
+                    },
+                    "fontSize": {
+                        "title-md": ["16px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "1.12", "letterSpacing": "-0.8px", "fontWeight": "400" }],
+                        "display-md": ["32px", { "lineHeight": "1.18", "letterSpacing": "-0.4px", "fontWeight": "400" }],
+                        "caption-uc": ["11px", { "lineHeight": "1.4", "letterSpacing": "1.8px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.55", "letterSpacing": "0", "fontWeight": "400" }],
+                        "display-xl-mobile": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.5px", "fontWeight": "400" }],
+                        "button": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "display-xl": ["56px", { "lineHeight": "1.08", "letterSpacing": "-1.2px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .accordion-content {
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-canvas text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="w-full top-0 sticky bg-canvas border-b border-hairline z-50 transition-all duration-300"><div class="flex justify-between items-center h-20 px-grid-margin max-w-[1280px] mx-auto transition-all duration-300"><div class="flex-none"><a class="font-display-md text-display-md tracking-tight text-ink dark:text-on-dark uppercase" href="#"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2UiUIDvSBjPSUTYmVzJizBUTJNX9HHm-rXUssUgorwaNo2CmOn-5O0rgd8Q2t2DE9zSlLZfC4T7DO4Hv8UtK7VPzm8xPnxEOgjnR_-Wu5NfhOdYU8BEe6lspWTqtpsPicPUgvB7oWZOs92xMfjoy7pown9ymBjueFdELTRWwsEpEQyUXRDW6W4souAZa7ua2rxX4wQ_eWvSaLKRhn3QNzSLfIEc_iaRtrinD16Juw0cCJ27aGo1xOQavo9UOsOvTnagJwqoYtu_od" alt="Vela Wear Logo" class="h-10 w-auto object-contain"></a></div><div class="flex items-center gap-item-gap"><div class="hidden md:flex gap-item-gap items-center"><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Collections</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Lookbook</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Story</a><a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Journal</a></div><div class="hidden md:flex items-center bg-surface-container-high rounded-full px-4 py-2 gap-2 w-48 focus-within:w-64 transition-all duration-300"><span class="material-symbols-outlined text-xl text-on-surface-variant">search</span><input type="text" placeholder="Search" class="bg-transparent border-none focus:ring-0 p-0 text-body-md w-full placeholder-on-surface-variant"></div><div class="flex items-center gap-4"><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all"><span class="material-symbols-outlined text-2xl">favorite</span></button><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all"><span class="material-symbols-outlined text-2xl" data-icon="shopping_bag">shopping_bag</span></button></div></div></div></nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-[1280px] mx-auto px-grid-margin py-section">
+<!-- Header & Search -->
+<header class="text-center mb-section max-w-2xl mx-auto">
+<h1 class="font-display-xl text-display-xl text-ink mb-6 md:hidden hidden">Help Center</h1>
+<h1 class="font-display-xl text-display-xl text-ink mb-6 hidden md:block">How can we assist you?</h1>
+<h1 class="font-display-xl-mobile text-display-xl-mobile text-ink mb-6 md:hidden">How can we assist you?</h1>
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-lowest border border-hairline rounded-DEFAULT py-4 pl-12 pr-4 font-body-md text-body-md text-ink focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm" placeholder="Search for answers..." type="text">
+</div>
+</header>
+<div class="flex flex-col lg:flex-row gap-item-gap items-start">
+<!-- Sidebar Navigation -->
+<aside class="w-full lg:w-1/4 sticky top-[120px] hidden lg:block">
+<h3 class="font-caption-uc text-caption-uc text-outline mb-6 tracking-widest">Help Topics</h3>
+<nav class="flex flex-col gap-4">
+<a class="font-title-md text-title-md text-primary border-l-2 border-primary pl-4 py-1" href="#">Overview</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors pl-4 py-1 border-l-2 border-transparent" href="#">Shipping &amp; Delivery</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors pl-4 py-1 border-l-2 border-transparent" href="#">Returns &amp; Exchanges</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors pl-4 py-1 border-l-2 border-transparent" href="#">Size &amp; Fit</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors pl-4 py-1 border-l-2 border-transparent" href="#">Product Care</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors pl-4 py-1 border-l-2 border-transparent" href="#">Contact Us</a>
+</nav>
+</aside>
+<!-- Main Help Content -->
+<div class="w-full lg:w-3/4 flex flex-col gap-section">
+<!-- Category Grid -->
+<section>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-item-gap">
+<!-- Card 1 -->
+<a class="group block bg-surface-card p-card-internal transition-transform hover:-translate-y-1 duration-300" href="#">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block" style="font-variation-settings: 'FILL' 0;">local_shipping</span>
+<h3 class="font-display-md text-display-md text-ink mb-2">Shipping &amp; Delivery</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Information on delivery times, costs, and international shipping.</p>
+</a>
+<!-- Card 2 -->
+<a class="group block bg-surface-card p-card-internal transition-transform hover:-translate-y-1 duration-300" href="#">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block" style="font-variation-settings: 'FILL' 0;">cached</span>
+<h3 class="font-display-md text-display-md text-ink mb-2">Returns</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Our return policy, how to initiate a return, and refund processing times.</p>
+</a>
+<!-- Card 3 -->
+<a class="group block bg-surface-card p-card-internal transition-transform hover:-translate-y-1 duration-300" href="#">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block" style="font-variation-settings: 'FILL' 0;">straighten</span>
+<h3 class="font-display-md text-display-md text-ink mb-2">Size Guide</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Detailed measurements and fit advice for all our garments.</p>
+</a>
+<!-- Card 4 -->
+<a class="group block bg-surface-card p-card-internal transition-transform hover:-translate-y-1 duration-300" href="#">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block" style="font-variation-settings: 'FILL' 0;">credit_card</span>
+<h3 class="font-display-md text-display-md text-ink mb-2">Payment Options</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Accepted payment methods, secure checkout, and billing inquiries.</p>
+</a>
+</div>
+</section>
+<!-- FAQ Accordion -->
+<section>
+<h2 class="font-display-lg text-display-lg text-ink mb-8 border-b border-hairline pb-4">Frequently Asked Questions</h2>
+<div class="flex flex-col border-b border-hairline">
+<button class="accordion-trigger w-full flex justify-between items-center py-6 text-left focus:outline-none hover:text-primary transition-colors">
+<span class="font-title-md text-title-md text-ink">How long does standard shipping take?</span>
+<span class="material-symbols-outlined transform transition-transform duration-300 text-outline">add</span>
+</button>
+<div class="accordion-content">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-8">
+                                Standard shipping typically takes 3-5 business days within the contiguous United States. International orders usually arrive within 10-14 business days, depending on customs clearance. You will receive a tracking number via email once your order has shipped.
+                            </p>
+</div>
+</div>
+<div class="flex flex-col border-b border-hairline">
+<button class="accordion-trigger w-full flex justify-between items-center py-6 text-left focus:outline-none hover:text-primary transition-colors">
+<span class="font-title-md text-title-md text-ink">Can I modify or cancel my order after placing it?</span>
+<span class="material-symbols-outlined transform transition-transform duration-300 text-outline">add</span>
+</button>
+<div class="accordion-content">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-8">
+                                We begin processing orders immediately to ensure prompt delivery. Unfortunately, we cannot modify or cancel orders once they have been placed. However, you can return unwanted items following our standard return policy once you receive them.
+                            </p>
+</div>
+</div>
+<div class="flex flex-col border-b border-hairline">
+<button class="accordion-trigger w-full flex justify-between items-center py-6 text-left focus:outline-none hover:text-primary transition-colors">
+<span class="font-title-md text-title-md text-ink">What is your return policy for sale items?</span>
+<span class="material-symbols-outlined transform transition-transform duration-300 text-outline">add</span>
+</button>
+<div class="accordion-content">
+<p class="font-body-md text-body-md text-on-surface-variant pb-6 pr-8">
+                                Items purchased on final sale cannot be returned or exchanged. Regular sale items can be returned within 14 days of delivery for store credit only. Please ensure all items are unworn, unwashed, and have original tags attached.
+                            </p>
+</div>
+</div>
+</section>
+<!-- Contact CTA -->
+<section class="bg-surface-dark text-on-dark p-card-internal text-center flex flex-col items-center justify-center">
+<h2 class="font-display-md text-display-md mb-4">Still need help?</h2>
+<p class="font-body-md text-body-md text-surface-variant mb-8 max-w-md">Our customer concierge team is available Monday through Friday, 9am to 6pm EST to assist with your editorial styling and order inquiries.</p>
+<a class="inline-block bg-primary text-on-primary font-button text-button px-8 py-4 rounded-DEFAULT hover:bg-surface-tint transition-colors" href="#">Contact Concierge</a>
+</section>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section bg-surface-dark mt-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-item-gap max-w-[1280px] mx-auto px-grid-margin">
+<div>
+<h2 class="font-display-md text-display-md text-on-dark mb-4">VELA WEAR</h2>
+<p class="font-caption-uc text-caption-uc text-surface-container-highest">© 2024 VELA WEAR. ALL RIGHTS RESERVED.</p>
+</div>
+<div class="flex flex-col gap-4">
+<a class="font-body-md text-body-md text-surface-container-highest hover:text-primary-fixed-dim transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-surface-container-highest hover:text-primary-fixed-dim transition-colors" href="#">Terms of Service</a>
+</div>
+<div class="flex flex-col gap-4">
+<a class="font-body-md text-body-md text-surface-container-highest hover:text-primary-fixed-dim transition-colors" href="#">Shipping</a>
+<a class="font-body-md text-body-md text-surface-container-highest hover:text-primary-fixed-dim transition-colors" href="#">Returns</a>
+</div>
+<div class="flex flex-col gap-4">
+<a class="font-body-md text-body-md text-surface-container-highest hover:text-primary-fixed-dim transition-colors" href="#">Sustainability</a>
+</div>
+</div>
+</footer>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const triggers = document.querySelectorAll('.accordion-trigger');
+            
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const content = trigger.nextElementSibling;
+                    const icon = trigger.querySelector('.material-symbols-outlined');
+                    const isOpen = content.classList.contains('open');
+
+                    // Close all other accordions (optional, for exclusive accordion behavior)
+                    document.querySelectorAll('.accordion-content').forEach(c => {
+                        if (c !== content) {
+                            c.classList.remove('open');
+                            c.previousElementSibling.querySelector('.material-symbols-outlined').textContent = 'add';
+                            c.previousElementSibling.querySelector('.material-symbols-outlined').style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    if (isOpen) {
+                        content.classList.remove('open');
+                        icon.textContent = 'add';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.classList.add('open');
+                        icon.textContent = 'remove';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
+
+</body></html>

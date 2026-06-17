@@ -3,6 +3,7 @@ import { ArrowRight, Eye, X } from "lucide-react";
 
 import { AuthField } from "@/components/auth/auth-field";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { BrandMark } from "@/components/shop/brand-mark";
 
 export function RegisterPage() {
   return (
@@ -11,9 +12,9 @@ export function RegisterPage() {
         <div className="mb-6 text-center">
           <Link
             href="/"
-            className="font-serif text-[32px] leading-[1.18] tracking-[-0.025em]"
+            className="inline-block transition-opacity hover:opacity-90"
           >
-            Vela Wear
+            <BrandMark className="mx-auto" />
           </Link>
           <h1 className="mt-2 font-serif text-[32px] leading-[1.18] tracking-[-0.0125em]">
             Now let&apos;s make you a Member.

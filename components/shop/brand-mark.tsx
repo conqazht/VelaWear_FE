@@ -1,14 +1,15 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <span
-      className={cn(
-        "font-serif text-xl font-semibold tracking-[0.3em] text-[#1c1a18] md:text-2xl",
-        className
-      )}
-    >
-      VELA WEAR
-    </span>
+    <Image
+      src="/logo.png"
+      alt="Vela Wear Logo"
+      width={40}
+      height={40}
+      className={cn("h-10 w-auto object-contain select-none", className)}
+      priority
+    />
   );
 }

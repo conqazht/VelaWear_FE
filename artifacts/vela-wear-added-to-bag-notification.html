@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Vela Wear - Added to Bag</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#fff8f4",
+                        "secondary-fixed": "#d7e8c9",
+                        "outline": "#89726c",
+                        "tertiary-fixed": "#ffdeac",
+                        "hairline": "#e3dccf",
+                        "outline-variant": "#dcc1b9",
+                        "surface-dark": "#1c1a18",
+                        "secondary-container": "#d4e5c6",
+                        "on-error-container": "#93000a",
+                        "canvas": "#f7f4ef",
+                        "on-secondary-container": "#58674e",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e7e1de",
+                        "primary-fixed": "#ffdbd1",
+                        "primary": "#964025",
+                        "on-primary-fixed": "#3a0a00",
+                        "surface-container-highest": "#e7e1de",
+                        "on-primary-container": "#fff8f6",
+                        "tertiary-container": "#916c29",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#ffb59f",
+                        "ink": "#1c1a18",
+                        "inverse-primary": "#ffb59f",
+                        "secondary": "#54634a",
+                        "on-surface-variant": "#55423d",
+                        "primary-container": "#b5573a",
+                        "surface-container-low": "#f9f2ef",
+                        "on-secondary-fixed": "#121f0c",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#9b4428",
+                        "surface-card": "#efe7dc",
+                        "secondary-fixed-dim": "#bbccae",
+                        "inverse-on-surface": "#f6efec",
+                        "background": "#fff8f4",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "on-surface": "#1d1b19",
+                        "on-secondary-fixed-variant": "#3c4b34",
+                        "tertiary": "#765412",
+                        "surface-container-high": "#ede7e3",
+                        "surface-bright": "#fff8f4",
+                        "on-tertiary-fixed": "#281900",
+                        "inverse-surface": "#32302e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#dfd9d5",
+                        "on-primary-fixed-variant": "#7c2d13",
+                        "error-container": "#ffdad6",
+                        "on-dark": "#f7f4ef",
+                        "tertiary-fixed-dim": "#edbf74",
+                        "on-tertiary-container": "#fff8f2",
+                        "on-background": "#1d1b19",
+                        "surface-container": "#f3ede9",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section": "88px",
+                        "micro": "8px",
+                        "item-gap": "24px",
+                        "grid-margin": "16px",
+                        "card-internal": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Cormorant Garamond"],
+                        "body-md": ["Inter"],
+                        "display-xl": ["Cormorant Garamond"],
+                        "display-md": ["Cormorant Garamond"],
+                        "title-md": ["Inter"],
+                        "display-xl-mobile": ["Cormorant Garamond"],
+                        "caption-uc": ["Inter"],
+                        "button": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "1.12", "letterSpacing": "-0.8px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.55", "letterSpacing": "0", "fontWeight": "400" }],
+                        "display-xl": ["56px", { "lineHeight": "1.08", "letterSpacing": "-1.2px", "fontWeight": "400" }],
+                        "display-md": ["32px", { "lineHeight": "1.18", "letterSpacing": "-0.4px", "fontWeight": "400" }],
+                        "title-md": ["16px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "display-xl-mobile": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.5px", "fontWeight": "400" }],
+                        "caption-uc": ["11px", { "lineHeight": "1.4", "letterSpacing": "1.8px", "fontWeight": "500" }],
+                        "button": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.5px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface-container-highest antialiased text-ink min-h-screen relative flex flex-col">
+<!-- TopNavBar Placeholder (Simulating Context) -->
+<header class="absolute top-0 left-0 w-full z-10 flex justify-between items-center px-grid-margin max-w-[1280px] mx-auto h-20 border-b border-hairline bg-canvas">
+<nav class="hidden md:flex gap-item-gap">
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Collections</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Lookbook</a>
+</nav>
+<div class="font-display-lg text-display-lg tracking-tighter text-ink">VELA WEAR</div>
+<div class="flex gap-micro">
+<span class="material-symbols-outlined cursor-pointer">person</span>
+<span class="material-symbols-outlined cursor-pointer text-primary">shopping_bag</span>
+</div>
+</header>
+<!-- Overlay Background -->
+<div aria-hidden="true" class="fixed inset-0 z-40 pointer-events-none flex justify-end p-grid-margin pt-24">
+<!-- Modal Container -->
+<div class="bg-canvas w-full max-w-[360px] shadow-2xl relative flex flex-col pointer-events-auto h-fit p-6">
+<!-- Header -->
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-green-700 text-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<h2 class="font-title-md text-[22px] font-bold text-ink leading-none mt-1">Added to Bag</h2>
+</div>
+<button aria-label="Close modal" class="w-9 h-9 flex items-center justify-center text-ink transition-colors hover:text-primary">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Content Area -->
+<div class="flex flex-col gap-8">
+<!-- Main Product -->
+<div class="flex gap-4">
+<div class="w-[88px] h-[88px] flex-shrink-0 bg-surface-card rounded-md overflow-hidden">
+<img alt="Linen Blend Blazer" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLviwYUOCbeXTQfFMxFhsQ_pOKjmLTG0kHHSIE3qwdZQ8ORg8v94rbaXgRnTaIEOe64g_0ySuJl3UF51KPH4uNXTVAUKEf0mn-yvzbgm09Ypb3pjzRimrwXrBMw2O0zBgmliAqY05AaTozmju9nIrw0GI92Jg1mbMM3zTTz8Kt4JoMdctOg87yMUF6w1vRfa4YMusZvaZSYHCpXz4oHoR31cOLwMzjBQvBQY2rbRIlhwo15fheuYt25HL_M">
+</div>
+<div class="flex flex-col justify-center">
+<h3 class="font-title-md text-title-md text-ink">Linen Blend Blazer</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Men's Outerwear</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Size M</p>
+<p class="font-title-md text-title-md text-ink mt-1.5">$245.00</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-col gap-3">
+<button class="w-full bg-canvas text-ink font-button text-button py-4 px-6 border border-ink hover:bg-surface-container transition-colors duration-300">
+                        VIEW BAG (6)
+                    </button>
+<button class="w-full bg-primary text-on-primary font-button text-button py-4 px-6 hover:bg-primary-container transition-colors duration-300">
+                        CHECKOUT
+                    </button>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+</body></html>

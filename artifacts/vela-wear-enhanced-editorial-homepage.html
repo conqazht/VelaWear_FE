@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Vela Wear | Luxury Editorial Fashion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#ffb59f",
+                        "on-tertiary-fixed": "#281900",
+                        "surface": "#fff8f4",
+                        "on-primary-fixed-variant": "#7c2d13",
+                        "surface-container-highest": "#e7e1de",
+                        "surface-dark": "#1c1a18",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#ffdbd1",
+                        "primary-container": "#b5573a",
+                        "on-surface": "#1d1b19",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#916c29",
+                        "on-primary": "#ffffff",
+                        "secondary": "#54634a",
+                        "inverse-primary": "#ffb59f",
+                        "canvas": "#f7f4ef",
+                        "inverse-surface": "#32302e",
+                        "on-tertiary-container": "#fff8f2",
+                        "on-secondary-fixed-variant": "#3c4b34",
+                        "surface-variant": "#e7e1de",
+                        "on-primary-fixed": "#3a0a00",
+                        "error": "#ba1a1a",
+                        "background": "#fff8f4",
+                        "tertiary-fixed-dim": "#edbf74",
+                        "inverse-on-surface": "#f6efec",
+                        "tertiary": "#765412",
+                        "surface-container-high": "#ede7e3",
+                        "hairline": "#e3dccf",
+                        "surface-tint": "#9b4428",
+                        "surface-card": "#efe7dc",
+                        "on-dark": "#f7f4ef",
+                        "ink": "#1c1a18",
+                        "surface-dim": "#dfd9d5",
+                        "primary": "#964025",
+                        "on-surface-variant": "#55423d",
+                        "on-secondary-fixed": "#121f0c",
+                        "secondary-container": "#d4e5c6",
+                        "on-primary-container": "#fff8f6",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fff8f4",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "secondary-fixed-dim": "#bbccae",
+                        "outline-variant": "#dcc1b9",
+                        "surface-container": "#f3ede9",
+                        "surface-container-low": "#f9f2ef",
+                        "on-secondary-container": "#58674e",
+                        "tertiary-fixed": "#ffdeac",
+                        "on-background": "#1d1b19",
+                        "on-error-container": "#93000a",
+                        "outline": "#89726c",
+                        "secondary-fixed": "#d7e8c9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "none": "0px"
+                    },
+                    "spacing": {
+                        "section": "88px",
+                        "card-internal": "32px",
+                        "item-gap": "24px",
+                        "micro": "8px",
+                        "grid-margin": "16px"
+                    },
+                    "fontFamily": {
+                        "button": ["Inter"],
+                        "display-xl-mobile": ["Cormorant Garamond"],
+                        "display-md": ["Cormorant Garamond"],
+                        "display-xl": ["Cormorant Garamond"],
+                        "display-lg": ["Cormorant Garamond"],
+                        "title-md": ["Inter"],
+                        "caption-uc": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "button": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "display-xl-mobile": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.5px", "fontWeight": "400" }],
+                        "display-md": ["32px", { "lineHeight": "1.18", "letterSpacing": "-0.4px", "fontWeight": "400" }],
+                        "display-xl": ["56px", { "lineHeight": "1.08", "letterSpacing": "-1.2px", "fontWeight": "400" }],
+                        "display-lg": ["40px", { "lineHeight": "1.12", "letterSpacing": "-0.8px", "fontWeight": "400" }],
+                        "title-md": ["16px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "caption-uc": ["11px", { "lineHeight": "1.4", "letterSpacing": "1.8px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.55", "letterSpacing": "0", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.canvas'); color: theme('colors.ink'); overflow-x: hidden; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0; }
+        .hero-overlay { background: linear-gradient(to top, rgba(28, 26, 24, 0.4) 0%, transparent 50%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .slider-container { scroll-snap-type: x mandatory; }
+        .slider-item { scroll-snap-align: start; }
+    </style>
+</head>
+<body class="antialiased font-body-md text-body-md">
+<!-- TopNavBar -->
+<nav class="bg-canvas dark:bg-surface-dark w-full top-0 sticky z-50 border-b border-hairline dark:border-on-surface-variant flex justify-between items-center h-20 px-grid-margin max-w-[1280px] mx-auto transition-all duration-300"><div class="flex-none">
+<a class="font-display-md text-display-md tracking-tight text-ink dark:text-on-dark uppercase" href="#"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEBkBcpXeLbuJbgUCezINF6sMfVvIearyTwIMb5uBl08PFISvYOLRciNTSAIoobsPz1jpxL-hwUBhcjrSCnJaguWDgbzzKYHMPmDZ6gYteEWFpJYEhYqJf9t8Dv3WcygHY-JRNC_q7fYcWCMMtFYbqCqS3Uj8ntYwUAH2TAb7N0yD4erWe0mLkacJm3Clwk2N8T1YVvOTFPX3lf1uHXIJSAN0PfSFQZqn9wJ6IlS_--Sv7i486Uvk_RYogdH9Vp4NNWDVLOB2w3As_" alt="Vela Wear Logo" class="h-10 w-auto object-contain"></a>
+</div>
+<div class="flex items-center gap-item-gap">
+<div class="hidden md:flex gap-item-gap items-center">
+<a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Collections</a>
+<a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Lookbook</a>
+<a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Story</a>
+<a class="text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer font-title-md text-title-md" href="#">Journal</a>
+</div><a href="#" class="hidden md:block font-title-md text-button text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer">Help</a><div class="hidden md:flex items-center bg-surface-container-high rounded-full px-4 py-2 gap-2 w-48 focus-within:w-64 transition-all duration-300">
+    <span class="material-symbols-outlined text-xl text-on-surface-variant">search</span>
+    <input type="text" placeholder="Search" class="bg-transparent border-none focus:ring-0 p-0 text-body-md w-full placeholder-on-surface-variant">
+</div>
+<div class="flex items-center gap-4"><button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all">
+    <span class="material-symbols-outlined text-2xl">favorite</span>
+</button>
+<button class="text-primary dark:text-primary-fixed-dim cursor-pointer transition-opacity duration-300 active:opacity-70 hover:text-primary dark:hover:text-primary-fixed-dim transition-all">
+<span class="material-symbols-outlined text-2xl" data-icon="shopping_bag">shopping_bag</span>
+</button><a href="#" class="font-title-md text-button text-on-surface-variant dark:text-on-surface hover:text-primary transition-colors cursor-pointer ml-2">Join / Log In</a>
+</div>
+</div></nav>
+<!-- Hero Slider Section -->
+<section class="relative w-full h-[819px] overflow-hidden group">
+<div class="flex w-full h-full overflow-x-auto slider-container no-scrollbar transition-transform duration-700 ease-in-out" id="hero-slider">
+<!-- Slide 1 -->
+<div class="slider-item min-w-full h-full relative flex items-end pb-section px-grid-margin justify-center text-center">
+<img alt="https://lh3.googleusercontent.com/aida-public/AB6AXuDnlgzgGreQihhisxNEqhc_gB3nux5XRbRwcD3euAu2Am2gGq9JRPGOKUtB1hCE0SqSNdEvJcDn8y2hWPk6sosFg4AKiftSKlH0SWHKG4z3BTVP1rTiAXUah9tj2SUHCyLhvCgGhVqYiL8ew-4cWP1JknMFcAdxuL5Ix4uhXsPLbMz54P4aiY6SOOS_HDnkYzzJmj7x6pVIV6GcY8lZ8Y-mYz6_0twAn96sH8-GY-vb-e6RpLtUcpBKo1l-lUwraFKBf0NF0LIeNDeK" class="absolute inset-0 w-full h-full object-cover z-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnlgzgGreQihhisxNEqhc_gB3nux5XRbRwcD3euAu2Am2gGq9JRPGOKUtB1hCE0SqSNdEvJcDn8y2hWPk6sosFg4AKiftSKlH0SWHKG4z3BTVP1rTiAXUah9tj2SUHCyLhvCgGhVqYiL8ew-4cWP1JknMFcAdxuL5Ix4uhXsPLbMz54P4aiY6SOOS_HDnkYzzJmj7x6pVIV6GcY8lZ8Y-mYz6_0twAn96sH8-GY-vb-e6RpLtUcpBKo1l-lUwraFKBf0NF0LIeNDeK">
+<div class="absolute inset-0 hero-overlay z-10"></div>
+<div class="relative z-20 max-w-3xl mx-auto flex flex-col items-center">
+<h1 class="font-display-xl text-display-xl text-on-dark mb-8">Vela Wear — Bộ sưu tập Thu 2026</h1>
+<button class="bg-primary-container text-on-primary font-button text-button px-8 py-4 rounded hover:bg-primary transition-colors active:scale-95 duration-200">
+                    Khám phá ngay
+                </button>
+</div>
+</div>
+<!-- Slide 2 -->
+<div class="slider-item min-w-full h-full relative flex items-end pb-section px-grid-margin justify-center text-center">
+<img alt="https://lh3.googleusercontent.com/aida-public/AB6AXuDb2C_CdYCUxxS2v20r1u-piDVPxRGbeJYHnvWOeUu8AfdpbsiM-2QXXYby-n38tG-QGVtfjRTwPPwE-IvSgBxM0vPysyM9QF6URCE6JfhS66F0LrroSxwFrPu-9_zpSTfdLAl5QYfGNW-0c7deZ_L1aI4txERmjUvB_TPYC4f10EY-GVOJ2HFeRrvMlay0FJf8_Zj0Cl7Mm3DuH86q2_sKqDB-W4sQgA3SlibzuVBwt2ysRRcyTihHSUD9I8N0IT4GwmTC9aRpEv5w" class="absolute inset-0 w-full h-full object-cover z-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb2C_CdYCUxxS2v20r1u-piDVPxRGbeJYHnvWOeUu8AfdpbsiM-2QXXYby-n38tG-QGVtfjRTwPPwE-IvSgBxM0vPysyM9QF6URCE6JfhS66F0LrroSxwFrPu-9_zpSTfdLAl5QYfGNW-0c7deZ_L1aI4txERmjUvB_TPYC4f10EY-GVOJ2HFeRrvMlay0FJf8_Zj0Cl7Mm3DuH86q2_sKqDB-W4sQgA3SlibzuVBwt2ysRRcyTihHSUD9I8N0IT4GwmTC9aRpEv5w">
+<div class="absolute inset-0 hero-overlay z-10"></div>
+<div class="relative z-20 max-w-3xl mx-auto flex flex-col items-center">
+<h2 class="font-display-xl text-display-xl text-on-dark mb-8">Nét Đẹp Của Sự Tĩnh Lặng</h2>
+<button class="bg-primary-container text-on-primary font-button text-button px-8 py-4 rounded hover:bg-primary transition-colors active:scale-95 duration-200">
+                    Xem Lookbook
+                </button>
+</div>
+</div>
+</div>
+<!-- Navigation Arrows -->
+<button class="absolute left-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100" onclick="document.getElementById('hero-slider').scrollBy({left: -window.innerWidth, behavior: 'smooth'})">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="absolute right-6 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-all opacity-0 group-hover:opacity-100" onclick="document.getElementById('hero-slider').scrollBy({left: window.innerWidth, behavior: 'smooth'})">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+<!-- Pagination -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+<div class="w-8 h-1 bg-white rounded-full"></div>
+<div class="w-8 h-1 bg-white/40 rounded-full"></div>
+</div>
+</section>
+<!-- Featured Categories Section -->
+<section class="max-w-[1280px] mx-auto px-grid-margin py-section">
+<div class="mb-12">
+<h2 class="font-display-lg text-display-lg text-ink">Featured</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-item-gap">
+<!-- Category 1 -->
+<a class="group relative aspect-[3/4] block overflow-hidden bg-surface-card" href="#">
+<img alt="https://lh3.googleusercontent.com/aida-public/AB6AXuBB01iD0ZUAAbXEfBxGwf6S_tVo9lhi8Sz-9Bqgt3w7eHWeLzxcQtFE8j1hypM92Hh87JXPBZ7iRaIfzRGf0jcLZcybovsZochcNkAlY7HAXlGCDru3V3RzmnIPgmVqLbRBuMy8jWHj0t-SU9s_IlGrfTjt3-XJUcW5HSPgMAoXCWJB0X_8io6wtuVZ-TVQietcTPsIO0tn7S5Pbjv_Izf0xCID5DhIQoy7JxSgks5H_3ZA-PwUi3BSWgxbspE5oOAhi4ra3-No9FKa" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB01iD0ZUAAbXEfBxGwf6S_tVo9lhi8Sz-9Bqgt3w7eHWeLzxcQtFE8j1hypM92Hh87JXPBZ7iRaIfzRGf0jcLZcybovsZochcNkAlY7HAXlGCDru3V3RzmnIPgmVqLbRBuMy8jWHj0t-SU9s_IlGrfTjt3-XJUcW5HSPgMAoXCWJB0X_8io6wtuVZ-TVQietcTPsIO0tn7S5Pbjv_Izf0xCID5DhIQoy7JxSgks5H_3ZA-PwUi3BSWgxbspE5oOAhi4ra3-No9FKa">
+<div class="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors duration-300"></div>
+<div class="absolute bottom-8 left-8">
+<h3 class="font-display-md text-display-md text-on-dark uppercase">Essentials</h3>
+<span class="text-on-dark border-b border-white/50 text-button font-button mt-2 inline-block">Shop Now</span>
+</div>
+</a>
+<!-- Category 2 -->
+<a class="group relative aspect-[3/4] block overflow-hidden bg-surface-card" href="#">
+<img alt="https://lh3.googleusercontent.com/aida-public/AB6AXuCLGMe7fSol3cLxyNZeWO1_aSBSqo2xD7aktKUxgF3gx43in9HtB7MqVYyDZwQTbNNYlSJIubLUEWzwA1Q8jTYKYmkfsLyO60rtQVaxykhg6z3whbLFXQF7M6GRLQs1DLWvfyf23hvG2bVcPHsTHzOO8DdtQJo1YhIDfUXV8uo1qsMo2eP8Y40rlr-3f8g2l2momMxfNI3YNrunps0Dz6tTQ0_eDfY-aSHBt3bhC2n2To-wQXXBLREk8o5fQenXi1PKtBdMdSPXE8E9" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLGMe7fSol3cLxyNZeWO1_aSBSqo2xD7aktKUxgF3gx43in9HtB7MqVYyDZwQTbNNYlSJIubLUEWzwA1Q8jTYKYmkfsLyO60rtQVaxykhg6z3whbLFXQF7M6GRLQs1DLWvfyf23hvG2bVcPHsTHzOO8DdtQJo1YhIDfUXV8uo1qsMo2eP8Y40rlr-3f8g2l2momMxfNI3YNrunps0Dz6tTQ0_eDfY-aSHBt3bhC2n2To-wQXXBLREk8o5fQenXi1PKtBdMdSPXE8E9">
+<div class="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors duration-300"></div>
+<div class="absolute bottom-8 left-8">
+<h3 class="font-display-md text-display-md text-on-dark uppercase">Accessories</h3>
+<span class="text-on-dark border-b border-white/50 text-button font-button mt-2 inline-block">Explore</span>
+</div>
+</a>
+<!-- Category 3 -->
+<a class="group relative aspect-[3/4] block overflow-hidden bg-surface-card" href="#">
+<img alt="Lifestyle highlights" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3rdhdd2Is5yjK5nAVVfW6P2sBr2eFbIuyGPXLzEMmaaz6S048ueY6FpMEhTXDQ70RHHoicQkL8NH1GrGzWkFHgtJ9AZY0aQHNRuQigIU9TZZSReu_xPV2W9m1jyi0ZDIFVUqm10oAVd9EW7Alu_gKcYdm8ZYDEkWqM2BRPBkIOA-Nb0PQlIzJj-OeG8i8Jlv6_nDIuYrw1eSjwgjtRvkjlxlOxMtc3rdT9__yYdd3YpOJXLlEPuMNJbUU88td1TYmIABgQLcnDhg4">
+<div class="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors duration-300"></div>
+<div class="absolute bottom-8 left-8">
+<h3 class="font-display-md text-display-md text-on-dark uppercase">Outerwear</h3>
+<span class="text-on-dark border-b border-white/50 text-button font-button mt-2 inline-block">Discover</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Trending Now Section -->
+<section class="py-section">
+<div class="max-w-[1280px] mx-auto px-grid-margin mb-8 flex justify-between items-end">
+<h2 class="font-display-lg text-display-lg text-ink">Trending Now</h2>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto no-scrollbar scroll-smooth flex gap-item-gap px-grid-margin">
+<!-- Product Item 1 -->
+<div class="min-w-[300px] md:min-w-[400px] flex flex-col gap-4">
+<div class="aspect-square bg-surface-container-low overflow-hidden">
+<img alt="Linen Shirt" class="w-full h-full object-cover hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyQTGTpgHC2eDqWMGK8dR2RuHmPVKLBqYH20_WPIANN1bFcjjQ6-8kTI1SelzlScRo5881xkzSzOBJRYoe4ZCEbMWsPzeqydM2SbOliSQPh-TPL_WAoL7rp27x_yaBc-ZZBSe4qIc8o50jRXY4h5IFZJ21Ep5UAt5H3zV7d7ZI6AN8NcMV5aJx-vFgKR5CPdNAdoRcnsqs45aaesgReQqVl56pF2YS22-Wh2E_Zas8zX_4oPiVWTDcAc2IF3klxwGDZ2T1uIGDaNRi">
+</div>
+<div>
+<p class="font-title-md text-title-md text-ink">Classic Linen Shirt</p>
+<p class="text-on-surface-variant font-body-md">Men's Lifestyle</p>
+<p class="mt-2 font-medium">1,250,000₫</p>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="min-w-[300px] md:min-w-[400px] flex flex-col gap-4">
+<div class="aspect-square bg-surface-container-low overflow-hidden">
+<img alt="Tailored Trousers" class="w-full h-full object-cover hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvP7H8zQsUizbqeLCsGS0Hu3mLducId6DXvb0dwq-5VgHnm48wp8zWIsynRu5pIR4AE4ZUhPlPSHf9alsJK-GVFz9dFe37X68bqSV9t-gpzqZyUpJAdJHK4AHznxt5LgUBtExaHWPDISobXgESuMFsgJMBzFURdBOCeueSSZ7Q7B1_aD2VjnljK_qtpicDlBuOzhZDko34wB7-_XXWfDzX5u_afVC_XmAI3fffbOtgtuAo9ocnrGaHo3-afBhVIzN3nKWUEXl3bzA6">
+</div>
+<div>
+<p class="font-title-md text-title-md text-ink">Pleated Wool Trousers</p>
+<p class="text-on-surface-variant font-body-md">Women's Premium</p>
+<p class="mt-2 font-medium">2,400,000₫</p>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="min-w-[300px] md:min-w-[400px] flex flex-col gap-4">
+<div class="aspect-square bg-surface-container-low overflow-hidden">
+<img alt="Leather Tote" class="w-full h-full object-cover hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoYMTx73sE-zl-rrk3jPvaVd_aviVz5zLceFEuv_qsiBZ0vz3tWf27Y4bM3tKDRPWUDzVbW27UEQ7321iBNy9hj5FeoekgDPBRzmdvPUwTtUiPit_j3bnUld7t5DEEzvyPcUvLdCdnrk8SfaQH51KzYB2tNWGezSFzJVMhl_Um_ej-Htfj5ixSBPA7SfU5FD_jserlObo9OvUA7agoC_03nsUmacD6b7_nhyNV0PkA5Gzn9NBahxqHhxAgBy14QadlvpSwGsafxfga">
+</div>
+<div>
+<p class="font-title-md text-title-md text-ink">The Heritage Tote</p>
+<p class="text-on-surface-variant font-body-md">Accessories</p>
+<p class="mt-2 font-medium">3,800,000₫</p>
+</div>
+</div>
+<!-- Product Item 4 -->
+<div class="min-w-[300px] md:min-w-[400px] flex flex-col gap-4">
+<div class="aspect-square bg-surface-container-low overflow-hidden">
+<img alt="Oversized Coat" class="w-full h-full object-cover hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3rdhdd2Is5yjK5nAVVfW6P2sBr2eFbIuyGPXLzEMmaaz6S048ueY6FpMEhTXDQ70RHHoicQkL8NH1GrGzWkFHgtJ9AZY0aQHNRuQigIU9TZZSReu_xPV2W9m1jyi0ZDIFVUqm10oAVd9EW7Alu_gKcYdm8ZYDEkWqM2BRPBkIOA-Nb0PQlIzJj-OeG8i8Jlv6_nDIuYrw1eSjwgjtRvkjlxlOxMtc3rdT9__yYdd3YpOJXLlEPuMNJbUU88td1TYmIABgQLcnDhg4">
+</div>
+<div>
+<p class="font-title-md text-title-md text-ink">Merino Wool Coat</p>
+<p class="text-on-surface-variant font-body-md">Outerwear</p>
+<p class="mt-2 font-medium">5,600,000₫</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Collection (Story) -->
+<section class="bg-surface-dark py-section">
+<div class="max-w-[1280px] mx-auto px-grid-margin">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-section items-center">
+<div class="order-2 md:order-1 text-on-dark max-w-lg">
+<span class="font-caption-uc text-caption-uc text-primary-fixed-dim block mb-4">Mùa Thu 2026</span>
+<h2 class="font-display-lg text-display-lg mb-6">Sự Tĩnh Lặng Trầm Ấm</h2>
+<p class="font-body-md text-body-md text-surface-container-highest mb-8">
+                    Lấy cảm hứng từ những buổi chiều tà muộn, bộ sưu tập mang đến những thiết kế tối giản nhưng giàu chi tiết. Chất liệu len merino và lụa tự nhiên được dệt tinh xảo, tạo nên những cấu trúc phom dáng thoải mái nhưng đầy tính nghệ thuật. Một sự tôn vinh vẻ đẹp tĩnh lặng giữa nhịp sống hối hả.
+                </p>
+<a class="inline-flex items-center gap-2 text-primary-fixed-dim hover:text-on-dark transition-colors font-button text-button group border-b border-primary-fixed-dim pb-1" href="#">
+                    Xem chi tiết bộ sưu tập
+                    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+<div class="order-1 md:order-2 aspect-[4/5] bg-ink relative">
+<img alt="Featured Collection Image" class="w-full h-full object-cover" data-alt="Editorial portrait of a fashion model wearing an oversized dark coat against a terracotta background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3rdhdd2Is5yjK5nAVVfW6P2sBr2eFbIuyGPXLzEMmaaz6S048ueY6FpMEhTXDQ70RHHoicQkL8NH1GrGzWkFHgtJ9AZY0aQHNRuQigIU9TZZSReu_xPV2W9m1jyi0ZDIFVUqm10oAVd9EW7Alu_gKcYdm8ZYDEkWqM2BRPBkIOA-Nb0PQlIzJj-OeG8i8Jlv6_nDIuYrw1eSjwgjtRvkjlxlOxMtc3rdT9__yYdd3YpOJXLlEPuMNJbUU88td1TYmIABgQLcnDhg4">
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-surface-dark dark:bg-surface-dark w-full py-section transition-all duration-300">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-item-gap max-w-[1280px] mx-auto px-grid-margin">
+<!-- Brand & Newsletter -->
+<div class="col-span-1 md:col-span-2 md:pr-12">
+<div class="font-display-md text-display-md text-on-dark mb-4 uppercase">VELA WEAR</div>
+<p class="text-surface-container-highest font-body-md text-body-md mb-6 max-w-md">Đăng ký để nhận thông tin về bộ sưu tập mới và các bài viết editorial độc quyền.</p>
+<form class="flex gap-2 w-full max-w-md">
+<input class="flex-1 bg-ink border-hairline text-on-dark placeholder-surface-variant rounded focus:ring focus:ring-primary/15 focus:border-primary px-4 py-3 font-body-md text-body-md" placeholder="Email của bạn" type="email">
+<button class="bg-primary-container text-on-primary font-button text-button px-6 py-3 rounded hover:bg-primary transition-colors" type="button">
+                    Đăng ký
+                </button>
+</form>
+</div>
+<!-- Links 1 -->
+<div class="col-span-1">
+<h4 class="font-caption-uc text-caption-uc text-primary-fixed-dim mb-6">Chính Sách</h4>
+<ul class="space-y-4">
+<li class=""><a class="text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors font-body-md text-body-md" href="#">Privacy Policy</a></li>
+<li class=""><a class="text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors font-body-md text-body-md" href="#">Terms of Service</a></li>
+</ul>
+</div>
+<!-- Links 2 -->
+<div class="col-span-1">
+<h4 class="font-caption-uc text-caption-uc text-primary-fixed-dim mb-6">Hỗ Trợ</h4>
+<ul class="space-y-4">
+<li class=""><a class="text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors font-body-md text-body-md" href="#">Shipping</a></li>
+<li class=""><a class="text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors font-body-md text-body-md" href="#">Returns</a></li>
+<li class=""><a class="text-surface-container-highest dark:text-surface-variant hover:text-primary-fixed-dim transition-colors font-body-md text-body-md" href="#">Sustainability</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-[1280px] mx-auto px-grid-margin mt-section pt-8 border-t border-ink/50">
+<p class="font-caption-uc text-caption-uc text-surface-variant text-center">© 2024 VELA WEAR. ALL RIGHTS RESERVED.</p>
+</div>
+</footer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>
