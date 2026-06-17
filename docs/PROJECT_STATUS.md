@@ -4,6 +4,18 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-06-18
 
+### Product Detail Redesign & Enhanced Info Completed
+
+- Retrieved and downloaded Stitch HTML template for **Vela Wear - Synchronized Product Detail with Enhanced Previews & Info**.
+- Updated [product-detail-page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/product-detail-page.tsx) page container max-width to `max-w-[1800px] px-6 md:px-16` to match the brand's wide layout.
+- Redesigned [product-detail-client.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/product-detail-client.tsx):
+  - vertical thumbnail gallery next to main image (`flex flex-row gap-4`).
+  - customized ring-style color selectors and clean box size selectors.
+  - stacked full-width Thêm vào giỏ and Favourite buttons.
+  - interactive collapsibles for Size & Fit, Delivery, and Reviews.
+  - wired up Added to Bag and Added to Favorites notifications to trigger on button clicks.
+- Verification: ran `pnpm lint` and `pnpm build` successfully with 0 errors.
+
 ### Notifications & Favorites Integration Completed
 
 - Retrieved and downloaded Stitch HTML templates for **Vela Wear - Precision Nike-Style Notification** and **Vela Wear - Added to Favorites Notification (Sharp Style)**.
