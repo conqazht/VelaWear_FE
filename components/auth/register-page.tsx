@@ -1,13 +1,108 @@
-import Link from "next/link";
-import { ArrowRight, Eye, X } from "lucide-react";
+"use client";
 
-import { AuthField } from "@/components/auth/auth-field";
+import Link from "next/link";
+import { useState, useRef } from "react";
+import { Eye, EyeOff, X, RefreshCw, ChevronDown } from "lucide-react";
+
 import { AuthShell } from "@/components/auth/auth-shell";
 import { BrandMark } from "@/components/shop/brand-mark";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  id: string;
+  trailing?: React.ReactNode;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+}
+
+function FloatingInput({
+  label,
+  id,
+  trailing,
+  className,
+  type = "text",
+  inputRef,
+  ...props
+}: FloatingInputProps) {
+  return (
+    <div className="relative w-full">
+      <input
+        ref={inputRef}
+        type={type}
+        id={id}
+        placeholder=" "
+        className={cn(
+          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-none text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
+          trailing && "pr-12",
+          className
+        )}
+        {...props}
+      />
+      <label
+        htmlFor={id}
+        className="absolute left-4 -top-2.5 px-1 bg-[#efe7dc] text-xs text-[#55423d] transition-all duration-200
+                   peer-placeholder-shown:text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-[#55423d]/60 peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
+                   peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#964025] peer-focus:bg-[#efe7dc] peer-focus:px-1
+                   pointer-events-none"
+      >
+        {label}
+      </label>
+      {trailing && (
+        <div className="absolute inset-y-0 right-3 flex items-center text-ink">
+          {trailing}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function RegisterPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [preference, setPreference] = useState("");
+  const [isSelectFocused, setIsSelectFocused] = useState(false);
+  const [emailConsent, setEmailConsent] = useState(false);
+  const [termsConsent, setTermsConsent] = useState(false);
+  const [errors, setErrors] = useState<{
+    passwordMin?: boolean;
+    passwordRules?: boolean;
+  }>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+
+    const newErrors: typeof errors = {};
+    if (password.length < 8) {
+      newErrors.passwordMin = true;
+    }
+    if (
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password) ||
+      !/[0-9]/.test(password)
+    ) {
+      newErrors.passwordRules = true;
+    }
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      window.location.href = "/";
+    }
+  };
+  
   return (
-    <AuthShell className="flex min-h-screen items-start justify-center px-4 py-[88px]">
+    <AuthShell className="flex min-h-screen items-start justify-center px-4 pt-4 pb-20 md:pt-8">
       <section className="w-full max-w-[460px] bg-[#efe7dc] p-6 md:p-8">
         <div className="mb-6 text-center">
           <Link
@@ -16,167 +111,216 @@ export function RegisterPage() {
           >
             <BrandMark className="mx-auto" />
           </Link>
-          <h1 className="mt-2 font-serif text-[32px] leading-[1.18] tracking-[-0.0125em]">
+          <h1 className="mt-3 font-serif text-[32px] leading-[1.18] tracking-[-0.0125em] text-[#1c1a18]">
             Now let&apos;s make you a Member.
           </h1>
-          <p className="mt-2 text-base leading-[1.55] text-[#55423d]">
+          <p className="mt-2 text-sm leading-[1.55] text-[#55423d]">
             We&apos;ve sent a code to your email.
           </p>
         </div>
 
-        <form className="space-y-6">
-          <div>
-            <div className="mb-2 flex items-baseline justify-between">
-              <label className="text-base font-medium leading-[1.4]">Code</label>
-              <button
-                type="button"
-                className="text-[11px] font-medium uppercase leading-[1.4] tracking-[0.164em] text-[#964025]"
-              >
-                Resend Code
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Code Verification */}
+          <FloatingInput
+            id="code"
+            label="Code*"
+            type="text"
+            required
+            trailing={
+              <button type="button" aria-label="Refresh code" className="p-1 hover:opacity-85 transition-opacity cursor-pointer">
+                <RefreshCw className="size-4 text-ink" />
               </button>
-            </div>
-            <div className="grid grid-cols-6 gap-2">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <input
-                  aria-label={`Verification code digit ${index + 1}`}
-                  className="h-14 w-full rounded border border-[#e3dccf] bg-[#f7f4ef] text-center text-base font-medium text-[#1c1a18] outline-none focus:border-[#964025] focus:ring-2 focus:ring-[#964025]/15"
-                  inputMode="numeric"
-                  key={index}
-                  maxLength={1}
-                  placeholder="·"
-                />
-              ))}
-            </div>
-          </div>
+            }
+          />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <LabeledField
-              autoComplete="given-name"
-              label="First Name"
-              placeholder="First Name"
+          {/* First Name & Surname */}
+          <div className="grid grid-cols-2 gap-4">
+            <FloatingInput
+              id="firstName"
+              label="First Name*"
+              type="text"
+              required
             />
-            <LabeledField
-              autoComplete="family-name"
-              label="Surname"
-              placeholder="Surname"
+            <FloatingInput
+              id="lastName"
+              label="Surname*"
+              type="text"
+              required
             />
           </div>
 
+          {/* Password */}
           <div>
-            <LabeledField
-              autoComplete="new-password"
-              label="Password"
-              placeholder="Password"
-              type="password"
-              trailing={<Eye className="size-[22px]" strokeWidth={1.5} />}
+            <FloatingInput
+              id="password"
+              label="Password*"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              inputRef={passwordRef}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (isSubmitted) {
+                  const newErrors: typeof errors = {};
+                  if (e.target.value.length < 8) {
+                    newErrors.passwordMin = true;
+                  }
+                  if (
+                    !/[A-Z]/.test(e.target.value) ||
+                    !/[a-z]/.test(e.target.value) ||
+                    !/[0-9]/.test(e.target.value)
+                  ) {
+                    newErrors.passwordRules = true;
+                  }
+                  setErrors(newErrors);
+                }
+              }}
+              required
+              trailing={
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setShowPassword(!showPassword);
+                    setTimeout(() => {
+                      passwordRef.current?.focus();
+                    }, 0);
+                  }}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="p-1 hover:opacity-85 transition-opacity cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="size-[22px] text-ink" /> : <Eye className="size-[22px] text-ink" />}
+                </button>
+              }
             />
-            <div className="mt-2 grid gap-3 opacity-70 sm:grid-cols-[150px_1fr]">
-              <PasswordHint>Minimum of 8 characters</PasswordHint>
-              <PasswordHint>Uppercase, lowercase, and one number</PasswordHint>
-            </div>
+            {isSubmitted && (errors.passwordMin || errors.passwordRules) && (
+              <div className="mt-2 flex flex-col gap-1">
+                {errors.passwordMin && (
+                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider">
+                    <X className="size-3 text-destructive" strokeWidth={2.5} /> Minimum of 8 characters
+                  </span>
+                )}
+                {errors.passwordRules && (
+                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider">
+                    <X className="size-3 text-destructive" strokeWidth={2.5} /> Uppercase, lowercase letters and one number
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
-          <div>
-            <p className="mb-2 text-base font-medium leading-[1.4]">
-              Shopping Preference
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <PreferenceButton>Men&apos;s</PreferenceButton>
-              <PreferenceButton>Women&apos;s</PreferenceButton>
-            </div>
+          {/* Shopping Preference */}
+          <div className="relative w-full">
+            <Select
+              name="shoppingPreference"
+              value={preference}
+              onValueChange={setPreference}
+              required
+            >
+              <SelectTrigger
+                onFocus={() => setIsSelectFocused(true)}
+                onBlur={() => setIsSelectFocused(false)}
+                className="w-full !h-14 py-0 px-4 bg-transparent border border-ink rounded-none text-sm text-[#1c1a18] focus:border-[#964025] focus:ring-0 focus-visible:border-[#964025] focus-visible:ring-0 focus-visible:ring-offset-0 outline-hidden flex items-center justify-between select-none cursor-pointer data-placeholder:text-transparent"
+              >
+                <SelectValue placeholder=" ">
+                  {preference === "mens" ? "Men's" : preference === "womens" ? "Women's" : ""}
+                </SelectValue>
+              </SelectTrigger>
+              <label
+                className={cn(
+                  "absolute left-4 transition-all duration-200 pointer-events-none",
+                  (preference !== "" || isSelectFocused)
+                    ? "-top-2.5 text-xs bg-[#efe7dc] px-1"
+                    : "top-4 text-sm text-[#55423d]/60 bg-transparent px-0",
+                  isSelectFocused ? "text-[#964025]" : "text-[#55423d]"
+                )}
+              >
+                Shopping Preference*
+              </label>
+              <SelectContent
+                alignItemWithTrigger={false}
+                side="bottom"
+                sideOffset={4}
+                className="bg-[#efe7dc] border border-ink rounded-none shadow-none text-ink w-[var(--anchor-width)]"
+              >
+                <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-none cursor-pointer py-3 px-4">
+                  Men&apos;s
+                </SelectItem>
+                <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-none cursor-pointer py-3 px-4">
+                  Women&apos;s
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div>
-            <LabeledField
-              autoComplete="bday"
-              label="Date of Birth"
-              placeholder="mm/dd/yyyy"
-            />
-            <p className="mt-2 text-[13px] leading-[1.55] text-[#55423d]/70">
+          {/* Date of Birth */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-[#1c1a18] block mb-3.5">Date of Birth*</label>
+            <div className="grid grid-cols-3 gap-4">
+              <FloatingInput
+                id="dobDay"
+                label="Day*"
+                required
+              />
+              <FloatingInput
+                id="dobMonth"
+                label="Month*"
+                required
+              />
+              <FloatingInput
+                id="dobYear"
+                label="Year*"
+                required
+              />
+            </div>
+            <p className="text-[#55423d] text-[13px] opacity-70 mt-1">
               Get a Vela Member Reward every year on your Birthday.
             </p>
           </div>
 
-          <div className="space-y-4 border-t border-[#e3dccf] pt-[25px]">
-            <Agreement>
-              Sign up for emails to get updates from Vela on products, offers,
-              and your Member benefits.
-            </Agreement>
-            <Agreement>
-              I agree to Vela&apos;s{" "}
-              <Link href="#" className="underline underline-offset-2">
-                Privacy Policy
-              </Link>{" "}
-              and{" "}
-              <Link href="#" className="underline underline-offset-2">
-                Terms of Use
-              </Link>
-              .
-            </Agreement>
+          {/* Agreements */}
+          <div className="space-y-4 mt-4">
+            <div className="flex items-start gap-3 cursor-pointer group">
+              <Checkbox
+                id="emailConsent"
+                checked={emailConsent}
+                onCheckedChange={(checked) => setEmailConsent(!!checked)}
+                className="mt-1 size-5 rounded-none border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
+              />
+              <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none">
+                Sign up for emails to get updates from Vela on products, offers, and your Member benefits.
+              </label>
+            </div>
+            <div className="flex items-start gap-3 cursor-pointer group">
+              <Checkbox
+                id="termsConsent"
+                checked={termsConsent}
+                onCheckedChange={(checked) => setTermsConsent(!!checked)}
+                className="mt-1 size-5 rounded-none border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
+                required
+              />
+              <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none">
+                I agree to Vela&apos;s <Link href="#" className="underline hover:text-[#964025]">Privacy Policy</Link> and <Link href="#" className="underline hover:text-[#964025]">Terms of Use</Link>.
+              </label>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            className="flex h-12 w-full items-center justify-center gap-2 rounded bg-[#964025] text-sm font-medium tracking-[0.03125em] text-white transition-colors hover:bg-[#87391f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#964025]/30"
-          >
-            Create Account
-            <ArrowRight className="size-4" />
-          </button>
+          {/* Submit Action */}
+          <div className="pt-4">
+            <button
+              type="submit"
+              className="w-full h-14 bg-[#964025] text-white rounded-none font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider"
+            >
+              Create Account
+            </button>
+          </div>
         </form>
 
-        <p className="mt-8 text-center text-base leading-[1.55] text-[#55423d]">
-          Already a Member?{" "}
-          <Link href="/sign-in" className="text-[#1c1a18] underline underline-offset-2">
-            Sign In
-          </Link>
-        </p>
+        <div className="mt-8 text-center">
+          <p className="text-sm text-[#55423d]">
+            Already a Member? <Link href="/sign-in" className="text-[#1c1a18] underline font-medium hover:text-[#964025]">Sign In</Link>
+          </p>
+        </div>
       </section>
     </AuthShell>
-  );
-}
-
-function LabeledField({
-  label,
-  ...props
-}: React.ComponentProps<typeof AuthField> & { label: string }) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-base font-medium leading-[1.4]">
-        {label}
-      </span>
-      <AuthField {...props} />
-    </label>
-  );
-}
-
-function PasswordHint({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="flex items-center gap-[10px] text-[11px] font-medium uppercase leading-[1.4] tracking-[0.164em] text-[#55423d]">
-      <X className="size-2 shrink-0" strokeWidth={2} />
-      {children}
-    </span>
-  );
-}
-
-function PreferenceButton({ children }: { children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      className="flex h-12 items-center justify-center rounded border border-[#e3dccf] bg-[#f7f4ef] text-base font-medium text-[#1c1a18] transition-colors hover:border-[#964025]/50"
-    >
-      {children}
-    </button>
-  );
-}
-
-function Agreement({ children }: { children: React.ReactNode }) {
-  return (
-    <label className="flex items-start gap-3 text-base leading-[1.55] text-[#55423d]">
-      <input
-        className="mt-1 size-5 shrink-0 rounded border border-[#e3dccf] bg-[#f7f4ef] accent-[#964025]"
-        type="checkbox"
-      />
-      <span>{children}</span>
-    </label>
   );
 }
