@@ -20,7 +20,7 @@ export default function RootLayout({
       className="h-full antialiased"
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <CartProvider>
           <NotificationProvider>
             <FavoritesProvider>{children}</FavoritesProvider>

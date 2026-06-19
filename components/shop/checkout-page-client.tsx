@@ -66,8 +66,8 @@ export function CheckoutPageClient() {
 
   if (orderCompleted) {
     return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
-        <Card className="mx-auto mt-6 flex max-w-lg items-center rounded-sm border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
+      <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16 min-h-[80vh] flex flex-col justify-center items-center">
+        <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-sm border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
           <CheckCircle2 className="mb-6 size-14 text-[#b85a3c]" />
           <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
             Đặt hàng thành công!

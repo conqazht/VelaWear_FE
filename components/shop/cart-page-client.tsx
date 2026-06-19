@@ -18,41 +18,50 @@ export function CartPageClient() {
 
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
-      <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      {/* Breadcrumbs */}
+      <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+        <Link href="/" className="hover:text-[#1c1a18]">
+          Home
+        </Link>
+        <span>/</span>
+        <span className="font-medium text-[#1c1a18]">Cart</span>
+      </div>
+
+      <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-4xl">
-            Your Cart
+          <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+            Cart
           </h1>
-          <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60">
-            {cart.length === 0
-              ? "Your cart is currently empty"
-              : `${cart.length} unique designs handpicked`}
-          </p>
+          {cart.length > 0 && (
+            <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
+              {cart.length} unique designs handpicked
+            </p>
+          )}
         </div>
         <Link
           href="/collection"
-          className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c] hover:underline"
+          className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c] hover:underline animate-none"
         >
           ← Continue Shopping
         </Link>
       </div>
 
       {cart.length === 0 ? (
-        <div className="mx-auto max-w-md py-20 text-center">
-          <ShoppingBag className="mx-auto mb-4 size-12 text-[#1c1a18]/20" />
-          <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60">
+        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[80vh] flex flex-col justify-start pt-24 items-center">
+          <ShoppingBag className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
+          <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
             Giỏ hàng của bạn đang trống. Hãy quay lại cửa hàng để chọn thêm
             nhiều sản phẩm dệt lanh thủ công độc đáo nhé.
           </p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b85a3c]"
+            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b85a3c]"
           >
             Xem tất cả sản phẩm
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 min-h-[80vh]">
           <div className="space-y-6 lg:col-span-8">
             {cart.map((item) => (
               <Card

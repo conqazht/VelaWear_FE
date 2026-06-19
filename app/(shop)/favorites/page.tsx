@@ -32,28 +32,28 @@ export default function FavoritesPage() {
         <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
           Favorites
         </h1>
-        <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
-          {favorites.length === 0
-            ? "Your favorites list is currently empty"
-            : `${favorites.length} designs saved in your wishlist`}
-        </p>
+        {favorites.length > 0 && (
+          <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
+            {favorites.length} designs saved in your wishlist
+          </p>
+        )}
       </header>
 
       {favorites.length === 0 ? (
-        <div className="mx-auto max-w-md py-20 text-center select-none">
-          <Heart className="mx-auto mb-4 size-12 text-[#1c1a18]/20 stroke-1" />
-          <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60">
+        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[80vh] flex flex-col justify-start pt-24 items-center">
+          <Heart className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
+          <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
             Danh sách yêu thích của bạn đang trống. Hãy lưu lại những sản phẩm bạn yêu thích để dễ dàng theo dõi và đặt mua sau nhé.
           </p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
+            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
           >
             Khám phá bộ sưu tập
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-[80vh]">
           {favorites.map((product) => (
             <article
               key={product.id}
