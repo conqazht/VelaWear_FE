@@ -1,10 +1,43 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
-import { Product } from "@/lib/vela-data";
+import { Product, mapBackendProduct } from "@/lib/vela-data";
+import apiClient from "@/lib/api-client";
 
-export function ProductDetailPage({ product }: { product: Product }) {
+export function ProductDetailPage({ slug }: { slug: string }) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProduct() {
+      try {
+        const response = await apiClient.get("/products?size=100");
+        if (response.data?.data?.result) {
+          const bp = response.data.data.result.find((p: Parameters<typeof mapBackendProduct>[0]) => p.slug === slug);
+          if (bp) {
+            setProduct(mapBackendProduct(bp));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load product by slug", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProduct();
+  }, [slug]);
+
+  if (isLoading || !product) {
+    return (
+      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-16 py-32 text-center select-none">
+        <span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Loading product...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 md:px-16 py-12">
       <div className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
@@ -27,7 +60,7 @@ export function ProductDetailPage({ product }: { product: Product }) {
       <ProductDetailClient product={product} />
 
       <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2">
-        <div className="md:pr-6">
+        <div className="md:pr-6 text-left">
           <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
             Craft & Sustainability
           </span>

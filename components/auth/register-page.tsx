@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useRef } from "react";
-import { Eye, EyeOff, X, RefreshCw, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { BrandMark } from "@/components/shop/brand-mark";
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/components/auth/auth-provider";
 
 interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -67,6 +69,12 @@ function FloatingInput({
 export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear] = useState("");
   const [preference, setPreference] = useState("");
   const [isSelectFocused, setIsSelectFocused] = useState(false);
   const [emailConsent, setEmailConsent] = useState(false);
@@ -74,14 +82,19 @@ export function RegisterPage() {
   const [errors, setErrors] = useState<{
     passwordMin?: boolean;
     passwordRules?: boolean;
+    backend?: string;
   }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const passwordRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { register } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitted(true);
+    setErrors({});
 
     const newErrors: typeof errors = {};
     if (password.length < 8) {
@@ -94,10 +107,47 @@ export function RegisterPage() {
     ) {
       newErrors.passwordRules = true;
     }
-    setErrors(newErrors);
 
-    if (Object.keys(newErrors).length === 0) {
-      window.location.href = "/";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Format birthdate as YYYY-MM-DD
+      const formattedDay = dobDay.padStart(2, "0");
+      const formattedMonth = dobMonth.padStart(2, "0");
+      const birthDate = `${dobYear}-${formattedMonth}-${formattedDay}`;
+
+      // Map preference to gender ENUM (MALE, FEMALE, OTHER)
+      const gender =
+        preference === "womens"
+          ? "FEMALE"
+          : preference === "mens"
+          ? "MALE"
+          : "OTHER";
+
+      await register({
+        email,
+        password,
+        fullName: `${firstName} ${lastName}`.trim(),
+        birthDate,
+        gender,
+        avatar: null,
+      });
+
+      router.push("/sign-in");
+    } catch (err: unknown) {
+      const apiError = err as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        setErrors({ backend: apiError.response.data.message });
+      } else {
+        setErrors({ backend: "Registration failed. Please check your inputs and try again." });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -115,22 +165,25 @@ export function RegisterPage() {
             Now let&apos;s make you a Member.
           </h1>
           <p className="mt-2 text-sm leading-[1.55] text-[#55423d]">
-            We&apos;ve sent a code to your email.
+            Enter your details to register a new account.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Code Verification */}
+          {errors.backend && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
+              {errors.backend}
+            </div>
+          )}
+
+          {/* Email Address */}
           <FloatingInput
-            id="code"
-            label="Code*"
-            type="text"
+            id="email"
+            label="Email Address*"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
-            trailing={
-              <button type="button" aria-label="Refresh code" className="p-1 hover:opacity-85 transition-opacity cursor-pointer">
-                <RefreshCw className="size-4 text-ink" />
-              </button>
-            }
           />
 
           {/* First Name & Surname */}
@@ -139,12 +192,16 @@ export function RegisterPage() {
               id="firstName"
               label="First Name*"
               type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               required
             />
             <FloatingInput
               id="lastName"
               label="Surname*"
               type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
               required
             />
           </div>
@@ -213,7 +270,7 @@ export function RegisterPage() {
             <Select
               name="shoppingPreference"
               value={preference}
-              onValueChange={setPreference}
+              onValueChange={(val) => setPreference(val || "")}
               required
             >
               <SelectTrigger
@@ -259,16 +316,22 @@ export function RegisterPage() {
               <FloatingInput
                 id="dobDay"
                 label="Day*"
+                value={dobDay}
+                onChange={(e) => setDobDay(e.target.value)}
                 required
               />
               <FloatingInput
                 id="dobMonth"
                 label="Month*"
+                value={dobMonth}
+                onChange={(e) => setDobMonth(e.target.value)}
                 required
               />
               <FloatingInput
                 id="dobYear"
                 label="Year*"
+                value={dobYear}
+                onChange={(e) => setDobYear(e.target.value)}
                 required
               />
             </div>
@@ -308,9 +371,10 @@ export function RegisterPage() {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full h-14 bg-[#964025] text-white rounded-none font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider"
+              disabled={isSubmitting}
+              className="w-full h-14 bg-[#964025] text-white rounded-none font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50"
             >
-              Create Account
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </button>
           </div>
         </form>

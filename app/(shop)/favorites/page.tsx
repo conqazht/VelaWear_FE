@@ -5,14 +5,15 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
-import { money } from "@/lib/vela-data";
+import { money, Product } from "@/lib/vela-data";
+import { ProductCard } from "@/components/shop/product-card";
 
 export default function FavoritesPage() {
   const { favorites, removeFromFavorites } = useFavorites();
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
 
-  const handleAddToBag = (product: any) => {
+  const handleAddToBag = (product: Product) => {
     addToCart(product);
     showAddedToBag(product, product.size || "M", product.color || "Sand");
   };

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { CartProvider } from "@/components/shop/cart-provider";
 import { NotificationProvider } from "@/components/shop/notification-provider";
 import { FavoritesProvider } from "@/components/shop/favorites-provider";
@@ -21,11 +22,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        <CartProvider>
-          <NotificationProvider>
-            <FavoritesProvider>{children}</FavoritesProvider>
-          </NotificationProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <NotificationProvider>
+              <FavoritesProvider>{children}</FavoritesProvider>
+            </NotificationProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

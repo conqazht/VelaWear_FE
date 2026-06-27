@@ -1,26 +1,49 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { PRODUCTS, money } from "@/lib/vela-data";
+import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { ProductCard } from "@/components/shop/product-card";
+import apiClient from "@/lib/api-client";
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Filters state
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Recommended");
 
+  // Fetch search results from backend on mount and query changes
+  useEffect(() => {
+    async function searchProducts() {
+      setIsLoading(true);
+      try {
+        const response = await apiClient.get(`/products?name=${encodeURIComponent(query)}&size=100`);
+        if (response.data?.data?.result) {
+          const mapped = response.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p));
+          setProducts(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch search results from backend", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    searchProducts();
+  }, [query]);
+
   // Filter and search logic
   const filteredProducts = useMemo(() => {
-    let results = PRODUCTS;
+    let results = products;
 
-    // 1. Text Search query
+    // 1. Text Search query (fallback client-side filter to be extra safe)
     if (query.trim()) {
       const q = query.toLowerCase();
       results = results.filter(
@@ -52,7 +75,7 @@ function SearchResultsContent() {
     }
 
     return results;
-  }, [query, selectedCategories, selectedSizes, sortBy]);
+  }, [products, query, selectedCategories, selectedSizes, sortBy]);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) =>
@@ -67,6 +90,14 @@ function SearchResultsContent() {
       prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto w-full max-w-[1800px] px-6 py-32 text-center select-none">
+        <span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Searching products...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">

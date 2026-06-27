@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth/auth-provider";
 
 interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -58,6 +60,33 @@ function FloatingInput({
 export function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { signIn } = useAuth();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      await signIn(email, password);
+      router.push("/");
+    } catch (err: unknown) {
+      const apiError = err as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        setError(apiError.response.data.message);
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <AuthShell
@@ -74,12 +103,20 @@ export function SignInPage() {
           </p>
         </div>
 
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
+              {error}
+            </div>
+          )}
+
           <FloatingInput
             id="email"
             label="Email Address*"
             autoComplete="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
           <div>
@@ -89,6 +126,8 @@ export function SignInPage() {
               autoComplete="current-password"
               type={showPassword ? "text" : "password"}
               inputRef={passwordRef}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               trailing={
                 <button
@@ -115,9 +154,10 @@ export function SignInPage() {
           </div>
           <button
             type="submit"
-            className="flex h-14 w-full items-center justify-center rounded-none bg-[#964025] text-sm font-medium tracking-[0.03125em] text-white transition-colors hover:bg-[#87391f] cursor-pointer uppercase tracking-wider"
+            disabled={isSubmitting}
+            className="flex h-14 w-full items-center justify-center rounded-none bg-[#964025] text-sm font-medium tracking-[0.03125em] text-white transition-colors hover:bg-[#87391f] cursor-pointer uppercase tracking-wider disabled:opacity-50"
           >
-            Sign In
+            {isSubmitting ? "Signing In..." : "Sign In"}
           </button>
         </form>
       </section>

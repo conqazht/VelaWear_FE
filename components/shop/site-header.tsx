@@ -2,22 +2,20 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Menu, ShoppingBag, Heart, Search, X } from "lucide-react";
 
 import { BrandMark } from "@/components/shop/brand-mark";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 
 export function SiteHeader() {
   const { itemCount } = useCart();
   const { favorites } = useFavorites();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const pathname = usePathname();
   const router = useRouter();
-
-  // If path is /profile, simulate logged-in state to show member avatar
-  const isLoggedIn = pathname === "/profile";
+  const { user, isAuthenticated, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b border-hairline bg-canvas/95 backdrop-blur-md transition-all duration-300">
@@ -120,19 +118,30 @@ export function SiteHeader() {
             </Link>
 
             {/* Member Profile Avatar or Join/Login Link */}
-            <div className="hidden md:block">
-              {isLoggedIn ? (
-                <Link
-                  href="/profile"
-                  aria-label="View Profile"
-                  className="flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] hover:bg-surface-card text-ink text-xs font-semibold transition-colors flex-shrink-0"
-                >
-                  E
-                </Link>
+            <div className="hidden md:flex items-center gap-4">
+              {isAuthenticated && user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    aria-label="View Profile"
+                    className="flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] hover:bg-surface-card text-ink text-xs font-semibold transition-colors flex-shrink-0"
+                  >
+                    {user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      router.push("/");
+                    }}
+                    className="text-xs font-medium text-[#55423d]/60 hover:text-primary transition-colors cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <Link
-                  href="/profile"
-                  className="text-sm font-medium text-[#55423d]/80 hover:text-primary transition-colors tracking-[0.05em] ml-2"
+                  href="/sign-in"
+                  className="text-sm font-medium text-[#55423d]/80 hover:text-primary transition-colors tracking-[0.05em]"
                 >
                   Join / Log In
                 </Link>
@@ -219,13 +228,35 @@ export function SiteHeader() {
               >
                 Help
               </Link>
-              <Link
-                href="/profile"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-ink/80 hover:text-primary py-2 border-b border-hairline/30 font-medium"
-              >
-                {isLoggedIn ? "Eleanor (Profile)" : "Join / Log In"}
-              </Link>
+              {isAuthenticated && user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-ink/80 hover:text-primary py-2 border-b border-hairline/30 font-medium"
+                  >
+                    {user.fullName} (Profile)
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      signOut();
+                      router.push("/");
+                    }}
+                    className="text-left text-ink/60 hover:text-primary py-2 border-b border-hairline/30 font-medium cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-ink/80 hover:text-primary py-2 border-b border-hairline/30 font-medium"
+                >
+                  Join / Log In
+                </Link>
+              )}
             </div>
           </div>
         </div>

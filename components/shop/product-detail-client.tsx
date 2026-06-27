@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Heart,
   ChevronUp,
@@ -21,12 +21,34 @@ import {
   Product,
 } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
+import apiClient from "@/lib/api-client";
 
 const colorSwatches: Record<string, string> = {
   Sand: "bg-[#efe7dc]",
   Terracotta: "bg-[#b85a3c]",
   Ink: "bg-[#1c1a18]",
 };
+
+interface VariantColorInfo {
+  id: number;
+  name: string;
+}
+
+interface VariantSizeInfo {
+  id: number;
+  name: string;
+}
+
+interface ProductVariant {
+  id: number;
+  sku: string;
+  price: number;
+  salePrice: number | null;
+  stockQuantity: number;
+  color: VariantColorInfo | null;
+  size: VariantSizeInfo | null;
+  status: string;
+}
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -41,11 +63,74 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [selectedColor, setSelectedColor] = useState(product.color);
   const [selectedSize, setSelectedSize] = useState(product.size);
 
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     sizeAndFit: true,
     delivery: false,
     reviews: false,
   });
+
+  // Fetch product variants on mount
+  useEffect(() => {
+    if (!product.realId) return;
+    async function loadVariants() {
+      try {
+        const response = await apiClient.get(`/product-variants?productId=${product.realId}&size=100`);
+        if (response.data?.data?.result) {
+          setVariants(response.data.data.result);
+        }
+      } catch (err) {
+        console.error("Failed to load product variants", err);
+      }
+    }
+    loadVariants();
+  }, [product.realId]);
+
+  // Set default selected color/size once variants load
+  useEffect(() => {
+    if (variants.length > 0) {
+      const first = variants[0];
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (first.color?.name) setSelectedColor(first.color.name);
+      if (first.size?.name) setSelectedSize(first.size.name);
+    }
+  }, [variants]);
+
+  // Compute available colors and sizes
+  const colorsList = useMemo(() => {
+    if (variants.length === 0) return ["Sand", "Terracotta", "Ink"];
+    const unique = new Set<string>();
+    variants.forEach((v) => {
+      if (v.color?.name) unique.add(v.color.name);
+    });
+    return Array.from(unique);
+  }, [variants]);
+
+  const sizesList = useMemo(() => {
+    if (variants.length === 0) return ["S", "M", "L", "XL"];
+    const unique = new Set<string>();
+    variants.forEach((v) => {
+      if (v.size?.name) unique.add(v.size.name);
+    });
+    return Array.from(unique);
+  }, [variants]);
+
+  // Find currently active variant matching selection
+  const activeVariant = useMemo(() => {
+    return variants.find(
+      (v) =>
+        v.color?.name?.toLowerCase() === selectedColor?.toLowerCase() &&
+        v.size?.name?.toLowerCase() === selectedSize?.toLowerCase()
+    );
+  }, [variants, selectedColor, selectedSize]);
+
+  // Pricing hierarchy: active variant sale price > variant price > static product catalog price
+  const displayPrice = activeVariant ? Number(activeVariant.price) : product.price;
+  const displayOriginalPrice = activeVariant && activeVariant.salePrice 
+    ? Number(activeVariant.price) 
+    : product.originalPrice;
+  const mainPrice = activeVariant && activeVariant.salePrice ? Number(activeVariant.salePrice) : displayPrice;
+  const originalPrice = activeVariant && activeVariant.salePrice ? Number(activeVariant.price) : displayOriginalPrice;
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -100,11 +185,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </h1>
         <div className="mb-6 flex items-baseline gap-3">
           <span className="font-serif text-2xl font-light tracking-wider text-[#1c1a18]">
-            {money(product.price)}
+            {money(mainPrice)}
           </span>
-          {product.originalPrice && (
+          {originalPrice && originalPrice > mainPrice && (
             <span className="text-sm tracking-wider text-[#1c1a18]/40 line-through">
-              {money(product.originalPrice)}
+              {money(originalPrice)}
             </span>
           )}
         </div>
@@ -121,7 +206,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
             Color — {selectedColor}
           </span>
           <div className="flex gap-4">
-            {["Sand", "Terracotta", "Ink"].map((color) => (
+            {colorsList.map((color) => (
               <button
                 key={color}
                 type="button"
@@ -129,7 +214,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 aria-label={color}
                 className={cn(
                   "w-8 h-8 rounded-full border transition-all cursor-pointer ring-2 ring-offset-2",
-                  colorSwatches[color],
+                  colorSwatches[color] || "bg-[#b85a3c]",
                   selectedColor === color
                     ? "border-[#1c1a18] ring-[#1c1a18]/30 scale-105"
                     : "border-transparent ring-transparent hover:ring-hairline hover:scale-105"
@@ -148,7 +233,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
             </a>
           </div>
           <div className="grid grid-cols-4 gap-3">
-            {["S", "M", "L", "XL"].map((size) => (
+            {sizesList.map((size) => (
               <button
                 key={size}
                 type="button"
@@ -171,8 +256,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
           <Button
             type="button"
             onClick={() => {
-              addToCart(product, selectedColor, selectedSize);
-              showAddedToBag(product, selectedSize, selectedColor);
+              // Construct product with active variant pricing
+              const cartProduct = { ...product, price: mainPrice };
+              addToCart(cartProduct, selectedColor, selectedSize);
+              showAddedToBag(cartProduct, selectedSize, selectedColor);
             }}
             className="w-full py-4 bg-[#b5573a] hover:bg-[#964025] text-white font-semibold text-xs tracking-widest uppercase rounded-sm transition-colors cursor-pointer border-none shadow-sm h-auto"
           >

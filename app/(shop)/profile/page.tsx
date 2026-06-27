@@ -1,14 +1,42 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, PlusCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, PlusCircle, LockKeyhole } from "lucide-react";
 
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductCard } from "@/components/shop/product-card";
 import { useFavorites } from "@/components/shop/favorites-provider";
+import { useAuth } from "@/components/auth/auth-provider";
+import apiClient from "@/lib/api-client";
+import { money } from "@/lib/vela-data";
+import { Card } from "@/components/ui/card";
+
+interface Order {
+  id: number;
+  userId: number;
+  userFullName: string;
+  userEmail: string;
+  orderCode: string;
+  status: string;
+  subtotal: number;
+  shippingFee: number;
+  discountAmount: number;
+  finalAmount: number;
+  receiverName: string;
+  receiverPhone: string;
+  receiverAddress: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function MemberProfile() {
+  const { user, isAuthenticated } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
   const [activeSubTab, setActiveSubTab] = useState(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -22,6 +50,26 @@ export default function MemberProfile() {
   const [activeInterestTab, setActiveInterestTab] = useState("all");
   const carouselContainerRef = useRef<HTMLDivElement>(null);
   const { favorites } = useFavorites();
+
+  // Load user order history
+  useEffect(() => {
+    if (!user) return;
+    const userId = user.id;
+    async function loadOrders() {
+      setLoadingOrders(true);
+      try {
+        const response = await apiClient.get(`/orders/user/${userId}?size=100`);
+        if (response.data?.data?.result) {
+          setOrders(response.data.data.result);
+        }
+      } catch (err) {
+        console.error("Failed to load user orders", err);
+      } finally {
+        setLoadingOrders(false);
+      }
+    }
+    loadOrders();
+  }, [user]);
 
   const scrollCarousel = (direction: "left" | "right") => {
     if (carouselContainerRef.current) {
@@ -62,7 +110,7 @@ export default function MemberProfile() {
       name: "Essential Ribbed Knit",
       category: "Women's Lifestyle Dress",
       price: "$195.00",
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDGuT1MGV0s-GET9OLrNCIAqJ5bWclXZ2FF3tmfnLh7RDnUfaVGgI7VL3cPfVFuFA0sXCB73hKuUJHIebB3g_Iyo65Ohk6m4Do4dklPwbCsO55eNH4YiE_N8ou-uUCsxs4J4IzyCtMqwhStDk-QLTEeG3XH26_XEPVbI2fuospCTfuH6jabINPv4AEw0lhTd7Jl7PRs9qYKjw66nx8jTmwnzIleXOpvwEPrOrdnZ1Z3ZXXn2xqBTNeppJasQj3Iufsw0OXp39xBzZEL",
+      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuGuT1MGV0s-GET9OLrNCIAqJ5bWclXZ2FF3tmfnLh7RDnUfaVGgI7VL3cPfVFuFA0sXCB73hKuUJHIebB3g_Iyo65Ohk6m4Do4dklPwbCsO55eNH4YiE_N8ou-uUCsxs4J4IzyCtMqwhStDk-QLTEeG3XH26_XEPVbI2fuospCTfuH6jabINPv4AEw0lhTd7Jl7PRs9qYKjw66nx8jTmwnzIleXOpvwEPrOrdnZ1Z3ZXXn2xqBTNeppJasQj3Iufsw0OXp39xBzZEL",
     },
     {
       id: "rec-3",
@@ -73,6 +121,28 @@ export default function MemberProfile() {
     },
   ];
 
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
+        <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
+          <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+          <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
+            Đăng nhập để xem hồ sơ
+          </h2>
+          <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
+            Bạn cần đăng nhập tài khoản Vela Member để xem lịch sử đơn hàng, sản phẩm yêu thích và cài đặt tài khoản.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+          >
+            Đăng nhập ngay
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
       {/* Sub-Navigation */}
@@ -82,7 +152,7 @@ export default function MemberProfile() {
             <button
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`text-sm font-medium tracking-[0.05em] transition-colors ${
+              className={`text-sm font-medium tracking-[0.05em] transition-colors cursor-pointer ${
                 tab.id === activeSubTab
                   ? "text-primary border-b-2 border-primary pb-1 -mb-[18px]"
                   : "text-[#55423d]/60 hover:text-ink pb-1"
@@ -99,15 +169,15 @@ export default function MemberProfile() {
         
         {/* Profile Section */}
         <section className="flex items-center gap-6 md:gap-8 text-left">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-[#e7e1de] border border-hairline flex items-center justify-center text-ink text-3xl md:text-4xl font-serif font-light shadow-inner flex-shrink-0">
-            E
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-[#efe7dc] border border-hairline flex items-center justify-center text-ink text-3xl md:text-4xl font-serif font-light shadow-inner flex-shrink-0">
+            {user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="font-serif text-3xl md:text-display-lg text-ink leading-none font-medium tracking-tight mb-2">
-              Eleanor
+              {user.fullName}
             </h1>
             <p className="text-sm md:text-base text-on-surface-variant/80 font-light">
-              Vela Member Since October 2023
+              Vela Member Since {user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "June 2026"}
             </p>
           </div>
         </section>
@@ -221,58 +291,65 @@ export default function MemberProfile() {
               <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
                 Order History
               </h2>
-              <span className="text-xs text-[#55423d]/65">2 orders placed</span>
+              <span className="text-xs text-[#55423d]/65">
+                {orders.length} {orders.length === 1 ? "order" : "orders"} placed
+              </span>
             </div>
             
-            <div className="flex flex-col gap-8">
-              {/* Order 1 */}
-              <div className="border border-hairline/60 rounded-sm bg-surface-card/30 p-6 flex flex-col md:flex-row gap-6 justify-between">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-surface-card overflow-hidden rounded-sm flex-shrink-0 border border-hairline/25">
-                    <img
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwRzAE6C185QzyiPxCpVjB15ObBSeOKabu2pDX2jtjCbTbeBZqlIWMfXtCkW3cIuCjgaYSQAIUMWMTpqCihesHuOM_YtttUXMe469suIteQ-q2RNfi6MNmbukPG747ouYpZq-jzJ75zPYVXA1kP4enS-NOjFwWOfMB-z1LSUPNFHhtKMMpeiWx7CtS5dgfN-_EfjAvCgxN8hdxayD8dsnAAUx91mkM9xDoSu6DUS01v59PW5xRuI81N4DOIe2cUXUeYHlAbxxxgMsJ"
-                      alt="Linen Blend Blazer"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <h3 className="font-sans text-sm font-semibold text-ink">Linen Blend Blazer</h3>
-                    <p className="text-xs text-[#55423d]/75 mt-0.5">Size: M | Color: Sand</p>
-                    <p className="text-xs text-[#55423d]/50 mt-1">Order #VW-10492 • Placed on June 12, 2026</p>
-                  </div>
-                </div>
-                <div className="flex flex-row md:flex-col justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-hairline/40">
-                  <div className="text-sm font-bold text-ink">$245.00</div>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">
-                    Delivered
-                  </span>
-                </div>
+            {loadingOrders ? (
+              <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
+                Loading orders...
               </div>
+            ) : orders.length === 0 ? (
+              <div className="py-12 text-center select-none bg-surface-card/10 border border-hairline/20 rounded-sm">
+                <p className="text-sm text-[#1c1a18]/50 mb-6">Bạn chưa thực hiện đơn đặt hàng nào.</p>
+                <Link
+                  href="/collection"
+                  className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c] transition-colors"
+                >
+                  Mua sắm ngay
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8">
+                {orders.map((order) => {
+                  const statusColors: Record<string, string> = {
+                    DELIVERED: "bg-emerald-100 text-emerald-800",
+                    PENDING: "bg-yellow-100 text-yellow-800",
+                    CANCELLED: "bg-red-100 text-red-800",
+                  };
+                  const statusBadge = statusColors[order.status] || "bg-blue-100 text-blue-800";
 
-              {/* Order 2 */}
-              <div className="border border-hairline/60 rounded-sm bg-surface-card/30 p-6 flex flex-col md:flex-row gap-6 justify-between">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-surface-card overflow-hidden rounded-sm flex-shrink-0 border border-hairline/25">
-                    <img
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEIQP1onvFftdIpPdfA7kqAlQHAu_SknPhkK5aWLKs_qCZofjj9eJjMQ50OnceZ_K-9sqSJrMgZMiESDSuM9SpXP0ozbdO-mvi6w4tYkdgZ_uaMuqIqA6HstQyT7ZhWTmv250PRjHGzPRAMB_tra-1_71ox25I_64a8N9NdhHRVMs9HAiyZACTaboO61z-holquWMxK0CL0tW12dXdlYR_hYalde3HrqLDwtpCiR9xlRuEixHCMSH1WWZMzGZZMS5dBCUAme6_L4XJ"
-                      alt="Silk Drape Blouse"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <h3 className="font-sans text-sm font-semibold text-ink">Silk Drape Blouse</h3>
-                    <p className="text-xs text-[#55423d]/75 mt-0.5">Size: S | Color: Cream</p>
-                    <p className="text-xs text-[#55423d]/50 mt-1">Order #VW-10381 • Placed on May 24, 2026</p>
-                  </div>
-                </div>
-                <div className="flex flex-row md:flex-col justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-hairline/40">
-                  <div className="text-sm font-bold text-ink">$180.00</div>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">
-                    Delivered
-                  </span>
-                </div>
+                  return (
+                    <div key={order.id} className="border border-hairline/60 rounded-sm bg-surface-card/30 p-6 flex flex-col md:flex-row gap-6 justify-between">
+                      <div className="flex gap-4">
+                        <div className="w-20 h-20 bg-surface-card overflow-hidden rounded-sm flex-shrink-0 border border-hairline/25 relative flex items-center justify-center bg-[#efebe4]">
+                          <span className="font-serif text-xl font-light text-ink/40">V</span>
+                        </div>
+                        <div className="flex flex-col justify-center">
+                          <h3 className="font-sans text-sm font-semibold text-ink">Đơn hàng {order.orderCode}</h3>
+                          <p className="text-xs text-[#55423d]/75 mt-0.5">
+                            Người nhận: {order.receiverName} • SĐT: {order.receiverPhone}
+                          </p>
+                          <p className="text-xs text-[#55423d]/75">
+                            Địa chỉ: {order.receiverAddress}
+                          </p>
+                          <p className="text-xs text-[#55423d]/50 mt-1">
+                            Đặt ngày {order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-row md:flex-col justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-hairline/40">
+                        <div className="text-sm font-bold text-ink">{money(order.finalAmount || order.subtotal)}</div>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${statusBadge}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            )}
           </section>
         )}
 
@@ -316,16 +393,22 @@ export default function MemberProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/45 mb-1.5">First Name</span>
-                  <div className="border border-hairline bg-surface-card/25 p-3 rounded-sm text-sm text-ink font-medium">Eleanor</div>
+                  <div className="border border-hairline bg-surface-card/25 p-3 rounded-sm text-sm text-ink font-medium">
+                    {user.fullName.split(" ")[0] || "User"}
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/45 mb-1.5">Last Name</span>
-                  <div className="border border-hairline bg-surface-card/25 p-3 rounded-sm text-sm text-ink font-medium">Vela</div>
+                  <div className="border border-hairline bg-surface-card/25 p-3 rounded-sm text-sm text-ink font-medium">
+                    {user.fullName.split(" ").slice(1).join(" ") || "Member"}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/45 mb-1.5">Email Address</span>
-                <div className="border border-hairline bg-surface-card/25 p-3 rounded-sm text-sm text-ink font-medium">eleanor.vela@minimalist.com</div>
+                <div className="border border-hairline bg-surface-card/25 p-3 rounded-sm text-sm text-ink font-medium">
+                  {user.email}
+                </div>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/45 mb-1.5">Member Tier</span>

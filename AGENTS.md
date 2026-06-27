@@ -91,6 +91,7 @@ Source of truth: `package.json` and `components.json`.
 
 ### Before Starting
 
+- Read `convention.md` first before starting any task (either at the root directory or `commercial-fe/convention.md`) to ensure full compliance with the integration guidelines, API standards, and coding conventions.
 - Check the working tree with `git status --short` and avoid overwriting user changes.
 - Read `docs/PROJECT_STATUS.md` before making changes so the current project state, recent work, and known follow-ups are understood before editing.
 - Inspect the existing implementation before editing. Prefer `rg`/`rg --files` for search.
@@ -128,7 +129,7 @@ If a required check cannot run because the repo lacks a script or dependency, st
 
 ### Git
 
-- Commit completed work when the user asked for an implementation task and the repository is in a committable state.
-- Use a clear commit message, for example `docs: align agent instructions with vela wear app`.
+- Do NOT automatically commit completed work. The user will review the changes first and explicitly instruct you to commit when ready.
+- Use a clear commit message when instructed to commit, for example `docs: align agent instructions with vela wear app`.
 - Do not include unrelated user changes in the commit.
 - If only documentation instructions are changed, a documentation commit is appropriate after checks pass.

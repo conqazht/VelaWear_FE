@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ComponentProps } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { CheckCircle2, CreditCard, LockKeyhole } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,15 @@ import { FashionImage } from "@/components/shop/fashion-image";
 import { FieldLabel } from "@/components/shop/field-label";
 import { useCart } from "@/components/shop/cart-provider";
 import { CartItem, CHECKOUT_DEFAULT_ITEMS, money } from "@/lib/vela-data";
+import { useAuth } from "@/components/auth/auth-provider";
+import apiClient from "@/lib/api-client";
 
 export function CheckoutPageClient() {
   const { cart, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
+
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState("");
@@ -30,6 +35,19 @@ export function CheckoutPageClient() {
   const [discountApplied, setDiscountApplied] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pre-populate fields when user context is available
+  useEffect(() => {
+    if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEmail(user.email);
+      const names = user.fullName.split(" ");
+      setFirstName(names[0] || "");
+      setLastName(names.slice(1).join(" ") || "");
+    }
+  }, [user]);
 
   const activeItemsList: CartItem[] = useMemo(
     () =>
@@ -56,13 +74,65 @@ export function CheckoutPageClient() {
     );
   };
 
-  const handleCompletePurchase = (event: React.FormEvent) => {
+  const handleCompletePurchase = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!email || !firstName || !address || !cardNumber) return;
-    setOrderId(`VELA-${Math.floor(100000 + Math.random() * 900000)}`);
-    setOrderCompleted(true);
-    clearCart();
+    if (!email || !firstName || !address || !cardNumber || !phone) {
+      setError("Please fill out all required fields.");
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const orderCode = `VELA-${Math.floor(100000 + Math.random() * 900000)}`;
+      const payload = {
+        userId: user ? user.id : null,
+        orderCode,
+        subtotal: parseFloat(total.toFixed(2)),
+        receiverName: `${firstName} ${lastName}`.trim(),
+        receiverPhone: phone,
+        receiverAddress: `${address}, ${city}, ZIP: ${zipCode}`,
+        paymentMethod: "CASH", // Defaulting to Cash payment method
+      };
+
+      await apiClient.post("/orders", payload);
+      setOrderId(orderCode);
+      setOrderCompleted(true);
+      clearCart();
+    } catch (err: unknown) {
+      const apiError = err as { response?: { data?: { message?: string } } };
+      if (apiError.response?.data?.message) {
+        setError(apiError.response.data.message);
+      } else {
+        setError("Có lỗi xảy ra trong quá trình đặt hàng. Vui lòng thử lại.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
+        <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
+          <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+          <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
+            Đăng nhập để thanh toán
+          </h2>
+          <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
+            Bạn cần đăng nhập tài khoản Vela Member để tiến hành đặt hàng và nhận các ưu đãi thành viên.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+          >
+            Đăng nhập ngay
+          </Link>
+        </Card>
+      </div>
+    );
+  }
 
   if (orderCompleted) {
     return (
@@ -114,6 +184,12 @@ export function CheckoutPageClient() {
 
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
         <form onSubmit={handleCompletePurchase} className="space-y-10 lg:col-span-7">
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
+              {error}
+            </div>
+          )}
+
           <Card className="space-y-5 rounded-sm border-[#1c1a18]/5 bg-white p-8 py-8">
             <SectionTitle number="1" title="Contact Information" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -127,9 +203,12 @@ export function CheckoutPageClient() {
                 placeholder="address@domain.com"
               />
               <CheckoutInput
-                label="Phone Number"
+                label="Phone Number *"
                 type="tel"
+                required
                 autoComplete="tel"
+                value={phone}
+                onChange={setPhone}
                 placeholder="09xxx xxxxx"
               />
             </div>
@@ -238,10 +317,11 @@ export function CheckoutPageClient() {
 
           <Button
             type="submit"
-            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c]"
+            disabled={isSubmitting}
+            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c] disabled:opacity-50"
           >
             <LockKeyhole className="size-4" />
-            Complete Purchase
+            {isSubmitting ? "Completing Purchase..." : "Complete Purchase"}
           </Button>
         </form>
 

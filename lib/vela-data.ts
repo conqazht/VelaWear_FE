@@ -19,6 +19,7 @@ export interface Product {
   color: string;
   size: string;
   description: string;
+  realId?: number;
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -223,3 +224,28 @@ export const DETAIL_IMAGES = [
     label: "Horn Seam Detail",
   },
 ];
+
+// Map backend product data to client-side Product model to preserve high-res images and styling.
+export function mapBackendProduct(bp: { id: number; slug: string; name: string; description: string; categoryId: number }): Product {
+  // Find local match by matching slug, modified slug or exact name
+  const match = PRODUCTS.find(
+    (p) =>
+      p.id === bp.slug ||
+      p.id === bp.slug.replace(/-[0-9]+$/, "") ||
+      p.name.toLowerCase() === bp.name.toLowerCase()
+  );
+
+  return {
+    id: bp.slug,
+    realId: bp.id,
+    name: bp.name,
+    description: bp.description || (match ? match.description : ""),
+    price: match ? match.price : 150,
+    originalPrice: match ? match.originalPrice : undefined,
+    image: match ? match.image : "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80",
+    badge: match ? match.badge : undefined,
+    color: match ? match.color : "Sand",
+    size: match ? match.size : "M",
+    category: match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN"),
+  };
+}

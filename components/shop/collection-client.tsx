@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +14,67 @@ import {
 } from "@/components/ui/select";
 import { ProductCard } from "@/components/shop/product-card";
 import { cn } from "@/lib/utils";
-import { categoryLabels, categoryTabs, Product } from "@/lib/vela-data";
+import { categoryLabels, Product, mapBackendProduct } from "@/lib/vela-data";
+import apiClient from "@/lib/api-client";
 
-export function CollectionClient({ products }: { products: Product[] }) {
+export function CollectionClient({ products: initialProducts }: { products: Product[] }) {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState(["ÁO SƠ MI", "SIZE M"]);
   const [sortBy, setSortBy] = useState("Newest");
+
+  const [categories, setCategories] = useState<Array<{ id: number; name: string; slug: string }>>([]);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch categories and products on mount
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [catsRes, prodsRes] = await Promise.all([
+          apiClient.get("/categories?size=100"),
+          apiClient.get("/products?size=100"),
+        ]);
+
+        if (catsRes.data?.data?.result) {
+          setCategories(catsRes.data.data.result);
+        }
+
+        if (prodsRes.data?.data?.result) {
+          const mapped = prodsRes.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p));
+          setProducts(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load collection data from BE API", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Compute category tabs list dynamically from backend categories
+  const categoryTabsList = useMemo(() => {
+    const list = ["ALL"];
+    categories.forEach((cat) => {
+      const key = cat.slug.toUpperCase().replace("-", " ");
+      if (!list.includes(key)) {
+        list.push(key);
+      }
+    });
+    return list;
+  }, [categories]);
+
+  // Compute dynamic category labels to handle any custom backend categories
+  const dynamicCategoryLabels = useMemo(() => {
+    const labels: Record<string, string> = { ...categoryLabels };
+    categories.forEach((cat) => {
+      const key = cat.slug.toUpperCase().replace("-", " ");
+      if (!labels[key]) {
+        labels[key] = cat.name;
+      }
+    });
+    return labels;
+  }, [categories]);
 
   const filteredProducts = useMemo(() => {
     const items = products.filter(
@@ -34,23 +89,31 @@ export function CollectionClient({ products }: { products: Product[] }) {
     });
   }, [products, selectedCategory, sortBy]);
 
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <span className="text-xs uppercase tracking-widest text-ink/40">Loading collection...</span>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-6 border-b border-[#1c1a18]/10 pb-6">
         <div className="flex flex-wrap gap-4 md:gap-8">
-          {categoryTabs.map((cat) => (
+          {categoryTabsList.map((cat) => (
             <button
               key={cat}
               type="button"
               onClick={() => setSelectedCategory(cat)}
               className={cn(
-                "-mb-6 border-b-2 pb-2 text-xs font-medium uppercase tracking-wider transition-all duration-300",
+                "-mb-6 border-b-2 pb-2 text-xs font-medium uppercase tracking-wider transition-all duration-300 cursor-pointer",
                 selectedCategory === cat
                   ? "border-[#1c1a18] font-semibold text-[#1c1a18]"
                   : "border-transparent text-[#1c1a18]/45 hover:text-[#1c1a18]"
               )}
             >
-              {categoryLabels[cat]}
+              {dynamicCategoryLabels[cat] || cat}
             </button>
           ))}
         </div>
@@ -63,7 +126,7 @@ export function CollectionClient({ products }: { products: Product[] }) {
             value={sortBy}
             onValueChange={(value) => value && setSortBy(value)}
           >
-            <SelectTrigger className="h-8 rounded-sm border-transparent bg-transparent px-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] focus-visible:ring-[#b85a3c]/30">
+            <SelectTrigger className="h-8 rounded-sm border-transparent bg-transparent px-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] focus-visible:ring-[#b85a3c]/30 cursor-pointer">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-sm bg-[#f7f4ef] text-[#1c1a18]">
@@ -95,7 +158,7 @@ export function CollectionClient({ products }: { products: Product[] }) {
                   )
                 }
                 aria-label={`Remove ${filter}`}
-                className="transition-colors hover:text-[#b85a3c]"
+                className="transition-colors hover:text-[#b85a3c] cursor-pointer"
               >
                 <X className="size-3" />
               </button>
@@ -105,18 +168,24 @@ export function CollectionClient({ products }: { products: Product[] }) {
             type="button"
             variant="ghost"
             onClick={() => setActiveFilters([])}
-            className="h-7 rounded-sm px-2 text-[9px] font-semibold uppercase tracking-widest text-[#b85a3c] hover:bg-[#efebe4]"
+            className="h-7 rounded-sm px-2 text-[9px] font-semibold uppercase tracking-widest text-[#b85a3c] hover:bg-[#efebe4] cursor-pointer"
           >
             Clear All
           </Button>
         </div>
       )}
 
-      <div className="mb-20 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {filteredProducts.length === 0 ? (
+        <div className="mb-20 text-center py-12">
+          <p className="text-sm text-[#55423d]/60">Không tìm thấy sản phẩm nào trong danh mục này.</p>
+        </div>
+      ) : (
+        <div className="mb-20 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </>
   );
 }
