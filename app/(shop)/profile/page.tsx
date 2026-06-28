@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, PlusCircle, LockKeyhole } from "lucide-react";
 
 import { FashionImage } from "@/components/shop/fashion-image";
@@ -34,6 +35,7 @@ interface Order {
 
 export default function MemberProfile() {
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
@@ -147,15 +149,21 @@ export default function MemberProfile() {
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
       {/* Sub-Navigation */}
       <div className="w-full border-b border-hairline/40 select-none">
-        <div className="max-w-[1800px] mx-auto flex justify-center gap-8 py-4">
+        <div className="max-w-[1280px] mx-auto flex justify-center gap-8 py-4">
           {subTabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`text-sm font-medium tracking-[0.05em] transition-colors cursor-pointer ${
+              onClick={() => {
+                if (tab.id === "settings") {
+                  router.push("/profile/settings");
+                } else {
+                  setActiveSubTab(tab.id);
+                }
+              }}
+              className={`text-sm font-medium tracking-[0.05em] transition-colors cursor-pointer pb-1 ${
                 tab.id === activeSubTab
-                  ? "text-primary border-b-2 border-primary pb-1 -mb-[18px]"
-                  : "text-[#55423d]/60 hover:text-ink pb-1"
+                  ? "text-primary border-b-2 border-primary -mb-[18px]"
+                  : "text-[#55423d]/60 hover:text-ink"
               }`}
             >
               {tab.label}
@@ -165,7 +173,7 @@ export default function MemberProfile() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-grow max-w-[1800px] w-full mx-auto px-6 md:px-16 py-12 flex flex-col gap-16">
+      <main className="flex-grow max-w-[1280px] w-full mx-auto px-6 md:px-16 py-16 flex flex-col gap-16">
         
         {/* Profile Section */}
         <section className="flex items-center gap-6 md:gap-8 text-left">
@@ -173,7 +181,7 @@ export default function MemberProfile() {
             {user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="font-serif text-3xl md:text-display-lg text-ink leading-none font-medium tracking-tight mb-2">
+            <h1 className="font-serif text-3xl md:text-5xl text-ink leading-none font-medium tracking-tight mb-2">
               {user.fullName}
             </h1>
             <p className="text-sm md:text-base text-on-surface-variant/80 font-light">
@@ -191,32 +199,35 @@ export default function MemberProfile() {
                 <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
                   Interests
                 </h2>
-                <button className="text-sm font-medium text-ink hover:text-primary transition-colors">
+                <button className="text-sm font-medium text-ink hover:text-primary transition-colors cursor-pointer">
                   Edit
                 </button>
               </div>
 
-              <div className="flex gap-6 overflow-x-auto no-scrollbar border-b border-hairline/40 pb-4">
-                {interestTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveInterestTab(tab.id)}
-                    className={`text-sm font-medium tracking-[0.05em] transition-colors whitespace-nowrap ${
-                      tab.id === activeInterestTab
-                        ? "text-ink border-b-2 border-ink pb-4 -mb-[18px]"
-                        : "text-on-surface-variant/65 hover:text-ink pb-4"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                {interestTabs.map((tab) => {
+                  const isActive = tab.id === activeInterestTab;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveInterestTab(tab.id)}
+                      className={`text-sm font-medium px-4 py-2 rounded-sm transition-colors whitespace-nowrap cursor-pointer ${
+                        isActive
+                          ? "text-ink bg-surface-card"
+                          : "text-on-surface-variant/75 hover:text-ink bg-transparent hover:bg-surface-card"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="mt-4">
                 <p className="text-sm text-ink font-light max-w-xl">
                   {"Add your interests to shop a collection of products that are based on what you're into."}
                 </p>
-                <div className="w-full md:w-[300px] h-[300px] bg-surface-card border border-hairline/50 rounded-sm mt-6 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-[#efe7dc]/70 transition-colors group">
+                <div className="w-full md:w-[300px] h-[300px] bg-surface-card border border-hairline/50 rounded-md mt-6 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-[#efe7dc]/70 transition-colors group">
                   <PlusCircle className="size-8 text-ink/70 group-hover:text-primary transition-colors" />
                   <span className="text-sm font-medium text-ink tracking-[0.05em]">
                     Add Interests
@@ -235,14 +246,14 @@ export default function MemberProfile() {
                   <button
                     onClick={() => scrollCarousel("left")}
                     aria-label="Scroll left"
-                    className="w-10 h-10 rounded-full border border-hairline bg-canvas flex items-center justify-center text-ink hover:bg-surface-card transition-colors active:scale-95"
+                    className="w-10 h-10 rounded-sm bg-surface-card flex items-center justify-center text-ink hover:bg-[#efe7dc]/80 transition-colors active:scale-95 cursor-pointer"
                   >
                     <ChevronLeft className="size-5" />
                   </button>
                   <button
                     onClick={() => scrollCarousel("right")}
                     aria-label="Scroll right"
-                    className="w-10 h-10 rounded-full border border-hairline bg-canvas flex items-center justify-center text-ink hover:bg-surface-card transition-colors active:scale-95"
+                    className="w-10 h-10 rounded-sm bg-surface-card flex items-center justify-center text-ink hover:bg-[#efe7dc]/80 transition-colors active:scale-95 cursor-pointer"
                   >
                     <ChevronRight className="size-5" />
                   </button>
@@ -258,19 +269,19 @@ export default function MemberProfile() {
                     key={product.id}
                     className="min-w-[280px] w-[280px] md:min-w-[400px] md:w-[400px] flex flex-col group cursor-pointer"
                   >
-                    <div className="w-full aspect-square bg-surface-card relative overflow-hidden mb-4 rounded-sm shadow-sm transition-shadow duration-500 hover:shadow-md">
+                    <div className="w-full aspect-[3/4] bg-surface-card relative overflow-hidden mb-4 rounded-none border border-hairline/20">
                       <FashionImage
                         src={product.src}
                         alt={product.name}
-                        className="transition-transform duration-[1200ms] group-hover:scale-103"
+                        className="transition-transform duration-[1200ms] group-hover:scale-103 rounded-none"
                       />
-                      <div className="absolute inset-0 bg-[#1c1a18]/5 group-hover:bg-[#1c1a18]/10 transition-colors duration-500" />
+                      <div className="absolute inset-0 bg-[#1c1a18]/5 group-hover:bg-[#1c1a18]/10 transition-colors duration-500 rounded-none" />
                     </div>
                     <div className="px-1 text-left">
                       <h3 className="font-serif text-lg text-ink font-light group-hover:text-primary transition-colors">
                         {product.name}
                       </h3>
-                      <p className="text-on-surface-variant/75 text-xs tracking-wider uppercase mt-0.5">
+                      <p className="text-on-surface-variant/75 text-xs tracking-wider uppercase mt-0.5 font-medium">
                         {product.category}
                       </p>
                       <p className="text-sm font-semibold text-ink mt-2">
@@ -321,7 +332,11 @@ export default function MemberProfile() {
                   const statusBadge = statusColors[order.status] || "bg-blue-100 text-blue-800";
 
                   return (
-                    <div key={order.id} className="border border-hairline/60 rounded-sm bg-surface-card/30 p-6 flex flex-col md:flex-row gap-6 justify-between">
+                    <Link
+                      key={order.id}
+                      href={`/profile/orders/${order.orderCode}`}
+                      className="border border-hairline/60 rounded-sm bg-surface-card/30 p-6 flex flex-col md:flex-row gap-6 justify-between hover:bg-surface-card/65 transition-colors cursor-pointer"
+                    >
                       <div className="flex gap-4">
                         <div className="w-20 h-20 bg-surface-card overflow-hidden rounded-sm flex-shrink-0 border border-hairline/25 relative flex items-center justify-center bg-[#efebe4]">
                           <span className="font-serif text-xl font-light text-ink/40">V</span>
@@ -345,7 +360,7 @@ export default function MemberProfile() {
                           {order.status}
                         </span>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>

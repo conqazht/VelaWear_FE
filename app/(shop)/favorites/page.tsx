@@ -6,7 +6,6 @@ import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import { money, Product } from "@/lib/vela-data";
-import { ProductCard } from "@/components/shop/product-card";
 
 export default function FavoritesPage() {
   const { favorites, removeFromFavorites } = useFavorites();
