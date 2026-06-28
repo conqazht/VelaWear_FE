@@ -20,6 +20,12 @@ export interface Product {
   size: string;
   description: string;
   realId?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  material?: string;
+  care?: string;
+  shortDescription?: string;
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -226,7 +232,23 @@ export const DETAIL_IMAGES = [
 ];
 
 // Map backend product data to client-side Product model to preserve high-res images and styling.
-export function mapBackendProduct(bp: { id: number; slug: string; name: string; description: string; categoryId: number }): Product {
+export function mapBackendProduct(
+  bp: {
+    id: number;
+    slug: string;
+    name: string;
+    description: string;
+    categoryId: number;
+    seoTitle?: string;
+    seoDescription?: string;
+    seoKeywords?: string;
+    material?: string;
+    care?: string;
+    shortDescription?: string;
+  },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  locale: string = "vi"
+): Product {
   // Find local match by matching slug, modified slug or exact name
   const match = PRODUCTS.find(
     (p) =>
@@ -244,8 +266,14 @@ export function mapBackendProduct(bp: { id: number; slug: string; name: string; 
     originalPrice: match ? match.originalPrice : undefined,
     image: match ? match.image : "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80",
     badge: match ? match.badge : undefined,
-    color: match ? match.color : "Sand",
+    color: match ? match.color : "Black",
     size: match ? match.size : "M",
     category: match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN"),
+    seoTitle: bp.seoTitle,
+    seoDescription: bp.seoDescription,
+    seoKeywords: bp.seoKeywords,
+    material: bp.material,
+    care: bp.care,
+    shortDescription: bp.shortDescription,
   };
 }

@@ -6,19 +6,22 @@ import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
+import { getActiveLocale } from "@/lib/i18n";
 
 export function ProductDetailPage({ slug }: { slug: string }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const activeLocale = getActiveLocale();
+
   useEffect(() => {
     async function loadProduct() {
       try {
-        const response = await apiClient.get("/products?size=100");
+        const response = await apiClient.get(`/products?size=100&locale=${activeLocale}`);
         if (response.data?.data?.result) {
           const bp = response.data.data.result.find((p: Parameters<typeof mapBackendProduct>[0]) => p.slug === slug);
           if (bp) {
-            setProduct(mapBackendProduct(bp));
+            setProduct(mapBackendProduct(bp, activeLocale));
           }
         }
       } catch (err) {
@@ -28,7 +31,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
       }
     }
     loadProduct();
-  }, [slug]);
+  }, [slug, activeLocale]);
 
   if (isLoading || !product) {
     return (

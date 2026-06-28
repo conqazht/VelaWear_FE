@@ -2,6 +2,16 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-06-28
+
+### Storefront Catalog i18n Completed
+
+- **Locale Source**: Created `lib/i18n.ts` defining `DEFAULT_LOCALE = "vi"` and `getActiveLocale()` helper function.
+- **Request Interceptor**: Configured `apiClient` in `lib/api-client.ts` to automatically attach the `Accept-Language` header to backend requests.
+- **API Locale Propagation**: Modified `collection-client.tsx`, search `page.tsx`, `product-detail-page.tsx`, and `product-detail-client.tsx` to explicitly append `locale` query parameters to `/categories`, `/products`, and `/product-variants` requests, ensuring data caching query keys align with active locales.
+- **Localized Fields Mapping & UI**: Updated `Product` model types in `lib/vela-data.ts` to support optional localized metadata (`seoTitle`, `seoDescription`, `seoKeywords`, `material`, `care`, `shortDescription`). Updated `mapBackendProduct` mapper to consume them. Added a new interactive accordion panel for **Material & Care** in the product detail view.
+- **Verification**: Ran `pnpm lint` and `pnpm build` successfully, ensuring zero typescript compilation or static site generation errors.
+
 ## 2026-06-18
 
 ### Member Registration Form Design Refinements Completed

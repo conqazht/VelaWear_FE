@@ -22,12 +22,35 @@ import {
 } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
 import apiClient from "@/lib/api-client";
+import { getActiveLocale } from "@/lib/i18n";
 
 const colorSwatches: Record<string, string> = {
-  Sand: "bg-[#efe7dc]",
-  Terracotta: "bg-[#b85a3c]",
-  Ink: "bg-[#1c1a18]",
+  Black: "bg-[#000000]",
+  Red: "bg-[#d32f2f]",
+  Yellow: "bg-[#f2c94c]",
+  Purple: "bg-[#7b2cbf]",
+  Orange: "bg-[#f97316]",
 };
+
+const seedSizes = [
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "35",
+  "36",
+  "37",
+  "38",
+  "39",
+  "40",
+  "41",
+  "42",
+  "43",
+  "44",
+  "45",
+];
 
 interface VariantColorInfo {
   id: number;
@@ -66,16 +89,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     sizeAndFit: true,
+    materialAndCare: false,
     delivery: false,
     reviews: false,
   });
+
+  const activeLocale = getActiveLocale();
 
   // Fetch product variants on mount
   useEffect(() => {
     if (!product.realId) return;
     async function loadVariants() {
       try {
-        const response = await apiClient.get(`/product-variants?productId=${product.realId}&size=100`);
+        const response = await apiClient.get(`/product-variants?productId=${product.realId}&size=100&locale=${activeLocale}`);
         if (response.data?.data?.result) {
           setVariants(response.data.data.result);
         }
@@ -84,7 +110,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       }
     }
     loadVariants();
-  }, [product.realId]);
+  }, [product.realId, activeLocale]);
 
   // Set default selected color/size once variants load
   useEffect(() => {
@@ -98,7 +124,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
   // Compute available colors and sizes
   const colorsList = useMemo(() => {
-    if (variants.length === 0) return ["Sand", "Terracotta", "Ink"];
+    if (variants.length === 0) return ["Black", "Red", "Yellow", "Purple", "Orange"];
     const unique = new Set<string>();
     variants.forEach((v) => {
       if (v.color?.name) unique.add(v.color.name);
@@ -107,7 +133,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   }, [variants]);
 
   const sizesList = useMemo(() => {
-    if (variants.length === 0) return ["S", "M", "L", "XL"];
+    if (variants.length === 0) return seedSizes;
     const unique = new Set<string>();
     variants.forEach((v) => {
       if (v.size?.name) unique.add(v.size.name);
@@ -214,7 +240,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 aria-label={color}
                 className={cn(
                   "w-8 h-8 rounded-full border transition-all cursor-pointer ring-2 ring-offset-2",
-                  colorSwatches[color] || "bg-[#b85a3c]",
+                  colorSwatches[color] || "bg-[#d32f2f]",
                   selectedColor === color
                     ? "border-[#1c1a18] ring-[#1c1a18]/30 scale-105"
                     : "border-transparent ring-transparent hover:ring-hairline hover:scale-105"
@@ -313,6 +339,42 @@ export function ProductDetailClient({ product }: { product: Product }) {
               </div>
             )}
           </div>
+
+          {/* Material & Care */}
+          {(product.material || product.care) && (
+            <div className="border-b border-hairline/40 py-5">
+              <button
+                type="button"
+                onClick={() => toggleSection("materialAndCare")}
+                className="flex justify-between items-center w-full group text-left cursor-pointer"
+              >
+                <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
+                  Material & Care
+                </h3>
+                {openSections.materialAndCare ? (
+                  <ChevronUp className="size-4 text-ink/70" />
+                ) : (
+                  <ChevronDown className="size-4 text-ink/70" />
+                )}
+              </button>
+              {openSections.materialAndCare && (
+                <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                    {product.material && (
+                      <p>
+                        <span className="font-medium text-ink">Material:</span> {product.material}
+                      </p>
+                    )}
+                    {product.care && (
+                      <p>
+                        <span className="font-medium text-ink">Care Instructions:</span> {product.care}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Free Delivery and Returns */}
           <div className="border-b border-hairline/40 py-5">

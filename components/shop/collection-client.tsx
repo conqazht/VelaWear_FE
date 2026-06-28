@@ -16,6 +16,7 @@ import { ProductCard } from "@/components/shop/product-card";
 import { cn } from "@/lib/utils";
 import { categoryLabels, Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
+import { getActiveLocale } from "@/lib/i18n";
 
 export function CollectionClient({ products: initialProducts }: { products: Product[] }) {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -26,13 +27,15 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [isLoading, setIsLoading] = useState(true);
 
+  const activeLocale = getActiveLocale();
+
   // Fetch categories and products on mount
   useEffect(() => {
     async function loadData() {
       try {
         const [catsRes, prodsRes] = await Promise.all([
-          apiClient.get("/categories?size=100"),
-          apiClient.get("/products?size=100"),
+          apiClient.get(`/categories?size=100&locale=${activeLocale}`),
+          apiClient.get(`/products?size=100&locale=${activeLocale}`),
         ]);
 
         if (catsRes.data?.data?.result) {
@@ -40,7 +43,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
         }
 
         if (prodsRes.data?.data?.result) {
-          const mapped = prodsRes.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p));
+          const mapped = prodsRes.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p, activeLocale));
           setProducts(mapped);
         }
       } catch (err) {
@@ -50,7 +53,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
       }
     }
     loadData();
-  }, []);
+  }, [activeLocale]);
 
   // Compute category tabs list dynamically from backend categories
   const categoryTabsList = useMemo(() => {
@@ -66,13 +69,12 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
 
   // Compute dynamic category labels to handle any custom backend categories
   const dynamicCategoryLabels = useMemo(() => {
-    const labels: Record<string, string> = { ...categoryLabels };
+    const labels: Record<string, string> = {};
     categories.forEach((cat) => {
       const key = cat.slug.toUpperCase().replace("-", " ");
-      if (!labels[key]) {
-        labels[key] = cat.name;
-      }
+      labels[key] = cat.name;
     });
+    labels["ALL"] = categoryLabels["ALL"] || "Tất cả";
     return labels;
   }, [categories]);
 

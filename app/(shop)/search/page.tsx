@@ -7,6 +7,27 @@ import { ChevronDown } from "lucide-react";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { ProductCard } from "@/components/shop/product-card";
 import apiClient from "@/lib/api-client";
+import { getActiveLocale } from "@/lib/i18n";
+
+const seedSizes = [
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "35",
+  "36",
+  "37",
+  "38",
+  "39",
+  "40",
+  "41",
+  "42",
+  "43",
+  "44",
+  "45",
+];
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -20,14 +41,16 @@ function SearchResultsContent() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Recommended");
 
+  const activeLocale = getActiveLocale();
+
   // Fetch search results from backend on mount and query changes
   useEffect(() => {
     async function searchProducts() {
       setIsLoading(true);
       try {
-        const response = await apiClient.get(`/products?name=${encodeURIComponent(query)}&size=100`);
+        const response = await apiClient.get(`/products?name=${encodeURIComponent(query)}&size=100&locale=${activeLocale}`);
         if (response.data?.data?.result) {
-          const mapped = response.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p));
+          const mapped = response.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p, activeLocale));
           setProducts(mapped);
         }
       } catch (err) {
@@ -37,7 +60,7 @@ function SearchResultsContent() {
       }
     }
     searchProducts();
-  }, [query]);
+  }, [query, activeLocale]);
 
   // Filter and search logic
   const filteredProducts = useMemo(() => {
@@ -179,7 +202,7 @@ function SearchResultsContent() {
                 Size
               </h3>
               <div className="grid grid-cols-3 gap-2">
-                {["S", "M", "L", "XL", "OS"].map((size) => {
+                {seedSizes.map((size) => {
                   const isSelected = selectedSizes.includes(size);
                   return (
                     <button

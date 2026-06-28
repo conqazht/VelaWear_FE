@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getActiveLocale } from "./i18n";
 
 let accessToken: string | null = null;
 
@@ -18,11 +19,14 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptor to attach access token to request headers
+// Interceptor to attach access token and Accept-Language header to request headers
 apiClient.interceptors.request.use(
   (config) => {
-    if (accessToken && config.headers) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    if (config.headers) {
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+      config.headers["Accept-Language"] = getActiveLocale();
     }
     return config;
   },
