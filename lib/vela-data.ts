@@ -236,6 +236,7 @@ export function mapBackendProduct(
   bp: {
     id: number;
     slug: string;
+    originalSlug?: string;
     name: string;
     description: string;
     categoryId: number;
@@ -249,9 +250,10 @@ export function mapBackendProduct(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   locale: string = "vi"
 ): Product {
-  // Find local match by matching slug, modified slug or exact name
+  // Find local match by matching originalSlug, slug, or name
   const match = PRODUCTS.find(
     (p) =>
+      (bp.originalSlug && p.id === bp.originalSlug) ||
       p.id === bp.slug ||
       p.id === bp.slug.replace(/-[0-9]+$/, "") ||
       p.name.toLowerCase() === bp.name.toLowerCase()

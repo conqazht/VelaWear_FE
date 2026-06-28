@@ -17,12 +17,9 @@ export function ProductDetailPage({ slug }: { slug: string }) {
   useEffect(() => {
     async function loadProduct() {
       try {
-        const response = await apiClient.get(`/products?size=100&locale=${activeLocale}`);
-        if (response.data?.data?.result) {
-          const bp = response.data.data.result.find((p: Parameters<typeof mapBackendProduct>[0]) => p.slug === slug);
-          if (bp) {
-            setProduct(mapBackendProduct(bp, activeLocale));
-          }
+        const response = await apiClient.get(`/products/slug/${slug}?locale=${activeLocale}`);
+        if (response.data?.data) {
+          setProduct(mapBackendProduct(response.data.data, activeLocale));
         }
       } catch (err) {
         console.error("Failed to load product by slug", err);
