@@ -66,9 +66,9 @@ export function CartPageClient() {
             {cart.map((item) => (
               <Card
                 key={`${item.id}-${item.color}-${item.size}`}
-                className="flex gap-6 rounded-sm border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row"
+                className="flex gap-6 rounded-md border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row"
               >
-                <div className="relative mx-auto h-32 w-24 shrink-0 overflow-hidden rounded-sm bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28">
+                <div className="relative mx-auto h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28">
                   <FashionImage src={item.image} alt={item.name} />
                 </div>
 
@@ -137,7 +137,7 @@ export function CartPageClient() {
             ))}
           </div>
 
-          <Card className="sticky top-24 rounded-sm border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
+          <Card className="sticky top-24 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
             <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
               Order Summary
             </h2>
@@ -169,7 +169,7 @@ export function CartPageClient() {
               </div>
             </div>
 
-            <div className="mt-6 flex items-start gap-2.5 rounded-sm bg-[#f7f4ef] p-3 text-[10px] leading-relaxed text-[#1c1a18]/65">
+            <div className="mt-6 flex items-start gap-2.5 rounded-md bg-[#f7f4ef] p-3 text-[10px] leading-relaxed text-[#1c1a18]/65">
               <Tag className="mt-0.5 size-4 shrink-0 text-[#b85a3c]" />
               <span>
                 Complimentary premium dust bags and signature gift boxing

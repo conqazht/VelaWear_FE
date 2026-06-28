@@ -178,7 +178,7 @@ export function SiteHeader() {
                   router.push(`/search?q=${encodeURIComponent(q.trim())}`);
                 }
               }}
-              className="flex items-center bg-surface-card rounded-md px-4 py-3 gap-3 w-full border border-hairline"
+              className="flex items-center bg-surface-card rounded-sm px-4 py-3 gap-3 w-full border border-hairline"
             >
               <button type="submit" aria-label="Submit search" className="p-0 border-none bg-transparent">
                 <Search className="size-5 text-[#55423d]/60 cursor-pointer" />

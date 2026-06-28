@@ -90,7 +90,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         >
           {notification.type === "bag" ? (
             /* ADDED TO BAG NOTIFICATION (Nike Style) */
-            <div className="bg-canvas w-full max-w-[360px] shadow-2xl border border-hairline relative flex flex-col p-6 rounded-sm ml-auto text-ink">
+            <div className="bg-canvas w-full max-w-[360px] shadow-2xl border border-hairline relative flex flex-col p-6 rounded-md ml-auto text-ink">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -114,7 +114,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               <div className="flex flex-col gap-6">
                 {/* Main Product */}
                 <div className="flex gap-4">
-                  <div className="w-[88px] h-[88px] flex-shrink-0 bg-surface-card rounded-sm overflow-hidden border border-hairline/30">
+                  <div className="w-[88px] h-[88px] flex-shrink-0 bg-surface-card rounded-none overflow-hidden border border-hairline/30">
                     <img
                       src={notification.product.image}
                       alt={notification.product.name}
@@ -158,7 +158,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             </div>
           ) : (
             /* ADDED TO FAVORITES NOTIFICATION (Sharp Style) */
-            <div className="w-full max-w-[400px] bg-canvas border border-hairline shadow-[0_20px_40px_-15px_rgba(28,26,24,0.15)] flex flex-col rounded-sm ml-auto overflow-hidden text-ink">
+            <div className="w-full max-w-[400px] bg-canvas border border-hairline shadow-[0_20px_40px_-15px_rgba(28,26,24,0.15)] flex flex-col rounded-md ml-auto overflow-hidden text-ink">
               {/* Header */}
               <div className="flex items-center justify-between px-6 border-b border-hairline bg-surface py-3.5">
                 <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               {/* Content */}
               <div className="p-6 flex gap-6 text-left">
                 {/* Product Image */}
-                <div className="w-[100px] h-[133px] flex-shrink-0 bg-surface-card border border-hairline/30 rounded-sm overflow-hidden">
+                <div className="w-[100px] h-[133px] flex-shrink-0 bg-surface-card border border-hairline/30 rounded-none overflow-hidden">
                   <img
                     src={notification.product.image}
                     alt={notification.product.name}

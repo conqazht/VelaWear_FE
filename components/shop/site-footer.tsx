@@ -16,7 +16,7 @@ export function SiteFooter() {
           </p>
           <form 
             onSubmit={(e) => e.preventDefault()}
-            className="mt-2 flex w-full max-w-sm border border-white/20 bg-transparent"
+            className="mt-2 flex w-full max-w-sm border border-white/20 bg-transparent rounded-sm overflow-hidden"
           >
             <input
               type="email"
@@ -25,7 +25,7 @@ export function SiteFooter() {
             />
             <button 
               type="submit"
-              className="h-10 rounded-none bg-[#b5573a] px-6 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#a04a30] whitespace-nowrap"
+              className="h-10 rounded-none bg-[#b5573a] px-6 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#a04a30] whitespace-nowrap cursor-pointer"
             >
               Đăng ký
             </button>

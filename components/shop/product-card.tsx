@@ -22,7 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <Card className="group h-full gap-0 rounded-md border-transparent bg-white p-3 py-3 transition-all duration-300 hover:border-[#1c1a18]/5 hover:shadow-xl relative">
-      <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-sm bg-[#efebe4]">
+      <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-none bg-[#efebe4]">
         <Link href={`/products/${product.id}`} className="block w-full h-full">
           {product.badge && (
             <Badge className="absolute left-4 top-4 z-10 rounded-sm bg-[#1c1a18] px-2 text-[9px] font-bold uppercase tracking-widest text-[#f7f4ef]">

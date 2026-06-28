@@ -33,7 +33,7 @@ function FloatingInput({
         id={id}
         placeholder=" "
         className={cn(
-          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-none text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
+          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
           trailing && "pr-12",
           className
         )}
@@ -155,7 +155,7 @@ export function SignInPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex h-14 w-full items-center justify-center rounded-none bg-[#964025] text-sm font-medium tracking-[0.03125em] text-white transition-colors hover:bg-[#87391f] cursor-pointer uppercase tracking-wider disabled:opacity-50"
+            className="flex h-14 w-full items-center justify-center rounded-sm bg-[#964025] text-sm font-medium tracking-[0.03125em] text-white transition-colors hover:bg-[#87391f] cursor-pointer uppercase tracking-wider disabled:opacity-50"
           >
             {isSubmitting ? "Signing In..." : "Sign In"}
           </button>

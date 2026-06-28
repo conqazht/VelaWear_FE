@@ -115,7 +115,7 @@ export function CheckoutPageClient() {
   if (!isAuthenticated) {
     return (
       <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
-        <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
+        <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
             Đăng nhập để thanh toán
@@ -137,7 +137,7 @@ export function CheckoutPageClient() {
   if (orderCompleted) {
     return (
       <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16 min-h-[80vh] flex flex-col justify-center items-center">
-        <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-sm border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
+        <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
           <CheckCircle2 className="mb-6 size-14 text-[#b85a3c]" />
           <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
             Đặt hàng thành công!
@@ -190,7 +190,7 @@ export function CheckoutPageClient() {
             </div>
           )}
 
-          <Card className="space-y-5 rounded-sm border-[#1c1a18]/5 bg-white p-8 py-8">
+          <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
             <SectionTitle number="1" title="Contact Information" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <CheckoutInput
@@ -214,7 +214,7 @@ export function CheckoutPageClient() {
             </div>
           </Card>
 
-          <Card className="space-y-5 rounded-sm border-[#1c1a18]/5 bg-white p-8 py-8">
+          <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
             <SectionTitle number="2" title="Shipping Address" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <CheckoutInput
@@ -267,7 +267,7 @@ export function CheckoutPageClient() {
             </div>
           </Card>
 
-          <Card className="space-y-5 rounded-sm border-[#1c1a18]/5 bg-white p-8 py-8">
+          <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
             <SectionTitle number="3" title="Payment Details" />
             <div>
               <FieldLabel>Card Number *</FieldLabel>
@@ -325,14 +325,14 @@ export function CheckoutPageClient() {
           </Button>
         </form>
 
-        <Card className="sticky top-24 rounded-sm border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
+        <Card className="sticky top-24 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
           <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
             Your Order Summary
           </h2>
           <div className="no-scrollbar mb-8 max-h-[280px] space-y-4 overflow-y-auto pr-1">
             {activeItemsList.map((item) => (
               <div key={`${item.id}-${item.size}`} className="flex items-center gap-4">
-                <div className="relative h-18 w-14 shrink-0 overflow-hidden rounded-sm border border-[#1c1a18]/5 bg-[#efebe4]">
+                <div className="relative h-18 w-14 shrink-0 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4]">
                   <FashionImage src={item.image} alt={item.name} />
                 </div>
                 <div className="min-w-0 flex-grow text-xs">

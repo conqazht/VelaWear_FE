@@ -148,7 +148,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               type="button"
               onClick={() => setActiveImage(detail.src)}
               className={cn(
-                "relative aspect-[3/4] overflow-hidden rounded-sm border bg-[#efebe4] transition-all cursor-pointer",
+                "relative aspect-[3/4] overflow-hidden rounded-none border bg-[#efebe4] transition-all cursor-pointer",
                 activeImage === detail.src
                   ? "border-[#1c1a18] opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
@@ -165,7 +165,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* Main Product Image */}
-        <div className="flex-1 aspect-[3/4] relative overflow-hidden rounded-sm border border-[#1c1a18]/5 bg-[#efebe4]">
+        <div className="flex-1 aspect-[3/4] relative overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4]">
           <FashionImage
             src={activeImage}
             alt={product.name}
@@ -387,7 +387,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 <p className="text-xs font-light tracking-wide text-on-surface-variant/80 max-w-sm leading-relaxed">
                   Have your say. Be the first to review the {product.name}.
                 </p>
-                <button className="mt-2 px-6 py-2.5 border border-ink rounded-full font-semibold text-xs tracking-wider uppercase bg-transparent text-ink hover:bg-ink hover:text-white transition-colors cursor-pointer">
+                <button className="mt-2 px-6 py-2.5 border border-ink rounded-sm font-semibold text-xs tracking-wider uppercase bg-transparent text-ink hover:bg-ink hover:text-white transition-colors cursor-pointer">
                   Write a review
                 </button>
               </div>

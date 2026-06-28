@@ -42,7 +42,7 @@ function FloatingInput({
         id={id}
         placeholder=" "
         className={cn(
-          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-none text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
+          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
           trailing && "pr-12",
           className
         )}
@@ -276,7 +276,7 @@ export function RegisterPage() {
               <SelectTrigger
                 onFocus={() => setIsSelectFocused(true)}
                 onBlur={() => setIsSelectFocused(false)}
-                className="w-full !h-14 py-0 px-4 bg-transparent border border-ink rounded-none text-sm text-[#1c1a18] focus:border-[#964025] focus:ring-0 focus-visible:border-[#964025] focus-visible:ring-0 focus-visible:ring-offset-0 outline-hidden flex items-center justify-between select-none cursor-pointer data-placeholder:text-transparent"
+                className="w-full !h-14 py-0 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] focus:border-[#964025] focus:ring-0 focus-visible:border-[#964025] focus-visible:ring-0 focus-visible:ring-offset-0 outline-hidden flex items-center justify-between select-none cursor-pointer data-placeholder:text-transparent"
               >
                 <SelectValue placeholder=" ">
                   {preference === "mens" ? "Men's" : preference === "womens" ? "Women's" : ""}
@@ -297,12 +297,12 @@ export function RegisterPage() {
                 alignItemWithTrigger={false}
                 side="bottom"
                 sideOffset={4}
-                className="bg-[#efe7dc] border border-ink rounded-none shadow-none text-ink w-[var(--anchor-width)]"
+                className="bg-[#efe7dc] border border-ink rounded-md shadow-none text-ink w-[var(--anchor-width)]"
               >
-                <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-none cursor-pointer py-3 px-4">
+                <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
                   Men&apos;s
                 </SelectItem>
-                <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-none cursor-pointer py-3 px-4">
+                <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
                   Women&apos;s
                 </SelectItem>
               </SelectContent>
@@ -347,7 +347,7 @@ export function RegisterPage() {
                 id="emailConsent"
                 checked={emailConsent}
                 onCheckedChange={(checked) => setEmailConsent(!!checked)}
-                className="mt-1 size-5 rounded-none border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
+                className="mt-1 size-5 rounded-sm border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
               />
               <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none">
                 Sign up for emails to get updates from Vela on products, offers, and your Member benefits.
@@ -358,7 +358,7 @@ export function RegisterPage() {
                 id="termsConsent"
                 checked={termsConsent}
                 onCheckedChange={(checked) => setTermsConsent(!!checked)}
-                className="mt-1 size-5 rounded-none border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
+                className="mt-1 size-5 rounded-sm border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
                 required
               />
               <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none">
@@ -372,7 +372,7 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-14 bg-[#964025] text-white rounded-none font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50"
+              className="w-full h-14 bg-[#964025] text-white rounded-sm font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50"
             >
               {isSubmitting ? "Creating Account..." : "Create Account"}
             </button>
