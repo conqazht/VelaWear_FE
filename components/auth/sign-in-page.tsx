@@ -6,56 +6,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { AuthShell } from "@/components/auth/auth-shell";
-import { cn } from "@/lib/utils";
+import { FloatingInput } from "@/components/auth/floating-input";
 import { useAuth } from "@/components/auth/auth-provider";
-
-interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  id: string;
-  trailing?: React.ReactNode;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
-}
-
-function FloatingInput({
-  label,
-  id,
-  trailing,
-  className,
-  type = "text",
-  inputRef,
-  ...props
-}: FloatingInputProps) {
-  return (
-    <div className="relative w-full">
-      <input
-        ref={inputRef}
-        type={type}
-        id={id}
-        placeholder=" "
-        className={cn(
-          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
-          trailing && "pr-12",
-          className
-        )}
-        {...props}
-      />
-      <label
-        htmlFor={id}
-        className="absolute left-4 -top-2.5 px-1 bg-[#efe7dc] text-xs text-[#55423d] transition-all duration-200
-                   peer-placeholder-shown:text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-[#55423d]/60 peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-                   peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#964025] peer-focus:bg-[#efe7dc] peer-focus:px-1
-                   pointer-events-none"
-      >
-        {label}
-      </label>
-      {trailing && (
-        <div className="absolute inset-y-0 right-3 flex items-center text-ink">
-          {trailing}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -147,7 +99,7 @@ export function SignInPage() {
               }
             />
             <div className="mt-2 flex justify-end">
-              <Link href="#" className="text-sm leading-[1.55] text-[#1c1a18] hover:text-[#964025] transition-colors">
+              <Link href="/forgot-password" className="text-sm leading-[1.55] text-[#1c1a18] hover:text-[#964025] transition-colors">
                 Forgot Password?
               </Link>
             </div>

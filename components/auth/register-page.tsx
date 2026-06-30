@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useState, useRef } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useOtpFlow } from "@/components/auth/use-otp-flow";
+import { OtpEntry } from "@/components/auth/otp-entry";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { BrandMark } from "@/components/shop/brand-mark";
+import { FloatingInput } from "@/components/auth/floating-input";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -18,53 +21,6 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/components/auth/auth-provider";
 
-interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  id: string;
-  trailing?: React.ReactNode;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
-}
-
-function FloatingInput({
-  label,
-  id,
-  trailing,
-  className,
-  type = "text",
-  inputRef,
-  ...props
-}: FloatingInputProps) {
-  return (
-    <div className="relative w-full">
-      <input
-        ref={inputRef}
-        type={type}
-        id={id}
-        placeholder=" "
-        className={cn(
-          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
-          trailing && "pr-12",
-          className
-        )}
-        {...props}
-      />
-      <label
-        htmlFor={id}
-        className="absolute left-4 -top-2.5 px-1 bg-[#efe7dc] text-xs text-[#55423d] transition-all duration-200
-                   peer-placeholder-shown:text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-[#55423d]/60 peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-                   peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#964025] peer-focus:bg-[#efe7dc] peer-focus:px-1
-                   pointer-events-none"
-      >
-        {label}
-      </label>
-      {trailing && (
-        <div className="absolute inset-y-0 right-3 flex items-center text-ink">
-          {trailing}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -82,40 +38,26 @@ export function RegisterPage() {
   const [errors, setErrors] = useState<{
     passwordMin?: boolean;
     passwordRules?: boolean;
-    backend?: string;
   }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { register } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-    setErrors({});
-
-    const newErrors: typeof errors = {};
-    if (password.length < 8) {
-      newErrors.passwordMin = true;
-    }
-    if (
-      !/[A-Z]/.test(password) ||
-      !/[a-z]/.test(password) ||
-      !/[0-9]/.test(password)
-    ) {
-      newErrors.passwordRules = true;
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
+  const {
+    showOtpStep,
+    otpCode,
+    setOtpCode,
+    cooldown,
+    isSubmitting: isOtpSubmitting,
+    error: otpError,
+    handleRequestOtp,
+    handleVerifyOtp,
+    resetFlow,
+  } = useOtpFlow({
+    email,
+    purpose: "REGISTER",
+    onVerifySuccess: async () => {
       // Format birthdate as YYYY-MM-DD
       const formattedDay = dobDay.padStart(2, "0");
       const formattedMonth = dobMonth.padStart(2, "0");
@@ -139,17 +81,51 @@ export function RegisterPage() {
       });
 
       router.push("/sign-in");
-    } catch (err: unknown) {
-      const apiError = err as { response?: { data?: { message?: string } } };
-      if (apiError.response?.data?.message) {
-        setErrors({ backend: apiError.response.data.message });
-      } else {
-        setErrors({ backend: "Registration failed. Please check your inputs and try again." });
-      }
-    } finally {
-      setIsSubmitting(false);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+    setErrors({});
+
+    const newErrors: typeof errors = {};
+    if (password.length < 8) {
+      newErrors.passwordMin = true;
     }
+    if (
+      !/[A-Z]/.test(password) ||
+      !/[a-z]/.test(password) ||
+      !/[0-9]/.test(password)
+    ) {
+      newErrors.passwordRules = true;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    await handleRequestOtp();
   };
+
+  if (showOtpStep) {
+    return (
+      <OtpEntry
+        email={email}
+        otpCode={otpCode}
+        setOtpCode={setOtpCode}
+        cooldown={cooldown}
+        isSubmitting={isOtpSubmitting}
+        error={otpError}
+        onVerify={handleVerifyOtp}
+        onResend={handleRequestOtp}
+        onCancel={resetFlow}
+        cancelLabel="Change email"
+        actionLabel="Verify & Create Account"
+      />
+    );
+  }
   
   return (
     <AuthShell className="flex min-h-screen items-start justify-center px-4 pt-4 pb-20 md:pt-8">
@@ -170,9 +146,9 @@ export function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {errors.backend && (
+          {otpError && (
             <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
-              {errors.backend}
+              {otpError}
             </div>
           )}
 
@@ -371,10 +347,10 @@ export function RegisterPage() {
           <div className="pt-4">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isOtpSubmitting}
               className="w-full h-14 bg-[#964025] text-white rounded-sm font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50"
             >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
+              {isOtpSubmitting ? "Creating Account..." : "Create Account"}
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   User as UserIcon,
   CreditCard,
@@ -17,9 +18,53 @@ import {
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Card } from "@/components/ui/card";
+import { useOtpFlow } from "@/components/auth/use-otp-flow";
+import { OtpEntry } from "@/components/auth/otp-entry";
+import { changeEmail } from "@/lib/auth-otp-api";
 
 export default function MemberSettings() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, checkSession } = useAuth();
+  const [emailDraft, setEmailDraft] = useState<string | null>(null);
+  const [requestedEmail, setRequestedEmail] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const newEmail = emailDraft ?? user?.email ?? "";
+  const otpEmail = requestedEmail ?? newEmail;
+
+  const {
+    showOtpStep,
+    otpCode,
+    setOtpCode,
+    cooldown,
+    isSubmitting: isOtpSubmitting,
+    error: otpError,
+    handleRequestOtp,
+    handleVerifyOtp,
+    resetFlow,
+  } = useOtpFlow({
+    email: otpEmail,
+    purpose: "CHANGE_EMAIL",
+    onVerifySuccess: async () => {
+      // Step 2: Change email using verified marker
+      await changeEmail({ newEmail: otpEmail });
+
+      // Refresh session/profile
+      await checkSession();
+
+      setEmailDraft(null);
+      setRequestedEmail(null);
+      resetFlow();
+      setSuccessMessage("Your email has been successfully updated.");
+    },
+  });
+
+  const handleRequestChangeEmailOtp = async () => {
+    setSuccessMessage(null);
+    setRequestedEmail(newEmail);
+    const success = await handleRequestOtp();
+    if (!success) {
+      setRequestedEmail(null);
+    }
+  };
 
   // If user is loading or not authenticated, render login prompt
   if (!isAuthenticated || !user) {
@@ -116,15 +161,61 @@ export default function MemberSettings() {
           <h2 className="font-serif text-2xl md:text-3xl text-ink font-light mb-10">Account Details</h2>
           <form className="flex flex-col gap-8" onSubmit={(e) => e.preventDefault()}>
             {/* Email Field */}
-            <div className="relative">
-              <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
-                Email*
-              </label>
-              <input
-                className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all"
-                type="email"
-                defaultValue={user.email}
-              />
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
+                  Email*
+                </label>
+                <input
+                  className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all"
+                  type="email"
+                  value={newEmail}
+                  disabled={showOtpStep || isOtpSubmitting}
+                  onChange={(e) => setEmailDraft(e.target.value)}
+                />
+              </div>
+
+              {otpError && !showOtpStep && (
+                <p className="text-xs text-red-600 font-medium">{otpError}</p>
+              )}
+
+              {successMessage && (
+                <p className="text-xs text-green-600 font-medium">{successMessage}</p>
+              )}
+
+              {newEmail !== user.email && !showOtpStep && (
+                <div className="mt-2 flex justify-end">
+                  <button
+                    type="button"
+                    disabled={isOtpSubmitting}
+                    onClick={handleRequestChangeEmailOtp}
+                    className="px-6 py-2.5 bg-[#964025] hover:bg-[#87391f] text-white text-xs font-semibold rounded-sm tracking-wider uppercase disabled:opacity-50 cursor-pointer border-0"
+                  >
+                    Verify & Update Email
+                  </button>
+                </div>
+              )}
+
+              {showOtpStep && (
+                <OtpEntry
+                  inline
+                  email={otpEmail}
+                  otpCode={otpCode}
+                  setOtpCode={setOtpCode}
+                  cooldown={cooldown}
+                  isSubmitting={isOtpSubmitting}
+                  error={otpError}
+                  onVerify={handleVerifyOtp}
+                  onResend={handleRequestOtp}
+                  onCancel={() => {
+                    resetFlow();
+                    setEmailDraft(null);
+                    setRequestedEmail(null);
+                  }}
+                  cancelLabel="Cancel"
+                  actionLabel="Confirm Code"
+                />
+              )}
             </div>
 
             {/* Password Section */}

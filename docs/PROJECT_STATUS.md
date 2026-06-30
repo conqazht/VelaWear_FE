@@ -2,6 +2,17 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-06-30
+
+### Reusable OTP & Account Flows Integration (Vela Wear)
+
+- **Auth OTP API Client & Hook**: Created `lib/auth-otp-api.ts` defining types and client methods (`requestOtp`, `verifyOtp`, `resetPassword`, `changeEmail`). Added a reusable `components/auth/use-otp-flow.ts` React hook to encapsulate OTP request, verification, cooldown timers, and API error states.
+- **Shared OTP UI Component**: Created `components/auth/otp-entry.tsx` featuring standard or inline layout options, validation checks, custom timers, and child inputs extension.
+- **Registration Flow Integration**: Refactored `register-page.tsx` to utilize the new reusable hook and component, verifying email OTP before user accounts are finalized.
+- **Forgot Password Reset**: Integrated the dedicated `/forgot-password` route utilizing the reusable hook and component to collect, verify OTP, and reset credentials.
+- **Change Email Flow Integration**: Refactored the Profile Settings page (`app/(shop)/profile/settings/page.tsx`) to implement inline email updates with OTP checks, updating user context profiles.
+- **Verification**: Verified zero errors/warnings in Next.js Turbopack production builds.
+
 ## 2026-06-28
 
 ### Storefront Catalog i18n Completed
