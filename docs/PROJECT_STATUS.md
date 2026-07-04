@@ -2,6 +2,24 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-07-04
+
+### Frontend Checkout API Integration (Phase 7)
+
+- **Checkout API Client**: Created `lib/checkout-api.ts` with TypeScript types (`CheckoutRequest`, `CheckoutResponse`, `CheckoutItemRequest`, `CheckoutItemResponse`) and functions (`submitCheckout`, `cancelOrder`, `extractCheckoutError`) following the existing `auth-otp-api.ts` pattern.
+- **CartItem variantId**: Added `variantId?: number` to `CartItem` in `lib/vela-data.ts`. Added `OrderSummary` type for order display. Updated `INITIAL_CART_ITEMS` with placeholder `variantId` values.
+- **Cart Provider**: Updated `components/shop/cart-provider.tsx` `addToCart` to copy `product.realId` → `cartItem.variantId`.
+- **Checkout Page Rewrite**: Rewrote `components/shop/checkout-page-client.tsx`:
+  - Replaced `apiClient.post("/orders", ...)` with `submitCheckout()` from checkout API.
+  - Removed client-side order code generation; uses server-returned `orderCode`.
+  - Replaced credit card form with payment method radio selector (COD default, Bank Transfer, VNPay/MoMo as coming-soon disabled options).
+  - Coupon code sent to server via `CheckoutRequest.couponCode` instead of client-side validation.
+  - Success screen shows server-returned `orderCode`, `finalAmount`, `paymentMethod`, `status`.
+  - Proper error handling: insufficient stock, invalid coupon, validation errors, unauthenticated.
+  - Loading spinner during submission.
+- **Verification**: `pnpm lint` — 0 errors (5 pre-existing warnings). `pnpm build` — clean, all 28 pages generated.
+- **Follow-ups**: Integrate online payment gateways (VNPay, MoMo) when backend support is ready. Add order tracking/history page that uses the `OrderSummary` type.
+
 ## 2026-06-30
 
 ### Reusable OTP & Account Flows Integration (Vela Wear)

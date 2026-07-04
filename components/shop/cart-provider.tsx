@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 
-import { CartItem, INITIAL_CART_ITEMS, Product } from "@/lib/vela-data";
+import { CartItem, Product } from "@/lib/vela-data";
 
 interface CartContextValue {
   cart: CartItem[];
@@ -23,7 +23,7 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>(INITIAL_CART_ITEMS);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   const addToCart = useCallback(
     (product: Product, color = product.color, size = product.size) => {
@@ -51,6 +51,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             size,
             image: product.image,
             quantity: 1,
+            variantId: product.realId,
           },
         ];
       });

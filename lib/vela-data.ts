@@ -6,6 +6,16 @@ export interface CartItem {
   size: string;
   image: string;
   quantity: number;
+  variantId?: number;
+}
+
+export interface OrderSummary {
+  orderId: number;
+  orderCode: string;
+  status: string;
+  finalAmount: number;
+  paymentStatus: string;
+  createdAt: string;
 }
 
 export interface Product {
@@ -182,6 +192,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCYdVw6NSfqrb0akyMIBJweqH_ikdgR3YQiUUYJBsCQUj4ANphiX7BEBFbDXYP67O90q-SSuvlqJ0n0VemewPgKIKOoIvUY72IluuKzLbHsb7Fl4AtAL9kdQy6UDEMekEOO-Dq8TH4jEz7OGxihmIaerES3AN2U6XRn8H_pWmWDgelrO3w--9Tv5tMYDVUD6ElfZxtsIdMKrvTzREWpNAhSUUWuBVLJmBEvV-CDNLQ3LzCXQ74USh_v1gwOe3fbYjbI9EcusAYh-8Cd",
     quantity: 1,
+    variantId: 1001,
   },
   {
     id: "pleated-trousers-cart",
@@ -192,6 +203,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAqazprdw5XwjumWSyZXk7fBVqgYV-Md2en-0MY01hZ2U79uUYjKS_CZhuu12l9G7CyDITpV9JKIlrCIguTuCU-PiVgyRWK5TX5ekAVgofRlgnIS9Qa7Rtkk9sMNr9_IhnZe2E5kBc1w-rAqsQXzjPSy76ovNPcxC0gS2OuxT0DLAcY48eaYiaRtiC5lx1ekFb32T9BOXAhkePYeprhOmLaA-BasgdugFfxNcRY6SWtMNZEy-xIh7igIGNrt0Ka5jjTpb9Uk6CeWEtl",
     quantity: 1,
+    variantId: 1002,
   },
 ];
 
