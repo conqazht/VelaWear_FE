@@ -31,11 +31,10 @@ export function SignInPage() {
   const {
     register,
     handleSubmit,
-    control,
     setFocus,
     formState: { errors, isSubmitting },
   } = useForm<SignInFormValues>({
-    resolver: zodResolver(signInSchema as any),
+    resolver: zodResolver(signInSchema as never),
     defaultValues: { email: "", password: "" },
     shouldFocusError: false,
   });

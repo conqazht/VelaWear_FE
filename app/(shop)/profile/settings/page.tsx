@@ -15,7 +15,7 @@ import {
   ChevronDown,
   LockKeyhole,
 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -37,15 +37,15 @@ export default function MemberSettings() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     resetField,
     formState: { errors },
   } = useForm<ChangeEmailFormValues>({
-    resolver: zodResolver(changeEmailSchema as any),
+    resolver: zodResolver(changeEmailSchema as never),
     defaultValues: { email: user?.email || "" },
   });
 
-  const newEmail = watch("email");
+  const newEmail = useWatch({ control, name: "email" });
   const otpEmail = requestedEmail ?? newEmail;
 
   const {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ComponentType, type SVGProps } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Compass, Sparkles, Sliders, Flower2 } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
@@ -12,7 +12,7 @@ interface Step {
   subtitle: string;
   description: string;
   image: string;
-  icon: React.ComponentType<any>;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 const STEPS: Step[] = [
@@ -58,11 +58,6 @@ export function EditorialCraft() {
   const [activeStep, setActiveStep] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // Monitor scrolling to pin the viewport and advance steps on desktop
   useEffect(() => {
@@ -124,7 +119,7 @@ export function EditorialCraft() {
   };
 
   const getStepProgressWidth = (index: number) => {
-    if (typeof window === "undefined" || !isMounted || window.innerWidth < 1024) {
+    if (typeof window === "undefined" || window.innerWidth < 1024) {
       return index === activeStep ? "100%" : "0%";
     }
     

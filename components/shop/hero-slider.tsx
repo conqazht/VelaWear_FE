@@ -26,10 +26,11 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   useEffect(() => {
     if (!isAutoplay) return;
     const interval = setInterval(() => {
-      handleNext();
+      setDirection("right");
+      setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 6000);
     return () => clearInterval(interval);
-  }, [current, isAutoplay]);
+  }, [isAutoplay, slides.length]);
 
   const handlePrev = () => {
     setIsAutoplay(false);

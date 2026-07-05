@@ -349,7 +349,11 @@ export function Testimonials() {
                       <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Phân loại</label>
                       <select
                         value={formCategory}
-                        onChange={(e) => setFormCategory(e.target.value as any)}
+                        onChange={(e) =>
+                          setFormCategory(
+                            e.target.value as "essentials" | "outerwear" | "accessories"
+                          )
+                        }
                         className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
                       >
                         <option value="essentials">Essentials</option>

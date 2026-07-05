@@ -68,7 +68,7 @@ export function CheckoutPageClient() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema as any),
+    resolver: zodResolver(checkoutSchema as never),
     defaultValues: {
       email: "",
       phone: "",
@@ -106,11 +106,15 @@ export function CheckoutPageClient() {
 
     try {
       const request: CheckoutRequest = {
+        userId: user?.id as number,
         receiverName: `${data.firstName} ${data.lastName}`.trim(),
         receiverPhone: data.phone,
         receiverAddress: [data.address, data.city, data.zipCode].filter(Boolean).join(", "),
         paymentMethod,
+        subtotal,
         shippingFee,
+        discountAmount: 0,
+        finalAmount: estimatedTotal,
         couponCode: couponCode.trim() || undefined,
       };
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -32,18 +32,21 @@ export function ForgotPasswordPage() {
   const [sceneStatus, setSceneStatus] = useState<AuthSceneStatus>("idle");
 
   const requestForm = useForm<RequestFormValues>({
-    resolver: zodResolver(requestSchema as any),
+    resolver: zodResolver(requestSchema as never),
     defaultValues: { email: "" },
     shouldFocusError: false,
   });
 
   const resetForm = useForm<ResetFormValues>({
-    resolver: zodResolver(resetSchema as any),
+    resolver: zodResolver(resetSchema as never),
     defaultValues: { newPassword: "" },
     shouldFocusError: false,
   });
 
-  const emailValue = requestForm.watch("email");
+  const emailValue = useWatch({
+    control: requestForm.control,
+    name: "email",
+  });
 
   const {
     showOtpStep,

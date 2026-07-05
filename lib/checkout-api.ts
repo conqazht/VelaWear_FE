@@ -1,15 +1,20 @@
 import apiClient from "./api-client";
+import type { ApiResponse } from "./api/types";
 
 // ---------------------------------------------------------------------------
 // Request types
 // ---------------------------------------------------------------------------
 
 export interface CheckoutRequest {
+  userId: number;
   receiverName: string;
   receiverPhone: string;
   receiverAddress: string;
   paymentMethod: "COD" | "VNPAY" | "MOMO" | "BANK_TRANSFER";
+  subtotal: number;
   shippingFee: number;
+  discountAmount?: number;
+  finalAmount: number;
   couponCode?: string;
 }
 
@@ -56,6 +61,22 @@ interface ApiEnvelope<T = unknown> {
   data: T | null;
   message: string;
   timestamp: string;
+}
+
+interface OrderApiResponse {
+  id: number;
+  orderCode: string;
+  status: string;
+  subtotal: number;
+  shippingFee: number;
+  discountAmount: number;
+  finalAmount: number;
+  receiverName: string;
+  receiverPhone: string;
+  receiverAddress: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  createdAt: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -166,22 +187,48 @@ export function extractCheckoutError(error: unknown): CheckoutError {
 export async function submitCheckout(
   request: CheckoutRequest
 ): Promise<CheckoutResponse> {
-  const response = await apiClient.post<ApiEnvelope<CheckoutResponse>>(
-    "/checkout",
-    request
-  );
+  const response = await apiClient.post<ApiResponse<OrderApiResponse>>("/orders", {
+    userId: request.userId,
+    orderCode: `VW-${Date.now()}`,
+    status: "PENDING",
+    subtotal: request.subtotal,
+    shippingFee: request.shippingFee,
+    discountAmount: request.discountAmount ?? 0,
+    finalAmount: request.finalAmount,
+    receiverName: request.receiverName,
+    receiverPhone: request.receiverPhone,
+    receiverAddress: request.receiverAddress,
+    paymentMethod: request.paymentMethod,
+    paymentStatus: "UNPAID",
+  });
 
   const data = response.data.data;
   if (!data) {
-    throw new Error("Unexpected empty response from checkout API.");
+    throw new Error("Unexpected empty response from order API.");
   }
 
-  return data;
+  return {
+    orderId: data.id,
+    orderCode: data.orderCode,
+    status: data.status,
+    subtotal: Number(data.subtotal),
+    shippingFee: Number(data.shippingFee),
+    discountAmount: Number(data.discountAmount),
+    finalAmount: Number(data.finalAmount),
+    receiverName: data.receiverName,
+    receiverPhone: data.receiverPhone,
+    receiverAddress: data.receiverAddress,
+    paymentMethod: data.paymentMethod,
+    paymentStatus: data.paymentStatus,
+    items: [],
+    paymentId: null,
+    createdAt: data.createdAt,
+  };
 }
 
 /**
  * Cancel a pending order by ID.
  */
 export async function cancelOrder(orderId: number): Promise<void> {
-  await apiClient.post(`/checkout/${orderId}/cancel`);
+  await apiClient.put(`/orders/${orderId}`, { status: "CANCELLED" });
 }
