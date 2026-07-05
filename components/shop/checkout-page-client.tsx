@@ -2,8 +2,18 @@
 
 import Link from "next/link";
 import type { ComponentProps } from "react";
-import { useMemo, useState, useEffect } from "react";
-import { CheckCircle2, CreditCard, LockKeyhole } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  CheckCircle2,
+  LockKeyhole,
+  Loader2,
+  AlertTriangle,
+  Truck,
+  ShoppingBag,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,103 +22,114 @@ import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { FieldLabel } from "@/components/shop/field-label";
 import { useCart } from "@/components/shop/cart-provider";
-import { CartItem, CHECKOUT_DEFAULT_ITEMS, money } from "@/lib/vela-data";
+import { money } from "@/lib/vela-data";
 import { useAuth } from "@/components/auth/auth-provider";
-import apiClient from "@/lib/api-client";
+import {
+  submitCheckout,
+  extractCheckoutError,
+  type CheckoutRequest,
+  type CheckoutResponse,
+} from "@/lib/checkout-api";
+import { checkoutSchema } from "@/lib/validations";
+
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
+// ---------------------------------------------------------------------------
+// Payment method options
+// ---------------------------------------------------------------------------
+
+const PAYMENT_METHODS = [
+  { value: "COD" as const, label: "Thanh toán khi nhận hàng (COD)", disabled: false },
+  { value: "BANK_TRANSFER" as const, label: "Chuyển khoản ngân hàng", disabled: false },
+  { value: "VNPAY" as const, label: "VNPay (Sắp ra mắt)", disabled: true },
+  { value: "MOMO" as const, label: "MoMo (Sắp ra mắt)", disabled: true },
+] as const;
+
+type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function CheckoutPageClient() {
   const { cart, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
-  const [cardName, setCardName] = useState("");
   const [couponCode, setCouponCode] = useState("");
-  const [discountApplied, setDiscountApplied] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodValue>("COD");
   const [orderCompleted, setOrderCompleted] = useState(false);
-  const [orderId, setOrderId] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completedOrder, setCompletedOrder] = useState<CheckoutResponse | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema as never),
+    defaultValues: {
+      email: "",
+      phone: "",
+      firstName: "",
+      lastName: "",
+      address: "",
+      city: "",
+      zipCode: "",
+    },
+  });
 
   // Pre-populate fields when user context is available
   useEffect(() => {
     if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEmail(user.email);
+      setValue("email", user.email);
       const names = user.fullName.split(" ");
-      setFirstName(names[0] || "");
-      setLastName(names.slice(1).join(" ") || "");
+      setValue("firstName", names[0] || "");
+      setValue("lastName", names.slice(1).join(" ") || "");
     }
-  }, [user]);
+  }, [user, setValue]);
 
-  const activeItemsList: CartItem[] = useMemo(
-    () =>
-      cart.length > 0
-        ? cart
-        : CHECKOUT_DEFAULT_ITEMS.map((item) => ({ ...item, quantity: 1 })),
-    [cart]
-  );
+  const activeItemsList = cart;
 
+  // Client-side estimates for display only — server is authoritative
   const subtotal = activeItemsList.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const discountAmount = discountApplied ? subtotal * 0.15 : 0;
-  const shipping = subtotal >= 400 ? 0 : 15;
-  const taxes = (subtotal - discountAmount) * 0.08;
-  const total = subtotal - discountAmount + shipping + taxes;
+  const shippingFee = subtotal >= 400 ? 0 : 15;
+  const estimatedTotal = subtotal + shippingFee;
 
-  const handleApplyCoupon = (event: React.FormEvent) => {
-    event.preventDefault();
-    setDiscountApplied(
-      couponCode.toUpperCase() === "VELA15" ||
-        couponCode.toLowerCase() === "autumn"
-    );
-  };
-
-  const handleCompletePurchase = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!email || !firstName || !address || !cardNumber || !phone) {
-      setError("Please fill out all required fields.");
-      return;
-    }
-
-    setError(null);
-    setIsSubmitting(true);
+  const onCompletePurchase = async (data: CheckoutFormValues) => {
+    setApiError(null);
+    setCouponError(null);
 
     try {
-      const orderCode = `VELA-${Math.floor(100000 + Math.random() * 900000)}`;
-      const payload = {
-        userId: user ? user.id : null,
-        orderCode,
-        subtotal: parseFloat(total.toFixed(2)),
-        receiverName: `${firstName} ${lastName}`.trim(),
-        receiverPhone: phone,
-        receiverAddress: `${address}, ${city}, ZIP: ${zipCode}`,
-        paymentMethod: "CASH", // Defaulting to Cash payment method
+      const request: CheckoutRequest = {
+        userId: user?.id as number,
+        receiverName: `${data.firstName} ${data.lastName}`.trim(),
+        receiverPhone: data.phone,
+        receiverAddress: [data.address, data.city, data.zipCode].filter(Boolean).join(", "),
+        paymentMethod,
+        subtotal,
+        shippingFee,
+        discountAmount: 0,
+        finalAmount: estimatedTotal,
+        couponCode: couponCode.trim() || undefined,
       };
 
-      await apiClient.post("/orders", payload);
-      setOrderId(orderCode);
+      const response = await submitCheckout(request);
+      setCompletedOrder(response);
       setOrderCompleted(true);
       clearCart();
     } catch (err: unknown) {
-      const apiError = err as { response?: { data?: { message?: string } } };
-      if (apiError.response?.data?.message) {
-        setError(apiError.response.data.message);
+      const checkoutErr = extractCheckoutError(err);
+
+      if (checkoutErr.kind === "invalid_coupon") {
+        setCouponError(checkoutErr.message);
       } else {
-        setError("Có lỗi xảy ra trong quá trình đặt hàng. Vui lòng thử lại.");
+        setApiError(checkoutErr.message);
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -134,7 +155,7 @@ export function CheckoutPageClient() {
     );
   }
 
-  if (orderCompleted) {
+  if (orderCompleted && completedOrder) {
     return (
       <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16 min-h-[80vh] flex flex-col justify-center items-center">
         <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
@@ -146,22 +167,66 @@ export function CheckoutPageClient() {
             Cám ơn bạn đã lựa chọn tin dùng thời trang tối giản của{" "}
             <strong>VELA WEAR</strong>.
           </p>
-          <p className="mb-6 text-xs font-semibold text-[#1c1a18]/50">
+          <p className="mb-2 text-xs font-semibold text-[#1c1a18]/50">
             Mã đơn hàng của bạn:{" "}
             <span className="font-serif text-sm tracking-wide text-black">
-              {orderId}
+              {completedOrder.orderCode}
             </span>
           </p>
+          <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] uppercase tracking-widest text-[#1c1a18]/45">
+            <span>
+              Tổng:{" "}
+              <strong className="text-[#1c1a18]">
+                {money(completedOrder.finalAmount)}
+              </strong>
+            </span>
+            <span>
+              Thanh toán:{" "}
+              <strong className="text-[#1c1a18]">
+                {completedOrder.paymentMethod === "COD"
+                  ? "COD"
+                  : completedOrder.paymentMethod}
+              </strong>
+            </span>
+            <span>
+              Trạng thái:{" "}
+              <strong className="text-[#1c1a18]">
+                {completedOrder.status}
+              </strong>
+            </span>
+          </div>
           <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
           <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
             Thông tin giao nhận sẽ được cập nhật qua email{" "}
-            <strong>{email}</strong>.
+            <strong>{completedOrder.receiverName}</strong>.
           </p>
           <Link
             href="/"
             className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
           >
             Quay lại trang chủ VELA WEAR
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  if (activeItemsList.length === 0) {
+    return (
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] items-center justify-center px-6 py-24">
+        <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
+          <ShoppingBag className="mb-6 size-12 text-[#b85a3c]" />
+          <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
+            Giỏ hàng đang trống
+          </h2>
+          <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
+            Thêm sản phẩm vào giỏ hàng trước khi tiến hành thanh toán.
+          </p>
+          <Link
+            href="/collection"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+          >
+            Tiếp tục mua sắm
           </Link>
         </Card>
       </div>
@@ -183,10 +248,11 @@ export function CheckoutPageClient() {
       </div>
 
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-        <form onSubmit={handleCompletePurchase} className="space-y-10 lg:col-span-7">
-          {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
-              {error}
+        <form onSubmit={handleSubmit(onCompletePurchase)} className="space-y-10 lg:col-span-7">
+          {apiError && (
+            <div className="flex items-start gap-3 rounded border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              <span>{apiError}</span>
             </div>
           )}
 
@@ -196,20 +262,18 @@ export function CheckoutPageClient() {
               <CheckoutInput
                 label="Email Address *"
                 type="email"
-                required
                 autoComplete="email"
-                value={email}
-                onChange={setEmail}
                 placeholder="address@domain.com"
+                {...register("email")}
+                error={errors.email?.message}
               />
               <CheckoutInput
                 label="Phone Number *"
                 type="tel"
-                required
                 autoComplete="tel"
-                value={phone}
-                onChange={setPhone}
                 placeholder="09xxx xxxxx"
+                {...register("phone")}
+                error={errors.phone?.message}
               />
             </div>
           </Card>
@@ -219,37 +283,33 @@ export function CheckoutPageClient() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <CheckoutInput
                 label="First Name *"
-                required
                 autoComplete="given-name"
-                value={firstName}
-                onChange={setFirstName}
                 placeholder="Jon"
+                {...register("firstName")}
+                error={errors.firstName?.message}
               />
               <CheckoutInput
                 label="Last Name *"
-                required
                 autoComplete="family-name"
-                value={lastName}
-                onChange={setLastName}
                 placeholder="Doe"
+                {...register("lastName")}
+                error={errors.lastName?.message}
               />
             </div>
             <CheckoutInput
               label="Street Address *"
-              required
               autoComplete="street-address"
-              value={address}
-              onChange={setAddress}
               placeholder="Nguyễn Huệ, Quận 1, Tp.HCM"
+              {...register("address")}
+              error={errors.address?.message}
             />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <CheckoutInput
                 label="City *"
-                required
                 autoComplete="address-level2"
-                value={city}
-                onChange={setCity}
                 placeholder="Ho Chi Minh City"
+                {...register("city")}
+                error={errors.city?.message}
               />
               <CheckoutInput
                 label="State / Province"
@@ -258,61 +318,46 @@ export function CheckoutPageClient() {
               />
               <CheckoutInput
                 label="ZIP / Postal Code *"
-                required
                 autoComplete="postal-code"
-                value={zipCode}
-                onChange={setZipCode}
                 placeholder="70000"
+                {...register("zipCode")}
+                error={errors.zipCode?.message}
               />
             </div>
           </Card>
 
           <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
-            <SectionTitle number="3" title="Payment Details" />
-            <div>
-              <FieldLabel>Card Number *</FieldLabel>
-              <div className="relative">
-                <CreditCard className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#1c1a18]/60" />
-                <Input
-                  required
-                  autoComplete="cc-number"
-                  maxLength={19}
-                  value={cardNumber}
-                  onChange={(event) => setCardNumber(event.target.value)}
-                  placeholder="4111 8888 2222 0000"
-                  className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 pl-10 pr-4 font-serif text-sm tracking-widest focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
-                />
-              </div>
+            <SectionTitle number="3" title="Payment Method" />
+            <div className="space-y-3">
+              {PAYMENT_METHODS.map((method) => (
+                <label
+                  key={method.value}
+                  className={`flex cursor-pointer items-center gap-3 rounded-sm border p-4 transition-colors ${
+                    method.disabled
+                      ? "cursor-not-allowed border-[#1c1a18]/5 bg-[#f7f4ef]/20 opacity-50"
+                      : paymentMethod === method.value
+                        ? "border-[#b85a3c] bg-[#b85a3c]/5"
+                        : "border-[#1c1a18]/10 bg-white hover:border-[#1c1a18]/25"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={method.value}
+                    checked={paymentMethod === method.value}
+                    onChange={() => setPaymentMethod(method.value)}
+                    disabled={method.disabled}
+                    className="size-4 accent-[#b85a3c]"
+                  />
+                  <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
+                    {method.value === "COD" && (
+                      <Truck className="size-4 text-[#1c1a18]/50" />
+                    )}
+                    {method.label}
+                  </span>
+                </label>
+              ))}
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <CheckoutInput
-                label="Expiration Date *"
-                required
-                autoComplete="cc-exp"
-                maxLength={5}
-                value={cardExpiry}
-                onChange={setCardExpiry}
-                placeholder="MM / YY"
-              />
-              <CheckoutInput
-                label="Security Code *"
-                required
-                type="password"
-                autoComplete="cc-csc"
-                maxLength={4}
-                value={cardCvc}
-                onChange={setCardCvc}
-                placeholder="000"
-              />
-            </div>
-            <CheckoutInput
-              label="Name on Card *"
-              required
-              autoComplete="cc-name"
-              value={cardName}
-              onChange={setCardName}
-              placeholder="JONATHAN DOE"
-            />
           </Card>
 
           <Button
@@ -320,8 +365,17 @@ export function CheckoutPageClient() {
             disabled={isSubmitting}
             className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c] disabled:opacity-50"
           >
-            <LockKeyhole className="size-4" />
-            {isSubmitting ? "Completing Purchase..." : "Complete Purchase"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Đang xử lý đặt hàng...
+              </>
+            ) : (
+              <>
+                <LockKeyhole className="size-4" />
+                Hoàn tất đặt hàng
+              </>
+            )}
           </Button>
         </form>
 
@@ -350,43 +404,63 @@ export function CheckoutPageClient() {
             ))}
           </div>
 
-          <form onSubmit={handleApplyCoupon} className="mb-8 flex gap-2">
-            <Input
-              value={couponCode}
-              onChange={(event) => setCouponCode(event.target.value)}
-              autoComplete="off"
-              placeholder="VELA15 or AUTUMN"
-              className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold uppercase tracking-wider focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
-            />
-            <Button
-              type="submit"
-              className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c]"
-            >
-              Apply
-            </Button>
-          </form>
+          <div className="mb-8">
+            <div className="flex gap-2">
+              <Input
+                value={couponCode}
+                onChange={(event) => {
+                  setCouponCode(event.target.value);
+                  if (couponError) setCouponError(null);
+                }}
+                autoComplete="off"
+                placeholder="Nhập mã giảm giá"
+                className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold uppercase tracking-wider focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
+              />
+              <Button
+                type="button"
+                onClick={() => {
+                  if (couponCode.trim()) {
+                    setCouponError(null);
+                  }
+                }}
+                className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c]"
+              >
+                Apply
+              </Button>
+            </div>
+            {couponError && (
+              <p className="mt-2 text-xs text-red-600">{couponError}</p>
+            )}
+            {couponCode.trim() && !couponError && (
+              <p className="mt-2 text-xs text-[#1c1a18]/50">
+                Mã &ldquo;{couponCode.trim().toUpperCase()}&rdquo; sẽ được áp dụng khi đặt hàng.
+              </p>
+            )}
+          </div>
 
           <div className="space-y-4 border-t border-[#1c1a18]/5 pt-6 text-xs tracking-wide">
             <LedgerRow label="Subtotal" value={money(subtotal)} />
-            {discountApplied && (
+            <LedgerRow
+              label="Shipping"
+              value={shippingFee === 0 ? "Complimentary" : money(shippingFee)}
+            />
+            {couponCode.trim() && (
               <LedgerRow
-                label="Discount (15%)"
-                value={`-${money(discountAmount)}`}
+                label="Coupon"
+                value={couponCode.trim().toUpperCase()}
                 highlight
               />
             )}
-            <LedgerRow
-              label="Shipping"
-              value={shipping === 0 ? "Complimentary" : money(shipping)}
-            />
-            <LedgerRow label="Estimated Taxes" value={money(taxes)} />
             <Separator className="my-4 bg-[#1c1a18]/10" />
             <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
-              <span>Total Due</span>
+              <span>Estimated Total</span>
               <span className="font-serif text-lg tracking-wider text-[#b85a3c]">
-                {money(total)}
+                {money(estimatedTotal)}
               </span>
             </div>
+            <p className="text-[10px] leading-relaxed text-[#1c1a18]/40">
+              Giảm giá (nếu có) sẽ được áp dụng sau khi xác nhận mã coupon bởi hệ thống.
+            </p>
           </div>
         </Card>
       </div>
@@ -409,20 +483,20 @@ function SectionTitle({ number, title }: { number: string; title: string }) {
 
 function CheckoutInput({
   label,
-  onChange,
+  error,
   ...props
-}: Omit<ComponentProps<typeof Input>, "onChange"> & {
+}: ComponentProps<typeof Input> & {
   label: string;
-  onChange?: (value: string) => void;
+  error?: string;
 }) {
   return (
     <div>
       <FieldLabel>{label}</FieldLabel>
       <Input
         {...props}
-        onChange={(event) => onChange?.(event.target.value)}
         className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-4 text-sm focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
       />
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

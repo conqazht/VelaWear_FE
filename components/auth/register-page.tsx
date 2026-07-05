@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useState, useRef } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-import { AuthShell } from "@/components/auth/auth-shell";
-import { BrandMark } from "@/components/shop/brand-mark";
+import { useOtpFlow } from "@/components/auth/use-otp-flow";
+import { OtpEntry } from "@/components/auth/otp-entry";
+import { AnimatedAuthShell } from "@/components/auth/animated-auth-shell";
+import { FloatingInput } from "@/components/auth/floating-input";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -17,54 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/components/auth/auth-provider";
-
-interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-  id: string;
-  trailing?: React.ReactNode;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
-}
-
-function FloatingInput({
-  label,
-  id,
-  trailing,
-  className,
-  type = "text",
-  inputRef,
-  ...props
-}: FloatingInputProps) {
-  return (
-    <div className="relative w-full">
-      <input
-        ref={inputRef}
-        type={type}
-        id={id}
-        placeholder=" "
-        className={cn(
-          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
-          trailing && "pr-12",
-          className
-        )}
-        {...props}
-      />
-      <label
-        htmlFor={id}
-        className="absolute left-4 -top-2.5 px-1 bg-[#efe7dc] text-xs text-[#55423d] transition-all duration-200
-                   peer-placeholder-shown:text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-[#55423d]/60 peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-                   peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#964025] peer-focus:bg-[#efe7dc] peer-focus:px-1
-                   pointer-events-none"
-      >
-        {label}
-      </label>
-      {trailing && (
-        <div className="absolute inset-y-0 right-3 flex items-center text-ink">
-          {trailing}
-        </div>
-      )}
-    </div>
-  );
-}
+import type { AuthSceneFocus, AuthSceneStatus } from "@/components/auth/auth-motion-scene";
 
 export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -80,42 +34,39 @@ export function RegisterPage() {
   const [emailConsent, setEmailConsent] = useState(false);
   const [termsConsent, setTermsConsent] = useState(false);
   const [errors, setErrors] = useState<{
+    email?: string;
+    firstName?: string;
+    lastName?: string;
     passwordMin?: boolean;
     passwordRules?: boolean;
-    backend?: string;
+    gender?: string;
+    dob?: string;
+    terms?: string;
   }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const passwordRef = useRef<HTMLInputElement>(null);
+  const dobMonthRef = useRef<HTMLInputElement>(null);
+  const dobYearRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { register } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-    setErrors({});
+  const [sceneFocus, setSceneFocus] = useState<AuthSceneFocus>("none");
+  const [sceneStatus, setSceneStatus] = useState<AuthSceneStatus>("idle");
 
-    const newErrors: typeof errors = {};
-    if (password.length < 8) {
-      newErrors.passwordMin = true;
-    }
-    if (
-      !/[A-Z]/.test(password) ||
-      !/[a-z]/.test(password) ||
-      !/[0-9]/.test(password)
-    ) {
-      newErrors.passwordRules = true;
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
+  const {
+    showOtpStep,
+    otpCode,
+    setOtpCode,
+    cooldown,
+    isSubmitting: isOtpSubmitting,
+    error: otpError,
+    handleRequestOtp,
+    handleVerifyOtp,
+    resetFlow,
+  } = useOtpFlow({
+    email,
+    purpose: "REGISTER",
+    onVerifySuccess: async () => {
       // Format birthdate as YYYY-MM-DD
       const formattedDay = dobDay.padStart(2, "0");
       const formattedMonth = dobMonth.padStart(2, "0");
@@ -139,81 +90,231 @@ export function RegisterPage() {
       });
 
       router.push("/sign-in");
-    } catch (err: unknown) {
-      const apiError = err as { response?: { data?: { message?: string } } };
-      if (apiError.response?.data?.message) {
-        setErrors({ backend: apiError.response.data.message });
-      } else {
-        setErrors({ backend: "Registration failed. Please check your inputs and try again." });
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setIsSubmitted(true);
+    setErrors({});
+    setSceneStatus("idle");
+
+    const newErrors: typeof errors = {};
+
+    // 1. Email validation
+    if (!email.trim()) {
+      newErrors.email = "Required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Invalid Email";
+    }
+
+    // 2. Names validation
+    if (!firstName.trim()) {
+      newErrors.firstName = "Required";
+    }
+    if (!lastName.trim()) {
+      newErrors.lastName = "Required";
+    }
+
+    // 3. Password validation
+    if (!password) {
+      newErrors.passwordMin = true;
+    } else {
+      if (password.length < 8) {
+        newErrors.passwordMin = true;
       }
-    } finally {
-      setIsSubmitting(false);
+      if (
+        !/[A-Z]/.test(password) ||
+        !/[a-z]/.test(password) ||
+        !/[0-9]/.test(password)
+      ) {
+        newErrors.passwordRules = true;
+      }
+    }
+
+    // 4. Gender validation
+    if (!preference) {
+      newErrors.gender = "Required";
+    }
+
+    // 5. Date of Birth validation
+    const day = parseInt(dobDay, 10);
+    const month = parseInt(dobMonth, 10);
+    const year = parseInt(dobYear, 10);
+    const currentYear = new Date().getFullYear();
+
+    if (!dobDay || !dobMonth || !dobYear) {
+      newErrors.dob = "Required";
+    } else if (
+      isNaN(day) || day < 1 || day > 31 ||
+      isNaN(month) || month < 1 || month > 12 ||
+      isNaN(year) || year < 1900 || year > currentYear
+    ) {
+      newErrors.dob = "Invalid Date";
+    }
+
+    // 6. Terms consent validation
+    if (!termsConsent) {
+      newErrors.terms = "You must agree to the Terms of Use";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setSceneStatus("error");
+      setTimeout(() => setSceneStatus("idle"), 850);
+      return;
+    }
+
+    const success = await handleRequestOtp();
+    if (!success) {
+      setSceneStatus("error");
+      setTimeout(() => setSceneStatus("idle"), 850);
     }
   };
-  
-  return (
-    <AuthShell className="flex min-h-screen items-start justify-center px-4 pt-4 pb-20 md:pt-8">
-      <section className="w-full max-w-[460px] bg-[#efe7dc] p-6 md:p-8">
-        <div className="mb-6 text-center">
-          <Link
-            href="/"
-            className="inline-block transition-opacity hover:opacity-90"
-          >
-            <BrandMark className="mx-auto" />
-          </Link>
-          <h1 className="mt-3 font-serif text-[32px] leading-[1.18] tracking-[-0.0125em] text-[#1c1a18]">
-            Now let&apos;s make you a Member.
-          </h1>
-          <p className="mt-2 text-sm leading-[1.55] text-[#55423d]">
-            Enter your details to register a new account.
-          </p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {errors.backend && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
-              {errors.backend}
+  return (
+    <AnimatedAuthShell
+      mode="register"
+      focus={sceneFocus}
+      passwordVisible={showPassword}
+      status={sceneStatus}
+      title={showOtpStep ? "Verify Email" : "Now let's make you a Member."}
+      description={
+        showOtpStep
+          ? `We sent a 6-digit verification code to ${email}.`
+          : "Enter your details to register a new account."
+      }
+      footer={
+        !showOtpStep && (
+          <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d] border-none">
+            Already a Member?{" "}
+            <Link
+              href="/sign-in"
+              className="font-medium text-[#964025] underline decoration-[#964025]/30 underline-offset-2 transition-colors hover:text-[#87391f] border-none"
+            >
+              Sign In
+            </Link>
+          </p>
+        )
+      }
+    >
+      {showOtpStep ? (
+        <OtpEntry
+          email={email}
+          otpCode={otpCode}
+          setOtpCode={setOtpCode}
+          cooldown={cooldown}
+          isSubmitting={isOtpSubmitting}
+          error={otpError}
+          onVerify={handleVerifyOtp}
+          onResend={handleRequestOtp}
+          onCancel={resetFlow}
+          cancelLabel="Change email"
+          actionLabel="Verify & Create Account"
+          plain={true}
+        />
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 border-none">
+          {otpError && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded border-solid">
+              {otpError}
             </div>
           )}
 
-          {/* Email Address */}
-          <FloatingInput
-            id="email"
-            label="Email Address*"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="border-none">
+            <FloatingInput
+              id="email"
+              label="Email*"
+              type="email"
+              value={email}
+              error={!!errors.email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) {
+                  setErrors((prev) => {
+                    const copy = { ...prev };
+                    delete copy.email;
+                    return copy;
+                  });
+                }
+              }}
+              onFocus={() => setSceneFocus("email")}
+              onBlur={() => setSceneFocus("none")}
+            />
+            {errors.email && (
+              <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                {errors.email}
+              </p>
+            )}
+          </div>
 
-          {/* First Name & Surname */}
-          <div className="grid grid-cols-2 gap-4">
-            <FloatingInput
-              id="firstName"
-              label="First Name*"
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
-            />
-            <FloatingInput
-              id="lastName"
-              label="Surname*"
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4 border-none">
+            <div>
+              <FloatingInput
+                id="firstName"
+                label="First Name*"
+                type="text"
+                value={firstName}
+                error={!!errors.firstName}
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                  if (errors.firstName) {
+                    setErrors((prev) => {
+                      const copy = { ...prev };
+                      delete copy.firstName;
+                      return copy;
+                    });
+                  }
+                }}
+                onFocus={() => setSceneFocus("email")}
+                onBlur={() => setSceneFocus("none")}
+              />
+              {errors.firstName && (
+                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                  {errors.firstName}
+                </p>
+              )}
+            </div>
+            <div>
+              <FloatingInput
+                id="lastName"
+                label="Surname*"
+                type="text"
+                value={lastName}
+                error={!!errors.lastName}
+                onChange={(e) => {
+                  setLastName(e.target.value);
+                  if (errors.lastName) {
+                    setErrors((prev) => {
+                      const copy = { ...prev };
+                      delete copy.lastName;
+                      return copy;
+                    });
+                  }
+                }}
+                onFocus={() => setSceneFocus("email")}
+                onBlur={() => setSceneFocus("none")}
+              />
+              {errors.lastName && (
+                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                  {errors.lastName}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Password */}
-          <div>
+          <div className="border-none">
             <FloatingInput
               id="password"
               label="Password*"
               type={showPassword ? "text" : "password"}
               value={password}
               inputRef={passwordRef}
+              error={!!errors.passwordMin || !!errors.passwordRules}
               onChange={(e) => {
                 setPassword(e.target.value);
                 if (isSubmitted) {
@@ -227,11 +328,14 @@ export function RegisterPage() {
                     !/[0-9]/.test(e.target.value)
                   ) {
                     newErrors.passwordRules = true;
+                  } else {
+                    delete newErrors.passwordRules;
                   }
                   setErrors(newErrors);
                 }
               }}
-              required
+              onFocus={() => setSceneFocus("password")}
+              onBlur={() => setSceneFocus("none")}
               trailing={
                 <button
                   type="button"
@@ -243,21 +347,21 @@ export function RegisterPage() {
                     }, 0);
                   }}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="p-1 hover:opacity-85 transition-opacity cursor-pointer"
+                  className="p-1 hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent"
                 >
                   {showPassword ? <EyeOff className="size-[22px] text-ink" /> : <Eye className="size-[22px] text-ink" />}
                 </button>
               }
             />
             {isSubmitted && (errors.passwordMin || errors.passwordRules) && (
-              <div className="mt-2 flex flex-col gap-1">
+              <div className="mt-2 flex flex-col gap-1 border-none">
                 {errors.passwordMin && (
-                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider">
+                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider border-none">
                     <X className="size-3 text-destructive" strokeWidth={2.5} /> Minimum of 8 characters
                   </span>
                 )}
                 {errors.passwordRules && (
-                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider">
+                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider border-none">
                     <X className="size-3 text-destructive" strokeWidth={2.5} /> Uppercase, lowercase letters and one number
                   </span>
                 )}
@@ -265,126 +369,226 @@ export function RegisterPage() {
             )}
           </div>
 
-          {/* Shopping Preference */}
-          <div className="relative w-full">
-            <Select
-              name="shoppingPreference"
-              value={preference}
-              onValueChange={(val) => setPreference(val || "")}
-              required
-            >
-              <SelectTrigger
-                onFocus={() => setIsSelectFocused(true)}
-                onBlur={() => setIsSelectFocused(false)}
-                className="w-full !h-14 py-0 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] focus:border-[#964025] focus:ring-0 focus-visible:border-[#964025] focus-visible:ring-0 focus-visible:ring-offset-0 outline-hidden flex items-center justify-between select-none cursor-pointer data-placeholder:text-transparent"
-              >
-                <SelectValue placeholder=" ">
-                  {preference === "mens" ? "Men's" : preference === "womens" ? "Women's" : ""}
-                </SelectValue>
-              </SelectTrigger>
+          {/* Gender & Date of Birth */}
+          <div className="grid grid-cols-2 gap-4 border-none">
+            {/* Gender */}
+            <div className="w-full flex flex-col gap-2 border-none">
               <label
-                className={cn(
-                  "absolute left-4 transition-all duration-200 pointer-events-none",
-                  (preference !== "" || isSelectFocused)
-                    ? "-top-2.5 text-xs bg-[#efe7dc] px-1"
-                    : "top-4 text-sm text-[#55423d]/60 bg-transparent px-0",
-                  isSelectFocused ? "text-[#964025]" : "text-[#55423d]"
-                )}
+                htmlFor="gender"
+                className="block text-[14px] font-semibold text-[#1c1a18] select-none border-none"
               >
-                Shopping Preference*
+                Gender*
               </label>
-              <SelectContent
-                alignItemWithTrigger={false}
-                side="bottom"
-                sideOffset={4}
-                className="bg-[#efe7dc] border border-ink rounded-md shadow-none text-ink w-[var(--anchor-width)]"
-              >
-                <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
-                  Men&apos;s
-                </SelectItem>
-                <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
-                  Women&apos;s
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Date of Birth */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1c1a18] block mb-3.5">Date of Birth*</label>
-            <div className="grid grid-cols-3 gap-4">
-              <FloatingInput
-                id="dobDay"
-                label="Day*"
-                value={dobDay}
-                onChange={(e) => setDobDay(e.target.value)}
-                required
-              />
-              <FloatingInput
-                id="dobMonth"
-                label="Month*"
-                value={dobMonth}
-                onChange={(e) => setDobMonth(e.target.value)}
-                required
-              />
-              <FloatingInput
-                id="dobYear"
-                label="Year*"
-                value={dobYear}
-                onChange={(e) => setDobYear(e.target.value)}
-                required
-              />
+              <div className="relative w-full border-none">
+                <Select
+                  name="shoppingPreference"
+                  value={preference}
+                  onValueChange={(val) => {
+                    setPreference(val || "")
+                    if (val && errors.gender) {
+                      setErrors((prev) => {
+                        const copy = { ...prev };
+                        delete copy.gender;
+                        return copy;
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    id="gender"
+                    onFocus={() => setIsSelectFocused(true)}
+                    onBlur={() => setIsSelectFocused(false)}
+                    className={cn(
+                      "w-full px-4 py-3 rounded-[12px] border border-solid transition-all bg-white/60 text-[15px] text-[#1c1a18] outline-none flex items-center justify-between cursor-pointer focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 !h-12",
+                      errors.gender
+                        ? "border-red-500 bg-white/60 focus:border-red-500"
+                        : isSelectFocused
+                        ? "border-[#964025] bg-white/85 ring-2 ring-black/5"
+                        : "border-black/20"
+                    )}
+                  >
+                    <SelectValue placeholder="Select Gender">
+                      {preference === "mens" ? "Male" : preference === "womens" ? "Female" : ""}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent
+                    alignItemWithTrigger={false}
+                    side="bottom"
+                    sideOffset={4}
+                    className="bg-[#efe7dc] border border-black/20 rounded-[12px] shadow-none text-ink w-[var(--anchor-width)]"
+                  >
+                    <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
+                      Male
+                    </SelectItem>
+                    <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
+                      Female
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {errors.gender && (
+                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                  {errors.gender}
+                </p>
+              )}
             </div>
-            <p className="text-[#55423d] text-[13px] opacity-70 mt-1">
-              Get a Vela Member Reward every year on your Birthday.
-            </p>
+
+            {/* Date of Birth */}
+            <div className="w-full flex flex-col gap-2 border-none">
+              <label className="block text-[14px] font-semibold text-[#1c1a18] select-none border-none">
+                Date of Birth*
+              </label>
+              <div className="grid grid-cols-4 gap-2 w-full border-none">
+                <input
+                  id="dobDay"
+                  type="text"
+                  placeholder="DD"
+                  value={dobDay}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*$/.test(val) && val.length <= 2) {
+                      setDobDay(val);
+                      if (val.length === 2) {
+                        dobMonthRef.current?.focus();
+                      }
+                      if (errors.dob) {
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy.dob;
+                          return copy;
+                        });
+                      }
+                    }
+                  }}
+                  onFocus={() => setSceneFocus("email")}
+                  onBlur={() => setSceneFocus("none")}
+                  className={cn(
+                    "col-span-1 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
+                    errors.dob
+                      ? "border-red-500 bg-white/60 focus:border-red-500"
+                      : "border-black/20 focus:border-[#964025] bg-white/60 focus:bg-white/85"
+                  )}
+                />
+                <input
+                  ref={dobMonthRef}
+                  id="dobMonth"
+                  type="text"
+                  placeholder="MM"
+                  value={dobMonth}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*$/.test(val) && val.length <= 2) {
+                      setDobMonth(val);
+                      if (val.length === 2) {
+                        dobYearRef.current?.focus();
+                      }
+                      if (errors.dob) {
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy.dob;
+                          return copy;
+                        });
+                      }
+                    }
+                  }}
+                  onFocus={() => setSceneFocus("email")}
+                  onBlur={() => setSceneFocus("none")}
+                  className={cn(
+                    "col-span-1 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
+                    errors.dob
+                      ? "border-red-500 bg-white/60 focus:border-red-500"
+                      : "border-black/20 focus:border-[#964025] bg-white/60 focus:bg-white/85"
+                  )}
+                />
+                <input
+                  ref={dobYearRef}
+                  id="dobYear"
+                  type="text"
+                  placeholder="YYYY"
+                  value={dobYear}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*$/.test(val) && val.length <= 4) {
+                      setDobYear(val);
+                      if (errors.dob) {
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy.dob;
+                          return copy;
+                        });
+                      }
+                    }
+                  }}
+                  onFocus={() => setSceneFocus("email")}
+                  onBlur={() => setSceneFocus("none")}
+                  className={cn(
+                    "col-span-2 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
+                    errors.dob
+                      ? "border-red-500 bg-white/60 focus:border-red-500"
+                      : "border-black/20 focus:border-[#964025] bg-white/60 focus:bg-white/85"
+                  )}
+                />
+              </div>
+              {errors.dob && (
+                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                  {errors.dob}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Agreements */}
-          <div className="space-y-4 mt-4">
-            <div className="flex items-start gap-3 cursor-pointer group">
+          <div className="space-y-4 mt-4 border-none">
+            <div className="flex items-start gap-3 cursor-pointer group border-none">
               <Checkbox
                 id="emailConsent"
                 checked={emailConsent}
                 onCheckedChange={(checked) => setEmailConsent(!!checked)}
-                className="mt-1 size-5 rounded-sm border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
+                className="mt-1 size-5 rounded-[4px] border-[#1c1a18]/30 data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
               />
-              <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none">
+              <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
                 Sign up for emails to get updates from Vela on products, offers, and your Member benefits.
               </label>
             </div>
-            <div className="flex items-start gap-3 cursor-pointer group">
+            <div className="flex items-start gap-3 cursor-pointer group border-none">
               <Checkbox
                 id="termsConsent"
                 checked={termsConsent}
-                onCheckedChange={(checked) => setTermsConsent(!!checked)}
-                className="mt-1 size-5 rounded-sm border-[#1c1a18] data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
-                required
+                onCheckedChange={(checked) => {
+                  setTermsConsent(!!checked);
+                  if (checked && errors.terms) {
+                    setErrors((prev) => {
+                      const copy = { ...prev };
+                      delete copy.terms;
+                      return copy;
+                    });
+                  }
+                }}
+                className={cn(
+                  "mt-1 size-5 rounded-[4px] cursor-pointer shrink-0 transition-all duration-200",
+                  errors.terms
+                    ? "border-red-500 bg-red-500/10 shadow-[0_0_0_2px_rgba(239,68,68,0.2)]"
+                    : "border-[#1c1a18]/30 data-checked:bg-[#964025] data-checked:border-[#964025]"
+                )}
               />
-              <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none">
-                I agree to Vela&apos;s <Link href="#" className="underline hover:text-[#964025]">Privacy Policy</Link> and <Link href="#" className="underline hover:text-[#964025]">Terms of Use</Link>.
+              <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
+                I agree to Vela&apos;s <Link href="#" className="underline hover:text-[#964025] border-none">Privacy Policy</Link> and <Link href="#" className="underline hover:text-[#964025] border-none">Terms of Use</Link>.
               </label>
             </div>
           </div>
 
           {/* Submit Action */}
-          <div className="pt-4">
+          <div className="pt-4 border-none">
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full h-14 bg-[#964025] text-white rounded-sm font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50"
+              disabled={isOtpSubmitting}
+              className="w-full h-12 bg-[#964025] text-white rounded-[12px] font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50 border-none"
             >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
+              {isOtpSubmitting ? "Creating Account..." : "Create Account"}
             </button>
           </div>
         </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-[#55423d]">
-            Already a Member? <Link href="/sign-in" className="text-[#1c1a18] underline font-medium hover:text-[#964025]">Sign In</Link>
-          </p>
-        </div>
-      </section>
-    </AuthShell>
+      )}
+    </AnimatedAuthShell>
   );
 }

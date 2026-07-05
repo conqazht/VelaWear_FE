@@ -12,7 +12,11 @@ export function generateStaticParams() {
     { id: "chunky-wool-knit" },
     { id: "oversized-linen-shirt" },
     { id: "relaxed-trousers" },
-    { id: "lightweight-jacket" }
+    { id: "lightweight-jacket" },
+    { id: "classic-linen-shirt" },
+    { id: "pleated-wool-trousers" },
+    { id: "the-heritage-tote" },
+    { id: "merino-wool-coat" }
   ];
 }
 

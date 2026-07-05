@@ -6,6 +6,16 @@ export interface CartItem {
   size: string;
   image: string;
   quantity: number;
+  variantId?: number;
+}
+
+export interface OrderSummary {
+  orderId: number;
+  orderCode: string;
+  status: string;
+  finalAmount: number;
+  paymentStatus: string;
+  createdAt: string;
 }
 
 export interface Product {
@@ -170,6 +180,58 @@ export const PRODUCTS: Product[] = [
     description:
       "Dark olive green linen jacket. Tactile, premium construction with single breasted buttons.",
   },
+  {
+    id: "classic-linen-shirt",
+    name: "Classic Linen Shirt",
+    price: 55,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCyQTGTpgHC2eDqWMGK8dR2RuHmPVKLBqYH20_WPIANN1bFcjjQ6-8kTI1SelzlScRo5881xkzSzOBJRYoe4ZCEbMWsPzeqydM2SbOliSQPh-TPL_WAoL7rp27x_yaBc-ZZBSe4qIc8o50jRXY4h5IFZJ21Ep5UAt5H3zV7d7ZI6AN8NcMV5aJx-vFgKR5CPdNAdoRcnsqs45aaesgReQqVl56pF2YS22-Wh2E_Zas8zX_4oPiVWTDcAc2IF3klxwGDZ2T1uIGDaNRi",
+    category: "AO",
+    badge: "MỚI",
+    color: "Sage",
+    size: "M",
+    description:
+      "Chất liệu linen dệt mộc cực thoáng, đường may giấu chỉ vô cùng tinh tế và chỉ chu. Áo giặt vài lần vẫn giữ phom rủ rất đẹp. Màu sắc ấm áp, dễ chịu.",
+  },
+  {
+    id: "pleated-wool-trousers",
+    name: "Pleated Wool Trousers",
+    price: 100,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCvP7H8zQsUizbqeLCsGS0Hu3mLducId6DXvb0dwq-5VgHnm48wp8zWIsynRu5pIR4AE4ZUhPlPSHf9alsJK-GVFz9dFe37X68bqSV9t-gpzqZyUpJAdJHK4AHznxt5LgUBtExaHWPDISobXgESuMFsgJMBzFURdBOCeueSSZ7Q7B1_aD2VjnljK_qtpicDlBuOzhZDko34wB7-_XXWfDzX5u_afVC_XmAI3fffbOtgtuAo9ocnrGaHo3-afBhVIzN3nKWUEXl3bzA6",
+    category: "QUAN",
+    badge: "MỚI",
+    color: "Charcoal",
+    size: "S",
+    description:
+      "Quần tây ly xếp phom đứng tuyệt đẹp. Từng nếp gấp ly được ép tỉ mỉ và đứng dáng cực kỳ tôn dáng. Chất vải pha len nhẹ mặc rất dễ chịu, thích hợp cho cả công sở lẫn dạo phố cuối tuần.",
+  },
+  {
+    id: "the-heritage-tote",
+    name: "The Heritage Tote",
+    price: 160,
+    originalPrice: 190,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCoYMTx73sE-zl-rrk3jPvaVd_aviVz5zLceFEuv_qsiBZ0vz3tWf27Y4bM3tKDRPWUDzVbW27UEQ7321iBNy9hj5FeoekgDPBRzmdvPUwTtUiPit_j3bnUld7t5DEEzvyPcUvLdCdnrk8SfaQH51KzYB2tNWGezSFzJVMhl_Um_ej-Htfj5ixSBPA7SfU5FD_jserlObo9OvUA7agoC_03nsUmacD6b7_nhyNV0PkA5Gzn9NBahxqHhxAgBy14QadlvpSwGsafxfga",
+    category: "PHU KIEN",
+    badge: "Sale",
+    color: "Terracotta",
+    size: "OS",
+    description:
+      "Chiếc túi tote da thật cực kỳ dày dặn, da mềm mại tự nhiên và mùi hương mộc mạc tinh tế. Kích thước vừa vặn cho máy tính và tài liệu, quai xách chắc chắn vô cùng thanh thoát.",
+  },
+  {
+    id: "merino-wool-coat",
+    name: "Merino Wool Coat",
+    price: 240,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuC3rdhdd2Is5yjK5nAVVfW6P2sBr2eFbIuyGPXLzEMmaaz6S048ueY6FpMEhTXDQ70RHHoicQkL8NH1GrGzWkFHgtJ9AZY0aQHNRuQigIU9TZZSReu_xPV2W9m1jyi0ZDIFVUqm10oAVd9EW7Alu_gKcYdm8ZYDEkWqM2BRPBkIOA-Nb0PQlIzJj-OeG8i8Jlv6_nDIuYrw1eSjwgjtRvkjlxlOxMtc3rdT9__yYdd3YpOJXLlEPuMNJbUU88td1TYmIABgQLcnDhg4",
+    category: "AO",
+    color: "Charcoal",
+    size: "M",
+    description:
+      "Chiếc áo khoác mang lại cảm giác cực kỳ ấm áp và sang trọng. Chất len merino mềm mướt không tì vết, phom dáng rủ tự nhiên chuẩn phong cách rủ tinh tế. Đây thực sự là khoản đầu tư xứng đáng cho tủ đồ mùa đông.",
+  },
 ];
 
 export const INITIAL_CART_ITEMS: CartItem[] = [
@@ -182,6 +244,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCYdVw6NSfqrb0akyMIBJweqH_ikdgR3YQiUUYJBsCQUj4ANphiX7BEBFbDXYP67O90q-SSuvlqJ0n0VemewPgKIKOoIvUY72IluuKzLbHsb7Fl4AtAL9kdQy6UDEMekEOO-Dq8TH4jEz7OGxihmIaerES3AN2U6XRn8H_pWmWDgelrO3w--9Tv5tMYDVUD6ElfZxtsIdMKrvTzREWpNAhSUUWuBVLJmBEvV-CDNLQ3LzCXQ74USh_v1gwOe3fbYjbI9EcusAYh-8Cd",
     quantity: 1,
+    variantId: 1001,
   },
   {
     id: "pleated-trousers-cart",
@@ -192,6 +255,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAqazprdw5XwjumWSyZXk7fBVqgYV-Md2en-0MY01hZ2U79uUYjKS_CZhuu12l9G7CyDITpV9JKIlrCIguTuCU-PiVgyRWK5TX5ekAVgofRlgnIS9Qa7Rtkk9sMNr9_IhnZe2E5kBc1w-rAqsQXzjPSy76ovNPcxC0gS2OuxT0DLAcY48eaYiaRtiC5lx1ekFb32T9BOXAhkePYeprhOmLaA-BasgdugFfxNcRY6SWtMNZEy-xIh7igIGNrt0Ka5jjTpb9Uk6CeWEtl",
     quantity: 1,
+    variantId: 1002,
   },
 ];
 

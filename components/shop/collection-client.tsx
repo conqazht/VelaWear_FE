@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,51 +15,37 @@ import {
 import { ProductCard } from "@/components/shop/product-card";
 import { cn } from "@/lib/utils";
 import { categoryLabels, Product, mapBackendProduct } from "@/lib/vela-data";
-import apiClient from "@/lib/api-client";
 import { getActiveLocale } from "@/lib/i18n";
+import { useCategoriesQuery, useProductsQuery } from "@/lib/queries/catalog";
 
 export function CollectionClient({ products: initialProducts }: { products: Product[] }) {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [activeFilters, setActiveFilters] = useState(["ÁO SƠ MI", "SIZE M"]);
   const [sortBy, setSortBy] = useState("Newest");
 
-  const [categories, setCategories] = useState<Array<{ id: number; name: string; slug: string }>>([]);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [isLoading, setIsLoading] = useState(true);
-
   const activeLocale = getActiveLocale();
+  const categoriesQuery = useCategoriesQuery({ size: 100, locale: activeLocale });
+  const productsQuery = useProductsQuery({ size: 100, locale: activeLocale });
 
-  // Fetch categories and products on mount
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [catsRes, prodsRes] = await Promise.all([
-          apiClient.get(`/categories?size=100&locale=${activeLocale}`),
-          apiClient.get(`/products?size=100&locale=${activeLocale}`),
-        ]);
-
-        if (catsRes.data?.data?.result) {
-          setCategories(catsRes.data.data.result);
-        }
-
-        if (prodsRes.data?.data?.result) {
-          const mapped = prodsRes.data.data.result.map((p: Parameters<typeof mapBackendProduct>[0]) => mapBackendProduct(p, activeLocale));
-          setProducts(mapped);
-        }
-      } catch (err) {
-        console.error("Failed to load collection data from BE API", err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadData();
-  }, [activeLocale]);
+  const categories = useMemo(
+    () => categoriesQuery.data?.result ?? [],
+    [categoriesQuery.data?.result]
+  );
+  const products = useMemo(
+    () =>
+      productsQuery.data?.result?.map((product) =>
+        mapBackendProduct(product, activeLocale)
+      ) ?? initialProducts,
+    [activeLocale, initialProducts, productsQuery.data?.result]
+  );
+  const isLoading =
+    categoriesQuery.isLoading && productsQuery.isLoading && products.length === 0;
 
   // Compute category tabs list dynamically from backend categories
   const categoryTabsList = useMemo(() => {
     const list = ["ALL"];
     categories.forEach((cat) => {
-      const key = cat.slug.toUpperCase().replace("-", " ");
+      const key = (cat.slug ?? cat.name).toUpperCase().replace("-", " ");
       if (!list.includes(key)) {
         list.push(key);
       }
@@ -71,7 +57,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
   const dynamicCategoryLabels = useMemo(() => {
     const labels: Record<string, string> = {};
     categories.forEach((cat) => {
-      const key = cat.slug.toUpperCase().replace("-", " ");
+      const key = (cat.slug ?? cat.name).toUpperCase().replace("-", " ");
       labels[key] = cat.name;
     });
     labels["ALL"] = categoryLabels["ALL"] || "Tất cả";

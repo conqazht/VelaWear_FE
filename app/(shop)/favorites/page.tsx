@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, LockKeyhole, ShoppingBag } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import { money, Product } from "@/lib/vela-data";
 
 export default function FavoritesPage() {
+  const { isAuthenticated } = useAuth();
   const { favorites, removeFromFavorites } = useFavorites();
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
@@ -16,6 +18,29 @@ export default function FavoritesPage() {
     addToCart(product);
     showAddedToBag(product, product.size || "M", product.color || "Sand");
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 py-24">
+        <div className="mx-auto flex max-w-md flex-col items-center rounded-sm border border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
+          <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+          <h1 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
+            Đăng nhập để xem yêu thích
+          </h1>
+          <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
+            Danh sách yêu thích được lưu theo tài khoản, nên bạn cần đăng nhập
+            trước khi lưu hoặc xem sản phẩm yêu thích.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+          >
+            Đăng nhập ngay
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">

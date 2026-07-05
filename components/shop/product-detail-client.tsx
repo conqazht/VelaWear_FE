@@ -21,8 +21,8 @@ import {
   Product,
 } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
-import apiClient from "@/lib/api-client";
 import { getActiveLocale } from "@/lib/i18n";
+import { useProductVariantsQuery } from "@/lib/queries/catalog";
 
 const colorSwatches: Record<string, string> = {
   Black: "bg-[#000000]",
@@ -86,7 +86,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [selectedColor, setSelectedColor] = useState(product.color);
   const [selectedSize, setSelectedSize] = useState(product.size);
 
-  const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     sizeAndFit: true,
     materialAndCare: false,
@@ -95,22 +94,15 @@ export function ProductDetailClient({ product }: { product: Product }) {
   });
 
   const activeLocale = getActiveLocale();
-
-  // Fetch product variants on mount
-  useEffect(() => {
-    if (!product.realId) return;
-    async function loadVariants() {
-      try {
-        const response = await apiClient.get(`/product-variants?productId=${product.realId}&size=100&locale=${activeLocale}`);
-        if (response.data?.data?.result) {
-          setVariants(response.data.data.result);
-        }
-      } catch (err) {
-        console.error("Failed to load product variants", err);
-      }
-    }
-    loadVariants();
-  }, [product.realId, activeLocale]);
+  const variantsQuery = useProductVariantsQuery({
+    productId: product.realId,
+    size: 100,
+    locale: activeLocale,
+  });
+  const variants = useMemo(
+    () => (variantsQuery.data?.result ?? []) as ProductVariant[],
+    [variantsQuery.data?.result]
+  );
 
   // Set default selected color/size once variants load
   useEffect(() => {
