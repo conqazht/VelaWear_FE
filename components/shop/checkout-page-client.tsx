@@ -11,6 +11,9 @@ import {
   Truck,
   ShoppingBag,
 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -27,6 +30,9 @@ import {
   type CheckoutRequest,
   type CheckoutResponse,
 } from "@/lib/checkout-api";
+import { checkoutSchema } from "@/lib/validations";
+
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 // ---------------------------------------------------------------------------
 // Payment method options
@@ -49,33 +55,40 @@ export function CheckoutPageClient() {
   const { cart, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [zipCode, setZipCode] = useState("");
   const [couponCode, setCouponCode] = useState("");
-  const [paymentMethod, setPaymentMethod] =
-    useState<PaymentMethodValue>("COD");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodValue>("COD");
   const [orderCompleted, setOrderCompleted] = useState(false);
-  const [completedOrder, setCompletedOrder] =
-    useState<CheckoutResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<CheckoutResponse | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema as any),
+    defaultValues: {
+      email: "",
+      phone: "",
+      firstName: "",
+      lastName: "",
+      address: "",
+      city: "",
+      zipCode: "",
+    },
+  });
 
   // Pre-populate fields when user context is available
   useEffect(() => {
     if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEmail(user.email);
+      setValue("email", user.email);
       const names = user.fullName.split(" ");
-      setFirstName(names[0] || "");
-      setLastName(names.slice(1).join(" ") || "");
+      setValue("firstName", names[0] || "");
+      setValue("lastName", names.slice(1).join(" ") || "");
     }
-  }, [user]);
+  }, [user, setValue]);
 
   const activeItemsList = cart;
 
@@ -87,22 +100,15 @@ export function CheckoutPageClient() {
   const shippingFee = subtotal >= 400 ? 0 : 15;
   const estimatedTotal = subtotal + shippingFee;
 
-  const handleCompletePurchase = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!email || !firstName || !address || !phone) {
-      setError("Vui lòng điền đầy đủ các trường bắt buộc.");
-      return;
-    }
-
-    setError(null);
+  const onCompletePurchase = async (data: CheckoutFormValues) => {
+    setApiError(null);
     setCouponError(null);
-    setIsSubmitting(true);
 
     try {
       const request: CheckoutRequest = {
-        receiverName: `${firstName} ${lastName}`.trim(),
-        receiverPhone: phone,
-        receiverAddress: [address, city, zipCode].filter(Boolean).join(", "),
+        receiverName: `${data.firstName} ${data.lastName}`.trim(),
+        receiverPhone: data.phone,
+        receiverAddress: [data.address, data.city, data.zipCode].filter(Boolean).join(", "),
         paymentMethod,
         shippingFee,
         couponCode: couponCode.trim() || undefined,
@@ -118,10 +124,8 @@ export function CheckoutPageClient() {
       if (checkoutErr.kind === "invalid_coupon") {
         setCouponError(checkoutErr.message);
       } else {
-        setError(checkoutErr.message);
+        setApiError(checkoutErr.message);
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -190,7 +194,7 @@ export function CheckoutPageClient() {
           <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
           <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
             Thông tin giao nhận sẽ được cập nhật qua email{" "}
-            <strong>{email}</strong>.
+            <strong>{completedOrder.receiverName}</strong>.
           </p>
           <Link
             href="/"
@@ -240,11 +244,11 @@ export function CheckoutPageClient() {
       </div>
 
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-        <form onSubmit={handleCompletePurchase} className="space-y-10 lg:col-span-7">
-          {error && (
+        <form onSubmit={handleSubmit(onCompletePurchase)} className="space-y-10 lg:col-span-7">
+          {apiError && (
             <div className="flex items-start gap-3 rounded border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-              <span>{error}</span>
+              <span>{apiError}</span>
             </div>
           )}
 
@@ -254,20 +258,18 @@ export function CheckoutPageClient() {
               <CheckoutInput
                 label="Email Address *"
                 type="email"
-                required
                 autoComplete="email"
-                value={email}
-                onChange={setEmail}
                 placeholder="address@domain.com"
+                {...register("email")}
+                error={errors.email?.message}
               />
               <CheckoutInput
                 label="Phone Number *"
                 type="tel"
-                required
                 autoComplete="tel"
-                value={phone}
-                onChange={setPhone}
                 placeholder="09xxx xxxxx"
+                {...register("phone")}
+                error={errors.phone?.message}
               />
             </div>
           </Card>
@@ -277,37 +279,33 @@ export function CheckoutPageClient() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <CheckoutInput
                 label="First Name *"
-                required
                 autoComplete="given-name"
-                value={firstName}
-                onChange={setFirstName}
                 placeholder="Jon"
+                {...register("firstName")}
+                error={errors.firstName?.message}
               />
               <CheckoutInput
                 label="Last Name *"
-                required
                 autoComplete="family-name"
-                value={lastName}
-                onChange={setLastName}
                 placeholder="Doe"
+                {...register("lastName")}
+                error={errors.lastName?.message}
               />
             </div>
             <CheckoutInput
               label="Street Address *"
-              required
               autoComplete="street-address"
-              value={address}
-              onChange={setAddress}
               placeholder="Nguyễn Huệ, Quận 1, Tp.HCM"
+              {...register("address")}
+              error={errors.address?.message}
             />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <CheckoutInput
                 label="City *"
-                required
                 autoComplete="address-level2"
-                value={city}
-                onChange={setCity}
                 placeholder="Ho Chi Minh City"
+                {...register("city")}
+                error={errors.city?.message}
               />
               <CheckoutInput
                 label="State / Province"
@@ -316,11 +314,10 @@ export function CheckoutPageClient() {
               />
               <CheckoutInput
                 label="ZIP / Postal Code *"
-                required
                 autoComplete="postal-code"
-                value={zipCode}
-                onChange={setZipCode}
                 placeholder="70000"
+                {...register("zipCode")}
+                error={errors.zipCode?.message}
               />
             </div>
           </Card>
@@ -418,8 +415,6 @@ export function CheckoutPageClient() {
               <Button
                 type="button"
                 onClick={() => {
-                  // Coupon is applied during checkout submission via the couponCode field.
-                  // If user enters a code, it will be sent with the order.
                   if (couponCode.trim()) {
                     setCouponError(null);
                   }
@@ -484,20 +479,20 @@ function SectionTitle({ number, title }: { number: string; title: string }) {
 
 function CheckoutInput({
   label,
-  onChange,
+  error,
   ...props
-}: Omit<ComponentProps<typeof Input>, "onChange"> & {
+}: ComponentProps<typeof Input> & {
   label: string;
-  onChange?: (value: string) => void;
+  error?: string;
 }) {
   return (
     <div>
       <FieldLabel>{label}</FieldLabel>
       <Input
         {...props}
-        onChange={(event) => onChange?.(event.target.value)}
         className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-4 text-sm focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
       />
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

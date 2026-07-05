@@ -19,6 +19,7 @@ interface OtpEntryProps {
   cancelLabel?: string;
   actionLabel?: string;
   inline?: boolean;
+  plain?: boolean;
   children?: React.ReactNode;
 }
 
@@ -35,8 +36,65 @@ export function OtpEntry({
   cancelLabel = "Change email",
   actionLabel = "Verify & Continue",
   inline = false,
+  plain = false,
   children,
 }: OtpEntryProps) {
+  const formContent = (
+    <form onSubmit={onVerify} className="flex flex-col gap-6">
+      {error && (
+        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
+          {error}
+        </div>
+      )}
+
+      <FloatingInput
+        id="otpCode"
+        label="Verification Code*"
+        type="text"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        maxLength={6}
+        value={otpCode}
+        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+        required
+      />
+
+      {children}
+
+      <div className="flex items-center justify-between text-sm">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-[#55423d] hover:text-[#964025] underline cursor-pointer bg-transparent border-0"
+        >
+          {cancelLabel}
+        </button>
+        <button
+          type="button"
+          disabled={cooldown > 0 || isSubmitting}
+          onClick={onResend}
+          className="text-[#964025] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer bg-transparent border-0"
+        >
+          {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Code"}
+        </button>
+      </div>
+
+      <div className="pt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
+        >
+          {isSubmitting ? "Verifying..." : actionLabel}
+        </button>
+      </div>
+    </form>
+  );
+
+  if (plain) {
+    return formContent;
+  }
+
   const content = (
     <div className={cn("w-full text-left", !inline && "max-w-[460px] bg-[#efe7dc] p-6 md:p-8 rounded")}>
       {!inline && (
@@ -59,55 +117,7 @@ export function OtpEntry({
         </p>
       )}
 
-      <form onSubmit={onVerify} className="space-y-6">
-        {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
-            {error}
-          </div>
-        )}
-
-        <FloatingInput
-          id="otpCode"
-          label="Verification Code*"
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={6}
-          value={otpCode}
-          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-          required
-        />
-
-        {children}
-
-        <div className="flex items-center justify-between text-sm">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="text-[#55423d] hover:text-[#964025] underline cursor-pointer bg-transparent border-0"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            disabled={cooldown > 0 || isSubmitting}
-            onClick={onResend}
-            className="text-[#964025] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer bg-transparent border-0"
-          >
-            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Code"}
-          </button>
-        </div>
-
-        <div className="pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full h-14 bg-[#964025] text-white rounded-sm font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50"
-          >
-            {isSubmitting ? "Verifying..." : actionLabel}
-          </button>
-        </div>
-      </form>
+      {formContent}
     </div>
   );
 

@@ -1,128 +1,184 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
-import { AuthShell } from "@/components/auth/auth-shell";
+import { AnimatedAuthShell } from "@/components/auth/animated-auth-shell";
 import { FloatingInput } from "@/components/auth/floating-input";
 import { useAuth } from "@/components/auth/auth-provider";
+import type {
+  AuthSceneFocus,
+  AuthSceneStatus,
+} from "@/components/auth/auth-motion-scene";
+import { signInSchema } from "@/lib/validations";
+
+type SignInFormValues = z.infer<typeof signInSchema>;
 
 export function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { signIn } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [sceneFocus, setSceneFocus] = useState<AuthSceneFocus>("none");
+  const [sceneStatus, setSceneStatus] = useState<AuthSceneStatus>("idle");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+  const {
+    register,
+    handleSubmit,
+    control,
+    setFocus,
+    formState: { errors, isSubmitting },
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema as any),
+    defaultValues: { email: "", password: "" },
+    shouldFocusError: false,
+  });
+
+  const onSubmit = async (data: SignInFormValues) => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setApiError(null);
+    setSceneStatus("idle");
 
     try {
-      await signIn(email, password);
+      await signIn(data.email, data.password);
+      setSceneStatus("success");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       router.push("/");
     } catch (err: unknown) {
-      const apiError = err as { response?: { data?: { message?: string } } };
-      if (apiError.response?.data?.message) {
-        setError(apiError.response.data.message);
+      const errorObj = err as { response?: { data?: { message?: string } } };
+      if (errorObj.response?.data?.message) {
+        setApiError(errorObj.response.data.message);
       } else {
-        setError("Invalid email or password. Please try again.");
+        setApiError("Invalid email or password. Please try again.");
       }
-    } finally {
-      setIsSubmitting(false);
+      setSceneStatus("error");
+      setTimeout(() => setSceneStatus("idle"), 850);
     }
   };
 
+  const onInvalid = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setSceneStatus("error");
+    setTimeout(() => setSceneStatus("idle"), 850);
+  };
+
+  const emailRegister = register("email");
+  const passwordRegister = register("password");
+
   return (
-    <AuthShell
-      includeHeader
-      className="flex min-h-[calc(100vh-71px)] flex-col items-center px-4 pb-24 pt-10 md:pt-16"
+    <AnimatedAuthShell
+      mode="sign-in"
+      focus={sceneFocus}
+      passwordVisible={showPassword}
+      status={sceneStatus}
+      title="Sign In"
+      description="Enter your email and password to access your account."
+      footer={
+        <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d]">
+          New to Vela Wear?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-[#964025] underline decoration-[#964025]/30 underline-offset-2 transition-colors hover:text-[#87391f]"
+          >
+            Join the Vela Community
+          </Link>
+        </p>
+      }
     >
-      <section className="w-full max-w-[448px] rounded bg-[#efe7dc] px-6 pb-12 pt-8 shadow-[0_1px_1px_rgba(0,0,0,0.05)] md:px-8">
-        <div className="mb-8 text-center">
-          <h1 className="font-serif text-[40px] font-normal leading-[1.12] tracking-[-0.02em]">
-            Sign In
-          </h1>
-          <p className="mx-auto mt-[15px] max-w-[348px] text-base leading-[1.55] text-[#55423d]">
-            Enter your email and password to access your account.
-          </p>
-        </div>
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-6">
+        {apiError && (
+          <div className="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+            {apiError}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
-              {error}
-            </div>
-          )}
-
+        <div>
           <FloatingInput
             id="email"
-            label="Email Address*"
+            label="Email*"
             autoComplete="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            error={!!errors.email}
+            {...emailRegister}
+            onFocus={() => {
+              setSceneFocus("email");
+            }}
+            onBlur={(e) => {
+              emailRegister.onBlur(e);
+              setSceneFocus("none");
+            }}
           />
-          <div>
-            <FloatingInput
-              id="password"
-              label="Password*"
-              autoComplete="current-password"
-              type={showPassword ? "text" : "password"}
-              inputRef={passwordRef}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              trailing={
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    setShowPassword(!showPassword);
-                    setTimeout(() => {
-                      passwordRef.current?.focus();
-                    }, 0);
-                  }}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="p-1 hover:opacity-85 transition-opacity cursor-pointer"
-                >
-                  {showPassword ? <EyeOff className="size-[22px] text-ink" /> : <Eye className="size-[22px] text-ink" />}
-                </button>
-              }
-            />
-            <div className="mt-2 flex justify-end">
-              <Link href="/forgot-password" className="text-sm leading-[1.55] text-[#1c1a18] hover:text-[#964025] transition-colors">
-                Forgot Password?
-              </Link>
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex h-14 w-full items-center justify-center rounded-sm bg-[#964025] text-sm font-medium tracking-[0.03125em] text-white transition-colors hover:bg-[#87391f] cursor-pointer uppercase tracking-wider disabled:opacity-50"
-          >
-            {isSubmitting ? "Signing In..." : "Sign In"}
-          </button>
-        </form>
-      </section>
+          {errors.email && (
+            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">{errors.email.message}</p>
+          )}
+        </div>
 
-      <p className="mt-12 text-center text-sm leading-[1.55] text-[#55423d]">
-        New to Vela Wear?{" "}
-        <Link
-          href="/register"
-          className="text-[#964025] underline decoration-[#964025]/30 underline-offset-2 hover:text-[#87391f] transition-colors font-medium"
+        <div>
+          <FloatingInput
+            id="password"
+            label="Password*"
+            autoComplete="current-password"
+            type={showPassword ? "text" : "password"}
+            error={!!errors.password}
+            {...passwordRegister}
+            inputRef={passwordRegister.ref}
+            onFocus={() => {
+              setSceneFocus("password");
+            }}
+            onBlur={(e) => {
+              passwordRegister.onBlur(e);
+              setSceneFocus("none");
+            }}
+            trailing={
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                  setSceneFocus("password");
+                  setTimeout(() => setFocus("password"), 0);
+                }}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="cursor-pointer p-1 transition-opacity hover:opacity-85"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-[22px] text-ink" />
+                ) : (
+                  <Eye className="size-[22px] text-ink" />
+                )}
+              </button>
+            }
+          />
+          {errors.password && (
+            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">{errors.password.message}</p>
+          )}
+          <div className="mt-2 flex justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-sm leading-[1.55] text-[#1c1a18] transition-colors hover:text-[#964025]"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+        </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
         >
-          Join the Vela Community
-        </Link>
-      </p>
-    </AuthShell>
+          {isSubmitting ? "Signing In..." : "Sign In"}
+        </button>
+      </form>
+    </AnimatedAuthShell>
   );
 }

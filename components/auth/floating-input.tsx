@@ -1,55 +1,71 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
   id: string;
+  label: string;
   trailing?: React.ReactNode;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
-  bgColor?: string;
+  inputRef?: React.Ref<HTMLInputElement>;
+  error?: boolean;
 }
 
 export function FloatingInput({
-  label,
   id,
+  label,
+  type,
+  value,
+  onChange,
+  onFocus,
+  onBlur,
   trailing,
   className,
-  type = "text",
   inputRef,
-  bgColor = "bg-[#efe7dc]",
+  error,
   ...props
 }: FloatingInputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
-    <div className="relative w-full">
-      <input
-        ref={inputRef}
-        type={type}
-        id={id}
-        placeholder=" "
-        className={cn(
-          "peer w-full h-14 px-4 bg-transparent border border-ink rounded-sm text-sm text-[#1c1a18] outline-none transition-all focus:border-[#964025] focus:ring-0",
-          trailing && "pr-12",
-          className
-        )}
-        {...props}
-      />
+    <div className="relative w-full border-none">
       <label
         htmlFor={id}
-        className={cn(
-          "absolute left-4 -top-2.5 px-1 text-xs text-[#55423d] transition-all duration-200",
-          "peer-placeholder-shown:text-sm peer-placeholder-shown:top-4 peer-placeholder-shown:text-[#55423d]/60 peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0",
-          "peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#964025] peer-focus:px-1",
-          "pointer-events-none",
-          bgColor,
-          `peer-focus:${bgColor}`
-        )}
+        className="block text-[14px] font-semibold text-[#1c1a18] mb-2 select-none border-none"
       >
         {label}
       </label>
-      {trailing && (
-        <div className="absolute inset-y-0 right-3 flex items-center text-ink">
-          {trailing}
-        </div>
-      )}
+      <div className="relative w-full border-none">
+        <input
+          id={id}
+          ref={inputRef}
+          type={type}
+          value={value}
+          onChange={onChange}
+          onFocus={(e) => {
+            setIsFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setIsFocused(false);
+            onBlur?.(e);
+          }}
+          className={cn(
+            "w-full px-4 py-3 rounded-[12px] border border-solid transition-all bg-white/60 text-[15px] text-[#1c1a18] outline-none h-12",
+            error
+              ? "border-red-500 bg-white/60 focus:border-red-500 focus:bg-white/85 focus:ring-2 focus:ring-red-500/5"
+              : isFocused
+              ? "border-[#964025] bg-white/85 ring-2 ring-black/5"
+              : "border-black/20",
+            trailing && "pr-12",
+            className
+          )}
+          {...props}
+        />
+        {trailing && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-ink z-20 border-none bg-transparent">
+            {trailing}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
