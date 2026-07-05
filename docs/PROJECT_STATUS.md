@@ -4,6 +4,21 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-04
 
+### Premium Vela Wear Homepage & Adapted Header/Footer Integration
+
+- **Homepage Replacement**: Completely replaced the homepage in `components/shop/home-page-client.tsx` (actually `components/shop/home-page.tsx`) with the new design from `vela-wear (1)`. This integrates all premium sections: `HeroSlider`, `FeaturedCategories`, `StorySection`, `EditorialCraft`, `HorizontalSlider` (trending), brand values bento-grid, `Testimonials`, and `Newsletter`.
+- **Layout Spacing Standardized**: Updated all homepage section containers (`FeaturedCategories`, `StorySection`, `EditorialCraft`, `HorizontalSlider`, bento values, `Testimonials`, and `Newsletter`) to use the standard wide catalog styling (`max-w-[1800px] px-6 md:px-16 mx-auto`) for consistent desktop alignment.
+- **Hydration Bug Fixes**: 
+  - Added an `isMounted` mount check to `EditorialCraft` progress bar calculations to resolve client/server window mismatches.
+  - Added `suppressHydrationWarning` to all primary `<img>` and `<motion.img>` elements (including the **Vela Wear Logo** in `<SiteHeader>`, as well as `FeaturedCategories`, `StorySection`, `HeroSlider`, `EditorialCraft`, `HomeProductCard`) to prevent hydration mismatches caused by Chrome browser extensions (like lazy loaders or ad blockers) rewriting image source attributes to transparent GIF placeholders.
+- **Responsive Tablet Enhancements**: Changed sticky-scroll layout prefixes in `EditorialCraft` from `md:` to `lg:` so that tablet screens render a standard stacked layout, preventing structural bugs on iPad sizes.
+- **Smooth Header Transitions (Floria-style)**: Applied the header layout and animations from the `floria-landing-page` project. Encapsulated the header in a `<motion.header>` element that slides down on mount using a spring entrance animation. Swapped the transition logic to separate the outer layout container (which transitions `py-8` to `py-4` on scroll) from the inner content wrapper (which morphs from a flat borderless container to a glassmorphic `bg-white/20 border-white/30 rounded-full shadow` pill with blur-saturation filter), ensuring buttery smooth transition. Renamed "Join / Log In" to "Log In" across all navigation layouts. Enriched the desktop search bar sizing (w-52 focus-within:w-68, py-2, text-xs input, w-4 h-4 icon) and linked the cart button directly to the `/cart` route, removing the redundant sidebar drawer.
+- **Removed Link Deprecations**: Removed all `legacyBehavior` and `passHref` properties on `<Link>` components (and swapped nested `<motion.a>` for `<motion.div>`) in `FeaturedCategories` and `StorySection`, completely eliminating the `legacyBehavior` deprecation warning.
+- **ScrollReveal Animations**: Created `components/shop/scroll-reveal.tsx` supporting viewport scroll reveals with type-safe Cubic-Bezier transition easings.
+- **Vela Wear Product Catalog**: Added 4 new products (`classic-linen-shirt`, `pleated-wool-trousers`, `the-heritage-tote`, `merino-wool-coat`) to the global products database in `lib/vela-data.ts` using USD currency to align with other store pages.
+- **Dynamic Static Params**: Updated `app/(shop)/products/[id]/page.tsx` parameter generation list to include the 4 new product slugs.
+- **Verification**: Run `pnpm build` successfully with exit code 0. Verified zero linter warnings and clean compilation of all static page generations.
+
 ### Frontend Checkout API Integration (Phase 7)
 
 - **Checkout API Client**: Created `lib/checkout-api.ts` with TypeScript types (`CheckoutRequest`, `CheckoutResponse`, `CheckoutItemRequest`, `CheckoutItemResponse`) and functions (`submitCheckout`, `cancelOrder`, `extractCheckoutError`) following the existing `auth-otp-api.ts` pattern.
