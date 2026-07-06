@@ -36,6 +36,7 @@ export interface Product {
   material?: string;
   care?: string;
   shortDescription?: string;
+  images?: string[];
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -47,7 +48,12 @@ export const categoryLabels: Record<string, string> = {
 
 export const categoryTabs = ["ALL", "AO", "QUAN", "PHU KIEN"];
 
-export const money = (value: number) => `$${value.toFixed(2)}`;
+export const money = (value: number) => {
+  if (value >= 1000) {
+    return `${value.toLocaleString("vi-VN")}đ`;
+  }
+  return `$${value.toFixed(2)}`;
+};
 
 export const getProductById = (id: string) =>
   PRODUCTS.find((product) => product.id === id);
@@ -296,6 +302,24 @@ export const DETAIL_IMAGES = [
 ];
 
 // Map backend product data to client-side Product model to preserve high-res images and styling.
+export function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  if (url.startsWith("/uploads/") || url.startsWith("uploads/")) {
+    const cleanPath = url.startsWith("/") ? url : `/${url}`;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+    try {
+      const parsed = new URL(apiUrl);
+      return `${parsed.origin}${cleanPath}`;
+    } catch {
+      return `http://localhost:8080${cleanPath}`;
+    }
+  }
+  return url;
+}
+
 export function mapBackendProduct(
   bp: {
     id: number;
@@ -304,12 +328,20 @@ export function mapBackendProduct(
     name: string;
     description: string;
     categoryId: number;
+    price?: number;
+    originalPrice?: number;
+    image?: string | null;
+    thumbnail?: string | null;
+    status?: string;
     seoTitle?: string;
     seoDescription?: string;
     seoKeywords?: string;
     material?: string;
     care?: string;
     shortDescription?: string;
+    images?: string[];
+    categoryName?: string | null;
+    categorySlug?: string | null;
   },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   locale: string = "vi"
@@ -323,23 +355,33 @@ export function mapBackendProduct(
       p.name.toLowerCase() === bp.name.toLowerCase()
   );
 
+  const mainImg = bp.image || bp.thumbnail || (match ? match.image : undefined);
+  const resolvedMainImg = resolveImageUrl(mainImg);
+
+  const rawImages = bp.images && bp.images.length > 0 
+    ? bp.images 
+    : (match && match.id === "linen-blazer" 
+        ? DETAIL_IMAGES.map((img) => img.src) 
+        : [mainImg || "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80"]);
+
   return {
     id: bp.slug,
     realId: bp.id,
     name: bp.name,
     description: bp.description || (match ? match.description : ""),
-    price: match ? match.price : 150,
-    originalPrice: match ? match.originalPrice : undefined,
-    image: match ? match.image : "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80",
+    price: bp.price ?? (match ? match.price : 150),
+    originalPrice: bp.originalPrice ?? (match ? match.originalPrice : undefined),
+    image: resolvedMainImg,
     badge: match ? match.badge : undefined,
     color: match ? match.color : "Black",
     size: match ? match.size : "M",
-    category: match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN"),
+    category: bp.categoryName || (match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN")),
     seoTitle: bp.seoTitle,
     seoDescription: bp.seoDescription,
     seoKeywords: bp.seoKeywords,
     material: bp.material,
     care: bp.care,
     shortDescription: bp.shortDescription,
+    images: rawImages.map(resolveImageUrl),
   };
 }
