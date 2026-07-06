@@ -42,17 +42,17 @@ export function SiteFooter() {
       </motion.div>
 
       <motion.div
-        className="max-w-[1280px] mx-auto px-6 md:px-12 relative z-10"
+        className="mx-auto w-full max-w-[1800px] px-6 md:px-16 relative z-10"
         variants={containerVariants}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-80px" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-12 pb-20 border-b border-white/5">
+        <div className="grid grid-cols-1 gap-16 border-b border-white/5 pb-20 md:grid-cols-[minmax(0,1fr)_180px_180px_220px] md:items-start md:justify-between md:gap-10">
           {/* Column 1: Elegant Branding, slogan, and description */}
           <motion.div
             variants={itemVariants}
-            className="col-span-1 md:col-span-5 flex flex-col items-start pr-0 md:pr-12"
+            className="col-span-1 flex flex-col items-start pr-0 md:max-w-[440px] md:pr-6"
           >
             <h2 className="font-serif text-5xl md:text-7xl font-bold text-white tracking-tight uppercase leading-none mb-4">
               Vela.
@@ -65,11 +65,8 @@ export function SiteFooter() {
             </p>
           </motion.div>
 
-          {/* Spacer column */}
-          <div className="hidden md:block md:col-span-1" />
-
           {/* Column 2: Collection */}
-          <motion.div variants={itemVariants} className="col-span-1 md:col-span-2">
+          <motion.div variants={itemVariants} className="col-span-1">
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <h4 className="text-[11px] font-semibold uppercase tracking-[2px] text-white">
@@ -108,7 +105,7 @@ export function SiteFooter() {
           </motion.div>
 
           {/* Column 3: Studio */}
-          <motion.div variants={itemVariants} className="col-span-1 md:col-span-2">
+          <motion.div variants={itemVariants} className="col-span-1">
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <h4 className="text-[11px] font-semibold uppercase tracking-[2px] text-white">
@@ -135,7 +132,7 @@ export function SiteFooter() {
           </motion.div>
 
           {/* Column 4: Contact */}
-          <motion.div variants={itemVariants} className="col-span-1 md:col-span-2">
+          <motion.div variants={itemVariants} className="col-span-1">
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <h4 className="text-[11px] font-semibold uppercase tracking-[2px] text-white">

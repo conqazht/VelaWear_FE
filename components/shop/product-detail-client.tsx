@@ -16,7 +16,6 @@ import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import {
   categoryLabels,
-  DETAIL_IMAGES,
   money,
   Product,
 } from "@/lib/vela-data";
@@ -78,11 +77,15 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
   const favorited = isFavorite(product.id);
-  const gallery =
-    product.id === "linen-blazer"
-      ? DETAIL_IMAGES
-      : [{ src: product.image, label: "Main Look" }];
-  const [activeImage, setActiveImage] = useState(gallery[0].src);
+  const gallery = useMemo(() => {
+    if (product.images && product.images.length > 0) {
+      return product.images.map((img, idx) => ({ src: img, label: `Look ${idx + 1}` }));
+    }
+    return [{ src: product.image, label: "Main Look" }];
+  }, [product.images, product.image]);
+
+  const [activeImage, setActiveImage] = useState(gallery[0]?.src || product.image);
+
   const [selectedColor, setSelectedColor] = useState(product.color);
   const [selectedSize, setSelectedSize] = useState(product.size);
 
@@ -155,18 +158,18 @@ export function ProductDetailClient({ product }: { product: Product }) {
   };
 
   return (
-    <div className="mb-24 grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
+    <div className="mb-24 grid grid-cols-1 items-start gap-10 xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
       {/* LEFT COLUMN: Vertical Gallery & Main Image */}
-      <div className="flex gap-4 lg:col-span-7 select-none">
+      <div className="flex gap-4 select-none justify-start xl:w-[631px]">
         {/* Vertical Thumbnail List */}
-        <div className="flex flex-col gap-2 w-20 flex-none">
+        <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
           {gallery.map((detail) => (
             <button
               key={detail.src}
               type="button"
               onClick={() => setActiveImage(detail.src)}
               className={cn(
-                "relative aspect-[3/4] overflow-hidden rounded-none border bg-[#efebe4] transition-all cursor-pointer",
+                "relative aspect-[4/5] overflow-hidden rounded-none border bg-[#efebe4] transition-all cursor-pointer",
                 activeImage === detail.src
                   ? "border-[#1c1a18] opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
@@ -183,7 +186,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* Main Product Image */}
-        <div className="flex-1 aspect-[3/4] relative overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4]">
+        <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4] xl:h-[668.75px] xl:w-[535px] xl:flex-none">
           <FashionImage
             src={activeImage}
             alt={product.name}
@@ -194,7 +197,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       </div>
 
       {/* RIGHT COLUMN: Product Info & Actions */}
-      <div className="flex h-full flex-col justify-center lg:col-span-5 text-left">
+      <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
         <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
           {categoryLabels[product.category] ?? product.category} / Fine tailored craftsmanship
         </span>
@@ -213,10 +216,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         <Separator className="mb-8 bg-[#1c1a18]/10" />
-        
-        <p className="mb-10 text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
-          {product.description}
-        </p>
 
         {/* Color Selection */}
         <div className="mb-8">
@@ -279,7 +278,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               addToCart(cartProduct, selectedColor, selectedSize);
               showAddedToBag(cartProduct, selectedSize, selectedColor);
             }}
-            className="w-full py-4 bg-[#b5573a] hover:bg-[#964025] text-white font-semibold text-xs tracking-widest uppercase rounded-sm transition-colors cursor-pointer border-none shadow-sm h-auto"
+            className="w-full h-14 bg-black hover:bg-neutral-800 text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-colors cursor-pointer border-none shadow-sm flex items-center justify-center"
           >
             Thêm vào giỏ
           </Button>
@@ -288,16 +287,21 @@ export function ProductDetailClient({ product }: { product: Product }) {
             type="button"
             onClick={() => toggleFavorite(product, selectedSize)}
             className={cn(
-              "w-full py-4 border rounded-sm font-semibold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer h-auto",
+              "w-full h-14 border font-semibold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer rounded-full",
               favorited
-                ? "bg-[#b5573a] border-[#b5573a] text-white hover:bg-[#964025] hover:border-[#964025]"
-                : "border-ink bg-transparent text-ink hover:bg-ink hover:text-white"
+                ? "bg-neutral-100 border-neutral-300 text-black hover:bg-neutral-200"
+                : "border-neutral-300 bg-white text-black hover:border-black"
             )}
           >
             <span>{favorited ? "Favorited" : "Favourite"}</span>
-            <Heart className={cn("size-4 transition-transform active:scale-95 duration-200", favorited && "fill-white stroke-white")} />
+            <Heart className={cn("size-4 transition-transform active:scale-95 duration-200", favorited && "fill-black stroke-black")} />
           </button>
         </div>
+
+        {/* Product Description */}
+        <p className="mt-10 mb-6 text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
+          {product.description}
+        </p>
 
         {/* DETAILS ACCORDION SECTIONS */}
         <div className="mt-12 flex flex-col gap-6 text-left border-t border-hairline/40">

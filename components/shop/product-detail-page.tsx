@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
+import { RelatedProducts } from "@/components/shop/related-products";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
 import { getActiveLocale } from "@/lib/i18n";
@@ -32,14 +33,14 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
   if (isLoading || !product) {
     return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-16 py-32 text-center select-none">
+      <div className="mx-auto w-full max-w-[1800px] px-6 py-32 text-center select-none md:px-16">
         <span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Loading product...</span>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 md:px-16 py-12">
+    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
       <div className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           Home
@@ -57,9 +58,17 @@ export function ProductDetailPage({ slug }: { slug: string }) {
         </span>
       </div>
 
-      <ProductDetailClient product={product} />
+      <div className="mx-auto w-full xl:max-w-[1180px] 2xl:max-w-[1220px]">
+        <ProductDetailClient key={product.id} product={product} />
+      </div>
 
-      <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2">
+      <RelatedProducts
+        categoryId={product.realId}
+        categoryCode={product.category}
+        currentProductSlug={product.id}
+      />
+
+      <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
         <div className="md:pr-6 text-left">
           <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
             Craft & Sustainability
