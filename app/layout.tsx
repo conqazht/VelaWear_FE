@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import React from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
+import { BoneyardRegistry } from "@/components/providers/boneyard-registry";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { CartProvider } from "@/components/shop/cart-provider";
 import { NotificationProvider } from "@/components/shop/notification-provider";
@@ -23,15 +25,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        <QueryProvider>
-          <AuthProvider>
-            <CartProvider>
-              <NotificationProvider>
-                <FavoritesProvider>{children}</FavoritesProvider>
-              </NotificationProvider>
-            </CartProvider>
-          </AuthProvider>
-        </QueryProvider>
+        <BoneyardRegistry />
+        <React.Suspense fallback={null}>
+          <QueryProvider>
+            <AuthProvider>
+              <CartProvider>
+                <NotificationProvider>
+                  <FavoritesProvider>{children}</FavoritesProvider>
+                </NotificationProvider>
+              </CartProvider>
+            </AuthProvider>
+          </QueryProvider>
+        </React.Suspense>
       </body>
     </html>
   );

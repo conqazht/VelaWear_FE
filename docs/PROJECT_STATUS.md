@@ -31,6 +31,41 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-08
 
+### Prevent Search Skeleton Flash On Back Navigation
+- **Date/Time**: 2026-07-08T23:53:23+07:00
+- **Issue**: Returning from a product page back to `/search` remounted the client page with `isLoading = true`, so the Boneyard skeleton flashed even though the search catalog had just been loaded moments earlier.
+- **Implementation**: Added in-memory plus `sessionStorage` caching for the search catalog in `app/(shop)/search/page.tsx`. The search page now initializes from cached products when available and skips the refetch path, so `loading` only stays `true` on a genuinely cold load.
+- **Verification**: `pnpm build` passes.
+- **Known Follow-ups**: If search data needs stronger freshness guarantees later, we can add an expiry timestamp instead of keeping the cache for the whole tab session.
+
+### Align Product Detail Skeleton Gallery With Real Layout
+- **Date/Time**: 2026-07-08T23:45:02+07:00
+- **Issue**: The product detail skeleton was still showing a generic two-column image block, so the gallery area did not match the real product page with a vertical thumbnail rail plus a single large hero image.
+- **Implementation**: Updated `ProductDetailLoadingFallback` and `ProductDetailFixture` in `components/shop/product-detail-page.tsx` to mirror the actual `ProductDetailClient` structure and dimensions more closely, then regenerated Boneyard output with `npx boneyard-js build` so `bones/product-detail.bones.json` reflects the new gallery shape.
+- **Verification**: `npx boneyard-js build` completed successfully and refreshed `product-detail`. `pnpm build` passes.
+- **Known Follow-ups**: If the product detail gallery layout changes again, rerun `npx boneyard-js build` so the generated bones stay in sync.
+
+### Remove Visible Loading Text From Storefront Skeleton Fallbacks
+- **Date/Time**: 2026-07-08T23:37:33+07:00
+- **Scope**: Removed user-visible `Loading...` fallback copy from the Boneyard-integrated storefront areas: product detail, cart, favorites, collection, and search.
+- **Implementation**: Replaced text-only fallbacks with lightweight linen placeholder blocks, and changed the product detail route-level `Suspense` fallback to `null` so it cannot flash text before the page skeleton mounts.
+- **Verification**: Searched the affected shop skeleton files for remaining visible loading copy; only out-of-scope admin/profile loading text remains. `pnpm build` passes.
+- **Known Follow-ups**: `pnpm lint` still fails due to existing out-of-scope admin/shared/profile lint errors; admin files were intentionally left untouched.
+
+### Extend Boneyard Skeletons to Cart and Favorites
+- **Cart Skeleton**: Wrapped the cart page content in `Skeleton name="cart-page"` and used Zustand persist hydration status so the page can show a skeleton while the saved cart restores from local storage.
+- **Favorites Skeleton**: Split the favorites route into a server page plus `FavoritesPageClient`, wrapped the authenticated favorites UI in `Skeleton name="favorites-page"`, and kept the sign-in/empty/list states intact.
+- **Boneyard Capture**: Added guided crawl entries for `/cart` and `/favorites`, then ran `npx boneyard-js build` successfully. Generated `cart-page.bones.json` and `favorites-page.bones.json`; product detail remains covered by `product-detail`.
+- **Verification**: `pnpm build` passes. `pnpm lint` still fails due to existing out-of-scope admin and shared lint errors; admin files were intentionally left untouched.
+
+### Integrate Boneyard Skeleton Loading
+- **Boneyard Runtime Wiring**: Added a client-side Boneyard registry bridge at `components/providers/boneyard-registry.tsx`, mounted it from `app/layout.tsx`, and added an initial `bones/registry.ts` stub plus `boneyard.config.json` so the app builds before the first generated capture.
+- **Product Detail Skeleton**: Updated `components/shop/product-detail-page.tsx` to use `Skeleton` with a fixture and fallback, split content/error/unavailable states, and prevent API failures from leaving the page in an infinite loading state.
+- **Collection & Search Skeletons**: Wrapped the collection catalog and search results layouts with `Skeleton` at their real data-loading boundaries, keeping the existing Search `Suspense` boundary and adding a Collection boundary required by Next.js 16 prerendering.
+- **Boneyard Capture**: Configured guided crawl entries in `boneyard.config.json` and ran `npx boneyard-js build` successfully against the local dev server. Generated `collection-catalog`, `product-detail`, and `search-results` bones plus the final registry under `bones/`.
+- **Verification**: `pnpm build` passes after generated bones are registered. `pnpm lint` still fails only on pre-existing out-of-scope errors in `components/shop/site-header.tsx` (`react-hooks/set-state-in-effect`) and `scratch/extract-css.js` (`no-require-imports`); touched Boneyard files do not add lint errors.
+- **Known Follow-ups**: Re-run `npx boneyard-js build` after major layout changes to refresh `bones/*.bones.json`.
+
 ### Refine Base UI Navigation Motion Fidelity
 - **Transform-Origin Alignment**: Updated [navigation-menu.tsx](D:\CANH\Java\side project\commercial-fe\components\ui\navigation-menu.tsx) and [navigation-menu.module.css](D:\CANH\Java\side project\commercial-fe\components\ui\navigation-menu.module.css) so the popup now uses Base UI's `--transform-origin` and `--positioner-width/height` variables instead of a hard-coded top-left origin, improving continuity when switching between menu items.
 - **Closer-to-Source Timing**: Reduced root hover delays back toward Base UI defaults (`delay=50`, `closeDelay=80`) and softened popup/content translate distances so open/close and cross-item transitions feel closer to the official demo instead of over-sliding.

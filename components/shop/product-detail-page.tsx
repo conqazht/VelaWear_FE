@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Skeleton } from "boneyard-js/react";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
 import { RelatedProducts } from "@/components/shop/related-products";
@@ -12,35 +13,128 @@ import { getActiveLocale } from "@/lib/i18n";
 export function ProductDetailPage({ slug }: { slug: string }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const activeLocale = getActiveLocale();
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadProduct() {
+      setIsLoading(true);
+      setLoadError(false);
+      setProduct(null);
+
       try {
         const response = await apiClient.get(`/products/slug/${slug}?locale=${activeLocale}`);
+        if (!isMounted) return;
+
         if (response.data?.data) {
           setProduct(mapBackendProduct(response.data.data, activeLocale));
+        } else {
+          setLoadError(true);
         }
       } catch (err) {
         console.error("Failed to load product by slug", err);
+        if (isMounted) {
+          setLoadError(true);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
+
     loadProduct();
+
+    return () => {
+      isMounted = false;
+    };
   }, [slug, activeLocale]);
 
-  if (isLoading || !product) {
-    return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-32 text-center select-none md:px-16">
-        <span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Loading product...</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
+    <Skeleton
+      name="product-detail"
+      loading={isLoading}
+      className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]"
+      fallback={<ProductDetailLoadingFallback />}
+      fixture={<ProductDetailFixture />}
+    >
+      {product ? (
+        <ProductDetailContent product={product} />
+      ) : (
+        <ProductUnavailableState hasError={loadError} />
+      )}
+    </Skeleton>
+  );
+}
+
+function ProductDetailLoadingFallback() {
+  return (
+    <div className="mx-auto grid w-full gap-10 xl:max-w-[1180px] xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:max-w-[1220px] 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
+      <div className="flex gap-4 select-none justify-start xl:w-[631px]">
+        <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="aspect-[4/5] animate-pulse bg-[#efe7dc]" />
+          ))}
+        </div>
+
+        <div className="relative aspect-[4/5] flex-1 animate-pulse overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc] xl:h-[668.75px] xl:w-[535px] xl:flex-none" />
+      </div>
+
+      <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
+        <div className="mb-2 h-3 w-40 animate-pulse bg-[#efe7dc]" />
+        <div className="mb-4 h-12 w-full max-w-[320px] animate-pulse bg-[#efe7dc]" />
+        <div className="mb-6 h-8 w-48 animate-pulse bg-[#efe7dc]" />
+        <div className="mb-8 h-px w-full bg-[#1c1a18]/10" />
+        <div className="mb-8">
+          <div className="mb-4 h-3 w-28 animate-pulse bg-[#efe7dc]" />
+          <div className="flex gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-8 w-8 rounded-full animate-pulse bg-[#efe7dc]" />
+            ))}
+          </div>
+        </div>
+        <div className="mb-10">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div className="h-3 w-10 animate-pulse bg-[#efe7dc]" />
+            <div className="h-3 w-20 animate-pulse bg-[#efe7dc]" />
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-[50px] animate-pulse bg-[#efe7dc]" />
+            ))}
+          </div>
+        </div>
+        <div className="h-[68px] w-full animate-pulse rounded-full bg-[#efe7dc]" />
+        <div className="mt-5 h-[60px] w-full animate-pulse rounded-full bg-[#efe7dc]" />
+      </div>
+    </div>
+  );
+}
+
+function ProductUnavailableState({ hasError }: { hasError: boolean }) {
+  return (
+    <div className="py-28 text-center select-none">
+      <p className="mb-6 text-sm text-[#1c1a18]/55">
+        {hasError
+          ? "Không thể tải sản phẩm này. Vui lòng thử lại sau."
+          : "Không tìm thấy sản phẩm này."}
+      </p>
+      <Link
+        href="/collection"
+        className="inline-flex items-center rounded-none bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
+      >
+        Xem bộ sưu tập
+      </Link>
+    </div>
+  );
+}
+
+function ProductDetailContent({ product }: { product: Product }) {
+  return (
+    <>
       <div className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           Home
@@ -93,6 +187,77 @@ export function ProductDetailPage({ slug }: { slug: string }) {
             alt="Linen weave close-up detail texture"
           />
         </div>
+      </section>
+    </>
+  );
+}
+
+function ProductDetailFixture() {
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+        <span>Home</span>
+        <span>/</span>
+        <span className="font-medium text-[#1c1a18]">Collections</span>
+        <span>/</span>
+        <span>Tailored Linen Blazer</span>
+      </div>
+
+      <div className="mx-auto grid w-full gap-10 xl:max-w-[1180px] xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:max-w-[1220px] 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
+        <div className="flex gap-4 select-none justify-start xl:w-[631px]">
+          <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="aspect-[4/5] bg-[#efe7dc]" />
+            ))}
+          </div>
+
+          <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc] xl:h-[668.75px] xl:w-[535px] xl:flex-none" />
+        </div>
+
+        <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
+          <div className="space-y-3">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[#b85a3c]">Atelier Collection</p>
+            <h1 className="font-serif text-4xl font-light tracking-wide text-[#1c1a18]">Tailored Linen Blazer</h1>
+          </div>
+          <div className="mb-6 mt-6 h-8 w-48 bg-[#efe7dc]" />
+          <div className="mb-8 h-px w-full bg-[#1c1a18]/10" />
+          <div className="mb-8">
+            <div className="mb-4 h-3 w-28 bg-[#efe7dc]" />
+            <div className="flex gap-4">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="h-8 w-8 rounded-full bg-[#efe7dc]" />
+              ))}
+            </div>
+          </div>
+          <div className="mb-10">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="h-3 w-10 bg-[#efe7dc]" />
+              <div className="h-3 w-20 bg-[#efe7dc]" />
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="h-[50px] bg-[#efe7dc]" />
+              ))}
+            </div>
+          </div>
+          <div className="h-[68px] rounded-full bg-[#1c1a18]" />
+          <div className="mt-5 h-[60px] rounded-full bg-[#efe7dc]" />
+        </div>
+      </div>
+
+      <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
+        <div className="space-y-4">
+          <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
+            Craft & Sustainability
+          </span>
+          <h2 className="font-serif text-2xl font-light leading-tight tracking-[0.05em] text-[#1c1a18] md:text-4xl">
+            Woven with Intention.
+          </h2>
+          <p className="text-sm leading-7 text-[#1c1a18]/65">
+            Natural fibers and considered construction define the Vela Wear approach.
+          </p>
+        </div>
+        <div className="aspect-[16/10] bg-[#efebe4]" />
       </section>
     </div>
   );

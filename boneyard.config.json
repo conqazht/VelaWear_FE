@@ -1,0 +1,31 @@
+{
+  "breakpoints": [375, 768, 1280, 1536],
+  "out": "./bones",
+  "color": "#e7dfd3",
+  "animate": "shimmer",
+  "shimmerColor": "#f3eee6",
+  "speed": "1.8s",
+  "transition": 180,
+  "skeletons": {
+    "collection-catalog": {
+      "route": "/collection",
+      "wait": 1000
+    },
+    "product-detail": {
+      "route": "/products/linen-blazer",
+      "wait": 1000
+    },
+    "cart-page": {
+      "route": "/cart",
+      "wait": 1000
+    },
+    "favorites-page": {
+      "route": "/favorites",
+      "wait": 1000
+    },
+    "search-results": {
+      "route": "/search?q=shirt",
+      "wait": 1000
+    }
+  }
+}

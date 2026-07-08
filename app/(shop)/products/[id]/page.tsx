@@ -27,7 +27,7 @@ export default async function Page({
 }) {
   const { id: slug } = await params;
   return (
-    <Suspense fallback={<div className="py-32 text-center select-none"><span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Loading...</span></div>}>
+    <Suspense fallback={null}>
       <ProductDetailPage slug={slug} />
     </Suspense>
   );

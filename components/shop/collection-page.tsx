@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { CollectionClient } from "@/components/shop/collection-client";
@@ -23,7 +24,9 @@ export function CollectionPage() {
         </h1>
       </div>
 
-      <CollectionClient products={PRODUCTS} />
+      <Suspense fallback={<CollectionClientFallback />}>
+        <CollectionClient products={PRODUCTS} />
+      </Suspense>
 
       <section className="relative mt-4 mb-4 h-[300px] w-full overflow-hidden rounded-lg bg-black">
         <FashionImage
@@ -48,6 +51,23 @@ export function CollectionPage() {
           </Link>
         </div>
       </section>
+    </div>
+  );
+}
+
+function CollectionClientFallback() {
+  return (
+    <div className="space-y-8">
+      <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="space-y-3">
+            <div className="aspect-square animate-pulse bg-[#efe7dc]" />
+            <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
+            <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

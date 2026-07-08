@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { X, Check, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion, LayoutGroup } from "motion/react";
+import { Skeleton } from "boneyard-js/react";
+import { X, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/product-card";
@@ -25,13 +26,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-
 interface FilterGroupsProps {
   selectedCategoryId: number | "ALL";
   selectedColorId: number | null;
@@ -285,10 +279,9 @@ function FilterGroups({
 }
 
 export function CollectionClient({ products: initialProducts }: { products: Product[] }) {
-  const collectionTopRef = useRef<HTMLDivElement>(null);
   const collectionScrollAnchorRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
-  const [filterMotionIntent, setFilterMotionIntent] = useState<"show" | "hide">("show");
+  const filterMotionIntent: "show" | "hide" = "show";
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | "ALL">("ALL");
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
@@ -366,7 +359,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
 
   const meta = productsQuery.data?.meta;
 
-  const isLoading =
+  const isInitialLoading =
     categoriesQuery.isLoading && productsQuery.isLoading && products.length === 0;
 
   const categoryIdsWithProducts = useMemo(() => {
@@ -454,11 +447,6 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     setPage(targetPage);
   };
 
-  const toggleDesktopFilters = () => {
-    setFilterMotionIntent(showFilters ? "hide" : "show");
-    setShowFilters((current) => !current);
-  };
-
   // Render shadcn page numbers dynamically with ellipses
   const renderPageNumbers = () => {
     const totalPages = meta?.pages || 1;
@@ -531,52 +519,50 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <span className="text-xs uppercase tracking-widest text-ink/40">Loading collection...</span>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="w-full">
-        <div ref={collectionScrollAnchorRef} className="h-px w-full" aria-hidden="true" />
+      <Skeleton
+        name="collection-catalog"
+        loading={isInitialLoading}
+        fallback={<CollectionCatalogLoadingFallback />}
+        fixture={<CollectionCatalogFixture products={products.length > 0 ? products : initialProducts.slice(0, size)} />}
+      >
+        <div className="w-full">
+          <div ref={collectionScrollAnchorRef} className="h-px w-full" aria-hidden="true" />
 
-        <ProductToolbar
-          totalProducts={meta?.total || products.length}
-          showFilters={showFilters}
-          setShowFilters={setShowFilters}
-          setMobileFiltersOpen={setMobileFiltersOpen}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOptions={commonSortOptions}
-        />
+          <ProductToolbar
+            totalProducts={meta?.total || products.length}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            setMobileFiltersOpen={setMobileFiltersOpen}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOptions={commonSortOptions}
+          />
 
-        {/* Main Content Area */}
-        <ProductLayoutMain
-          showFilters={showFilters}
-          sidebarContent={<FilterGroups {...filterProps} />}
-          id="collection-layout"
-          shouldReduceMotion={Boolean(shouldReduceMotion)}
-          filterMotionIntent={filterMotionIntent}
-        >
-          {products.length === 0 ? (
-            <div className="py-20 text-center select-none min-h-[580px] flex items-center justify-center">
-              <p className="text-sm text-[#1c1a18]/50">
-                Không tìm thấy sản phẩm nào trong danh mục này.
-              </p>
-            </div>
-          ) : (
-            <div className="flex-grow w-full">
-              <ProductGrid>
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} imageAspect="collection" />
-                ))}
-              </ProductGrid>
+          {/* Main Content Area */}
+          <ProductLayoutMain
+            showFilters={showFilters}
+            sidebarContent={<FilterGroups {...filterProps} />}
+            id="collection-layout"
+            shouldReduceMotion={Boolean(shouldReduceMotion)}
+            filterMotionIntent={filterMotionIntent}
+          >
+            {products.length === 0 ? (
+              <div className="py-20 text-center select-none min-h-[580px] flex items-center justify-center">
+                <p className="text-sm text-[#1c1a18]/50">
+                  Không tìm thấy sản phẩm nào trong danh mục này.
+                </p>
+              </div>
+            ) : (
+              <div className="flex-grow w-full">
+                <ProductGrid>
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} imageAspect="collection" />
+                  ))}
+                </ProductGrid>
 
-              {/* Pagination Controls */}
+                {/* Pagination Controls */}
                 {meta && meta.pages > 1 && (
                   <div className="border-b border-[#1c1a18]/10 pb-4 pt-4">
                     <Pagination className="select-none">
@@ -611,9 +597,10 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
                   </div>
                 )}
               </div>
-          )}
-        </ProductLayoutMain>
-      </div>
+            )}
+          </ProductLayoutMain>
+        </div>
+      </Skeleton>
 
       {/* Mobile Filters Drawer */}
       <AnimatePresence>
@@ -671,5 +658,61 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function CollectionCatalogLoadingFallback() {
+  return (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="space-y-3">
+          <div className="aspect-square animate-pulse bg-[#efe7dc]" />
+          <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
+          <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CollectionCatalogFixture({ products }: { products: Product[] }) {
+  const fixtureProducts = products.slice(0, 6);
+
+  return (
+    <div className="w-full">
+      <ProductToolbar
+        totalProducts={fixtureProducts.length || 12}
+        showFilters={false}
+        setShowFilters={() => undefined}
+        setMobileFiltersOpen={() => undefined}
+        sortBy="featured"
+        setSortBy={() => undefined}
+        sortOptions={commonSortOptions}
+      />
+
+      <ProductLayoutMain
+        showFilters={false}
+        sidebarContent={<div className="min-h-[520px] border-r border-[#1c1a18]/10" />}
+        id="collection-layout-fixture"
+      >
+        {fixtureProducts.length > 0 ? (
+          <ProductGrid>
+            {fixtureProducts.map((product) => (
+              <ProductCard key={product.id} product={product} imageAspect="collection" />
+            ))}
+          </ProductGrid>
+        ) : (
+          <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="space-y-3">
+                <div className="aspect-square bg-[#efe7dc]" />
+                <div className="h-4 w-3/4 bg-[#efe7dc]" />
+                <div className="h-4 w-1/3 bg-[#efe7dc]" />
+              </div>
+            ))}
+          </div>
+        )}
+      </ProductLayoutMain>
+    </div>
   );
 }

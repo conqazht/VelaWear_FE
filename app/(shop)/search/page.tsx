@@ -3,7 +3,8 @@
 import { Suspense, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, SlidersHorizontal, X, Check } from "lucide-react";
+import { Skeleton } from "boneyard-js/react";
+import { ChevronDown, ChevronUp, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { ProductCard } from "@/components/shop/product-card";
@@ -12,6 +13,52 @@ import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 import { cn } from "@/lib/utils";
 import { ProductToolbar, ProductGrid, ProductLayoutMain, commonSortOptions } from "@/components/shop/product-layout-components";
+
+const searchCatalogCache = new Map<string, Product[]>();
+const searchCatalogStoragePrefix = "vela-search-catalog:";
+
+function readCachedSearchCatalog(locale: string): Product[] | null {
+  const memoryCache = searchCatalogCache.get(locale);
+  if (memoryCache && memoryCache.length > 0) {
+    return memoryCache;
+  }
+
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const stored = window.sessionStorage.getItem(`${searchCatalogStoragePrefix}${locale}`);
+    if (!stored) {
+      return null;
+    }
+
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return null;
+    }
+
+    const cachedProducts = parsed as Product[];
+    searchCatalogCache.set(locale, cachedProducts);
+    return cachedProducts;
+  } catch {
+    return null;
+  }
+}
+
+function persistSearchCatalog(locale: string, products: Product[]) {
+  searchCatalogCache.set(locale, products);
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(`${searchCatalogStoragePrefix}${locale}`, JSON.stringify(products));
+  } catch {
+    // Ignore storage failures.
+  }
+}
 
 const getNormalizedCategoryKey = (cat: string): string => {
   const c = cat.toLowerCase();
@@ -216,9 +263,11 @@ function FilterGroups({
 function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
+  const activeLocale = getActiveLocale();
+  const initialCatalogProducts = readCachedSearchCatalog(activeLocale) ?? [];
 
-  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(initialCatalogProducts);
+  const [isLoading, setIsLoading] = useState(initialCatalogProducts.length === 0);
 
   // Filter States
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -235,12 +284,19 @@ function SearchResultsContent() {
     color: true,
   });
 
-  const activeLocale = getActiveLocale();
-
   // Load catalog products once per locale, then filter locally for accent-insensitive search
   useEffect(() => {
+    const cachedCatalog = readCachedSearchCatalog(activeLocale);
+    if (cachedCatalog && cachedCatalog.length > 0) {
+      return;
+    }
+
+    let isMounted = true;
+
     async function loadCatalog() {
-      setIsLoading(true);
+      if (isMounted) {
+        setIsLoading(true);
+      }
       try {
         const data = await getProducts({
           size: 500,
@@ -249,15 +305,27 @@ function SearchResultsContent() {
         const mapped = (data.result || []).map((p: Parameters<typeof mapBackendProduct>[0]) =>
           mapBackendProduct(p, activeLocale)
         );
+        if (!isMounted) return;
+
+        persistSearchCatalog(activeLocale, mapped);
         setCatalogProducts(mapped);
       } catch (err) {
         console.error("Failed to load catalog for search", err);
-        setCatalogProducts([]);
+        if (isMounted) {
+          setCatalogProducts([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
+
     loadCatalog();
+
+    return () => {
+      isMounted = false;
+    };
   }, [activeLocale]);
 
   const filteredCatalog = useMemo(() => {
@@ -434,14 +502,6 @@ function SearchResultsContent() {
     setSelectedColors([]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-32 text-center select-none">
-        <span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Searching products...</span>
-      </div>
-    );
-  }
-
   const filterProps = {
     selectedCategories,
     selectedSizes,
@@ -459,7 +519,13 @@ function SearchResultsContent() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]">
+    <Skeleton
+      name="search-results"
+      loading={isLoading}
+      className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]"
+      fallback={<SearchResultsLoadingFallback />}
+      fixture={<SearchResultsFixture products={catalogProducts.slice(0, 6)} query={query} />}
+    >
       {/* Breadcrumbs */}
       <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
@@ -568,15 +634,89 @@ function SearchResultsContent() {
           </>
         )}
       </AnimatePresence>
+    </Skeleton>
+  );
+}
+
+function SearchResultsLoadingFallback() {
+  return (
+    <div className="space-y-8 py-6">
+      <div className="space-y-3">
+        <div className="h-3 w-28 animate-pulse bg-[#efe7dc]" />
+        <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="space-y-3">
+            <div className="aspect-[3/4] animate-pulse bg-[#efe7dc]" />
+            <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
+            <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
+          </div>
+        ))}
+      </div>
     </div>
+  );
+}
+
+function SearchResultsFixture({ products, query }: { products: Product[]; query: string }) {
+  const fixtureProducts = products.slice(0, 6);
+
+  return (
+    <>
+      <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+        <span>Home</span>
+        <span>/</span>
+        <span className="font-medium text-[#1c1a18]">Search</span>
+      </div>
+
+      <header className="mb-4">
+        <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+          Results for &ldquo;{query || "shirt"}&rdquo;
+        </h1>
+      </header>
+
+      <ProductToolbar
+        totalProducts={fixtureProducts.length || 12}
+        showFilters={false}
+        setShowFilters={() => undefined}
+        setMobileFiltersOpen={() => undefined}
+        sortBy="featured"
+        setSortBy={() => undefined}
+        sortOptions={commonSortOptions}
+      />
+
+      <ProductLayoutMain
+        showFilters={false}
+        sidebarContent={<div className="min-h-[520px] border-r border-[#1c1a18]/10" />}
+        id="search-layout-fixture"
+      >
+        {fixtureProducts.length > 0 ? (
+          <ProductGrid>
+            {fixtureProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </ProductGrid>
+        ) : (
+          <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="space-y-3">
+                <div className="aspect-[3/4] bg-[#efe7dc]" />
+                <div className="h-4 w-3/4 bg-[#efe7dc]" />
+                <div className="h-4 w-1/3 bg-[#efe7dc]" />
+              </div>
+            ))}
+          </div>
+        )}
+      </ProductLayoutMain>
+    </>
   );
 }
 
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-20 text-center text-xs uppercase tracking-widest text-[#1c1a18]/50">
-        Loading Search Results...
+      <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
+        <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
       </div>
     }>
       <SearchResultsContent />
