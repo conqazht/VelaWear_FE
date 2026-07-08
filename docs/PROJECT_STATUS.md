@@ -1,3 +1,11 @@
+### Fix Product Price Mismatch between Catalog and Detail Page
+
+- **Date/Time**: 2026-07-08T19:49:00+07:00
+- **Backend**: Updated ProductServiceImpl to query variants and identify the minimum salePrice or price for each product. Added price and salePrice to ProductResponse to expose it correctly to the frontend.
+- **Frontend**: Updated Product and mapBackendProduct in ela-data.ts to consume the real prices instead of falling back to mock static products.
+- **Verification**: mvnw clean compile (Backend) and pnpm build (Frontend) passed.
+- **Known Follow-ups**: None.
+
 ### Implement Advanced Product Filtering (Color, Size, Price Range)
 
 - **Backend**: Updated ProductFilterRequest and ProductSpecification to support querying products by their variants' attributes (colorId, sizeId, minPrice, maxPrice) via a subquery on ProductVariant using coalesce for salePrice/price.
@@ -22,6 +30,21 @@
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
 ## 2026-07-08
+
+### Refine Base UI Navigation Motion Fidelity
+- **Transform-Origin Alignment**: Updated [navigation-menu.tsx](D:\CANH\Java\side project\commercial-fe\components\ui\navigation-menu.tsx) and [navigation-menu.module.css](D:\CANH\Java\side project\commercial-fe\components\ui\navigation-menu.module.css) so the popup now uses Base UI's `--transform-origin` and `--positioner-width/height` variables instead of a hard-coded top-left origin, improving continuity when switching between menu items.
+- **Closer-to-Source Timing**: Reduced root hover delays back toward Base UI defaults (`delay=50`, `closeDelay=80`) and softened popup/content translate distances so open/close and cross-item transitions feel closer to the official demo instead of over-sliding.
+- **Popup Surface Tuning**: Slightly reduced dropdown corner radius and shadow weight to better match the Base UI/shadcn reference.
+- **Verification**: Source review completed against Base UI docs and v1.6.0 package source. Runtime verification still pending.
+
+### Optimize Navigation Menu Transitions & Hover Delays
+- **Encapsulated Styles in CSS Modules**: Created [navigation-menu.module.css](file:///d:/CANH/Java/side%20project/commercial-fe/components/ui/navigation-menu.module.css) and updated [navigation-menu.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/ui/navigation-menu.tsx) to delegate transitions, sizing variables, and animations to the CSS module file.
+- **Bound Viewport size to Popup CSS variables**: Bound `width` and `height` properties of `BaseNavigationMenu.Viewport` to `--popup-width` and `--popup-height` variables inside the CSS module, enabling smooth size-morphing animations without instant snapping (resolving the "cà giật" layout jump).
+- **Staggered Timings for Continuity**: Staggered the morphing speed of the outer `Viewport` (increased to `320ms`) to run slightly slower than the inner `Content` translation and fade (`180ms`). This lets the text change quickly and clearly while the container completes its resize morph smoothly in the background.
+- **Enhanced Translation Slide**: Increased horizontal slide translation distance to `1.75rem` (28px) and removed `width: 100%`/`height: 100%` restrictions on `.Content` to ensure natural layout flow and clear spatial direction during menu-to-menu switching.
+- **Tuned Hover Delays**: Updated hover open `delay` from `0` to `150`ms and `closeDelay` from `80` to `200`ms on `NavigationMenu.Root` to prevent accidental triggers when sweeping the mouse quickly.
+- **Removed Size Transition Clashes**: Scoped size transitions (`transition: width/height`) strictly to the `Viewport` container, removing them from `Positioner` and `Popup` to prevent nested layout thrashing.
+- **Verification**: Ran `pnpm lint` and `pnpm build` (successfully compiled).
 
 ### Align Navigation Menu With Base UI Docs
 - **Composition Fix**: Reworked `components/ui/navigation-menu.tsx` to follow the Base UI/shadcn navigation-menu composition more closely, including `NavigationMenu`, `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, and `NavigationMenuIndicator`.
@@ -296,3 +319,4 @@ Newest entries first. Every agent must read this file before starting work and u
 - Updated `AGENTS.md` so agents must read this status file before making changes and update it after completing meaningful work.
 - Verification: documentation-only change; no app code touched.
 - Follow-ups: keep this file current with concise summaries, verification results, and known next steps.
+

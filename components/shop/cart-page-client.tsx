@@ -9,15 +9,16 @@ import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { useCart } from "@/components/shop/cart-provider";
 import { money } from "@/lib/vela-data";
+import { RelatedProducts } from "@/components/shop/related-products";
 
 export function CartPageClient() {
   const { cart, subtotal, updateQuantity, removeItem } = useCart();
-  const shipping = subtotal >= 500 || subtotal === 0 ? 0 : 15;
+  const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
   const taxes = subtotal * 0.08;
   const total = subtotal + shipping + taxes;
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       {/* Breadcrumbs */}
       <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
@@ -47,7 +48,7 @@ export function CartPageClient() {
       </div>
 
       {cart.length === 0 ? (
-        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[80vh] flex flex-col justify-start pt-24 items-center">
+        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[50vh] flex flex-col justify-start pt-16 items-center">
           <ShoppingBag className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
           <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
             Giỏ hàng của bạn đang trống. Hãy quay lại cửa hàng để chọn thêm
@@ -137,7 +138,7 @@ export function CartPageClient() {
             ))}
           </div>
 
-          <Card className="sticky top-24 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
+          <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
             <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
               Order Summary
             </h2>
@@ -186,11 +187,20 @@ export function CartPageClient() {
             </Link>
 
             <p className="mt-4 text-center text-[10px] uppercase leading-relaxed tracking-widest text-[#1c1a18]/50">
-              Complimentary shipping on orders over $500
+              Miễn phí giao hàng cho đơn từ 500,000đ
             </p>
           </Card>
         </div>
       )}
+
+      {/* Recommended Products */}
+      <div className="mt-8">
+        <RelatedProducts 
+          categoryId={undefined}
+          categoryCode={"AO"}
+          currentProductSlug={""}
+        />
+      </div>
     </div>
   );
 }

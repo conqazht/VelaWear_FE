@@ -97,7 +97,7 @@ export function CheckoutPageClient() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shippingFee = subtotal >= 400 ? 0 : 15;
+  const shippingFee = subtotal >= 500000 ? 0 : 30000;
   const estimatedTotal = subtotal + shippingFee;
 
   const onCompletePurchase = async (data: CheckoutFormValues) => {
@@ -157,7 +157,7 @@ export function CheckoutPageClient() {
 
   if (orderCompleted && completedOrder) {
     return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16 min-h-[80vh] flex flex-col justify-center items-center">
+      <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px] min-h-[80vh] flex flex-col justify-center items-center">
         <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
           <CheckCircle2 className="mb-6 size-14 text-[#b85a3c]" />
           <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
@@ -234,7 +234,7 @@ export function CheckoutPageClient() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       <div className="mb-8 flex justify-between gap-4">
         <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-4xl">
           Checkout

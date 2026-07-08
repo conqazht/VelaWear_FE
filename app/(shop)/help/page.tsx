@@ -71,7 +71,7 @@ export default function HelpCenter() {
 
   return (
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
-      <main className="flex-grow w-full max-w-[1800px] mx-auto px-6 md:px-16 py-12 md:py-16">
+      <main className="flex-grow w-full max-w-[1800px] mx-auto px-6 md:px-16 pt-[104px] pb-12 md:pt-[120px] md:pb-16">
         
         {/* Header & Search */}
         <header className="text-center mb-16 md:mb-20 max-w-2xl mx-auto flex flex-col items-center">

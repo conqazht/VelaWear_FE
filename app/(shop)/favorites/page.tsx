@@ -43,7 +43,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       {/* Breadcrumbs */}
       <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">

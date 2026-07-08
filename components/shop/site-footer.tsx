@@ -29,7 +29,7 @@ export function SiteFooter() {
   };
 
   return (
-    <footer className="mt-auto bg-[#121110] text-[#f7f4ef] border-t border-white/5 pt-28 pb-16 transition-all duration-300 relative overflow-hidden">
+    <footer className="mt-auto bg-[#121110] text-[#f7f4ef] border-t border-white/5 pt-10 md:pt-12 pb-16 transition-all duration-300 relative overflow-hidden">
       {/* Huge low-opacity typography watermark behind the footer */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

@@ -1,0 +1,78 @@
+.Popup {
+  transform-origin: top center;
+  overflow: visible;
+  outline: none;
+  transition: opacity 250ms cubic-bezier(0.2, 0, 0, 1), transform 250ms cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform, opacity;
+}
+
+.Popup[data-ending-style] {
+  transform: scale(0.985) translateY(-0.25rem);
+  opacity: 0;
+}
+
+.Popup[data-starting-style] {
+  transform: scale(0.985) translateY(0.25rem);
+  opacity: 0;
+}
+
+.Viewport {
+  position: relative;
+  overflow: hidden;
+  width: var(--popup-width);
+  height: var(--popup-height);
+  /* Shell morphs slower for fluid continuity */
+  transition: width 250ms ease, height 250ms ease;
+  will-change: width, height;
+}
+
+.Content {
+  width: max-content;
+  height: max-content;
+  overflow: hidden;
+  border-radius: 1.25rem; /* slightly larger border radius for big menu */
+  border: 1px solid #e3dccf;
+  background-color: #f7f4ef;
+  color: #1c1a18;
+  box-shadow: 0 12px 32px rgba(28, 26, 24, 0.08);
+  /* Inner content slides slightly faster than the shell morphs */
+  transition: opacity 250ms ease, transform 250ms ease;
+  will-change: transform, opacity;
+}
+
+/* Transition states using correct Base UI data attributes */
+.Content[data-starting-style] {
+  opacity: 0;
+}
+.Content[data-ending-style] {
+  position: absolute; /* Prevent stacking flicker when fading out */
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+/* Activation direction: left */
+.Content[data-activation-direction="left"][data-starting-style] {
+  transform: translateX(1rem); /* Gentle slide */
+}
+.Content[data-activation-direction="left"][data-ending-style] {
+  transform: translateX(-1rem);
+}
+
+/* Activation direction: right */
+.Content[data-activation-direction="right"][data-starting-style] {
+  transform: translateX(-1rem);
+}
+.Content[data-activation-direction="right"][data-ending-style] {
+  transform: translateX(1rem);
+}
+
+/* Activation direction: down / fallback */
+.Content[data-starting-style]:not([data-activation-direction]),
+.Content[data-starting-style][data-activation-direction="down"] {
+  transform: translateY(0.5rem);
+}
+.Content[data-ending-style]:not([data-activation-direction]),
+.Content[data-ending-style][data-activation-direction="down"] {
+  transform: translateY(-0.5rem);
+}

@@ -391,7 +391,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
             {openSections.delivery && (
               <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <p className="text-xs font-light tracking-wide text-on-surface-variant/80 mb-3 leading-relaxed">
-                  Your order of $200.00 or more gets free standard delivery.
+                  Your order of 500,000đ or more gets free standard delivery.
                 </p>
                 <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
                   <li>Standard delivered 4-5 Business Days</li>

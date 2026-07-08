@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { NavigationMenu as BaseNavigationMenu } from "@base-ui/react/navigation-menu";
 
 import { cn } from "@/lib/utils";
+import styles from "./navigation-menu.module.css";
 
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof BaseNavigationMenu.Root>,
@@ -12,7 +13,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <BaseNavigationMenu.Root
     ref={ref}
-    delay={0}
+    delay={50}
     closeDelay={80}
     className={cn("relative z-10 flex max-w-max flex-1 items-center justify-center", className)}
     {...props}
@@ -22,10 +23,10 @@ const NavigationMenu = React.forwardRef<
       <BaseNavigationMenu.Positioner
         align="start"
         sideOffset={8}
-        className="z-50 transition-[width,height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width,height]"
+        className={cn("z-50", styles.Positioner)}
       >
-        <BaseNavigationMenu.Popup className="origin-top-left overflow-visible outline-none transition-[width,height,opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width,height,transform,opacity] data-[ending-style]:scale-[0.985] data-[ending-style]:opacity-0 data-[ending-style]:-translate-y-0.5 data-[starting-style]:scale-[0.985] data-[starting-style]:opacity-0 data-[starting-style]:translate-y-0.5">
-          <BaseNavigationMenu.Viewport className="relative overflow-hidden transition-[width,height] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width,height]" />
+        <BaseNavigationMenu.Popup className={styles.Popup}>
+          <BaseNavigationMenu.Viewport className={styles.Viewport} />
         </BaseNavigationMenu.Popup>
       </BaseNavigationMenu.Positioner>
     </BaseNavigationMenu.Portal>
@@ -48,7 +49,7 @@ const NavigationMenuItem = React.forwardRef<
 NavigationMenuItem.displayName = "NavigationMenuItem";
 
 function navigationMenuTriggerStyle() {
-  return "inline-flex h-10 items-center justify-center rounded-full px-2.5 py-2 text-sm font-medium transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a] focus:bg-[#efe7dc] focus:text-[#b5573a] focus:outline-none";
+  return "inline-flex h-10 items-center justify-center rounded-full px-2.5 py-2 text-sm font-medium transition-colors focus:outline-none";
 }
 
 const NavigationMenuTrigger = React.forwardRef<
@@ -77,27 +78,7 @@ const NavigationMenuContent = React.forwardRef<
     keepMounted
     className={(state) =>
       cn(
-        "overflow-hidden rounded-xl border border-[#e3dccf] bg-[#f7f4ef] text-[#1c1a18] shadow-[0_6px_18px_rgba(28,26,24,0.06)] transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[transform,opacity]",
-        state.transitionStatus === "starting" && "opacity-0",
-        state.transitionStatus === "ending" && "opacity-0",
-        state.activationDirection === "left" &&
-          (state.transitionStatus === "starting"
-            ? "translate-x-4"
-            : state.transitionStatus === "ending"
-              ? "-translate-x-4"
-              : "translate-x-0"),
-        state.activationDirection === "right" &&
-          (state.transitionStatus === "starting"
-            ? "-translate-x-4"
-            : state.transitionStatus === "ending"
-              ? "translate-x-4"
-              : "translate-x-0"),
-        (!state.activationDirection || state.activationDirection === "down") &&
-          (state.transitionStatus === "starting"
-            ? "translate-y-2"
-            : state.transitionStatus === "ending"
-              ? "-translate-y-2"
-              : "translate-y-0"),
+        styles.Content,
         typeof className === "function" ? className(state) : className
       )
     }
@@ -113,7 +94,7 @@ const NavigationMenuLink = React.forwardRef<
   <BaseNavigationMenu.Link
     ref={ref}
     className={cn(
-      "inline-flex w-full items-start rounded-2xl px-4 py-3 text-left transition-colors hover:bg-white/70 focus:bg-white/70 focus:outline-none",
+      "inline-flex w-full items-start rounded-2xl px-4 py-3 text-left transition-colors focus:outline-none",
       className
     )}
     {...props}

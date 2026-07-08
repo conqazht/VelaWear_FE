@@ -11,6 +11,7 @@ import { getProducts } from "@/lib/api/catalog";
 import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 import { cn } from "@/lib/utils";
+import { ProductToolbar, ProductGrid, ProductLayoutMain, commonSortOptions } from "@/components/shop/product-layout-components";
 
 const getNormalizedCategoryKey = (cat: string): string => {
   const c = cat.toLowerCase();
@@ -223,11 +224,9 @@ function SearchResultsContent() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<string>("Recommended");
-
-  // Sidebar Toggles
-  const [showFilters, setShowFilters] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState("featured");
 
   // Section Collapsibles
   const [expandedSections, setExpandedSections] = useState({
@@ -391,11 +390,11 @@ function SearchResultsContent() {
     }
 
     // 5. Sort
-    if (sortBy === "PriceLowToHigh") {
+    if (sortBy === "price_asc") {
       results = [...results].sort((a, b) => a.price - b.price);
-    } else if (sortBy === "PriceHighToLow") {
+    } else if (sortBy === "price_desc") {
       results = [...results].sort((a, b) => b.price - a.price);
-    } else if (sortBy === "Newest") {
+    } else if (sortBy === "newest") {
       results = [...results].reverse();
     }
 
@@ -460,9 +459,9 @@ function SearchResultsContent() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]">
       {/* Breadcrumbs */}
-      <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+      <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           Home
         </Link>
@@ -472,110 +471,47 @@ function SearchResultsContent() {
 
       {/* Search Header */}
       <header className="mb-4">
-        <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+        <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
           Results for &ldquo;{query}&rdquo;
         </h1>
       </header>
 
-      {/* Toolbar */}
-      <div className="sticky top-[var(--header-visible-height)] z-30 isolate mb-6 flex flex-col gap-3 py-3 transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:inset-y-0 before:-left-[100vw] before:-right-[100vw] before:-z-10 before:bg-[#f7f4ef] md:flex-row md:items-center md:justify-between">
-        <div className="relative z-10 flex items-center gap-4">
-          <p className="hidden text-xs uppercase tracking-widest text-[#1c1a18]/60 md:block">
-            Showing {filteredProducts.length} products
-          </p>
-          <button
-            type="button"
-            onClick={() => setMobileFiltersOpen(true)}
-            className="md:hidden flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] border border-[#1c1a18]/15 px-3 py-1.5 rounded-none bg-transparent hover:bg-[#1c1a18]/5 cursor-pointer"
-          >
-            <span>Filter</span>
-            <SlidersHorizontal className="size-3.5" />
-          </button>
-        </div>
-
-        <div className="relative z-10 flex items-center gap-4 md:gap-6">
-          {/* Hide/Show Filters Desktop Button */}
-          <button
-            type="button"
-            onClick={() => setShowFilters(!showFilters)}
-            className="hidden md:flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:text-[#b5573a] transition-colors cursor-pointer"
-          >
-            <span>{showFilters ? "Hide Filters" : "Show Filters"}</span>
-            <SlidersHorizontal className="size-3.5" />
-          </button>
-
-          {/* Premium Sort Dropdown */}
-          <div className="flex items-center gap-1 cursor-pointer group relative">
-            <span className="text-xs uppercase tracking-widest text-[#1c1a18]/50">Sort By:</span>
-            <div className="relative flex items-center">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-transparent border-none text-[#1c1a18] text-xs font-semibold uppercase tracking-wider p-0 pr-6 focus:ring-0 cursor-pointer font-medium opacity-0 absolute inset-0 w-full h-full z-10"
-              >
-                <option value="Recommended">Recommended</option>
-                <option value="Newest">Newest</option>
-                <option value="PriceLowToHigh">Price: Low to High</option>
-                <option value="PriceHighToLow">Price: High to Low</option>
-              </select>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#1c1a18]">
-                {sortBy === "Recommended" && "Recommended"}
-                {sortBy === "Newest" && "Newest"}
-                {sortBy === "PriceLowToHigh" && "Price: Low to High"}
-                {sortBy === "PriceHighToLow" && "Price: High to Low"}
-              </span>
-              <ChevronDown className="size-3.5 text-[#1c1a18] ml-1 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <ProductToolbar
+        totalProducts={filteredProducts.length}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        setMobileFiltersOpen={setMobileFiltersOpen}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        sortOptions={commonSortOptions}
+      />
 
       {/* Main Content Area */}
-      <div className="flex flex-col gap-12 md:flex-row items-start">
-        {/* Desktop Sidebar Filters */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 256, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="hidden md:block w-64 shrink-0 overflow-hidden pr-8 sticky top-[calc(var(--header-visible-height)+60px)] transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)]"
+      <ProductLayoutMain
+        showFilters={showFilters}
+        sidebarContent={<FilterGroups {...filterProps} />}
+        id="search-layout"
+      >
+        {filteredProducts.length === 0 ? (
+          <div className="py-20 text-center select-none">
+            <p className="text-sm text-[#1c1a18]/50 mb-6">
+              Không tìm thấy sản phẩm phù hợp với từ khóa của bạn.
+            </p>
+            <Link
+              href="/collection"
+              className="inline-flex items-center rounded-none bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
             >
-              <FilterGroups {...filterProps} />
-            </motion.aside>
-          )}
-        </AnimatePresence>
-
-        {/* Results Grid */}
-        <div className="flex-grow w-full">
-          {filteredProducts.length === 0 ? (
-            <div className="py-20 text-center select-none">
-              <p className="text-sm text-[#1c1a18]/50 mb-6">
-                Không tìm thấy sản phẩm phù hợp với từ khóa của bạn.
-              </p>
-              <Link
-                href="/collection"
-                className="inline-flex items-center rounded-none bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
-              >
-                Xem tất cả sản phẩm
-              </Link>
-            </div>
-          ) : (
-            <motion.div
-              layout
-              className={cn(
-                "grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 w-full transition-all duration-300",
-                showFilters ? "lg:grid-cols-3" : "lg:grid-cols-4"
-              )}
-            >
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </motion.div>
-          )}
-        </div>
-      </div>
+              Xem tất cả sản phẩm
+            </Link>
+          </div>
+        ) : (
+          <ProductGrid>
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </ProductGrid>
+        )}
+      </ProductLayoutMain>
 
       {/* Mobile Filters Drawer */}
       <AnimatePresence>

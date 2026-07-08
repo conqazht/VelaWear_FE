@@ -6,7 +6,7 @@ import { PRODUCTS } from "@/lib/vela-data";
 
 export function CollectionPage() {
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-8 pb-4 md:px-16 md:pt-10">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]">
       <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           Home

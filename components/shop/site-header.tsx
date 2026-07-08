@@ -17,6 +17,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { NavigationMenu as BaseNavigationMenu } from "@base-ui/react/navigation-menu";
 import { money } from "@/lib/vela-data";
 import { getProducts } from "@/lib/api/catalog";
 import { mapBackendProduct, type Product } from "@/lib/vela-data";
@@ -40,6 +41,7 @@ export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
   const [showCheckoutToast, setShowCheckoutToast] = useState(false);
 
@@ -51,7 +53,10 @@ export function SiteHeader() {
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
   const searchDebounceRef = useRef<number | null>(null);
   const searchRequestIdRef = useRef(0);
+  const searchHistoryLoadedRef = useRef(false);
   const activeLocale = getActiveLocale();
+  const searchHistoryStorageKey = "vela-search-history";
+  const maxSearchHistoryItems = 5;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -130,7 +135,7 @@ export function SiteHeader() {
     const requestId = ++searchRequestIdRef.current;
     searchDebounceRef.current = window.setTimeout(async () => {
       try {
-        const data = await getProducts({ size: 60, locale: activeLocale });
+        const data = await getProducts({ size: 500, locale: activeLocale });
         if (requestId !== searchRequestIdRef.current) return;
 
         const mapped = (data.result || []).map((product: Parameters<typeof mapBackendProduct>[0]) =>
@@ -156,6 +161,42 @@ export function SiteHeader() {
   }, [activeLocale, searchQuery]);
 
   useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(searchHistoryStorageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setSearchHistory(
+            parsed
+              .map((item) => (typeof item === "string" ? item.trim() : ""))
+              .filter(Boolean)
+              .slice(0, maxSearchHistoryItems)
+          );
+        }
+      }
+    } catch {
+      setSearchHistory([]);
+    } finally {
+      searchHistoryLoadedRef.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!searchHistoryLoadedRef.current) return;
+    try {
+      window.localStorage.setItem(searchHistoryStorageKey, JSON.stringify(searchHistory));
+    } catch {
+      // Ignore storage failures.
+    }
+  }, [searchHistory]);
+
+  useEffect(() => {
+    setSearchQuery("");
+    setSearchSuggestions([]);
+    setIsSearchSuggestionsOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
       if (!searchBoxRef.current) return;
       if (!searchBoxRef.current.contains(event.target as Node)) {
@@ -174,7 +215,7 @@ export function SiteHeader() {
   const safeUser = hasMounted ? user : null;
 
   const textClass = shouldBeTransparent
-    ? "text-[#efe7dc] hover:text-[#ffb59f]"
+    ? "text-[#efe7dc]"
     : "text-[#1c1a18] hover:text-[#b5573a]";
 
   const logoStyle = shouldBeTransparent
@@ -208,12 +249,44 @@ export function SiteHeader() {
     ? "text-[#efe7dc] placeholder-[#efe7dc]/50"
     : "text-[#1c1a18] placeholder-[#1c1a18]/50";
 
+  const persistSearchHistory = (term: string) => {
+    const normalized = term.trim();
+    if (!normalized) return;
+
+    setSearchHistory((prev) => {
+      const next = [normalized, ...prev.filter((item) => item.toLowerCase() !== normalized.toLowerCase())].slice(
+        0,
+        maxSearchHistoryItems
+      );
+      try {
+        window.localStorage.setItem(searchHistoryStorageKey, JSON.stringify(next));
+      } catch {
+        // Ignore storage failures.
+      }
+      return next;
+    });
+  };
+
+  const removeSearchHistoryItem = (term: string) => {
+    const target = term.trim().toLowerCase();
+    if (!target) return;
+
+    setSearchHistory((prev) => prev.filter((item) => item.toLowerCase() !== target));
+  };
+
+  const runSearch = (term: string) => {
+    const normalized = term.trim();
+    if (!normalized) return;
+
+    persistSearchHistory(normalized);
+    router.push(`/search?q=${encodeURIComponent(normalized)}`);
+    setIsMobileMenuOpen(false);
+    setIsSearchSuggestionsOpen(false);
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsMobileMenuOpen(false);
-    }
+    runSearch(searchQuery);
   };
 
   const navigationItems = [
@@ -380,29 +453,38 @@ export function SiteHeader() {
                         </span>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
-                        <div className="grid w-[640px] gap-3 p-4 md:grid-cols-2">
-                          <div className="rounded-2xl bg-white/75 p-5 flex flex-col justify-between">
+                        <div className="flex w-[800px] gap-10 p-8">
+                          <div className="flex w-1/3 flex-col justify-between p-2">
                             <div>
-                              <p className="text-[10px] uppercase tracking-[0.22em] text-[#1c1a18]/45">Vela Wear</p>
-                              <p className="mt-3 text-base font-semibold text-[#1c1a18]">{item.featuredTitle}</p>
-                              <p className="mt-2 text-xs leading-5 text-[#1c1a18]/65">{item.featuredDesc}</p>
+                              <p className="text-[10px] uppercase tracking-[0.22em] text-[#1c1a18]/50 font-semibold">Vela Wear</p>
+                              <p className="mt-4 text-2xl font-medium text-[#1c1a18] leading-tight">{item.featuredTitle}</p>
+                              <p className="mt-3 text-sm leading-6 text-[#1c1a18]/70">{item.featuredDesc}</p>
                             </div>
-                            <Link
-                              href={item.href}
-                              className="mt-4 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1"
+                            <BaseNavigationMenu.Link
+                              render={<Link href={item.href} onClick={() => {
+                                if (document.activeElement instanceof HTMLElement) {
+                                  document.activeElement.blur();
+                                }
+                              }} />}
+                              className="mt-6 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1 group/btn"
                             >
-                              Khám phá tất cả &rarr;
-                            </Link>
+                              Khám phá tất cả <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
+                            </BaseNavigationMenu.Link>
                           </div>
-                          <div className="grid gap-1">
+                          <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-2">
                             {item.subItems.map((sub) => (
                               <NavigationMenuLink
                                 key={sub.label}
-                                render={<Link href={sub.href} onClick={() => setIsMobileMenuOpen(false)} />}
-                                className="rounded-2xl px-4 py-3 transition-colors hover:bg-white/70"
+                                render={<Link href={sub.href} onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  if (document.activeElement instanceof HTMLElement) {
+                                    document.activeElement.blur();
+                                  }
+                                }} />}
+                                className="group/item flex flex-col justify-center rounded-xl p-4 transition-all duration-300 hover:bg-white/60 hover:shadow-[0_4px_12px_rgba(28,26,24,0.03)]"
                               >
-                                <p className="text-sm font-medium text-[#1c1a18]">{sub.label}</p>
-                                <p className="mt-1 text-[11px] leading-4 text-[#1c1a18]/55">Bộ sưu tập Vela Wear chính hãng</p>
+                                <p className="text-sm font-medium text-[#1c1a18] transition-colors group-hover/item:text-[#b5573a]">{sub.label}</p>
+                                <p className="mt-1.5 text-xs leading-5 text-[#1c1a18]/55">Khám phá bộ sưu tập</p>
                               </NavigationMenuLink>
                             ))}
                           </div>
@@ -411,7 +493,11 @@ export function SiteHeader() {
                     </>
                   ) : (
                     <NavigationMenuLink
-                      render={<Link href={item.href} />}
+                      render={<Link href={item.href} onClick={() => {
+                        if (document.activeElement instanceof HTMLElement) {
+                          document.activeElement.blur();
+                        }
+                      }} />}
                       className={navigationMenuTriggerStyle()}
                     >
                       <span className={`relative inline-flex items-center ${textClass} group/link`}>
@@ -442,76 +528,131 @@ export function SiteHeader() {
                   type="text"
                   placeholder="Tìm kiếm..."
                   value={searchQuery}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setIsSearchSuggestionsOpen(true);
                   }}
-                  onFocus={() => searchQuery.trim() && setIsSearchSuggestionsOpen(true)}
+                  onFocus={() => setIsSearchSuggestionsOpen(true)}
                   className={`bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full ${searchInputClass}`}
                 />
               </form>
 
               <AnimatePresence>
-                {isSearchSuggestionsOpen && searchQuery.trim() && (
+                {isSearchSuggestionsOpen && (searchQuery.trim() || searchHistory.length > 0) && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-xl border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_6px_18px_rgba(28,26,24,0.06)] z-50"
+                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-[20px] border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_6px_18px_rgba(28,26,24,0.06)] z-50"
                   >
-                    <div className="px-4 py-3 border-b border-[#1c1a18]/10">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
-                        Gợi ý tìm kiếm
-                      </p>
-                    </div>
-                    <div className="max-h-96 overflow-auto">
-                      {searchSuggestions.length > 0 ? (
-                        searchSuggestions.map((product) => (
-                          <Link
-                            key={product.id}
-                            href={`/products/${product.id}`}
-                            className="flex items-center gap-3 px-4 py-3 hover:bg-[#efe7dc] transition-colors border-b border-[#1c1a18]/5 last:border-b-0"
-                            onClick={() => {
-                              setIsSearchSuggestionsOpen(false);
-                            }}
-                          >
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="h-14 w-14 rounded-lg object-cover bg-white"
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-[#1c1a18]">
-                                {product.name}
-                              </p>
-                              <p className="truncate text-xs text-[#1c1a18]/55">
-                                {product.category}
-                              </p>
-                              <p className="mt-1 text-xs font-semibold text-[#b5573a]">
-                                {money(product.price)}
-                              </p>
-                            </div>
-                          </Link>
-                        ))
-                      ) : (
-                        <div className="px-4 py-6 text-sm text-[#1c1a18]/60">
-                          Không tìm thấy sản phẩm phù hợp.
+                    {searchQuery.trim() ? (
+                      <>
+                        <div className="px-4 py-3 border-b border-[#1c1a18]/10">
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
+                            Gợi ý tìm kiếm
+                          </p>
                         </div>
-                      )}
-                    </div>
-                    <div className="border-t border-[#1c1a18]/10 px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                          setIsSearchSuggestionsOpen(false);
-                        }}
-                        className="w-full rounded-full border border-[#1c1a18]/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
-                      >
-                        Xem thêm kết quả
-                      </button>
-                    </div>
+                        <div className="max-h-96 overflow-auto">
+                          {searchSuggestions.length > 0 ? (
+                            searchSuggestions.map((product) => (
+                              <Link
+                                key={product.id}
+                                href={`/products/${product.id}`}
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-[#efe7dc] transition-colors border-b border-[#1c1a18]/5 last:border-b-0"
+                                onClick={() => {
+                                  persistSearchHistory(searchQuery);
+                                  setIsSearchSuggestionsOpen(false);
+                                }}
+                              >
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="h-14 w-14 rounded-lg object-cover bg-white"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-medium text-[#1c1a18]">
+                                    {product.name}
+                                  </p>
+                                  <p className="truncate text-xs text-[#1c1a18]/55">
+                                    {product.category}
+                                  </p>
+                                  <p className="mt-1 text-xs font-semibold text-[#b5573a]">
+                                    {money(product.price)}
+                                  </p>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <div className="px-4 py-6 text-sm text-[#1c1a18]/60">
+                              Không tìm thấy sản phẩm phù hợp.
+                            </div>
+                          )}
+                        </div>
+                        <div className="border-t border-[#1c1a18]/10 px-4 py-3">
+                          <button
+                            type="button"
+                            onClick={() => runSearch(searchQuery)}
+                            className="w-full rounded-full border border-[#1c1a18]/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
+                          >
+                            Xem thêm kết quả
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="px-4 py-3 border-b border-[#1c1a18]/10 flex items-center justify-between gap-3">
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
+                            Lịch sử tìm kiếm gần đây
+                          </p>
+                          {searchHistory.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchHistory([])}
+                              className="text-[10px] uppercase tracking-[0.16em] text-[#1c1a18]/40 hover:text-[#1c1a18]"
+                            >
+                              Xóa
+                            </button>
+                          )}
+                        </div>
+                        <div className="max-h-96 overflow-auto p-3">
+                          <div className="flex flex-wrap gap-2">
+                            {searchHistory.map((term) => (
+                              <div
+                                key={term}
+                                className="inline-flex items-center gap-1 rounded-full border border-[#1c1a18]/10 bg-white px-3 py-2 text-xs text-[#1c1a18] hover:bg-[#efe7dc] transition-colors"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => runSearch(term)}
+                                  className="max-w-[150px] truncate text-left"
+                                  title={term}
+                                >
+                                  {term}
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={`Xóa ${term}`}
+                                  onClick={() => removeSearchHistoryItem(term)}
+                                  className="grid size-4 place-items-center rounded-full text-[#1c1a18]/45 transition-colors hover:bg-[#1c1a18] hover:text-white"
+                                >
+                                  <span className="text-[10px] leading-none">×</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          {searchHistory.length === 0 && (
+                            <div className="px-1 py-3 text-sm text-[#1c1a18]/60">
+                              Chưa có lịch sử tìm kiếm.
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

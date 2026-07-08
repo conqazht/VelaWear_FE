@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/shop/product-card";
 import { cn } from "@/lib/utils";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { getActiveLocale } from "@/lib/i18n";
+import { ProductToolbar, ProductGrid, ProductLayoutMain, commonSortOptions } from "@/components/shop/product-layout-components";
 import {
   useCategoriesQuery,
   useProductsQuery,
@@ -229,7 +230,7 @@ function FilterGroups({
           onClick={() => toggleSection("price")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Khoảng giá ($)</span>
+          <span>Khoảng giá (đ)</span>
           {expandedSections.price ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -306,7 +307,15 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     price: true,
   });
 
-  const [sortBy, setSortBy] = useState("createdAt,desc");
+  const [sortBy, setSortBy] = useState<string>("featured");
+
+  const backendSortMap: Record<string, string> = {
+    featured: "", // default sort
+    newest: "createdAt,desc",
+    price_asc: "price,asc",
+    price_desc: "price,desc",
+  };
+
   const [page, setPage] = useState(1);
   const size = 12;
 
@@ -323,7 +332,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
   const productsQuery = useProductsQuery({ 
     page,
     size,
-    sort: sortBy,
+    sort: backendSortMap[sortBy] || undefined,
     categoryId: selectedCategoryId === "ALL" ? undefined : selectedCategoryId,
     colorId: selectedColorId ?? undefined,
     sizeId: selectedSizeId ?? undefined,
@@ -394,13 +403,6 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     minPrice !== "" || 
     maxPrice !== "" || 
     selectedCategoryId !== "ALL";
-
-  const sortLabels: Record<string, string> = {
-    "createdAt,desc": "Mới nhất",
-    "price,asc": "Giá: Thấp đến Cao",
-    "price,desc": "Giá: Cao đến Thấp",
-  };
-  const currentSortLabel = sortLabels[sortBy] ?? "Mới nhất";
 
   const clearAllFilters = () => {
     setSelectedColorId(null);
@@ -542,146 +544,39 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
       <div className="w-full">
         <div ref={collectionScrollAnchorRef} className="h-px w-full" aria-hidden="true" />
 
-        {/* Nike-Style Toolbar Row */}
-        <div
-          ref={collectionTopRef}
-          className="sticky top-[var(--header-visible-height)] z-30 isolate mb-6 flex select-none flex-row items-center justify-between py-3 transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:inset-y-0 before:-left-[100vw] before:-right-[100vw] before:-z-10 before:bg-[#f7f4ef]"
-        >
-          <div className="relative z-10 flex items-center gap-4">
-            <p className="hidden text-xs uppercase tracking-widest text-[#1c1a18]/60 md:block">
-              Showing {meta?.total || products.length} products
-            </p>
-            <button
-              type="button"
-              onClick={() => setMobileFiltersOpen(true)}
-              className="md:hidden flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] border border-[#1c1a18]/15 px-3 py-1.5 rounded-none bg-transparent hover:bg-[#1c1a18]/5 cursor-pointer"
-            >
-              <span>Bộ lọc</span>
-              <SlidersHorizontal className="size-3.5" />
-            </button>
-          </div>
-
-          <div className="relative z-10 flex items-center gap-4 md:gap-6">
-            {/* Desktop Filter Toggle */}
-            <button
-              type="button"
-              onClick={toggleDesktopFilters}
-              className="hidden md:flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:text-[#b5573a] transition-colors cursor-pointer"
-            >
-              <span>{showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}</span>
-              <SlidersHorizontal className="size-3.5" />
-            </button>
-
-            {/* Premium Sort Dropdown */}
-            <div className="relative">
-              <Select
-                value={sortBy}
-                onValueChange={(value) => {
-                  setSortBy(value ?? "createdAt,desc");
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="h-auto border-none bg-transparent p-0 pr-0 text-xs font-semibold uppercase tracking-wider shadow-none hover:bg-transparent focus-visible:ring-0">
-                  <span className="text-[#1c1a18]">Sắp xếp:</span>
-                  <span className="text-[#1c1a18]/50">{currentSortLabel}</span>
-                </SelectTrigger>
-                <SelectContent
-                  alignItemWithTrigger={false}
-                  side="bottom"
-                  sideOffset={8}
-                  align="end"
-                  className="min-w-[170px] rounded-xl border border-[#e3dccf] bg-[#fbf8f3] p-1.5 shadow-[0_6px_18px_rgba(28,26,24,0.06)]"
-                >
-                  <SelectItem
-                    value="createdAt,desc"
-                    className="rounded-xl px-3 py-2.5 text-sm text-[#1c1a18] data-highlighted:bg-[#efe7dc] data-highlighted:text-[#1c1a18]"
-                  >
-                    Mới nhất
-                  </SelectItem>
-                  <SelectItem
-                    value="price,asc"
-                    className="rounded-xl px-3 py-2.5 text-sm text-[#1c1a18] data-highlighted:bg-[#efe7dc] data-highlighted:text-[#1c1a18]"
-                  >
-                    Giá: Thấp đến Cao
-                  </SelectItem>
-                  <SelectItem
-                    value="price,desc"
-                    className="rounded-xl px-3 py-2.5 text-sm text-[#1c1a18] data-highlighted:bg-[#efe7dc] data-highlighted:text-[#1c1a18]"
-                  >
-                    Giá: Cao đến Thấp
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+        <ProductToolbar
+          totalProducts={meta?.total || products.length}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          setMobileFiltersOpen={setMobileFiltersOpen}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOptions={commonSortOptions}
+        />
 
         {/* Main Content Area */}
-        <LayoutGroup id="collection-layout">
-        <motion.div
-          layout
-          className={cn(
-            "flex flex-col items-start relative",
-            showFilters ? "gap-8 md:flex-row" : "gap-0 md:flex-row"
-          )}
+        <ProductLayoutMain
+          showFilters={showFilters}
+          sidebarContent={<FilterGroups {...filterProps} />}
+          id="collection-layout"
+          shouldReduceMotion={Boolean(shouldReduceMotion)}
+          filterMotionIntent={filterMotionIntent}
         >
-          {/* Desktop Sidebar Filters */}
-          <motion.aside
-            layout
-            style={{
-              width: showFilters ? "16rem" : "0rem",
-              opacity: showFilters ? 1 : 0,
-              transitionProperty: "width, opacity, top",
-              transitionDuration: shouldReduceMotion
-                ? "10ms"
-                : filterMotionIntent === "hide"
-                  ? "260ms, 260ms, 220ms"
-                  : "220ms",
-              transitionTimingFunction:
-                filterMotionIntent === "hide"
-                  ? "cubic-bezier(0.77, 0, 0.175, 1), cubic-bezier(0.77, 0, 0.175, 1), cubic-bezier(0.23, 1, 0.32, 1)"
-                  : "cubic-bezier(0.23, 1, 0.32, 1)",
-            }}
-            aria-hidden={!showFilters}
-            className="sticky top-[calc(var(--header-visible-height)+60px)] hidden min-w-0 shrink-0 overflow-hidden will-change-[width,opacity] md:block"
-          >
-            <motion.div
-              animate={{
-                transform:
-                  shouldReduceMotion || showFilters
-                    ? "translate3d(0, 0, 0)"
-                    : "translate3d(-12px, 0, 0)",
-              }}
-              transition={{
-                duration: shouldReduceMotion ? 0.01 : 0.18,
-                ease: [0.23, 1, 0.32, 1],
-              }}
-              className={cn(
-                "w-64 pr-8 will-change-transform",
-                !showFilters && "pointer-events-none"
-              )}
-            >
-              <FilterGroups {...filterProps} />
-            </motion.div>
-          </motion.aside>
+          {products.length === 0 ? (
+            <div className="py-20 text-center select-none min-h-[580px] flex items-center justify-center">
+              <p className="text-sm text-[#1c1a18]/50">
+                Không tìm thấy sản phẩm nào trong danh mục này.
+              </p>
+            </div>
+          ) : (
+            <div className="flex-grow w-full">
+              <ProductGrid>
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} imageAspect="collection" />
+                ))}
+              </ProductGrid>
 
-          {/* Results Grid Wrapper */}
-          <motion.div layout className="flex-grow w-full">
-            {products.length === 0 ? (
-              <div className="py-20 text-center select-none min-h-[580px] flex items-center justify-center">
-                <p className="text-sm text-[#1c1a18]/50">
-                  Không tìm thấy sản phẩm nào trong danh mục này.
-                </p>
-              </div>
-            ) : (
-              <div className="w-full">
-                <div className="mb-6 grid w-full grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} imageAspect="collection" />
-                  ))}
-                </div>
-
-                {/* Pagination Controls */}
+              {/* Pagination Controls */}
                 {meta && meta.pages > 1 && (
                   <div className="border-b border-[#1c1a18]/10 pb-4 pt-4">
                     <Pagination className="select-none">
@@ -716,10 +611,8 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
                   </div>
                 )}
               </div>
-            )}
-          </motion.div>
-        </motion.div>
-        </LayoutGroup>
+          )}
+        </ProductLayoutMain>
       </div>
 
       {/* Mobile Filters Drawer */}
