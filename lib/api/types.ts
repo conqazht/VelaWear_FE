@@ -47,7 +47,8 @@ export type Product = {
   slug: string;
   originalSlug?: string;
   description: string;
-  price?: number;
+  price?: number | null;
+  salePrice?: number | null;
   thumbnail?: string | null;
   image?: string | null;
   status?: string;
