@@ -590,7 +590,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
                   side="bottom"
                   sideOffset={8}
                   align="end"
-                  className="min-w-[170px] rounded-2xl border border-[#e3dccf] bg-[#fbf8f3] p-1.5 shadow-[0_18px_40px_rgba(28,26,24,0.10)]"
+                  className="min-w-[170px] rounded-xl border border-[#e3dccf] bg-[#fbf8f3] p-1.5 shadow-[0_6px_18px_rgba(28,26,24,0.06)]"
                 >
                   <SelectItem
                     value="createdAt,desc"

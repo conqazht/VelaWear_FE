@@ -23,6 +23,13 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-08
 
+### Align Navigation Menu With Base UI Docs
+- **Composition Fix**: Reworked `components/ui/navigation-menu.tsx` to follow the Base UI/shadcn navigation-menu composition more closely, including `NavigationMenu`, `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, and `NavigationMenuIndicator`.
+- **Header Hover Style Preserved**: Updated `components/shop/site-header.tsx` so the desktop nav keeps the custom hover underline effect while using the docs-style `render={<Link />}` composition for Next.js links.
+- **Verification**: Ran `pnpm lint`; it completed with the same pre-existing 21 warnings and no new errors.
+
+## 2026-07-08
+
 ### Fix Navigation Menu & Floating Dropdown Composition
 - **Floating Viewport Composition**: Re-engineered `components/ui/navigation-menu.tsx` by wrapping the root `NavigationMenu` component with Base UI's `<Portal>`, `<Positioner>`, `<Popup className="z-50">`, and `<Viewport>` subcomponents. This enables dropdown/mega menu content (`NavigationMenuContent`) to float and align dynamically underneath its trigger instead of rendering statically in-flow.
 - **Support for Unstyled Links & Triggers**: Introduced an `unstyled` prop to `NavigationMenuLink` and `NavigationMenuTrigger` to allow custom top-level header links (like "Collection", "Help") and triggers (like "Sale", "Quần", "Áo", "Phụ kiện") to bypass default pill-shaped backgrounds and default padding.

@@ -15,6 +15,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { money } from "@/lib/vela-data";
 import { getProducts } from "@/lib/api/catalog";
@@ -363,18 +364,19 @@ export function SiteHeader() {
 
           {/* Desktop Navigation Menu */}
           <NavigationMenu className="hidden md:flex max-w-none flex-1 justify-start">
-            <NavigationMenuList className="gap-10 pl-10">
+            <NavigationMenuList className="gap-3 pl-3">
               {navigationItems.map((item) => (
                 <NavigationMenuItem key={item.label}>
                   {item.subItems ? (
                     <>
                       <NavigationMenuTrigger
-                        unstyled
-                        className={`relative pb-1 group/link bg-transparent text-sm font-medium tracking-[0.5px] ${textClass} transition-colors border-none cursor-pointer flex items-center gap-1`}
+                        className={`group/link relative bg-transparent px-2.5 text-sm font-medium tracking-[0.5px] ${textClass} transition-colors border-none cursor-pointer flex items-center gap-1`}
                       >
-                        <span className="relative">
-                          {item.label}
-                          <span className="absolute bottom-[-3px] left-0 w-full h-[1.5px] bg-[#b5573a] scale-x-0 origin-left group-hover/link:scale-x-100 transition-transform duration-300 ease-out" />
+                        <span className="relative inline-flex items-center gap-1">
+                          <span className="relative pb-0.5">
+                            {item.label}
+                            <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100" />
+                          </span>
                         </span>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
@@ -409,13 +411,14 @@ export function SiteHeader() {
                     </>
                   ) : (
                     <NavigationMenuLink
-                      unstyled
                       render={<Link href={item.href} />}
-                      className={`relative pb-1 group/link inline-flex h-10 items-center justify-center text-sm font-medium tracking-[0.5px] ${textClass} transition-colors`}
+                      className={navigationMenuTriggerStyle()}
                     >
-                      <span className="relative">
-                        {item.label}
-                        <span className="absolute bottom-[-3px] left-0 w-full h-[1.5px] bg-[#b5573a] scale-x-0 origin-left group-hover/link:scale-x-100 transition-transform duration-300 ease-out" />
+                      <span className={`relative inline-flex items-center ${textClass} group/link`}>
+                        <span className="relative pb-0.5">
+                          {item.label}
+                          <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100" />
+                        </span>
                       </span>
                     </NavigationMenuLink>
                   )}
@@ -455,7 +458,7 @@ export function SiteHeader() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-2xl border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_18px_50px_rgba(28,26,24,0.12)] z-50"
+                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-xl border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_6px_18px_rgba(28,26,24,0.06)] z-50"
                   >
                     <div className="px-4 py-3 border-b border-[#1c1a18]/10">
                       <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
