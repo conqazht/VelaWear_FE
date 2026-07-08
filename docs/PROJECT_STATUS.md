@@ -1,10 +1,89 @@
+### Implement Advanced Product Filtering (Color, Size, Price Range)
+
+- **Backend**: Updated ProductFilterRequest and ProductSpecification to support querying products by their variants' attributes (colorId, sizeId, minPrice, maxPrice) via a subquery on ProductVariant using coalesce for salePrice/price.
+- **Frontend**: Added hexCode to CatalogEntity type. Implemented dynamic fetching of colors and sizes. Developed a premium, collapsible filter panel in CollectionClient with animated height transitions using motion/react, circular color swatches, size chips, and price inputs. Managed filter states dynamically with derived selected tags.
+- Verification: mvn clean test (Backend) and pnpm lint && pnpm build (Frontend) passed.
+
+### Implement Reviews Filtering by Product ID
+
+- **Backend**: Updated ReviewFilterRequest and ReviewSpecification to support querying reviews by productId via a subquery joining OrderItem and ProductVariant. Fixed ReviewServiceImpl instantiations to pass the tests.
+- **Frontend**: Added userName, orderId, etc. to Review type. Implemented useProductReviewsQuery in React Query. Updated ProductDetailClient to dynamically fetch and display product reviews, average rating, and total review counts instead of the static mockup.
+- Verification: mvn clean test (Backend) and pnpm lint && pnpm build (Frontend) passed.
+
+### Dynamic Data & Pagination Integration Completed
+
+- Updated lib/vela-data.ts and lib/queries/catalog.ts to use backend data accurately and implement placeholderData: keepPreviousData for seamless pagination.
+- Refactored components/shop/collection-client.tsx to fetch real data with Server-Driven Pagination and Backend Filtering/Sorting.
+- Modified components/shop/home-page.tsx to use dynamic products and categories queries for trending and featured sections.
+- Verification: Ran pnpm lint and pnpm build successfully, resolving React 19 compiler manual memoization warnings.
+
 # Project Status
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
-## 2026-07-05
+## 2026-07-08
 
-### Floating Auth Label Border Fix
+### Fix Navigation Menu & Floating Dropdown Composition
+- **Floating Viewport Composition**: Re-engineered `components/ui/navigation-menu.tsx` by wrapping the root `NavigationMenu` component with Base UI's `<Portal>`, `<Positioner>`, `<Popup className="z-50">`, and `<Viewport>` subcomponents. This enables dropdown/mega menu content (`NavigationMenuContent`) to float and align dynamically underneath its trigger instead of rendering statically in-flow.
+- **Support for Unstyled Links & Triggers**: Introduced an `unstyled` prop to `NavigationMenuLink` and `NavigationMenuTrigger` to allow custom top-level header links (like "Collection", "Help") and triggers (like "Sale", "Quần", "Áo", "Phụ kiện") to bypass default pill-shaped backgrounds and default padding.
+- **Dropdown Stacking Context Fix**: Configured `className="z-50"` directly on Base UI's `Positioner` component inside `components/ui/navigation-menu.tsx`. This assigns a high z-index to the parent wrapper, resolving the stacking context bug where page content (such as the sticky filters toolbar and card favorite buttons) rendered on top of the dropdown.
+- **Restored Original Hover Underline Style**: Refactored the triggers and links in `components/shop/site-header.tsx` to use the unstyled setup, restoring the original hover underline animation and proper spacing (`gap-10 pl-10`).
+- **GPU-Accelerated Underline Transitions**: Replaced the legacy `width` animation with `scale-x-0` and `group-hover/link:scale-x-100` transform animations, scoping the underline element strictly to a relative text span (excluding the dropdown chevron) and positioning it with `bottom-[-3px]`. This completely removes browser subpixel rendering artifacts and trace remnants on mouse-leave.
+- **Verification**: Built and verified compilation cleanly using `pnpm lint` and `pnpm build`.
+
+## 2026-07-08
+
+### Fix Sort Dropdown Popup Position
+- **Position Adjustment**: Updated the Premium Sort Dropdown inside `components/shop/collection-client.tsx` to set `alignItemWithTrigger={false}`, `side="bottom"`, and `sideOffset={8}`. This ensures the dropdown options appear directly below the sort trigger button without overlapping/covering the text, matching the style of the gender selection dropdown in the signup form.
+- **Verification**: Ran `pnpm lint` (0 errors, 21 pre-existing warnings) and `pnpm build` (completed successfully).
+
+### Header & Filter Toolbar Scroll Synchronization
+- **Gap Elimination & Timing Sync**: Updated the slide-up hiding offset of the non-home page header in `components/shop/site-header.tsx` to be exactly `-72px` (matching the header's physical height) instead of `-120px` to keep its bottom boundary perfectly meeting the top of the viewport when fully hidden.
+- **Matched Easing and Durations**: Configured the sticky transition duration (`220ms`) and timing function (`cubic-bezier(0.23, 1, 0.32, 1)`) on the collection toolbar (`components/shop/collection-client.tsx`) and the search page toolbar/sidebar (`app/(shop)/search/page.tsx`) to exactly match the header's Framer Motion settings.
+- **Combined Sidebar Transitions**: Merged the `top` property transition into the inline transition style rules of the collection desktop sidebar so it transitions seamlessly with `width` and `opacity` without CSS class property conflicts.
+- **Verification**: Built and verified compilation cleanly using `pnpm lint` and `pnpm build`.
+
+
+## 2026-07-07
+
+### Header and Filter Toolbar Cohesion Refinement
+- **Unified Non-Home Surface**: Updated `components/shop/site-header.tsx` so the collection/search header now uses the same solid `#f7f4ef` surface as the page instead of a blurred, bordered layer. This removes the visual seam between the header and the sticky catalog toolbar.
+- **Faster Scroll Push Behavior**: Tuned the non-home header hide/show logic to react off scroll delta with a smaller threshold and a shorter `0.16s` ease-out transition, making the header feel pushed away and return immediately when scrolling back up.
+- **Sticky Toolbar Compression**: Updated both `components/shop/collection-client.tsx` and `app/(shop)/search/page.tsx` so the sticky toolbar uses the same page background, faster top-offset syncing (`duration-150`), and a condensed state where the product-count label fades/slides away after scrolling deeper, closer to the Nike behavior.
+- **Sidebar Stickiness Sync**: Reduced the desktop filter sidebar top-offset transition delay on collection and search so it tracks the header state more immediately rather than lagging behind it.
+- **Follow-Up Stability Pass**: Switched the non-home header to a fixed transformed layer to reduce content peeking during rapid up/down scrolls, and made the left/right toolbar groups share the same condensed transform so `Showing ... products` moves with the filter/sort row instead of feeling detached.
+- **Softer Header Motion**: Slightly slowed the non-home header hide/show response by increasing the scroll-delta threshold and motion duration, then added a same-color backplate plus explicit `body` background color so any overlap frame during fast scroll still reads as one continuous surface.
+- **Toolbar Count Placement**: Moved `Showing ... products` into the same desktop controls cluster as filter toggle and sort on both collection and search pages, and removed the scroll-based hide behavior for that count text.
+- **Vietnamese Typography Fix**: Swapped the serif heading stack from `Cormorant Garamond` to `Noto Serif` in `app/globals.css` to improve Vietnamese diacritic spacing on large headings and collection titles.
+- **Pagination Scroll Offset**: Added an anchor above the collection toolbar and shifted pagination scroll targets upward by 28px so page changes land a little higher and do not clip the first product row.
+- **Verification**: `pnpm lint` passes with the same pre-existing 21 warnings, and `pnpm build` completes successfully.
+
+### Nike-Style Collection Grid and Pagination
+- **Three-Column Grid**: Updated `components/shop/collection-client.tsx` so collection results always render 3 products per row on desktop. Cards are wider when filters are hidden and shrink naturally when the filter sidebar is shown.
+- **Square Collection Imagery**: Added an `imageAspect` option to `components/shop/product-card.tsx`; collection cards now use square images to match the Nike-style reference while other ProductCard usages keep the existing portrait ratio.
+- **Pagination Behavior**: Removed the invisible placeholder slots and fixed min-height reservation. Pagination now follows the real product grid height, and pagination clicks jump users back to the collection toolbar without smooth-scroll animation.
+- **Filter Toggle Motion**: Reworked show/hide filters around a dedicated sidebar track width transition so the product grid receives a continuous width change while filters hide/show. The filter contents still use opacity/`translate3d`, with separate show vs hide timing and reduced-motion handling.
+- **Product Resize Cleanup**: Removed per-tile FLIP resize and scoped ProductCard transitions to border/shadow only, preventing `transition-all` from fighting the product image resize.
+- **Verification**: `pnpm lint` passes with 0 errors; existing repo warnings remain unchanged. Browser check confirmed 3 desktop columns with filters hidden/shown, square collection images, no placeholder slots, and pagination clicks jumping back to the collection toolbar.
+
+### Implement Nike-Style Refined Search & Collection Filters
+- **Collapsible Sidebar Filters (Search & Collection)**: Integrated collapsible leftmost sidebar filters (Category, Size, Color, Price Range) into both the search page (`app/(shop)/search/page.tsx`) and collection page (`components/shop/collection-client.tsx`). Sidebar is hidden by default (`showFilters` defaults to `false`). Grouped each in animated collapsible panels using `motion.div` and `AnimatePresence`.
+- **Nike-Style Sticky Header & Scroll Toggles**:
+  - Implemented scroll-down-to-hide and scroll-up-to-show animations for the floating site header on non-home pages using Framer Motion (`SiteHeader`).
+  - Redesigned the header on non-home pages to be flat and full-bleed instead of a floating pill, forcing a fixed height of `h-[72px]` and perfect edge padding alignment (`px-6 md:px-16 mx-auto`) with a clean bottom border (`border-b border-[#e3dccf]/50`). The home page header remains unchanged.
+  - Optimized scroll show/hide response speed: reduced duration to `0.2s` and applied a custom cubic-bezier ease-out curve (`ease: [0.22, 1, 0.36, 1]`) to trigger animations instantly on scroll direction change.
+  - Synchronized header visibility with a CSS custom property `--header-visible-height` on `:root` (shifting between exactly `72px` when visible, and `0px` when hidden) to avoid any layout gap between the sticky header and toolbar.
+  - Configured Collection and Search filter toolbars to stick to `top-[var(--header-visible-height)]` and left sidebars to stick to `top-[calc(var(--header-visible-height)+60px)]` with smooth `transition-[top] duration-300` properties, pinning them visually in the viewport like Nike.com.
+- **Borderless & Full-Bleed Filter Toolbar**:
+  - Removed the horizontal separating line (`border-b border-[#1c1a18]/10`) from the top toolbars in both `components/shop/collection-client.tsx` and `app/(shop)/search/page.tsx`.
+  - Added breakout negative horizontal margins (`-mx-6 md:-mx-16`) and matching positive paddings (`px-6 md:px-16`) to the sticky toolbars, stretching their backgrounds to be 100% full bleed to the viewport edges (merging seamlessly with the header) while keeping their text contents aligned with the catalog grids.
+  - Adjusted margins (`mb-6`) to let the toolbar row blend seamlessly with the product grid background.
+- **Height-Stable Layout & shadcn Pagination**:
+  - Installed and integrated the shadcn Pagination component into the collection view, customizing it to render raw anchors (for client-side state clicks) or Next.js `<Link>` components depending on `href` to avoid page reloads.
+  - Set dynamic minimum heights (`lg:min-h-[1950px]` when filters shown, `lg:min-h-[1450px]` when filters hidden) on the product grid wrapper to match a fully populated 12-product layout, locking the pagination controls at a fixed Y position even when items are sparse.
+  - Moved the separator line to the bottom (`border-b`) of the pagination wrapper so that the pagination controls are positioned cleanly above the line.
+- **Lookbook Spacing Fix**: Adjusted the Lookbook teaser card margins to `mt-12 mb-12` and height to `h-[300px]` in `components/shop/collection-page.tsx` to make the empty white spaces above and below the card equal (48px) and visually balanced.
+- **Verification**: `pnpm lint` and `pnpm build` compile and build cleanly with 0 errors.
 
 - **Floating Label Gap**: Updated `components/auth/floating-input.tsx` so floating labels use a wider invisible `legend` gap plus visible `#efe7dc` background, padding, and z-index, preventing the input border from cutting through label text on focus/value.
 - **Select Label Match**: Applied the same floating label treatment to the register page shopping preference select field.
@@ -51,7 +130,13 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Verification**: Documentation-only task. No app code changed, so `pnpm lint` and `pnpm build` were not run.
 - **Follow-ups**: Use `form-prompt.md` as the build brief when implementing the animated sign-in and register redesign in the existing auth pages/components.
 
-## 2026-07-04
+## 2026-07-05
+
+### Floating Auth Label Border Fix
+
+- **Floating Label Gap**: Updated `components/auth/floating-input.tsx` so floating labels use a wider invisible `legend` gap plus visible `#efe7dc` background, padding, and z-index, preventing the input border from cutting through label text on focus/value.
+- **Select Label Match**: Applied the same floating label treatment to the register page shopping preference select field.
+- **Verification**: `pnpm build` passes. Visual/DOM smoke test confirmed focused auth labels render with matching background and z-index. Dev server was stopped after verification.
 
 ### Premium Vela Wear Homepage & Adapted Header/Footer Integration
 

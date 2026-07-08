@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Heart, ShoppingBag, Menu, X, Trash2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
@@ -8,9 +8,26 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useAuth } from "@/components/auth/auth-provider";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import { money } from "@/lib/vela-data";
+import { getProducts } from "@/lib/api/catalog";
+import { mapBackendProduct, type Product } from "@/lib/vela-data";
+import { getActiveLocale } from "@/lib/i18n";
+import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 
 export function SiteHeader() {
+  const hasMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
@@ -21,15 +38,52 @@ export function SiteHeader() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
+  const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
   const [showCheckoutToast, setShowCheckoutToast] = useState(false);
 
   // Scroll state
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
   const lastScrollY = useRef(0);
+  const headerToggleAnchorY = useRef(0);
+  const searchBoxRef = useRef<HTMLDivElement | null>(null);
+  const searchDebounceRef = useRef<number | null>(null);
+  const searchRequestIdRef = useRef(0);
+  const activeLocale = getActiveLocale();
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const scrollDelta = currentScrollY - lastScrollY.current;
+
+      if (!isHome) {
+        if (currentScrollY <= 24) {
+          setShowHeader(true);
+          headerToggleAnchorY.current = currentScrollY;
+        } else if (scrollDelta > 0) {
+          if (showHeader) {
+            if (currentScrollY > 72 && currentScrollY - headerToggleAnchorY.current > 28) {
+              setShowHeader(false);
+              headerToggleAnchorY.current = currentScrollY;
+            }
+          } else {
+            headerToggleAnchorY.current = currentScrollY;
+          }
+        } else if (scrollDelta < 0) {
+          if (!showHeader) {
+            if (headerToggleAnchorY.current - currentScrollY > 18) {
+              setShowHeader(true);
+              headerToggleAnchorY.current = currentScrollY;
+            }
+          } else {
+            headerToggleAnchorY.current = currentScrollY;
+          }
+        }
+      } else {
+        setShowHeader(true);
+      }
+
       if (currentScrollY > 20) {
         setIsScrolled(true);
       } else {
@@ -39,12 +93,84 @@ export function SiteHeader() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    // Trigger once on mount
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHome, showHeader]);
+
+  // Synchronize CSS custom property with header visibility state
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!isHome) {
+      if (showHeader) {
+        root.style.setProperty("--header-visible-height", "72px");
+      } else {
+        root.style.setProperty("--header-visible-height", "0px");
+      }
+    } else {
+      root.style.setProperty("--header-visible-height", "0px");
+    }
+  }, [showHeader, isHome]);
+
+  useEffect(() => {
+    const trimmedQuery = searchQuery.trim();
+
+    if (!trimmedQuery) {
+      if (searchDebounceRef.current !== null) {
+        window.clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+      return;
+    }
+
+    if (searchDebounceRef.current !== null) {
+      window.clearTimeout(searchDebounceRef.current);
+    }
+
+    const requestId = ++searchRequestIdRef.current;
+    searchDebounceRef.current = window.setTimeout(async () => {
+      try {
+        const data = await getProducts({ size: 60, locale: activeLocale });
+        if (requestId !== searchRequestIdRef.current) return;
+
+        const mapped = (data.result || []).map((product: Parameters<typeof mapBackendProduct>[0]) =>
+          mapBackendProduct(product, activeLocale)
+        );
+        const normalizedQuery = normalizeSearchText(trimmedQuery);
+        const filtered = mapped.filter((product) => {
+          const searchable = [product.name, product.category, product.id, product.description]
+            .filter(Boolean)
+            .join(" ");
+          return matchesSearchText(searchable, normalizedQuery);
+        });
+
+        setSearchSuggestions(filtered.slice(0, 4));
+      } catch {
+        if (requestId !== searchRequestIdRef.current) return;
+      } finally {
+        if (requestId === searchRequestIdRef.current) {
+          searchDebounceRef.current = null;
+        }
+      }
+    }, 180);
+  }, [activeLocale, searchQuery]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!searchBoxRef.current) return;
+      if (!searchBoxRef.current.contains(event.target as Node)) {
+        setIsSearchSuggestionsOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
   const shouldBeTransparent = isHome && !isScrolled;
+  const safeFavoritesCount = hasMounted ? favorites.length : 0;
+  const safeItemCount = hasMounted ? itemCount : 0;
+  const safeIsAuthenticated = hasMounted ? isAuthenticated : false;
+  const safeUser = hasMounted ? user : null;
 
   const textClass = shouldBeTransparent
     ? "text-[#efe7dc] hover:text-[#ffb59f]"
@@ -58,18 +184,18 @@ export function SiteHeader() {
     ? "text-[#efe7dc] hover:text-[#ffb59f]"
     : "text-[#1c1a18] hover:text-[#b5573a]";
 
-  // Layout changes: fixed on home page (transparent or pill), sticky on other pages
+  // Layout changes: fixed on home page (transparent or pill), flat full-bleed on other pages
   const headerClass = isHome
     ? `fixed top-0 inset-x-0 z-50 flex justify-center px-4 md:px-8 transition-all duration-500 ${
         isScrolled ? "py-4" : "py-8"
       }`
-    : `sticky top-0 inset-x-0 z-50 flex justify-center px-4 md:px-8 py-4 transition-all duration-300`;
+    : "fixed top-0 inset-x-0 z-50 h-[72px] w-full overflow-visible bg-[#f7f4ef] flex items-center will-change-transform";
 
   const innerClass = isHome
     ? isScrolled
       ? "w-full max-w-[1800px] flex items-center justify-between rounded-full bg-white/20 border border-white/30 shadow-[0_12px_40px_rgba(28,26,24,0.06)] px-6 py-3 transition-all duration-500"
       : "w-full max-w-[1800px] flex items-center justify-between rounded-none bg-transparent border-b border-transparent px-4 md:px-8 py-2 transition-all duration-500"
-    : "w-full max-w-[1800px] flex items-center justify-between rounded-full bg-[#f7f4ef]/90 border border-[#e3dccf]/60 shadow-[0_12px_40px_rgba(28,26,24,0.04)] px-6 py-3 transition-all duration-300";
+      : "w-full max-w-[1800px] h-full flex items-center justify-between px-6 md:px-16 mx-auto";
 
   const burgerClass = shouldBeTransparent
     ? "text-[#efe7dc] hover:text-[#ffb59f]"
@@ -89,18 +215,86 @@ export function SiteHeader() {
     }
   };
 
+  const navigationItems = [
+    {
+      label: "Sale",
+      href: "/collection",
+      featuredTitle: "Ưu Đãi Lên Đến 50%",
+      featuredDesc: "Áp dụng cho toàn bộ sản phẩm thuộc bộ sưu tập cũ và sản phẩm chọn lọc.",
+      subItems: [
+        { label: "Sale Áo", href: "/collection" },
+        { label: "Sale Quần", href: "/collection" },
+        { label: "Sale Phụ Kiện", href: "/collection" },
+        { label: "Flash Sale", href: "/collection" },
+      ],
+    },
+    {
+      label: "Collection",
+      href: "/collection",
+      featuredTitle: "Mùa Hè 2026",
+      featuredDesc: "Tập trung vào phom dáng tối giản và các chất liệu tự nhiên như linen, organic cotton.",
+      subItems: [
+        { label: "New Arrivals", href: "/collection" },
+        { label: "Artisan Linen", href: "/collection" },
+        { label: "Minimalist Tailoring", href: "/collection" },
+        { label: "Heritage Wool", href: "/collection" },
+      ],
+    },
+    {
+      label: "Quần",
+      href: "/collection",
+      featuredTitle: "Chất Liệu Bền Vững",
+      featuredDesc: "Các thiết kế quần âu xếp ly tinh tế và quần relaxed thoải mái cho mọi hoạt động.",
+      subItems: [
+        { label: "Quần Tây Ly Xếp", href: "/collection" },
+        { label: "Quần Âu Slim-fit", href: "/collection" },
+        { label: "Quần Trousers Relaxed", href: "/collection" },
+        { label: "Quần Shorts Linen", href: "/collection" },
+      ],
+    },
+    {
+      label: "Áo",
+      href: "/collection",
+      featuredTitle: "Phom Dáng Phóng Khoáng",
+      featuredDesc: "Từ những chiếc áo thun signature chất dày dặn đến áo sơ mi linen bay bổng.",
+      subItems: [
+        { label: "Áo Thun Signature", href: "/collection" },
+        { label: "Áo Sơ Mi Linen", href: "/collection" },
+        { label: "Áo Blazer Lịch Lãm", href: "/collection" },
+        { label: "Áo Khoác Nhẹ", href: "/collection" },
+      ],
+    },
+    {
+      label: "Phụ kiện",
+      href: "/collection",
+      featuredTitle: "Chi Tiết Hoàn Thiện",
+      featuredDesc: "Điểm nhấn tinh tế từ túi tote heritage vải canvas dày đến các phụ kiện da cao cấp.",
+      subItems: [
+        { label: "Túi Canvas Heritage", href: "/collection" },
+        { label: "Thắt Lưng Da", href: "/collection" },
+        { label: "Ví Cầm Tay", href: "/collection" },
+        { label: "Mũ Vải Tối Giản", href: "/collection" },
+      ],
+    },
+    {
+      label: "Help",
+      href: "/help",
+    },
+  ];
+
   return (
     <>
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        initial={{ y: isHome ? -120 : -72 }}
+        animate={{ y: showHeader ? 0 : (isHome ? -120 : -72) }}
+        transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
         className={headerClass}
       >
+        {!isHome && <div aria-hidden="true" className="absolute inset-0 bg-[var(--background)]" />}
         <div
-          className={innerClass}
+          className={`${innerClass} relative z-10`}
           style={
-            (isHome && isScrolled) || !isHome
+            isHome && isScrolled
               ? {
                   WebkitBackdropFilter: "blur(24px) saturate(160%)",
                   backdropFilter: "blur(24px) saturate(160%)",
@@ -150,7 +344,7 @@ export function SiteHeader() {
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEBkBcpXeLbuJbgUCezINF6sMfVvIearyTwIMb5uBl08PFISvYOLRciNTSAIoobsPz1jpxL-hwUBhcjrSCnJaguWDgbzzKYHMPmDZ6gYteEWFpJYEhYqJf9t8Dv3WcygHY-JRNC_q7fYcWCMMtFYbqCqS3Uj8ntYwUAH2TAb7N0yD4erWe0mLkacJm3Clwk2N8T1YVvOTFPX3lf1uHXIJSAN0PfSFQZqn9wJ6IlS_--Sv7i486Uvk_RYogdH9Vp4NNWDVLOB2w3As_"
                   alt="Vela Wear Logo"
                   style={logoStyle}
-                  className="h-8 md:h-9 w-auto object-contain transition-all duration-300"
+                  className="h-8 md:h-9 w-auto object-contain"
                   referrerPolicy="no-referrer"
                 />
                 
@@ -167,56 +361,158 @@ export function SiteHeader() {
             </Link>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-10">
-            <Link
-              href="/collection"
-              className={`text-sm font-medium tracking-[0.5px] ${textClass} transition-colors relative pb-1 group/link`}
-            >
-              Collections
-              <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#b5573a] group-hover/link:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/collection"
-              className={`text-sm font-medium tracking-[0.5px] ${textClass} transition-colors relative pb-1 group/link`}
-            >
-              Lookbook
-              <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#b5573a] group-hover/link:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="#editorial-craft"
-              className={`text-sm font-medium tracking-[0.5px] ${textClass} transition-colors relative pb-1 group/link`}
-            >
-              Craftsmanship
-              <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#b5573a] group-hover/link:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="#testimonials"
-              className={`text-sm font-medium tracking-[0.5px] ${textClass} transition-colors relative pb-1 group/link`}
-            >
-              Reviews
-              <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#b5573a] group-hover/link:w-full transition-all duration-300" />
-            </Link>
-          </nav>
+          {/* Desktop Navigation Menu */}
+          <NavigationMenu className="hidden md:flex max-w-none flex-1 justify-start">
+            <NavigationMenuList className="gap-10 pl-10">
+              {navigationItems.map((item) => (
+                <NavigationMenuItem key={item.label}>
+                  {item.subItems ? (
+                    <>
+                      <NavigationMenuTrigger
+                        unstyled
+                        className={`relative pb-1 group/link bg-transparent text-sm font-medium tracking-[0.5px] ${textClass} transition-colors border-none cursor-pointer flex items-center gap-1`}
+                      >
+                        <span className="relative">
+                          {item.label}
+                          <span className="absolute bottom-[-3px] left-0 w-full h-[1.5px] bg-[#b5573a] scale-x-0 origin-left group-hover/link:scale-x-100 transition-transform duration-300 ease-out" />
+                        </span>
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <div className="grid w-[640px] gap-3 p-4 md:grid-cols-2">
+                          <div className="rounded-2xl bg-white/75 p-5 flex flex-col justify-between">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.22em] text-[#1c1a18]/45">Vela Wear</p>
+                              <p className="mt-3 text-base font-semibold text-[#1c1a18]">{item.featuredTitle}</p>
+                              <p className="mt-2 text-xs leading-5 text-[#1c1a18]/65">{item.featuredDesc}</p>
+                            </div>
+                            <Link
+                              href={item.href}
+                              className="mt-4 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1"
+                            >
+                              Khám phá tất cả &rarr;
+                            </Link>
+                          </div>
+                          <div className="grid gap-1">
+                            {item.subItems.map((sub) => (
+                              <NavigationMenuLink
+                                key={sub.label}
+                                render={<Link href={sub.href} onClick={() => setIsMobileMenuOpen(false)} />}
+                                className="rounded-2xl px-4 py-3 transition-colors hover:bg-white/70"
+                              >
+                                <p className="text-sm font-medium text-[#1c1a18]">{sub.label}</p>
+                                <p className="mt-1 text-[11px] leading-4 text-[#1c1a18]/55">Bộ sưu tập Vela Wear chính hãng</p>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </>
+                  ) : (
+                    <NavigationMenuLink
+                      unstyled
+                      render={<Link href={item.href} />}
+                      className={`relative pb-1 group/link inline-flex h-10 items-center justify-center text-sm font-medium tracking-[0.5px] ${textClass} transition-colors`}
+                    >
+                      <span className="relative">
+                        {item.label}
+                        <span className="absolute bottom-[-3px] left-0 w-full h-[1.5px] bg-[#b5573a] scale-x-0 origin-left group-hover/link:scale-x-100 transition-transform duration-300 ease-out" />
+                      </span>
+                    </NavigationMenuLink>
+                  )}
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* Right side items */}
           <div className="flex items-center gap-4 md:gap-6">
             {/* Desktop Search bar */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className={`hidden lg:flex items-center ${searchBgClass} rounded-full px-4 py-2 gap-2.5 w-52 focus-within:w-68 transition-all duration-300 border border-transparent focus-within:border-[#b5573a]/20`}
-            >
-              <button type="submit" aria-label="Search" className="cursor-pointer focus:outline-none border-none p-0 bg-transparent flex items-center justify-center">
-                <Search className={`w-4 h-4 ${shouldBeTransparent ? "text-[#efe7dc]/80" : "text-[#8a857c]"}`} />
-              </button>
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full ${searchInputClass}`}
-              />
-            </form>
+            <div ref={searchBoxRef} className="relative hidden lg:block w-52 focus-within:w-68 transition-all duration-300">
+              <form
+                onSubmit={handleSearchSubmit}
+                className={`flex items-center ${searchBgClass} rounded-full px-4 py-2 gap-2.5 w-full border border-transparent focus-within:border-[#b5573a]/20`}
+              >
+                <button type="submit" aria-label="Search" className="cursor-pointer focus:outline-none border-none p-0 bg-transparent flex items-center justify-center">
+                  <Search className={`w-4 h-4 ${shouldBeTransparent ? "text-[#efe7dc]/80" : "text-[#8a857c]"}`} />
+                </button>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearchSuggestionsOpen(true);
+                  }}
+                  onFocus={() => searchQuery.trim() && setIsSearchSuggestionsOpen(true)}
+                  className={`bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full ${searchInputClass}`}
+                />
+              </form>
+
+              <AnimatePresence>
+                {isSearchSuggestionsOpen && searchQuery.trim() && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-2xl border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_18px_50px_rgba(28,26,24,0.12)] z-50"
+                  >
+                    <div className="px-4 py-3 border-b border-[#1c1a18]/10">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
+                        Gợi ý tìm kiếm
+                      </p>
+                    </div>
+                    <div className="max-h-96 overflow-auto">
+                      {searchSuggestions.length > 0 ? (
+                        searchSuggestions.map((product) => (
+                          <Link
+                            key={product.id}
+                            href={`/products/${product.id}`}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-[#efe7dc] transition-colors border-b border-[#1c1a18]/5 last:border-b-0"
+                            onClick={() => {
+                              setIsSearchSuggestionsOpen(false);
+                            }}
+                          >
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="h-14 w-14 rounded-lg object-cover bg-white"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-[#1c1a18]">
+                                {product.name}
+                              </p>
+                              <p className="truncate text-xs text-[#1c1a18]/55">
+                                {product.category}
+                              </p>
+                              <p className="mt-1 text-xs font-semibold text-[#b5573a]">
+                                {money(product.price)}
+                              </p>
+                            </div>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="px-4 py-6 text-sm text-[#1c1a18]/60">
+                          Không tìm thấy sản phẩm phù hợp.
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-[#1c1a18]/10 px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                          setIsSearchSuggestionsOpen(false);
+                        }}
+                        className="w-full rounded-full border border-[#1c1a18]/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
+                      >
+                        Xem thêm kết quả
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             <div className="flex items-center gap-3">
               {/* Wishlist Link */}
@@ -231,13 +527,13 @@ export function SiteHeader() {
                   aria-label="Wishlist"
                 >
                   <Heart className="w-4.5 h-4.5" />
-                  {favorites.length > 0 && (
+                  {safeFavoritesCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute top-0 right-0 w-4.5 h-4.5 rounded-full bg-[#b5573a] text-white text-[9px] font-bold flex items-center justify-center border border-[#f7f4ef]"
                     >
-                      {favorites.length}
+                      {safeFavoritesCount}
                     </motion.span>
                   )}
                 </motion.button>
@@ -255,13 +551,13 @@ export function SiteHeader() {
                   aria-label="Shopping Bag"
                 >
                   <ShoppingBag className="w-4.5 h-4.5" />
-                  {itemCount > 0 && (
+                  {safeItemCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute top-0 right-0 w-4.5 h-4.5 rounded-full bg-[#b5573a] text-white text-[9px] font-bold flex items-center justify-center border border-[#f7f4ef]"
                     >
-                      {itemCount}
+                      {safeItemCount}
                     </motion.span>
                   )}
                 </motion.button>
@@ -269,15 +565,15 @@ export function SiteHeader() {
 
               {/* Account Profile / Login */}
               <div className="hidden md:flex items-center gap-4">
-                {isAuthenticated && user ? (
+                {safeIsAuthenticated && safeUser ? (
                   <div className="flex items-center gap-3">
                     <Link
                       href="/profile"
                       aria-label="View Profile"
                       className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-ink text-xs font-semibold hover:bg-white transition-colors flex-shrink-0`}
                     >
-                      {user.fullName
-                        ? user.fullName
+                      {safeUser.fullName
+                        ? safeUser.fullName
                             .split(" ")
                             .map((n) => n[0])
                             .join("")
@@ -322,34 +618,16 @@ export function SiteHeader() {
             }`}
           >
             <div className="px-6 py-8 flex flex-col gap-6">
-              <Link
-                href="/collection"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="font-serif text-2xl text-[#1c1a18] hover:text-[#b5573a] transition-colors"
-              >
-                Collections
-              </Link>
-              <Link
-                href="/collection"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="font-serif text-2xl text-[#1c1a18] hover:text-[#b5573a] transition-colors"
-              >
-                Lookbook
-              </Link>
-              <Link
-                href="#editorial-craft"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="font-serif text-2xl text-[#1c1a18] hover:text-[#b5573a] transition-colors"
-              >
-                Craftsmanship
-              </Link>
-              <Link
-                href="#testimonials"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="font-serif text-2xl text-[#1c1a18] hover:text-[#b5573a] transition-colors"
-              >
-                Reviews
-              </Link>
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="font-serif text-2xl text-[#1c1a18] hover:text-[#b5573a] transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
               <div className="h-[1px] bg-[#e3dccf] my-2" />
               
               {/* Mobile Search */}
@@ -365,14 +643,14 @@ export function SiteHeader() {
               </form>
 
               {/* Mobile Account Profile */}
-              {isAuthenticated && user ? (
+              {safeIsAuthenticated && safeUser ? (
                 <div className="flex flex-col gap-4">
                   <Link
                     href="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
                   >
-                    View Profile ({user.fullName})
+                    View Profile ({safeUser.fullName})
                   </Link>
                   <button
                     onClick={() => {
