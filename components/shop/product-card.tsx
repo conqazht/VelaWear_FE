@@ -13,7 +13,12 @@ import { useNotification } from "@/components/shop/notification-provider";
 import { cn } from "@/lib/utils";
 import { categoryLabels, money, Product } from "@/lib/vela-data";
 
-export function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps {
+  product: Product;
+  imageAspect?: "portrait" | "square" | "collection";
+}
+
+export function ProductCard({ product, imageAspect = "portrait" }: ProductCardProps) {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
@@ -21,8 +26,29 @@ export function ProductCard({ product }: { product: Product }) {
   const favorited = isFavorite(product.id);
 
   return (
-    <Card className="group h-full gap-0 rounded-md border-transparent bg-white p-3 py-3 transition-all duration-300 hover:border-[#1c1a18]/5 hover:shadow-xl relative">
-      <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-none bg-[#efebe4]">
+    <Card
+      className={cn(
+        "group relative h-full gap-0 overflow-hidden rounded-md border-transparent bg-white transition-[border-color,box-shadow] duration-200 ease-out hover:border-[#1c1a18]/5 hover:shadow-xl",
+        imageAspect === "square" ? "p-0" : "p-3 py-3"
+      )}
+      style={
+        imageAspect === "square"
+          ? { width: "100%", minHeight: "560px" }
+          : imageAspect === "collection"
+            ? { width: "100%", minHeight: "500px" }
+            : undefined
+      }
+    >
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-none bg-[#efebe4]",
+          imageAspect === "square"
+            ? "h-[400px]"
+            : imageAspect === "collection"
+              ? "aspect-[4/5]"
+              : "aspect-[3/4]"
+        )}
+      >
         <Link href={`/products/${product.id}`} className="block w-full h-full">
           {product.badge && (
             <Badge className="absolute left-4 top-4 z-10 rounded-sm bg-[#1c1a18] px-2 text-[9px] font-bold uppercase tracking-widest text-[#f7f4ef]">
@@ -32,7 +58,7 @@ export function ProductCard({ product }: { product: Product }) {
           <FashionImage
             src={product.image}
             alt={product.name}
-            className="transition-transform duration-700 group-hover:scale-[1.04]"
+            className="transition-none"
           />
         </Link>
 
@@ -58,7 +84,16 @@ export function ProductCard({ product }: { product: Product }) {
         </button>
       </div>
 
-      <div className="flex flex-grow flex-col">
+      <div
+        className={cn(
+          "flex flex-grow flex-col",
+          imageAspect === "square"
+            ? "px-[40px] pt-4 pb-5"
+            : imageAspect === "collection"
+              ? "px-0 pt-4 pb-4"
+              : "px-0"
+        )}
+      >
         <span className="mb-1 text-[9px] font-semibold uppercase tracking-widest text-[#1c1a18]/45">
           {categoryLabels[product.category] ?? product.category}
         </span>

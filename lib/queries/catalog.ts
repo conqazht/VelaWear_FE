@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   getBrands,
   getCategories,
@@ -8,9 +8,11 @@ import {
   getProduct,
   getProducts,
   getProductVariants,
+  getReviews,
   getSizes,
   type ProductFilters,
   type ProductVariantFilters,
+  type ReviewFilters,
 } from "@/lib/api/catalog";
 import type { PageParams } from "@/lib/api/types";
 import { queryKeys } from "./keys";
@@ -19,6 +21,7 @@ export function useProductsQuery(filters: ProductFilters = {}) {
   return useQuery({
     queryKey: queryKeys.products.list(filters),
     queryFn: () => getProducts(filters),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -62,6 +65,14 @@ export function useProductVariantsQuery(params: ProductVariantFilters = {}) {
   return useQuery({
     queryKey: queryKeys.catalog.variants(params),
     queryFn: () => getProductVariants(params),
+    enabled: params.productId === undefined || Boolean(params.productId),
+  });
+}
+
+export function useProductReviewsQuery(params: ReviewFilters = {}) {
+  return useQuery({
+    queryKey: queryKeys.reviews.list(params),
+    queryFn: () => getReviews(params),
     enabled: params.productId === undefined || Boolean(params.productId),
   });
 }

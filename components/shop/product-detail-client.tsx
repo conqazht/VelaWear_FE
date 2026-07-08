@@ -90,7 +90,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [selectedSize, setSelectedSize] = useState(product.size);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    sizeAndFit: true,
+    sizeAndFit: false,
     materialAndCare: false,
     delivery: false,
     reviews: false,

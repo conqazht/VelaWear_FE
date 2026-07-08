@@ -2,7 +2,10 @@
 
 import { Sparkles, Leaf, ShieldCheck, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { PRODUCTS } from "@/lib/vela-data";
+import { useMemo } from "react";
+import { PRODUCTS, mapBackendProduct } from "@/lib/vela-data";
+import { getActiveLocale } from "@/lib/i18n";
+import { useProductsQuery, useCategoriesQuery } from "@/lib/queries/catalog";
 
 // Import new modular subcomponents
 import { HeroSlider } from "./hero-slider";
@@ -19,19 +22,19 @@ const HERO_SLIDES = [
     id: "slide-1",
     title: "Vela Wear — Bộ sưu tập Thu 2026",
     subtitle: "Mùa Thu 2026",
-    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop",
+    image: "/landingpage1.png",
     ctaText: "Khám phá ngay",
   },
   {
     id: "slide-2",
     title: "Nét Đẹp Của Sự Tĩnh Lặng",
     subtitle: "Lookbook 2026",
-    image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=2000&auto=format&fit=crop",
+    image: "/landingpage2.jpg",
     ctaText: "Xem Lookbook",
   },
 ];
 
-const CATEGORIES = [
+const STATIC_CATEGORIES = [
   {
     id: "cat-1",
     name: "Essentials",
@@ -53,11 +56,34 @@ const CATEGORIES = [
 ];
 
 export function HomePage() {
-  // Map specific trending products from the global array to preserve USD compatibility
-  const trendingProductIds = ["classic-linen-shirt", "pleated-wool-trousers", "the-heritage-tote", "merino-wool-coat"];
-  const trendingProducts = trendingProductIds
-    .map(id => PRODUCTS.find(p => p.id === id))
-    .filter((p): p is typeof PRODUCTS[number] => !!p);
+  const activeLocale = getActiveLocale();
+  
+  // Fetch newest products for trending
+  const productsQuery = useProductsQuery({ size: 10, sort: "createdAt,desc", locale: activeLocale });
+  const categoriesQuery = useCategoriesQuery({ size: 10, sort: "sortOrder,asc", locale: activeLocale });
+
+  const trendingProducts = useMemo(() => {
+    if (productsQuery.data?.result && productsQuery.data.result.length > 0) {
+      return productsQuery.data.result.map((product) => mapBackendProduct(product, activeLocale));
+    }
+    // Fallback to static if backend fails or empty
+    const trendingProductIds = ["classic-linen-shirt", "pleated-wool-trousers", "the-heritage-tote", "merino-wool-coat"];
+    return trendingProductIds
+      .map(id => PRODUCTS.find(p => p.id === id))
+      .filter((p): p is typeof PRODUCTS[number] => !!p);
+  }, [productsQuery.data, activeLocale]);
+
+  const featuredCategories = useMemo(() => {
+    if (categoriesQuery.data?.result && categoriesQuery.data.result.length > 0) {
+      return categoriesQuery.data.result.slice(0, 3).map((cat, index) => ({
+        id: `cat-${cat.id}`,
+        name: cat.name,
+        image: STATIC_CATEGORIES[index % STATIC_CATEGORIES.length].image, // keep premium static images
+        link: `/collection`,
+      }));
+    }
+    return STATIC_CATEGORIES;
+  }, [categoriesQuery.data]);
 
   return (
     <div className="min-h-screen bg-[#f7f4ef] text-[#1c1a18] flex flex-col selection:bg-[#b5573a] selection:text-white">
@@ -87,7 +113,7 @@ export function HomePage() {
             </ScrollReveal>
           </div>
 
-          <FeaturedCategories categories={CATEGORIES} />
+          <FeaturedCategories categories={featuredCategories} />
         </section>
 
         {/* 3. Story Bento Grid Section */}

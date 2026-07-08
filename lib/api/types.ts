@@ -53,6 +53,9 @@ export type Product = {
   status?: string;
   createdAt?: string;
   updatedAt?: string;
+  images?: string[];
+  categoryName?: string | null;
+  categorySlug?: string | null;
 };
 
 export type CatalogEntity = {
@@ -60,6 +63,7 @@ export type CatalogEntity = {
   name: string;
   slug?: string;
   code?: string;
+  hexCode?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -119,8 +123,12 @@ export type UserAddress = {
 export type Review = {
   id: number;
   userId: number;
+  userName: string;
+  orderId: number;
+  orderCode: string;
   orderItemId: number;
+  productName: string;
   rating: number;
-  content?: string | null;
+  comment?: string | null;
   createdAt?: string;
 };

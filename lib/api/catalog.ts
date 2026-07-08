@@ -6,12 +6,14 @@ import type {
   Product,
   ProductVariant,
   ResultPaginationDTO,
+  Review,
 } from "./types";
 
 export type ProductFilters = PageParams & {
   keyword?: string;
   name?: string;
   slug?: string;
+  locale?: string;
   categoryId?: number;
   brandId?: number;
   colorId?: number;
@@ -63,4 +65,15 @@ export function getProductForRender(id: number | string) {
   return serverApiGet<Product>(`/products/${id}`, {
     next: { revalidate: 300 },
   });
+}
+
+export type ReviewFilters = PageParams & {
+  productId?: number;
+  userId?: number;
+  orderId?: number;
+  orderItemId?: number;
+};
+
+export function getReviews(filters: ReviewFilters = {}) {
+  return apiGet<ResultPaginationDTO<Review>>("/reviews", filters);
 }

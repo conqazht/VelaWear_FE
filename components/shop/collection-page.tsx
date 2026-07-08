@@ -6,8 +6,8 @@ import { PRODUCTS } from "@/lib/vela-data";
 
 export function CollectionPage() {
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 py-12 md:px-16">
-      <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-8 pb-4 md:px-16 md:pt-10">
+      <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           Home
         </Link>
@@ -17,19 +17,15 @@ export function CollectionPage() {
         <span className="text-[#1c1a18]/40">All Products</span>
       </div>
 
-      <div className="mb-12">
-        <h1 className="mb-4 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+      <div className="mb-4">
+        <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
           Tất cả sản phẩm
         </h1>
-        <p className="max-w-2xl text-xs leading-relaxed text-[#1c1a18]/60 md:text-sm">
-          Xem trọn vẹn những sáng tạo thủ công mang âm hưởng trầm ấm giao mùa,
-          được dệt tay bằng bông lành tính và lanh tự nhiên.
-        </p>
       </div>
 
       <CollectionClient products={PRODUCTS} />
 
-      <section className="relative mb-20 h-[320px] w-full overflow-hidden rounded-lg bg-black">
+      <section className="relative mt-4 mb-4 h-[300px] w-full overflow-hidden rounded-lg bg-black">
         <FashionImage
           src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80"
           alt="Lookbook visual teaser"

@@ -34,7 +34,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
             suppressHydrationWarning
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
         </Link>

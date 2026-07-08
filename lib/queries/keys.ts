@@ -36,4 +36,8 @@ export const queryKeys = {
     root: ["user-addresses"] as const,
     list: (params?: unknown) => ["user-addresses", params] as const,
   },
+  reviews: {
+    root: ["reviews"] as const,
+    list: (params?: unknown) => ["reviews", params] as const,
+  },
 };
