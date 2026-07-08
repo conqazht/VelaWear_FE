@@ -133,3 +133,33 @@ If a required check cannot run because the repo lacks a script or dependency, st
 - Use a clear commit message when instructed to commit, for example `docs: align agent instructions with vela wear app`.
 - Do not include unrelated user changes in the commit.
 - If only documentation instructions are changed, a documentation commit is appropriate after checks pass.
+
+## Co-location-based structure
+
+Keep feature code close to the route that owns it.
+
+- Admin Dashboard routes: `app/(admin)/dashboard/<screen>/page.tsx`
+- Shop/User routes: `app/(shop)/<screen>/page.tsx`
+- Screen-specific components: `app/.../<screen>/_components/`
+- Screen-specific data and schemas: `app/.../<screen>/_data/`
+- Shared dashboard components: `app/(admin)/dashboard/_components/`
+- Shared application components: `components/`
+- Local shadcn components: `components/ui/`
+- Shared hooks and utilities: `hooks/` and `lib/`
+- Theme presets: `styles/presets/`
+
+Keep a component inside its route until it is reused by another feature. Do not move screen-specific code into a shared directory preemptively.
+
+## Creating or extending a screen
+
+1. Inspect the closest current screen before writing code. Finance, Infrastructure, CRM, and Analytics are useful references for Admin.
+2. When reproducing a UI from a screenshot or image, follow its visual direction closely. Implement it with the project's existing components and semantic theme tokens rather than copying raw color values. Do not use arbitrary hex, RGB, HSL, or OKLCH values unless explicitly requested.
+3. Reuse the existing layouts, local components, and theme tokens.
+4. Break each new page into focused components inside the route's `_components/` directory. Keep `page.tsx` small and focused on composing those pieces.
+5. Never add `"use client"` to `page.tsx`. Move interactive or browser-dependent code into a dedicated Client Component.
+6. Add the screen to `navigation/sidebar/sidebar-items.ts` when it should appear in the dashboard navigation.
+7. Decide the information hierarchy before choosing widgets. Let the content determine the page structure.
+8. Keep the established visual rhythm where it fits: compact spacing, clear typography hierarchy, responsive action rows, and grids that collapse cleanly on smaller screens.
+9. Use semantic theme tokens so new screens work with light mode, dark mode, and the existing theme presets.
+10. Handle relevant loading, empty, error, disabled, and overflow states.
+11. Keep screens accessible with semantic HTML, keyboard support, visible focus states, labels, and appropriate ARIA attributes.
