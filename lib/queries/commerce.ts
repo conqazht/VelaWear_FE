@@ -6,21 +6,23 @@ import {
   createPayment,
   createReview,
   createUserAddress,
-  createWishlist,
+  createMyWishlist,
   deleteUserAddress,
-  deleteWishlist,
+  deleteMyWishlist,
   getCartByUser,
+  getCoupons,
   getOrderByCode,
   getOrdersByUser,
+  getReviewsByUser,
   getUserAddresses,
-  getWishlists,
+  getMyWishlists,
   updateUser,
   updateUserAddress,
+  type CouponFilters,
   type CreateOrderRequest,
   type CreatePaymentRequest,
   type CreateReviewRequest,
   type CreateUserAddressRequest,
-  type CreateWishlistRequest,
   type UpdateUserAddressRequest,
 } from "@/lib/api/commerce";
 import type { PageParams, User } from "@/lib/api/types";
@@ -34,11 +36,19 @@ export function useUserCartQuery(userId?: number) {
   });
 }
 
-export function useWishlistsQuery(params: PageParams & { userId?: number } = {}) {
+export function useWishlistsQuery(params: PageParams = {}, enabled = true) {
   return useQuery({
     queryKey: queryKeys.wishlists.list(params),
-    queryFn: () => getWishlists(params),
-    enabled: typeof params.userId === "number",
+    queryFn: () => getMyWishlists(params),
+    enabled,
+  });
+}
+
+export function useCouponsQuery(params: CouponFilters = {}, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.coupons.list(params),
+    queryFn: () => getCoupons(params),
+    enabled,
   });
 }
 
@@ -46,7 +56,7 @@ export function useCreateWishlistMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateWishlistRequest) => createWishlist(request),
+    mutationFn: (productId: number) => createMyWishlist(productId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.wishlists.root });
     },
@@ -57,7 +67,7 @@ export function useDeleteWishlistMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => deleteWishlist(id),
+    mutationFn: (productId: number) => deleteMyWishlist(productId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.wishlists.root });
     },
@@ -106,6 +116,17 @@ export function useOrderByCodeQuery(orderCode?: string) {
     queryKey: queryKeys.orders.byCode(orderCode ?? ""),
     queryFn: () => getOrderByCode(orderCode as string),
     enabled: Boolean(orderCode),
+  });
+}
+
+export function useReviewsByUserQuery(userId?: number, params: PageParams = {}) {
+  return useQuery({
+    queryKey:
+      typeof userId === "number"
+        ? queryKeys.reviews.list({ userId, ...params })
+        : queryKeys.reviews.root,
+    queryFn: () => getReviewsByUser(userId as number, params),
+    enabled: typeof userId === "number",
   });
 }
 
@@ -172,7 +193,12 @@ export function useUpdateProfileMutation() {
 }
 
 export function useCreateReviewMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (request: CreateReviewRequest) => createReview(request),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.reviews.root });
+    },
   });
 }

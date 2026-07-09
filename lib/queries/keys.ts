@@ -23,6 +23,10 @@ export const queryKeys = {
     root: ["wishlists"] as const,
     list: (params?: unknown) => ["wishlists", params] as const,
   },
+  coupons: {
+    root: ["coupons"] as const,
+    list: (params?: unknown) => ["coupons", params] as const,
+  },
   orders: {
     root: ["orders"] as const,
     byUser: (userId: number, params?: unknown) =>

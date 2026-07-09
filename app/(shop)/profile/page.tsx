@@ -1,57 +1,99 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, PlusCircle, LockKeyhole, User, MapPin, ChevronDown, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
+import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays, Star } from "lucide-react";
 
-import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductCard } from "@/components/shop/product-card";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import { useAuth } from "@/components/auth/auth-provider";
-import apiClient from "@/lib/api-client";
 import { money } from "@/lib/vela-data";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import {
+  useCouponsQuery,
+  useOrdersByUserQuery,
+  useReviewsByUserQuery,
+  useUpdateProfileMutation,
+  useUserAddressesQuery,
+} from "@/lib/queries/commerce";
+import type { Coupon, Gender, UserAddress } from "@/lib/api/types";
 
-interface Order {
-  id: number;
-  userId: number;
-  userFullName: string;
-  userEmail: string;
-  orderCode: string;
-  status: string;
-  subtotal: number;
-  shippingFee: number;
-  discountAmount: number;
-  finalAmount: number;
-  receiverName: string;
-  receiverPhone: string;
-  receiverAddress: string;
-  paymentMethod: string;
-  paymentStatus: string;
-  createdAt: string;
-  updatedAt: string;
-}
+const profileTabIds = ["profile", "orders", "favourites", "coupons", "reviews"] as const;
+type ProfileTabId = (typeof profileTabIds)[number];
+
+const genderOptions: { value: Gender; label: string }[] = [
+  { value: "MALE", label: "Male" },
+  { value: "FEMALE", label: "Female" },
+  { value: "OTHER", label: "Other" },
+];
+
+const getProfileTabId = (tab: string | null): ProfileTabId =>
+  profileTabIds.includes(tab as ProfileTabId) ? (tab as ProfileTabId) : "profile";
+
+const formatDisplayDate = (value?: string | null, locale = "vi-VN") => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(locale);
+};
+
+const formatMemberSince = (value?: string | null) => {
+  if (!value) return "June 2026";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "June 2026";
+  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+};
+
+const formatAddress = (address: UserAddress) =>
+  [
+    address.addressDetail ?? address.addressLine,
+    address.ward,
+    address.district,
+    address.province,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+const formatCouponValue = (coupon: Coupon) =>
+  coupon.type.includes("PERCENT")
+    ? `${coupon.value}%`
+    : money(Number(coupon.value || 0));
 
 export default function MemberProfile() {
-  const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(false);
+  const { user, isAuthenticated, checkSession } = useAuth();
+  const { favorites, toggleFavorite } = useFavorites();
+  const { addToCart } = useCart();
+  const { showAddedToBag } = useNotification();
+  const updateProfileMutation = useUpdateProfileMutation();
+  const userId = user?.id;
+  const ordersQuery = useOrdersByUserQuery(userId, {
+    size: 100,
+    sort: "createdAt,desc",
+  });
+  const addressesQuery = useUserAddressesQuery({ userId, size: 100 });
+  const couponsQuery = useCouponsQuery(
+    { status: "ACTIVE", size: 100, sort: "endDate,asc" },
+    isAuthenticated
+  );
+  const reviewsQuery = useReviewsByUserQuery(userId, {
+    size: 100,
+    sort: "createdAt,desc",
+  });
+  const orders = ordersQuery.data?.result ?? [];
+  const addresses = addressesQuery.data?.result ?? [];
+  const coupons = couponsQuery.data?.result ?? [];
+  const reviews = reviewsQuery.data?.result ?? [];
 
-  const [activeSubTab, setActiveSubTab] = useState(() => {
+  const [activeSubTab, setActiveSubTab] = useState<ProfileTabId>(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab && ["profile", "orders", "favourites", "settings"].includes(tab)) {
-        return tab;
-      }
+      return getProfileTabId(params.get("tab"));
     }
     return "profile";
   });
@@ -74,38 +116,73 @@ export default function MemberProfile() {
     confirm: false
   });
 
-  const [editForm, setEditForm] = useState({
+  const [editFormDraft, setEditForm] = useState({
     fullName: "",
     email: "",
     gender: "",
-    dob: "2005-09-07"
+    dob: ""
   });
   const [formTouched, setFormTouched] = useState({ fullName: false, email: false, gender: false, dob: false });
   const [formModified, setFormModified] = useState({ fullName: false, email: false, gender: false, dob: false });
   const [isGenderOpen, setIsGenderOpen] = useState(false);
   const [isDobOpen, setIsDobOpen] = useState(false);
+  const [profileSaveMessage, setProfileSaveMessage] = useState<string | null>(null);
+  const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      setEditForm({
-        fullName: user.fullName || "",
-        email: user.email || "",
-        gender: "Female",
-        dob: "2005-09-07"
-      });
-    }
-  }, [user]);
+  const editForm = {
+    fullName: formModified.fullName ? editFormDraft.fullName : user?.fullName ?? "",
+    email: user?.email ?? "",
+    gender: formModified.gender ? editFormDraft.gender : user?.gender ?? "",
+    dob: formModified.dob ? editFormDraft.dob : user?.birthDate ?? "",
+  };
 
   const isFormDirty = user ? (
-    editForm.fullName !== (user.fullName || "") || 
-    editForm.email !== (user.email || "") || 
-    editForm.gender !== "Female" ||
-    editForm.dob !== "2005-09-07"
+    editForm.fullName.trim() !== (user.fullName || "") ||
+    editForm.gender !== (user.gender || "") ||
+    editForm.dob !== (user.birthDate || "")
   ) : false;
-  const carouselContainerRef = useRef<HTMLDivElement>(null);
-  const { favorites, toggleFavorite } = useFavorites();
-  const { addToCart } = useCart();
-  const { showAddedToBag } = useNotification();
+  const isProfileFormValid =
+    editForm.fullName.trim() !== "" &&
+    editForm.gender !== "" &&
+    editForm.dob.trim() !== "";
+
+  const getApiErrorMessage = (error: unknown) => {
+    const apiError = error as {
+      response?: { data?: { message?: string } };
+      message?: string;
+    };
+
+    return apiError.response?.data?.message ?? apiError.message ?? "Could not update profile. Please try again.";
+  };
+
+  const handleSaveProfile = async () => {
+    setProfileSaveMessage(null);
+    setProfileSaveError(null);
+
+    if (!user || !isProfileFormValid) {
+      setFormTouched({ fullName: true, email: false, gender: true, dob: true });
+      return;
+    }
+
+    try {
+      await updateProfileMutation.mutateAsync({
+        id: user.id,
+        request: {
+          fullName: editForm.fullName.trim(),
+          birthDate: editForm.dob,
+          avatar: user.avatar,
+          gender: editForm.gender as Gender,
+        },
+      });
+      await checkSession();
+      setEditForm({ fullName: "", email: "", gender: "", dob: "" });
+      setFormTouched({ fullName: false, email: false, gender: false, dob: false });
+      setFormModified({ fullName: false, email: false, gender: false, dob: false });
+      setProfileSaveMessage("Your profile has been updated.");
+    } catch (error) {
+      setProfileSaveError(getApiErrorMessage(error));
+    }
+  };
 
   // Mock settings state
   const [reviewVisibility, setReviewVisibility] = useState("social");
@@ -117,68 +194,12 @@ export default function MemberProfile() {
     workoutData: true
   });
 
-  // Load user order history
-  useEffect(() => {
-    if (!user) return;
-    const userId = user.id;
-    async function loadOrders() {
-      setLoadingOrders(true);
-      try {
-        const response = await apiClient.get(`/orders/user/${userId}?size=100`);
-        if (response.data?.data?.result) {
-          setOrders(response.data.data.result);
-        }
-      } catch (err) {
-        console.error("Failed to load user orders", err);
-      } finally {
-        setLoadingOrders(false);
-      }
-    }
-    loadOrders();
-  }, [user]);
-
-  const scrollCarousel = (direction: "left" | "right") => {
-    if (carouselContainerRef.current) {
-      const scrollAmount = 420; // card width + gap
-      carouselContainerRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const subTabs = [
+  const subTabs: { id: ProfileTabId; label: string }[] = [
     { id: "profile", label: "Profile" },
     { id: "orders", label: "Orders" },
     { id: "favourites", label: "Favourites" },
     { id: "coupons", label: "Coupons" },
     { id: "reviews", label: "Reviews" },
-  ];
-
-
-
-  const recommendedProducts = [
-    {
-      id: "rec-1",
-      name: "The Structure Blazer",
-      category: "Women's Premium Outerwear",
-      price: "$380.00",
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCxzCLSuFXV2BaU_SI-C_UwGVCKl_C5oG7VQ2x4d2AYRhiEPCQc038hB1fHURu_8AyqSm8ehgRf7EhvZwpFfrGcM0Pu4SQy9V3NSP7j2SSYp2l-jEoj_TfgJ3OYKBuscMy758AcU-4C3xzqrcQnxKPi8SR5Bw_wDhtEPhm_MXuY-q8xJxzKaAo0qnerVZ42QkfLEYBKqmTfqi8Pqum4CI0uDru7lreW5oGv4YKS4vMH5V09P233xozoG0Es9dZjx95QfW1RPBxZ_G1U",
-    },
-    {
-      id: "rec-2",
-      name: "Essential Ribbed Knit",
-      category: "Women's Lifestyle Dress",
-      price: "$195.00",
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuGuT1MGV0s-GET9OLrNCIAqJ5bWclXZ2FF3tmfnLh7RDnUfaVGgI7VL3cPfVFuFA0sXCB73hKuUJHIebB3g_Iyo65Ohk6m4Do4dklPwbCsO55eNH4YiE_N8ou-uUCsxs4J4IzyCtMqwhStDk-QLTEeG3XH26_XEPVbI2fuospCTfuH6jabINPv4AEw0lhTd7Jl7PRs9qYKjw66nx8jTmwnzIleXOpvwEPrOrdnZ1Z3ZXXn2xqBTNeppJasQj3Iufsw0OXp39xBzZEL",
-    },
-    {
-      id: "rec-3",
-      name: "Artisan Chelsea Boot",
-      category: "Men's Premium Footwear",
-      price: "$450.00",
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuB8BUrYe4sh5K3HlJx6vFaK4p3MbI90KdEks40-fb3Srz0p8yWIRP6VhInTRF7dF-gVHjOF3dJZm-nOZ-exwrim-sQ5h1tu85BK4_TrwmsVSw9O1s_5QUyQ4FpyJ4gurcZTJumdU5iycxYZ1NROVRs0lFHDWMWPJb9boNfQEvvLJILCLfrydP5rT1RY-kVazb5FBuZZm6NqsSW-7tXyJyTzhn8oahWVu7dLiELgH4kdSx6aR5yXI1NnB1_58sWm87F3eCHEk2DGBDa4",
-    },
   ];
 
   if (!isAuthenticated || !user) {
@@ -211,13 +232,7 @@ export default function MemberProfile() {
           {subTabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => {
-                if (tab.id === "settings") {
-                  router.push("/profile/settings");
-                } else {
-                  setActiveSubTab(tab.id);
-                }
-              }}
+              onClick={() => setActiveSubTab(tab.id)}
               className={`relative text-sm font-medium tracking-[0.05em] transition-colors cursor-pointer pb-0.5 group ${
                 tab.id === activeSubTab
                   ? "text-[#b5573a]"
@@ -355,6 +370,7 @@ export default function MemberProfile() {
                             id="email"
                             placeholder="Email*"
                             value={editForm.email}
+                            readOnly
                             onChange={(e) => {
                               setEditForm(prev => ({ ...prev, email: e.target.value }));
                               setFormModified(prev => ({...prev, email: true}));
@@ -384,6 +400,9 @@ export default function MemberProfile() {
                         {formTouched.email && formModified.email && editForm.email.trim() !== "" && !editForm.email.includes("@") && (
                           <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter a valid email address.</p>
                         )}
+                        <p className="text-xs text-ink/45 mt-1.5">
+                          Email changes are handled in account settings with OTP verification.
+                        </p>
                       </div>
                       
                       {/* Password block (Readonly) */}
@@ -406,7 +425,7 @@ export default function MemberProfile() {
                           <Select
                             value={editForm.gender}
                             onValueChange={(val) => {
-                              setEditForm(prev => ({ ...prev, gender: val }));
+                              setEditForm(prev => ({ ...prev, gender: val ?? "" }));
                               setFormModified(prev => ({...prev, gender: true}));
                               setFormTouched(prev => ({...prev, gender: false}));
                             }}
@@ -428,9 +447,11 @@ export default function MemberProfile() {
                               <SelectValue placeholder="" />
                             </SelectTrigger>
                             <SelectContent alignItemWithTrigger={false} className="bg-canvas border-hairline rounded-lg shadow-sm">
-                              <SelectItem value="Male" className="cursor-pointer">Male</SelectItem>
-                              <SelectItem value="Female" className="cursor-pointer">Female</SelectItem>
-                              <SelectItem value="Other" className="cursor-pointer">Other</SelectItem>
+                              {genderOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value} className="cursor-pointer">
+                                  {option.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <label 
@@ -470,12 +491,10 @@ export default function MemberProfile() {
                             }`}
                           />
                           <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
-                            <PopoverTrigger asChild>
-                              <button 
-                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#1c1a18]/5 rounded-md transition-colors cursor-pointer text-ink/70 hover:text-ink outline-none"
-                              >
-                                <CalendarDays className="size-4" />
-                              </button>
+                            <PopoverTrigger
+                              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#1c1a18]/5 rounded-md transition-colors cursor-pointer text-ink/70 hover:text-ink outline-none"
+                            >
+                              <CalendarDays className="size-4" />
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
                               <Calendar
@@ -492,8 +511,6 @@ export default function MemberProfile() {
                                 }}
                                 className="rounded-md border-hairline shadow-sm"
                                 captionLayout="dropdown"
-                                fromYear={1900}
-                                toYear={new Date().getFullYear()}
                               />
                             </PopoverContent>
                           </Popover>
@@ -524,18 +541,26 @@ export default function MemberProfile() {
                           Delete
                         </button>
                       </div>
+
+                      {profileSaveError && (
+                        <p className="text-sm text-red-600">{profileSaveError}</p>
+                      )}
+                      {profileSaveMessage && (
+                        <p className="text-sm text-emerald-700">{profileSaveMessage}</p>
+                      )}
                       
                       {/* Save Button */}
                       <div className="flex justify-end border-t border-[#1c1a18]/10 pt-8">
                         <button 
-                          disabled={!isFormDirty}
+                          onClick={handleSaveProfile}
+                          disabled={!isFormDirty || !isProfileFormValid || updateProfileMutation.isPending}
                           className={`px-6 py-2 rounded-full border text-sm font-medium transition-colors ${
-                            isFormDirty
+                            isFormDirty && isProfileFormValid && !updateProfileMutation.isPending
                               ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 cursor-pointer"
                               : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed"
                           }`}
                         >
-                          Save
+                          {updateProfileMutation.isPending ? "Saving..." : "Save"}
                         </button>
                       </div>
                     </div>
@@ -545,14 +570,50 @@ export default function MemberProfile() {
                 {activeProfileSidebarTab === "delivery" && (
                   <div>
                     <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Delivery Addresses</h2>
-                    <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/30 border border-[#1c1a18]/15 rounded-md">
-                      <p className="text-sm text-ink/70 font-light max-w-md">
-                        Bạn chưa có địa chỉ giao hàng nào.
-                      </p>
-                      <button className="inline-flex py-3.5 px-10 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors cursor-pointer">
-                        Thêm địa chỉ mới
-                      </button>
-                    </div>
+                    {addressesQuery.isLoading ? (
+                      <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
+                        Loading addresses...
+                      </div>
+                    ) : addresses.length === 0 ? (
+                      <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/30 border border-[#1c1a18]/15 rounded-md">
+                        <p className="text-sm text-ink/70 font-light max-w-md">
+                          Bạn chưa có địa chỉ giao hàng nào.
+                        </p>
+                        <button className="inline-flex py-3.5 px-10 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors cursor-pointer">
+                          Thêm địa chỉ mới
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        {addresses.map((address) => (
+                          <div
+                            key={address.id}
+                            className="rounded-md border border-[#1c1a18]/15 bg-surface-card/30 p-5"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h3 className="text-sm font-semibold text-ink">
+                                    {address.receiverName}
+                                  </h3>
+                                  {address.isDefault && (
+                                    <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="mt-1 text-sm text-ink/65">
+                                  {address.phone ?? address.receiverPhone ?? "Chưa cập nhật số điện thoại"}
+                                </p>
+                                <p className="mt-2 text-sm leading-relaxed text-ink/70">
+                                  {formatAddress(address) || "Chưa cập nhật địa chỉ"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 
@@ -574,7 +635,7 @@ export default function MemberProfile() {
                         <h3 className="text-sm font-medium text-ink mb-1">Profile Display</h3>
                         <p className="text-sm text-ink/60 mb-1.5">{user.fullName}</p>
                         <p className="text-xs text-ink/50 font-light">
-                          Vela Member Since {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "June 2026"}
+                          Vela Member Since {formatMemberSince(user.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -623,7 +684,7 @@ export default function MemberProfile() {
                           <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${locationSharing === "dont_share" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                             {locationSharing === "dont_share" && <div className="size-2.5 bg-ink rounded-full" />}
                           </div>
-                          <span className="text-sm text-ink">Don't share my location</span>
+                          <span className="text-sm text-ink">Don&apos;t share my location</span>
                           <input type="radio" className="hidden" checked={locationSharing === "dont_share"} onChange={() => setLocationSharing("dont_share")} />
                         </label>
                       </div>
@@ -742,7 +803,7 @@ export default function MemberProfile() {
               </span>
             </div>
             
-            {loadingOrders ? (
+            {ordersQuery.isLoading ? (
               <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
                 Loading orders...
               </div>
@@ -785,12 +846,12 @@ export default function MemberProfile() {
                             Địa chỉ: {order.receiverAddress}
                           </p>
                           <p className="text-xs text-[#55423d]/50 mt-1">
-                            Đặt ngày {order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : ""}
+                            Đặt ngày {formatDisplayDate(order.createdAt)}
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-row md:flex-col justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-hairline/40">
-                        <div className="text-sm font-bold text-ink">{money(order.finalAmount || order.subtotal)}</div>
+                        <div className="text-sm font-bold text-ink">{money(Number(order.finalAmount ?? order.subtotal ?? 0))}</div>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${statusBadge}`}>
                           {order.status}
                         </span>
@@ -845,7 +906,7 @@ export default function MemberProfile() {
                         onClick={(e) => {
                           e.preventDefault();
                           addToCart(product);
-                          showAddedToBag(product, product.sizes?.[0] || "M", product.colors?.[0] || "Default");
+                          showAddedToBag(product, product.size || "M", product.color || "Default");
                         }}
                         className="w-full py-3 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
                       >
@@ -862,32 +923,126 @@ export default function MemberProfile() {
         {/* COUPONS TAB CONTENT */}
         {activeSubTab === "coupons" && (
           <section className="flex flex-col gap-6 text-left">
-            <div className="border-b border-hairline pb-4">
+            <div className="border-b border-hairline pb-4 flex justify-between items-end">
               <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
                 Your Coupons
               </h2>
+              <span className="text-xs text-[#55423d]/65">
+                {coupons.length} active {coupons.length === 1 ? "coupon" : "coupons"}
+              </span>
             </div>
-            <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/10 border border-hairline/20 rounded-sm">
-              <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
-                Bạn chưa có mã giảm giá nào.
-              </p>
-            </div>
+            {couponsQuery.isLoading ? (
+              <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
+                Loading coupons...
+              </div>
+            ) : coupons.length === 0 ? (
+              <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/10 border border-hairline/20 rounded-sm">
+                <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
+                  Bạn chưa có mã giảm giá nào.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {coupons.map((coupon) => (
+                  <div
+                    key={coupon.id}
+                    className="border border-hairline/60 rounded-sm bg-surface-card/30 p-5 flex flex-col gap-5"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b5573a]">
+                          {coupon.type.replaceAll("_", " ")}
+                        </p>
+                        <h3 className="mt-1 font-serif text-2xl font-light tracking-tight text-ink">
+                          {coupon.code}
+                        </h3>
+                      </div>
+                      <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-800">
+                        {coupon.status}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-3xl font-semibold text-ink">
+                        {formatCouponValue(coupon)}
+                      </p>
+                      <p className="mt-1 text-xs text-ink/55">
+                        Minimum order {money(Number(coupon.minOrderAmount ?? 0))}
+                        {coupon.maxDiscount
+                          ? ` • Max discount ${money(Number(coupon.maxDiscount))}`
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="border-t border-[#1c1a18]/10 pt-4 text-xs text-ink/60">
+                      <p>Valid until {formatDisplayDate(coupon.endDate) || "No expiry"}</p>
+                      <p className="mt-1">
+                        Used {coupon.usedCount}
+                        {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""} times
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
         {/* REVIEWS TAB CONTENT */}
         {activeSubTab === "reviews" && (
           <section className="flex flex-col gap-6 text-left">
-            <div className="border-b border-hairline pb-4">
+            <div className="border-b border-hairline pb-4 flex justify-between items-end">
               <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
                 Your Reviews
               </h2>
+              <span className="text-xs text-[#55423d]/65">
+                {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+              </span>
             </div>
-            <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/10 border border-hairline/20 rounded-sm">
-              <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
-                Bạn chưa có đánh giá nào.
-              </p>
-            </div>
+            {reviewsQuery.isLoading ? (
+              <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
+                Loading reviews...
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/10 border border-hairline/20 rounded-sm">
+                <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
+                  Bạn chưa có đánh giá nào.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="border border-hairline/60 rounded-sm bg-surface-card/30 p-5"
+                  >
+                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-ink">
+                          {review.productName}
+                        </h3>
+                        <p className="mt-1 text-xs text-ink/50">
+                          Order {review.orderCode} • {formatDisplayDate(review.createdAt)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                          <Star
+                            key={index}
+                            className={`size-4 ${
+                              index < review.rating
+                                ? "fill-[#b5573a] text-[#b5573a]"
+                                : "text-ink/20"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm leading-relaxed text-ink/70">
+                      {review.comment || "Bạn chưa viết nội dung đánh giá cho sản phẩm này."}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
 

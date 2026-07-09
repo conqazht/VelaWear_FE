@@ -36,6 +36,7 @@ export type User = {
   gender: Gender | null;
   createdAt: string;
   updatedAt: string;
+  hasPassword: boolean;
   roles?: unknown;
 };
 
@@ -98,10 +99,22 @@ export type Wishlist = {
 
 export type Order = {
   id: number;
+  userId?: number;
+  userFullName?: string;
+  userEmail?: string;
   orderCode: string;
   status: string;
+  subtotal?: number;
+  shippingFee?: number;
+  discountAmount?: number;
   finalAmount?: number;
+  receiverName?: string;
+  receiverPhone?: string;
+  receiverAddress?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
   createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Payment = {
@@ -116,9 +129,28 @@ export type UserAddress = {
   id: number;
   userId: number;
   receiverName: string;
-  receiverPhone: string;
-  addressLine: string;
+  phone?: string;
+  receiverPhone?: string;
+  province?: string;
+  district?: string;
+  ward?: string;
+  addressDetail?: string;
+  addressLine?: string;
   isDefault?: boolean;
+};
+
+export type Coupon = {
+  id: number;
+  code: string;
+  type: "PERCENTAGE" | "FIXED_AMOUNT" | string;
+  value: number;
+  minOrderAmount?: number | null;
+  maxDiscount?: number | null;
+  usageLimit?: number | null;
+  usedCount: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  status: "ACTIVE" | "INACTIVE" | "EXPIRED" | string;
 };
 
 export type Review = {
