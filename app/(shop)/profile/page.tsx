@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, PlusCircle, LockKeyhole, User, MapPin, ChevronDown, X, Check, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, PlusCircle, LockKeyhole, User, MapPin, ChevronDown, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
 
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductCard } from "@/components/shop/product-card";
@@ -14,6 +14,10 @@ import { useAuth } from "@/components/auth/auth-provider";
 import apiClient from "@/lib/api-client";
 import { money } from "@/lib/vela-data";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 interface Order {
   id: number;
@@ -73,16 +77,20 @@ export default function MemberProfile() {
   const [editForm, setEditForm] = useState({
     fullName: "",
     email: "",
+    gender: "",
     dob: "2005-09-07"
   });
-  const [formTouched, setFormTouched] = useState({ fullName: false, email: false, dob: false });
-  const [formModified, setFormModified] = useState({ fullName: false, email: false, dob: false });
+  const [formTouched, setFormTouched] = useState({ fullName: false, email: false, gender: false, dob: false });
+  const [formModified, setFormModified] = useState({ fullName: false, email: false, gender: false, dob: false });
+  const [isGenderOpen, setIsGenderOpen] = useState(false);
+  const [isDobOpen, setIsDobOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
       setEditForm({
         fullName: user.fullName || "",
         email: user.email || "",
+        gender: "Female",
         dob: "2005-09-07"
       });
     }
@@ -91,12 +99,23 @@ export default function MemberProfile() {
   const isFormDirty = user ? (
     editForm.fullName !== (user.fullName || "") || 
     editForm.email !== (user.email || "") || 
+    editForm.gender !== "Female" ||
     editForm.dob !== "2005-09-07"
   ) : false;
   const carouselContainerRef = useRef<HTMLDivElement>(null);
   const { favorites, toggleFavorite } = useFavorites();
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
+
+  // Mock settings state
+  const [reviewVisibility, setReviewVisibility] = useState("social");
+  const [locationSharing, setLocationSharing] = useState("dont_share");
+  const [emailUpdates, setEmailUpdates] = useState(false);
+  const [privacySettings, setPrivacySettings] = useState({
+    personalisedAds: true,
+    profileAds: true,
+    workoutData: true
+  });
 
   // Load user order history
   useEffect(() => {
@@ -218,21 +237,6 @@ export default function MemberProfile() {
 
       {/* Main Content Area */}
       <main className="flex-grow w-full px-6 md:px-16 py-10 md:py-16 flex flex-col gap-10">
-        
-        {/* Profile Section */}
-        <section className="flex items-center gap-5 md:gap-6 text-left">
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#efe7dc] border border-hairline flex items-center justify-center text-ink text-2xl md:text-3xl font-serif font-light shadow-inner flex-shrink-0">
-            {user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
-          </div>
-          <div className="flex flex-col justify-center">
-            <h1 className="font-serif text-2xl md:text-3xl text-ink leading-none font-medium tracking-tight mb-1.5">
-              {user.fullName}
-            </h1>
-            <p className="text-xs md:text-sm text-on-surface-variant/80 font-light">
-              Vela Member Since {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "June 2026"}
-            </p>
-          </div>
-        </section>
 
         {/* PROFILE TAB CONTENT */}
         {activeSubTab === "profile" && (
@@ -263,6 +267,39 @@ export default function MemberProfile() {
                   >
                     <MapPin className="size-4" />
                     Delivery Addresses
+                  </button>
+                  <button 
+                    onClick={() => setActiveProfileSidebarTab("visibility")}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+                      activeProfileSidebarTab === "visibility" 
+                        ? "bg-surface-card text-ink" 
+                        : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
+                    }`}
+                  >
+                    <Eye className="size-4" />
+                    Profile Visibility
+                  </button>
+                  <button 
+                    onClick={() => setActiveProfileSidebarTab("communication")}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+                      activeProfileSidebarTab === "communication" 
+                        ? "bg-surface-card text-ink" 
+                        : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
+                    }`}
+                  >
+                    <Mail className="size-4" />
+                    Communication
+                  </button>
+                  <button 
+                    onClick={() => setActiveProfileSidebarTab("privacy")}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+                      activeProfileSidebarTab === "privacy" 
+                        ? "bg-surface-card text-ink" 
+                        : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
+                    }`}
+                  >
+                    <Shield className="size-4" />
+                    Privacy
                   </button>
                 </nav>
               </aside>
@@ -363,32 +400,113 @@ export default function MemberProfile() {
                         </div>
                       </div>
                       
+                      {/* Gender Input */}
+                      <div>
+                        <div className="relative">
+                          <Select
+                            value={editForm.gender}
+                            onValueChange={(val) => {
+                              setEditForm(prev => ({ ...prev, gender: val }));
+                              setFormModified(prev => ({...prev, gender: true}));
+                              setFormTouched(prev => ({...prev, gender: false}));
+                            }}
+                            onOpenChange={(open) => {
+                              setIsGenderOpen(open);
+                              if (!open) {
+                                setFormTouched(prev => ({...prev, gender: true}));
+                              }
+                            }}
+                          >
+                            <SelectTrigger
+                              id="gender"
+                              className={`!w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink focus:ring-0 focus:outline-none transition-colors duration-500 ease-out flex items-center justify-between ${
+                                formTouched.gender && formModified.gender && editForm.gender === ""
+                                  ? "border-red-600 focus:border-red-600"
+                                  : (isGenderOpen ? "border-ink/60" : "border-[#1c1a18]/20")
+                              }`}
+                            >
+                              <SelectValue placeholder="" />
+                            </SelectTrigger>
+                            <SelectContent alignItemWithTrigger={false} className="bg-canvas border-hairline rounded-lg shadow-sm">
+                              <SelectItem value="Male" className="cursor-pointer">Male</SelectItem>
+                              <SelectItem value="Female" className="cursor-pointer">Female</SelectItem>
+                              <SelectItem value="Other" className="cursor-pointer">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <label 
+                            htmlFor="gender"
+                            className={`absolute left-3 transition-all duration-300 ease-out pointer-events-none bg-canvas px-1 ${
+                              editForm.gender === "" && !isGenderOpen
+                                ? "top-[15px] text-sm" 
+                                : "-top-2 text-xs"
+                            } ${
+                              formTouched.gender && formModified.gender && editForm.gender === ""
+                                ? "text-red-600"
+                                : "text-ink/70"
+                            }`}
+                          >
+                            Gender*
+                          </label>
+                        </div>
+                        {formTouched.gender && formModified.gender && editForm.gender === "" && (
+                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please select your gender.</p>
+                        )}
+                      </div>
+                      
                       {/* Date of Birth Input */}
                       <div>
                         <div className="relative">
                           <input 
-                            type="date"
+                            type="text"
                             id="dob"
-                            placeholder="Date of Birth*"
-                            value={editForm.dob}
-                            onChange={(e) => {
-                              setEditForm(prev => ({ ...prev, dob: e.target.value }));
-                              setFormModified(prev => ({...prev, dob: true}));
-                              setFormTouched(prev => ({...prev, dob: false}));
-                            }}
+                            placeholder=""
+                            value={editForm.dob ? format(new Date(editForm.dob), "dd/MM/yyyy") : ""}
+                            readOnly
                             onBlur={() => setFormTouched(prev => ({...prev, dob: true}))}
-                            className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
+                            className={`peer !w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out cursor-default ${
                               formTouched.dob && formModified.dob && editForm.dob.trim() === ""
                                 ? "border-red-600 focus:border-red-600"
-                                : "border-[#1c1a18]/20 focus:border-ink/60"
+                                : (isDobOpen ? "border-ink/60" : "border-[#1c1a18]/20 focus:border-ink/60")
                             }`}
                           />
+                          <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
+                            <PopoverTrigger asChild>
+                              <button 
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#1c1a18]/5 rounded-md transition-colors cursor-pointer text-ink/70 hover:text-ink outline-none"
+                              >
+                                <CalendarDays className="size-4" />
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={editForm.dob ? new Date(editForm.dob) : undefined}
+                                onSelect={(date) => {
+                                  if (date) {
+                                    const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                                    setEditForm(prev => ({ ...prev, dob: formatted }));
+                                    setFormModified(prev => ({...prev, dob: true}));
+                                    setFormTouched(prev => ({...prev, dob: false}));
+                                    setIsDobOpen(false);
+                                  }
+                                }}
+                                className="rounded-md border-hairline shadow-sm"
+                                captionLayout="dropdown"
+                                fromYear={1900}
+                                toYear={new Date().getFullYear()}
+                              />
+                            </PopoverContent>
+                          </Popover>
                           <label 
                             htmlFor="dob"
-                            className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
+                            className={`absolute left-3 transition-all duration-300 ease-out pointer-events-none bg-canvas px-1 ${
+                              editForm.dob === "" && !isDobOpen
+                                ? "top-[15px] text-sm" 
+                                : "-top-2 text-xs"
+                            } ${
                               formTouched.dob && formModified.dob && editForm.dob.trim() === ""
-                                ? "text-red-600 peer-focus:text-red-600"
-                                : "text-ink/70 peer-focus:text-ink/70"
+                                ? "text-red-600"
+                                : "text-ink/70"
                             }`}
                           >
                             Date of Birth*
@@ -431,8 +549,176 @@ export default function MemberProfile() {
                       <p className="text-sm text-ink/70 font-light max-w-md">
                         Bạn chưa có địa chỉ giao hàng nào.
                       </p>
-                      <button className="inline-flex bg-primary-container text-on-primary text-xs font-semibold uppercase tracking-widest py-3 px-6 hover:bg-[#964025] transition-colors rounded-sm shadow-sm cursor-pointer">
+                      <button className="inline-flex py-3.5 px-10 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors cursor-pointer">
                         Thêm địa chỉ mới
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {activeProfileSidebarTab === "visibility" && (
+                  <div>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Profile Visibility</h2>
+                    <p className="text-sm text-ink/70 font-light mb-8 max-w-md">
+                      Your Vela Wear profile represents you on product reviews and across the Vela family of apps.
+                    </p>
+                    
+                    <div className="flex items-center gap-5 md:gap-6 text-left mb-12">
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#efe7dc] border border-hairline flex items-center justify-center text-ink text-2xl md:text-3xl font-serif font-light shadow-inner flex-shrink-0 relative">
+                        {user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
+                        <button className="absolute bottom-0 right-0 bg-white border border-hairline rounded-full p-1.5 shadow-sm hover:scale-105 transition-transform flex items-center justify-center">
+                          <PencilLine className="size-3.5 text-ink" />
+                        </button>
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <h3 className="text-sm font-medium text-ink mb-1">Profile Display</h3>
+                        <p className="text-sm text-ink/60 mb-1.5">{user.fullName}</p>
+                        <p className="text-xs text-ink/50 font-light">
+                          Vela Member Since {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "June 2026"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-[#1c1a18]/10 pt-8 mb-8">
+                      <h3 className="text-base font-medium text-ink mb-4">Product Review Visibility</h3>
+                      <p className="text-sm text-ink/70 font-light mb-6">
+                        Choose how you will appear on any Vela product reviews you complete. Changing these settings will also affect your visibility for connecting with friends. <button className="font-semibold underline underline-offset-4">Learn More</button>
+                      </p>
+                      <div className="flex flex-col gap-4">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${reviewVisibility === "private" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                            {reviewVisibility === "private" && <div className="size-2.5 bg-ink rounded-full" />}
+                          </div>
+                          <span className="text-sm text-ink">Private: Profile visible to only you</span>
+                          <input type="radio" className="hidden" checked={reviewVisibility === "private"} onChange={() => setReviewVisibility("private")} />
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${reviewVisibility === "social" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                            {reviewVisibility === "social" && <div className="size-2.5 bg-ink rounded-full" />}
+                          </div>
+                          <span className="text-sm text-ink">Social: Profile visible to friends</span>
+                          <input type="radio" className="hidden" checked={reviewVisibility === "social"} onChange={() => setReviewVisibility("social")} />
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${reviewVisibility === "public" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                            {reviewVisibility === "public" && <div className="size-2.5 bg-ink rounded-full" />}
+                          </div>
+                          <span className="text-sm text-ink">Public: Everyone can view profile</span>
+                          <input type="radio" className="hidden" checked={reviewVisibility === "public"} onChange={() => setReviewVisibility("public")} />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 mb-8">
+                      <h3 className="text-base font-medium text-ink mb-4">Location Sharing</h3>
+                      <div className="flex flex-col gap-4">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${locationSharing === "friends" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                            {locationSharing === "friends" && <div className="size-2.5 bg-ink rounded-full" />}
+                          </div>
+                          <span className="text-sm text-ink">Share my location with friends only</span>
+                          <input type="radio" className="hidden" checked={locationSharing === "friends"} onChange={() => setLocationSharing("friends")} />
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${locationSharing === "dont_share" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                            {locationSharing === "dont_share" && <div className="size-2.5 bg-ink rounded-full" />}
+                          </div>
+                          <span className="text-sm text-ink">Don't share my location</span>
+                          <input type="radio" className="hidden" checked={locationSharing === "dont_share"} onChange={() => setLocationSharing("dont_share")} />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeProfileSidebarTab === "communication" && (
+                  <div>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Communication Preferences</h2>
+                    
+                    <div className="mb-8">
+                      <h3 className="text-base font-medium text-ink mb-3">General Communication</h3>
+                      <p className="text-sm text-ink/70 font-light mb-6">
+                        Get updates on products, offers and your Member benefits.
+                      </p>
+                      
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className={`size-5 rounded-sm border flex items-center justify-center transition-colors ${emailUpdates ? "border-ink bg-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                          {emailUpdates && <Check className="size-3.5 text-white" />}
+                        </div>
+                        <span className="text-sm text-ink">Yes, send me emails.</span>
+                        <input type="checkbox" className="hidden" checked={emailUpdates} onChange={() => setEmailUpdates(!emailUpdates)} />
+                      </label>
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeProfileSidebarTab === "privacy" && (
+                  <div>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Privacy</h2>
+                    
+                    <p className="text-sm text-ink/70 font-light mb-4 max-w-lg">
+                      We use your data to serve you relevant ads and measure how well they perform. This includes data about how you use our site and apps. You can control how your data is used for advertising by adjusting your privacy settings below.
+                    </p>
+                    <p className="text-sm text-ink/70 font-light mb-8">
+                      For more information, see our Privacy Policy. <button className="font-medium underline underline-offset-4 text-ink">Vela Privacy Policy</button>
+                    </p>
+                    
+                    <div className="border-t border-[#1c1a18]/10 pt-6 mb-6">
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <div className={`mt-0.5 size-5 flex-shrink-0 rounded-sm border flex items-center justify-center transition-colors ${privacySettings.personalisedAds ? "border-ink bg-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                          {privacySettings.personalisedAds && <Check className="size-3.5 text-white" />}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-ink mb-1.5">Personalised advertising</span>
+                          <span className="text-sm text-ink/60 font-light mb-2">Allows sharing of data about how you use our site and apps with advertising partners.</span>
+                          <button className="text-sm font-medium underline underline-offset-4 text-ink/70 hover:text-ink text-left w-fit">Learn more about personalised advertising</button>
+                        </div>
+                        <input type="checkbox" className="hidden" checked={privacySettings.personalisedAds} onChange={() => setPrivacySettings(prev => ({...prev, personalisedAds: !prev.personalisedAds}))} />
+                      </label>
+                    </div>
+
+                    <div className="border-t border-[#1c1a18]/10 pt-6 mb-6">
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <div className={`mt-0.5 size-5 flex-shrink-0 rounded-sm border flex items-center justify-center transition-colors ${privacySettings.profileAds ? "border-ink bg-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                          {privacySettings.profileAds && <Check className="size-3.5 text-white" />}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-ink mb-1.5">Profile-based personalised advertising</span>
+                          <span className="text-sm text-ink/60 font-light mb-2">Allows sharing of your email address and phone number with advertising partners to personalise advertising based on your interests.</span>
+                          <button className="text-sm font-medium underline underline-offset-4 text-ink/70 hover:text-ink text-left w-fit">Learn more about profile-based advertising</button>
+                        </div>
+                        <input type="checkbox" className="hidden" checked={privacySettings.profileAds} onChange={() => setPrivacySettings(prev => ({...prev, profileAds: !prev.profileAds}))} />
+                      </label>
+                    </div>
+
+                    <div className="border-t border-[#1c1a18]/10 pt-6 mb-8">
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <div className={`mt-0.5 size-5 flex-shrink-0 rounded-sm border flex items-center justify-center transition-colors ${privacySettings.workoutData ? "border-ink bg-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
+                          {privacySettings.workoutData && <Check className="size-3.5 text-white" />}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-ink mb-1.5">Use workout data</span>
+                          <span className="text-sm text-ink/60 font-light mb-2">Use my workout data to give me adaptive training plans, personalised product recommendations and special event invitations.</span>
+                        </div>
+                        <input type="checkbox" className="hidden" checked={privacySettings.workoutData} onChange={() => setPrivacySettings(prev => ({...prev, workoutData: !prev.workoutData}))} />
+                      </label>
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
+                        Save
                       </button>
                     </div>
                   </div>
