@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays, Star } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/product-card";
@@ -90,13 +91,14 @@ export default function MemberProfile() {
   const coupons = couponsQuery.data?.result ?? [];
   const reviews = reviewsQuery.data?.result ?? [];
 
-  const [activeSubTab, setActiveSubTab] = useState<ProfileTabId>(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return getProfileTabId(params.get("tab"));
-    }
-    return "profile";
-  });
+  const searchParams = useSearchParams();
+  const [activeSubTab, setActiveSubTab] = useState<ProfileTabId>(() =>
+    getProfileTabId(searchParams.get("tab"))
+  );
+
+  useEffect(() => {
+    setActiveSubTab(getProfileTabId(searchParams.get("tab")));
+  }, [searchParams]);
   const [activeProfileSidebarTab, setActiveProfileSidebarTab] = useState("account");
 
   const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
@@ -255,9 +257,18 @@ export default function MemberProfile() {
 
         {/* PROFILE TAB CONTENT */}
         {activeSubTab === "profile" && (
-          <>
+          <section className="flex flex-col gap-6 text-left">
+            <div className="border-b border-hairline pb-4 flex justify-between items-end">
+              <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
+                Your Profile
+              </h2>
+              <span className="text-xs text-[#55423d]/65">
+                Vela Member
+              </span>
+            </div>
+            
             {/* Redesigned Profile Section */}
-            <section className="flex flex-col md:flex-row gap-12 md:gap-40 lg:gap-56 mt-2 text-left">
+            <div className="flex flex-col md:flex-row gap-12 md:gap-40 lg:gap-56 mt-2 text-left">
               {/* Sidebar */}
               <aside className="w-full md:w-52 flex-shrink-0">
                 <nav className="flex flex-col gap-2">
@@ -348,7 +359,7 @@ export default function MemberProfile() {
                           />
                           <label 
                             htmlFor="fullName"
-                            className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
+                            className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
                               formTouched.fullName && formModified.fullName && editForm.fullName.trim() === ""
                                 ? "text-red-600 peer-focus:text-red-600"
                                 : "text-ink/70 peer-focus:text-ink/70"
@@ -385,7 +396,7 @@ export default function MemberProfile() {
                           />
                           <label 
                             htmlFor="email"
-                            className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
+                            className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
                               formTouched.email && formModified.email && (editForm.email.trim() === "" || !editForm.email.includes("@"))
                                 ? "text-red-600 peer-focus:text-red-600"
                                 : "text-ink/70 peer-focus:text-ink/70"
@@ -456,7 +467,7 @@ export default function MemberProfile() {
                           </Select>
                           <label 
                             htmlFor="gender"
-                            className={`absolute left-3 transition-all duration-300 ease-out pointer-events-none bg-canvas px-1 ${
+                            className={`absolute left-3 transition-all duration-200 ease-out pointer-events-none bg-canvas px-1 ${
                               editForm.gender === "" && !isGenderOpen
                                 ? "top-[15px] text-sm" 
                                 : "-top-2 text-xs"
@@ -516,7 +527,7 @@ export default function MemberProfile() {
                           </Popover>
                           <label 
                             htmlFor="dob"
-                            className={`absolute left-3 transition-all duration-300 ease-out pointer-events-none bg-canvas px-1 ${
+                            className={`absolute left-3 transition-all duration-200 ease-out pointer-events-none bg-canvas px-1 ${
                               editForm.dob === "" && !isDobOpen
                                 ? "top-[15px] text-sm" 
                                 : "-top-2 text-xs"
@@ -785,10 +796,8 @@ export default function MemberProfile() {
                   </div>
                 )}
               </div>
-            </section>
-
-
-          </>
+            </div>
+          </section>
         )}
 
         {/* ORDERS TAB CONTENT */}
@@ -867,10 +876,13 @@ export default function MemberProfile() {
         {/* FAVOURITES TAB CONTENT */}
         {activeSubTab === "favourites" && (
           <section className="flex flex-col gap-6 text-left">
-            <div className="border-b border-hairline pb-4">
+            <div className="border-b border-hairline pb-4 flex justify-between items-end">
               <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
                 Your Favourites
               </h2>
+              <span className="text-xs text-[#55423d]/65">
+                {favorites.length} {favorites.length === 1 ? "item" : "items"} saved
+              </span>
             </div>
             {favorites.length === 0 ? (
               <div className="py-16 text-center flex flex-col items-center gap-6">
@@ -1066,10 +1078,13 @@ export default function MemberProfile() {
                 <X className="size-5 text-ink" />
               </button>
 
-              <h2 className="text-2xl font-serif font-light text-ink tracking-tight mb-8">Edit Password</h2>
+              <h2 className="text-2xl font-serif font-light text-ink tracking-tight mb-8">
+                {user?.hasPassword !== false ? "Edit Password" : "Create Password"}
+              </h2>
 
               <div className="flex flex-col gap-6">
                 {/* Current Password */}
+                {user?.hasPassword !== false && (
                 <div>
                   <div className="relative">
                     <input 
@@ -1104,6 +1119,7 @@ export default function MemberProfile() {
                     <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter your current password.</p>
                   )}
                 </div>
+                )}
                 
                 {/* New Password */}
                 <div>
@@ -1194,14 +1210,20 @@ export default function MemberProfile() {
 
               <div className="flex justify-end">
                 <button 
-                  disabled={passwordForm.currentPassword.length === 0 || passwordForm.newPassword.length < 8 || passwordForm.newPassword !== passwordForm.confirmPassword}
-                  className={`px-8 py-2.5 rounded-full border text-sm font-medium transition-colors ${
-                    passwordForm.currentPassword.length > 0 && passwordForm.newPassword.length >= 8 && passwordForm.newPassword === passwordForm.confirmPassword
-                      ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 cursor-pointer"
-                      : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed"
+                  disabled={
+                    user?.hasPassword !== false 
+                      ? passwordForm.currentPassword.length === 0 || passwordForm.newPassword.length < 8 || passwordForm.newPassword !== passwordForm.confirmPassword
+                      : passwordForm.newPassword.length < 8 || passwordForm.newPassword !== passwordForm.confirmPassword
+                  }
+                  className={`px-8 py-2.5 rounded-full border text-sm font-medium transition-colors cursor-pointer ${
+                    (user?.hasPassword !== false 
+                      ? passwordForm.currentPassword.length > 0 && passwordForm.newPassword.length >= 8 && passwordForm.newPassword === passwordForm.confirmPassword
+                      : passwordForm.newPassword.length >= 8 && passwordForm.newPassword === passwordForm.confirmPassword)
+                      ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90"
+                      : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed pointer-events-none"
                   }`}
                 >
-                  Save
+                  {user?.hasPassword !== false ? "Save" : "Create Password"}
                 </button>
               </div>
             </div>

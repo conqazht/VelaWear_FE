@@ -23,16 +23,32 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Card } from "@/components/ui/card";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { OtpEntry } from "@/components/auth/otp-entry";
-import { changeEmail } from "@/lib/auth-otp-api";
-import { emailSchema } from "@/lib/validations";
+import { changeEmail, changePassword } from "@/lib/auth-otp-api";
+import { emailSchema, strongPasswordSchema } from "@/lib/validations";
 
 const changeEmailSchema = z.object({ email: emailSchema });
 type ChangeEmailFormValues = z.infer<typeof changeEmailSchema>;
+
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().optional(),
+    newPassword: strongPasswordSchema,
+    confirmPassword: z.string({ message: "Required" }).min(1, "Required"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 
 export default function MemberSettings() {
   const { user, isAuthenticated, checkSession } = useAuth();
   const [requestedEmail, setRequestedEmail] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isPasswordEditing, setIsPasswordEditing] = useState(false);
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+  const [passwordSubmitError, setPasswordSubmitError] = useState<string | null>(null);
+  const hasPassword = Boolean(user?.hasPassword);
 
   const {
     register,
@@ -47,6 +63,21 @@ export default function MemberSettings() {
 
   const newEmail = useWatch({ control, name: "email" });
   const otpEmail = requestedEmail ?? newEmail;
+
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    reset: resetPasswordForm,
+    setError: setPasswordFieldError,
+    formState: { errors: passwordErrors },
+  } = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(changePasswordSchema as never),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
   const {
     showOtpStep,
@@ -81,6 +112,53 @@ export default function MemberSettings() {
     if (!success) {
       setRequestedEmail(null);
     }
+  };
+
+  const getApiErrorMessage = (error: unknown) => {
+    const apiError = error as {
+      response?: { data?: { message?: string } };
+      message?: string;
+    };
+
+    return apiError.response?.data?.message ?? apiError.message ?? "Could not update password. Please try again.";
+  };
+
+  const handleSubmitPassword = async (data: ChangePasswordFormValues) => {
+    setSuccessMessage(null);
+    setPasswordSubmitError(null);
+    if (hasPassword && !data.currentPassword?.trim()) {
+      setPasswordFieldError("currentPassword", {
+        type: "manual",
+        message: "Current password is required",
+      });
+      return;
+    }
+
+    try {
+      setIsPasswordSubmitting(true);
+      await changePassword({
+        currentPassword: hasPassword ? data.currentPassword : undefined,
+        newPassword: data.newPassword,
+      });
+      await checkSession();
+      resetPasswordForm();
+      setIsPasswordEditing(false);
+      setSuccessMessage(
+        hasPassword
+          ? "Your password has been successfully updated."
+          : "Password created. You can now sign in with email and password."
+      );
+    } catch (error) {
+      setPasswordSubmitError(getApiErrorMessage(error));
+    } finally {
+      setIsPasswordSubmitting(false);
+    }
+  };
+
+  const handleCancelPasswordChange = () => {
+    setPasswordSubmitError(null);
+    resetPasswordForm();
+    setIsPasswordEditing(false);
   };
 
   // If user is loading or not authenticated, render login prompt
@@ -237,20 +315,120 @@ export default function MemberSettings() {
               )}
             </form>
 
-            <form className="flex flex-col gap-8" onSubmit={(e) => e.preventDefault()}>
+            <div className="flex flex-col gap-8">
               {/* Password Section */}
-              <div className="flex justify-between items-end border-b border-hairline/60 pb-4">
-                <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-ink">Password</span>
-                  <span className="text-sm text-[#55423d]/60 tracking-[0.2em] mt-1">•••••••••••••</span>
+              <form
+                className="flex flex-col gap-4 border-b border-hairline/60 pb-6"
+                onSubmit={handlePasswordSubmit(handleSubmitPassword)}
+              >
+                <div className="flex justify-between items-start gap-6">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-ink">
+                      {hasPassword ? "Password" : "Create password"}
+                    </span>
+                    <span className="text-sm text-[#55423d]/60">
+                      {hasPassword
+                        ? "Change your password with your current password."
+                        : "Your account was created with Google. Add a password to also sign in with email."}
+                    </span>
+                  </div>
+                  {!isPasswordEditing && (
+                    <button
+                      className="text-sm font-medium text-primary underline hover:text-[#964025] transition-colors disabled:opacity-50"
+                      type="button"
+                      disabled={showOtpStep}
+                      onClick={() => {
+                        setSuccessMessage(null);
+                        setIsPasswordEditing(true);
+                      }}
+                    >
+                      {hasPassword ? "Edit" : "Set password"}
+                    </button>
+                  )}
                 </div>
-                <button
-                  className="text-sm font-medium text-primary underline hover:text-[#964025] transition-colors"
-                  type="button"
-                >
-                  Edit
-                </button>
-              </div>
+
+                {isPasswordEditing && (
+                  <div className="grid gap-4">
+                    {hasPassword && (
+                      <div className="relative">
+                        <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
+                          Current Password*
+                        </label>
+                        <input
+                          className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
+                          type="password"
+                          autoComplete="current-password"
+                          disabled={isPasswordSubmitting}
+                          {...registerPassword("currentPassword")}
+                        />
+                        {passwordErrors.currentPassword && (
+                          <p className="mt-2 text-xs text-red-600 font-medium">
+                            {passwordErrors.currentPassword.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="relative">
+                      <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
+                        New Password*
+                      </label>
+                      <input
+                        className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
+                        type="password"
+                        autoComplete="new-password"
+                        disabled={isPasswordSubmitting}
+                        {...registerPassword("newPassword")}
+                      />
+                      {passwordErrors.newPassword && (
+                        <p className="mt-2 text-xs text-red-600 font-medium">
+                          {passwordErrors.newPassword.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="relative">
+                      <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
+                        Confirm New Password*
+                      </label>
+                      <input
+                        className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
+                        type="password"
+                        autoComplete="new-password"
+                        disabled={isPasswordSubmitting}
+                        {...registerPassword("confirmPassword")}
+                      />
+                      {passwordErrors.confirmPassword && (
+                        <p className="mt-2 text-xs text-red-600 font-medium">
+                          {passwordErrors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {passwordSubmitError && (
+                      <p className="text-xs text-red-600 font-medium">{passwordSubmitError}</p>
+                    )}
+
+                    <div className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        disabled={isPasswordSubmitting}
+                        onClick={handleCancelPasswordChange}
+                        className="px-5 py-2.5 border border-hairline/80 rounded-sm text-xs font-semibold uppercase tracking-wider text-ink hover:border-primary transition-colors disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isPasswordSubmitting}
+                        className="px-6 py-2.5 bg-[#964025] hover:bg-[#87391f] text-white text-xs font-semibold rounded-sm tracking-wider uppercase disabled:opacity-50 cursor-pointer border-0"
+                      >
+                        {hasPassword ? "Update Password" : "Create Password"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
 
               {/* Date of Birth Field */}
               <div className="relative">
@@ -309,7 +487,7 @@ export default function MemberSettings() {
                   Save
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </section>
       </main>
