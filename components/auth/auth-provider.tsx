@@ -9,6 +9,7 @@ import {
 } from "@/lib/queries/auth";
 import type { RegisterRequest } from "@/lib/api/auth";
 import type { User } from "@/lib/api/types";
+import { useCartStore } from "@/store/cart-store";
 
 export type { User };
 
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const user = (sessionQuery.data ?? null) as User | null;
   const isLoading = sessionQuery.isLoading || sessionQuery.isFetching;
@@ -53,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         registerMutation.mutateAsync(data as RegisterRequest),
       signOut: async () => {
         await logoutMutation.mutateAsync();
+        clearCart();
       },
       checkSession: async () => {
         await sessionQuery.refetch();
@@ -62,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isLoading,
       isAuthenticated,
+      clearCart,
       loginMutation,
       logoutMutation,
       registerMutation,
