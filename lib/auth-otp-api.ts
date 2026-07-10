@@ -1,6 +1,9 @@
 import apiClient from "./api-client";
 
-export type OtpPurpose = "REGISTER" | "FORGOT_PASSWORD" | "CHANGE_EMAIL";
+export type OtpPurpose =
+  | "REGISTER"
+  | "FORGOT_PASSWORD"
+  | "CHANGE_EMAIL";
 export type OtpErrorKind =
   | "cooldown"
   | "expired"
@@ -27,6 +30,11 @@ export interface ForgotPasswordResetPayload {
 
 export interface ChangeEmailPayload {
   newEmail: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword?: string;
+  newPassword: string;
 }
 
 export interface OtpRequestResult {
@@ -164,4 +172,8 @@ export async function resetPassword(payload: ForgotPasswordResetPayload): Promis
 
 export async function changeEmail(payload: ChangeEmailPayload): Promise<void> {
   await apiClient.put("/auth/me/email", payload);
+}
+
+export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+  await apiClient.put("/auth/me/password", payload);
 }

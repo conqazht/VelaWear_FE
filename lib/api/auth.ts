@@ -21,14 +21,29 @@ export type TokenResponse = {
   expiresIn?: number;
 };
 
+export type OAuth2ExchangeRequest = {
+  code: string;
+};
+
 function normalizeUser(user: User): User {
-  const normalized = { ...user };
+  const normalized = { ...user, hasPassword: Boolean(user.hasPassword) };
   delete normalized.roles;
   return normalized;
 }
 
 export async function login(request: LoginRequest): Promise<TokenResponse> {
   const token = await apiPost<TokenResponse, LoginRequest>("/auth/login", request);
+  setAccessToken(token.accessToken);
+  return token;
+}
+
+export async function exchangeOAuth2Code(
+  request: OAuth2ExchangeRequest
+): Promise<TokenResponse> {
+  const token = await apiPost<TokenResponse, OAuth2ExchangeRequest>(
+    "/auth/oauth2/exchange",
+    request
+  );
   setAccessToken(token.accessToken);
   return token;
 }
