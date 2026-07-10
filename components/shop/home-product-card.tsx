@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
-import { money, Product } from "@/lib/vela-data";
+import { getCategoryLabel, money, Product } from "@/lib/vela-data";
 
 interface HomeProductCardProps {
   product: Product;
@@ -19,8 +19,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
 
   const favorited = isFavorite(product.id);
 
-  // Map local categories
-  const displayCategory = product.category === "AO" ? "Clothes" : product.category === "QUAN" ? "Trousers" : "Accessories";
+  const displayCategory = getCategoryLabel(product.category, "en");
 
   return (
     <motion.div

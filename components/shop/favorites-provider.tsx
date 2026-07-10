@@ -2,13 +2,17 @@
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQueries } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   useCreateWishlistMutation,
   useDeleteWishlistMutation,
   useWishlistsQuery,
 } from "@/lib/queries/commerce";
-import { Product } from "@/lib/vela-data";
+import { getProduct } from "@/lib/api/catalog";
+import { getActiveLocale } from "@/lib/i18n";
+import { queryKeys } from "@/lib/queries/keys";
+import { mapBackendProduct, Product } from "@/lib/vela-data";
 import { useNotification } from "./notification-provider";
 
 interface FavoritesContextValue {
@@ -22,13 +26,13 @@ interface FavoritesContextValue {
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
-  const [favorites, setFavorites] = useState<Product[]>([]);
+  const [optimisticFavorites, setOptimisticFavorites] = useState<Product[]>([]);
+  const [optimisticRemovedProductIds, setOptimisticRemovedProductIds] = useState<Set<number>>(new Set());
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const { showAddedToFavorites } = useNotification();
-  const wishlistsQuery = useWishlistsQuery(
-    user ? { userId: user.id, size: 100 } : {}
-  );
+  const activeLocale = getActiveLocale();
+  const wishlistsQuery = useWishlistsQuery({ size: 100 }, isAuthenticated);
   const createWishlistMutation = useCreateWishlistMutation();
   const deleteWishlistMutation = useDeleteWishlistMutation();
 
@@ -37,16 +41,58 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     [wishlistsQuery.data?.result]
   );
 
-  const isFavorite = useCallback((productId: string) => {
-    const localMatch = favorites.some((item) => item.id === productId);
-    const product = favorites.find((item) => item.id === productId);
-    const serverMatch =
-      product?.realId !== undefined
-        ? serverWishlists.some((item) => item.productId === product.realId)
-        : false;
+  const wishlistProductIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          serverWishlists
+            .map((item) => item.productId)
+            .filter((productId) => !optimisticRemovedProductIds.has(productId))
+        )
+      ),
+    [optimisticRemovedProductIds, serverWishlists]
+  );
 
-    return localMatch || serverMatch;
-  }, [favorites, serverWishlists]);
+  const wishlistProductQueries = useQueries({
+    queries: wishlistProductIds.map((productId) => ({
+      queryKey: queryKeys.products.detail(productId),
+      queryFn: () => getProduct(productId),
+      enabled: typeof user?.id === "number",
+    })),
+  });
+
+  const serverFavorites = useMemo(
+    () => {
+      return wishlistProductIds
+        .map((_, index) => wishlistProductQueries[index]?.data)
+        .filter(Boolean)
+        .map((product) => mapBackendProduct(product!, activeLocale));
+    },
+    [activeLocale, wishlistProductIds, wishlistProductQueries]
+  );
+
+  const favorites = useMemo(() => {
+    const serverIds = new Set(serverFavorites.map((item) => item.realId ?? item.id));
+    const pendingFavorites = optimisticFavorites.filter(
+      (item) => !serverIds.has(item.realId ?? item.id)
+    );
+
+    return [...serverFavorites, ...pendingFavorites];
+  }, [optimisticFavorites, serverFavorites]);
+
+  const isFavorite = useCallback((productId: string) => {
+    return favorites.some((item) => item.id === productId);
+  }, [favorites]);
+
+  const isFavoriteProduct = useCallback((product: Product) => {
+    if (product.realId !== undefined) {
+      return favorites.some(
+        (item) => item.realId === product.realId || item.id === product.id
+      );
+    }
+
+    return favorites.some((item) => item.id === product.id);
+  }, [favorites]);
 
   const addToFavorites = useCallback((product: Product, size = "M") => {
     if (!isAuthenticated || !user) {
@@ -56,16 +102,29 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
     if (product.realId === undefined) return;
 
-    setFavorites((prev) => {
+    if (serverWishlists.some((item) => item.productId === product.realId)) {
+      showAddedToFavorites(product, size);
+      return;
+    }
+
+    setOptimisticFavorites((prev) => {
       if (prev.some((item) => item.id === product.id)) return prev;
       return [...prev, product];
     });
-    createWishlistMutation.mutate({
-      userId: user.id,
-      productId: product.realId,
+    setOptimisticRemovedProductIds((prev) => {
+      const next = new Set(prev);
+      next.delete(product.realId);
+      return next;
     });
-    showAddedToFavorites(product, size);
-  }, [createWishlistMutation, isAuthenticated, router, showAddedToFavorites, user]);
+    createWishlistMutation.mutate(product.realId, {
+      onSuccess: () => {
+        showAddedToFavorites(product, size);
+      },
+      onError: () => {
+        setOptimisticFavorites((prev) => prev.filter((item) => item.id !== product.id));
+      },
+    });
+  }, [createWishlistMutation, isAuthenticated, router, serverWishlists, showAddedToFavorites, user]);
 
   const removeFromFavorites = useCallback((productId: string) => {
     const product = favorites.find((item) => item.id === productId);
@@ -73,19 +132,68 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       (item) => product?.realId !== undefined && item.productId === product.realId
     );
 
-    setFavorites((prev) => prev.filter((item) => item.id !== productId));
+    setOptimisticFavorites((prev) => prev.filter((item) => item.id !== productId));
+    if (product?.realId !== undefined) {
+      setOptimisticRemovedProductIds((prev) => new Set(prev).add(product.realId));
+    }
+    if (wishlist && product?.realId !== undefined) {
+      deleteWishlistMutation.mutate(product.realId, {
+        onError: () => {
+          if (product?.realId !== undefined) {
+            setOptimisticRemovedProductIds((prev) => {
+              const next = new Set(prev);
+              next.delete(product.realId);
+              return next;
+            });
+          }
+        },
+      });
+    }
+  }, [deleteWishlistMutation, favorites, serverWishlists]);
+
+  const removeProductFromFavorites = useCallback((product: Product) => {
+    const matchedProduct = favorites.find(
+      (item) =>
+        item.id === product.id ||
+        (product.realId !== undefined && item.realId === product.realId)
+    );
+    const realId = product.realId ?? matchedProduct?.realId;
+    const wishlist = serverWishlists.find(
+      (item) => realId !== undefined && item.productId === realId
+    );
+
+    setOptimisticFavorites((prev) =>
+      prev.filter(
+        (item) =>
+          item.id !== product.id &&
+          (realId === undefined || item.realId !== realId)
+      )
+    );
+    if (realId !== undefined) {
+      setOptimisticRemovedProductIds((prev) => new Set(prev).add(realId));
+    }
     if (wishlist) {
-      deleteWishlistMutation.mutate(wishlist.id);
+      deleteWishlistMutation.mutate(realId, {
+        onError: () => {
+          if (realId !== undefined) {
+            setOptimisticRemovedProductIds((prev) => {
+              const next = new Set(prev);
+              next.delete(realId);
+              return next;
+            });
+          }
+        },
+      });
     }
   }, [deleteWishlistMutation, favorites, serverWishlists]);
 
   const toggleFavorite = useCallback((product: Product, size = "M") => {
-    if (isFavorite(product.id)) {
-      removeFromFavorites(product.id);
+    if (isFavoriteProduct(product)) {
+      removeProductFromFavorites(product);
     } else {
       addToFavorites(product, size);
     }
-  }, [isFavorite, addToFavorites, removeFromFavorites]);
+  }, [isFavoriteProduct, addToFavorites, removeProductFromFavorites]);
 
   const value = useMemo(() => ({
     favorites,

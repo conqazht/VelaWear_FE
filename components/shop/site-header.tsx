@@ -710,11 +710,11 @@ export function SiteHeader() {
               {/* Account Profile / Login */}
               <div className="hidden md:flex items-center gap-4">
                 {safeIsAuthenticated && safeUser ? (
-                  <div className="flex items-center gap-3">
+                  <div className="relative group">
                     <Link
                       href="/profile"
                       aria-label="View Profile"
-                      className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-ink text-xs font-semibold hover:bg-white transition-colors flex-shrink-0`}
+                      className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-[#1c1a18] text-xs font-semibold group-hover:bg-[#b5573a] group-hover:text-white group-hover:border-[#b5573a] transition-all duration-300 flex-shrink-0 cursor-pointer`}
                     >
                       {safeUser.fullName
                         ? safeUser.fullName
@@ -725,15 +725,24 @@ export function SiteHeader() {
                             .toUpperCase()
                         : "U"}
                     </Link>
-                    <button
-                      onClick={() => {
-                        signOut();
-                        router.push("/");
-                      }}
-                      className={`text-xs font-medium ${textClass} cursor-pointer transition-colors`}
-                    >
-                      Sign Out
-                    </button>
+
+                    {/* Invisible bridge to keep hover state active */}
+                    <div className="absolute right-0 top-8 h-4 w-32 bg-transparent" />
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-[#f7f4ef] rounded-[16px] border border-[#1c1a18]/10 shadow-[0_4px_16px_rgba(28,26,24,0.06)] overflow-hidden">
+                      <div className="px-4 py-2.5 border-b border-[#1c1a18]/10">
+                        <span className="font-sans text-sm font-semibold text-[#1c1a18]">Account</span>
+                      </div>
+                      <div className="flex flex-col py-1">
+                        <Link href="/profile" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Profile</Link>
+                        <Link href="/profile?tab=orders" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Orders</Link>
+                        <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Favourites</Link>
+                        <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Coupons</Link>
+                        <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Reviews</Link>
+                        <button onClick={() => { signOut(); router.push("/"); }} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">Log Out</button>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <Link

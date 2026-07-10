@@ -5,7 +5,13 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useProductsQuery } from "@/lib/queries/catalog";
-import { PRODUCTS, mapBackendProduct, money, type Product } from "@/lib/vela-data";
+import {
+  getCategoryLabel,
+  mapBackendProduct,
+  money,
+  PRODUCTS,
+  type Product,
+} from "@/lib/vela-data";
 import { getActiveLocale } from "@/lib/i18n";
 
 interface RelatedProductsProps {
@@ -121,12 +127,7 @@ export function RelatedProducts({
         style={{ scrollbarWidth: "none" }}
       >
         {recommendedProducts.map((product) => {
-          const displayCategory =
-            product.category === "AO"
-              ? "Clothes"
-              : product.category === "QUAN"
-              ? "Trousers"
-              : "Accessories";
+          const displayCategory = getCategoryLabel(product.category, "en");
 
           return (
             <motion.div

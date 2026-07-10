@@ -119,7 +119,7 @@ export function EditorialCraft() {
   };
 
   const getStepProgressWidth = (index: number) => {
-    if (typeof window === "undefined" || window.innerWidth < 1024) {
+    if (scrollProgress === 0) {
       return index === activeStep ? "100%" : "0%";
     }
     

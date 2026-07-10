@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -10,9 +11,22 @@ import { categoryLabels, money, Product } from "@/lib/vela-data";
 interface ProductCardProps {
   product: Product;
   imageAspect?: "portrait" | "square" | "collection";
+  imageAction?: ReactNode;
+  footerAction?: ReactNode;
 }
 
-export function ProductCard({ product, imageAspect = "portrait" }: ProductCardProps) {
+const imageAspectClass: Record<NonNullable<ProductCardProps["imageAspect"]>, string> = {
+  portrait: "aspect-square",
+  square: "aspect-square",
+  collection: "aspect-square",
+};
+
+export function ProductCard({
+  product,
+  imageAspect = "portrait",
+  imageAction,
+  footerAction,
+}: ProductCardProps) {
   return (
     <Card
       className={cn(
@@ -23,7 +37,7 @@ export function ProductCard({ product, imageAspect = "portrait" }: ProductCardPr
       <div
         className={cn(
           "relative overflow-hidden rounded-none bg-[#efebe4]",
-          "aspect-square"
+          imageAspectClass[imageAspect]
         )}
       >
         <Link href={`/products/${product.id}`} className="block w-full h-full">
@@ -38,6 +52,11 @@ export function ProductCard({ product, imageAspect = "portrait" }: ProductCardPr
             className="transition-none"
           />
         </Link>
+        {imageAction && (
+          <div className="absolute right-4 top-4 z-20">
+            {imageAction}
+          </div>
+        )}
       </div>
       <div
         className={cn(
@@ -63,6 +82,7 @@ export function ProductCard({ product, imageAspect = "portrait" }: ProductCardPr
             </span>
           )}
         </div>
+        {footerAction && <div className="mt-5 w-full">{footerAction}</div>}
       </div>
     </Card>
   );

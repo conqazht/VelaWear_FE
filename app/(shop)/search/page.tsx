@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { ProductCard } from "@/components/shop/product-card";
+import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { getProducts } from "@/lib/api/catalog";
 import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
@@ -645,15 +646,7 @@ function SearchResultsLoadingFallback() {
         <div className="h-3 w-28 animate-pulse bg-[#efe7dc]" />
         <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
       </div>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="space-y-3">
-            <div className="aspect-[3/4] animate-pulse bg-[#efe7dc]" />
-            <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
-            <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
-          </div>
-        ))}
-      </div>
+      <ProductCardSkeletonGrid />
     </div>
   );
 }

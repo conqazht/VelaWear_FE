@@ -7,8 +7,10 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
-import { FashionImage } from "@/components/shop/fashion-image";
-import { money, Product, PRODUCTS } from "@/lib/vela-data";
+import { ProductCard } from "@/components/shop/product-card";
+import { ProductGrid } from "@/components/shop/product-layout-components";
+import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
+import { Product, PRODUCTS } from "@/lib/vela-data";
 
 export function FavoritesPageClient() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -45,15 +47,7 @@ function FavoritesPageLoadingFallback() {
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
       <div className="h-8 w-56 animate-pulse bg-[#efe7dc]" />
-      <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="space-y-3">
-            <div className="aspect-[3/4] animate-pulse bg-[#efe7dc]" />
-            <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
-            <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
-          </div>
-        ))}
-      </div>
+      <ProductCardSkeletonGrid count={6} imageAspect="collection" gridClassName="mt-10" />
     </div>
   );
 }
@@ -93,7 +87,7 @@ function FavoritesContent({
   handleAddToBag,
 }: FavoritesContentProps) {
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]">
       <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           Home
@@ -102,16 +96,16 @@ function FavoritesContent({
         <span className="font-medium text-[#1c1a18]">Favorites</span>
       </div>
 
-      <header className="mb-12">
-        <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+      <div className="mb-4">
+        <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
           Favorites
         </h1>
         {favorites.length > 0 && (
-          <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
+          <p className="text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50 mt-1">
             {favorites.length} designs saved in your wishlist
           </p>
         )}
-      </header>
+      </div>
 
       {favorites.length === 0 ? (
         <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[80vh] flex flex-col justify-start pt-24 items-center">
@@ -147,53 +141,33 @@ function FavoritesGrid({
   handleAddToBag: (product: Product) => void;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-[80vh]">
+    <ProductGrid>
       {products.map((product) => (
-        <article
+        <ProductCard
           key={product.id}
-          className="group flex flex-col relative bg-white hover:shadow-lg transition-shadow duration-300 rounded-sm overflow-hidden border border-[#1c1a18]/5"
-        >
-          <div className="relative w-full aspect-[3/4] overflow-hidden bg-[#dfd9d5]">
-            <FashionImage src={product.image} alt={product.name} />
+          product={product}
+          imageAspect="collection"
+          imageAction={
             <button
               onClick={() => removeFromFavorites(product.id)}
               aria-label="Remove from favorites"
-              className="absolute top-4 right-4 bg-white p-2 hover:bg-[#efebe4] transition-colors z-10 text-primary border border-hairline/20 rounded-none shadow-sm"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-[#1c1a18]/10 bg-white/95 text-[#964025] shadow-sm transition-colors hover:bg-[#efebe4]"
             >
-              <Heart className="size-4 fill-[#964025] stroke-[#964025]" />
+              <Heart className="size-4 fill-current stroke-current" />
             </button>
-          </div>
-
-          <div className="p-6 flex flex-col flex-grow justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-2 gap-4">
-                <h2 className="font-serif text-lg font-semibold text-[#1c1a18]">
-                  {product.name}
-                </h2>
-                <span className="font-serif text-base font-light text-[#1c1a18] whitespace-nowrap">
-                  {money(product.price)}
-                </span>
-              </div>
-              <p className="text-[10px] font-semibold text-[#1c1a18]/60 uppercase tracking-widest mb-6">
-                {product.category === "AO"
-                  ? "Áo"
-                  : product.category === "QUAN"
-                  ? "Quần"
-                  : "Phụ kiện"}
-              </p>
-            </div>
-
+          }
+          footerAction={
             <button
               onClick={() => handleAddToBag(product)}
-              className="w-full bg-[#f3ede9] border border-[#e3dccf] py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:bg-[#b5573a] hover:text-white hover:border-[#b5573a] transition-all flex items-center justify-center gap-2"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e3dccf] bg-[#f3ede9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] transition-all hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white"
             >
               <ShoppingBag className="size-4" />
               <span>Add to Bag</span>
             </button>
-          </div>
-        </article>
+          }
+        />
       ))}
-    </div>
+    </ProductGrid>
   );
 }
 

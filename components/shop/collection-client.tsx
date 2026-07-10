@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/product-card";
+import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { cn } from "@/lib/utils";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { getActiveLocale } from "@/lib/i18n";
@@ -663,15 +664,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
 
 function CollectionCatalogLoadingFallback() {
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="space-y-3">
-          <div className="aspect-square animate-pulse bg-[#efe7dc]" />
-          <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
-          <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
-        </div>
-      ))}
-    </div>
+    <ProductCardSkeletonGrid imageAspect="square" />
   );
 }
 

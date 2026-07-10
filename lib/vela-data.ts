@@ -46,6 +46,27 @@ export const categoryLabels: Record<string, string> = {
   "PHU KIEN": "Phụ kiện",
 };
 
+const englishCategoryLabels: Record<string, string> = {
+  ALL: "All",
+  AO: "Clothes",
+  QUAN: "Trousers",
+  "PHU KIEN": "Accessories",
+};
+
+const categoryFallbackLabels = {
+  vi: "Phụ kiện",
+  en: "Accessories",
+} as const;
+
+export function getCategoryLabel(
+  category: string,
+  locale: keyof typeof categoryFallbackLabels = "vi"
+) {
+  const labels = locale === "en" ? englishCategoryLabels : categoryLabels;
+
+  return labels[category] ?? categoryFallbackLabels[locale];
+}
+
 export const categoryTabs = ["ALL", "AO", "QUAN", "PHU KIEN"];
 
 export const money = (value: number) => {

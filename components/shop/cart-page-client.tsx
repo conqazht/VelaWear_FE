@@ -79,16 +79,23 @@ export function CartPageClient() {
                 key={`${item.id}-${item.color}-${item.size}`}
                 className="flex gap-6 rounded-md border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row"
               >
-                <div className="relative mx-auto h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28">
+                <Link
+                  href={`/products/${item.id}`}
+                  className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28"
+                  aria-label={`View ${item.name}`}
+                >
                   <FashionImage src={item.image} alt={item.name} />
-                </div>
+                </Link>
 
                 <div className="flex flex-grow flex-col justify-between">
                   <div>
                     <div className="flex items-start justify-between gap-4">
-                      <h3 className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b85a3c]">
+                      <Link
+                        href={`/products/${item.id}`}
+                        className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b85a3c]"
+                      >
                         {item.name}
-                      </h3>
+                      </Link>
                       <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18]">
                         {money(item.price * item.quantity)}
                       </span>

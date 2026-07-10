@@ -74,9 +74,12 @@ interface ProductVariant {
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
-  const favorited = isFavorite(product.id);
+  const favorited =
+    product.realId !== undefined
+      ? favorites.some((item) => item.realId === product.realId || item.id === product.id)
+      : isFavorite(product.id);
   const gallery = useMemo(() => {
     if (product.images && product.images.length > 0) {
       return product.images.map((img, idx) => ({ src: img, label: `Look ${idx + 1}` }));
