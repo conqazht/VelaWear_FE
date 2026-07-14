@@ -16,12 +16,14 @@ import { getInitials } from "@/lib/utils";
 
 export function NavUser({
   user,
+  onLogout,
 }: {
   readonly user: {
     readonly name: string;
     readonly email: string;
     readonly avatar: string;
   };
+  readonly onLogout: () => void;
 }) {
   const { isMobile } = useSidebar();
 
@@ -79,7 +81,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={onLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

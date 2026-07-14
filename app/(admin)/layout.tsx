@@ -6,6 +6,7 @@ import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
 
 import { AdminThemeEnforcer } from "./_components/admin-theme-enforcer";
+import { AdminAuthGate } from "./_components/admin-auth-gate";
 
 export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
   await connection();
@@ -39,7 +40,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       />
       <AdminThemeEnforcer />
       <PreferencesStoreProvider initialValues={PREFERENCE_DEFAULTS}>
-        {children}
+        <AdminAuthGate>{children}</AdminAuthGate>
         <Toaster />
       </PreferencesStoreProvider>
     </TooltipProvider>

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
-import Link from "next/link";
 
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
