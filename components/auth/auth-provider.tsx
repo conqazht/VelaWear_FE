@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearCart = useCartStore((state) => state.clearCart);
 
   const user = (sessionQuery.data ?? null) as User | null;
-  const isLoading = sessionQuery.isLoading || sessionQuery.isFetching;
+  const isLoading = sessionQuery.isPending;
   const isAuthenticated = user !== null;
 
   const value = useMemo<AuthContextValue>(

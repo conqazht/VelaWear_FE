@@ -14,6 +14,8 @@ import _profile_addresses from './profile-addresses.bones.json'
 import _profile_orders from './profile-orders.bones.json'
 import _profile_favourites from './profile-favourites.bones.json'
 import _order_details from './order-details.bones.json'
+import _admin_session from './admin-session.bones.json'
+import _management_resource_page from './management-resource-page.bones.json'
 
 configureBoneyard({"color":"#e7dfd3","animate":"shimmer","shimmerColor":"#f3eee6","speed":"1.8s","transition":180})
 
@@ -29,4 +31,6 @@ registerBones({
   "profile-orders": _profile_orders,
   "profile-favourites": _profile_favourites,
   "order-details": _order_details,
+  "admin-session": _admin_session,
+  "management-resource-page": _management_resource_page,
 })
