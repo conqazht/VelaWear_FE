@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import OrderDetailsClient from "./order-details-client";
+import OrderDetailsClient, { OrderDetailsLoadingFallback } from "./order-details-client";
 
 export function generateStaticParams() {
   return [{ code: "VW-9824-BKL" }];
@@ -12,7 +12,7 @@ export default async function Page({
 }) {
   const { code } = await params;
   return (
-    <Suspense fallback={<div className="py-32 text-center select-none"><span className="text-xs uppercase tracking-widest text-ink/40">Loading...</span></div>}>
+    <Suspense fallback={<div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16"><OrderDetailsLoadingFallback /></div>}>
       <OrderDetailsClient code={code} />
     </Suspense>
   );

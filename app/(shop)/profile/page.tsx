@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays, Star } from "lucide-react";
+import { Skeleton } from "boneyard-js/react";
+import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/product-card";
 import { useFavorites } from "@/components/shop/favorites-provider";
@@ -17,13 +19,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import {
-  useCouponsQuery,
   useOrdersByUserQuery,
-  useReviewsByUserQuery,
   useUpdateProfileMutation,
   useUserAddressesQuery,
 } from "@/lib/queries/commerce";
-import type { Coupon, Gender, UserAddress } from "@/lib/api/types";
+import type { Gender, UserAddress } from "@/lib/api/types";
 
 const profileTabIds = ["profile", "orders", "favourites", "coupons", "reviews"] as const;
 type ProfileTabId = (typeof profileTabIds)[number];
@@ -53,22 +53,58 @@ const formatMemberSince = (value?: string | null) => {
 
 const formatAddress = (address: UserAddress) =>
   [
-    address.addressDetail ?? address.addressLine,
+    address.addressDetail,
     address.ward,
-    address.district,
     address.province,
   ]
     .filter(Boolean)
     .join(", ");
 
-const formatCouponValue = (coupon: Coupon) =>
-  coupon.type.includes("PERCENT")
-    ? `${coupon.value}%`
-    : money(Number(coupon.value || 0));
+const orderStatusMeta: Record<string, { label: string; badge: string; dot: string }> = {
+  PENDING: {
+    label: "Chờ xác nhận",
+    badge: "bg-amber-100 text-amber-800",
+    dot: "bg-amber-500",
+  },
+  CONFIRMED: {
+    label: "Đã xác nhận",
+    badge: "bg-sky-100 text-sky-800",
+    dot: "bg-sky-500",
+  },
+  SHIPPING: {
+    label: "Chờ giao hàng",
+    badge: "bg-indigo-100 text-indigo-800",
+    dot: "bg-indigo-500",
+  },
+  COMPLETED: {
+    label: "Đã nhận",
+    badge: "bg-emerald-100 text-emerald-800",
+    dot: "bg-emerald-500",
+  },
+  CANCELLED: {
+    label: "Đã huỷ",
+    badge: "bg-rose-100 text-rose-800",
+    dot: "bg-rose-500",
+  },
+  REFUNDED: {
+    label: "Trả hàng / hoàn tiền",
+    badge: "bg-violet-100 text-violet-800",
+    dot: "bg-violet-500",
+  },
+};
+
+const orderStatusOrder = [
+  "PENDING",
+  "CONFIRMED",
+  "SHIPPING",
+  "COMPLETED",
+  "CANCELLED",
+  "REFUNDED",
+] as const;
 
 export default function MemberProfile() {
-  const { user, isAuthenticated, checkSession } = useAuth();
-  const { favorites, toggleFavorite } = useFavorites();
+  const { user, isAuthenticated, isLoading: isAuthLoading, checkSession } = useAuth();
+  const { favorites, toggleFavorite, isLoading: favoritesLoading } = useFavorites();
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
   const updateProfileMutation = useUpdateProfileMutation();
@@ -78,27 +114,16 @@ export default function MemberProfile() {
     sort: "createdAt,desc",
   });
   const addressesQuery = useUserAddressesQuery({ userId, size: 100 });
-  const couponsQuery = useCouponsQuery(
-    { status: "ACTIVE", size: 100, sort: "endDate,asc" },
-    isAuthenticated
-  );
-  const reviewsQuery = useReviewsByUserQuery(userId, {
-    size: 100,
-    sort: "createdAt,desc",
-  });
   const orders = ordersQuery.data?.result ?? [];
+  const orderStats = orderStatusOrder.map((status) => ({
+    status,
+    ...orderStatusMeta[status],
+    count: orders.filter((order) => order.status === status).length,
+  }));
   const addresses = addressesQuery.data?.result ?? [];
-  const coupons = couponsQuery.data?.result ?? [];
-  const reviews = reviewsQuery.data?.result ?? [];
 
   const searchParams = useSearchParams();
-  const [activeSubTab, setActiveSubTab] = useState<ProfileTabId>(() =>
-    getProfileTabId(searchParams.get("tab"))
-  );
-
-  useEffect(() => {
-    setActiveSubTab(getProfileTabId(searchParams.get("tab")));
-  }, [searchParams]);
+  const activeSubTab = getProfileTabId(searchParams.get("tab"));
   const [activeProfileSidebarTab, setActiveProfileSidebarTab] = useState("account");
 
   const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
@@ -196,16 +221,15 @@ export default function MemberProfile() {
     workoutData: true
   });
 
-  const subTabs: { id: ProfileTabId; label: string }[] = [
-    { id: "profile", label: "Profile" },
-    { id: "orders", label: "Orders" },
-    { id: "favourites", label: "Favourites" },
-    { id: "coupons", label: "Coupons" },
-    { id: "reviews", label: "Reviews" },
-  ];
+
+
+  if (isAuthLoading) {
+    return <ProfileTabLoading tab={activeSubTab} />;
+  }
 
   if (!isAuthenticated || !user) {
     return (
+      <ProfileSignedOutBoundary tab={activeSubTab}>
       <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
@@ -223,35 +247,12 @@ export default function MemberProfile() {
           </Link>
         </Card>
       </div>
+      </ProfileSignedOutBoundary>
     );
   }
 
   return (
-    <div className="bg-canvas text-ink min-h-screen flex flex-col pt-[104px] md:pt-[120px]">
-      {/* Sub-Navigation */}
-      <div className="w-full select-none overflow-x-auto no-scrollbar">
-        <div className="w-full min-w-max flex justify-center gap-8 md:gap-12 px-6 md:px-16 py-4 mx-auto">
-          {subTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`relative text-sm font-medium tracking-[0.05em] transition-colors cursor-pointer pb-0.5 group ${
-                tab.id === activeSubTab
-                  ? "text-[#b5573a]"
-                  : "text-[#55423d]/60 hover:text-ink"
-              }`}
-            >
-              {tab.label}
-              <span 
-                className={`absolute bottom-[-1px] left-[10%] h-[1.5px] w-[80%] bg-[#b5573a] transition-transform duration-300 ease-out origin-center ${
-                  tab.id === activeSubTab ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                }`} 
-              />
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <div className="bg-canvas text-ink min-h-screen flex flex-col">
       {/* Main Content Area */}
       <main className="flex-grow w-full px-6 md:px-16 py-10 md:py-16 flex flex-col gap-10">
 
@@ -266,7 +267,7 @@ export default function MemberProfile() {
                 Vela Member
               </span>
             </div>
-            
+
             {/* Redesigned Profile Section */}
             <div className="flex flex-col md:flex-row gap-12 md:gap-40 lg:gap-56 mt-2 text-left">
               {/* Sidebar */}
@@ -582,9 +583,14 @@ export default function MemberProfile() {
                   <div>
                     <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Delivery Addresses</h2>
                     {addressesQuery.isLoading ? (
-                      <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
-                        Loading addresses...
-                      </div>
+                      <Skeleton
+                        name="profile-addresses"
+                        loading
+                        fallback={<ProfileAddressesLoadingFallback />}
+                        fixture={<ProfileAddressesLoadingFixture />}
+                      >
+                        <ProfileAddressesLoadingFixture />
+                      </Skeleton>
                     ) : addresses.length === 0 ? (
                       <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/30 border border-[#1c1a18]/15 rounded-md">
                         <p className="text-sm text-ink/70 font-light max-w-md">
@@ -614,7 +620,7 @@ export default function MemberProfile() {
                                   )}
                                 </div>
                                 <p className="mt-1 text-sm text-ink/65">
-                                  {address.phone ?? address.receiverPhone ?? "Chưa cập nhật số điện thoại"}
+                                  {address.phone ?? "Chưa cập nhật số điện thoại"}
                                 </p>
                                 <p className="mt-2 text-sm leading-relaxed text-ink/70">
                                   {formatAddress(address) || "Chưa cập nhật địa chỉ"}
@@ -811,12 +817,39 @@ export default function MemberProfile() {
                 {orders.length} {orders.length === 1 ? "order" : "orders"} placed
               </span>
             </div>
-            
-            {ordersQuery.isLoading ? (
-              <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
-                Loading orders...
+
+            {!ordersQuery.isLoading && orders.length > 0 && (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                {orderStats.map((stat) => {
+                  const percentage = Math.round((stat.count / orders.length) * 100);
+                  return (
+                    <div
+                      key={stat.status}
+                      className="rounded-sm border border-hairline/45 bg-white/65 p-4"
+                    >
+                      <div className="mb-4 flex items-center gap-2">
+                        <span className={`size-2 rounded-full ${stat.dot}`} aria-hidden="true" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink/50">
+                          {stat.label}
+                        </span>
+                      </div>
+                      <div className="flex items-end justify-between gap-2">
+                        <span className="font-serif text-2xl text-ink">{stat.count}</span>
+                        <span className="pb-0.5 text-[10px] font-medium text-ink/40">{percentage}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ) : orders.length === 0 ? (
+            )}
+
+            <Skeleton
+              name="profile-orders"
+              loading={ordersQuery.isLoading}
+              fallback={<ProfileOrdersLoadingFallback />}
+              fixture={<ProfileOrdersLoadingFixture />}
+            >
+            {orders.length === 0 ? (
               <div className="py-12 text-center select-none bg-surface-card/10 border border-hairline/20 rounded-sm">
                 <p className="text-sm text-[#1c1a18]/50 mb-6">Bạn chưa thực hiện đơn đặt hàng nào.</p>
                 <Link
@@ -829,12 +862,10 @@ export default function MemberProfile() {
             ) : (
               <div className="flex flex-col gap-8">
                 {orders.map((order) => {
-                  const statusColors: Record<string, string> = {
-                    DELIVERED: "bg-emerald-100 text-emerald-800",
-                    PENDING: "bg-yellow-100 text-yellow-800",
-                    CANCELLED: "bg-red-100 text-red-800",
+                  const status = orderStatusMeta[order.status] ?? {
+                    label: order.status,
+                    badge: "bg-slate-100 text-slate-800",
                   };
-                  const statusBadge = statusColors[order.status] || "bg-blue-100 text-blue-800";
 
                   return (
                     <Link
@@ -861,8 +892,8 @@ export default function MemberProfile() {
                       </div>
                       <div className="flex flex-row md:flex-col justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-hairline/40">
                         <div className="text-sm font-bold text-ink">{money(Number(order.finalAmount ?? order.subtotal ?? 0))}</div>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${statusBadge}`}>
-                          {order.status}
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${status.badge}`}>
+                          {status.label}
                         </span>
                       </div>
                     </Link>
@@ -870,6 +901,7 @@ export default function MemberProfile() {
                 })}
               </div>
             )}
+            </Skeleton>
           </section>
         )}
 
@@ -884,6 +916,12 @@ export default function MemberProfile() {
                 {favorites.length} {favorites.length === 1 ? "item" : "items"} saved
               </span>
             </div>
+            <Skeleton
+              name="profile-favourites"
+              loading={favoritesLoading}
+              fallback={<ProfileFavouritesLoadingFallback />}
+              fixture={<ProfileFavouritesLoadingFixture />}
+            >
             {favorites.length === 0 ? (
               <div className="py-16 text-center flex flex-col items-center gap-6">
                 <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
@@ -929,136 +967,9 @@ export default function MemberProfile() {
                 ))}
               </div>
             )}
+            </Skeleton>
           </section>
         )}
-
-        {/* COUPONS TAB CONTENT */}
-        {activeSubTab === "coupons" && (
-          <section className="flex flex-col gap-6 text-left">
-            <div className="border-b border-hairline pb-4 flex justify-between items-end">
-              <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
-                Your Coupons
-              </h2>
-              <span className="text-xs text-[#55423d]/65">
-                {coupons.length} active {coupons.length === 1 ? "coupon" : "coupons"}
-              </span>
-            </div>
-            {couponsQuery.isLoading ? (
-              <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
-                Loading coupons...
-              </div>
-            ) : coupons.length === 0 ? (
-              <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/10 border border-hairline/20 rounded-sm">
-                <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
-                  Bạn chưa có mã giảm giá nào.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {coupons.map((coupon) => (
-                  <div
-                    key={coupon.id}
-                    className="border border-hairline/60 rounded-sm bg-surface-card/30 p-5 flex flex-col gap-5"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b5573a]">
-                          {coupon.type.replaceAll("_", " ")}
-                        </p>
-                        <h3 className="mt-1 font-serif text-2xl font-light tracking-tight text-ink">
-                          {coupon.code}
-                        </h3>
-                      </div>
-                      <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-800">
-                        {coupon.status}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-3xl font-semibold text-ink">
-                        {formatCouponValue(coupon)}
-                      </p>
-                      <p className="mt-1 text-xs text-ink/55">
-                        Minimum order {money(Number(coupon.minOrderAmount ?? 0))}
-                        {coupon.maxDiscount
-                          ? ` • Max discount ${money(Number(coupon.maxDiscount))}`
-                          : ""}
-                      </p>
-                    </div>
-                    <div className="border-t border-[#1c1a18]/10 pt-4 text-xs text-ink/60">
-                      <p>Valid until {formatDisplayDate(coupon.endDate) || "No expiry"}</p>
-                      <p className="mt-1">
-                        Used {coupon.usedCount}
-                        {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""} times
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* REVIEWS TAB CONTENT */}
-        {activeSubTab === "reviews" && (
-          <section className="flex flex-col gap-6 text-left">
-            <div className="border-b border-hairline pb-4 flex justify-between items-end">
-              <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
-                Your Reviews
-              </h2>
-              <span className="text-xs text-[#55423d]/65">
-                {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-              </span>
-            </div>
-            {reviewsQuery.isLoading ? (
-              <div className="py-8 text-center text-xs uppercase tracking-widest text-[#1c1a18]/45">
-                Loading reviews...
-              </div>
-            ) : reviews.length === 0 ? (
-              <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/10 border border-hairline/20 rounded-sm">
-                <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
-                  Bạn chưa có đánh giá nào.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border border-hairline/60 rounded-sm bg-surface-card/30 p-5"
-                  >
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-ink">
-                          {review.productName}
-                        </h3>
-                        <p className="mt-1 text-xs text-ink/50">
-                          Order {review.orderCode} • {formatDisplayDate(review.createdAt)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: 5 }).map((_, index) => (
-                          <Star
-                            key={index}
-                            className={`size-4 ${
-                              index < review.rating
-                                ? "fill-[#b5573a] text-[#b5573a]"
-                                : "text-ink/20"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm leading-relaxed text-ink/70">
-                      {review.comment || "Bạn chưa viết nội dung đánh giá cho sản phẩm này."}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-
 
         {/* Edit Password Modal */}
         {isEditPasswordOpen && (
@@ -1231,6 +1142,107 @@ export default function MemberProfile() {
         )}
 
       </main>
+    </div>
+  );
+}
+
+function ProfileAddressesLoadingFallback() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2" aria-hidden="true">
+      <div className="h-36 rounded-md bg-white" />
+      <div className="h-36 rounded-md bg-white" />
+    </div>
+  );
+}
+
+function ProfileTabLoading({ tab }: { tab: ProfileTabId }) {
+  if (tab === "orders") {
+    return (
+      <Skeleton name="profile-orders" loading fallback={<ProfileOrdersLoadingFallback />} fixture={<ProfileOrdersLoadingFixture />}>
+        <ProfileOrdersLoadingFixture />
+      </Skeleton>
+    );
+  }
+
+  if (tab === "favourites") {
+    return (
+      <Skeleton name="profile-favourites" loading fallback={<ProfileFavouritesLoadingFallback />} fixture={<ProfileFavouritesLoadingFixture />}>
+        <ProfileFavouritesLoadingFixture />
+      </Skeleton>
+    );
+  }
+
+  return (
+    <Skeleton name="profile-addresses" loading fallback={<ProfileAddressesLoadingFallback />} fixture={<ProfileAddressesLoadingFixture />}>
+      <ProfileAddressesLoadingFixture />
+    </Skeleton>
+  );
+}
+
+function ProfileSignedOutBoundary({ tab, children }: { tab: ProfileTabId; children: ReactNode }) {
+  if (tab === "orders") {
+    return <Skeleton name="profile-orders" loading={false} fallback={<ProfileOrdersLoadingFallback />} fixture={<ProfileOrdersLoadingFixture />}>{children}</Skeleton>;
+  }
+
+  if (tab === "favourites") {
+    return <Skeleton name="profile-favourites" loading={false} fallback={<ProfileFavouritesLoadingFallback />} fixture={<ProfileFavouritesLoadingFixture />}>{children}</Skeleton>;
+  }
+
+  return <Skeleton name="profile-addresses" loading={false} fallback={<ProfileAddressesLoadingFallback />} fixture={<ProfileAddressesLoadingFixture />}>{children}</Skeleton>;
+}
+
+function ProfileAddressesLoadingFixture() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {Array.from({ length: 2 }).map((_, index) => (
+        <article key={index} className="min-h-36 rounded-md border border-[#1c1a18]/10 bg-white p-5">
+          <h3 className="font-medium">Công Anh</h3>
+          <p className="mt-3 text-sm">12 Nguyễn Huệ, Bến Nghé, TP. Hồ Chí Minh</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ProfileOrdersLoadingFallback() {
+  return (
+    <div className="space-y-4" aria-hidden="true">
+      {Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-32 rounded-md bg-white" />)}
+    </div>
+  );
+}
+
+function ProfileOrdersLoadingFixture() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <article key={index} className="min-h-32 rounded-md border border-[#1c1a18]/10 bg-white p-6">
+          <div className="flex justify-between"><h3 className="font-medium">VW-CONGANH-000{index + 1}</h3><span>Đã xác nhận</span></div>
+          <p className="mt-6 text-sm">1 sản phẩm · 1.499.000 ₫</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ProfileFavouritesLoadingFallback() {
+  return (
+    <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4" aria-hidden="true">
+      {Array.from({ length: 4 }).map((_, index) => <div key={index} className="aspect-[3/4] rounded-sm bg-white" />)}
+    </div>
+  );
+}
+
+function ProfileFavouritesLoadingFixture() {
+  return (
+    <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <article key={index} className="space-y-3">
+          <div className="aspect-[3/4] rounded-sm bg-white" />
+          <h3 className="font-medium">Sản phẩm Vela Wear</h3>
+          <p className="text-sm">1.499.000 ₫</p>
+        </article>
+      ))}
     </div>
   );
 }

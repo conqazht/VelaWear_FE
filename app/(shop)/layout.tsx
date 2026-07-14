@@ -1,5 +1,7 @@
-import { SiteFooter } from "@/components/shop/site-footer";
-import { SiteHeader } from "@/components/shop/site-header";
+import {
+  CachedSiteFooter,
+  CachedSiteHeader,
+} from "@/components/shop/cached-shop-chrome";
 
 export default function ShopLayout({
   children,
@@ -8,9 +10,9 @@ export default function ShopLayout({
 }>) {
   return (
     <>
-      <SiteHeader />
+      <CachedSiteHeader />
       <main className="flex-1">{children}</main>
-      <SiteFooter />
+      <CachedSiteFooter />
     </>
   );
 }
