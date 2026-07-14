@@ -37,7 +37,18 @@ export type User = {
   createdAt: string;
   updatedAt: string;
   hasPassword: boolean;
-  roles?: unknown;
+  roles?: Array<{
+    id: number;
+    name: string;
+  }>;
+};
+
+export type ProductColorImages = {
+  colorId: number;
+  colorName: string;
+  hexCode?: string | null;
+  thumbnail?: string | null;
+  images: string[];
 };
 
 export type Product = {
@@ -56,6 +67,7 @@ export type Product = {
   createdAt?: string;
   updatedAt?: string;
   images?: string[];
+  colorImages?: ProductColorImages[];
   categoryName?: string | null;
   categorySlug?: string | null;
 };

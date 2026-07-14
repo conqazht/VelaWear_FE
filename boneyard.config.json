@@ -7,6 +7,14 @@
   "speed": "1.8s",
   "transition": 180,
   "skeletons": {
+    "admin-session": {
+      "route": "/dashboard/users",
+      "wait": 1000
+    },
+    "management-resource-page": {
+      "route": "/dashboard/users",
+      "wait": 1000
+    },
     "collection-catalog": {
       "route": "/collection",
       "wait": 1000

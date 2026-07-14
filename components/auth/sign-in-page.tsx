@@ -17,6 +17,7 @@ import type {
   AuthSceneStatus,
 } from "@/components/auth/auth-motion-scene";
 import { getSafeInternalRedirect } from "@/lib/auth/post-auth-redirect";
+import { getPostSignInPath, getRoleSessionLabel } from "@/lib/auth/roles";
 import { signInSchema } from "@/lib/validations";
 
 type SignInFormValues = z.infer<typeof signInSchema>;
@@ -29,6 +30,7 @@ export function SignInPage() {
   const redirectTo = getSafeInternalRedirect(searchParams.get("redirect"));
 
   const [apiError, setApiError] = useState<string | null>(null);
+  const [sessionRoleLabel, setSessionRoleLabel] = useState<string | null>(null);
   const [sceneFocus, setSceneFocus] = useState<AuthSceneFocus>("none");
   const [sceneStatus, setSceneStatus] = useState<AuthSceneStatus>("idle");
 
@@ -48,14 +50,17 @@ export function SignInPage() {
       document.activeElement.blur();
     }
     setApiError(null);
+    setSessionRoleLabel(null);
     setSceneStatus("idle");
 
     try {
-      await signIn(data.email, data.password);
+      const profile = await signIn(data.email, data.password);
+      setSessionRoleLabel(getRoleSessionLabel(profile));
       setSceneStatus("success");
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      router.replace(redirectTo ?? "/");
+      router.replace(redirectTo ?? getPostSignInPath(profile));
     } catch (err: unknown) {
+      setSessionRoleLabel(null);
       const errorObj = err as { response?: { data?: { message?: string } } };
       if (errorObj.response?.data?.message) {
         setApiError(errorObj.response.data.message);
@@ -179,7 +184,11 @@ export function SignInPage() {
           disabled={isSubmitting}
           className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
         >
-          {isSubmitting ? "Signing In..." : "Sign In"}
+          {isSubmitting
+            ? sessionRoleLabel
+              ? `Checking ${sessionRoleLabel} session...`
+              : "Signing In..."
+            : "Sign In"}
         </button>
 
         <div className="relative flex items-center mt-2">

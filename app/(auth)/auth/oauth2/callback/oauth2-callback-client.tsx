@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { exchangeOAuth2Code } from "@/lib/api/auth";
+import { exchangeOAuth2Code, getMe } from "@/lib/api/auth";
 import { AuthLoader } from "@/components/auth/auth-loader";
 import {
   clearPostAuthRedirect,
   createSignInHref,
   getStoredPostAuthRedirect,
 } from "@/lib/auth/post-auth-redirect";
+import { getPostSignInPath, getRoleSessionLabel } from "@/lib/auth/roles";
+import { queryKeys } from "@/lib/queries/keys";
 
 let activeOAuthExchange: {
   code: string;
@@ -31,6 +34,8 @@ function exchangeOAuth2CodeOnce(code: string) {
 export function OAuth2CallbackClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const [sessionRoleLabel, setSessionRoleLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -47,10 +52,15 @@ export function OAuth2CallbackClient() {
     async function completeLogin() {
       try {
         await exchangeOAuth2CodeOnce(loginCode);
-        if (!cancelled) {
-          clearPostAuthRedirect();
-          router.replace(redirectTo ?? "/");
-        }
+        if (cancelled) return;
+
+        const profile = await getMe();
+        if (cancelled) return;
+
+        queryClient.setQueryData(queryKeys.auth.session, profile);
+        setSessionRoleLabel(getRoleSessionLabel(profile));
+        clearPostAuthRedirect();
+        router.replace(redirectTo ?? getPostSignInPath(profile));
       } catch {
         if (!cancelled) {
           clearPostAuthRedirect();
@@ -65,7 +75,15 @@ export function OAuth2CallbackClient() {
     return () => {
       cancelled = true;
     };
-  }, [router, searchParams]);
+  }, [queryClient, router, searchParams]);
 
-  return <AuthLoader message="Đang hoàn tất đăng nhập..." />;
+  return (
+    <AuthLoader
+      message={
+        sessionRoleLabel
+          ? `Checking ${sessionRoleLabel} session...`
+          : "Đang hoàn tất đăng nhập..."
+      }
+    />
+  );
 }
