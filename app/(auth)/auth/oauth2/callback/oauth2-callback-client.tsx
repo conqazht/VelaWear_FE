@@ -5,6 +5,28 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { exchangeOAuth2Code } from "@/lib/api/auth";
 import { AuthLoader } from "@/components/auth/auth-loader";
+import {
+  clearPostAuthRedirect,
+  createSignInHref,
+  getStoredPostAuthRedirect,
+} from "@/lib/auth/post-auth-redirect";
+
+let activeOAuthExchange: {
+  code: string;
+  promise: ReturnType<typeof exchangeOAuth2Code>;
+} | null = null;
+
+function exchangeOAuth2CodeOnce(code: string) {
+  if (activeOAuthExchange?.code === code) return activeOAuthExchange.promise;
+
+  const promise = exchangeOAuth2Code({ code });
+  activeOAuthExchange = { code, promise };
+  const clearActiveExchange = () => {
+    if (activeOAuthExchange?.promise === promise) activeOAuthExchange = null;
+  };
+  void promise.then(clearActiveExchange, clearActiveExchange);
+  return promise;
+}
 
 export function OAuth2CallbackClient() {
   const router = useRouter();
@@ -12,8 +34,10 @@ export function OAuth2CallbackClient() {
 
   useEffect(() => {
     const code = searchParams.get("code");
+    const redirectTo = getStoredPostAuthRedirect();
     if (!code) {
-      router.replace("/sign-in?error=oauth2_login_failed");
+      const signInHref = createSignInHref(redirectTo);
+      router.replace(`${signInHref}${signInHref.includes("?") ? "&" : "?"}error=oauth2_login_failed`);
       return;
     }
 
@@ -22,13 +46,16 @@ export function OAuth2CallbackClient() {
 
     async function completeLogin() {
       try {
-        await exchangeOAuth2Code({ code: loginCode });
+        await exchangeOAuth2CodeOnce(loginCode);
         if (!cancelled) {
-          router.replace("/");
+          clearPostAuthRedirect();
+          router.replace(redirectTo ?? "/");
         }
       } catch {
         if (!cancelled) {
-          router.replace("/sign-in?error=oauth2_login_failed");
+          clearPostAuthRedirect();
+          const signInHref = createSignInHref(redirectTo);
+          router.replace(`${signInHref}${signInHref.includes("?") ? "&" : "?"}error=oauth2_login_failed`);
         }
       }
     }

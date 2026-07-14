@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,7 @@ import type {
   AuthSceneFocus,
   AuthSceneStatus,
 } from "@/components/auth/auth-motion-scene";
+import { getSafeInternalRedirect } from "@/lib/auth/post-auth-redirect";
 import { signInSchema } from "@/lib/validations";
 
 type SignInFormValues = z.infer<typeof signInSchema>;
@@ -23,7 +24,9 @@ type SignInFormValues = z.infer<typeof signInSchema>;
 export function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn } = useAuth();
+  const redirectTo = getSafeInternalRedirect(searchParams.get("redirect"));
 
   const [apiError, setApiError] = useState<string | null>(null);
   const [sceneFocus, setSceneFocus] = useState<AuthSceneFocus>("none");
@@ -51,7 +54,7 @@ export function SignInPage() {
       await signIn(data.email, data.password);
       setSceneStatus("success");
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      router.push("/");
+      router.replace(redirectTo ?? "/");
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } } };
       if (errorObj.response?.data?.message) {
@@ -185,7 +188,7 @@ export function SignInPage() {
           <div className="flex-grow border-t border-[#1c1a18]/10"></div>
         </div>
 
-        <GoogleOAuthButton />
+        <GoogleOAuthButton redirectTo={redirectTo} />
       </form>
     </AnimatedAuthShell>
   );

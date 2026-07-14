@@ -298,7 +298,7 @@ export function BrandsManagement() {
         }
         isLoading={brandsQuery.isPending}
         isFetching={brandsQuery.isFetching}
-        error={brandsQuery.isError ? getApiErrorMessage(brandsQuery.error) : null}
+        error={brandsQuery.isError ? brandsQuery.error : null}
         emptyTitle="No brands found"
         emptyDescription="Create a brand or adjust the current search and status filter."
       />

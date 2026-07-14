@@ -260,7 +260,7 @@ export function Roles() {
         }
         isLoading={rolesQuery.isPending}
         isFetching={rolesQuery.isFetching}
-        error={rolesQuery.isError ? getApiErrorMessage(rolesQuery.error) : null}
+        error={rolesQuery.isError ? rolesQuery.error : null}
         emptyTitle="No roles found"
         emptyDescription="Try another search or create a role for your access model."
       />

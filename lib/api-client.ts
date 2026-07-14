@@ -1,8 +1,10 @@
 import axios from "axios";
 import { getActiveLocale } from "./i18n";
+import { createSignInHref } from "./auth/post-auth-redirect";
 
 let accessToken: string | null = null;
 let refreshPromise: Promise<string> | null = null;
+let sessionExpiryRedirectStarted = false;
 
 export function getAccessToken(): string | null {
   return accessToken;
@@ -10,6 +12,16 @@ export function getAccessToken(): string | null {
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  if (token) sessionExpiryRedirectStarted = false;
+}
+
+function redirectExpiredSessionToSignIn() {
+  if (typeof window === "undefined" || sessionExpiryRedirectStarted) return;
+  if (window.location.pathname === "/sign-in") return;
+
+  sessionExpiryRedirectStarted = true;
+  const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  window.location.replace(createSignInHref(currentPath));
 }
 
 const apiClient = axios.create({
@@ -74,6 +86,9 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      const requestHadAccessToken = Boolean(
+        accessToken || originalRequest.headers?.Authorization,
+      );
 
       try {
         const newAccessToken = await refreshAccessTokenOnce();
@@ -85,6 +100,7 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         // Refresh token is expired or invalid, clear token
         setAccessToken(null);
+        if (requestHadAccessToken) redirectExpiredSessionToSignIn();
         return Promise.reject(refreshError);
       }
     }

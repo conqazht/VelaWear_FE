@@ -219,7 +219,7 @@ export function SizesManagement() {
         }
         isLoading={sizesQuery.isPending}
         isFetching={sizesQuery.isFetching}
-        error={sizesQuery.isError ? getApiErrorMessage(sizesQuery.error) : null}
+        error={sizesQuery.isError ? sizesQuery.error : null}
         emptyTitle="No sizes found"
         emptyDescription="Add a size or adjust the current search."
       />

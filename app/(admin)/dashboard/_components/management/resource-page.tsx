@@ -4,6 +4,8 @@ import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Download, Plus, RefreshCw, Search } from "lucide-react";
 
+import { getApiErrorMessage, getApiErrorStatus } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { AnimatedStatus } from "@/components/errors/animated-status";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +56,7 @@ type ResourcePageProps<T extends { id: number }> = {
   onRefresh?: () => void;
   isLoading?: boolean;
   isFetching?: boolean;
-  error?: string | null;
+  error?: unknown;
   emptyTitle?: string;
   emptyDescription?: string;
 };
@@ -88,12 +90,37 @@ export function ResourcePage<T extends { id: number }>({
   const currentPage = Math.min(Math.max(page, 1), safePageCount);
   const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = total === 0 ? 0 : Math.min(currentPage * pageSize, total);
+  const errorStatus = error ? getApiErrorStatus(error) : null;
+  const errorMessage = error ? getApiErrorMessage(error) : null;
+  const statusScene =
+    errorStatus === 403
+      ? {
+          code: "403",
+          title: "This resource is outside your access",
+          description: "Your account is signed in, but it does not have permission to view this management data.",
+          accent: "#ffb59f",
+        }
+      : errorStatus === 404
+        ? {
+            code: "404",
+            title: "This management resource was not found",
+            description: "The endpoint or resource may have moved. Refresh once, then return to the dashboard if it remains unavailable.",
+            accent: "#f7f4ef",
+          }
+        : errorStatus !== null && errorStatus >= 500
+          ? {
+              code: String(errorStatus),
+              title: "The server could not complete this request",
+              description: "Vela Wear is temporarily unable to load this management data. Your filters and current page are still preserved.",
+              accent: "#ff8f78",
+            }
+          : null;
 
-  return (
-    <Card>
-      <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
-        <CardTitle className="text-xl leading-none">{title}</CardTitle>
-        <CardDescription className="max-w-xl leading-snug">{description}</CardDescription>
+  const cardHeader = (
+    <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
+      <CardTitle className="text-xl leading-none">{title}</CardTitle>
+      <CardDescription className="max-w-xl leading-snug">{description}</CardDescription>
+      {statusScene ? null : (
         <CardAction className="col-start-1 row-start-auto flex w-full flex-wrap justify-start gap-2 justify-self-stretch md:col-start-2 md:row-span-2 md:row-start-1 md:w-auto md:flex-nowrap md:justify-end md:justify-self-end">
           <InputGroup className="h-8 w-full md:w-64">
             <InputGroupAddon align="inline-start">
@@ -124,7 +151,38 @@ export function ResourcePage<T extends { id: number }>({
             </Button>
           ) : null}
         </CardAction>
-      </CardHeader>
+      )}
+    </CardHeader>
+  );
+
+  if (statusScene) {
+    const canRetry = errorStatus !== 403 && onRefresh;
+
+    return (
+      <Card>
+        {cardHeader}
+        <CardContent className="px-4">
+          <AnimatedStatus
+            code={statusScene.code}
+            title={statusScene.title}
+            description={statusScene.description}
+            accent={statusScene.accent}
+            variant="panel"
+            primaryAction={
+              canRetry
+                ? { label: "Try again", onClick: onRefresh }
+                : { label: "Back to dashboard", href: "/dashboard/default" }
+            }
+            secondaryAction={{ label: "Return to storefront", href: "/" }}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      {cardHeader}
 
       <CardContent className="flex flex-col gap-4 px-0">
         {filters.length > 0 ? (
@@ -147,11 +205,11 @@ export function ResourcePage<T extends { id: number }>({
           </div>
         ) : null}
 
-        {error ? (
+        {errorMessage ? (
           <div className="px-4">
             <Alert variant="destructive">
               <AlertTitle>Unable to load {title.toLowerCase()}</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           </div>
         ) : null}
