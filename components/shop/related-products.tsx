@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useProductsQuery } from "@/lib/queries/catalog";
 import {
@@ -140,12 +141,14 @@ export function RelatedProducts({
             >
               {/* Image box with no borders/shadows */}
               <div className="relative aspect-[3/4] w-full bg-[#efe7dc] overflow-hidden">
-                <Link href={`/products/${product.id}`} className="block w-full h-full">
-                    <img
+                <Link href={`/products/${product.id}`} className="relative block h-full w-full">
+                    <Image
                       suppressHydrationWarning
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(min-width: 768px) 340px, (min-width: 640px) 280px, 240px"
+                      className="object-cover"
                       referrerPolicy="no-referrer"
                     />
                 </Link>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export interface HeroSlide {
@@ -79,12 +80,13 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           className="absolute inset-0 w-full h-full"
         >
           {/* Background Image */}
-          <img
-            suppressHydrationWarning
+          <Image
             src={slides[current].image}
             alt={slides[current].title}
-            className="absolute inset-0 w-full h-full object-cover select-none"
-            referrerPolicy="no-referrer"
+            fill
+            sizes="100vw"
+            preload={current === 0}
+            className="object-cover select-none"
           />
 
           {/* Subtly dark vignette overlay */}

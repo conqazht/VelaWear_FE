@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { Heart, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
@@ -28,12 +29,14 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
     >
       {/* Product Image Wrapper */}
       <div className="relative aspect-[3/4] w-full bg-[#efe7dc] overflow-hidden rounded-none">
-        <Link href={`/products/${product.id}`} className="block w-full h-full">
-          <img
+        <Link href={`/products/${product.id}`} className="relative block h-full w-full">
+          <Image
             suppressHydrationWarning
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            fill
+            sizes="(min-width: 768px) 400px, (min-width: 640px) 340px, 280px"
+            className="object-cover"
             referrerPolicy="no-referrer"
           />
         </Link>

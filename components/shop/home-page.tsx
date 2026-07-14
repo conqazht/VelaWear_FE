@@ -22,14 +22,14 @@ const HERO_SLIDES = [
     id: "slide-1",
     title: "Vela Wear — Bộ sưu tập Thu 2026",
     subtitle: "Mùa Thu 2026",
-    image: "/landingpage1.png",
+    image: "/images/home/hero-autumn-2026.avif",
     ctaText: "Khám phá ngay",
   },
   {
     id: "slide-2",
     title: "Nét Đẹp Của Sự Tĩnh Lặng",
     subtitle: "Lookbook 2026",
-    image: "/landingpage2.jpg",
+    image: "/images/home/hero-lookbook-2026.jpg",
     ctaText: "Xem Lookbook",
   },
 ];
@@ -38,19 +38,19 @@ const STATIC_CATEGORIES = [
   {
     id: "cat-1",
     name: "Essentials",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBB01iD0ZUAAbXEfBxGwf6S_tVo9lhi8Sz-9Bqgt3w7eHWeLzxcQtFE8j1hypM92Hh87JXPBZ7iRaIfzRGf0jcLZcybovsZochcNkAlY7HAXlGCDru3V3RzmnIPgmVqLbRBuMy8jWHj0t-SU9s_IlGrfTjt3-XJUcW5HSPgMAoXCWJB0X_8io6wtuVZ-TVQietcTPsIO0tn7S5Pbjv_Izf0xCID5DhIQoy7JxSgks5H_3ZA-PwUi3BSWgxbspE5oOAhi4ra3-No9FKa",
+    image: "/images/categories/essentials.jpg",
     link: "/collection",
   },
   {
     id: "cat-2",
     name: "Accessories",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCLGMe7fSol3cLxyNZeWO1_aSBSqo2xD7aktKUxgF3gx43in9HtB7MqVYyDZwQTbNNYlSJIubLUEWzwA1Q8jTYKYmkfsLyO60rtQVaxykhg6z3whbLFXQF7M6GRLQs1DLWvfyf23hvG2bVcPHsTHzOO8DdtQJo1YhIDfUXV8uo1qsMo2eP8Y40rlr-3f8g2l2momMxfNI3YNrunps0Dz6tTQ0_eDfY-aSHBt3bhC2n2To-wQXXBLREk8o5fQenXi1PKtBdMdSPXE8E9",
+    image: "/images/categories/accessories.jpg",
     link: "/collection",
   },
   {
     id: "cat-3",
     name: "Outerwear",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC3rdhdd2Is5yjK5nAVVfW6P2sBr2eFbIuyGPXLzEMmaaz6S048ueY6FpMEhTXDQ70RHHoicQkL8NH1GrGzWkFHgtJ9AZY0aQHNRuQigIU9TZZSReu_xPV2W9m1jyi0ZDIFVUqm10oAVd9EW7Alu_gKcYdm8ZYDEkWqM2BRPBkIOA-Nb0PQlIzJj-OeG8i8Jlv6_nDIuYrw1eSjwgjtRvkjlxlOxMtc3rdT9__yYdd3YpOJXLlEPuMNJbUU88td1TYmIABgQLcnDhg4",
+    image: "/images/categories/outerwear.png",
     link: "/collection",
   },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { X, Check, CheckCircle2, ArrowRight } from "lucide-react";
 import { Product, money, categoryLabels } from "@/lib/vela-data";
@@ -115,10 +116,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 {/* Main Product */}
                 <div className="flex gap-4">
                   <div className="w-[88px] h-[88px] flex-shrink-0 bg-surface-card rounded-none overflow-hidden border border-hairline/30">
-                    <img
+                    <Image
                       src={notification.product.image}
                       alt={notification.product.name}
-                      className="w-full h-full object-cover"
+                      width={88}
+                      height={88}
+                      className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="flex flex-col justify-center text-left">
@@ -180,10 +183,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               <div className="p-6 flex gap-6 text-left">
                 {/* Product Image */}
                 <div className="w-[100px] h-[133px] flex-shrink-0 bg-surface-card border border-hairline/30 rounded-none overflow-hidden">
-                  <img
+                  <Image
                     src={notification.product.image}
                     alt={notification.product.name}
-                    className="w-full h-full object-cover"
+                    width={100}
+                    height={133}
+                    className="h-full w-full object-cover"
                   />
                 </div>
                 {/* Product Details */}

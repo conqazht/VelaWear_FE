@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Heart, ShoppingBag, Menu, X, Trash2, CheckCircle2 } from "lucide-react";
+import { Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
@@ -24,6 +25,29 @@ import { mapBackendProduct, type Product } from "@/lib/vela-data";
 import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 
+const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
+const MAX_SEARCH_HISTORY_ITEMS = 5;
+
+function readSearchHistory(): string[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const stored = window.localStorage.getItem(SEARCH_HISTORY_STORAGE_KEY);
+    if (!stored) return [];
+
+    const parsed: unknown = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .filter((item): item is string => typeof item === "string")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, MAX_SEARCH_HISTORY_ITEMS);
+  } catch {
+    return [];
+  }
+}
+
 export function SiteHeader() {
   const hasMounted = useSyncExternalStore(
     () => () => {},
@@ -34,16 +58,16 @@ export function SiteHeader() {
   const router = useRouter();
   const isHome = pathname === "/";
 
-  const { cart, itemCount, subtotal, removeItem, clearCart } = useCart();
+  const { itemCount } = useCart();
   const { favorites } = useFavorites();
   const { user, isAuthenticated, signOut } = useAuth();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [searchHistory, setSearchHistory] = useState<string[]>(readSearchHistory);
   const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
-  const [showCheckoutToast, setShowCheckoutToast] = useState(false);
+  const [searchPathname, setSearchPathname] = useState(pathname);
 
   // Scroll state
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,10 +77,14 @@ export function SiteHeader() {
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
   const searchDebounceRef = useRef<number | null>(null);
   const searchRequestIdRef = useRef(0);
-  const searchHistoryLoadedRef = useRef(false);
   const activeLocale = getActiveLocale();
-  const searchHistoryStorageKey = "vela-search-history";
-  const maxSearchHistoryItems = 5;
+
+  if (searchPathname !== pathname) {
+    setSearchPathname(pathname);
+    setSearchQuery("");
+    setSearchSuggestions([]);
+    setIsSearchSuggestionsOpen(false);
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -162,39 +190,11 @@ export function SiteHeader() {
 
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(searchHistoryStorageKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setSearchHistory(
-            parsed
-              .map((item) => (typeof item === "string" ? item.trim() : ""))
-              .filter(Boolean)
-              .slice(0, maxSearchHistoryItems)
-          );
-        }
-      }
-    } catch {
-      setSearchHistory([]);
-    } finally {
-      searchHistoryLoadedRef.current = true;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!searchHistoryLoadedRef.current) return;
-    try {
-      window.localStorage.setItem(searchHistoryStorageKey, JSON.stringify(searchHistory));
+      window.localStorage.setItem(SEARCH_HISTORY_STORAGE_KEY, JSON.stringify(searchHistory));
     } catch {
       // Ignore storage failures.
     }
   }, [searchHistory]);
-
-  useEffect(() => {
-    setSearchQuery("");
-    setSearchSuggestions([]);
-    setIsSearchSuggestionsOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -256,13 +256,8 @@ export function SiteHeader() {
     setSearchHistory((prev) => {
       const next = [normalized, ...prev.filter((item) => item.toLowerCase() !== normalized.toLowerCase())].slice(
         0,
-        maxSearchHistoryItems
+        MAX_SEARCH_HISTORY_ITEMS
       );
-      try {
-        window.localStorage.setItem(searchHistoryStorageKey, JSON.stringify(next));
-      } catch {
-        // Ignore storage failures.
-      }
       return next;
     });
   };
@@ -413,13 +408,13 @@ export function SiteHeader() {
                   rotateY: { duration: 0.8, ease: "easeInOut" },
                 }}
               >
-                <img
-                  suppressHydrationWarning
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEBkBcpXeLbuJbgUCezINF6sMfVvIearyTwIMb5uBl08PFISvYOLRciNTSAIoobsPz1jpxL-hwUBhcjrSCnJaguWDgbzzKYHMPmDZ6gYteEWFpJYEhYqJf9t8Dv3WcygHY-JRNC_q7fYcWCMMtFYbqCqS3Uj8ntYwUAH2TAb7N0yD4erWe0mLkacJm3Clwk2N8T1YVvOTFPX3lf1uHXIJSAN0PfSFQZqn9wJ6IlS_--Sv7i486Uvk_RYogdH9Vp4NNWDVLOB2w3As_"
+                <Image
+                  src="/images/brand/vela-wear-logo.png"
                   alt="Vela Wear Logo"
+                  width={512}
+                  height={512}
                   style={logoStyle}
                   className="h-8 md:h-9 w-auto object-contain"
-                  referrerPolicy="no-referrer"
                 />
                 
                 {/* Shine effect on hover */}
@@ -569,9 +564,11 @@ export function SiteHeader() {
                                   setIsSearchSuggestionsOpen(false);
                                 }}
                               >
-                                <img
+                                <Image
                                   src={product.image}
                                   alt={product.name}
+                                  width={56}
+                                  height={56}
                                   className="h-14 w-14 rounded-lg object-cover bg-white"
                                 />
                                 <div className="min-w-0 flex-1">
@@ -825,26 +822,6 @@ export function SiteHeader() {
                   Log In
                 </Link>
               )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-
-
-      {/* Toast popup */}
-      <AnimatePresence>
-        {showCheckoutToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 right-6 z-50 bg-[#1c1a18] text-white px-5 py-4 rounded-[10px] flex items-center gap-3 shadow-2xl border border-white/10"
-          >
-            <CheckCircle2 className="w-5 h-5 text-[#5d8a6c]" />
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[1px]">Thanh toán thành công</p>
-              <p className="text-[11px] text-[#8a857c] mt-0.5">Vela Wear đang chuẩn bị đơn hàng cao cấp của bạn!</p>
             </div>
           </motion.div>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -166,11 +166,14 @@ function NavItem({ item, isItemActive, isSubItemActive, isSubmenuOpen }: NavItem
     return <NavDropdownItem item={item} isActive={isItemActive(item)} isSubItemActive={isSubItemActive} />;
   }
 
+  const defaultOpen = isSubmenuOpen(item);
+
   return (
     <NavCollapsibleItem
+      key={`${item.id}:${defaultOpen}`}
       item={item}
       isActive={isItemActive(item)}
-      defaultOpen={isSubmenuOpen(item)}
+      defaultOpen={defaultOpen}
       isSubItemActive={isSubItemActive}
     />
   );
@@ -261,10 +264,6 @@ function NavDropdownItem({ item, isActive, isSubItemActive }: NavDropdownItemPro
 function NavCollapsibleItem({ item, isActive, defaultOpen, isSubItemActive }: NavCollapsibleItemProps) {
   const Icon = item.icon;
   const [open, setOpen] = useState(defaultOpen);
-
-  useEffect(() => {
-    setOpen(defaultOpen);
-  }, [defaultOpen]);
 
   return (
     <Collapsible

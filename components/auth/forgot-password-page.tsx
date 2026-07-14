@@ -94,7 +94,7 @@ export function ForgotPasswordPage() {
     }
     try {
       await handleVerifyOtp();
-    } catch (err) {
+    } catch {
       setSceneStatus("error");
       setTimeout(() => setSceneStatus("idle"), 850);
     }
@@ -185,7 +185,7 @@ export function ForgotPasswordPage() {
                 error={!!resetForm.formState.errors.newPassword}
                 {...passwordRegister}
                 inputRef={passwordRegister.ref}
-                onFocus={(e) => {
+                onFocus={() => {
                   setSceneFocus("password");
                 }}
                 onBlur={(e) => {
@@ -239,7 +239,7 @@ export function ForgotPasswordPage() {
               type="email"
               error={!!requestForm.formState.errors.email}
               {...emailRegister}
-              onFocus={(e) => {
+              onFocus={() => {
                 setSceneFocus("email");
               }}
               onBlur={(e) => {

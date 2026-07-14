@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Star, Quote, Plus, X, Award, Check } from "lucide-react";
+import { Star, Quote, Plus, X, Check } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
 
 interface Review {
