@@ -29,6 +29,28 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-07-14
+
+### Extend Admin Catalog and Product Variant Workflow
+- **Date/Time**: 2026-07-14T00:37:03+07:00
+- **Implementation**: Expanded the existing Products editor into one Details + Variants & Inventory workflow covering SKU, color, size, price, sale price, stock, and variant status. New products stay `DRAFT` until their variants finish saving; unchanged variants are skipped, dirty variants merge the latest server values before update, active variants are staged safely when activating/archiving a product, and partial successes remain recoverable in the open editor. Added full Categories and Brands management routes plus one combined Colors & Sizes route with independent tab state, CRUD, pagination, filters/search, validation, CSV export, and safe archive/delete messaging. Added the matching catalog API/query layer and sidebar links. Product Media was intentionally excluded after scope clarification because the frontend only renders the backend-provided `thumbnail` and ordered `images` values. Backend product/category updates now preserve translation metadata omitted from their update contracts while retaining the previous defaults when a VI translation is first created.
+- **Verification**: Scoped ESLint passes with zero warnings; `pnpm exec tsc --noEmit --pretty false` passes; final `pnpm build` passes and generates all 63 pages including `/dashboard/categories`, `/dashboard/brands`, and `/dashboard/attributes`. Browser QA confirmed the new routes resolve through the admin auth gate with no console errors. Backend targeted tests pass (`ProductServiceImplTest` + `CategoryServiceImplTest`: 18 tests, 0 failures/errors). Full `pnpm lint` remains blocked by 13 pre-existing out-of-scope errors in legacy/shared files such as `nav-main.tsx`, invoice/mail effects, tasks copy, storefront header, responsive hooks, carousel, and scratch scripts.
+- **Known Follow-ups**: The backend still lacks an atomic product-with-variants command, so multi-request saves can partially succeed; direct variant stock updates do not create inventory audit logs; and color/size FK or database-constraint failures currently surface as generic 500 responses instead of actionable 409/400 errors.
+
+### Build Vela Wear Admin Management Workspace
+- **Date/Time**: 2026-07-14T00:05:53+07:00
+- **Implementation**: Reworked Users and Roles around the real backend, added Permissions, Products, Orders, and Coupons management routes, and introduced a shared admin list/form/delete system with server pagination, filters, loading/error/empty states, CSV export, mutation toasts, and safe destructive-action handling. Added Vela Wear admin branding, authentication gating, real sidebar session/logout data, single-flight token refresh, protected core roles/current account, controlled order status transitions, and a Management-first sidebar.
+- **Verification**: Scoped ESLint passes with zero warnings, `pnpm exec tsc --noEmit --pretty false` passes, and `pnpm build` passes with all six routes in the generated manifest. Browser QA verified all six route shells/tables/forms before auth gating and verified the final unauthenticated guard with no new console errors.
+- **Known Follow-ups**: Backend still needs role-permission assignment, effective-permission/session data for permission-aware navigation, authoritative order transition/refund commands with reason/audit data, and a full-filter server export endpoint.
+
+## 2026-07-13
+
+### Remove Unused Admin Demo Sections
+- **Date/Time**: 2026-07-13 (Asia/Saigon)
+- **Implementation**: Removed Academy, Logistics, Authentication, and the complete Legacy dashboard group from the admin sidebar. Deleted their admin route pages and co-located components while preserving the separate storefront authentication flow under `app/(auth)`.
+- **Verification**: `pnpm build` and `pnpm exec eslint navigation/sidebar/sidebar-items.ts` pass. Removed routes no longer appear in the generated route manifest.
+- **Known Follow-ups**: None.
+
 ## 2026-07-08
 
 ### Prevent Search Skeleton Flash On Back Navigation
