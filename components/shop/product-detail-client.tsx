@@ -25,31 +25,12 @@ import { useProductReviewsQuery, useProductVariantsQuery } from "@/lib/queries/c
 
 const colorSwatches: Record<string, string> = {
   Black: "bg-[#000000]",
+  White: "bg-[#ffffff]",
   Red: "bg-[#d32f2f]",
   Yellow: "bg-[#f2c94c]",
   Purple: "bg-[#7b2cbf]",
   Orange: "bg-[#f97316]",
 };
-
-const seedSizes = [
-  "XS",
-  "S",
-  "M",
-  "L",
-  "XL",
-  "XXL",
-  "35",
-  "36",
-  "37",
-  "38",
-  "39",
-  "40",
-  "41",
-  "42",
-  "43",
-  "44",
-  "45",
-];
 
 interface VariantColorInfo {
   id: number;
@@ -80,17 +61,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
     product.realId !== undefined
       ? favorites.some((item) => item.realId === product.realId || item.id === product.id)
       : isFavorite(product.id);
-  const gallery = useMemo(() => {
-    if (product.images && product.images.length > 0) {
-      return product.images.map((img, idx) => ({ src: img, label: `Look ${idx + 1}` }));
-    }
-    return [{ src: product.image, label: "Main Look" }];
-  }, [product.images, product.image]);
-
-  const [activeImage, setActiveImage] = useState(gallery[0]?.src || product.image);
-
-  const [selectedColor, setSelectedColor] = useState(product.color);
+  const [selectedColor, setSelectedColor] = useState(
+    product.colorImages?.[0]?.colorName || product.color
+  );
   const [selectedSize, setSelectedSize] = useState(product.size);
+  const [activeImage, setActiveImage] = useState(product.image);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     sizeAndFit: false,
@@ -151,43 +126,76 @@ export function ProductDetailClient({ product }: { product: Product }) {
     return () => window.cancelAnimationFrame(frameId);
   }, [openSections.reviews, productReviews.length]);
 
-  // Set default selected color/size once variants load
-  useEffect(() => {
-    if (variants.length > 0) {
-      const first = variants[0];
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (first.color?.name) setSelectedColor(first.color.name);
-      if (first.size?.name) setSelectedSize(first.size.name);
-    }
-  }, [variants]);
-
-  // Compute available colors and sizes
+  // Compute available colors and keep the backend gallery order when possible.
   const colorsList = useMemo(() => {
-    if (variants.length === 0) return ["Black", "Red", "Yellow", "Purple", "Orange"];
     const unique = new Set<string>();
+    product.colorImages?.forEach((group) => {
+      if (group.colorName) unique.add(group.colorName);
+    });
     variants.forEach((v) => {
       if (v.color?.name) unique.add(v.color.name);
     });
+    if (unique.size === 0 && product.color) unique.add(product.color);
     return Array.from(unique);
-  }, [variants]);
+  }, [product.color, product.colorImages, variants]);
+
+  const resolvedSelectedColor =
+    colorsList.find((color) => color.toLowerCase() === selectedColor?.toLowerCase()) ||
+    colorsList[0] ||
+    product.color;
 
   const sizesList = useMemo(() => {
-    if (variants.length === 0) return seedSizes;
+    if (variants.length === 0) return product.size ? [product.size] : [];
     const unique = new Set<string>();
-    variants.forEach((v) => {
-      if (v.size?.name) unique.add(v.size.name);
-    });
+    variants
+      .filter(
+        (v) =>
+          !resolvedSelectedColor ||
+          v.color?.name?.toLowerCase() === resolvedSelectedColor.toLowerCase()
+      )
+      .forEach((v) => {
+        if (v.size?.name) unique.add(v.size.name);
+      });
     return Array.from(unique);
-  }, [variants]);
+  }, [product.size, resolvedSelectedColor, variants]);
+
+  const resolvedSelectedSize =
+    sizesList.find((size) => size.toLowerCase() === selectedSize?.toLowerCase()) ||
+    sizesList[0] ||
+    product.size;
 
   // Find currently active variant matching selection
   const activeVariant = useMemo(() => {
     return variants.find(
       (v) =>
-        v.color?.name?.toLowerCase() === selectedColor?.toLowerCase() &&
-        v.size?.name?.toLowerCase() === selectedSize?.toLowerCase()
+        v.color?.name?.toLowerCase() === resolvedSelectedColor?.toLowerCase() &&
+        v.size?.name?.toLowerCase() === resolvedSelectedSize?.toLowerCase()
     );
-  }, [variants, selectedColor, selectedSize]);
+  }, [resolvedSelectedColor, resolvedSelectedSize, variants]);
+
+  const gallery = useMemo(() => {
+    const selectedGroup = product.colorImages?.find(
+      (group) => group.colorName.toLowerCase() === resolvedSelectedColor?.toLowerCase()
+    );
+    const colorImages = selectedGroup
+      ? [selectedGroup.thumbnail, ...selectedGroup.images].filter(
+          (image): image is string => Boolean(image)
+        )
+      : [];
+    const rawImages = colorImages.length > 0
+      ? colorImages
+      : product.images && product.images.length > 0
+        ? product.images
+        : [product.image];
+
+    return Array.from(new Set(rawImages)).map((src, idx) => ({
+      src,
+      label: `${resolvedSelectedColor || "Product"} look ${idx + 1}`,
+    }));
+  }, [product.colorImages, product.image, product.images, resolvedSelectedColor]);
+  const displayedImage = gallery.some((detail) => detail.src === activeImage)
+    ? activeImage
+    : gallery[0]?.src || product.image;
 
   // Pricing hierarchy: active variant sale price > variant price > static product catalog price
   const displayPrice = activeVariant ? Number(activeVariant.price) : product.price;
@@ -214,7 +222,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               onClick={() => setActiveImage(detail.src)}
               className={cn(
                 "relative aspect-[4/5] overflow-hidden rounded-none border bg-[#efebe4] transition-all cursor-pointer",
-                activeImage === detail.src
+                displayedImage === detail.src
                   ? "border-[#1c1a18] opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
               )}
@@ -232,7 +240,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         {/* Main Product Image */}
         <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4] xl:h-[668.75px] xl:w-[535px] xl:flex-none">
           <FashionImage
-            src={activeImage}
+            src={displayedImage}
             alt={product.name}
             priority
             className="object-cover w-full h-full"
@@ -264,24 +272,31 @@ export function ProductDetailClient({ product }: { product: Product }) {
         {/* Color Selection */}
         <div className="mb-8">
           <span className="block text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60 mb-4">
-            Color — {selectedColor}
+            Color — {resolvedSelectedColor}
           </span>
           <div className="flex gap-4">
-            {colorsList.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setSelectedColor(color)}
-                aria-label={color}
-                className={cn(
-                  "w-8 h-8 rounded-full border transition-all cursor-pointer ring-2 ring-offset-2",
-                  colorSwatches[color] || "bg-[#d32f2f]",
-                  selectedColor === color
-                    ? "border-[#1c1a18] ring-[#1c1a18]/30 scale-105"
-                    : "border-transparent ring-transparent hover:ring-hairline hover:scale-105"
-                )}
-              />
-            ))}
+            {colorsList.map((color) => {
+              const hexCode = product.colorImages?.find(
+                (group) => group.colorName.toLowerCase() === color.toLowerCase()
+              )?.hexCode;
+
+              return (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setSelectedColor(color)}
+                  aria-label={color}
+                  style={hexCode ? { backgroundColor: hexCode } : undefined}
+                  className={cn(
+                    "w-8 h-8 rounded-full border transition-all cursor-pointer ring-2 ring-offset-2",
+                    !hexCode && (colorSwatches[color] || "bg-[#d32f2f]"),
+                    resolvedSelectedColor === color
+                      ? "border-[#1c1a18] ring-[#1c1a18]/30 scale-105"
+                      : "border-[#1c1a18]/15 ring-transparent hover:ring-hairline hover:scale-105"
+                  )}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -301,7 +316,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 onClick={() => setSelectedSize(size)}
                 className={cn(
                   "py-3 border font-semibold text-xs tracking-wider transition-colors cursor-pointer rounded-sm",
-                  selectedSize === size
+                  resolvedSelectedSize === size
                     ? "border-[#1c1a18] bg-[#efe7dc] text-ink"
                     : "border-hairline hover:border-ink text-ink/75"
                 )}
@@ -319,8 +334,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
             onClick={() => {
               // Construct product with active variant pricing
               const cartProduct = { ...product, price: mainPrice, variantId: activeVariant?.id };
-              addToCart(cartProduct, selectedColor, selectedSize);
-              showAddedToBag(cartProduct, selectedSize, selectedColor);
+              addToCart(cartProduct, resolvedSelectedColor, resolvedSelectedSize);
+              showAddedToBag(cartProduct, resolvedSelectedSize, resolvedSelectedColor);
             }}
             className="w-full h-14 bg-black hover:bg-neutral-800 text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-colors cursor-pointer border-none shadow-sm flex items-center justify-center"
           >
@@ -329,7 +344,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           <button
             type="button"
-            onClick={() => toggleFavorite(product, selectedSize)}
+            onClick={() => toggleFavorite(product, resolvedSelectedSize)}
             className={cn(
               "w-full h-14 border font-semibold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer rounded-full",
               favorited
