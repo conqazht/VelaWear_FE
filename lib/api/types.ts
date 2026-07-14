@@ -40,6 +40,14 @@ export type User = {
   roles?: unknown;
 };
 
+export type ProductColorImages = {
+  colorId: number;
+  colorName: string;
+  hexCode?: string | null;
+  thumbnail?: string | null;
+  images: string[];
+};
+
 export type Product = {
   id: number;
   brandId?: number | null;
@@ -56,6 +64,7 @@ export type Product = {
   createdAt?: string;
   updatedAt?: string;
   images?: string[];
+  colorImages?: ProductColorImages[];
   categoryName?: string | null;
   categorySlug?: string | null;
 };

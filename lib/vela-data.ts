@@ -20,6 +20,14 @@ export interface OrderSummary {
   createdAt: string;
 }
 
+export interface ProductColorImages {
+  colorId: number;
+  colorName: string;
+  hexCode?: string | null;
+  thumbnail?: string;
+  images: string[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -40,6 +48,7 @@ export interface Product {
   care?: string;
   shortDescription?: string;
   images?: string[];
+  colorImages?: ProductColorImages[];
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -361,6 +370,13 @@ export function mapBackendProduct(
     care?: string;
     shortDescription?: string;
     images?: string[];
+    colorImages?: Array<{
+      colorId: number;
+      colorName: string;
+      hexCode?: string | null;
+      thumbnail?: string | null;
+      images: string[];
+    }>;
     categoryName?: string | null;
     categorySlug?: string | null;
   },
@@ -376,7 +392,23 @@ export function mapBackendProduct(
       p.name.toLowerCase() === bp.name.toLowerCase()
   );
 
-  const mainImg = bp.image || bp.thumbnail || (match ? match.image : undefined);
+  const colorImages = (bp.colorImages ?? []).map((group) => {
+    const images = Array.from(new Set(group.images.map(resolveImageUrl)));
+    const thumbnail = group.thumbnail ? resolveImageUrl(group.thumbnail) : images[0];
+
+    return {
+      colorId: group.colorId,
+      colorName: group.colorName,
+      hexCode: group.hexCode,
+      thumbnail,
+      images,
+    };
+  });
+  const mainImg =
+    bp.image ||
+    bp.thumbnail ||
+    colorImages[0]?.thumbnail ||
+    (match ? match.image : undefined);
   const resolvedMainImg = resolveImageUrl(mainImg);
 
   const rawImages = bp.images && bp.images.length > 0 
@@ -394,7 +426,7 @@ export function mapBackendProduct(
     originalPrice: bp.salePrice != null ? bp.price ?? undefined : undefined,
     image: resolvedMainImg,
     badge: match ? match.badge : undefined,
-    color: match ? match.color : "Black",
+    color: colorImages[0]?.colorName || (match ? match.color : "Black"),
     size: match ? match.size : "M",
     category: bp.categoryName || (match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN")),
     seoTitle: bp.seoTitle,
@@ -404,5 +436,6 @@ export function mapBackendProduct(
     care: bp.care,
     shortDescription: bp.shortDescription,
     images: rawImages.map(resolveImageUrl),
+    colorImages,
   };
 }
