@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { exchangeOAuth2Code } from "@/lib/api/auth";
+import { AuthLoader } from "@/components/auth/auth-loader";
 
 export function OAuth2CallbackClient() {
   const router = useRouter();
@@ -39,9 +40,5 @@ export function OAuth2CallbackClient() {
     };
   }, [router, searchParams]);
 
-  return (
-    <main className="grid min-h-dvh place-items-center bg-[#f6f0e8] px-6 text-center text-[#1c1a18]">
-      <p className="text-sm font-medium uppercase tracking-wider">Completing Google login...</p>
-    </main>
-  );
+  return <AuthLoader message="Đang hoàn tất đăng nhập..." />;
 }

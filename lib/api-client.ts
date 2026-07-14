@@ -2,6 +2,7 @@ import axios from "axios";
 import { getActiveLocale } from "./i18n";
 
 let accessToken: string | null = null;
+let refreshPromise: Promise<string> | null = null;
 
 export function getAccessToken(): string | null {
   return accessToken;
@@ -18,6 +19,30 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+function refreshAccessTokenOnce() {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(
+        `${apiClient.defaults.baseURL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      )
+      .then((response) => {
+        const newAccessToken = response.data?.data?.accessToken;
+        if (!newAccessToken) {
+          throw new Error("Invalid refresh response format");
+        }
+        setAccessToken(newAccessToken);
+        return newAccessToken as string;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+}
 
 // Interceptor to attach access token and Accept-Language header to request headers
 apiClient.interceptors.request.use(
@@ -51,26 +76,12 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Call the refresh API. Since we set withCredentials: true, 
-        // the browser automatically includes the HTTP-only refresh_token cookie
-        // if it exists. Mobile clients/tests can also pass it in the body, but
-        // for browser clients, passing an empty body is correct.
-        const refreshResponse = await axios.post(
-          `${apiClient.defaults.baseURL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const newAccessToken = await refreshAccessTokenOnce();
 
-        if (refreshResponse.data && refreshResponse.data.data) {
-          const newAccessToken = refreshResponse.data.data.accessToken;
-          setAccessToken(newAccessToken);
-
-          // Retry the original request with the new access token
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          }
-          return apiClient(originalRequest);
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
+        return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh token is expired or invalid, clear token
         setAccessToken(null);

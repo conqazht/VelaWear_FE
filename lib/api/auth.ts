@@ -26,9 +26,7 @@ export type OAuth2ExchangeRequest = {
 };
 
 function normalizeUser(user: User): User {
-  const normalized = { ...user, hasPassword: Boolean(user.hasPassword) };
-  delete normalized.roles;
-  return normalized;
+  return { ...user, hasPassword: Boolean(user.hasPassword) };
 }
 
 export async function login(request: LoginRequest): Promise<TokenResponse> {
