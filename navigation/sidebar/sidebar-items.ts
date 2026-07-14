@@ -3,20 +3,24 @@ import {
   Calendar,
   ChartBar,
   CheckSquare,
-  Fingerprint,
-  Forklift,
+  ClipboardList,
+  FolderTree,
   Gauge,
-  GraduationCap,
   Kanban,
+  KeyRound,
   LayoutDashboard,
   ListTodo,
   Lock,
   type LucideIcon,
   Mail,
   MessageSquare,
+  Package,
+  Palette,
   ReceiptText,
   Server,
   ShoppingBag,
+  TicketPercent,
+  Tags,
   Users,
 } from "lucide-react";
 
@@ -61,6 +65,66 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
+    label: "Management",
+    items: [
+      {
+        id: "users",
+        title: "Users",
+        url: "/dashboard/users",
+        icon: Users,
+      },
+      {
+        id: "roles",
+        title: "Roles",
+        url: "/dashboard/roles",
+        icon: Lock,
+      },
+      {
+        id: "permissions",
+        title: "Permissions",
+        url: "/dashboard/permissions",
+        icon: KeyRound,
+      },
+      {
+        id: "products",
+        title: "Products",
+        url: "/dashboard/products",
+        icon: Package,
+      },
+      {
+        id: "categories",
+        title: "Categories",
+        url: "/dashboard/categories",
+        icon: FolderTree,
+      },
+      {
+        id: "brands",
+        title: "Brands",
+        url: "/dashboard/brands",
+        icon: Tags,
+      },
+      {
+        id: "attributes",
+        title: "Colors & Sizes",
+        url: "/dashboard/attributes",
+        icon: Palette,
+      },
+      {
+        id: "orders",
+        title: "Orders",
+        url: "/dashboard/orders",
+        icon: ClipboardList,
+      },
+      {
+        id: "coupons",
+        title: "Coupons",
+        url: "/dashboard/coupons",
+        icon: TicketPercent,
+      },
+    ],
+  },
+  {
+    id: 2,
     label: "Dashboards",
     items: [
       {
@@ -100,18 +164,6 @@ export const sidebarItems: NavGroup[] = [
         icon: ShoppingBag,
       },
       {
-        id: "academy",
-        title: "Academy",
-        url: "/dashboard/academy",
-        icon: GraduationCap,
-      },
-      {
-        id: "logistics",
-        title: "Logistics",
-        url: "/dashboard/logistics",
-        icon: Forklift,
-      },
-      {
         id: "infrastructure",
         title: "Infrastructure",
         url: "/dashboard/infrastructure",
@@ -121,7 +173,7 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
-    id: 2,
+    id: 3,
     label: "Pages",
     items: [
       {
@@ -160,45 +212,6 @@ export const sidebarItems: NavGroup[] = [
         title: "Invoice",
         url: "/dashboard/invoice",
         icon: ReceiptText,
-      },
-      {
-        id: "users",
-        title: "Users",
-        url: "/dashboard/users",
-        icon: Users,
-      },
-      {
-        id: "roles",
-        title: "Roles",
-        url: "/dashboard/roles",
-        icon: Lock,
-      },
-      {
-        id: "authentication",
-        title: "Authentication",
-        icon: Fingerprint,
-        subItems: [
-          { id: "auth-login-v1", title: "Login v1", url: "/auth/v1/login", newTab: true },
-          { id: "auth-login-v2", title: "Login v2", url: "/auth/v2/login", newTab: true },
-          { id: "auth-register-v1", title: "Register v1", url: "/auth/v1/register", newTab: true },
-          { id: "auth-register-v2", title: "Register v2", url: "/auth/v2/register", newTab: true },
-        ],
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: "Legacy",
-    items: [
-      {
-        id: "legacy-dashboards",
-        title: "Dashboards",
-        subItems: [
-          { id: "legacy-default", title: "Default V1", url: "/dashboard/default-v1" },
-          { id: "legacy-crm", title: "CRM V1", url: "/dashboard/crm-v1" },
-          { id: "legacy-finance", title: "Finance V1", url: "/dashboard/finance-v1" },
-          { id: "legacy-analytics", title: "Analytics V1", url: "/dashboard/analytics-v1" },
-        ],
       },
     ],
   },
