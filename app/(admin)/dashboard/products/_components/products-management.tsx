@@ -761,7 +761,7 @@ export function ProductsManagement() {
         }
         isLoading={productsQuery.isPending}
         isFetching={productsQuery.isFetching}
-        error={productsQuery.isError ? getApiErrorMessage(productsQuery.error) : null}
+        error={productsQuery.isError ? productsQuery.error : null}
         emptyTitle="No products found"
         emptyDescription="Add a product or adjust the current search and catalog filters."
       />

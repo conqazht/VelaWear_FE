@@ -12,7 +12,6 @@ import {
   downloadCsv,
   formatAdminDateTime,
   formatCurrency,
-  getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -166,7 +165,7 @@ export function OrdersManagement() {
     !isAuthLoading && !isAuthenticated
       ? "Authentication is required to manage orders. Please sign in with an authorized admin account."
       : null;
-  const queryError = ordersQuery.isError ? getApiErrorMessage(ordersQuery.error) : null;
+  const queryError = ordersQuery.isError ? ordersQuery.error : null;
 
   return (
     <>

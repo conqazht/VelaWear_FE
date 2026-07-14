@@ -6,6 +6,8 @@ import { Skeleton } from "boneyard-js/react";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
 import { RelatedProducts } from "@/components/shop/related-products";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
 import { getActiveLocale } from "@/lib/i18n";
@@ -13,7 +15,9 @@ import { getActiveLocale } from "@/lib/i18n";
 export function ProductDetailPage({ slug }: { slug: string }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [isMissing, setIsMissing] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   const activeLocale = getActiveLocale();
 
@@ -22,7 +26,8 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
     async function loadProduct() {
       setIsLoading(true);
-      setLoadError(false);
+      setLoadError(null);
+      setIsMissing(false);
       setProduct(null);
 
       try {
@@ -32,12 +37,11 @@ export function ProductDetailPage({ slug }: { slug: string }) {
         if (response.data?.data) {
           setProduct(mapBackendProduct(response.data.data, activeLocale));
         } else {
-          setLoadError(true);
+          setIsMissing(true);
         }
       } catch (err) {
-        console.error("Failed to load product by slug", err);
         if (isMounted) {
-          setLoadError(true);
+          setLoadError(err);
         }
       } finally {
         if (isMounted) {
@@ -51,7 +55,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     return () => {
       isMounted = false;
     };
-  }, [slug, activeLocale]);
+  }, [slug, activeLocale, retryKey]);
 
   return (
     <Skeleton
@@ -63,8 +67,26 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     >
       {product ? (
         <ProductDetailContent product={product} />
+      ) : loadError ? (
+        <StorefrontApiStatus
+          error={loadError}
+          onRetry={() => setRetryKey((value) => value + 1)}
+          resourceLabel="sản phẩm"
+          returnHref="/collection"
+          variant="panel"
+        />
       ) : (
-        <ProductUnavailableState hasError={loadError} />
+        <StorefrontStatus
+          status={404}
+          eyebrow="VELA WEAR / SẢN PHẨM"
+          title="Thiết kế này không còn trong bộ sưu tập"
+          description={isMissing
+            ? "Sản phẩm có thể đã ngừng hiển thị hoặc đường dẫn đã thay đổi. Hãy khám phá những thiết kế đang có tại Vela."
+            : "Không tìm thấy thông tin sản phẩm bạn đang tìm kiếm."}
+          primaryAction={{ label: "Xem bộ sưu tập", href: "/collection" }}
+          secondaryAction={{ label: "Về trang chủ", href: "/" }}
+          variant="panel"
+        />
       )}
     </Skeleton>
   );
@@ -110,24 +132,6 @@ function ProductDetailLoadingFallback() {
         <div className="h-[68px] w-full animate-pulse rounded-full bg-[#efe7dc]" />
         <div className="mt-5 h-[60px] w-full animate-pulse rounded-full bg-[#efe7dc]" />
       </div>
-    </div>
-  );
-}
-
-function ProductUnavailableState({ hasError }: { hasError: boolean }) {
-  return (
-    <div className="py-28 text-center select-none">
-      <p className="mb-6 text-sm text-[#1c1a18]/55">
-        {hasError
-          ? "Không thể tải sản phẩm này. Vui lòng thử lại sau."
-          : "Không tìm thấy sản phẩm này."}
-      </p>
-      <Link
-        href="/collection"
-        className="inline-flex items-center rounded-none bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
-      >
-        Xem bộ sưu tập
-      </Link>
     </div>
   );
 }

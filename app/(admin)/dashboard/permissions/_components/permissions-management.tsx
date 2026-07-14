@@ -296,7 +296,7 @@ export function PermissionsManagement() {
         }
         isLoading={permissionsQuery.isPending}
         isFetching={permissionsQuery.isFetching}
-        error={permissionsQuery.isError ? getApiErrorMessage(permissionsQuery.error) : null}
+        error={permissionsQuery.isError ? permissionsQuery.error : null}
         emptyTitle="No permissions found"
         emptyDescription="Add a permission or adjust the name, method, and module filters."
       />

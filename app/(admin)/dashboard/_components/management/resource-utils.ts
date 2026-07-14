@@ -1,3 +1,5 @@
+export { getApiErrorStatus } from "@/lib/api/errors";
+
 export function formatAdminDate(value?: string | null) {
   if (!value) return "—";
 

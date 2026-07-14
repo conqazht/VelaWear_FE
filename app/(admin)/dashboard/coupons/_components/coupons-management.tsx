@@ -372,7 +372,7 @@ export function CouponsManagement() {
         }
         isLoading={couponsQuery.isPending}
         isFetching={couponsQuery.isFetching}
-        error={couponsQuery.isError ? getApiErrorMessage(couponsQuery.error) : null}
+        error={couponsQuery.isError ? couponsQuery.error : null}
         emptyTitle="No coupons found"
         emptyDescription="Create a coupon or adjust the current search and filters."
       />

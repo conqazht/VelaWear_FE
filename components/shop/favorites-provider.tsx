@@ -10,6 +10,7 @@ import {
   useWishlistsQuery,
 } from "@/lib/queries/commerce";
 import { getProduct } from "@/lib/api/catalog";
+import { getApiErrorStatus } from "@/lib/api/errors";
 import { getActiveLocale } from "@/lib/i18n";
 import { queryKeys } from "@/lib/queries/keys";
 import { mapBackendProduct, Product } from "@/lib/vela-data";
@@ -18,6 +19,8 @@ import { useNotification } from "./notification-provider";
 interface FavoritesContextValue {
   favorites: Product[];
   isLoading: boolean;
+  error: unknown | null;
+  retry: () => void;
   addToFavorites: (product: Product, size?: string) => void;
   removeFromFavorites: (productId: string) => void;
   isFavorite: (productId: string) => boolean;
@@ -67,6 +70,18 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     (isAuthenticated &&
       (wishlistsQuery.isLoading ||
         wishlistProductQueries.some((query) => query.isLoading)));
+
+  const productQueryError = wishlistProductQueries.find(
+    (query) => query.error && getApiErrorStatus(query.error) !== 404
+  )?.error ?? null;
+  const error = wishlistsQuery.error ?? productQueryError;
+
+  const retry = useCallback(() => {
+    void wishlistsQuery.refetch();
+    wishlistProductQueries.forEach((query) => {
+      if (query.isError) void query.refetch();
+    });
+  }, [wishlistsQuery, wishlistProductQueries]);
 
   const serverFavorites = useMemo(
     () => {
@@ -207,11 +222,13 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({
     favorites,
     isLoading,
+    error,
+    retry,
     addToFavorites,
     removeFromFavorites,
     isFavorite,
     toggleFavorite,
-  }), [favorites, isLoading, addToFavorites, removeFromFavorites, isFavorite, toggleFavorite]);
+  }), [favorites, isLoading, error, retry, addToFavorites, removeFromFavorites, isFavorite, toggleFavorite]);
 
   return (
     <FavoritesContext.Provider value={value}>

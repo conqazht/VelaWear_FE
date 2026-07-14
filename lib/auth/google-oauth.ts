@@ -1,5 +1,7 @@
 "use client";
 
+import { storePostAuthRedirect } from "@/lib/auth/post-auth-redirect";
+
 const DEFAULT_BACKEND_ORIGIN = "http://localhost:8080";
 
 export function getGoogleOAuthUrl() {
@@ -7,6 +9,7 @@ export function getGoogleOAuthUrl() {
   return `${backendOrigin}/oauth2/authorization/google`;
 }
 
-export function startGoogleOAuthLogin() {
+export function startGoogleOAuthLogin(redirectTo?: string | null) {
+  storePostAuthRedirect(redirectTo);
   window.location.href = getGoogleOAuthUrl();
 }

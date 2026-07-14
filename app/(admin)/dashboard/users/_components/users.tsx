@@ -373,7 +373,7 @@ export function Users() {
         }
         isLoading={usersQuery.isPending}
         isFetching={usersQuery.isFetching}
-        error={usersQuery.isError ? getApiErrorMessage(usersQuery.error) : null}
+        error={usersQuery.isError ? usersQuery.error : null}
         emptyTitle="No users found"
         emptyDescription="Try another filter or create the first managed account."
       />

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Skeleton } from "boneyard-js/react";
 import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { RatingStars } from "@/components/shop/rating-stars";
 import { useReviewsByUserQuery } from "@/lib/queries/commerce";
 
@@ -46,7 +47,15 @@ export function ReviewsClient() {
             </span>
           </div>
 
-        {reviewsQuery.isLoading ? (
+        {reviewsQuery.isError ? (
+          <StorefrontApiStatus
+            error={reviewsQuery.error}
+            onRetry={() => void reviewsQuery.refetch()}
+            resourceLabel="đánh giá của bạn"
+            returnHref="/collection"
+            variant="panel"
+          />
+        ) : reviewsQuery.isLoading ? (
           <Skeleton
             name="reviews-page"
             loading

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Skeleton } from "boneyard-js/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  AlertCircle,
   CheckCircle2,
   Clock3,
   CreditCard,
@@ -15,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { Card } from "@/components/ui/card";
 import {
   getOrderByCode,
@@ -86,17 +87,16 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     },
   });
   const histories = historiesQuery.data?.result ?? [];
-  const requestError = cancelMutation.error ?? orderQuery.error ?? historiesQuery.error;
-  const error = !hasAccess && order
-    ? "Bạn không có quyền xem đơn hàng này."
-    : requestError
-      ? getErrorMessage(requestError)
-      : null;
+  const error = cancelMutation.error ? getErrorMessage(cancelMutation.error) : null;
 
   const handleCancel = async () => {
     if (!order || !window.confirm("Bạn chắc chắn muốn huỷ đơn hàng này?")) return;
 
-    await cancelMutation.mutateAsync(order.id);
+    try {
+      await cancelMutation.mutateAsync(order.id);
+    } catch {
+      // The mutation state renders the actionable message in the order page.
+    }
   };
 
   const isPageLoading =
@@ -133,12 +133,64 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     );
   }
 
-  if (!order || !hasAccess) {
+  if (orderQuery.isError) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-32 text-center">
-        <AlertCircle className="mx-auto mb-4 size-8 text-[#b85a3c]" />
-        <p className="mb-5 text-sm text-[#b85a3c]">{error ?? "Không tìm thấy đơn hàng."}</p>
-        <Link href="/profile?tab=orders" className="text-xs uppercase tracking-widest text-ink underline">Quay lại đơn hàng</Link>
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
+        <StorefrontApiStatus
+          error={orderQuery.error}
+          onRetry={() => void orderQuery.refetch()}
+          resourceLabel="đơn hàng"
+          returnHref="/profile?tab=orders"
+          returnLabel="Về lịch sử đơn hàng"
+          variant="panel"
+        />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
+        <StorefrontStatus
+          status={404}
+          eyebrow="VELA MEMBER / ĐƠN HÀNG"
+          title="Không tìm thấy đơn hàng này"
+          description="Mã đơn có thể không còn hợp lệ hoặc đường dẫn đã thay đổi. Bạn có thể quay lại lịch sử để chọn một đơn hàng khác."
+          primaryAction={{ label: "Về lịch sử đơn hàng", href: "/profile?tab=orders" }}
+          secondaryAction={{ label: "Tiếp tục mua sắm", href: "/collection" }}
+          variant="panel"
+        />
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
+        <StorefrontStatus
+          status={403}
+          eyebrow="VELA MEMBER / QUYỀN TRUY CẬP"
+          title="Đơn hàng này không thuộc tài khoản của bạn"
+          description="Bạn đã đăng nhập nhưng tài khoản hiện tại không có quyền xem thông tin của đơn hàng này."
+          primaryAction={{ label: "Về đơn hàng của tôi", href: "/profile?tab=orders" }}
+          secondaryAction={{ label: "Về trang chủ", href: "/" }}
+          variant="panel"
+        />
+      </div>
+    );
+  }
+
+  if (historiesQuery.isError) {
+    return (
+      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
+        <StorefrontApiStatus
+          error={historiesQuery.error}
+          onRetry={() => void historiesQuery.refetch()}
+          resourceLabel="lịch sử trạng thái đơn hàng"
+          returnHref="/profile?tab=orders"
+          returnLabel="Về lịch sử đơn hàng"
+          variant="panel"
+        />
       </div>
     );
   }

@@ -6,16 +6,18 @@ import { cn } from "@/lib/utils";
 type GoogleOAuthButtonProps = {
   className?: string;
   label?: string;
+  redirectTo?: string | null;
 };
 
 export function GoogleOAuthButton({
   className,
   label = "Continue with Google",
+  redirectTo,
 }: GoogleOAuthButtonProps) {
   return (
     <button
       type="button"
-      onClick={startGoogleOAuthLogin}
+      onClick={() => startGoogleOAuthLogin(redirectTo)}
       className={cn(
         "flex h-12 w-full items-center justify-center gap-2.5 rounded-[12px] border border-[#1c1a18]/20 bg-transparent text-sm font-medium text-[#1c1a18] transition-colors hover:bg-black/5 cursor-pointer",
         className

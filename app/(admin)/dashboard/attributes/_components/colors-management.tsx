@@ -249,7 +249,7 @@ export function ColorsManagement() {
         }
         isLoading={colorsQuery.isPending}
         isFetching={colorsQuery.isFetching}
-        error={colorsQuery.isError ? getApiErrorMessage(colorsQuery.error) : null}
+        error={colorsQuery.isError ? colorsQuery.error : null}
         emptyTitle="No colors found"
         emptyDescription="Add a color or adjust the current search."
       />

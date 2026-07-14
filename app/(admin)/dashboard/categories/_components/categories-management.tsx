@@ -353,7 +353,7 @@ export function CategoriesManagement() {
         }
         isLoading={categoriesQuery.isPending}
         isFetching={categoriesQuery.isFetching || parentCategoriesQuery.isFetching}
-        error={categoriesQuery.isError ? getApiErrorMessage(categoriesQuery.error) : null}
+        error={categoriesQuery.isError ? categoriesQuery.error : null}
         emptyTitle="No categories found"
         emptyDescription="Add a category or adjust the current name and status filters."
       />
