@@ -93,8 +93,8 @@ export const checkoutSchema = z.object({
   firstName: requiredStringSchema("Tên không được để trống"),
   lastName: requiredStringSchema("Họ không được để trống"),
   address: requiredStringSchema("Địa chỉ không được để trống"),
-  city: requiredStringSchema("Thành phố không được để trống"),
-  zipCode: requiredStringSchema("Mã bưu chính không được để trống"),
+  provinceCode: requiredStringSchema("Vui lòng chọn tỉnh/thành phố"),
+  wardCode: requiredStringSchema("Vui lòng chọn phường/xã"),
 });
 
 /**

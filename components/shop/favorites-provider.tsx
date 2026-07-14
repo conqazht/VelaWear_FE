@@ -17,6 +17,7 @@ import { useNotification } from "./notification-provider";
 
 interface FavoritesContextValue {
   favorites: Product[];
+  isLoading: boolean;
   addToFavorites: (product: Product, size?: string) => void;
   removeFromFavorites: (productId: string) => void;
   isFavorite: (productId: string) => boolean;
@@ -28,7 +29,7 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [optimisticFavorites, setOptimisticFavorites] = useState<Product[]>([]);
   const [optimisticRemovedProductIds, setOptimisticRemovedProductIds] = useState<Set<number>>(new Set());
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const { showAddedToFavorites } = useNotification();
   const activeLocale = getActiveLocale();
@@ -60,6 +61,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       enabled: typeof user?.id === "number",
     })),
   });
+
+  const isLoading =
+    isAuthLoading ||
+    (isAuthenticated &&
+      (wishlistsQuery.isLoading ||
+        wishlistProductQueries.some((query) => query.isLoading)));
 
   const serverFavorites = useMemo(
     () => {
@@ -113,10 +120,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     });
     setOptimisticRemovedProductIds((prev) => {
       const next = new Set(prev);
-      next.delete(product.realId);
+      if (product.realId !== undefined) {
+        next.delete(product.realId);
+      }
       return next;
     });
-    createWishlistMutation.mutate(product.realId, {
+    createWishlistMutation.mutate(product.realId!, {
       onSuccess: () => {
         showAddedToFavorites(product, size);
       },
@@ -134,15 +143,15 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
     setOptimisticFavorites((prev) => prev.filter((item) => item.id !== productId));
     if (product?.realId !== undefined) {
-      setOptimisticRemovedProductIds((prev) => new Set(prev).add(product.realId));
+      setOptimisticRemovedProductIds((prev) => new Set(prev).add(product.realId!));
     }
     if (wishlist && product?.realId !== undefined) {
-      deleteWishlistMutation.mutate(product.realId, {
+      deleteWishlistMutation.mutate(product.realId!, {
         onError: () => {
           if (product?.realId !== undefined) {
             setOptimisticRemovedProductIds((prev) => {
               const next = new Set(prev);
-              next.delete(product.realId);
+              next.delete(product.realId!);
               return next;
             });
           }
@@ -172,7 +181,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     if (realId !== undefined) {
       setOptimisticRemovedProductIds((prev) => new Set(prev).add(realId));
     }
-    if (wishlist) {
+    if (wishlist && realId !== undefined) {
       deleteWishlistMutation.mutate(realId, {
         onError: () => {
           if (realId !== undefined) {
@@ -197,11 +206,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => ({
     favorites,
+    isLoading,
     addToFavorites,
     removeFromFavorites,
     isFavorite,
     toggleFavorite,
-  }), [favorites, addToFavorites, removeFromFavorites, isFavorite, toggleFavorite]);
+  }), [favorites, isLoading, addToFavorites, removeFromFavorites, isFavorite, toggleFavorite]);
 
   return (
     <FavoritesContext.Provider value={value}>

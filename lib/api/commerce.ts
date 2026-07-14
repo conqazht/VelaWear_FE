@@ -2,7 +2,9 @@ import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 import type {
   Cart,
   Coupon,
+  MyCoupons,
   Order,
+  OrderStatusHistory,
   PageParams,
   Payment,
   ResultPaginationDTO,
@@ -22,15 +24,31 @@ export type CreateWishlistRequest = {
 };
 
 export type CreateOrderRequest = Record<string, unknown>;
-export type UpdateOrderRequest = Record<string, unknown>;
+export type UpdateOrderRequest = {
+  status?: string;
+  shippingFee?: number;
+  discountAmount?: number;
+  finalAmount?: number;
+  receiverName?: string;
+  receiverPhone?: string;
+  receiverAddress?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+};
+
+export type ReplaceCartItemsRequest = {
+  items: Array<{ variantId: number; quantity: number }>;
+};
 export type CreatePaymentRequest = Record<string, unknown>;
 export type UpdatePaymentRequest = Record<string, unknown>;
 
 export type CreateUserAddressRequest = {
   userId: number;
   receiverName: string;
-  receiverPhone: string;
-  addressLine: string;
+  phone: string;
+  province: string;
+  ward: string;
+  addressDetail: string;
   isDefault?: boolean;
 };
 
@@ -49,13 +67,38 @@ export type CouponFilters = PageParams & {
   status?: string;
 };
 
-export type ReviewFilters = PageParams & {
+export type CommerceReviewFilters = PageParams & {
   userId?: number;
   productId?: number;
   orderId?: number;
   orderItemId?: number;
   ratingFrom?: number;
   ratingTo?: number;
+};
+
+export type OrderFilters = PageParams & {
+  userId?: number;
+  orderCode?: string;
+  status?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  finalAmountFrom?: number;
+  finalAmountTo?: number;
+  createdFrom?: string;
+  createdTo?: string;
+  updatedFrom?: string;
+  updatedTo?: string;
+};
+
+export type OrderStatusHistoryFilters = PageParams & {
+  fromStatus?: string;
+  toStatus?: string;
+  changedBy?: number;
+  reason?: string;
+  createdFrom?: string;
+  createdTo?: string;
 };
 
 export function getCartByUser(userId: number) {
@@ -98,8 +141,24 @@ export function getCoupons(params: CouponFilters = {}) {
   return apiGet<ResultPaginationDTO<Coupon>>("/coupons", params);
 }
 
+export function getMyCoupons() {
+  return apiGet<MyCoupons>("/coupons/me");
+}
+
 export function createOrder(request: CreateOrderRequest) {
   return apiPost<Order, CreateOrderRequest>("/orders", request);
+}
+
+export function getMyCart() {
+  return apiGet<Cart>("/carts/me");
+}
+
+export function replaceMyCartItems(request: ReplaceCartItemsRequest) {
+  return apiPut<Cart, ReplaceCartItemsRequest>("/carts/me/items", request);
+}
+
+export function getOrders(params: OrderFilters = {}) {
+  return apiGet<ResultPaginationDTO<Order>>("/orders", params);
 }
 
 export function getOrdersByUser(userId: number, params: PageParams = {}) {
@@ -110,8 +169,26 @@ export function getOrderByCode(orderCode: string) {
   return apiGet<Order>(`/orders/code/${orderCode}`);
 }
 
+export function getOrderById(id: number) {
+  return apiGet<Order>(`/orders/${id}`);
+}
+
+export function getOrderStatusHistories(
+  id: number,
+  params: OrderStatusHistoryFilters = {}
+) {
+  return apiGet<ResultPaginationDTO<OrderStatusHistory>>(
+    `/orders/${id}/status-histories`,
+    params
+  );
+}
+
 export function updateOrder(id: number, request: UpdateOrderRequest) {
   return apiPut<Order, UpdateOrderRequest>(`/orders/${id}`, request);
+}
+
+export function deleteOrder(id: number) {
+  return apiDelete<void>(`/orders/${id}`);
 }
 
 export function createPayment(request: CreatePaymentRequest) {
@@ -153,7 +230,7 @@ export function deleteUserAddress(id: number) {
   return apiDelete<void>(`/user-addresses/${id}`);
 }
 
-export function getReviews(params: ReviewFilters = {}) {
+export function getCommerceReviews(params: CommerceReviewFilters = {}) {
   return apiGet<ResultPaginationDTO<Review>>("/reviews", params);
 }
 

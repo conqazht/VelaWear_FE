@@ -6,15 +6,11 @@ import type { ApiResponse } from "./api/types";
 // ---------------------------------------------------------------------------
 
 export interface CheckoutRequest {
-  userId: number;
   receiverName: string;
   receiverPhone: string;
   receiverAddress: string;
   paymentMethod: "COD" | "VNPAY" | "MOMO" | "BANK_TRANSFER";
-  subtotal: number;
   shippingFee: number;
-  discountAmount?: number;
-  finalAmount: number;
   couponCode?: string;
 }
 
@@ -34,6 +30,13 @@ export interface CheckoutItemResponse {
   subtotal: number;
 }
 
+export interface PaymentInitiationResponse {
+  provider: string;
+  method: string;
+  actionUrl: string;
+  fields: Record<string, string>;
+}
+
 export interface CheckoutResponse {
   orderId: number;
   orderCode: string;
@@ -49,6 +52,7 @@ export interface CheckoutResponse {
   paymentStatus: string;
   items: CheckoutItemResponse[];
   paymentId: number | null;
+  paymentInitiation: PaymentInitiationResponse | null;
   createdAt: string;
 }
 
@@ -61,22 +65,6 @@ interface ApiEnvelope<T = unknown> {
   data: T | null;
   message: string;
   timestamp: string;
-}
-
-interface OrderApiResponse {
-  id: number;
-  orderCode: string;
-  status: string;
-  subtotal: number;
-  shippingFee: number;
-  discountAmount: number;
-  finalAmount: number;
-  receiverName: string;
-  receiverPhone: string;
-  receiverAddress: string;
-  paymentMethod: string;
-  paymentStatus: string;
-  createdAt: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -187,42 +175,24 @@ export function extractCheckoutError(error: unknown): CheckoutError {
 export async function submitCheckout(
   request: CheckoutRequest
 ): Promise<CheckoutResponse> {
-  const response = await apiClient.post<ApiResponse<OrderApiResponse>>("/orders", {
-    userId: request.userId,
-    orderCode: `VW-${Date.now()}`,
-    status: "PENDING",
-    subtotal: request.subtotal,
-    shippingFee: request.shippingFee,
-    discountAmount: request.discountAmount ?? 0,
-    finalAmount: request.finalAmount,
-    receiverName: request.receiverName,
-    receiverPhone: request.receiverPhone,
-    receiverAddress: request.receiverAddress,
-    paymentMethod: request.paymentMethod,
-    paymentStatus: "UNPAID",
-  });
+  const response = await apiClient.post<ApiResponse<CheckoutResponse>>("/checkout", request);
 
   const data = response.data.data;
   if (!data) {
-    throw new Error("Unexpected empty response from order API.");
+    throw new Error("Unexpected empty response from checkout API.");
   }
 
   return {
-    orderId: data.id,
-    orderCode: data.orderCode,
-    status: data.status,
+    ...data,
     subtotal: Number(data.subtotal),
     shippingFee: Number(data.shippingFee),
     discountAmount: Number(data.discountAmount),
     finalAmount: Number(data.finalAmount),
-    receiverName: data.receiverName,
-    receiverPhone: data.receiverPhone,
-    receiverAddress: data.receiverAddress,
-    paymentMethod: data.paymentMethod,
-    paymentStatus: data.paymentStatus,
-    items: [],
-    paymentId: null,
-    createdAt: data.createdAt,
+    items: data.items.map((item) => ({
+      ...item,
+      price: Number(item.price),
+      subtotal: Number(item.subtotal),
+    })),
   };
 }
 

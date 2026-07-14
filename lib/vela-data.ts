@@ -1,5 +1,7 @@
 export interface CartItem {
   id: string;
+  productId?: number;
+  productSlug?: string;
   name: string;
   price: number;
   color: string;
@@ -30,6 +32,7 @@ export interface Product {
   size: string;
   description: string;
   realId?: number;
+  variantId?: number;
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;

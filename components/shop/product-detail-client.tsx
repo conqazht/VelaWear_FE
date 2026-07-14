@@ -5,12 +5,12 @@ import {
   Heart,
   ChevronUp,
   ChevronDown,
-  Star,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
+import { RatingStars } from "@/components/shop/rating-stars";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -21,7 +21,7 @@ import {
 } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
 import { getActiveLocale } from "@/lib/i18n";
-import { useProductVariantsQuery } from "@/lib/queries/catalog";
+import { useProductReviewsQuery, useProductVariantsQuery } from "@/lib/queries/catalog";
 
 const colorSwatches: Record<string, string> = {
   Black: "bg-[#000000]",
@@ -109,6 +109,47 @@ export function ProductDetailClient({ product }: { product: Product }) {
     () => (variantsQuery.data?.result ?? []) as ProductVariant[],
     [variantsQuery.data?.result]
   );
+  const reviewsQuery = useProductReviewsQuery({
+    productId: product.realId,
+    size: 100,
+    sort: "createdAt,desc",
+  });
+  const productReviews = useMemo(
+    () => reviewsQuery.data?.result ?? [],
+    [reviewsQuery.data?.result]
+  );
+  const averageRating = useMemo(() => {
+    if (productReviews.length === 0) return 0;
+
+    const ratingTotal = productReviews.reduce((total, review) => {
+      const rating = Number(review.rating);
+      return total + (Number.isFinite(rating) ? Math.min(5, Math.max(0, rating)) : 0);
+    }, 0);
+    return ratingTotal / productReviews.length;
+  }, [productReviews]);
+  const reviewCount = reviewsQuery.data?.meta.total ?? productReviews.length;
+
+  useEffect(() => {
+    if (window.location.hash !== "#reviews") return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOpenSections((current) => current.reviews ? current : { ...current, reviews: true });
+  }, []);
+
+  useEffect(() => {
+    if (!openSections.reviews || productReviews.length === 0) return;
+
+    const linkedReviewId = new URLSearchParams(window.location.search).get("review");
+    if (!linkedReviewId) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      document.getElementById(`review-${linkedReviewId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [openSections.reviews, productReviews.length]);
 
   // Set default selected color/size once variants load
   useEffect(() => {
@@ -208,11 +249,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
           {product.name}
         </h1>
         <div className="mb-6 flex items-baseline gap-3">
-          <span className="font-serif text-2xl font-light tracking-wider text-[#1c1a18]">
+          <span className="font-serif text-2xl font-light tracking-wider text-[#1c1a18] font-numeric">
             {money(mainPrice)}
           </span>
           {originalPrice && originalPrice > mainPrice && (
-            <span className="text-sm tracking-wider text-[#1c1a18]/40 line-through">
+            <span className="text-sm tracking-wider text-[#1c1a18]/40 line-through font-numeric">
               {money(originalPrice)}
             </span>
           )}
@@ -277,7 +318,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
             type="button"
             onClick={() => {
               // Construct product with active variant pricing
-              const cartProduct = { ...product, price: mainPrice };
+              const cartProduct = { ...product, price: mainPrice, variantId: activeVariant?.id };
               addToCart(cartProduct, selectedColor, selectedSize);
               showAddedToBag(cartProduct, selectedSize, selectedColor);
             }}
@@ -414,22 +455,24 @@ export function ProductDetailClient({ product }: { product: Product }) {
             )}
           </div>
 
-          {/* Reviews (0) */}
-          <div className="border-b border-hairline/40 py-5">
+          {/* Product reviews */}
+          <div id="reviews" className="scroll-mt-32 border-b border-hairline/40 py-5">
             <button
               type="button"
               onClick={() => toggleSection("reviews")}
               className="flex justify-between items-center w-full group text-left cursor-pointer"
             >
               <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
-                Reviews (0)
+                Reviews ({reviewCount})
               </h3>
               <div className="flex items-center gap-4">
-                <div className="flex text-on-surface-variant/40 gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="size-3 text-[#55423d]/45" />
-                  ))}
-                </div>
+                <RatingStars
+                  rating={averageRating}
+                  sizeClassName="size-3"
+                  className="gap-0.5"
+                  activeClassName="text-[#b85a3c]"
+                  inactiveClassName="text-[#55423d]/20"
+                />
                 {openSections.reviews ? (
                   <ChevronUp className="size-4 text-ink/70" />
                 ) : (
@@ -438,19 +481,64 @@ export function ProductDetailClient({ product }: { product: Product }) {
               </div>
             </button>
             {openSections.reviews && (
-              <div className="flex flex-col items-start gap-3 mt-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300 text-left">
-                <div className="flex text-on-surface-variant/30 gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="size-3.5 text-[#55423d]/30" />
-                  ))}
-                </div>
-                <p className="text-sm font-semibold text-ink">No reviews</p>
-                <p className="text-xs font-light tracking-wide text-on-surface-variant/80 max-w-sm leading-relaxed">
-                  Have your say. Be the first to review the {product.name}.
-                </p>
-                <button className="mt-2 px-6 py-2.5 border border-ink rounded-sm font-semibold text-xs tracking-wider uppercase bg-transparent text-ink hover:bg-ink hover:text-white transition-colors cursor-pointer">
-                  Write a review
-                </button>
+              <div className="mt-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300 text-left">
+                {reviewsQuery.isLoading ? (
+                  <div className="space-y-3" aria-hidden="true">
+                    <div className="h-16 animate-pulse rounded-sm bg-[#efe7dc]" />
+                    <div className="h-16 animate-pulse rounded-sm bg-[#efe7dc]" />
+                  </div>
+                ) : reviewsQuery.isError ? (
+                  <p className="text-xs font-light leading-relaxed text-on-surface-variant/80">
+                    Không thể tải đánh giá lúc này. Vui lòng thử lại sau.
+                  </p>
+                ) : productReviews.length === 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-ink">Chưa có đánh giá</p>
+                    <p className="text-xs font-light tracking-wide text-on-surface-variant/80 max-w-sm leading-relaxed">
+                      Hãy là người đầu tiên chia sẻ trải nghiệm về {product.name}.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 border-b border-hairline/40 pb-4">
+                      <span className="font-serif text-2xl text-ink">{averageRating.toFixed(1)}</span>
+                      <div>
+                        <RatingStars
+                          rating={averageRating}
+                          sizeClassName="size-4"
+                          activeClassName="text-[#b85a3c]"
+                        />
+                        <p className="mt-1 text-[10px] uppercase tracking-wider text-on-surface-variant/65">
+                          {reviewCount} đánh giá
+                        </p>
+                      </div>
+                    </div>
+                    <div className="max-h-80 space-y-4 overflow-y-auto pr-1">
+                      {productReviews.map((review) => (
+                        <article
+                          key={review.id}
+                          id={`review-${review.id}`}
+                          className="scroll-mt-40 border-b border-hairline/30 pb-4 last:border-0"
+                        >
+                          <div className="mb-2 flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold text-ink">{review.userName}</p>
+                              {review.createdAt && (
+                                <time className="text-[10px] text-on-surface-variant/55">
+                                  {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                                </time>
+                              )}
+                            </div>
+                            <RatingStars rating={review.rating} sizeClassName="size-3" className="gap-0.5" />
+                          </div>
+                          <p className="text-xs font-light leading-relaxed text-on-surface-variant/85">
+                            {review.comment || "Khách hàng không để lại bình luận."}
+                          </p>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -6,9 +6,9 @@ import {
   getCategories,
   getColors,
   getProduct,
+  getProductReviews,
   getProducts,
   getProductVariants,
-  getReviews,
   getSizes,
   type ProductFilters,
   type ProductVariantFilters,
@@ -72,7 +72,7 @@ export function useProductVariantsQuery(params: ProductVariantFilters = {}) {
 export function useProductReviewsQuery(params: ReviewFilters = {}) {
   return useQuery({
     queryKey: queryKeys.reviews.list(params),
-    queryFn: () => getReviews(params),
-    enabled: params.productId === undefined || Boolean(params.productId),
+    queryFn: () => getProductReviews(params.productId as number, params),
+    enabled: Boolean(params.productId),
   });
 }

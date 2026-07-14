@@ -11,9 +11,10 @@ import {
   Truck,
   ShoppingBag,
 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Skeleton } from "boneyard-js/react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,8 +32,20 @@ import {
   type CheckoutResponse,
 } from "@/lib/checkout-api";
 import { checkoutSchema } from "@/lib/validations";
+import {
+  getVietnamProvinces,
+  getVietnamWards,
+  type VietnamProvince,
+  type VietnamWard,
+} from "@/lib/vietnam-address-api";
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
+const CHECKOUT_DETAILS_STORAGE_PREFIX = "vela-checkout-details";
+
+function checkoutDetailsStorageKey(userId: number) {
+  return `${CHECKOUT_DETAILS_STORAGE_PREFIX}:${userId}`;
+}
 
 // ---------------------------------------------------------------------------
 // Payment method options
@@ -41,8 +54,6 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 const PAYMENT_METHODS = [
   { value: "COD" as const, label: "Thanh toán khi nhận hàng (COD)", disabled: false },
   { value: "BANK_TRANSFER" as const, label: "Chuyển khoản ngân hàng", disabled: false },
-  { value: "VNPAY" as const, label: "VNPay (Sắp ra mắt)", disabled: true },
-  { value: "MOMO" as const, label: "MoMo (Sắp ra mắt)", disabled: true },
 ] as const;
 
 type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
@@ -61,11 +72,16 @@ export function CheckoutPageClient() {
   const [completedOrder, setCompletedOrder] = useState<CheckoutResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [provinces, setProvinces] = useState<VietnamProvince[]>([]);
+  const [wards, setWards] = useState<VietnamWard[]>([]);
+  const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
+  const [addressApiError, setAddressApiError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema as never),
@@ -75,20 +91,94 @@ export function CheckoutPageClient() {
       firstName: "",
       lastName: "",
       address: "",
-      city: "",
-      zipCode: "",
+      provinceCode: "",
+      wardCode: "",
     },
   });
 
-  // Pre-populate fields when user context is available
+  const selectedProvinceCode = useWatch({ control, name: "provinceCode" });
+  const isLoadingWards = Boolean(selectedProvinceCode) && wards.length === 0 && !addressApiError;
+
+  // Restore the last successful checkout details for this account.
   useEffect(() => {
-    if (user) {
-      setValue("email", user.email);
-      const names = user.fullName.split(" ");
-      setValue("firstName", names[0] || "");
-      setValue("lastName", names.slice(1).join(" ") || "");
+    if (!user) return;
+
+    try {
+      const storedValue = window.localStorage.getItem(checkoutDetailsStorageKey(user.id));
+      if (storedValue) {
+        const parsedDetails = checkoutSchema.safeParse(JSON.parse(storedValue));
+        if (parsedDetails.success) {
+          setValue("email", parsedDetails.data.email);
+          setValue("phone", parsedDetails.data.phone);
+          setValue("firstName", parsedDetails.data.firstName);
+          setValue("lastName", parsedDetails.data.lastName);
+          setValue("address", parsedDetails.data.address);
+          setValue("provinceCode", parsedDetails.data.provinceCode);
+          setValue("wardCode", parsedDetails.data.wardCode);
+          return;
+        }
+      }
+    } catch {
+      // Ignore unavailable or malformed browser storage and use account defaults.
     }
+
+    setValue("email", user.email);
+    const names = user.fullName.split(" ");
+    setValue("firstName", names[0] || "");
+    setValue("lastName", names.slice(1).join(" ") || "");
   }, [user, setValue]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    getVietnamProvinces(controller.signal)
+      .then((data) => {
+        if (!active) return;
+        setProvinces(data);
+        setAddressApiError(null);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setAddressApiError("Không thể tải danh sách tỉnh/thành. Vui lòng thử lại.");
+      })
+      .finally(() => {
+        if (active) setIsLoadingProvinces(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProvinceCode) {
+      return;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+
+    getVietnamWards(Number(selectedProvinceCode), controller.signal)
+      .then((data) => {
+        if (!active) return;
+        setWards(data);
+        setAddressApiError(null);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setWards([]);
+        setAddressApiError("Không thể tải danh sách phường/xã. Vui lòng thử lại.");
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [selectedProvinceCode]);
 
   const activeItemsList = cart;
 
@@ -103,24 +193,41 @@ export function CheckoutPageClient() {
   const onCompletePurchase = async (data: CheckoutFormValues) => {
     setApiError(null);
     setCouponError(null);
+    setAddressApiError(null);
+
+    const selectedProvince = provinces.find(
+      (province) => String(province.code) === data.provinceCode
+    );
+    const selectedWard = wards.find((ward) => String(ward.code) === data.wardCode);
+
+    if (!selectedProvince || !selectedWard) {
+      setAddressApiError("Vui lòng chọn đầy đủ tỉnh/thành và phường/xã.");
+      return;
+    }
 
     try {
       const request: CheckoutRequest = {
-        userId: user?.id as number,
         receiverName: `${data.firstName} ${data.lastName}`.trim(),
         receiverPhone: data.phone,
-        receiverAddress: [data.address, data.city, data.zipCode].filter(Boolean).join(", "),
+        receiverAddress: [data.address, selectedWard.name, selectedProvince.name].join(", "),
         paymentMethod,
-        subtotal,
         shippingFee,
-        discountAmount: 0,
-        finalAmount: estimatedTotal,
         couponCode: couponCode.trim() || undefined,
       };
 
       const response = await submitCheckout(request);
       setCompletedOrder(response);
       setOrderCompleted(true);
+      if (user) {
+        try {
+          window.localStorage.setItem(
+            checkoutDetailsStorageKey(user.id),
+            JSON.stringify(data)
+          );
+        } catch {
+          // Checkout remains successful when browser storage is unavailable.
+        }
+      }
       clearCart();
     } catch (err: unknown) {
       const checkoutErr = extractCheckoutError(err);
@@ -176,7 +283,7 @@ export function CheckoutPageClient() {
           <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] uppercase tracking-widest text-[#1c1a18]/45">
             <span>
               Tổng:{" "}
-              <strong className="text-[#1c1a18]">
+              <strong className="text-[#1c1a18] font-numeric">
                 {money(completedOrder.finalAmount)}
               </strong>
             </span>
@@ -256,107 +363,154 @@ export function CheckoutPageClient() {
             </div>
           )}
 
-          <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
-            <SectionTitle number="1" title="Contact Information" />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <CheckoutInput
-                label="Email Address *"
-                type="email"
-                autoComplete="email"
-                placeholder="address@domain.com"
-                {...register("email")}
-                error={errors.email?.message}
-              />
-              <CheckoutInput
-                label="Phone Number *"
-                type="tel"
-                autoComplete="tel"
-                placeholder="09xxx xxxxx"
-                {...register("phone")}
-                error={errors.phone?.message}
-              />
-            </div>
-          </Card>
-
-          <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
-            <SectionTitle number="2" title="Shipping Address" />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <CheckoutInput
-                label="First Name *"
-                autoComplete="given-name"
-                placeholder="Jon"
-                {...register("firstName")}
-                error={errors.firstName?.message}
-              />
-              <CheckoutInput
-                label="Last Name *"
-                autoComplete="family-name"
-                placeholder="Doe"
-                {...register("lastName")}
-                error={errors.lastName?.message}
-              />
-            </div>
-            <CheckoutInput
-              label="Street Address *"
-              autoComplete="street-address"
-              placeholder="Nguyễn Huệ, Quận 1, Tp.HCM"
-              {...register("address")}
-              error={errors.address?.message}
-            />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <CheckoutInput
-                label="City *"
-                autoComplete="address-level2"
-                placeholder="Ho Chi Minh City"
-                {...register("city")}
-                error={errors.city?.message}
-              />
-              <CheckoutInput
-                label="State / Province"
-                autoComplete="address-level1"
-                placeholder="Sông Bé"
-              />
-              <CheckoutInput
-                label="ZIP / Postal Code *"
-                autoComplete="postal-code"
-                placeholder="70000"
-                {...register("zipCode")}
-                error={errors.zipCode?.message}
-              />
-            </div>
-          </Card>
-
-          <Card className="space-y-5 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8">
-            <SectionTitle number="3" title="Payment Method" />
+          <Card className="space-y-8 rounded-md border-none bg-white p-6 py-6 shadow-sm">
             <div className="space-y-3">
-              {PAYMENT_METHODS.map((method) => (
-                <label
-                  key={method.value}
-                  className={`flex cursor-pointer items-center gap-3 rounded-sm border p-4 transition-colors ${
-                    method.disabled
-                      ? "cursor-not-allowed border-[#1c1a18]/5 bg-[#f7f4ef]/20 opacity-50"
-                      : paymentMethod === method.value
-                        ? "border-[#b85a3c] bg-[#b85a3c]/5"
-                        : "border-[#1c1a18]/10 bg-white hover:border-[#1c1a18]/25"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value={method.value}
-                    checked={paymentMethod === method.value}
-                    onChange={() => setPaymentMethod(method.value)}
-                    disabled={method.disabled}
-                    className="size-4 accent-[#b85a3c]"
-                  />
-                  <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
-                    {method.value === "COD" && (
-                      <Truck className="size-4 text-[#1c1a18]/50" />
-                    )}
-                    {method.label}
-                  </span>
-                </label>
-              ))}
+              <SectionTitle number="1" title="Contact Information" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <CheckoutInput
+                  label="Email Address *"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="address@domain.com"
+                  {...register("email")}
+                  error={errors.email?.message}
+                />
+                <CheckoutInput
+                  label="Phone Number *"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="09xxx xxxxx"
+                  {...register("phone")}
+                  error={errors.phone?.message}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <SectionTitle number="2" title="Shipping Address" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <CheckoutInput
+                  label="First Name *"
+                  autoComplete="given-name"
+                  placeholder="Jon"
+                  {...register("firstName")}
+                  error={errors.firstName?.message}
+                />
+                <CheckoutInput
+                  label="Last Name *"
+                  autoComplete="family-name"
+                  placeholder="Doe"
+                  {...register("lastName")}
+                  error={errors.lastName?.message}
+                />
+              </div>
+              <CheckoutInput
+                label="Số nhà, tên đường *"
+                autoComplete="street-address"
+                placeholder="Ví dụ: 123 Nguyễn Huệ"
+                {...register("address")}
+                error={errors.address?.message}
+              />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <FieldLabel>Tỉnh / Thành phố *</FieldLabel>
+                  <Skeleton
+                    name="checkout-province-select"
+                    loading={isLoadingProvinces}
+                    fallback={<AddressSelectLoadingFallback />}
+                    fixture={<AddressSelectLoadingFixture label="Chọn tỉnh/thành" />}
+                  >
+                  <select
+                    autoComplete="address-level1"
+                    disabled={isLoadingProvinces}
+                    {...register("provinceCode", {
+                      onChange: () => {
+                        setValue("wardCode", "");
+                        setWards([]);
+                      },
+                    })}
+                    className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="">Chọn tỉnh/thành</option>
+                    {provinces.map((province) => (
+                      <option key={province.code} value={province.code}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+                  </Skeleton>
+                  {errors.provinceCode?.message && (
+                    <p className="text-xs text-red-600">{errors.provinceCode.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <FieldLabel>Phường / Xã *</FieldLabel>
+                  <Skeleton
+                    name="checkout-ward-select"
+                    loading={isLoadingWards}
+                    fallback={<AddressSelectLoadingFallback />}
+                    fixture={<AddressSelectLoadingFixture label="Chọn phường/xã" />}
+                  >
+                  <select
+                    autoComplete="address-level2"
+                    disabled={!selectedProvinceCode || isLoadingWards}
+                    {...register("wardCode")}
+                    className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="">Chọn phường/xã</option>
+                    {wards.map((ward) => (
+                      <option key={ward.code} value={ward.code}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </select>
+                  </Skeleton>
+                  {errors.wardCode?.message && (
+                    <p className="text-xs text-red-600">{errors.wardCode.message}</p>
+                  )}
+                </div>
+              </div>
+              {addressApiError && (
+                <div className="flex items-start gap-2 rounded border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-700">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                  <span>{addressApiError}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <SectionTitle number="3" title="Payment Method" />
+              <div className="space-y-3">
+                {PAYMENT_METHODS.map((method) => (
+                  <label
+                    key={method.value}
+                    className={`flex cursor-pointer items-center gap-3 rounded-sm border p-4 transition-colors ${
+                      method.disabled
+                        ? "cursor-not-allowed border-[#1c1a18]/5 bg-[#f7f4ef]/20 opacity-50"
+                        : paymentMethod === method.value
+                          ? "border-[#b85a3c] bg-[#b85a3c]/5"
+                          : "border-[#1c1a18]/10 bg-white hover:border-[#1c1a18]/25"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={method.value}
+                      checked={paymentMethod === method.value}
+                      onChange={() => setPaymentMethod(method.value)}
+                      disabled={method.disabled}
+                      className="size-4 accent-[#b85a3c]"
+                    />
+                    <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
+                      {method.value === "COD" && (
+                        <Truck className="size-4 text-[#1c1a18]/50" />
+                      )}
+                      {method.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
           </Card>
 
@@ -379,7 +533,7 @@ export function CheckoutPageClient() {
           </Button>
         </form>
 
-        <Card className="sticky top-24 rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
+        <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
           <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
             Your Order Summary
           </h2>
@@ -397,7 +551,7 @@ export function CheckoutPageClient() {
                     Qty {item.quantity} / {item.size || "M"} / {item.color || "Oat"}
                   </p>
                 </div>
-                <span className="font-serif text-xs font-semibold text-[#1c1a18]">
+                <span className="font-serif text-xs font-semibold text-[#1c1a18] font-numeric">
                   {money(item.price * item.quantity)}
                 </span>
               </div>
@@ -454,7 +608,7 @@ export function CheckoutPageClient() {
             <Separator className="my-4 bg-[#1c1a18]/10" />
             <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
               <span>Estimated Total</span>
-              <span className="font-serif text-lg tracking-wider text-[#b85a3c]">
+              <span className="font-serif text-lg tracking-wider text-[#b85a3c] font-numeric">
                 {money(estimatedTotal)}
               </span>
             </div>
@@ -520,6 +674,18 @@ function LedgerRow({
     >
       <span>{label}</span>
       <span className="font-semibold text-[#1c1a18]">{value}</span>
+    </div>
+  );
+}
+
+function AddressSelectLoadingFallback() {
+  return <div className="h-11 w-full rounded-sm bg-[#f7f4ef]" aria-hidden="true" />;
+}
+
+function AddressSelectLoadingFixture({ label }: { label: string }) {
+  return (
+    <div className="flex h-11 w-full items-center rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18]">
+      {label}
     </div>
   );
 }

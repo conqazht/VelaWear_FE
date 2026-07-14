@@ -11,6 +11,7 @@ import {
   deleteMyWishlist,
   getCartByUser,
   getCoupons,
+  getMyCoupons,
   getOrderByCode,
   getOrdersByUser,
   getReviewsByUser,
@@ -48,6 +49,14 @@ export function useCouponsQuery(params: CouponFilters = {}, enabled = true) {
   return useQuery({
     queryKey: queryKeys.coupons.list(params),
     queryFn: () => getCoupons(params),
+    enabled,
+  });
+}
+
+export function useMyCouponsQuery(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.coupons.my,
+    queryFn: getMyCoupons,
     enabled,
   });
 }

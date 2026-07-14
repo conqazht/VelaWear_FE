@@ -77,3 +77,10 @@ export type ReviewFilters = PageParams & {
 export function getReviews(filters: ReviewFilters = {}) {
   return apiGet<ResultPaginationDTO<Review>>("/reviews", filters);
 }
+
+export function getProductReviews(productId: number, filters: ReviewFilters = {}) {
+  return apiGet<ResultPaginationDTO<Review>>(`/reviews/product/${productId}`, {
+    ...filters,
+    productId: undefined,
+  });
+}

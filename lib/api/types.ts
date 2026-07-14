@@ -81,10 +81,24 @@ export type ProductVariant = {
   size?: CatalogEntity | null;
 };
 
+export type CartApiItem = {
+  id: number;
+  variantId: number;
+  productId?: number | null;
+  productSlug?: string | null;
+  productName: string;
+  image?: string | null;
+  sku?: string | null;
+  color?: string | null;
+  size?: string | null;
+  price: number;
+  quantity: number;
+};
+
 export type Cart = {
   id: number;
   userId?: number;
-  items?: unknown[];
+  items: CartApiItem[];
   createdAt?: string;
   updatedAt?: string;
 };
@@ -115,6 +129,31 @@ export type Order = {
   paymentStatus?: string;
   createdAt?: string;
   updatedAt?: string;
+  items?: OrderItem[];
+};
+
+export type OrderItem = {
+  id: number;
+  variantId?: number | null;
+  productName: string;
+  variantName?: string | null;
+  sku: string;
+  image?: string | null;
+  price: number;
+  quantity: number;
+  subtotal: number;
+  status: string;
+  createdAt?: string;
+};
+
+export type OrderStatusHistory = {
+  id: number;
+  orderId: number;
+  fromStatus?: string | null;
+  toStatus: string;
+  changedBy?: number | null;
+  reason?: string | null;
+  createdAt: string;
 };
 
 export type Payment = {
@@ -129,14 +168,11 @@ export type UserAddress = {
   id: number;
   userId: number;
   receiverName: string;
-  phone?: string;
-  receiverPhone?: string;
-  province?: string;
-  district?: string;
-  ward?: string;
-  addressDetail?: string;
-  addressLine?: string;
-  isDefault?: boolean;
+  phone: string;
+  province: string;
+  ward: string;
+  addressDetail: string;
+  isDefault: boolean;
 };
 
 export type Coupon = {
@@ -153,6 +189,20 @@ export type Coupon = {
   status: "ACTIVE" | "INACTIVE" | "EXPIRED" | string;
 };
 
+export type CouponUsage = {
+  id: number;
+  coupon: Coupon;
+  orderId: number;
+  orderCode: string;
+  discountAmount: number;
+  usedAt: string;
+};
+
+export type MyCoupons = {
+  availableCoupons: Coupon[];
+  usageHistory: CouponUsage[];
+};
+
 export type Review = {
   id: number;
   userId: number;
@@ -161,6 +211,8 @@ export type Review = {
   orderCode: string;
   orderItemId: number;
   productName: string;
+  productId?: number | null;
+  productSlug?: string | null;
   rating: number;
   comment?: string | null;
   createdAt?: string;

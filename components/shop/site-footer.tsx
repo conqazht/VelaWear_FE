@@ -3,8 +3,10 @@
 import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function SiteFooter() {
+  const isLandingPage = usePathname() === "/";
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -32,10 +34,10 @@ export function SiteFooter() {
     <footer className="mt-auto bg-[#121110] text-[#f7f4ef] border-t border-white/5 pt-10 md:pt-12 pb-16 transition-all duration-300 relative overflow-hidden">
       {/* Huge low-opacity typography watermark behind the footer */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        initial={isLandingPage ? { opacity: 0, scale: 0.95 } : false}
+        whileInView={isLandingPage ? { opacity: 1, scale: 1 } : undefined}
+        viewport={isLandingPage ? { once: true } : undefined}
+        transition={isLandingPage ? { duration: 1.5, ease: "easeOut" } : undefined}
         className="absolute left-10 bottom-0 text-[18vw] font-bold text-white/[0.012] tracking-widest uppercase select-none pointer-events-none font-serif leading-none"
       >
         VELA
@@ -44,9 +46,9 @@ export function SiteFooter() {
       <motion.div
         className="mx-auto w-full max-w-[1800px] px-6 md:px-16 relative z-10"
         variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-80px" }}
+        initial={isLandingPage ? "hidden" : false}
+        whileInView={isLandingPage ? "show" : undefined}
+        viewport={isLandingPage ? { once: true, margin: "-80px" } : undefined}
       >
         <div className="grid grid-cols-1 gap-16 border-b border-white/5 pb-20 md:grid-cols-[minmax(0,1fr)_180px_180px_220px] md:items-start md:justify-between md:gap-10">
           {/* Column 1: Elegant Branding, slogan, and description */}
