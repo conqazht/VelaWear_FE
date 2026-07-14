@@ -581,7 +581,7 @@ export function SiteHeader() {
                                   <p className="truncate text-xs text-[#1c1a18]/55">
                                     {product.category}
                                   </p>
-                                  <p className="mt-1 text-xs font-semibold text-[#b5573a]">
+                                  <p className="mt-1 text-xs font-semibold text-[#b5573a] font-numeric">
                                     {money(product.price)}
                                   </p>
                                 </div>

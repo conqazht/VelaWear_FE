@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Skeleton } from "boneyard-js/react";
 
 import { Download, Printer } from "lucide-react";
 
@@ -47,9 +48,15 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
           className="@container/preview relative min-h-[calc(100svh-15rem)] flex-1 rounded-b-xl bg-stone-200 p-4 dark:bg-stone-800"
         >
           {paperLayout === null ? (
-            <div className="absolute inset-0 grid place-items-center text-muted-foreground text-sm">
-              Loading Preview
-            </div>
+            <Skeleton
+              name="invoice-preview"
+              loading
+              className="absolute inset-4"
+              fallback={<InvoicePreviewLoadingFallback />}
+              fixture={<InvoicePreviewLoadingFixture />}
+            >
+              <InvoicePreviewLoadingFixture />
+            </Skeleton>
           ) : null}
           <div
             style={{
@@ -73,5 +80,20 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
         </div>
       </div>
     </>
+  );
+}
+
+function InvoicePreviewLoadingFallback() {
+  return <div className="mx-auto h-full max-w-[min(100%,48rem)] rounded-sm bg-white" aria-hidden="true" />;
+}
+
+function InvoicePreviewLoadingFixture() {
+  return (
+    <article className="mx-auto min-h-full max-w-[min(100%,48rem)] space-y-8 rounded-sm bg-white p-10">
+      <h2 className="text-3xl font-semibold">Invoice</h2>
+      <div className="h-px bg-border" />
+      <section className="grid grid-cols-2 gap-8"><p>Bill to</p><p>Invoice details</p></section>
+      <div className="h-64 rounded border" />
+    </article>
   );
 }

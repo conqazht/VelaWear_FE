@@ -47,7 +47,7 @@ function FavoritesPageLoadingFallback() {
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
       <div className="h-8 w-56 animate-pulse bg-[#efe7dc]" />
-      <ProductCardSkeletonGrid count={6} imageAspect="collection" gridClassName="mt-10" />
+      <ProductCardSkeletonGrid count={6} imageAspect="portrait" gridClassName="mt-10" />
     </div>
   );
 }

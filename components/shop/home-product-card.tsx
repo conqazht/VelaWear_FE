@@ -105,11 +105,11 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
 
         {/* Price */}
         <div className="flex items-center gap-2.5 mt-0.5">
-          <span className="text-sm font-semibold text-[#1c1a18]">
+          <span className="text-sm font-semibold text-[#1c1a18] font-numeric">
             {money(product.price)}
           </span>
           {product.originalPrice && (
-            <span className="text-xs text-[#8a857c] line-through">
+            <span className="text-xs text-[#8a857c] line-through font-numeric">
               {money(product.originalPrice)}
             </span>
           )}

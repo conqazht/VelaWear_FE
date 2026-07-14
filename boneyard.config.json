@@ -26,6 +26,46 @@
     "search-results": {
       "route": "/search?q=shirt",
       "wait": 1000
+    },
+    "reviews-page": {
+      "route": "/reviews",
+      "wait": 1000
+    },
+    "coupons-page": {
+      "route": "/coupons",
+      "wait": 1000
+    },
+    "order-details": {
+      "route": "/profile/orders/VW-CONGANH-1001",
+      "wait": 1000
+    },
+    "profile-addresses": {
+      "route": "/profile",
+      "wait": 0
+    },
+    "profile-orders": {
+      "route": "/profile?tab=orders",
+      "wait": 0
+    },
+    "profile-favourites": {
+      "route": "/profile?tab=favourites",
+      "wait": 0
+    },
+    "checkout-province-select": {
+      "route": "/checkout",
+      "wait": 1000
+    },
+    "checkout-ward-select": {
+      "route": "/checkout",
+      "wait": 1000
+    },
+    "invoice-preview": {
+      "route": "/dashboard/invoice",
+      "wait": 1000
+    },
+    "mail-layout": {
+      "route": "/mail",
+      "wait": 1000
     }
   }
 }

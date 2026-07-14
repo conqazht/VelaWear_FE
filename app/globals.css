@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -92,6 +92,7 @@ html[data-admin-theme="true"].dark:not([data-theme-preset]) {
   --font-serif: var(--font-cormorant);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-cormorant);
+  --font-numeric: 'Space Grotesk', sans-serif;
   --color-warm-beige: #f7f4ef;
   --color-warm-sand: #efe7dc;
   --color-warm-clay: #b5573a;

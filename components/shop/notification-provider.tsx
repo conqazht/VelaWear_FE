@@ -131,7 +131,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     <p className="text-xs text-on-surface-variant/75 mt-0.5">
                       Size {notification.size}
                     </p>
-                    <p className="font-sans text-sm font-bold text-ink mt-1.5">
+                    <p className="font-sans text-sm font-bold text-ink mt-1.5 font-numeric">
                       {money(notification.product.price)}
                     </p>
                   </div>
@@ -197,7 +197,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                   <p className="text-xs text-on-surface-variant/75 mb-2.5">
                     Size: {notification.size}
                   </p>
-                  <p className="font-sans text-sm font-bold text-ink mt-auto">
+                  <p className="font-sans text-sm font-bold text-ink mt-auto font-numeric">
                     {money(notification.product.price)}
                   </p>
                 </div>

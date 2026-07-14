@@ -167,11 +167,11 @@ export function RelatedProducts({
 
                 {/* Price */}
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm font-semibold text-[#1c1a18]">
+                  <span className="text-sm font-semibold text-[#1c1a18] font-numeric">
                     {money(product.price)}
                   </span>
                   {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-xs text-[#8a857c] line-through">
+                    <span className="text-xs text-[#8a857c] line-through font-numeric">
                       {money(product.originalPrice)}
                     </span>
                   )}

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Skeleton } from "boneyard-js/react";
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -33,7 +34,15 @@ export function MailComponent({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] 
 
   if (!isMounted) {
     return (
-      <div className="flex size-full items-center justify-center text-muted-foreground text-sm">Loading mail...</div>
+      <Skeleton
+        name="mail-layout"
+        loading
+        className="size-full"
+        fallback={<MailLoadingFallback />}
+        fixture={<MailLoadingFixture />}
+      >
+        <MailLoadingFixture />
+      </Skeleton>
     );
   }
 
@@ -41,6 +50,19 @@ export function MailComponent({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] 
     <MailMobileLayout mails={mails} />
   ) : (
     <MailDesktopLayout mails={mails} defaultLayout={defaultLayout} />
+  );
+}
+
+function MailLoadingFallback() {
+  return <div className="size-full rounded-lg bg-muted" aria-hidden="true" />;
+}
+
+function MailLoadingFixture() {
+  return (
+    <div className="grid size-full grid-cols-[18rem_1fr] overflow-hidden rounded-lg border">
+      <aside className="space-y-4 border-r p-4"><h2 className="text-xl font-semibold">Inbox</h2><div className="h-16 rounded border" /><div className="h-16 rounded border" /></aside>
+      <main className="space-y-6 p-8"><h2 className="text-2xl font-semibold">Message subject</h2><div className="h-px bg-border" /><p>Message content preview</p></main>
+    </div>
   );
 }
 

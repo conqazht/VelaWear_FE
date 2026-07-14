@@ -73,11 +73,11 @@ export function ProductCard({
           </h3>
         </Link>
         <div className="mt-2 flex items-center gap-2.5">
-          <span className="text-[14px] md:text-[15px] font-semibold tracking-wider text-[#1c1a18]">
+          <span className="text-[14px] md:text-[15px] font-semibold tracking-wider text-[#1c1a18] font-numeric">
             {money(product.price)}
           </span>
           {product.originalPrice && (
-            <span className="text-[12px] font-light tracking-widest text-[#1c1a18]/40 line-through">
+            <span className="text-[12px] font-light tracking-widest text-[#1c1a18]/40 line-through font-numeric">
               {money(product.originalPrice)}
             </span>
           )}

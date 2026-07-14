@@ -8,6 +8,12 @@ import _product_detail from './product-detail.bones.json'
 import _cart_page from './cart-page.bones.json'
 import _favorites_page from './favorites-page.bones.json'
 import _search_results from './search-results.bones.json'
+import _reviews_page from './reviews-page.bones.json'
+import _coupons_page from './coupons-page.bones.json'
+import _profile_addresses from './profile-addresses.bones.json'
+import _profile_orders from './profile-orders.bones.json'
+import _profile_favourites from './profile-favourites.bones.json'
+import _order_details from './order-details.bones.json'
 
 configureBoneyard({"color":"#e7dfd3","animate":"shimmer","shimmerColor":"#f3eee6","speed":"1.8s","transition":180})
 
@@ -17,4 +23,10 @@ registerBones({
   "cart-page": _cart_page,
   "favorites-page": _favorites_page,
   "search-results": _search_results,
+  "reviews-page": _reviews_page,
+  "coupons-page": _coupons_page,
+  "profile-addresses": _profile_addresses,
+  "profile-orders": _profile_orders,
+  "profile-favourites": _profile_favourites,
+  "order-details": _order_details,
 })

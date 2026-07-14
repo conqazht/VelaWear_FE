@@ -80,7 +80,7 @@ export function CartPageClient() {
                 className="flex gap-6 rounded-md border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row"
               >
                 <Link
-                  href={`/products/${item.id}`}
+                  href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
                   className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28"
                   aria-label={`View ${item.name}`}
                 >
@@ -91,12 +91,12 @@ export function CartPageClient() {
                   <div>
                     <div className="flex items-start justify-between gap-4">
                       <Link
-                        href={`/products/${item.id}`}
+                        href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
                         className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b85a3c]"
                       >
                         {item.name}
                       </Link>
-                      <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18]">
+                      <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
                         {money(item.price * item.quantity)}
                       </span>
                     </div>
@@ -162,7 +162,7 @@ export function CartPageClient() {
             <div className="space-y-4 text-xs tracking-wide">
               <div className="flex justify-between text-[#1c1a18]/65">
                 <span>Subtotal</span>
-                <span className="font-semibold text-[#1c1a18]">
+                <span className="font-semibold text-[#1c1a18] font-numeric">
                   {money(subtotal)}
                 </span>
               </div>
@@ -174,14 +174,14 @@ export function CartPageClient() {
               </div>
               <div className="flex justify-between text-[#1c1a18]/65">
                 <span>Estimated Taxes (8%)</span>
-                <span className="font-semibold text-[#1c1a18]">
+                <span className="font-semibold text-[#1c1a18] font-numeric">
                   {money(taxes)}
                 </span>
               </div>
               <Separator className="my-6 bg-[#1c1a18]/10" />
               <div className="flex justify-between text-sm font-semibold text-[#1c1a18] md:text-base">
                 <span>Total Amount</span>
-                <span className="font-serif text-lg tracking-wider">
+                <span className="font-serif text-lg tracking-wider font-numeric">
                   {money(total)}
                 </span>
               </div>
@@ -294,7 +294,7 @@ function CartPageFixture() {
                     <h3 className="font-serif text-lg font-semibold text-[#1c1a18]">
                       {item.name}
                     </h3>
-                    <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18]">
+                    <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
                       {money(item.price)}
                     </span>
                   </div>
@@ -327,7 +327,7 @@ function CartPageFixture() {
             <Separator className="my-6 bg-[#1c1a18]/10" />
             <div className="flex justify-between text-sm font-semibold text-[#1c1a18]">
               <span>Total Amount</span>
-              <span className="font-serif text-lg tracking-wider">{money(1296000)}</span>
+              <span className="font-serif text-lg tracking-wider font-numeric">{money(1296000)}</span>
             </div>
           </div>
           <div className="mt-8 h-12 rounded-sm bg-[#1c1a18]" />
