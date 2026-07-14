@@ -1,223 +1,296 @@
 "use client";
-"use no memo";
 
 import { useState } from "react";
+import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { DeleteResourceDialog } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
-  type ColumnFiltersState,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  type PaginationState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { AlertTriangle, ChevronRight, FileUp, Search } from "lucide-react";
-
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
+  ResourcePage,
+  type ManagementColumn,
+} from "@/app/(admin)/dashboard/_components/management/resource-page";
+import {
+  downloadCsv,
+  formatAdminDate,
+  getApiErrorMessage,
+} from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { AdminRole } from "@/lib/api/admin-rbac";
+import {
+  useAdminRoleQuery,
+  useAdminRolesQuery,
+  useCreateAdminRoleMutation,
+  useDeleteAdminRoleMutation,
+  useUpdateAdminRoleMutation,
+} from "@/lib/queries/admin-rbac";
 
-import { rolesColumns } from "./roles-table/columns";
-import type { Role } from "./roles-table/data";
-import { RolesTable } from "./roles-table/table";
+import { RoleFormSheet, type RoleFormValues } from "./role-form-sheet";
 
-function getRoleTypeFilter(groupFilter: string) {
-  if (groupFilter === "System roles") {
-    return "System";
-  }
+type SearchField = "name" | "description";
+type RoleFormMode = "create" | "edit";
+const PROTECTED_ROLE_NAMES = new Set(["ADMIN", "MANAGER", "STAFF", "USER"]);
 
-  if (groupFilter === "Custom roles") {
-    return "Custom";
-  }
+export function Roles() {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchField, setSearchField] = useState<SearchField>("name");
+  const [formMode, setFormMode] = useState<RoleFormMode | null>(null);
+  const [activeRole, setActiveRole] = useState<AdminRole | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminRole | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  return "All";
-}
-
-function getRoleGroupFilterValue(typeFilter: string | null) {
-  if (typeFilter === "System") {
-    return "System roles";
-  }
-
-  if (typeFilter === "Custom") {
-    return "Custom roles";
-  }
-
-  return undefined;
-}
-
-export function Roles({ roles }: { roles: Role[] }) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 12,
+  const rolesQuery = useAdminRolesQuery({
+    page,
+    size: pageSize,
+    sort: "createdAt,desc",
+    ...(searchValue.trim() ? { [searchField]: searchValue.trim() } : {}),
   });
+  const roleDetailQuery = useAdminRoleQuery(
+    formMode === "edit" ? activeRole?.id : undefined
+  );
+  const createMutation = useCreateAdminRoleMutation();
+  const updateMutation = useUpdateAdminRoleMutation();
+  const deleteMutation = useDeleteAdminRoleMutation();
 
-  const table = useReactTable({
-    data: roles,
-    columns: rolesColumns,
-    defaultColumn: {
-      size: 140,
-      minSize: 80,
-      maxSize: 420,
-    },
-    state: { columnFilters, pagination },
-    onColumnFiltersChange: setColumnFilters,
-    onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    autoResetPageIndex: false,
-    initialState: {
-      columnVisibility: { group: false, search: false },
-    },
-  });
+  const rows = rolesQuery.data?.result ?? [];
+  const meta = rolesQuery.data?.meta ?? {
+    page,
+    pageSize,
+    pages: 0,
+    total: 0,
+  };
+  const isFormPending = createMutation.isPending || updateMutation.isPending;
 
-  const search = (table.getColumn("search")?.getFilterValue() as string | undefined) ?? "";
-  const groupFilter = (table.getColumn("group")?.getFilterValue() as string | undefined) ?? "";
-  const typeFilter = getRoleTypeFilter(groupFilter);
-  const ownerFilter = (table.getColumn("owner")?.getFilterValue() as string | undefined) ?? "All";
-  const statusFilter = (table.getColumn("status")?.getFilterValue() as string | undefined) ?? "All";
+  function openCreate() {
+    setActiveRole(null);
+    setFormError(null);
+    setFormMode("create");
+  }
+
+  function openEdit(role: AdminRole) {
+    setActiveRole(role);
+    setFormError(null);
+    setFormMode("edit");
+  }
+
+  function closeForm(force = false) {
+    if (isFormPending && !force) return;
+    setFormMode(null);
+    setActiveRole(null);
+    setFormError(null);
+  }
+
+  async function handleSubmit(values: RoleFormValues) {
+    setFormError(null);
+    const request = {
+      name: values.name.trim(),
+      description: values.description.trim() || null,
+    };
+
+    try {
+      if (formMode === "create") {
+        await createMutation.mutateAsync(request);
+        toast.success("Role created", {
+          description: `${request.name} is ready for user assignment.`,
+        });
+      } else if (activeRole) {
+        await updateMutation.mutateAsync({ id: activeRole.id, request });
+        toast.success("Role updated", {
+          description: `${request.name} was updated successfully.`,
+        });
+      }
+      closeForm(true);
+    } catch (error) {
+      setFormError(getApiErrorMessage(error));
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success("Role deleted", {
+        description: `${deleteTarget.name} and its user/permission links were removed.`,
+      });
+      if (rows.length === 1 && page > 1) setPage((current) => current - 1);
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error("Unable to delete role", {
+        description: getApiErrorMessage(error),
+      });
+    }
+  }
+
+  const columns: ManagementColumn<AdminRole>[] = [
+    {
+      key: "name",
+      header: "Role",
+      cell: (role) => (
+        <div className="min-w-44">
+          <p className="font-medium">{role.name}</p>
+          <p className="text-muted-foreground text-xs tabular-nums">ID {role.id}</p>
+        </div>
+      ),
+    },
+    {
+      key: "description",
+      header: "Description",
+      className: "max-w-md",
+      cell: (role) => (
+        <p className="text-muted-foreground line-clamp-2 text-sm">
+          {role.description || "No description"}
+        </p>
+      ),
+    },
+    {
+      key: "access",
+      header: "Access map",
+      cell: () => <Badge variant="outline">Available in details</Badge>,
+    },
+    {
+      key: "createdAt",
+      header: "Created",
+      cell: (role) => <span className="text-sm">{formatAdminDate(role.createdAt)}</span>,
+    },
+    {
+      key: "updatedAt",
+      header: "Updated",
+      cell: (role) => <span className="text-sm">{formatAdminDate(role.updatedAt)}</span>,
+    },
+    {
+      key: "actions",
+      header: <span className="sr-only">Actions</span>,
+      headerClassName: "w-16",
+      className: "text-right",
+      cell: (role) => {
+        const isProtectedRole = PROTECTED_ROLE_NAMES.has(role.name.toUpperCase());
+
+        return (
+          <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Open actions for ${role.name}`}
+              />
+            }
+          >
+            <MoreHorizontal />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => openEdit(role)}>
+                <Pencil /> Edit and inspect access
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={isProtectedRole}
+              onClick={() => setDeleteTarget(role)}
+            >
+              <Trash2 /> {isProtectedRole ? "Core role is protected" : "Delete role"}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl tracking-tight">Roles & Permissions</h1>
-          <p className="text-muted-foreground text-sm">Manage access roles and permissions across your organization.</p>
-        </div>
+    <>
+      <ResourcePage
+        title="Roles"
+        description="Create named access roles and inspect the permissions currently assigned by the backend."
+        rows={rows}
+        columns={columns}
+        total={meta.total}
+        page={meta.page || page}
+        pageSize={meta.pageSize || pageSize}
+        pageCount={meta.pages}
+        searchValue={searchValue}
+        searchPlaceholder={
+          searchField === "description" ? "Search descriptions..." : "Search role names..."
+        }
+        onSearchChange={(value) => {
+          setSearchValue(value);
+          setPage(1);
+        }}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
+        filters={[
+          {
+            label: "Search by",
+            value: searchField,
+            options: [
+              { label: "Name", value: "name" },
+              { label: "Description", value: "description" },
+            ],
+            onValueChange: (value) => {
+              setSearchField((value as SearchField | null) ?? "name");
+              setPage(1);
+            },
+          },
+        ]}
+        primaryAction={{ label: "Create role", onClick: openCreate, icon: Plus }}
+        onRefresh={() => void rolesQuery.refetch()}
+        onExport={() =>
+          downloadCsv("vela-roles.csv", rows.map((role) => ({
+            id: role.id,
+            name: role.name,
+            description: role.description,
+            createdAt: role.createdAt,
+            updatedAt: role.updatedAt,
+          })))
+        }
+        isLoading={rolesQuery.isPending}
+        isFetching={rolesQuery.isFetching}
+        error={rolesQuery.isError ? getApiErrorMessage(rolesQuery.error) : null}
+        emptyTitle="No roles found"
+        emptyDescription="Try another search or create a role for your access model."
+      />
 
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline">
-            <FileUp data-icon="inline-start" />
-            Import JSON
-          </Button>
-          <Button size="sm">Create role</Button>
-        </div>
-      </div>
+      {formMode ? (
+        <RoleFormSheet
+          mode={formMode}
+          role={activeRole ?? undefined}
+          permissions={roleDetailQuery.data?.permissions ?? []}
+          isPermissionsLoading={roleDetailQuery.isPending && formMode === "edit"}
+          permissionsError={
+            roleDetailQuery.isError ? getApiErrorMessage(roleDetailQuery.error) : null
+          }
+          error={formError}
+          isPending={isFormPending}
+          onClose={() => closeForm()}
+          onSubmit={handleSubmit}
+        />
+      ) : null}
 
-      <Tabs className="h-full gap-4" defaultValue="roles">
-        <TabsList
-          variant="line"
-          className="w-full justify-start gap-2 border-b ps-0 *:data-[slot=tabs-trigger]:flex-none"
-        >
-          <TabsTrigger value="roles">Roles</TabsTrigger>
-          <TabsTrigger value="permission-sets">Permission sets</TabsTrigger>
-          <TabsTrigger value="access-reviews">Access reviews</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="roles">
-          <div className="flex flex-col gap-4">
-            <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
-              <AlertTriangle className="size-4" />
-              <AlertTitle>Review required</AlertTitle>
-              <AlertDescription>3 roles have unreviewed permission changes.</AlertDescription>
-              <AlertAction>
-                <Button size="sm" variant="link">
-                  Review changes
-                  <ChevronRight data-icon="inline-end" />
-                </Button>
-              </AlertAction>
-            </Alert>
-
-            <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
-              <div className="flex flex-col items-stretch gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                <InputGroup className="h-7 w-full rounded-md sm:w-82">
-                  <InputGroupAddon>
-                    <Search />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    className="h-7"
-                    placeholder="Search roles..."
-                    value={search}
-                    onChange={(e) => {
-                      table.getColumn("search")?.setFilterValue(e.target.value || undefined);
-                      table.setPageIndex(0);
-                    }}
-                  />
-                </InputGroup>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Select
-                    value={typeFilter}
-                    onValueChange={(v) => {
-                      table.getColumn("group")?.setFilterValue(getRoleGroupFilterValue(v));
-                      table.setPageIndex(0);
-                    }}
-                  >
-                    <SelectTrigger size="sm">
-                      <span className="text-muted-foreground">Type:</span>
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent align="start" alignItemWithTrigger={false}>
-                      <SelectGroup>
-                        <SelectItem value="All">All</SelectItem>
-                        <SelectItem value="System">System</SelectItem>
-                        <SelectItem value="Custom">Custom</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={ownerFilter}
-                    onValueChange={(v) => {
-                      table.getColumn("owner")?.setFilterValue(v === "All" ? undefined : v);
-                      table.setPageIndex(0);
-                    }}
-                  >
-                    <SelectTrigger size="sm">
-                      <span className="text-muted-foreground">Owner:</span>
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent align="start" alignItemWithTrigger={false}>
-                      <SelectGroup>
-                        <SelectItem value="All">All</SelectItem>
-                        <SelectItem value="System">System</SelectItem>
-                        <SelectItem value="Jane Doe">Jane Doe</SelectItem>
-                        <SelectItem value="Alex Kim">Alex Kim</SelectItem>
-                        <SelectItem value="Chris Lee">Chris Lee</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={statusFilter}
-                    onValueChange={(v) => {
-                      table.getColumn("status")?.setFilterValue(v === "All" ? undefined : v);
-                      table.setPageIndex(0);
-                    }}
-                  >
-                    <SelectTrigger size="sm">
-                      <span className="text-muted-foreground">Status:</span>
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent align="start" alignItemWithTrigger={false}>
-                      <SelectGroup>
-                        <SelectItem value="All">All</SelectItem>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Needs review">Needs review</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <RolesTable table={table} />
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="permission-sets">
-          <div className="flex h-full items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm">
-            Permission Sets Coming Soon
-          </div>
-        </TabsContent>
-        <TabsContent value="access-reviews">
-          <div className="flex h-full items-center justify-center rounded-md border border-dashed text-muted-foreground text-sm">
-            Access Reviews Coming Soon
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+      <DeleteResourceDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) setDeleteTarget(null);
+        }}
+        resourceName={deleteTarget?.name ?? "role"}
+        description="This hard-deletes the role and cascades every user-role and role-permission link. The backend does not protect system roles or the last administrator."
+        onConfirm={() => void handleDelete()}
+        isPending={deleteMutation.isPending}
+      />
+    </>
   );
 }
