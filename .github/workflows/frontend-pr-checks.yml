@@ -1,0 +1,54 @@
+name: Frontend PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: "Lint, type check & build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+      NEXT_PUBLIC_BACKEND_ORIGIN: http://localhost:8080
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm exec eslint . --max-warnings 25
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit --pretty false --incremental false
+
+      - name: Production build
+        run: pnpm build
