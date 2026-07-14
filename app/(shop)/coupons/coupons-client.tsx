@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Skeleton } from "boneyard-js/react";
 import { CalendarClock, History, PiggyBank, Ticket } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useMyCouponsQuery } from "@/lib/queries/commerce";
 import type { Coupon } from "@/lib/api/types";
 import { money } from "@/lib/vela-data";
@@ -65,7 +66,7 @@ export function CouponsClient() {
             </span>
           </div>
 
-          {!couponsQuery.isLoading && (
+          {!couponsQuery.isLoading && !couponsQuery.isError && (
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <CouponStat label="Mã khả dụng" value={coupons.length.toString()} icon={<Ticket className="size-4" />} />
               <CouponStat label="Lượt đã dùng" value={usageHistory.length.toString()} icon={<History className="size-4" />} />
@@ -74,7 +75,15 @@ export function CouponsClient() {
             </div>
           )}
 
-        {couponsQuery.isLoading ? (
+        {couponsQuery.isError ? (
+          <StorefrontApiStatus
+            error={couponsQuery.error}
+            onRetry={() => void couponsQuery.refetch()}
+            resourceLabel="mã giảm giá"
+            returnHref="/collection"
+            variant="panel"
+          />
+        ) : couponsQuery.isLoading ? (
           <Skeleton
             name="coupons-page"
             loading
@@ -165,7 +174,7 @@ export function CouponsClient() {
         )}
         </section>
 
-        {!couponsQuery.isLoading && (
+        {!couponsQuery.isLoading && !couponsQuery.isError && (
           <section className="flex flex-col gap-6 text-left">
             <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
               <div>

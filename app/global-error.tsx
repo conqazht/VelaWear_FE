@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatedStatus } from "@/components/errors/animated-status";
+import { StorefrontStatus } from "@/components/errors/storefront-status";
 
 import "./globals.css";
 
@@ -12,16 +12,15 @@ export default function GlobalError({
   unstable_retry: () => void;
 }) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <body>
         <title>500 — Vela Wear</title>
-        <AnimatedStatus
-          code="500"
-          title="Vela Wear needs a moment"
-          description="A critical error interrupted the application. Retry the experience, or return to the storefront."
-          primaryAction={{ label: "Try again", onClick: unstable_retry }}
-          secondaryAction={{ label: "Return home", href: "/" }}
-          accent="#ff8f78"
+        <StorefrontStatus
+          status={500}
+          title="Vela Wear cần một chút thời gian"
+          description="Một lỗi nghiêm trọng đã làm gián đoạn ứng dụng. Hãy thử mở lại trải nghiệm hoặc quay về cửa hàng."
+          primaryAction={{ label: "Thử lại", onClick: unstable_retry }}
+          secondaryAction={{ label: "Về trang chủ", href: "/" }}
           reference={error.digest}
         />
       </body>

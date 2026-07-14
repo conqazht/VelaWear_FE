@@ -1,14 +1,13 @@
-import { AnimatedStatus } from "@/components/errors/animated-status";
+import { StorefrontStatus } from "@/components/errors/storefront-status";
 
 export default function NotFound() {
   return (
-    <AnimatedStatus
-      code="404"
-      title="This page slipped out of view"
-      description="The address may be outdated, the page may have moved, or the link may never have existed."
-      primaryAction={{ label: "Return home", href: "/" }}
-      secondaryAction={{ label: "Browse collection", href: "/collection" }}
-      accent="#f7f4ef"
+    <StorefrontStatus
+      status={404}
+      title="Trang này đã rời khỏi bộ sưu tập"
+      description="Đường dẫn có thể đã được thay đổi, nội dung đã chuyển sang một địa chỉ mới hoặc chưa từng tồn tại."
+      primaryAction={{ label: "Xem bộ sưu tập", href: "/collection" }}
+      secondaryAction={{ label: "Về trang chủ", href: "/" }}
     />
   );
 }

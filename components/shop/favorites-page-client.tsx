@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Skeleton } from "boneyard-js/react";
 import { Heart, LockKeyhole, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -13,8 +14,14 @@ import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { Product, PRODUCTS } from "@/lib/vela-data";
 
 export function FavoritesPageClient() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const { favorites, removeFromFavorites } = useFavorites();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const {
+    favorites,
+    isLoading: isFavoritesLoading,
+    error,
+    retry,
+    removeFromFavorites,
+  } = useFavorites();
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
 
@@ -26,12 +33,22 @@ export function FavoritesPageClient() {
   return (
     <Skeleton
       name="favorites-page"
-      loading={isLoading}
+      loading={isAuthLoading || isFavoritesLoading}
       fallback={<FavoritesPageLoadingFallback />}
       fixture={<FavoritesPageFixture />}
     >
       {!isAuthenticated ? (
         <FavoritesSignInState />
+      ) : error ? (
+        <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
+          <StorefrontApiStatus
+            error={error}
+            onRetry={retry}
+            resourceLabel="danh sách yêu thích"
+            returnHref="/collection"
+            variant="panel"
+          />
+        </div>
       ) : (
         <FavoritesContent
           favorites={favorites}

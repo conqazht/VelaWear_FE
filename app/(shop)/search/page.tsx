@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { getProducts } from "@/lib/api/catalog";
 import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
@@ -269,6 +270,8 @@ function SearchResultsContent() {
 
   const [catalogProducts, setCatalogProducts] = useState<Product[]>(initialCatalogProducts);
   const [isLoading, setIsLoading] = useState(initialCatalogProducts.length === 0);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   // Filter States
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -297,6 +300,7 @@ function SearchResultsContent() {
     async function loadCatalog() {
       if (isMounted) {
         setIsLoading(true);
+        setLoadError(null);
       }
       try {
         const data = await getProducts({
@@ -311,9 +315,9 @@ function SearchResultsContent() {
         persistSearchCatalog(activeLocale, mapped);
         setCatalogProducts(mapped);
       } catch (err) {
-        console.error("Failed to load catalog for search", err);
         if (isMounted) {
           setCatalogProducts([]);
+          setLoadError(err);
         }
       } finally {
         if (isMounted) {
@@ -327,7 +331,7 @@ function SearchResultsContent() {
     return () => {
       isMounted = false;
     };
-  }, [activeLocale]);
+  }, [activeLocale, retryKey]);
 
   const filteredCatalog = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query);
@@ -518,6 +522,20 @@ function SearchResultsContent() {
     clearAllFilters,
     hasActiveFilters,
   };
+
+  if (loadError) {
+    return (
+      <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
+        <StorefrontApiStatus
+          error={loadError}
+          onRetry={() => setRetryKey((value) => value + 1)}
+          resourceLabel="kết quả tìm kiếm"
+          returnHref="/collection"
+          variant="panel"
+        />
+      </div>
+    );
+  }
 
   return (
     <Skeleton

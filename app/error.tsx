@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatedStatus } from "@/components/errors/animated-status";
+import { StorefrontStatus } from "@/components/errors/storefront-status";
 
 export default function ErrorPage({
   error,
@@ -10,13 +10,12 @@ export default function ErrorPage({
   unstable_retry: () => void;
 }) {
   return (
-    <AnimatedStatus
-      code="500"
-      title="The experience needs a quick reset"
-      description="An unexpected server error interrupted this page. Try the request again, or return home while we recover."
-      primaryAction={{ label: "Try again", onClick: unstable_retry }}
-      secondaryAction={{ label: "Return home", href: "/" }}
-      accent="#ff8f78"
+    <StorefrontStatus
+      status={500}
+      title="Trải nghiệm cần một nhịp nghỉ"
+      description="Một lỗi ngoài dự kiến đã làm gián đoạn trang này. Hãy thử tải lại hoặc quay về cửa hàng trong lúc chúng tôi khôi phục kết nối."
+      primaryAction={{ label: "Thử lại", onClick: unstable_retry }}
+      secondaryAction={{ label: "Về trang chủ", href: "/" }}
       reference={error.digest}
     />
   );

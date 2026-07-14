@@ -1,10 +1,15 @@
-"use client";
+import { AnimatedStatus } from "@/components/errors/animated-status";
 
 export default function DashboardNotFound() {
   return (
-    <div className="flex h-full flex-col items-center justify-center space-y-2 text-center">
-      <h1 className="font-semibold text-2xl">Page not found.</h1>
-      <p className="text-muted-foreground">This section will be added in future updates.</p>
-    </div>
+    <AnimatedStatus
+      code="404"
+      title="This Management page is unavailable"
+      description="The address may be outdated, the page may have moved, or this section is not part of the current workspace."
+      primaryAction={{ label: "Open Management", href: "/dashboard/users" }}
+      secondaryAction={{ label: "Dashboard home", href: "/dashboard/default" }}
+      accent="#f7f4ef"
+      variant="panel"
+    />
   );
 }

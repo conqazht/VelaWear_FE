@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Bounds = {
   width: number;
@@ -24,6 +23,8 @@ type StatusCodeRainProps = {
   code: string;
   color?: string;
   compact?: boolean;
+  hint?: string;
+  hintTone?: "light" | "dark";
 };
 
 const GRAVITY = 0.78;
@@ -105,6 +106,8 @@ export function StatusCodeRain({
   code,
   color = "#f7f4ef",
   compact = false,
+  hint = "Click anywhere to drop the code",
+  hintTone = "light",
 }: StatusCodeRainProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const boundsRef = useRef<Bounds>({ width: 0, height: 0 });
@@ -113,6 +116,38 @@ export function StatusCodeRain({
   const [drops, setDrops] = useState<StatusDrop[]>([]);
   const [animationRun, setAnimationRun] = useState(0);
   const [showHint, setShowHint] = useState(true);
+
+  const addDrop = useCallback((clientX: number, clientY: number, button: number) => {
+    if (button !== 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const glyphs = Array.from(code).filter((character) => character.trim().length > 0);
+    if (glyphs.length === 0) return;
+
+    const rect = container.getBoundingClientRect();
+    const newDrop: StatusDrop = {
+      id: nextDropId.current,
+      glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+      velocityX: (Math.random() - 0.5) * 6,
+      velocityY: -1,
+      rotation: 0,
+      restFrames: 0,
+      settled: false,
+    };
+    nextDropId.current += 1;
+
+    const nextDrops = [...dropsRef.current.slice(-(MAX_DROPS - 1)), newDrop];
+    dropsRef.current = nextDrops;
+    setDrops(nextDrops);
+    setShowHint(false);
+    setAnimationRun((value) => value + 1);
+  }, [code]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -145,6 +180,27 @@ export function StatusCodeRain({
 
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const surface = container?.parentElement;
+    if (!surface) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest("a, button, input, select, textarea, [role='button']")
+      ) {
+        return;
+      }
+
+      addDrop(event.clientX, event.clientY, event.button);
+    };
+
+    surface.addEventListener("pointerdown", handlePointerDown);
+    return () => surface.removeEventListener("pointerdown", handlePointerDown);
+  }, [addDrop]);
 
   useEffect(() => {
     if (animationRun === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -187,43 +243,10 @@ export function StatusCodeRain({
     };
   }, [animationRun]);
 
-  const addDrop = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    const glyphs = Array.from(code).filter((character) => character.trim().length > 0);
-    if (glyphs.length === 0) return;
-
-    const rect = container.getBoundingClientRect();
-    const newDrop: StatusDrop = {
-      id: nextDropId.current,
-      glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-      velocityX: (Math.random() - 0.5) * 6,
-      velocityY: -1,
-      rotation: 0,
-      restFrames: 0,
-      settled: false,
-    };
-    nextDropId.current += 1;
-
-    const nextDrops = [...dropsRef.current.slice(-(MAX_DROPS - 1)), newDrop];
-    dropsRef.current = nextDrops;
-    setDrops(nextDrops);
-    setShowHint(false);
-    setAnimationRun((value) => value + 1);
-  };
-
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 cursor-crosshair select-none overflow-hidden"
-      onPointerDown={addDrop}
+      className="pointer-events-none absolute inset-0 select-none overflow-hidden"
       aria-hidden="true"
     >
       {drops.map((drop) => (
@@ -244,15 +267,19 @@ export function StatusCodeRain({
         </span>
       ))}
 
-      {showHint ? (
+      {showHint && hint ? (
         <span
           className={
             compact
-              ? "absolute inset-x-0 bottom-4 text-center text-[11px] uppercase tracking-[0.24em] text-white/38 motion-safe:animate-pulse motion-reduce:hidden"
-              : "absolute inset-x-0 bottom-8 text-center text-xs uppercase tracking-[0.28em] text-white/42 motion-safe:animate-pulse motion-reduce:hidden"
+              ? `absolute inset-x-0 bottom-4 text-center text-[11px] uppercase tracking-[0.24em] motion-safe:animate-pulse motion-reduce:hidden ${
+                  hintTone === "dark" ? "text-[#1c1a18]/42" : "text-white/38"
+                }`
+              : `absolute inset-x-4 bottom-20 text-center text-[10px] uppercase tracking-[0.2em] motion-safe:animate-pulse motion-reduce:hidden sm:inset-x-0 sm:text-xs sm:tracking-[0.28em] ${
+                  hintTone === "dark" ? "text-[#1c1a18]/46" : "text-white/42"
+                }`
           }
         >
-          Click anywhere to drop the code
+          {hint}
         </span>
       ) : null}
     </div>

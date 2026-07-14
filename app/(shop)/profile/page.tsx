@@ -8,6 +8,7 @@ import { Skeleton } from "boneyard-js/react";
 import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/product-card";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -104,7 +105,13 @@ const orderStatusOrder = [
 
 export default function MemberProfile() {
   const { user, isAuthenticated, isLoading: isAuthLoading, checkSession } = useAuth();
-  const { favorites, toggleFavorite, isLoading: favoritesLoading } = useFavorites();
+  const {
+    favorites,
+    toggleFavorite,
+    isLoading: favoritesLoading,
+    error: favoritesError,
+    retry: retryFavorites,
+  } = useFavorites();
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
   const updateProfileMutation = useUpdateProfileMutation();
@@ -591,6 +598,14 @@ export default function MemberProfile() {
                       >
                         <ProfileAddressesLoadingFixture />
                       </Skeleton>
+                    ) : addressesQuery.isError ? (
+                      <StorefrontApiStatus
+                        error={addressesQuery.error}
+                        onRetry={() => void addressesQuery.refetch()}
+                        resourceLabel="địa chỉ giao hàng"
+                        returnHref="/collection"
+                        variant="panel"
+                      />
                     ) : addresses.length === 0 ? (
                       <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/30 border border-[#1c1a18]/15 rounded-md">
                         <p className="text-sm text-ink/70 font-light max-w-md">
@@ -818,7 +833,7 @@ export default function MemberProfile() {
               </span>
             </div>
 
-            {!ordersQuery.isLoading && orders.length > 0 && (
+            {!ordersQuery.isLoading && !ordersQuery.isError && orders.length > 0 && (
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                 {orderStats.map((stat) => {
                   const percentage = Math.round((stat.count / orders.length) * 100);
@@ -849,7 +864,15 @@ export default function MemberProfile() {
               fallback={<ProfileOrdersLoadingFallback />}
               fixture={<ProfileOrdersLoadingFixture />}
             >
-            {orders.length === 0 ? (
+            {ordersQuery.isError ? (
+              <StorefrontApiStatus
+                error={ordersQuery.error}
+                onRetry={() => void ordersQuery.refetch()}
+                resourceLabel="lịch sử đơn hàng"
+                returnHref="/collection"
+                variant="panel"
+              />
+            ) : orders.length === 0 ? (
               <div className="py-12 text-center select-none bg-surface-card/10 border border-hairline/20 rounded-sm">
                 <p className="text-sm text-[#1c1a18]/50 mb-6">Bạn chưa thực hiện đơn đặt hàng nào.</p>
                 <Link
@@ -922,7 +945,15 @@ export default function MemberProfile() {
               fallback={<ProfileFavouritesLoadingFallback />}
               fixture={<ProfileFavouritesLoadingFixture />}
             >
-            {favorites.length === 0 ? (
+            {favoritesError ? (
+              <StorefrontApiStatus
+                error={favoritesError}
+                onRetry={retryFavorites}
+                resourceLabel="danh sách yêu thích"
+                returnHref="/collection"
+                variant="panel"
+              />
+            ) : favorites.length === 0 ? (
               <div className="py-16 text-center flex flex-col items-center gap-6">
                 <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
                   Danh sách yêu thích của bạn đang trống. Hãy khám phá các sản phẩm tuyệt vời của Vela Wear để thêm vào danh sách yêu thích.

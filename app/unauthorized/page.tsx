@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AnimatedStatus } from "@/components/errors/animated-status";
+import { StorefrontStatus } from "@/components/errors/storefront-status";
 
 export const metadata: Metadata = {
   title: "403 — Access denied | Vela Wear",
@@ -8,13 +8,12 @@ export const metadata: Metadata = {
 
 export default function ForbiddenPage() {
   return (
-    <AnimatedStatus
-      code="403"
-      title="This area is not in your collection"
-      description="Your account is signed in, but it does not have permission to open this workspace or resource."
-      primaryAction={{ label: "Return home", href: "/" }}
-      secondaryAction={{ label: "Open dashboard", href: "/dashboard/default" }}
-      accent="#ffb59f"
+    <StorefrontStatus
+      status={403}
+      title="Khu vực này chưa dành cho bạn"
+      description="Tài khoản hiện tại đã đăng nhập nhưng chưa có quyền mở nội dung này. Hãy quay lại cửa hàng hoặc chọn một bộ sưu tập khác."
+      primaryAction={{ label: "Về trang chủ", href: "/" }}
+      secondaryAction={{ label: "Xem bộ sưu tập", href: "/collection" }}
     />
   );
 }

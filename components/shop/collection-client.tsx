@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { cn } from "@/lib/utils";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { getActiveLocale } from "@/lib/i18n";
@@ -354,8 +355,8 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     () =>
       productsQuery.data?.result?.map((product) =>
         mapBackendProduct(product, activeLocale)
-      ) ?? (page === 1 && selectedCategoryId === "ALL" && !selectedColorId && !selectedSizeId && !minPrice && !maxPrice ? initialProducts.slice(0, size) : []),
-    [activeLocale, initialProducts, productsQuery.data, page, selectedCategoryId, selectedColorId, selectedSizeId, minPrice, maxPrice, size]
+      ) ?? (!productsQuery.isError && page === 1 && selectedCategoryId === "ALL" && !selectedColorId && !selectedSizeId && !minPrice && !maxPrice ? initialProducts.slice(0, size) : []),
+    [activeLocale, initialProducts, productsQuery.data, productsQuery.isError, page, selectedCategoryId, selectedColorId, selectedSizeId, minPrice, maxPrice, size]
   );
 
   const meta = productsQuery.data?.meta;
@@ -528,6 +529,15 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
         fallback={<CollectionCatalogLoadingFallback />}
         fixture={<CollectionCatalogFixture products={products.length > 0 ? products : initialProducts.slice(0, size)} />}
       >
+        {productsQuery.isError ? (
+          <StorefrontApiStatus
+            error={productsQuery.error}
+            onRetry={() => void productsQuery.refetch()}
+            resourceLabel="bộ sưu tập"
+            returnHref="/"
+            variant="panel"
+          />
+        ) : (
         <div className="w-full">
           <div ref={collectionScrollAnchorRef} className="h-px w-full" aria-hidden="true" />
 
@@ -601,6 +611,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
             )}
           </ProductLayoutMain>
         </div>
+        )}
       </Skeleton>
 
       {/* Mobile Filters Drawer */}
