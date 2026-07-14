@@ -37,7 +37,10 @@ export type User = {
   createdAt: string;
   updatedAt: string;
   hasPassword: boolean;
-  roles?: unknown;
+  roles?: Array<{
+    id: number;
+    name: string;
+  }>;
 };
 
 export type Product = {

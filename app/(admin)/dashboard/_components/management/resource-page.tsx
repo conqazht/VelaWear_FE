@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
 import type { LucideIcon } from "lucide-react";
 import { Download, Plus, RefreshCw, Search } from "lucide-react";
 
@@ -89,7 +90,7 @@ export function ResourcePage<T extends { id: number }>({
   const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = total === 0 ? 0 : Math.min(currentPage * pageSize, total);
 
-  return (
+  const content = (
     <Card>
       <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
         <CardTitle className="text-xl leading-none">{title}</CardTitle>
@@ -248,5 +249,15 @@ export function ResourcePage<T extends { id: number }>({
         </div>
       </CardContent>
     </Card>
+  );
+
+  return (
+    <BoneyardSkeleton
+      name="management-resource-page"
+      loading={isLoading}
+      fixture={content}
+    >
+      {content}
+    </BoneyardSkeleton>
   );
 }

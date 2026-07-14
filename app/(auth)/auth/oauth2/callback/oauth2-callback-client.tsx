@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { exchangeOAuth2Code } from "@/lib/api/auth";
+import { exchangeOAuth2Code, getMe } from "@/lib/api/auth";
 import { AuthLoader } from "@/components/auth/auth-loader";
+import { getPostSignInPath, getRoleSessionLabel } from "@/lib/auth/roles";
+import { queryKeys } from "@/lib/queries/keys";
 
 export function OAuth2CallbackClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const [sessionRoleLabel, setSessionRoleLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -23,9 +28,12 @@ export function OAuth2CallbackClient() {
     async function completeLogin() {
       try {
         await exchangeOAuth2Code({ code: loginCode });
-        if (!cancelled) {
-          router.replace("/");
-        }
+        const profile = await getMe();
+        if (cancelled) return;
+
+        queryClient.setQueryData(queryKeys.auth.session, profile);
+        setSessionRoleLabel(getRoleSessionLabel(profile));
+        router.replace(getPostSignInPath(profile));
       } catch {
         if (!cancelled) {
           router.replace("/sign-in?error=oauth2_login_failed");
@@ -38,7 +46,15 @@ export function OAuth2CallbackClient() {
     return () => {
       cancelled = true;
     };
-  }, [router, searchParams]);
+  }, [queryClient, router, searchParams]);
 
-  return <AuthLoader message="Đang hoàn tất đăng nhập..." />;
+  return (
+    <AuthLoader
+      message={
+        sessionRoleLabel
+          ? `Checking ${sessionRoleLabel} session...`
+          : "Đang hoàn tất đăng nhập..."
+      }
+    />
+  );
 }

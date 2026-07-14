@@ -28,13 +28,8 @@ export function useProfileQuery(enabled = true) {
 }
 
 export function useLoginMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (request: LoginRequest) => login(request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.root });
-    },
   });
 }
 
