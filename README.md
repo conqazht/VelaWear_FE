@@ -16,6 +16,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Kiểm thử và CI
+
+```bash
+pnpm test:unit
+pnpm test:e2e:smoke
+pnpm test:e2e:fullstack
+```
+
+Xem [hướng dẫn Playwright và CI full-stack bằng tiếng Việt](./docs/PLAYWRIGHT_CI_VI.md)
+để biết test nào chạy ở frontend/backend, cách chạy đồng thời hai repository và cách
+cấu hình GitHub Actions.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

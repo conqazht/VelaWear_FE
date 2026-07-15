@@ -11,7 +11,9 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --grep @smoke",
+    "test:e2e:smoke": "playwright test --grep @smoke",
+    "test:e2e:fullstack": "playwright test --grep @fullstack --workers=1"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

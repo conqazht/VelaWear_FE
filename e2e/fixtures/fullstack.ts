@@ -1,0 +1,129 @@
+import {
+  expect,
+  test as base,
+  type APIRequestContext,
+  type Response,
+} from "@playwright/test";
+
+const apiUrl = process.env.PLAYWRIGHT_API_URL ?? "http://localhost:8080/api/v1";
+const userEmail = process.env.E2E_USER_EMAIL ?? "user@velawear.local";
+const userPassword = process.env.E2E_USER_PASSWORD ?? "Password123!";
+const variantSku = process.env.E2E_VARIANT_SKU ?? "VW-TEE-BLK-M";
+
+type ApiEnvelope<T> = {
+  data: T;
+};
+
+type LoginResponse = {
+  accessToken: string;
+};
+
+type ProductVariant = {
+  id: number;
+  sku: string;
+};
+
+type PaginatedResult<T> = {
+  result: T[];
+};
+
+type CheckoutResponse = {
+  orderId: number;
+};
+
+type FullstackSession = {
+  accessToken: string;
+  api: APIRequestContext;
+  variantId: number;
+};
+
+type FullstackFixtures = {
+  fullstackSession: FullstackSession;
+};
+
+function isCheckoutResponse(response: Response) {
+  const url = new URL(response.url());
+  return response.request().method() === "POST" &&
+    url.pathname === "/api/v1/checkout" &&
+    response.status() === 201;
+}
+
+export const test = base.extend<FullstackFixtures>({
+  fullstackSession: async ({ context, page }, provide) => {
+    const api = context.request;
+    const loginResponse = await api.post(`${apiUrl}/auth/login`, {
+      data: { email: userEmail, password: userPassword },
+    });
+    expect(loginResponse.ok(), await loginResponse.text()).toBeTruthy();
+    const loginBody = await loginResponse.json() as ApiEnvelope<LoginResponse>;
+    const accessToken = loginBody.data.accessToken;
+    expect(accessToken).toBeTruthy();
+
+    const variantsResponse = await api.get(
+      `${apiUrl}/product-variants?sku=${encodeURIComponent(variantSku)}&size=100`,
+    );
+    expect(variantsResponse.ok(), await variantsResponse.text()).toBeTruthy();
+    const variantsBody = await variantsResponse.json() as ApiEnvelope<PaginatedResult<ProductVariant>>;
+    const variant = variantsBody.data.result.find((item) => item.sku === variantSku);
+    expect(variant, `Missing seeded product variant ${variantSku}`).toBeTruthy();
+
+    const cartResponse = await api.put(`${apiUrl}/carts/me/items`, {
+      data: { items: [{ variantId: variant!.id, quantity: 1 }] },
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    expect(cartResponse.ok(), await cartResponse.text()).toBeTruthy();
+
+    await page.route("https://provinces.open-api.vn/api/v2/p/", async (route) => {
+      await route.fulfill({
+        json: [
+          {
+            code: 79,
+            name: "Ho Chi Minh",
+            division_type: "city",
+            codename: "ho_chi_minh",
+          },
+        ],
+      });
+    });
+    await page.route(/https:\/\/provinces\.open-api\.vn\/api\/v2\/w\/\?province=79$/, async (route) => {
+      await route.fulfill({
+        json: [
+          {
+            code: 760,
+            name: "Ben Nghe",
+            division_type: "ward",
+            codename: "ben_nghe",
+            province_code: 79,
+          },
+        ],
+      });
+    });
+
+    const createdOrderIds = new Set<number>();
+    const responseTasks: Promise<void>[] = [];
+    const captureCreatedOrder = (response: Response) => {
+      if (!isCheckoutResponse(response)) return;
+      responseTasks.push(
+        response.json()
+          .then((body: ApiEnvelope<CheckoutResponse>) => {
+            if (body.data?.orderId) createdOrderIds.add(body.data.orderId);
+          })
+          .catch(() => undefined),
+      );
+    };
+    page.on("response", captureCreatedOrder);
+
+    await provide({ accessToken, api, variantId: variant!.id });
+
+    page.off("response", captureCreatedOrder);
+    await Promise.allSettled(responseTasks);
+    for (const orderId of createdOrderIds) {
+      const cancelResponse = await api.post(`${apiUrl}/checkout/${orderId}/cancel`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      expect(cancelResponse.ok(), await cancelResponse.text()).toBeTruthy();
+    }
+  },
+});
+
+export { expect };

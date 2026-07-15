@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   validate:
-    name: "Lint, type check & build"
+    name: "Lint, type check, unit test & build"
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -52,5 +52,56 @@ jobs:
       - name: Type check
         run: pnpm exec tsc --noEmit --pretty false --incremental false
 
+      - name: Unit tests
+        run: pnpm test:unit
+
       - name: Production build
         run: pnpm build
+
+  playwright-smoke:
+    name: "Playwright smoke"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+      NEXT_PUBLIC_BACKEND_ORIGIN: http://localhost:8080
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright smoke tests
+        run: pnpm test:e2e:smoke
+
+      - name: Upload Playwright smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-smoke-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

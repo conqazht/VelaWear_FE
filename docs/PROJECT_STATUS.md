@@ -33,6 +33,14 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-15
 
+### Bổ sung kiểm thử race condition và Playwright CI hai repository
+- **Date/Time**: 2026-07-15 (Asia/Saigon)
+- **Implementation**: Bổ sung test cho cơ chế single-flight khi nhiều request cùng nhận `401`; tách logic gợi ý tìm kiếm thành hook có generation guard để response cũ không ghi đè response mới; thêm promise mutex cho checkout để hai lần submit cùng tick chỉ tạo một preview và một checkout, đồng thời giữ nguyên `Idempotency-Key` khi retry sau lỗi. Playwright được chia thành smoke suite và full-stack suite; full-stack đăng nhập, tạo cart, preview và checkout trên backend thật, chỉ mock API tỉnh/phường bên ngoài, rồi tự hủy order đã tạo khi teardown.
+- **CI**: PR FE chạy lint, TypeScript, unit test, build và Playwright smoke. Workflow full-stack riêng checkout FE + BE cạnh nhau trên cùng runner, khởi động PostgreSQL/Redis/backend, chạy khi push `main`, theo lịch ban đêm hoặc thủ công với hai ref. Race suite không retry để regression không bị che thành flaky-green; workflow lưu report, trace, screenshot và backend log khi cần điều tra. CI backend hiện tại không cần thay đổi vì các integration test race chạy trong Maven/Testcontainers.
+- **Documentation**: Thêm `docs/PLAYWRIGHT_CI_VI.md` bằng tiếng Việt, giải thích vai trò của từng tầng test, cách chạy local, cách hai repository được checkout trong CI, secret tối thiểu và cách đọc lỗi/artifact.
+- **Verification**: Vitest 28/28; TypeScript pass; ESLint 0 error (còn 4 warning TanStack Table có sẵn); production build pass với 68 routes; Playwright Chromium smoke 2/2; Playwright full-stack 1/1 với backend, PostgreSQL và Redis thật; workflow YAML/actionlint không có lỗi schema hoặc expression.
+- **Known Follow-ups**: Trước khi workflow full-stack chạy trên GitHub, cần tạo fine-grained PAT chỉ có `Contents: read` cho repository BE và lưu thành secret `CROSS_REPO_READ_TOKEN` ở repository FE. Không ghi token vào source hoặc artifact.
+
 ### Triển khai Sale Campaign cho storefront và Management
 - **Date/Time**: 2026-07-15 (Asia/Saigon)
 - **Implementation**: Loại bỏ toàn bộ `salePrice` khỏi contract và màn quản lý Product/Variant; mọi giá giảm giờ đi qua campaign `STANDARD` hoặc `FLASH`. Thêm Management workspace `/dashboard/sales` với danh sách, filter, CSV, editor ba bước chọn nhiều variant, publish/cancel, optimistic version, chỉnh display/tăng quota/kết thúc/end-and-clone theo lifecycle. Thêm storefront `/sale` và `/flash-sale`, banner, countdown theo `serverTime`, quota/giới hạn khách, giá canonical ở product/cart/order snapshot và giải thích coupon. Checkout dùng server preview + `pricingFingerprint`, `Idempotency-Key`, retry lost-response, stable conflict codes, cart refresh, SePay deadline 15 phút + 30 giây grace và command hủy đơn riêng. Cart không giữ stock/quota; sản phẩm Sale bắt buộc chọn đúng variant trước khi thêm.

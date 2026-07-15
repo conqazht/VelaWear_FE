@@ -22,9 +22,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { NavigationMenu as BaseNavigationMenu } from "@base-ui/react/navigation-menu";
 import { money } from "@/lib/vela-data";
-import { getProducts } from "@/lib/api/catalog";
-import { mapBackendProduct, type Product } from "@/lib/vela-data";
-import { matchesSearchText, normalizeSearchText } from "@/lib/search";
+import { useSearchSuggestions } from "@/components/shop/use-search-suggestions";
 
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
@@ -66,7 +64,7 @@ export function SiteHeader() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
+  const searchSuggestions = useSearchSuggestions(searchQuery, activeLocale);
   const [searchHistory, setSearchHistory] = useState<string[]>(readSearchHistory);
   const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
   const [searchPathname, setSearchPathname] = useState(pathname);
@@ -77,13 +75,10 @@ export function SiteHeader() {
   const lastScrollY = useRef(0);
   const headerToggleAnchorY = useRef(0);
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
-  const searchDebounceRef = useRef<number | null>(null);
-  const searchRequestIdRef = useRef(0);
 
   if (searchPathname !== pathname) {
     setSearchPathname(pathname);
     setSearchQuery("");
-    setSearchSuggestions([]);
     setIsSearchSuggestionsOpen(false);
   }
 
@@ -145,49 +140,6 @@ export function SiteHeader() {
       root.style.setProperty("--header-visible-height", "0px");
     }
   }, [showHeader, isHome]);
-
-  useEffect(() => {
-    const trimmedQuery = searchQuery.trim();
-
-    if (!trimmedQuery) {
-      if (searchDebounceRef.current !== null) {
-        window.clearTimeout(searchDebounceRef.current);
-        searchDebounceRef.current = null;
-      }
-      return;
-    }
-
-    if (searchDebounceRef.current !== null) {
-      window.clearTimeout(searchDebounceRef.current);
-    }
-
-    const requestId = ++searchRequestIdRef.current;
-    searchDebounceRef.current = window.setTimeout(async () => {
-      try {
-        const data = await getProducts({ size: 500, locale: activeLocale });
-        if (requestId !== searchRequestIdRef.current) return;
-
-        const mapped = (data.result || []).map((product: Parameters<typeof mapBackendProduct>[0]) =>
-          mapBackendProduct(product, activeLocale)
-        );
-        const normalizedQuery = normalizeSearchText(trimmedQuery);
-        const filtered = mapped.filter((product) => {
-          const searchable = [product.name, product.category, product.id, product.description]
-            .filter(Boolean)
-            .join(" ");
-          return matchesSearchText(searchable, normalizedQuery);
-        });
-
-        setSearchSuggestions(filtered.slice(0, 4));
-      } catch {
-        if (requestId !== searchRequestIdRef.current) return;
-      } finally {
-        if (requestId === searchRequestIdRef.current) {
-          searchDebounceRef.current = null;
-        }
-      }
-    }, 180);
-  }, [activeLocale, searchQuery]);
 
   useEffect(() => {
     try {
