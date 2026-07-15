@@ -108,6 +108,7 @@ export function CheckoutPageClient() {
     request: CheckoutRequest;
     serverTime: string;
   } | null>(null);
+  const checkoutSubmissionRef = useRef<Promise<void> | null>(null);
 
   const {
     register,
@@ -326,7 +327,7 @@ export function CheckoutPageClient() {
   const displayedDiscount = preview?.discountAmount ?? 0;
   const displayedTotal = preview?.finalAmount ?? subtotal + localShippingEstimate;
 
-  const onCompletePurchase = async (data: CheckoutFormValues) => {
+  const performCompletePurchase = async (data: CheckoutFormValues) => {
     setApiError(null);
     setCouponError(null);
     setAddressApiError(null);
@@ -413,6 +414,20 @@ export function CheckoutPageClient() {
         await loadPreview().catch(() => undefined);
       }
     }
+  };
+
+  const onCompletePurchase = (data: CheckoutFormValues) => {
+    if (checkoutSubmissionRef.current) {
+      return checkoutSubmissionRef.current;
+    }
+
+    const submission = performCompletePurchase(data).finally(() => {
+      if (checkoutSubmissionRef.current === submission) {
+        checkoutSubmissionRef.current = null;
+      }
+    });
+    checkoutSubmissionRef.current = submission;
+    return submission;
   };
 
   const onCheckoutFormSubmit = (event: FormEvent<HTMLFormElement>) => {

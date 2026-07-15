@@ -1,0 +1,227 @@
+# Workflow này kiểm tra contract thật giữa browser, FE, BE, PostgreSQL và Redis.
+# Cả hai repository được checkout vào hai thư mục trên CÙNG một GitHub runner;
+# không cần tạo repository E2E thứ ba và không cần deploy ứng dụng trước khi test.
+name: Full-stack E2E
+
+on:
+  # Sau khi FE được merge vào main, chạy lại luồng full-stack với BE main hiện tại.
+  push:
+    branches: [main]
+  schedule:
+    # Cron của GitHub dùng UTC: 19:00 UTC = 02:00 ngày hôm sau tại Việt Nam.
+    - cron: "0 19 * * *"
+  # Cho phép chọn riêng branch/tag/SHA của FE và BE khi cần test hai PR phối hợp.
+  # Nút Run workflow chỉ xuất hiện sau khi file này đã tồn tại trên default branch.
+  workflow_dispatch:
+    inputs:
+      frontend_ref:
+        description: Frontend branch, tag, or SHA
+        required: true
+        default: main
+        type: string
+      backend_ref:
+        description: Backend branch, tag, or SHA
+        required: true
+        default: main
+        type: string
+
+permissions:
+  # GITHUB_TOKEN mặc định chỉ cần đọc source của chính repository FE.
+  contents: read
+
+concurrency:
+  # Mỗi cặp FE ref + BE ref là một nhóm riêng. Chạy lại cùng cặp ref sẽ hủy run cũ
+  # để không tốn runner; hai cặp ref khác nhau vẫn có thể chạy độc lập.
+  group: >-
+    fullstack-e2e-${{ github.event_name }}-
+    ${{ github.event_name == 'workflow_dispatch' && inputs.frontend_ref || github.ref }}-
+    ${{ github.event_name == 'workflow_dispatch' && inputs.backend_ref || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  fullstack-e2e:
+    name: "Playwright full-stack"
+    runs-on: ubuntu-latest
+    # Chặn job treo vô hạn nếu backend, browser hoặc network nội bộ không phản hồi.
+    timeout-minutes: 30
+
+    # Service containers chỉ tồn tại trong thời gian job và được GitHub tự dọn.
+    # Port được publish về localhost để Spring Boot chạy trực tiếp trên runner sử dụng.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: velawear_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        # GitHub chỉ bắt đầu các step sau khi PostgreSQL báo sẵn sàng.
+        options: >-
+          --health-cmd "pg_isready -U postgres -d velawear_e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      redis:
+        image: redis:8.8.0
+        ports:
+          - 6379:6379
+        # Redis cũng phải trả lời PONG trước khi backend được khởi động.
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      # CI=true bật reporter GitHub/HTML trong Playwright config.
+      CI: "true"
+      # Race regression phải làm job đỏ ngay, không được retry thành flaky-green.
+      PLAYWRIGHT_RETRIES: "0"
+      NEXT_TELEMETRY_DISABLED: "1"
+
+      # Hai URL public mà code FE dùng. Giữ cùng hostname localhost để cookie
+      # HttpOnly/SameSite hoạt động nhất quán giữa browser (3000) và API (8080).
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+      NEXT_PUBLIC_BACKEND_ORIGIN: http://localhost:8080
+
+      # Backend dùng profile test và kết nối thẳng tới service containers phía trên.
+      # Tắt Docker Compose của Spring vì GitHub Actions đã quản lý PostgreSQL/Redis.
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/velawear_e2e
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATA_REDIS_HOST: localhost
+      SPRING_DATA_REDIS_PORT: "6379"
+
+      # Đây là credential chỉ dùng trong runner disposable, không phải secret production.
+      JWT_ACCESS_TOKEN_SECRET_KEY: fullstack-access-secret-key-for-ci-must-be-at-least-64-characters-long
+      JWT_REFRESH_TOKEN_SECRET_KEY: fullstack-refresh-secret-key-for-ci-must-be-at-least-64-characters-long
+      JWT_ACCESS_TOKEN_EXPIRATION: "900"
+      JWT_REFRESH_TOKEN_EXPIRATION: "259200"
+
+      # Không gọi email/payment provider thật trong E2E; SePay chỉ được test qua
+      # integration test backend hoặc fixture mô phỏng ở suite phù hợp.
+      RESEND_API_KEY: test-resend-api-key
+      SEPAY_ENABLED: "false"
+
+    steps:
+      # Checkout repo đang chạy workflow vào $GITHUB_WORKSPACE/frontend.
+      # Push/schedule dùng đúng FE commit kích hoạt run; manual dùng frontend_ref.
+      - name: Check out frontend
+        uses: actions/checkout@v7
+        with:
+          path: frontend
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.frontend_ref || github.sha }}
+          # Không để credential checkout tồn tại trong git config của runner.
+          persist-credentials: false
+
+      # GITHUB_TOKEN của FE không đọc được private repo BE, nên checkout thứ hai dùng
+      # fine-grained PAT chỉ có Contents: read cho VelaWear_BE. Secret được lưu ở FE.
+      - name: Check out backend
+        uses: actions/checkout@v7
+        with:
+          repository: coqanklazy/VelaWear_BE
+          path: backend
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_ref || 'main' }}
+          token: ${{ secrets.CROSS_REPO_READ_TOKEN }}
+          persist-credentials: false
+
+      # Ghi SHA đã resolve vào Job Summary để một lỗi E2E luôn truy ngược được
+      # chính xác cặp source FE/BE đã chạy, kể cả khi input là tên branch.
+      - name: Record resolved revisions
+        shell: bash
+        run: |
+          {
+            echo "### Full-stack revisions"
+            echo "- Frontend: $(git -C frontend rev-parse HEAD)"
+            echo "- Backend: $(git -C backend rev-parse HEAD)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      # Chạy Spring Boot nền bằng nohup để workflow tiếp tục sang Playwright.
+      # Log và PID đặt ở workspace root để step artifact/cleanup luôn tìm thấy.
+      - name: Start backend
+        shell: bash
+        run: |
+          chmod +x backend/mvnw
+          cd backend
+          nohup ./mvnw --batch-mode --no-transfer-progress spring-boot:run \
+            > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
+          echo $! > "$GITHUB_WORKSPACE/backend.pid"
+
+      # Poll tối đa 60 * 2 = 120 giây. Nếu backend không UP, in 200 dòng log cuối
+      # ngay trong job log trước khi fail để không phải đoán lỗi khởi động.
+      - name: Wait for backend health
+        shell: bash
+        run: |
+          for _ in {1..60}; do
+            if curl --silent --fail http://localhost:8080/actuator/health \
+              | grep --quiet '"status":"UP"'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          tail -n 200 backend.log
+          exit 1
+
+      # Cài pnpm trước setup-node vì setup-node cần pnpm để quản lý dependency cache.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.5.2
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        # Bảo đảm CI dùng chính xác dependency versions trong pnpm-lock.yaml.
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        working-directory: frontend
+        # --with-deps cài cả Chromium và system libraries cần thiết trên Ubuntu runner.
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Script chỉ chọn test @fullstack và ép workers=1 vì fixture dùng chung seed user/cart.
+      - name: Run full-stack Playwright tests
+        working-directory: frontend
+        run: pnpm test:e2e:fullstack
+
+      - name: Upload full-stack artifacts
+        # Luôn upload report/backend.log; khi test fail Playwright còn tạo trace/screenshot.
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fullstack-e2e-${{ github.run_id }}
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            backend.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # Cleanup phải chạy cả khi step test hoặc upload thất bại. Service containers
+      # do GitHub tự dọn; ở đây chỉ cần dừng tiến trình Spring Boot đã chạy nền.
+      - name: Stop backend
+        if: always()
+        shell: bash
+        run: |
+          if [ -f backend.pid ]; then
+            kill "$(cat backend.pid)" 2>/dev/null || true
+          fi
