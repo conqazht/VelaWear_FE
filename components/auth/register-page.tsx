@@ -19,9 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type { AuthSceneFocus, AuthSceneStatus } from "@/components/auth/auth-motion-scene";
+import type { AuthErrorMessageKey } from "@/lib/i18n/messages/auth-errors";
 
 export function RegisterPage() {
+  const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -35,14 +38,14 @@ export function RegisterPage() {
   const [emailConsent, setEmailConsent] = useState(false);
   const [termsConsent, setTermsConsent] = useState(false);
   const [errors, setErrors] = useState<{
-    email?: string;
-    firstName?: string;
-    lastName?: string;
+    email?: AuthErrorMessageKey;
+    firstName?: AuthErrorMessageKey;
+    lastName?: AuthErrorMessageKey;
     passwordMin?: boolean;
     passwordRules?: boolean;
-    gender?: string;
-    dob?: string;
-    terms?: string;
+    gender?: AuthErrorMessageKey;
+    dob?: AuthErrorMessageKey;
+    terms?: AuthErrorMessageKey;
   }>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -107,17 +110,17 @@ export function RegisterPage() {
 
     // 1. Email validation
     if (!email.trim()) {
-      newErrors.email = "Required";
+      newErrors.email = "auth.validation.required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Invalid Email";
+      newErrors.email = "auth.validation.invalidEmail";
     }
 
     // 2. Names validation
     if (!firstName.trim()) {
-      newErrors.firstName = "Required";
+      newErrors.firstName = "auth.validation.required";
     }
     if (!lastName.trim()) {
-      newErrors.lastName = "Required";
+      newErrors.lastName = "auth.validation.required";
     }
 
     // 3. Password validation
@@ -138,7 +141,7 @@ export function RegisterPage() {
 
     // 4. Gender validation
     if (!preference) {
-      newErrors.gender = "Required";
+      newErrors.gender = "auth.validation.required";
     }
 
     // 5. Date of Birth validation
@@ -148,18 +151,18 @@ export function RegisterPage() {
     const currentYear = new Date().getFullYear();
 
     if (!dobDay || !dobMonth || !dobYear) {
-      newErrors.dob = "Required";
+      newErrors.dob = "auth.validation.required";
     } else if (
       isNaN(day) || day < 1 || day > 31 ||
       isNaN(month) || month < 1 || month > 12 ||
       isNaN(year) || year < 1900 || year > currentYear
     ) {
-      newErrors.dob = "Invalid Date";
+      newErrors.dob = "auth.validation.invalidDate";
     }
 
     // 6. Terms consent validation
     if (!termsConsent) {
-      newErrors.terms = "You must agree to the Terms of Use";
+      newErrors.terms = "auth.validation.termsRequired";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -182,21 +185,21 @@ export function RegisterPage() {
       focus={sceneFocus}
       passwordVisible={showPassword}
       status={sceneStatus}
-      title={showOtpStep ? "Verify Email" : "Now let's make you a Member."}
+      title={showOtpStep ? t("auth.register.verifyTitle") : t("auth.register.title")}
       description={
         showOtpStep
-          ? `We sent a 6-digit verification code to ${email}.`
-          : "Enter your details to register a new account."
+          ? t("auth.register.verifyDescription", { email })
+          : t("auth.register.description")
       }
       footer={
         !showOtpStep && (
           <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d] border-none">
-            Already a Member?{" "}
+            {t("auth.register.alreadyMember")} {" "}
             <Link
               href="/sign-in"
               className="font-medium text-[#964025] underline decoration-[#964025]/30 underline-offset-2 transition-colors hover:text-[#87391f] border-none"
             >
-              Sign In
+              {t("auth.common.signIn")}
             </Link>
           </p>
         )
@@ -213,8 +216,8 @@ export function RegisterPage() {
           onVerify={handleVerifyOtp}
           onResend={handleRequestOtp}
           onCancel={resetFlow}
-          cancelLabel="Change email"
-          actionLabel="Verify & Create Account"
+          cancelLabel={t("auth.otp.changeEmail")}
+          actionLabel={t("auth.register.verifyAndCreate")}
           plain={true}
         />
       ) : (
@@ -228,7 +231,7 @@ export function RegisterPage() {
           <div className="border-none">
             <FloatingInput
               id="email"
-              label="Email*"
+              label={t("auth.common.email")}
               type="email"
               value={email}
               error={!!errors.email}
@@ -247,7 +250,7 @@ export function RegisterPage() {
             />
             {errors.email && (
               <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
-                {errors.email}
+                {t(errors.email)}
               </p>
             )}
           </div>
@@ -256,7 +259,7 @@ export function RegisterPage() {
             <div>
               <FloatingInput
                 id="firstName"
-                label="First Name*"
+                label={t("auth.register.firstName")}
                 type="text"
                 value={firstName}
                 error={!!errors.firstName}
@@ -275,14 +278,14 @@ export function RegisterPage() {
               />
               {errors.firstName && (
                 <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
-                  {errors.firstName}
+                  {t(errors.firstName)}
                 </p>
               )}
             </div>
             <div>
               <FloatingInput
                 id="lastName"
-                label="Surname*"
+                label={t("auth.register.lastName")}
                 type="text"
                 value={lastName}
                 error={!!errors.lastName}
@@ -301,7 +304,7 @@ export function RegisterPage() {
               />
               {errors.lastName && (
                 <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
-                  {errors.lastName}
+                  {t(errors.lastName)}
                 </p>
               )}
             </div>
@@ -311,7 +314,7 @@ export function RegisterPage() {
           <div className="border-none">
             <FloatingInput
               id="password"
-              label="Password*"
+              label={t("auth.common.password")}
               type={showPassword ? "text" : "password"}
               value={password}
               inputRef={passwordRef}
@@ -347,7 +350,7 @@ export function RegisterPage() {
                       passwordRef.current?.focus();
                     }, 0);
                   }}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={t(showPassword ? "auth.common.hidePassword" : "auth.common.showPassword")}
                   className="p-1 hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent"
                 >
                   {showPassword ? <EyeOff className="size-[22px] text-ink" /> : <Eye className="size-[22px] text-ink" />}
@@ -358,12 +361,14 @@ export function RegisterPage() {
               <div className="mt-2 flex flex-col gap-1 border-none">
                 {errors.passwordMin && (
                   <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider border-none">
-                    <X className="size-3 text-destructive" strokeWidth={2.5} /> Minimum of 8 characters
+                    <X className="size-3 text-destructive" strokeWidth={2.5} />{" "}
+                    {t("auth.validation.passwordMin")}
                   </span>
                 )}
                 {errors.passwordRules && (
                   <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider border-none">
-                    <X className="size-3 text-destructive" strokeWidth={2.5} /> Uppercase, lowercase letters and one number
+                    <X className="size-3 text-destructive" strokeWidth={2.5} />{" "}
+                    {t("auth.validation.passwordRules")}
                   </span>
                 )}
               </div>
@@ -378,7 +383,7 @@ export function RegisterPage() {
                 htmlFor="gender"
                 className="block text-[14px] font-semibold text-[#1c1a18] select-none border-none"
               >
-                Gender*
+                {t("auth.register.gender")}
               </label>
               <div className="relative w-full border-none">
                 <Select
@@ -408,8 +413,12 @@ export function RegisterPage() {
                         : "border-black/20"
                     )}
                   >
-                    <SelectValue placeholder="Select Gender">
-                      {preference === "mens" ? "Male" : preference === "womens" ? "Female" : ""}
+                    <SelectValue placeholder={t("auth.register.selectGender")}>
+                      {preference === "mens"
+                        ? t("auth.register.male")
+                        : preference === "womens"
+                          ? t("auth.register.female")
+                          : ""}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent
@@ -419,17 +428,17 @@ export function RegisterPage() {
                     className="bg-[#efe7dc] border border-black/20 rounded-[12px] shadow-none text-ink w-[var(--anchor-width)]"
                   >
                     <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
-                      Male
+                      {t("auth.register.male")}
                     </SelectItem>
                     <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
-                      Female
+                      {t("auth.register.female")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {errors.gender && (
                 <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
-                  {errors.gender}
+                  {t(errors.gender)}
                 </p>
               )}
             </div>
@@ -437,11 +446,12 @@ export function RegisterPage() {
             {/* Date of Birth */}
             <div className="w-full flex flex-col gap-2 border-none">
               <label className="block text-[14px] font-semibold text-[#1c1a18] select-none border-none">
-                Date of Birth*
+                {t("auth.register.dateOfBirth")}
               </label>
               <div className="grid grid-cols-4 gap-2 w-full border-none">
                 <input
                   id="dobDay"
+                  aria-label={t("auth.register.dayAria")}
                   type="text"
                   placeholder="DD"
                   value={dobDay}
@@ -473,6 +483,7 @@ export function RegisterPage() {
                 <input
                   ref={dobMonthRef}
                   id="dobMonth"
+                  aria-label={t("auth.register.monthAria")}
                   type="text"
                   placeholder="MM"
                   value={dobMonth}
@@ -504,6 +515,7 @@ export function RegisterPage() {
                 <input
                   ref={dobYearRef}
                   id="dobYear"
+                  aria-label={t("auth.register.yearAria")}
                   type="text"
                   placeholder="YYYY"
                   value={dobYear}
@@ -532,7 +544,7 @@ export function RegisterPage() {
               </div>
               {errors.dob && (
                 <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
-                  {errors.dob}
+                  {t(errors.dob)}
                 </p>
               )}
             </div>
@@ -548,7 +560,7 @@ export function RegisterPage() {
                 className="mt-1 size-5 rounded-[4px] border-[#1c1a18]/30 data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
               />
               <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
-                Sign up for emails to get updates from Vela on products, offers, and your Member benefits.
+                {t("auth.register.emailConsent")}
               </label>
             </div>
             <div className="flex items-start gap-3 cursor-pointer group border-none">
@@ -573,7 +585,15 @@ export function RegisterPage() {
                 )}
               />
               <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
-                I agree to Vela&apos;s <Link href="#" className="underline hover:text-[#964025] border-none">Privacy Policy</Link> and <Link href="#" className="underline hover:text-[#964025] border-none">Terms of Use</Link>.
+                {t("auth.register.termsPrefix")} {" "}
+                <Link href="#" className="underline hover:text-[#964025] border-none">
+                  {t("auth.register.privacyPolicy")}
+                </Link>{" "}
+                {t("auth.register.termsJoin")} {" "}
+                <Link href="#" className="underline hover:text-[#964025] border-none">
+                  {t("auth.register.termsOfUse")}
+                </Link>
+                .
               </label>
             </div>
           </div>
@@ -585,12 +605,14 @@ export function RegisterPage() {
               disabled={isOtpSubmitting}
               className="w-full h-12 bg-[#964025] text-white rounded-[12px] font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50 border-none"
             >
-              {isOtpSubmitting ? "Creating Account..." : "Create Account"}
+              {isOtpSubmitting ? t("auth.register.creating") : t("auth.register.create")}
             </button>
 
             <div className="relative flex items-center mt-4">
               <div className="flex-grow border-t border-[#1c1a18]/10"></div>
-              <span className="flex-shrink-0 mx-4 text-xs uppercase tracking-wider text-[#1c1a18]/50">Or</span>
+              <span className="flex-shrink-0 mx-4 text-xs uppercase tracking-wider text-[#1c1a18]/50">
+                {t("auth.common.or")}
+              </span>
               <div className="flex-grow border-t border-[#1c1a18]/10"></div>
             </div>
 

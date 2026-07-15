@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -35,12 +36,14 @@ type ProductFormProps = {
   catalogError?: string | null;
 };
 
-const PRODUCT_STATUSES: Array<{ value: ProductStatus; label: string }> = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "OUT_OF_STOCK", label: "Out of stock" },
-];
+const PRODUCT_STATUS_MESSAGE_KEYS = {
+  DRAFT: "admin.commerce.products.status.draft",
+  ACTIVE: "admin.commerce.products.status.active",
+  INACTIVE: "admin.commerce.products.status.inactive",
+  OUT_OF_STOCK: "admin.commerce.products.status.outOfStock",
+} as const;
+
+const PRODUCT_STATUSES: ProductStatus[] = ["DRAFT", "ACTIVE", "INACTIVE", "OUT_OF_STOCK"];
 
 export function ProductForm({
   values,
@@ -51,6 +54,8 @@ export function ProductForm({
   isCatalogLoading = false,
   catalogError,
 }: ProductFormProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof ProductFormValues>(key: Key, value: ProductFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -59,20 +64,28 @@ export function ProductForm({
     <FieldGroup>
       {catalogError ? (
         <Alert variant="destructive">
-          <AlertTitle>Catalog options unavailable</AlertTitle>
+          <AlertTitle>{t("admin.commerce.products.form.catalogUnavailable")}</AlertTitle>
           <AlertDescription>{catalogError}</AlertDescription>
         </Alert>
       ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="product-category">Category</FieldLabel>
+          <FieldLabel htmlFor="product-category">
+            {t("admin.commerce.products.form.category")}
+          </FieldLabel>
           <Select
             value={values.categoryId || null}
             onValueChange={(value) => update("categoryId", value ?? "")}
             disabled={isCatalogLoading}
           >
             <SelectTrigger id="product-category" className="w-full">
-              <SelectValue placeholder={isCatalogLoading ? "Loading categories..." : "Select category"} />
+              <SelectValue
+                placeholder={
+                  isCatalogLoading
+                    ? t("admin.commerce.products.form.loadingCategories")
+                    : t("admin.commerce.products.form.selectCategory")
+                }
+              />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
               {categories.map((category) => (
@@ -85,14 +98,22 @@ export function ProductForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="product-brand">Brand</FieldLabel>
+          <FieldLabel htmlFor="product-brand">
+            {t("admin.commerce.products.form.brand")}
+          </FieldLabel>
           <Select
             value={values.brandId || null}
             onValueChange={(value) => update("brandId", value ?? "")}
             disabled={isCatalogLoading}
           >
             <SelectTrigger id="product-brand" className="w-full">
-              <SelectValue placeholder={isCatalogLoading ? "Loading brands..." : "Select brand"} />
+              <SelectValue
+                placeholder={
+                  isCatalogLoading
+                    ? t("admin.commerce.products.form.loadingBrands")
+                    : t("admin.commerce.products.form.selectBrand")
+                }
+              />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
               {brands.map((brand) => (
@@ -106,19 +127,19 @@ export function ProductForm({
       </div>
 
       <Field>
-        <FieldLabel htmlFor="product-name">Product name</FieldLabel>
+        <FieldLabel htmlFor="product-name">{t("admin.commerce.products.form.name")}</FieldLabel>
         <Input
           id="product-name"
           value={values.name}
           onChange={(event) => update("name", event.target.value)}
           maxLength={255}
-          placeholder="e.g. Structured linen blazer"
+          placeholder={t("admin.commerce.products.form.namePlaceholder")}
           required
         />
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="product-slug">Slug</FieldLabel>
+        <FieldLabel htmlFor="product-slug">{t("admin.commerce.products.form.slug")}</FieldLabel>
         <Input
           id="product-slug"
           value={values.slug}
@@ -130,38 +151,42 @@ export function ProductForm({
         />
         <FieldDescription>
           {isEditing
-            ? "The backend treats a product slug as immutable after creation."
-            : "Use a unique, URL-safe slug. It cannot be changed later."}
+            ? t("admin.commerce.products.form.slugImmutable")
+            : t("admin.commerce.products.form.slugHelp")}
         </FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="product-description">Description</FieldLabel>
+        <FieldLabel htmlFor="product-description">
+          {t("admin.commerce.products.form.description")}
+        </FieldLabel>
         <Textarea
           id="product-description"
           value={values.description}
           onChange={(event) => update("description", event.target.value)}
-          placeholder="Describe materials, fit, and product details."
+          placeholder={t("admin.commerce.products.form.descriptionPlaceholder")}
           rows={6}
         />
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="product-status">Catalog status</FieldLabel>
+        <FieldLabel htmlFor="product-status">
+          {t("admin.commerce.products.form.status")}
+        </FieldLabel>
         <Select value={values.status} onValueChange={(value) => update("status", value as ProductStatus)}>
           <SelectTrigger id="product-status" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="start" alignItemWithTrigger={false}>
             {PRODUCT_STATUSES.map((status) => (
-              <SelectItem key={status.value} value={status.value}>
-                {status.label}
+              <SelectItem key={status} value={status}>
+                {t(PRODUCT_STATUS_MESSAGE_KEYS[status])}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <FieldDescription>
-          Product visibility is independent from each variant&apos;s stock and selling status.
+          {t("admin.commerce.products.form.statusHelp")}
         </FieldDescription>
       </Field>
     </FieldGroup>

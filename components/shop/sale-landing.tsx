@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlarmClock, ArrowRight, BadgePercent, ShoppingBag, Users } from "lucide-react";
 
 import { FashionImage } from "@/components/shop/fashion-image";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,6 +22,7 @@ import { money, resolveImageUrl } from "@/lib/vela-data";
 
 export function SaleLanding({ type }: { type: SaleCampaignType }) {
   const isFlash = type === "FLASH";
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const salesQuery = usePublicSalesQuery({
     type,
@@ -77,15 +79,19 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
           <div className="max-w-3xl">
             <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em]">
               {isFlash ? <AlarmClock className="size-4" /> : <BadgePercent className="size-4" />}
-              {isFlash ? "Ưu đãi giới hạn theo thời gian" : "Chương trình giảm giá theo mùa"}
+              {isFlash
+                ? t("storefront.sale.flash.eyebrow")
+                : t("storefront.sale.standard.eyebrow")}
             </div>
             <h1 className="font-serif text-4xl font-light tracking-tight md:text-7xl">
-              {isFlash ? "Flash Sale" : "Sale"}
+              {isFlash
+                ? t("storefront.sale.flash.title")
+                : t("storefront.sale.standard.title")}
             </h1>
             <p className={isFlash ? "mt-5 max-w-2xl text-white/75" : "mt-5 max-w-2xl text-[#1c1a18]/65"}>
               {isFlash
-                ? "Giá Flash chỉ được giữ khi đặt hàng thành công. Thêm vào giỏ không đồng nghĩa với giữ suất."
-                : "Khám phá các campaign đang hoạt động. Sản phẩm Standard Sale vẫn có thể dùng coupon khi đáp ứng điều kiện."}
+                ? t("storefront.sale.flash.description")
+                : t("storefront.sale.standard.description")}
             </p>
           </div>
           <Link
@@ -96,7 +102,9 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
                 : "inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#8f2f20]"
             }
           >
-            {isFlash ? "Xem Standard Sale" : "Xem Flash Sale"}
+            {isFlash
+              ? t("storefront.sale.viewStandard")
+              : t("storefront.sale.viewFlash")}
             <ArrowRight className="size-4" />
           </Link>
         </div>
@@ -107,22 +115,22 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
 
         {salesQuery.isError ? (
           <Card className="border-red-200 bg-red-50 p-8 text-center text-sm text-red-800">
-            Không thể tải chương trình giảm giá. Vui lòng thử lại sau.
+            {t("storefront.sale.loadError")}
           </Card>
         ) : null}
 
         {!salesQuery.isLoading && !salesQuery.isError && campaigns.length === 0 ? (
           <Card className="border-dashed border-[#1c1a18]/15 bg-white/50 px-6 py-20 text-center">
             <ShoppingBag className="mx-auto mb-5 size-10 text-[#1c1a18]/25" />
-            <h2 className="font-serif text-2xl">Chưa có campaign phù hợp</h2>
+            <h2 className="font-serif text-2xl">{t("storefront.sale.empty.title")}</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-[#1c1a18]/55">
-              Các chương trình mới sẽ xuất hiện tại đây ngay khi được publish và đến đúng thời gian.
+              {t("storefront.sale.empty.description")}
             </p>
             <Button
               render={<Link href="/collection" />}
               className="mt-7 bg-[#1c1a18] text-white hover:bg-[#b5573a]"
             >
-              Tiếp tục mua sắm
+              {t("storefront.sale.continueShopping")}
             </Button>
           </Card>
         ) : null}
@@ -136,19 +144,29 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
 }
 
 function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: number }) {
+  const { locale, t } = useI18n();
   const isFlash = campaign.type === "FLASH";
   const isUpcoming = campaign.phase === "UPCOMING";
   const target = isUpcoming ? campaign.startsAt : campaign.endsAt;
   const countdown = getCountdown(target, now);
   const products = groupSaleItems(campaign.items ?? []);
   const bannerUrl = safeBannerUrl(campaign.bannerUrl);
+  const campaignTypeLabel = isFlash
+    ? t("storefront.sale.type.flash")
+    : t("storefront.sale.type.standard");
+  const campaignPhaseLabel =
+    campaign.phase === "UPCOMING"
+      ? t("storefront.sale.phase.upcoming")
+      : campaign.phase === "LIVE"
+        ? t("storefront.sale.phase.live")
+        : t("storefront.sale.phase.ended");
 
   return (
     <section className="overflow-hidden rounded-2xl border border-[#1c1a18]/8 bg-white shadow-[0_18px_60px_rgba(28,26,24,0.06)]">
       {bannerUrl ? (
         <div
           role="img"
-          aria-label={`Banner ${campaign.name}`}
+          aria-label={t("storefront.sale.bannerAria", { name: campaign.name })}
           className="h-40 bg-[#e8ded2] bg-cover bg-center md:h-64"
           style={{ backgroundImage: `url(${JSON.stringify(bannerUrl)})` }}
         />
@@ -157,24 +175,37 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <Badge className={isFlash ? "bg-[#8f2f20] text-white" : "bg-[#1c1a18] text-white"}>
-              {campaign.type}
+              {campaignTypeLabel}
             </Badge>
-            <Badge variant="outline">{campaign.phase}</Badge>
-            <span className="text-xs text-[#1c1a18]/50">Mã: {campaign.code}</span>
+            <Badge variant="outline">{campaignPhaseLabel}</Badge>
+            <span className="text-xs text-[#1c1a18]/50">
+              {t("storefront.sale.code", { code: campaign.code })}
+            </span>
           </div>
           <h2 className="font-serif text-3xl font-light md:text-4xl">{campaign.name}</h2>
           {campaign.description ? (
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[#1c1a18]/60">{campaign.description}</p>
           ) : null}
           <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#8f2f20]">
-            {isFlash ? "Không áp dụng coupon cho dòng Flash" : "Có thể áp dụng coupon đủ điều kiện"}
+            {isFlash
+              ? t("storefront.sale.coupon.flashIneligible")
+              : t("storefront.sale.coupon.standardEligible")}
           </p>
         </div>
-        <CountdownBlock label={isUpcoming ? "Bắt đầu sau" : "Kết thúc sau"} countdown={countdown} />
+        <CountdownBlock
+          label={
+            isUpcoming
+              ? t("storefront.sale.countdown.startsIn")
+              : t("storefront.sale.countdown.endsIn")
+          }
+          countdown={countdown}
+        />
       </header>
 
       {products.length === 0 ? (
-        <p className="p-8 text-sm text-[#1c1a18]/55">Campaign chưa có sản phẩm hiển thị.</p>
+        <p className="p-8 text-sm text-[#1c1a18]/55">
+          {t("storefront.sale.noProducts")}
+        </p>
       ) : (
         <div className="grid gap-px bg-[#1c1a18]/8 sm:grid-cols-2 xl:grid-cols-4">
           {products.map((product) => {
@@ -183,7 +214,9 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
               product.remainingQuota !== null &&
               product.remainingQuota <= 0;
             const soldOut = quotaSoldOut || product.availableQuantity <= 0;
-            const soldOutLabel = quotaSoldOut ? "Đã hết suất" : "Hết hàng";
+            const soldOutLabel = quotaSoldOut
+              ? t("storefront.sale.flashSoldOut")
+              : t("storefront.sale.outOfStock");
             const used =
               product.quota !== null && product.remainingQuota !== null
                 ? Math.max(0, product.quota - product.remainingQuota)
@@ -209,7 +242,9 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
                 </Link>
                 <div className="flex flex-1 flex-col pt-5">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-[#1c1a18]/45">
-                    {product.variants.length} lựa chọn màu / size
+                    {t("storefront.sale.variantOptions", {
+                      count: product.variants.length,
+                    })}
                   </p>
                   <Link href={`/products/${encodeURIComponent(product.productSlug)}`}>
                     <h3 className="mt-2 min-h-12 font-serif text-lg leading-6 hover:text-[#b5573a]">
@@ -217,9 +252,13 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
                     </h3>
                   </Link>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="font-semibold text-[#8f2f20]">{money(product.promotionalPrice)}</span>
+                    <span className="font-semibold text-[#8f2f20]">
+                      {money(product.promotionalPrice, locale)}
+                    </span>
                     {product.referencePrice > product.promotionalPrice ? (
-                      <span className="text-xs text-[#1c1a18]/35 line-through">{money(product.referencePrice)}</span>
+                      <span className="text-xs text-[#1c1a18]/35 line-through">
+                        {money(product.referencePrice, locale)}
+                      </span>
                     ) : null}
                   </div>
 
@@ -227,16 +266,24 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
                     <div className="mt-5 space-y-2">
                       <Progress value={progress} className="h-1.5" />
                       <div className="flex items-center justify-between text-[11px] text-[#1c1a18]/55">
-                        <span>Còn {Math.max(0, product.remainingQuota ?? 0)}/{product.quota} suất</span>
+                        <span>
+                          {t("storefront.sale.quotaRemaining", {
+                            remaining: Math.max(0, product.remainingQuota ?? 0),
+                            quota: product.quota,
+                          })}
+                        </span>
                         {product.maxPerCustomer ? (
                           <span className="inline-flex items-center gap-1">
-                            <Users className="size-3" /> Tối đa {product.maxPerCustomer}/khách
+                            <Users className="size-3" />
+                            {t("storefront.sale.maxPerCustomer", {
+                              count: product.maxPerCustomer,
+                            })}
                           </span>
                         ) : null}
                       </div>
                       {product.maxPerCustomer ? (
                         <p className="text-[10px] leading-4 text-[#1c1a18]/45">
-                          Lượt mua còn lại của từng tài khoản được xác nhận tại giỏ hàng và checkout.
+                          {t("storefront.sale.customerQuotaAdvisory")}
                         </p>
                       ) : null}
                     </div>
@@ -247,14 +294,14 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
                       render={<Link href={`/products/${encodeURIComponent(product.productSlug)}`} />}
                       className="mt-6 w-full bg-[#1c1a18] text-white hover:bg-[#b5573a]"
                     >
-                      Chọn biến thể
+                      {t("storefront.sale.selectVariant")}
                     </Button>
                   ) : (
                     <Button
                       disabled
                       className="mt-6 w-full bg-[#1c1a18]/20 text-white"
                     >
-                      {isUpcoming ? "Sắp mở bán" : soldOutLabel}
+                      {isUpcoming ? t("storefront.sale.upcoming") : soldOutLabel}
                     </Button>
                   )}
                 </div>
@@ -278,11 +325,12 @@ function safeBannerUrl(value?: string | null) {
 }
 
 function CountdownBlock({ label, countdown }: { label: string; countdown: ReturnType<typeof getCountdown> }) {
+  const { t } = useI18n();
   const values = [
-    [countdown.days, "Ngày"],
-    [countdown.hours, "Giờ"],
-    [countdown.minutes, "Phút"],
-    [countdown.seconds, "Giây"],
+    [countdown.days, t("storefront.sale.countdown.days")],
+    [countdown.hours, t("storefront.sale.countdown.hours")],
+    [countdown.minutes, t("storefront.sale.countdown.minutes")],
+    [countdown.seconds, t("storefront.sale.countdown.seconds")],
   ] as const;
 
   return (
@@ -301,8 +349,10 @@ function CountdownBlock({ label, countdown }: { label: string; countdown: Return
 }
 
 function SaleLoading() {
+  const { t } = useI18n();
+
   return (
-    <div className="space-y-8" aria-label="Đang tải chương trình giảm giá">
+    <div className="space-y-8" aria-label={t("storefront.sale.loadingAria")}>
       {[0, 1].map((item) => (
         <div key={item} className="animate-pulse overflow-hidden rounded-2xl border border-[#1c1a18]/8 bg-white">
           <div className="h-36 bg-[#efe7dc]" />

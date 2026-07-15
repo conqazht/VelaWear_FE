@@ -1,12 +1,7 @@
 import { Check } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
-
-const STEPS = [
-  { value: 1, title: "Campaign details", description: "Type and schedule" },
-  { value: 2, title: "Products & pricing", description: "Variants and limits" },
-  { value: 3, title: "Review", description: "Validate and save" },
-] as const;
 
 export function CampaignStepper({
   currentStep,
@@ -15,9 +10,31 @@ export function CampaignStepper({
   currentStep: number;
   onStepChange: (step: 1 | 2 | 3) => void;
 }) {
+  const { t } = useI18n();
+  const steps = [
+    {
+      value: 1,
+      title: t("admin.sales.editor.step.details.title"),
+      description: t("admin.sales.editor.step.details.description"),
+    },
+    {
+      value: 2,
+      title: t("admin.sales.editor.step.products.title"),
+      description: t("admin.sales.editor.step.products.description"),
+    },
+    {
+      value: 3,
+      title: t("admin.sales.editor.step.review.title"),
+      description: t("admin.sales.editor.step.review.description"),
+    },
+  ] as const;
+
   return (
-    <ol className="grid gap-2 md:grid-cols-3" aria-label="Campaign form steps">
-      {STEPS.map((step) => {
+    <ol
+      className="grid gap-2 md:grid-cols-3"
+      aria-label={t("admin.sales.editor.stepper.aria")}
+    >
+      {steps.map((step) => {
         const isActive = currentStep === step.value;
         const isComplete = currentStep > step.value;
 

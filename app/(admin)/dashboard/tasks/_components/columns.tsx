@@ -3,6 +3,7 @@
 import type { Column, ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal, RotateCcw } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -44,34 +45,56 @@ function SortIcon({ sortDirection }: { sortDirection: false | "asc" | "desc" }) 
 }
 
 function TitleColumnHeader({ column }: { column: Column<Task, unknown> }) {
+  const { t } = useI18n();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={<Button variant="ghost" size="sm" className="-ml-3 text-muted-foreground data-popup-open:bg-accent" />}
       >
-        Title
+        {t("admin.workflows.tasks.title")}
         <SortIcon sortDirection={column.getIsSorted()} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem onSelect={() => column.toggleSorting(false)}>
           <ArrowUp />
-          Asc
+          {t("admin.workflows.tasks.ascending")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => column.toggleSorting(true)}>
           <ArrowDown />
-          Desc
+          {t("admin.workflows.tasks.descending")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => column.clearSorting()}>
           <RotateCcw />
-          Reset
+          {t("admin.workflows.common.reset")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-export const columns: ColumnDef<Task>[] = [
+export function useTaskColumns(): ColumnDef<Task>[] {
+  const { t } = useI18n();
+  const labelNames: Record<string, string> = {
+    bug: t("admin.workflows.tasks.labelBug"),
+    documentation: t("admin.workflows.tasks.labelDocumentation"),
+    feature: t("admin.workflows.tasks.labelFeature"),
+  };
+  const statusNames: Record<string, string> = {
+    backlog: t("admin.workflows.tasks.statusBacklog"),
+    canceled: t("admin.workflows.tasks.statusCanceled"),
+    done: t("admin.workflows.tasks.statusDone"),
+    "in progress": t("admin.workflows.tasks.statusInProgress"),
+    todo: t("admin.workflows.tasks.statusTodo"),
+  };
+  const priorityNames: Record<string, string> = {
+    high: t("admin.workflows.common.high"),
+    low: t("admin.workflows.common.low"),
+    medium: t("admin.workflows.common.medium"),
+  };
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -79,7 +102,7 @@ export const columns: ColumnDef<Task>[] = [
         checked={table.getIsAllPageRowsSelected()}
         indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t("admin.workflows.tasks.selectAll")}
         className="translate-y-0.5"
       />
     ),
@@ -87,7 +110,7 @@ export const columns: ColumnDef<Task>[] = [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t("admin.workflows.tasks.selectRow", { id: row.original.id })}
         className="translate-y-0.5"
       />
     ),
@@ -96,7 +119,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "id",
-    header: "Task",
+    header: t("admin.workflows.tasks.task"),
     cell: ({ row }) => <div className="w-20 font-mono text-muted-foreground text-sm">{row.getValue("id")}</div>,
     enableSorting: false,
     enableHiding: false,
@@ -111,7 +134,7 @@ export const columns: ColumnDef<Task>[] = [
         <div className="flex min-w-0 items-center gap-2">
           {label && (
             <Badge className="rounded-sm bg-transparent" variant="outline">
-              {label.label}
+              {labelNames[label.value] ?? label.label}
             </Badge>
           )}
           <span className="max-w-lg truncate font-medium text-sm">{row.getValue("title")}</span>
@@ -121,7 +144,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: t("admin.workflows.common.status"),
     cell: ({ row }) => {
       const status = statuses.find((status) => status.value === row.getValue("status"));
 
@@ -132,7 +155,7 @@ export const columns: ColumnDef<Task>[] = [
       return (
         <Badge className={cn("gap-1.5 rounded-sm border font-medium", statusStyles[status.value])} variant="outline">
           {status.icon && <status.icon className="size-4" />}
-          {status.label}
+          {statusNames[status.value] ?? status.label}
         </Badge>
       );
     },
@@ -142,7 +165,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "priority",
-    header: "Priority",
+    header: t("admin.workflows.common.priority"),
     cell: ({ row }) => {
       const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
 
@@ -153,7 +176,7 @@ export const columns: ColumnDef<Task>[] = [
       return (
         <div className="flex items-center gap-2 text-sm">
           {priority.icon && <priority.icon className="size-4 text-muted-foreground" />}
-          {priority.label}
+          {priorityNames[priority.value] ?? priority.label}
         </div>
       );
     },
@@ -175,20 +198,20 @@ export const columns: ColumnDef<Task>[] = [
               }
             >
               <MoreHorizontal />
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">{t("admin.workflows.tasks.openMenu")}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Make a copy</DropdownMenuItem>
-              <DropdownMenuItem>Favorite</DropdownMenuItem>
+              <DropdownMenuItem>{t("admin.workflows.tasks.edit")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("admin.workflows.tasks.makeCopy")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("admin.workflows.tasks.favorite")}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>{t("admin.workflows.tasks.labels")}</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuRadioGroup value={task.label}>
                     {labels.map((label) => (
                       <DropdownMenuRadioItem key={label.value} value={label.value}>
-                        {label.label}
+                        {labelNames[label.value] ?? label.label}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>
@@ -196,7 +219,7 @@ export const columns: ColumnDef<Task>[] = [
               </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                Delete
+                {t("admin.workflows.tasks.delete")}
                 <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -205,4 +228,5 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
   },
-];
+  ];
+}

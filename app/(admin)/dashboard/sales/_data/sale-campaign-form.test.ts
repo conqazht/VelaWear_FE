@@ -5,6 +5,8 @@ import {
   toCreateSaleCampaignRequest,
   validateSaleCampaignForm,
 } from "@/app/(admin)/dashboard/sales/_data/sale-campaign-form";
+import { interpolateMessage } from "@/lib/i18n/define-messages";
+import { salesAdminManagementMessages } from "@/lib/i18n/messages/sales-admin-management";
 
 function validValues() {
   const values = createEmptySaleCampaignForm();
@@ -59,6 +61,22 @@ describe("sale campaign admin form", () => {
     expect(validateSaleCampaignForm(values)).toMatchObject({
       valid: false,
       step: 2,
+    });
+  });
+
+  it("trả validation message theo translator được truyền vào", () => {
+    const values = validValues();
+    values.name = "";
+
+    expect(
+      validateSaleCampaignForm(values, {
+        t: (key, variables) =>
+          interpolateMessage(salesAdminManagementMessages.vi[key], variables),
+      }),
+    ).toMatchObject({
+      valid: false,
+      step: 1,
+      message: "Nhập tên chiến dịch.",
     });
   });
 

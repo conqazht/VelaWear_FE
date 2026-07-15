@@ -3,9 +3,11 @@
 import { ArrowUpRight, PackageCheck, PackageX, TriangleAlert } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { Separator } from "@/components/ui/separator";
+import { getIntlLocale } from "@/lib/i18n";
 
 const chartData = [{ month: "current", "in-stock": 760, "low-stock": 320, "out-of-stock": 160 }];
 const totalUnits = chartData[0]["in-stock"] + chartData[0]["low-stock"] + chartData[0]["out-of-stock"];
@@ -36,46 +38,52 @@ const gaugeSegments = Array.from({ length: gaugeSegmentCount }, (_, index) => {
   };
 });
 
-const inventorySummary = [
-  {
-    icon: PackageCheck,
-    label: "In stock",
-    value: chartData[0]["in-stock"],
-  },
-  {
-    icon: TriangleAlert,
-    label: "Low stock",
-    value: chartData[0]["low-stock"],
-  },
-  {
-    icon: PackageX,
-    label: "Out",
-    value: chartData[0]["out-of-stock"],
-  },
-] as const;
-
-const chartConfig = {
-  "in-stock": {
-    label: "In stock",
-    color: "var(--chart-2)",
-  },
-  "low-stock": {
-    label: "Low stock",
-    color: "var(--chart-1)",
-  },
-  "out-of-stock": {
-    label: "Out of stock",
-    color: "var(--destructive)",
-  },
-} satisfies ChartConfig;
-
 export function Inventory() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
+  const availableLabel = percentFormatter.format(availablePercent / 100);
+  const inventorySummary = [
+    {
+      icon: PackageCheck,
+      label: t("admin.dashboardsA.ecommerce.inStock"),
+      value: chartData[0]["in-stock"],
+    },
+    {
+      icon: TriangleAlert,
+      label: t("admin.dashboardsA.ecommerce.lowStock"),
+      value: chartData[0]["low-stock"],
+    },
+    {
+      icon: PackageX,
+      label: t("admin.dashboardsA.ecommerce.out"),
+      value: chartData[0]["out-of-stock"],
+    },
+  ] as const;
+  const chartConfig = {
+    "in-stock": {
+      label: t("admin.dashboardsA.ecommerce.inStock"),
+      color: "var(--chart-2)",
+    },
+    "low-stock": {
+      label: t("admin.dashboardsA.ecommerce.lowStock"),
+      color: "var(--chart-1)",
+    },
+    "out-of-stock": {
+      label: t("admin.dashboardsA.ecommerce.outOfStock"),
+      color: "var(--destructive)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Inventory</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("admin.dashboardsA.ecommerce.inventory")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {availablePercent}% available
+          {t("admin.dashboardsA.ecommerce.availablePercent", { percent: availableLabel })}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -108,10 +116,10 @@ export function Inventory() {
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 22}
                         >
-                          {availablePercent}%
+                          {availableLabel}
                         </tspan>
                         <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy || 0) + 38}>
-                          Available
+                          {t("admin.dashboardsA.ecommerce.available")}
                         </tspan>
                       </text>
                     );
@@ -131,7 +139,7 @@ export function Inventory() {
               </div>
               <div>
                 <div className="text-muted-foreground text-xs leading-none">{item.label}</div>
-                <div className="font-medium text-sm tabular-nums">{item.value.toLocaleString()}</div>
+                <div className="font-medium text-sm tabular-nums">{numberFormatter.format(item.value)}</div>
               </div>
             </div>
           ))}

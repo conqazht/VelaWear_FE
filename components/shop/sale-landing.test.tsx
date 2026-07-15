@@ -2,6 +2,12 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SaleLanding } from "@/components/shop/sale-landing";
+import { I18nProvider } from "@/components/providers/i18n-provider";
+import {
+  LOCALE_STORAGE_KEY,
+  setActiveLocale,
+  type Locale,
+} from "@/lib/i18n";
 
 const { usePublicSalesQueryMock } = vi.hoisted(() => ({
   usePublicSalesQueryMock: vi.fn(),
@@ -20,8 +26,21 @@ vi.mock("@/lib/queries/sales", () => ({
   usePublicSalesQuery: usePublicSalesQueryMock,
 }));
 
+function renderSaleLanding(type: "STANDARD" | "FLASH", locale: Locale = "vi") {
+  window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  setActiveLocale(locale);
+
+  return render(
+    <I18nProvider initialLocale={locale}>
+      <SaleLanding type={type} />
+    </I18nProvider>,
+  );
+}
+
 describe("SaleLanding", () => {
   beforeEach(() => {
+    window.localStorage.clear();
+    setActiveLocale("vi");
     usePublicSalesQueryMock.mockReturnValue({
       data: { serverTime: "2026-07-15T00:00:00.000Z", campaigns: [] },
       isLoading: false,
@@ -30,15 +49,26 @@ describe("SaleLanding", () => {
   });
 
   it("giải thích rõ coupon cho Standard Sale", () => {
-    render(<SaleLanding type="STANDARD" />);
+    renderSaleLanding("STANDARD");
     expect(screen.getByRole("heading", { name: "Sale" })).toBeInTheDocument();
     expect(screen.getByText(/Standard Sale vẫn có thể dùng coupon/i)).toBeInTheDocument();
   });
 
   it("cảnh báo thêm giỏ không giữ suất ở Flash Sale", () => {
-    render(<SaleLanding type="FLASH" />);
+    renderSaleLanding("FLASH");
     expect(screen.getByRole("heading", { name: "Flash Sale" })).toBeInTheDocument();
     expect(screen.getByText(/Thêm vào giỏ không đồng nghĩa với giữ suất/i)).toBeInTheDocument();
+  });
+
+  it("hiển thị nội dung Flash Sale bằng tiếng Anh", () => {
+    renderSaleLanding("FLASH", "en");
+
+    expect(screen.getByRole("heading", { name: "Flash Sale" })).toBeInTheDocument();
+    expect(screen.getByText(/Adding an item to your bag does not reserve/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /View Standard Sale/i })).toHaveAttribute(
+      "href",
+      "/sale",
+    );
   });
 
   it("hiển thị hết hàng khi quota còn nhưng availableQuantity bằng 0", () => {
@@ -81,7 +111,7 @@ describe("SaleLanding", () => {
       isError: false,
     });
 
-    render(<SaleLanding type="FLASH" />);
+    renderSaleLanding("FLASH");
 
     expect(screen.getAllByText("Hết hàng")).toHaveLength(2);
     expect(screen.getByRole("button", { name: "Hết hàng" })).toBeDisabled();

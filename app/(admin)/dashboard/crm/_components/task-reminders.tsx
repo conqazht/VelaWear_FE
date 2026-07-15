@@ -1,7 +1,11 @@
+"use client";
+
 import { CalendarDays, CalendarRange } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const proposalSent = 12;
@@ -16,15 +20,25 @@ const proposalGoalBars = Array.from({ length: proposalGoalBarCount }, (_, index)
 }));
 
 export function TaskReminders() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
+  const timeFormatter = new Intl.DateTimeFormat(intlLocale, { hour: "numeric", minute: "2-digit" });
+  const formatTime = (value: string) => {
+    const [hour, minute] = value.split(":").map(Number);
+    return timeFormatter.format(new Date(2024, 0, 1, hour, minute));
+  };
+
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
       <Card className="xl:col-span-8">
         <CardHeader>
-          <CardTitle>Upcoming Meetings</CardTitle>
+          <CardTitle>{t("admin.dashboardsA.crm.upcomingMeetings")}</CardTitle>
           <CardAction>
             <Button variant="outline" size="sm">
               <CalendarDays data-icon="inline-start" />
-              View Calendar
+              {t("admin.dashboardsA.crm.viewCalendar")}
             </Button>
           </CardAction>
         </CardHeader>
@@ -32,19 +46,19 @@ export function TaskReminders() {
           <div className="space-y-1">
             <div className="flex items-center justify-between text-muted-foreground text-xs tabular-nums">
               <div className="flex flex-col items-center gap-1">
-                <span>08:45</span>
+                <span>{formatTime("08:45")}</span>
                 <span className="h-2 w-px bg-border" />
               </div>
               <div className="flex flex-col items-center gap-1">
-                <span>09:00</span>
+                <span>{formatTime("09:00")}</span>
                 <span className="h-2 w-px bg-border" />
               </div>
               <div className="flex flex-col items-center gap-1">
-                <span>10:00</span>
+                <span>{formatTime("10:00")}</span>
                 <span className="h-2 w-px bg-border" />
               </div>
               <div className="flex flex-col items-center gap-1">
-                <span>10:20</span>
+                <span>{formatTime("10:20")}</span>
                 <span className="h-2 w-px bg-border" />
               </div>
             </div>
@@ -58,7 +72,7 @@ export function TaskReminders() {
                   </div>
                   <div className="min-w-0">
                     <div className="truncate font-medium text-primary-foreground text-xs leading-none">
-                      Product demo with Tim
+                      {t("admin.dashboardsA.crm.productDemo", { name: "Tim" })}
                     </div>
                     <div className="truncate text-[10px] text-primary-foreground/75">Weblabs Studio</div>
                   </div>
@@ -72,14 +86,17 @@ export function TaskReminders() {
 
       <Card className="xl:col-span-4">
         <CardHeader>
-          <CardTitle>Monthly Proposal Goal</CardTitle>
+          <CardTitle>{t("admin.dashboardsA.crm.monthlyProposalGoal")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex items-end justify-between gap-3">
             <div className="font-medium text-2xl tabular-nums leading-none">
-              {proposalSent} <span className="font-normal text-base text-muted-foreground">sent</span>
+              {numberFormatter.format(proposalSent)}{" "}
+              <span className="font-normal text-base text-muted-foreground">{t("admin.dashboardsA.crm.sent")}</span>
             </div>
-            <div className="text-muted-foreground text-sm tabular-nums">{proposalGoal} target</div>
+            <div className="text-muted-foreground text-sm tabular-nums">
+              {t("admin.dashboardsA.crm.target", { count: numberFormatter.format(proposalGoal) })}
+            </div>
           </div>
           <div className="flex h-10 w-full items-end gap-0.5">
             {proposalGoalBars.map((bar) => (
@@ -94,7 +111,9 @@ export function TaskReminders() {
             ))}
           </div>
           <p className="text-muted-foreground text-sm">
-            {proposalProgressPercentage}% of this month&apos;s proposal target reached.
+            {t("admin.dashboardsA.crm.proposalProgress", {
+              percent: percentFormatter.format(proposalProgressPercentage / 100),
+            })}
           </p>
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import {
   formatCurrency,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -22,6 +23,7 @@ export function CampaignReviewStep({
 }: {
   values: SaleCampaignFormValues;
 }) {
+  const { locale, t } = useI18n();
   const totalQuota =
     values.type === "FLASH"
       ? values.items.reduce((sum, item) => sum + (Number(item.quota) || 0), 0)
@@ -33,13 +35,16 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Tag className="size-4 text-muted-foreground" /> Campaign
+              <Tag className="size-4 text-muted-foreground" />
+              {t("admin.sales.editor.review.campaign")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium">{values.name || "Unnamed campaign"}</p>
+            <p className="font-medium">
+              {values.name || t("admin.sales.editor.review.unnamed")}
+            </p>
             <p className="mt-1 font-mono text-muted-foreground text-xs">
-              {values.code || "NO_CODE"}
+              {values.code || t("admin.sales.editor.review.noCode")}
             </p>
           </CardContent>
         </Card>
@@ -47,13 +52,16 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CalendarClock className="size-4 text-muted-foreground" /> Schedule
+              <CalendarClock className="size-4 text-muted-foreground" />
+              {t("admin.sales.editor.review.schedule")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p>{formatAdminDateTime(values.startsAt)}</p>
+            <p>{formatAdminDateTime(values.startsAt, locale)}</p>
             <p className="mt-1 text-muted-foreground text-xs">
-              to {formatAdminDateTime(values.endsAt)}
+              {t("admin.sales.editor.review.scheduleTo", {
+                date: formatAdminDateTime(values.endsAt, locale),
+              })}
             </p>
           </CardContent>
         </Card>
@@ -61,13 +69,16 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Package className="size-4 text-muted-foreground" /> Variants
+              <Package className="size-4 text-muted-foreground" />
+              {t("admin.sales.editor.review.variants")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="font-medium tabular-nums">{values.items.length}</p>
             <p className="mt-1 text-muted-foreground text-xs">
-              across {new Set(values.items.map((item) => item.productId)).size} product(s)
+              {t("admin.sales.editor.review.productCount", {
+                count: new Set(values.items.map((item) => item.productId)).size,
+              })}
             </p>
           </CardContent>
         </Card>
@@ -75,17 +86,22 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TicketPercent className="size-4 text-muted-foreground" /> Rules
+              <TicketPercent className="size-4 text-muted-foreground" />
+              {t("admin.sales.editor.review.rules")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Badge variant={values.type === "FLASH" ? "default" : "secondary"}>
-              {values.type === "FLASH" ? "Flash sale" : "Standard sale"}
+              {values.type === "FLASH"
+                ? t("admin.sales.editor.type.flash")
+                : t("admin.sales.editor.type.standard")}
             </Badge>
             <p className="mt-2 text-muted-foreground text-xs">
               {values.type === "FLASH"
-                ? `${totalQuota ?? 0} total quota · coupons excluded`
-                : "No quota · eligible coupons may apply"}
+                ? t("admin.sales.editor.review.flashRules", {
+                    count: totalQuota ?? 0,
+                  })
+                : t("admin.sales.editor.review.standardRules")}
             </p>
           </CardContent>
         </Card>
@@ -95,14 +111,24 @@ export function CampaignReviewStep({
         <Table className={values.type === "FLASH" ? "min-w-[900px]" : "min-w-[650px]"}>
           <TableHeader>
             <TableRow>
-              <TableHead>Product / variant</TableHead>
-              <TableHead className="text-right">Reference</TableHead>
-              <TableHead className="text-right">Sale price</TableHead>
-              <TableHead className="text-right">Discount</TableHead>
+              <TableHead>{t("admin.sales.editor.review.column.productVariant")}</TableHead>
+              <TableHead className="text-right">
+                {t("admin.sales.editor.review.column.reference")}
+              </TableHead>
+              <TableHead className="text-right">
+                {t("admin.sales.editor.review.column.salePrice")}
+              </TableHead>
+              <TableHead className="text-right">
+                {t("admin.sales.editor.review.column.discount")}
+              </TableHead>
               {values.type === "FLASH" ? (
                 <>
-                  <TableHead className="text-right">Quota</TableHead>
-                  <TableHead className="text-right">Customer limit</TableHead>
+                  <TableHead className="text-right">
+                    {t("admin.sales.editor.review.column.quota")}
+                  </TableHead>
+                  <TableHead className="text-right">
+                    {t("admin.sales.editor.review.column.customerLimit")}
+                  </TableHead>
                 </>
               ) : null}
             </TableRow>
@@ -127,10 +153,10 @@ export function CampaignReviewStep({
                     </p>
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {formatCurrency(item.referencePrice)}
+                    {formatCurrency(item.referencePrice, locale)}
                   </TableCell>
                   <TableCell className="text-right font-medium tabular-nums">
-                    {formatCurrency(price)}
+                    {formatCurrency(price, locale)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{percentage}%</TableCell>
                   {values.type === "FLASH" ? (
@@ -139,7 +165,7 @@ export function CampaignReviewStep({
                         {item.quota || "—"}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {item.maxPerCustomer || "No limit"}
+                        {item.maxPerCustomer || t("admin.sales.editor.review.noLimit")}
                       </TableCell>
                     </>
                   ) : null}
@@ -151,11 +177,11 @@ export function CampaignReviewStep({
       </div>
 
       <div className="rounded-xl border bg-muted/30 p-4 text-sm">
-        <p className="font-medium">Before publishing</p>
+        <p className="font-medium">{t("admin.sales.editor.review.beforePublishing")}</p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-          <li>The backend validates schedule overlap again inside a transaction.</li>
-          <li>Reference prices are snapshotted when the campaign is published.</li>
-          <li>Flash quota and per-customer limits are enforced by the database at checkout.</li>
+          <li>{t("admin.sales.editor.review.checkOverlap")}</li>
+          <li>{t("admin.sales.editor.review.checkReferencePrice")}</li>
+          <li>{t("admin.sales.editor.review.checkFlashEnforcement")}</li>
         </ul>
       </div>
     </div>

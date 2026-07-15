@@ -10,19 +10,36 @@ import { Product, mapBackendProduct } from "@/lib/vela-data";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { getProducts } from "@/lib/api/catalog";
-import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 import { cn } from "@/lib/utils";
-import { ProductToolbar, ProductGrid, ProductLayoutMain, commonSortOptions } from "@/components/shop/product-layout-components";
+import { ProductToolbar, ProductGrid, ProductLayoutMain, useCommonSortOptions } from "@/components/shop/product-layout-components";
 
-const searchCatalogCache = new Map<string, Product[]>();
+type CachedSearchCatalog = {
+  version: 1;
+  cachedAt: number;
+  products: Product[];
+};
+
+const SEARCH_CATALOG_CACHE_VERSION = 1;
+const SEARCH_CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+const searchCatalogCache = new Map<string, CachedSearchCatalog>();
 const searchCatalogStoragePrefix = "vela-search-catalog:";
+
+function readMemorySearchCatalog(locale: string): Product[] | null {
+  const entry = searchCatalogCache.get(locale);
+  if (!entry || Date.now() - entry.cachedAt > SEARCH_CATALOG_CACHE_TTL_MS) return null;
+  return entry.products;
+}
 
 function readCachedSearchCatalog(locale: string): Product[] | null {
   const memoryCache = searchCatalogCache.get(locale);
-  if (memoryCache && memoryCache.length > 0) {
-    return memoryCache;
+  if (memoryCache) {
+    if (Date.now() - memoryCache.cachedAt <= SEARCH_CATALOG_CACHE_TTL_MS) {
+      return memoryCache.products;
+    }
+    searchCatalogCache.delete(locale);
   }
 
   if (typeof window === "undefined") {
@@ -35,31 +52,60 @@ function readCachedSearchCatalog(locale: string): Product[] | null {
       return null;
     }
 
-    const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
+    const parsed: unknown = JSON.parse(stored);
+    if (!isCachedSearchCatalog(parsed)) {
+      window.sessionStorage.removeItem(`${searchCatalogStoragePrefix}${locale}`);
       return null;
     }
 
-    const cachedProducts = parsed as Product[];
-    searchCatalogCache.set(locale, cachedProducts);
-    return cachedProducts;
+    if (Date.now() - parsed.cachedAt > SEARCH_CATALOG_CACHE_TTL_MS) {
+      window.sessionStorage.removeItem(`${searchCatalogStoragePrefix}${locale}`);
+      return null;
+    }
+
+    searchCatalogCache.set(locale, parsed);
+    return parsed.products;
   } catch {
     return null;
   }
 }
 
 function persistSearchCatalog(locale: string, products: Product[]) {
-  searchCatalogCache.set(locale, products);
+  const entry: CachedSearchCatalog = {
+    version: SEARCH_CATALOG_CACHE_VERSION,
+    cachedAt: Date.now(),
+    products,
+  };
+  searchCatalogCache.set(locale, entry);
 
   if (typeof window === "undefined") {
     return;
   }
 
   try {
-    window.sessionStorage.setItem(`${searchCatalogStoragePrefix}${locale}`, JSON.stringify(products));
+    window.sessionStorage.setItem(`${searchCatalogStoragePrefix}${locale}`, JSON.stringify(entry));
   } catch {
     // Ignore storage failures.
   }
+}
+
+function isCachedSearchCatalog(value: unknown): value is CachedSearchCatalog {
+  if (!value || typeof value !== "object") return false;
+
+  const candidate = value as Partial<CachedSearchCatalog>;
+  return candidate.version === SEARCH_CATALOG_CACHE_VERSION &&
+    typeof candidate.cachedAt === "number" &&
+    Number.isFinite(candidate.cachedAt) &&
+    Array.isArray(candidate.products) &&
+    candidate.products.length > 0 &&
+    candidate.products.every(
+      (product) =>
+        product &&
+        typeof product === "object" &&
+        typeof product.id === "string" &&
+        typeof product.name === "string" &&
+        typeof product.price === "number",
+    );
 }
 
 const getNormalizedCategoryKey = (cat: string): string => {
@@ -69,11 +115,11 @@ const getNormalizedCategoryKey = (cat: string): string => {
   return "PHU KIEN";
 };
 
-const categoryDisplayNames: Record<string, string> = {
-  AO: "Shirts & Tops",
-  QUAN: "Trousers & Bottoms",
-  "PHU KIEN": "Accessories",
-};
+const categoryDisplayNameKeys = {
+  AO: "storefront.search.shirts",
+  QUAN: "storefront.search.trousers",
+  "PHU KIEN": "storefront.search.accessories",
+} as const;
 
 interface FilterGroupsProps {
   selectedCategories: string[];
@@ -81,7 +127,7 @@ interface FilterGroupsProps {
   selectedColors: string[];
   categoryCounts: Record<string, number>;
   sizesToDisplay: string[];
-  colorsToDisplay: { name: string; hex: string }[];
+  colorsToDisplay: { name: string; label?: string; hex: string }[];
   expandedSections: { category: boolean; size: boolean; color: boolean };
   handleCategoryToggle: (category: string) => void;
   handleSizeToggle: (size: string) => void;
@@ -108,6 +154,8 @@ function FilterGroups({
   hasActiveFilters,
   isMobile = false,
 }: FilterGroupsProps) {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-8">
       {/* Category Section */}
@@ -117,7 +165,7 @@ function FilterGroups({
           onClick={() => toggleSection("category")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Category</span>
+          <span>{t("storefront.catalog.category")}</span>
           {expandedSections.category ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -130,7 +178,8 @@ function FilterGroups({
               className="overflow-hidden"
             >
               <div className="pt-4 space-y-3 text-sm text-[#1c1a18]/70">
-                {Object.entries(categoryDisplayNames).map(([key, label]) => {
+                {(Object.keys(categoryDisplayNameKeys) as Array<keyof typeof categoryDisplayNameKeys>).map((key) => {
+                  const labelKey = categoryDisplayNameKeys[key];
                   const isChecked = selectedCategories.includes(key);
                   const count = categoryCounts[key] || 0;
                   return (
@@ -145,7 +194,7 @@ function FilterGroups({
                         <Check className="absolute size-3 text-[#f7f4ef] opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" />
                       </div>
                       <span className="group-hover:text-[#1c1a18] transition-colors">
-                        {label} {count > 0 && `(${count})`}
+                        {t(labelKey)} {count > 0 && `(${count})`}
                       </span>
                     </label>
                   );
@@ -163,7 +212,7 @@ function FilterGroups({
           onClick={() => toggleSection("size")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Size</span>
+          <span>{t("storefront.catalog.size")}</span>
           {expandedSections.size ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -190,7 +239,7 @@ function FilterGroups({
                           : "border-[#1c1a18]/10 hover:border-[#1c1a18] text-[#1c1a18]/70 bg-transparent"
                       )}
                     >
-                      {size}
+                      {size === "One Size" ? t("storefront.common.oneSize") : size}
                     </button>
                   );
                 })}
@@ -207,7 +256,7 @@ function FilterGroups({
           onClick={() => toggleSection("color")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Color</span>
+          <span>{t("storefront.catalog.color")}</span>
           {expandedSections.color ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -220,14 +269,14 @@ function FilterGroups({
               className="overflow-hidden"
             >
               <div className="pt-4 flex flex-wrap gap-3">
-                {colorsToDisplay.map(({ name, hex }) => {
+                {colorsToDisplay.map(({ name, label, hex }) => {
                   const isSelected = selectedColors.includes(name);
                   return (
                     <button
                       key={name}
                       type="button"
                       onClick={() => handleColorToggle(name)}
-                      title={name}
+                      title={label ?? name}
                       style={{ backgroundColor: hex }}
                       className={cn(
                         "w-8 h-8 rounded-none border border-[#1c1a18]/10 shadow-sm transition-all cursor-pointer relative",
@@ -255,7 +304,7 @@ function FilterGroups({
           onClick={clearAllFilters}
           className="w-full py-2.5 border border-[#b5573a] text-[#b5573a] hover:bg-[#b5573a] hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider rounded-none cursor-pointer"
         >
-          Clear All Filters
+          {t("storefront.common.clearAllFilters")}
         </button>
       )}
     </div>
@@ -265,10 +314,12 @@ function FilterGroups({
 function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
-  const activeLocale = getActiveLocale();
-  const initialCatalogProducts = readCachedSearchCatalog(activeLocale) ?? [];
+  const { locale: activeLocale, t } = useI18n();
+  const sortOptions = useCommonSortOptions();
+  const initialCatalogProducts = readMemorySearchCatalog(activeLocale) ?? [];
 
   const [catalogProducts, setCatalogProducts] = useState<Product[]>(initialCatalogProducts);
+  const [catalogLocale, setCatalogLocale] = useState(activeLocale);
   const [isLoading, setIsLoading] = useState(initialCatalogProducts.length === 0);
   const [loadError, setLoadError] = useState<unknown>(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -290,15 +341,20 @@ function SearchResultsContent() {
 
   // Load catalog products once per locale, then filter locally for accent-insensitive search
   useEffect(() => {
-    const cachedCatalog = readCachedSearchCatalog(activeLocale);
-    if (cachedCatalog && cachedCatalog.length > 0) {
-      return;
-    }
-
     let isMounted = true;
 
     async function loadCatalog() {
-      if (isMounted) {
+      const cachedCatalog = readCachedSearchCatalog(activeLocale);
+      if (cachedCatalog && cachedCatalog.length > 0) {
+        if (!isMounted) return;
+
+        setCatalogProducts(cachedCatalog);
+        setCatalogLocale(activeLocale);
+        setLoadError(null);
+        setIsLoading(false);
+      } else if (isMounted) {
+        setCatalogProducts([]);
+        setCatalogLocale(activeLocale);
         setIsLoading(true);
         setLoadError(null);
       }
@@ -314,10 +370,13 @@ function SearchResultsContent() {
 
         persistSearchCatalog(activeLocale, mapped);
         setCatalogProducts(mapped);
+        setCatalogLocale(activeLocale);
       } catch (err) {
         if (isMounted) {
-          setCatalogProducts([]);
-          setLoadError(err);
+          if (!cachedCatalog) {
+            setCatalogProducts([]);
+            setLoadError(err);
+          }
         }
       } finally {
         if (isMounted) {
@@ -333,17 +392,24 @@ function SearchResultsContent() {
     };
   }, [activeLocale, retryKey]);
 
+  const visibleCatalogProducts = catalogLocale === activeLocale
+    ? catalogProducts
+    : initialCatalogProducts;
+  const isCatalogLoading = catalogLocale === activeLocale
+    ? isLoading
+    : initialCatalogProducts.length === 0;
+
   const filteredCatalog = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query);
-    if (!normalizedQuery) return catalogProducts;
+    if (!normalizedQuery) return visibleCatalogProducts;
 
-    return catalogProducts.filter((product) => {
+    return visibleCatalogProducts.filter((product) => {
       const searchable = [product.name, product.category, product.id, product.description]
         .filter(Boolean)
         .join(" ");
       return matchesSearchText(searchable, normalizedQuery);
     });
-  }, [catalogProducts, query]);
+  }, [query, visibleCatalogProducts]);
 
   const products = filteredCatalog;
 
@@ -416,11 +482,11 @@ function SearchResultsContent() {
   // Fallbacks if data is sparse
   const sizesToDisplay = availableSizes.length > 0 ? availableSizes : ["XS", "S", "M", "L", "XL"];
   const colorsToDisplay = availableColors.length > 0 ? availableColors : [
-    { name: "Black", hex: "#1c1a18" },
-    { name: "White", hex: "#ffffff" },
-    { name: "Sand", hex: "#e0d7c6" },
-    { name: "Terracotta", hex: "#c97a63" },
-    { name: "Sage", hex: "#a3b899" }
+    { name: "Black", label: t("storefront.search.colorBlack"), hex: "#1c1a18" },
+    { name: "White", label: t("storefront.search.colorWhite"), hex: "#ffffff" },
+    { name: "Sand", label: t("storefront.search.colorSand"), hex: "#e0d7c6" },
+    { name: "Terracotta", label: t("storefront.search.colorTerracotta"), hex: "#c97a63" },
+    { name: "Sage", label: t("storefront.search.colorSage"), hex: "#a3b899" }
   ];
 
   // Dynamic filter processing
@@ -523,13 +589,13 @@ function SearchResultsContent() {
     hasActiveFilters,
   };
 
-  if (loadError) {
+  if (loadError && catalogLocale === activeLocale) {
     return (
       <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
         <StorefrontApiStatus
           error={loadError}
           onRetry={() => setRetryKey((value) => value + 1)}
-          resourceLabel="kết quả tìm kiếm"
+          resourceLabel={t("storefront.search.resource")}
           returnHref="/collection"
           variant="panel"
         />
@@ -540,24 +606,24 @@ function SearchResultsContent() {
   return (
     <Skeleton
       name="search-results"
-      loading={isLoading}
+      loading={isCatalogLoading}
       className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]"
       fallback={<SearchResultsLoadingFallback />}
-      fixture={<SearchResultsFixture products={catalogProducts.slice(0, 6)} query={query} />}
+      fixture={<SearchResultsFixture products={visibleCatalogProducts.slice(0, 6)} query={query} />}
     >
       {/* Breadcrumbs */}
       <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
-          Home
+          {t("storefront.common.home")}
         </Link>
         <span>/</span>
-        <span className="font-medium text-[#1c1a18]">Search</span>
+        <span className="font-medium text-[#1c1a18]">{t("storefront.search.title")}</span>
       </div>
 
       {/* Search Header */}
       <header className="mb-4">
         <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
-          Results for &ldquo;{query}&rdquo;
+          {t("storefront.search.resultsFor", { query })}
         </h1>
       </header>
 
@@ -568,7 +634,7 @@ function SearchResultsContent() {
         setMobileFiltersOpen={setMobileFiltersOpen}
         sortBy={sortBy}
         setSortBy={setSortBy}
-        sortOptions={commonSortOptions}
+        sortOptions={sortOptions}
       />
 
       {/* Main Content Area */}
@@ -580,13 +646,13 @@ function SearchResultsContent() {
         {filteredProducts.length === 0 ? (
           <div className="py-20 text-center select-none">
             <p className="text-sm text-[#1c1a18]/50 mb-6">
-              Không tìm thấy sản phẩm phù hợp với từ khóa của bạn.
+              {t("storefront.search.noResults")}
             </p>
             <Link
               href="/collection"
               className="inline-flex items-center rounded-none bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
             >
-              Xem tất cả sản phẩm
+              {t("storefront.search.viewAll")}
             </Link>
           </div>
         ) : (
@@ -619,7 +685,7 @@ function SearchResultsContent() {
               className="fixed right-0 top-0 h-full w-[85vw] max-w-sm bg-[#f7f4ef] z-50 p-6 overflow-y-auto flex flex-col shadow-2xl md:hidden"
             >
               <div className="flex items-center justify-between border-b border-[#1c1a18]/10 pb-4 mb-6">
-                <h2 className="font-serif text-2xl font-light text-[#1c1a18]">Bộ lọc</h2>
+                <h2 className="font-serif text-2xl font-light text-[#1c1a18]">{t("storefront.common.filters")}</h2>
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
@@ -639,14 +705,14 @@ function SearchResultsContent() {
                   onClick={clearAllFilters}
                   className="flex-1 py-3 border border-[#1c1a18] text-[#1c1a18] text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#1c1a18]/5 rounded-none cursor-pointer"
                 >
-                  Xóa tất cả
+                  {t("storefront.common.clearAll")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
                   className="flex-1 py-3 bg-[#1c1a18] text-white text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#b5573a] rounded-none cursor-pointer"
                 >
-                  Áp dụng
+                  {t("storefront.common.apply")}
                 </button>
               </div>
             </motion.div>
@@ -671,18 +737,22 @@ function SearchResultsLoadingFallback() {
 
 function SearchResultsFixture({ products, query }: { products: Product[]; query: string }) {
   const fixtureProducts = products.slice(0, 6);
+  const { t } = useI18n();
+  const sortOptions = useCommonSortOptions();
 
   return (
     <>
       <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
-        <span>Home</span>
+        <span>{t("storefront.common.home")}</span>
         <span>/</span>
-        <span className="font-medium text-[#1c1a18]">Search</span>
+        <span className="font-medium text-[#1c1a18]">{t("storefront.search.title")}</span>
       </div>
 
       <header className="mb-4">
         <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
-          Results for &ldquo;{query || "shirt"}&rdquo;
+          {t("storefront.search.resultsFor", {
+            query: query || t("storefront.search.fixtureQuery"),
+          })}
         </h1>
       </header>
 
@@ -693,7 +763,7 @@ function SearchResultsFixture({ products, query }: { products: Product[]; query:
         setMobileFiltersOpen={() => undefined}
         sortBy="featured"
         setSortBy={() => undefined}
-        sortOptions={commonSortOptions}
+        sortOptions={sortOptions}
       />
 
       <ProductLayoutMain

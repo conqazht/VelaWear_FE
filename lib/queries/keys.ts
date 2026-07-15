@@ -5,11 +5,11 @@ export const queryKeys = {
   },
   products: {
     root: ["products"] as const,
-    list: (filters: unknown) => ["products", filters] as const,
-    detail: (id: number | string) => ["product", id] as const,
+    list: (filters: unknown, locale?: string) => ["products", filters, locale] as const,
+    detail: (id: number | string, locale?: string) => ["product", id, locale] as const,
   },
   catalog: {
-    categories: (params?: unknown) => ["categories", params] as const,
+    categories: (params?: unknown, locale?: string) => ["categories", params, locale] as const,
     brands: (params?: unknown) => ["brands", params] as const,
     colors: (params?: unknown) => ["colors", params] as const,
     sizes: (params?: unknown) => ["sizes", params] as const,
@@ -21,7 +21,8 @@ export const queryKeys = {
   },
   wishlists: {
     root: ["wishlists"] as const,
-    list: (params?: unknown) => ["wishlists", params] as const,
+    list: (userId: number | undefined, params?: unknown) =>
+      ["wishlists", "user", userId ?? "anonymous", params] as const,
   },
   coupons: {
     root: ["coupons"] as const,

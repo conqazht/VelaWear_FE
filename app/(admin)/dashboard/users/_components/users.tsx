@@ -13,11 +13,11 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-page";
 import {
   downloadCsv,
-  formatAdminDate,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { AdminGender, AdminUser } from "@/lib/api/admin-rbac";
+import { formatDate } from "@/lib/i18n/format";
 import {
   useAdminRolesQuery,
   useAdminUsersQuery,
@@ -44,6 +45,12 @@ import { UserFormSheet, type UserFormValues } from "./user-form-sheet";
 type UserFormMode = "create" | "edit";
 type SearchField = "fullName" | "email";
 
+const GENDER_MESSAGE_KEYS = {
+  MALE: "admin.commerce.users.gender.male",
+  FEMALE: "admin.commerce.users.gender.female",
+  OTHER: "admin.commerce.users.gender.other",
+} as const;
+
 function resolveAvatarUrl(value: string | null) {
   if (!value) return undefined;
   if (/^https?:\/\//i.test(value)) return value;
@@ -57,8 +64,10 @@ function resolveAvatarUrl(value: string | null) {
 }
 
 function RoleBadges({ user }: { user: AdminUser }) {
+  const { t } = useI18n();
+
   if (user.roles.length === 0) {
-    return <span className="text-muted-foreground text-sm">No roles</span>;
+    return <span className="text-muted-foreground text-sm">{t("admin.commerce.users.noRoles")}</span>;
   }
 
   return (
@@ -77,6 +86,7 @@ function RoleBadges({ user }: { user: AdminUser }) {
 
 export function Users() {
   const { user: currentUser } = useAuth();
+  const { locale, t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -156,11 +166,11 @@ export function Users() {
             id: createdUser.id,
             request: { roles: values.roles },
           });
-          toast.success("User created", {
-            description: `${createdUser.fullName} can now sign in with the assigned access.`,
+          toast.success(t("admin.commerce.users.created"), {
+            description: t("admin.commerce.users.createdDescription", { name: createdUser.fullName }),
           });
         } catch (error) {
-          toast.warning("User created without roles", {
+          toast.warning(t("admin.commerce.users.createdWithoutRoles"), {
             description: getApiErrorMessage(error),
           });
         }
@@ -194,8 +204,8 @@ export function Users() {
         });
       }
 
-      toast.success("User updated", {
-        description: `${values.fullName.trim()}'s profile and access are up to date.`,
+      toast.success(t("admin.commerce.users.updated"), {
+        description: t("admin.commerce.users.updatedDescription", { name: values.fullName.trim() }),
       });
       closeForm(true);
     } catch (error) {
@@ -207,13 +217,13 @@ export function Users() {
     if (!deleteTarget) return;
     try {
       await deleteMutation.mutateAsync(deleteTarget.id);
-      toast.success("User deleted", {
-        description: `${deleteTarget.fullName} was removed from active user management.`,
+      toast.success(t("admin.commerce.users.deleted"), {
+        description: t("admin.commerce.users.deletedDescription", { name: deleteTarget.fullName }),
       });
       if (rows.length === 1 && page > 1) setPage((current) => current - 1);
       setDeleteTarget(null);
     } catch (error) {
-      toast.error("Unable to delete user", {
+      toast.error(t("admin.commerce.users.unableDelete"), {
         description: getApiErrorMessage(error),
       });
     }
@@ -222,7 +232,7 @@ export function Users() {
   const columns: ManagementColumn<AdminUser>[] = [
     {
       key: "user",
-      header: "User",
+      header: t("admin.commerce.users.column.user"),
       cell: (user) => (
         <div className="flex min-w-64 items-center gap-3">
           <Avatar size="lg">
@@ -240,38 +250,46 @@ export function Users() {
     },
     {
       key: "roles",
-      header: "Roles",
+      header: t("admin.commerce.users.column.roles"),
       cell: (user) => <RoleBadges user={user} />,
     },
     {
       key: "gender",
-      header: "Gender",
+      header: t("admin.commerce.users.column.gender"),
       cell: (user) => (
-        <span className="text-sm capitalize">{user.gender?.toLowerCase() ?? "—"}</span>
+        <span className="text-sm">
+          {user.gender ? t(GENDER_MESSAGE_KEYS[user.gender]) : "—"}
+        </span>
       ),
     },
     {
       key: "password",
-      header: "Sign-in",
+      header: t("admin.commerce.users.column.signIn"),
       cell: (user) => (
         <Badge variant={user.hasPassword ? "outline" : "secondary"}>
-          {user.hasPassword ? "Password" : "Social only"}
+          {user.hasPassword
+            ? t("admin.commerce.users.signIn.password")
+            : t("admin.commerce.users.signIn.socialOnly")}
         </Badge>
       ),
     },
     {
       key: "birthDate",
-      header: "Birth date",
-      cell: (user) => <span className="text-sm">{formatAdminDate(user.birthDate)}</span>,
+      header: t("admin.commerce.users.column.birthDate"),
+      cell: (user) => (
+        <span className="text-sm">
+          {user.birthDate ? formatDate(user.birthDate, locale) : "—"}
+        </span>
+      ),
     },
     {
       key: "createdAt",
-      header: "Joined",
-      cell: (user) => <span className="text-sm">{formatAdminDate(user.createdAt)}</span>,
+      header: t("admin.commerce.users.column.joined"),
+      cell: (user) => <span className="text-sm">{formatDate(user.createdAt, locale)}</span>,
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-16",
       className: "text-right",
       cell: (user) => (
@@ -281,7 +299,7 @@ export function Users() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Open actions for ${user.fullName}`}
+                aria-label={t("admin.commerce.common.openActions", { name: user.fullName })}
               />
             }
           >
@@ -290,7 +308,7 @@ export function Users() {
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => openEdit(user)}>
-                <Pencil /> Edit user and roles
+                <Pencil /> {t("admin.commerce.users.edit")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -299,7 +317,10 @@ export function Users() {
               disabled={user.id === currentUser?.id}
               onClick={() => setDeleteTarget(user)}
             >
-              <Trash2 /> {user.id === currentUser?.id ? "Current account is protected" : "Delete user"}
+              <Trash2 />
+              {user.id === currentUser?.id
+                ? t("admin.commerce.users.protected")
+                : t("admin.commerce.users.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -310,8 +331,8 @@ export function Users() {
   return (
     <>
       <ResourcePage
-        title="Users"
-        description="Manage customer and staff accounts, profile details, and role-based access."
+        title={t("admin.commerce.users.title")}
+        description={t("admin.commerce.users.description")}
         rows={rows}
         columns={columns}
         total={meta.total}
@@ -319,7 +340,11 @@ export function Users() {
         pageSize={meta.pageSize || pageSize}
         pageCount={meta.pages}
         searchValue={searchValue}
-        searchPlaceholder={searchField === "email" ? "Search email..." : "Search name..."}
+        searchPlaceholder={
+          searchField === "email"
+            ? t("admin.commerce.users.searchEmail")
+            : t("admin.commerce.users.searchName")
+        }
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -331,11 +356,11 @@ export function Users() {
         }}
         filters={[
           {
-            label: "Search by",
+            label: t("admin.commerce.users.searchBy"),
             value: searchField,
             options: [
-              { label: "Full name", value: "fullName" },
-              { label: "Email", value: "email" },
+              { label: t("admin.commerce.users.fullName"), value: "fullName" },
+              { label: t("admin.commerce.users.email"), value: "email" },
             ],
             onValueChange: (value) => {
               setSearchField((value as SearchField | null) ?? "fullName");
@@ -343,13 +368,13 @@ export function Users() {
             },
           },
           {
-            label: "Gender",
+            label: t("admin.commerce.users.column.gender"),
             value: gender,
             options: [
-              { label: "All", value: "ALL" },
-              { label: "Male", value: "MALE" },
-              { label: "Female", value: "FEMALE" },
-              { label: "Other", value: "OTHER" },
+              { label: t("admin.commerce.common.all"), value: "ALL" },
+              { label: t("admin.commerce.users.gender.male"), value: "MALE" },
+              { label: t("admin.commerce.users.gender.female"), value: "FEMALE" },
+              { label: t("admin.commerce.users.gender.other"), value: "OTHER" },
             ],
             onValueChange: (value) => {
               setGender((value as AdminGender | "ALL" | null) ?? "ALL");
@@ -357,7 +382,7 @@ export function Users() {
             },
           },
         ]}
-        primaryAction={{ label: "Add user", onClick: openCreate, icon: Plus }}
+        primaryAction={{ label: t("admin.commerce.users.add"), onClick: openCreate, icon: Plus }}
         onRefresh={() => void usersQuery.refetch()}
         onExport={() =>
           downloadCsv("vela-users.csv", rows.map((user) => ({
@@ -367,15 +392,17 @@ export function Users() {
             gender: user.gender,
             birthDate: user.birthDate,
             roles: user.roles.map((role) => role.name).join(" | "),
-            hasPassword: user.hasPassword ? "Yes" : "No",
+            hasPassword: user.hasPassword
+              ? t("admin.commerce.users.csvYes")
+              : t("admin.commerce.users.csvNo"),
             createdAt: user.createdAt,
           })))
         }
         isLoading={usersQuery.isPending}
         isFetching={usersQuery.isFetching}
         error={usersQuery.isError ? usersQuery.error : null}
-        emptyTitle="No users found"
-        emptyDescription="Try another filter or create the first managed account."
+        emptyTitle={t("admin.commerce.users.emptyTitle")}
+        emptyDescription={t("admin.commerce.users.emptyDescription")}
       />
 
       {formMode ? (
@@ -397,8 +424,8 @@ export function Users() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteTarget(null);
         }}
-        resourceName={deleteTarget?.fullName ?? "user"}
-        description="The account will be soft-deleted and disappear from active user management. Existing access tokens may remain valid until they expire."
+        resourceName={deleteTarget?.fullName ?? t("admin.commerce.users.resource")}
+        description={t("admin.commerce.users.deleteDescription")}
         onConfirm={() => void handleDelete()}
         isPending={deleteMutation.isPending}
       />

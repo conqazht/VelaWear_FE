@@ -4,6 +4,7 @@
 import type { Table } from "@tanstack/react-table";
 import { ListFilter, X } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,6 +24,12 @@ interface TaskPriorityFilterProps<TData> {
 }
 
 export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TData>) {
+  const { t } = useI18n();
+  const priorityNames: Record<string, string> = {
+    high: t("admin.workflows.common.high"),
+    low: t("admin.workflows.common.low"),
+    medium: t("admin.workflows.common.medium"),
+  };
   const column = table.getColumn("priority");
 
   if (!column) {
@@ -60,7 +67,7 @@ export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TDa
         }
       >
         <ListFilter data-icon="inline-start" />
-        Priority
+        {t("admin.workflows.common.priority")}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-50">
         <DropdownMenuGroup>
@@ -75,7 +82,7 @@ export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TDa
                 onSelect={(event) => event.preventDefault()}
               >
                 <priority.icon className="text-muted-foreground" />
-                {priority.label}
+                {priorityNames[priority.value] ?? priority.label}
               </DropdownMenuCheckboxItem>
             );
           })}
@@ -86,7 +93,7 @@ export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TDa
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={clearFilter} className="justify-center text-center">
                 <X />
-                Clear filters
+                {t("admin.workflows.common.clearFilters")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

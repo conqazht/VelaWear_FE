@@ -4,6 +4,17 @@ import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Star, Quote, Plus, X, Check } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
+import { useI18n } from "@/components/providers/i18n-provider";
+import type { Locale } from "@/lib/i18n";
+import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
+import { formatDate } from "@/lib/i18n/format";
+
+const REVIEW_PRODUCT_IDS = new Set([
+  "classic-linen-shirt",
+  "pleated-wool-trousers",
+  "the-heritage-tote",
+  "merino-wool-coat",
+]);
 
 interface Review {
   id: string;
@@ -15,6 +26,7 @@ interface Review {
   date: string;
   initial: string;
   category: "essentials" | "outerwear" | "accessories";
+  locale: Locale;
 }
 
 const INITIAL_REVIEWS: Review[] = [
@@ -23,44 +35,48 @@ const INITIAL_REVIEWS: Review[] = [
     name: "Khánh Linh",
     location: "Hà Nội",
     rating: 5,
-    productBought: "Merino Wool Coat",
+    productBought: "Áo khoác len merino",
     quote: "Chiếc áo khoác mang lại cảm giác cực kỳ ấm áp và sang trọng. Chất len merino mềm mướt không tì vết, phom dáng rủ tự nhiên chuẩn phong cách rủ tinh tế. Đây thực sự là khoản đầu tư xứng đáng cho tủ đồ mùa đông.",
-    date: "15/06/2026",
+    date: "2026-06-15",
     initial: "KL",
     category: "outerwear",
+    locale: "vi",
   },
   {
     id: "rev-2",
     name: "Minh Trí",
     location: "TP. Hồ Chí Minh",
     rating: 5,
-    productBought: "Classic Linen Shirt",
+    productBought: "Áo sơ mi linen cổ điển",
     quote: "Chất liệu linen dệt mộc cực thoáng, đường may giấu chỉ vô cùng tinh tế và chỉ chu. Áo giặt vài lần vẫn giữ phom rủ rất đẹp. Tôi đặc biệt yêu mến gam màu đất nung ấm áp của Vela.",
-    date: "28/05/2026",
+    date: "2026-05-28",
     initial: "MT",
     category: "essentials",
+    locale: "vi",
   },
   {
     id: "rev-3",
     name: "Thanh Nhàn",
     location: "Đà Nẵng",
     rating: 5,
-    productBought: "The Heritage Tote",
+    productBought: "Túi tote di sản",
     quote: "Chiếc túi tote da thật cực kỳ dày dặn, da mềm mại tự nhiên và mùi hương mộc mạc tinh tế. Kích thước vừa vặn cho máy tính và tài liệu, quai xách chắc chắn vô cùng thanh thoát.",
-    date: "02/06/2026",
+    date: "2026-06-02",
     initial: "TN",
     category: "accessories",
+    locale: "vi",
   },
   {
     id: "rev-4",
     name: "Hoàng Lâm",
     location: "Hải Phòng",
     rating: 5,
-    productBought: "Pleated Wool Trousers",
+    productBought: "Quần len xếp ly",
     quote: "Quần tây ly xếp phom đứng tuyệt đẹp. Từng nếp gấp ly được ép tỉ mỉ và đứng dáng cực kỳ tôn dáng. Chất vải pha len nhẹ mặc rất dễ chịu, thích hợp cho cả công sở lẫn dạo phố cuối tuần.",
-    date: "10/06/2026",
+    date: "2026-06-10",
     initial: "HL",
     category: "essentials",
+    locale: "vi",
   },
   {
     id: "rev-5",
@@ -69,9 +85,10 @@ const INITIAL_REVIEWS: Review[] = [
     rating: 5,
     productBought: "Minimalist Silk Dress",
     quote: "Vela Wear totally transformed our gallery space. It didn't look like clothes; it looked like living art. Pure design intelligence in every single thread.",
-    date: "14/05/2026",
+    date: "2026-05-14",
     initial: "A",
     category: "outerwear",
+    locale: "en",
   },
   {
     id: "rev-6",
@@ -80,9 +97,10 @@ const INITIAL_REVIEWS: Review[] = [
     rating: 5,
     productBought: "Artisan Wool Blazer",
     quote: "Their structural approach to garments is unparalleled. Not just an outfit, an architectural statement. The silhouette flows seamlessly with your movements.",
-    date: "22/04/2026",
+    date: "2026-04-22",
     initial: "M",
     category: "outerwear",
+    locale: "en",
   },
   {
     id: "rev-7",
@@ -91,9 +109,10 @@ const INITIAL_REVIEWS: Review[] = [
     rating: 5,
     productBought: "Relaxed Silk Trousers",
     quote: "Elegant, fluid, and brilliantly executed. It stands out by whispering instead of shouting. A profound paradigm shift in modern essential wear.",
-    date: "09/05/2026",
+    date: "2026-05-09",
     initial: "E",
     category: "essentials",
+    locale: "en",
   },
   {
     id: "rev-8",
@@ -102,13 +121,15 @@ const INITIAL_REVIEWS: Review[] = [
     rating: 5,
     productBought: "Draped Linen Jacket",
     quote: "I've never experienced a tailoring so deeply attuned to natural workflows. It responds with quiet intelligence. Simple, refined, absolute comfort.",
-    date: "30/04/2026",
+    date: "2026-04-30",
     initial: "J",
     category: "accessories",
+    locale: "en",
   }
 ];
 
 export function Testimonials() {
+  const { locale, t } = useI18n();
   const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
   const [filter, setFilter] = useState<"all" | "essentials" | "outerwear" | "accessories">("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -117,13 +138,16 @@ export function Testimonials() {
   const [formName, setFormName] = useState("");
   const [formLocation, setFormLocation] = useState("Hà Nội");
   const [formRating, setFormRating] = useState(5);
-  const [formProduct, setFormProduct] = useState("Classic Linen Shirt");
+  const [formProduct, setFormProduct] = useState("classic-linen-shirt");
   const [formCategory, setFormCategory] = useState<"essentials" | "outerwear" | "accessories">("essentials");
   const [formQuote, setFormQuote] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const reviewProducts = getLocalizedFixtureProducts(locale).filter((product) =>
+    REVIEW_PRODUCT_IDS.has(product.id),
+  );
 
   const filteredReviews = reviews.filter(
-    (rev) => filter === "all" || rev.category === filter
+    (rev) => rev.locale === locale && (filter === "all" || rev.category === filter)
   );
 
   const col1 = filteredReviews.filter((_, idx) => idx % 3 === 0);
@@ -143,15 +167,17 @@ export function Testimonials() {
     };
 
     const newReview: Review = {
-      id: `rev-${Date.now()}`,
+      id: `rev-${crypto.randomUUID()}`,
       name: formName,
       location: formLocation,
       rating: formRating,
-      productBought: formProduct,
+      productBought:
+        reviewProducts.find((product) => product.id === formProduct)?.name ?? formProduct,
       quote: formQuote,
-      date: new Date().toLocaleDateString("vi-VN"),
+      date: new Date().toISOString(),
       initial: getInitials(formName),
       category: formCategory,
+      locale,
     };
 
     setReviews([newReview, ...reviews]);
@@ -176,13 +202,13 @@ export function Testimonials() {
         <div className="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <ScrollReveal direction="right" className="max-w-xl">
             <span className="text-[11px] font-semibold uppercase tracking-[2px] text-[#b5573a] block mb-3">
-              Ý kiến khách hàng
+              {t("testimonials.eyebrow")}
             </span>
             <h2 className="font-serif text-3.5xl md:text-5xl font-light tracking-tight text-[#1c1a18]">
-              Cảm hứng & Sự chia sẻ
+              {t("testimonials.title")}
             </h2>
             <p className="text-[#8a857c] text-sm md:text-base mt-4 font-light leading-relaxed">
-              Những lời chia sẻ chân thực về sự tương tác, phom dáng rủ tự nhiên và kết cấu thớ vải tinh mỹ từ giới mộ điệu sở hữu Vela Wear.
+              {t("testimonials.description")}
             </p>
           </ScrollReveal>
 
@@ -195,7 +221,7 @@ export function Testimonials() {
               whileTap={{ scale: 0.95 }}
             >
               <Plus className="w-4 h-4" />
-              Viết đánh giá
+              {t("testimonials.write")}
             </motion.button>
           </ScrollReveal>
         </div>
@@ -212,7 +238,7 @@ export function Testimonials() {
                   : "bg-[#efe7dc]/50 hover:bg-[#efe7dc] text-[#1c1a18]"
               }`}
             >
-              {tab === "all" ? "Tất cả" : tab}
+              {t(`testimonials.filter.${tab}` as const)}
             </button>
           ))}
         </div>
@@ -252,7 +278,7 @@ export function Testimonials() {
                         {rev.name}
                       </h4>
                       <p className="text-[10px] text-[#8a857c] uppercase tracking-[1px] mt-1 leading-none">
-                        {rev.location} &bull; Bought: <span className="text-[#b5573a]/80 font-medium">{rev.productBought}</span>
+                        {rev.location} &bull; {t("testimonials.bought")}: <span className="text-[#b5573a]/80 font-medium">{rev.productBought}</span> &bull; {formatDate(rev.date, locale)}
                       </p>
                     </div>
                   </div>
@@ -283,11 +309,11 @@ export function Testimonials() {
               className="fixed inset-0 m-auto w-full max-w-lg h-fit bg-[#f7f4ef] rounded-[24px] border border-[#e3dccf] shadow-2xl p-8 z-50 flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center pb-4 border-b border-[#e3dccf]">
-                <h3 className="font-serif text-2xl text-[#1c1a18] font-medium">Chia sẻ cảm nhận của bạn</h3>
+                <h3 className="font-serif text-2xl text-[#1c1a18] font-medium">{t("testimonials.modal.title")}</h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="p-1 rounded-full text-[#1c1a18] hover:text-[#b5573a] hover:bg-black/5 transition-all cursor-pointer"
-                  aria-label="Đóng"
+                  aria-label={t("testimonials.modal.close")}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -298,33 +324,33 @@ export function Testimonials() {
                   <div className="w-16 h-16 rounded-full bg-[#5d8a6c]/10 flex items-center justify-center text-[#5d8a6c]">
                     <Check className="w-8 h-8" />
                   </div>
-                  <h4 className="font-serif text-xl font-medium text-[#1c1a18]">Cám ơn đóng góp của bạn</h4>
+                  <h4 className="font-serif text-xl font-medium text-[#1c1a18]">{t("testimonials.success.title")}</h4>
                   <p className="text-xs text-[#8a857c] max-w-xs leading-relaxed">
-                    Ý kiến của bạn đã được xuất bản và chia sẻ trực tiếp trên Vela Archives.
+                    {t("testimonials.success.description")}
                   </p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmitReview} className="flex flex-col gap-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Tên của bạn *</label>
+                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.name")}</label>
                       <input
                         type="text"
                         required
                         value={formName}
                         onChange={(e) => setFormName(e.target.value)}
-                        placeholder="Nhập tên..."
+                        placeholder={t("testimonials.form.namePlaceholder")}
                         className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Tỉnh/Thành phố *</label>
+                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.location")}</label>
                       <input
                         type="text"
                         required
                         value={formLocation}
                         onChange={(e) => setFormLocation(e.target.value)}
-                        placeholder="Ví dụ: Hà Nội"
+                        placeholder={t("testimonials.form.locationPlaceholder")}
                         className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50"
                       />
                     </div>
@@ -332,21 +358,22 @@ export function Testimonials() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Sản phẩm đã mua</label>
+                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.product")}</label>
                       <select
                         value={formProduct}
                         onChange={(e) => setFormProduct(e.target.value)}
                         className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
                       >
-                        <option value="Classic Linen Shirt">Classic Linen Shirt</option>
-                        <option value="Pleated Wool Trousers">Pleated Wool Trousers</option>
-                        <option value="The Heritage Tote">The Heritage Tote</option>
-                        <option value="Merino Wool Coat">Merino Wool Coat</option>
+                        {reviewProducts.map((product) => (
+                          <option key={product.id} value={product.id}>
+                            {product.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Phân loại</label>
+                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.category")}</label>
                       <select
                         value={formCategory}
                         onChange={(e) =>
@@ -356,21 +383,22 @@ export function Testimonials() {
                         }
                         className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
                       >
-                        <option value="essentials">Essentials</option>
-                        <option value="outerwear">Outerwear</option>
-                        <option value="accessories">Accessories</option>
+                        <option value="essentials">{t("testimonials.filter.essentials")}</option>
+                        <option value="outerwear">{t("testimonials.filter.outerwear")}</option>
+                        <option value="accessories">{t("testimonials.filter.accessories")}</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Đánh giá chất lượng (Số sao)</label>
+                    <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.rating")}</label>
                     <div className="flex gap-2 text-[#b5573a]">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           type="button"
                           onClick={() => setFormRating(star)}
+                          aria-label={t("testimonials.form.star", { count: star })}
                           className="p-1 hover:scale-110 transition-transform cursor-pointer"
                         >
                           <Star className={`w-6 h-6 ${star <= formRating ? "fill-current" : "text-[#e3dccf]"}`} />
@@ -380,12 +408,12 @@ export function Testimonials() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">Lời chứng nhận / Đánh giá của bạn *</label>
+                    <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.review")}</label>
                     <textarea
                       required
                       value={formQuote}
                       onChange={(e) => setFormQuote(e.target.value)}
-                      placeholder="Lời chứng thực của bạn..."
+                      placeholder={t("testimonials.form.reviewPlaceholder")}
                       rows={4}
                       className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50 resize-none"
                     />
@@ -395,7 +423,7 @@ export function Testimonials() {
                     type="submit"
                     className="mt-2 w-full bg-[#1c1a18] hover:bg-[#b5573a] text-white text-xs font-semibold uppercase tracking-[1.5px] py-4 rounded-[8px] transition-colors duration-300 shadow-md cursor-pointer"
                   >
-                    Gửi ý kiến
+                    {t("testimonials.form.submit")}
                   </button>
                 </form>
               )}

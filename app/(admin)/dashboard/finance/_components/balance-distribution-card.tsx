@@ -4,101 +4,85 @@ import * as React from "react";
 
 import { Label, Pie, PieChart } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 
 type BalanceKey = "investment" | "main" | "reserve" | "savings";
 
 const balanceData: {
-  account: string;
   amount: number;
   key: BalanceKey;
   percentage: number;
 }[] = [
   {
-    account: "Main Wallet",
     amount: 122_540,
     key: "main",
     percentage: 52.2,
   },
   {
-    account: "Savings Account",
     amount: 48_320,
     key: "savings",
     percentage: 20.6,
   },
   {
-    account: "Investment Account",
     amount: 36_780,
     key: "investment",
     percentage: 15.7,
   },
   {
-    account: "Reserve Account",
     amount: 27_256,
     key: "reserve",
     percentage: 11.5,
   },
 ];
 
-const chartConfig = {
-  amount: {
-    label: "Balance",
-  },
-  investment: {
-    color: "var(--chart-1)",
-    label: "Investment Account",
-  },
-  main: {
-    color: "var(--chart-2)",
-    label: "Main Wallet",
-  },
-  reserve: {
-    color: "var(--chart-3)",
-    label: "Reserve Account",
-  },
-  savings: {
-    color: "var(--chart-4)",
-    label: "Savings Account",
-  },
-} satisfies ChartConfig;
-
-const currencies = {
-  EUR: {
-    label: "Euro Balance",
-  },
-  GBP: {
-    label: "GBP Balance",
-  },
-  USD: {
-    label: "USD Balance",
-  },
-} as const;
-
-type Currency = keyof typeof currencies;
-
-const getAccountColor = (key: BalanceKey) => {
-  const config = chartConfig[key];
-
-  return "color" in config ? config.color : undefined;
+const balanceColors: Record<BalanceKey, string> = {
+  investment: "var(--chart-1)",
+  main: "var(--chart-2)",
+  reserve: "var(--chart-3)",
+  savings: "var(--chart-4)",
 };
 
-const chartData = balanceData.map((item) => ({
-  ...item,
-  fill: getAccountColor(item.key),
-}));
+const currencies = ["EUR", "GBP", "USD"] as const;
+
+type Currency = (typeof currencies)[number];
 
 const totalBalance = balanceData.reduce((total, item) => total + item.amount, 0);
 
 export function BalanceDistributionCard() {
+  const { locale, t } = useI18n();
   const [currency, setCurrency] = React.useState<Currency>("USD");
+  const accountLabels = {
+    investment: t("admin.finance.allocation.investment"),
+    main: t("admin.finance.allocation.main"),
+    reserve: t("admin.finance.allocation.reserve"),
+    savings: t("admin.finance.allocation.savings"),
+  } satisfies Record<BalanceKey, string>;
+  const chartConfig = {
+    amount: { label: t("admin.finance.allocation.balance") },
+    investment: { color: balanceColors.investment, label: accountLabels.investment },
+    main: { color: balanceColors.main, label: accountLabels.main },
+    reserve: { color: balanceColors.reserve, label: accountLabels.reserve },
+    savings: { color: balanceColors.savings, label: accountLabels.savings },
+  } satisfies ChartConfig;
+  const chartData = balanceData.map((item) => ({
+    ...item,
+    account: accountLabels[item.key],
+    fill: balanceColors[item.key],
+  }));
+  const currencyLabels: Record<Currency, string> = {
+    EUR: t("admin.finance.currency.eur"),
+    GBP: t("admin.finance.currency.gbp"),
+    USD: t("admin.finance.currency.usd"),
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Account Allocation</CardTitle>
+        <CardTitle className="font-normal">{t("admin.finance.allocation.title")}</CardTitle>
         <CardAction>
           <Select onValueChange={(value) => setCurrency(value as Currency)} value={currency}>
             <SelectTrigger className="w-36" size="sm">
@@ -106,9 +90,9 @@ export function BalanceDistributionCard() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {Object.entries(currencies).map(([value, item]) => (
+                {currencies.map((value) => (
                   <SelectItem key={value} value={value}>
-                    {item.label}
+                    {currencyLabels[value]}
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -143,14 +127,14 @@ export function BalanceDistributionCard() {
                   return (
                     <text dominantBaseline="middle" textAnchor="middle" x={viewBox.cx} y={viewBox.cy}>
                       <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy ?? 0) - 8}>
-                        Total
+                        {t("admin.finance.allocation.total")}
                       </tspan>
                       <tspan
                         className="fill-foreground font-heading font-medium text-lg tabular-nums"
                         x={viewBox.cx}
                         y={(viewBox.cy ?? 0) + 14}
                       >
-                        {formatCurrency(totalBalance, { currency, noDecimals: true })}
+                        {formatCurrency(totalBalance, locale, currency)}
                       </tspan>
                     </text>
                   );
@@ -169,10 +153,10 @@ export function BalanceDistributionCard() {
                   <p className="truncate text-muted-foreground text-xs">{item.account}</p>
                 </div>
                 <p className="font-medium tabular-nums">
-                  {formatCurrency(item.amount, { currency, noDecimals: true })}
+                  {formatCurrency(item.amount, locale, currency)}
                 </p>
               </div>
-              <div className="font-medium tabular-nums">{item.percentage}%</div>
+              <div className="font-medium tabular-nums">{formatNumber(item.percentage / 100, locale, { style: "percent", maximumFractionDigits: 1 })}</div>
             </div>
           ))}
         </div>

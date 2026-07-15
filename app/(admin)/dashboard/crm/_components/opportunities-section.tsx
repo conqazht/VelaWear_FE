@@ -15,6 +15,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ListFilter } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -35,8 +36,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getIntlLocale } from "@/lib/i18n";
 
-import { opportunitiesColumns } from "./opportunities-table/columns";
+import { useOpportunitiesColumns } from "./opportunities-table/columns";
 import opportunitiesData from "./opportunities-table/data.json";
 import { opportunitiesSchema } from "./opportunities-table/schema";
 
@@ -49,6 +51,23 @@ function preventPaginationNavigation(event: React.MouseEvent<HTMLAnchorElement>)
 }
 
 export function OpportunitiesSection() {
+  const { locale, t } = useI18n();
+  const columns = useOpportunitiesColumns();
+  const numberFormatter = new Intl.NumberFormat(getIntlLocale(locale));
+  const stageLabels: Record<(typeof stageOptions)[number], string> = {
+    all: t("admin.dashboardsA.crm.allStages"),
+    Discovery: t("admin.dashboardsA.crm.discovery"),
+    Negotiation: t("admin.dashboardsA.crm.negotiation"),
+    "Proposal Sent": t("admin.dashboardsA.crm.proposalSent"),
+    Qualified: t("admin.dashboardsA.crm.qualified"),
+  };
+  const healthLabels: Record<(typeof healthOptions)[number], string> = {
+    all: t("admin.dashboardsA.crm.allHealth"),
+    "At Risk": t("admin.dashboardsA.crm.atRisk"),
+    "Needs Review": t("admin.dashboardsA.crm.needsReview"),
+    "On Hold": t("admin.dashboardsA.crm.onHold"),
+    "On Track": t("admin.dashboardsA.crm.onTrack"),
+  };
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility] = React.useState<VisibilityState>({});
@@ -60,7 +79,7 @@ export function OpportunitiesSection() {
 
   const table = useReactTable({
     data: opportunities,
-    columns: opportunitiesColumns,
+    columns,
     state: {
       rowSelection,
       columnFilters,
@@ -101,15 +120,13 @@ export function OpportunitiesSection() {
     <section>
       <Card>
         <CardHeader>
-          <CardTitle className="leading-none">Recent Opportunities</CardTitle>
-          <CardDescription>
-            Track qualified leads moving through discovery, proposal, and closing stages.
-          </CardDescription>
+          <CardTitle className="leading-none">{t("admin.dashboardsA.crm.recentOpportunities")}</CardTitle>
+          <CardDescription>{t("admin.dashboardsA.crm.opportunitiesDescription")}</CardDescription>
           <CardAction>
             <div className="flex items-center gap-2">
               <Input
                 className="h-7 w-44 md:w-52"
-                placeholder="Search deals..."
+                placeholder={t("admin.dashboardsA.crm.searchDeals")}
                 value={searchQuery}
                 onChange={(event) => {
                   table.setGlobalFilter(event.target.value || undefined);
@@ -119,7 +136,7 @@ export function OpportunitiesSection() {
               <DropdownMenu>
                 <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
                   <ListFilter data-icon="inline-start" />
-                  Stage
+                  {t("admin.dashboardsA.crm.stage")}
                   <ChevronDownIcon data-icon="inline-end" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
@@ -132,7 +149,7 @@ export function OpportunitiesSection() {
                   >
                     {stageOptions.map((option) => (
                       <DropdownMenuRadioItem key={option} value={option}>
-                        {option === "all" ? "All stages" : option}
+                        {stageLabels[option]}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>
@@ -141,7 +158,7 @@ export function OpportunitiesSection() {
               <DropdownMenu>
                 <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
                   <ListFilter data-icon="inline-start" />
-                  Health
+                  {t("admin.dashboardsA.crm.health")}
                   <ChevronDownIcon data-icon="inline-end" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40">
@@ -154,7 +171,7 @@ export function OpportunitiesSection() {
                   >
                     {healthOptions.map((option) => (
                       <DropdownMenuRadioItem key={option} value={option}>
-                        {option === "all" ? "All health" : option}
+                        {healthLabels[option]}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>
@@ -189,7 +206,7 @@ export function OpportunitiesSection() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                      No results.
+                      {t("admin.dashboardsA.common.noResults")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -198,7 +215,10 @@ export function OpportunitiesSection() {
           </div>
           <div className="flex items-center justify-between gap-4 px-4 pb-1">
             <p className="text-muted-foreground text-sm">
-              Viewing {visibleOpportunityCount} out of {filteredOpportunityCount.toLocaleString()} opportunities
+              {t("admin.dashboardsA.crm.viewingOpportunities", {
+                total: numberFormatter.format(filteredOpportunityCount),
+                visible: numberFormatter.format(visibleOpportunityCount),
+              })}
             </p>
 
             <Pagination className="mx-0 w-auto justify-end">

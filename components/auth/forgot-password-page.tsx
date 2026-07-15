@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,19 +12,29 @@ import { FloatingInput } from "@/components/auth/floating-input";
 import { resetPassword } from "@/lib/auth-otp-api";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { OtpEntry } from "@/components/auth/otp-entry";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type {
   AuthSceneFocus,
   AuthSceneStatus,
 } from "@/components/auth/auth-motion-scene";
-import { emailSchema, strongPasswordSchema } from "@/lib/validations";
+import {
+  createForgotPasswordRequestSchema,
+  createStrongPasswordSchema,
+} from "@/lib/validations";
 
-const requestSchema = z.object({ email: emailSchema });
-const resetSchema = z.object({ newPassword: strongPasswordSchema });
-
-type RequestFormValues = z.infer<typeof requestSchema>;
-type ResetFormValues = z.infer<typeof resetSchema>;
+type RequestFormValues = { email: string };
+type ResetFormValues = { newPassword: string };
 
 export function ForgotPasswordPage() {
+  const { locale, t } = useI18n();
+  const requestSchema = useMemo(
+    () => createForgotPasswordRequestSchema(locale),
+    [locale],
+  );
+  const resetSchema = useMemo(
+    () => z.object({ newPassword: createStrongPasswordSchema(locale) }),
+    [locale],
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<"REQUEST" | "VERIFY" | "SUCCESS">("REQUEST");
 
@@ -105,14 +115,14 @@ export function ForgotPasswordPage() {
     setStep("REQUEST");
   };
 
-  let title = "Reset Password";
-  let description = "Enter your email to request a verification code.";
+  let title = t("auth.forgot.requestTitle");
+  let description = t("auth.forgot.requestDescription");
   if (step === "VERIFY") {
-    title = "Verify Email";
-    description = `We sent a 6-digit verification code to ${emailValue}.`;
+    title = t("auth.forgot.verifyTitle");
+    description = t("auth.forgot.verifyDescription", { email: emailValue });
   } else if (step === "SUCCESS") {
-    title = "Password Reset";
-    description = "Your password has been successfully reset.";
+    title = t("auth.forgot.successTitle");
+    description = t("auth.forgot.successDescription");
   }
 
   const onInvalid = () => {
@@ -138,7 +148,7 @@ export function ForgotPasswordPage() {
         step !== "SUCCESS" && (
           <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d]">
             <Link href="/sign-in" className="text-sm text-[#55423d] hover:text-[#964025] underline decoration-[#964025]/30 underline-offset-4">
-              Back to Sign In
+              {t("auth.common.backToSignIn")}
             </Link>
           </p>
         )
@@ -150,13 +160,13 @@ export function ForgotPasswordPage() {
             <Check className="h-8 w-8" />
           </div>
           <p className="text-sm leading-[1.55] text-[#55423d] mb-8">
-            You can now sign in with your new password.
+            {t("auth.forgot.successBody")}
           </p>
           <Link
             href="/sign-in"
             className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] cursor-pointer"
           >
-            Go to Sign In
+            {t("auth.forgot.goToSignIn")}
           </Link>
         </div>
       )}
@@ -173,14 +183,14 @@ export function ForgotPasswordPage() {
             onVerify={resetForm.handleSubmit(onResetSubmit, onInvalid)}
             onResend={handleRequestOtp}
             onCancel={handleCancel}
-            cancelLabel="Change email"
-            actionLabel="Reset Password"
+            cancelLabel={t("auth.otp.changeEmail")}
+            actionLabel={t("auth.forgot.resetAction")}
             plain={true}
           >
             <div>
               <FloatingInput
                 id="newPassword"
-                label="New Password*"
+                label={t("auth.common.newPassword")}
                 type={showPassword ? "text" : "password"}
                 error={!!resetForm.formState.errors.newPassword}
                 {...passwordRegister}
@@ -201,7 +211,7 @@ export function ForgotPasswordPage() {
                       setSceneFocus("password");
                       setTimeout(() => resetForm.setFocus("newPassword"), 0);
                     }}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={t(showPassword ? "auth.common.hidePassword" : "auth.common.showPassword")}
                     className="cursor-pointer p-1 transition-opacity hover:opacity-85"
                   >
                     {showPassword ? (
@@ -215,7 +225,8 @@ export function ForgotPasswordPage() {
               {resetForm.formState.errors.newPassword && (
                 <div className="mt-2 flex flex-col gap-1">
                   <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider">
-                    <X className="size-3 text-destructive" strokeWidth={2.5} /> {resetForm.formState.errors.newPassword.message}
+                    <X className="size-3 text-destructive" strokeWidth={2.5} />{" "}
+                    {resetForm.formState.errors.newPassword.message}
                   </span>
                 </div>
               )}
@@ -235,7 +246,7 @@ export function ForgotPasswordPage() {
           <div>
             <FloatingInput
               id="email"
-              label="Email*"
+              label={t("auth.common.email")}
               type="email"
               error={!!requestForm.formState.errors.email}
               {...emailRegister}
@@ -248,7 +259,9 @@ export function ForgotPasswordPage() {
               }}
             />
             {requestForm.formState.errors.email && (
-              <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">{requestForm.formState.errors.email.message}</p>
+              <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                {requestForm.formState.errors.email.message}
+              </p>
             )}
           </div>
 
@@ -257,7 +270,7 @@ export function ForgotPasswordPage() {
             disabled={isOtpSubmitting}
             className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
           >
-            {isOtpSubmitting ? "Requesting..." : "Send Verification Code"}
+            {isOtpSubmitting ? t("auth.forgot.requesting") : t("auth.forgot.sendCode")}
           </button>
         </form>
       )}

@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
-import { getCategoryLabel, money, Product } from "@/lib/vela-data";
+import { useI18n } from "@/components/providers/i18n-provider";
+import { getCategoryLabel, getProductBadgeLabel, money, Product } from "@/lib/vela-data";
 
 interface HomeProductCardProps {
   product: Product;
@@ -19,6 +20,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
+  const { locale, t } = useI18n();
 
   const favorited = isFavorite(product.id);
   const flashUnavailable =
@@ -28,7 +30,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
   const requiresVariantSelection =
     product.pricing != null && product.pricing.priceSource !== "BASE";
 
-  const displayCategory = getCategoryLabel(product.category, "en");
+  const displayCategory = getCategoryLabel(product.category, locale);
 
   return (
     <motion.div
@@ -56,7 +58,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
         <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
           {product.badge && (
             <span className="bg-[#b5573a] text-white text-[10px] font-medium uppercase tracking-[1.5px] px-3 py-1 rounded-full shadow-sm">
-              {product.badge}
+              {getProductBadgeLabel(product.badge, locale)}
             </span>
           )}
         </div>
@@ -72,7 +74,9 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
           whileHover={{ scale: 1.1, backgroundColor: "#efe7dc" }}
           whileTap={{ scale: 0.9 }}
           transition={{ duration: 0.2 }}
-          aria-label={favorited ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={favorited
+            ? t("storefront.common.removeFromWishlist")
+            : t("storefront.common.addToWishlist")}
         >
           <Heart
             className={`w-4 h-4 transition-colors duration-300 ${
@@ -101,10 +105,10 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
           >
             <ShoppingBag className="w-4 h-4" />
             {flashUnavailable
-              ? "Đã hết suất Flash"
+              ? t("storefront.sale.flashSoldOut")
               : requiresVariantSelection
-                ? "Chọn biến thể"
-                : "Thêm vào giỏ"}
+                ? t("storefront.sale.selectVariant")
+                : t("storefront.common.addToBag")}
           </motion.button>
         </div>
       </div>
@@ -126,11 +130,11 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
         {/* Price */}
         <div className="flex items-center gap-2.5 mt-0.5">
           <span className="text-sm font-semibold text-[#1c1a18] font-numeric">
-            {money(product.price)}
+            {money(product.price, locale)}
           </span>
           {product.originalPrice && (
             <span className="text-xs text-[#8a857c] line-through font-numeric">
-              {money(product.originalPrice)}
+              {money(product.originalPrice, locale)}
             </span>
           )}
         </div>

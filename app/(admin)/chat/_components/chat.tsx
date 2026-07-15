@@ -2,6 +2,7 @@
 
 import { type CSSProperties, useState } from "react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { useIsLg } from "@/hooks/use-lg";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -10,14 +11,12 @@ import { cn } from "@/lib/utils";
 import { ChatConversationList } from "./chat-conversation-list";
 import { ChatProfileDetails } from "./chat-profile-details";
 import { ChatThread } from "./chat-thread";
-import type { Conversation } from "./data";
+import { conversationsByLocale } from "./data";
 import { useChat } from "./use-chat";
 
-interface ChatProps {
-  conversations: Conversation[];
-}
-
-export function Chat({ conversations }: ChatProps) {
+export function Chat() {
+  const { locale, t } = useI18n();
+  const conversations = conversationsByLocale[locale];
   const [chat] = useChat();
   const [showContact, setShowContact] = useState(false);
   const [showThread, setShowThread] = useState(false);
@@ -77,8 +76,12 @@ export function Chat({ conversations }: ChatProps) {
       {!isLg && (
         <Sheet open={showContact} onOpenChange={setShowContact}>
           <SheetContent side="right" className="w-80 p-0" showCloseButton={false}>
-            <SheetTitle className="sr-only">Contact profile</SheetTitle>
-            <SheetDescription className="sr-only">View contact details and activity</SheetDescription>
+            <SheetTitle className="sr-only">
+              {t("admin.communications.chat.profile.title")}
+            </SheetTitle>
+            <SheetDescription className="sr-only">
+              {t("admin.communications.chat.profile.description")}
+            </SheetDescription>
             <ChatProfileDetails contact={activeConversation.contact} onClose={() => setShowContact(false)} />
           </SheetContent>
         </Sheet>

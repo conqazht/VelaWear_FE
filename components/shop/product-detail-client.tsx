@@ -16,13 +16,15 @@ import { RatingStars } from "@/components/shop/rating-stars";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
-  categoryLabels,
+  getCategoryLabel,
   money,
   Product,
 } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
-import { getActiveLocale } from "@/lib/i18n";
+import { getIntlLocale } from "@/lib/i18n";
+import { formatDateTime } from "@/lib/i18n/format";
 import { useProductReviewsQuery, useProductVariantsQuery } from "@/lib/queries/catalog";
 import type { ProductVariant as ApiProductVariant } from "@/lib/api/types";
 
@@ -39,6 +41,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
+  const { locale: activeLocale, t } = useI18n();
   const favorited =
     product.realId !== undefined
       ? favorites.some((item) => item.realId === product.realId || item.id === product.id)
@@ -56,7 +59,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
     reviews: false,
   });
 
-  const activeLocale = getActiveLocale();
   const variantsQuery = useProductVariantsQuery({
     productId: product.realId,
     size: 100,
@@ -172,9 +174,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
     return Array.from(new Set(rawImages)).map((src, idx) => ({
       src,
-      label: `${resolvedSelectedColor || "Product"} look ${idx + 1}`,
+      label: t("storefront.product.galleryLabel", {
+        color: resolvedSelectedColor || t("storefront.product.galleryFallback"),
+        number: idx + 1,
+      }),
     }));
-  }, [product.colorImages, product.image, product.images, resolvedSelectedColor]);
+  }, [product.colorImages, product.image, product.images, resolvedSelectedColor, t]);
   const displayedImage = gallery.some((detail) => detail.src === activeImage)
     ? activeImage
     : gallery[0]?.src || product.image;
@@ -254,18 +259,18 @@ export function ProductDetailClient({ product }: { product: Product }) {
       {/* RIGHT COLUMN: Product Info & Actions */}
       <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
         <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
-          {categoryLabels[product.category] ?? product.category} / Fine tailored craftsmanship
+          {getCategoryLabel(product.category, activeLocale)} / {t("storefront.product.craftsmanship")}
         </span>
         <h1 className="mb-4 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-display-lg leading-tight">
           {product.name}
         </h1>
         <div className="mb-6 flex items-baseline gap-3">
           <span className="font-serif text-2xl font-light tracking-wider text-[#1c1a18] font-numeric">
-            {money(mainPrice)}
+            {money(mainPrice, activeLocale)}
           </span>
           {originalPrice && originalPrice > mainPrice && (
             <span className="text-sm tracking-wider text-[#1c1a18]/40 line-through font-numeric">
-              {money(originalPrice)}
+              {money(originalPrice, activeLocale)}
             </span>
           )}
         </div>
@@ -274,31 +279,44 @@ export function ProductDetailClient({ product }: { product: Product }) {
           <div className="mb-6 rounded-lg border border-[#b5573a]/20 bg-[#fff8f3] p-4 text-xs text-[#1c1a18]/70">
             <div className="flex items-center gap-2 font-semibold uppercase tracking-[0.14em] text-[#8f2f20]">
               <BadgePercent className="size-4" />
-              {activePricing?.priceSource === "FLASH_SALE" ? "Flash Sale" : "Standard Sale"}
+              {activePricing?.priceSource === "FLASH_SALE"
+                ? t("storefront.sale.type.flash")
+                : t("storefront.sale.type.standard")}
               {activePricing?.campaignName ? ` · ${activePricing.campaignName}` : ""}
             </div>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
               {activePricing?.endsAt ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock3 className="size-3.5" /> Kết thúc {new Date(activePricing.endsAt).toLocaleString("vi-VN")}
+                  <Clock3 className="size-3.5" aria-hidden="true" />
+                  {t("storefront.sale.product.endsAt", {
+                    date: formatDateTime(activePricing.endsAt, activeLocale),
+                  })}
                 </span>
               ) : null}
               {activePricing?.priceSource === "FLASH_SALE" && activePricing.remainingQuota != null ? (
-                <span>Còn {Math.max(0, activePricing.remainingQuota)} suất</span>
+                <span>
+                  {t("storefront.sale.product.quotaRemaining", {
+                    count: Math.max(0, activePricing.remainingQuota),
+                  })}
+                </span>
               ) : null}
               {activePricing?.maxPerCustomer ? (
                 <span>
-                  Tối đa {activePricing.maxPerCustomer} sản phẩm/khách
+                  {t("storefront.sale.product.maxPerCustomer", {
+                    count: activePricing.maxPerCustomer,
+                  })}
                   {activePricing.customerRemaining != null
-                    ? ` · Bạn còn ${activePricing.customerRemaining}`
-                    : " · Lượt còn lại xác nhận tại giỏ/checkout"}
+                    ? ` · ${t("storefront.sale.product.customerRemaining", {
+                        count: activePricing.customerRemaining,
+                      })}`
+                    : ` · ${t("storefront.sale.product.customerRemainingAdvisory")}`}
                 </span>
               ) : null}
             </div>
             <p className="mt-2 text-[11px] text-[#1c1a18]/50">
               {activePricing?.priceSource === "FLASH_SALE"
-                ? "Không áp dụng coupon. Thêm vào giỏ chưa giữ quota; giới hạn theo tài khoản được backend xác nhận lại ở giỏ và checkout."
-                : "Có thể áp dụng coupon khi mã đáp ứng điều kiện."}
+                ? t("storefront.sale.product.flashCouponNotice")
+                : t("storefront.sale.product.standardCouponNotice")}
             </p>
           </div>
         ) : null}
@@ -308,7 +326,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         {/* Color Selection */}
         <div className="mb-8">
           <span className="block text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60 mb-4">
-            Color — {resolvedSelectedColor}
+            {t("storefront.product.color")} — {resolvedSelectedColor}
           </span>
           <div className="flex gap-4">
             {colorsList.map((color) => {
@@ -339,9 +357,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
         {/* Size Selection */}
         <div className="mb-10">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60">Size</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60">{t("storefront.product.size")}</span>
             <a className="text-[10px] font-semibold uppercase tracking-widest underline hover:text-[#b85a3c] transition-colors" href="#">
-              Size Guide
+              {t("storefront.product.sizeGuide")}
             </a>
           </div>
           <div className="grid grid-cols-4 gap-3">
@@ -382,12 +400,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
             className="w-full h-14 bg-black hover:bg-neutral-800 text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-colors cursor-pointer border-none shadow-sm flex items-center justify-center"
           >
             {flashSoldOut
-              ? "Đã hết suất Flash"
+              ? t("storefront.sale.flashSoldOut")
               : customerLimitReached
-                ? "Bạn đã đạt giới hạn mua"
+                ? t("storefront.sale.customerLimitReached")
                 : activeVariant?.stockQuantity === 0
-                  ? "Hết hàng"
-                  : "Thêm vào giỏ"}
+                  ? t("storefront.sale.outOfStock")
+                  : t("storefront.common.addToBag")}
           </Button>
 
           <button
@@ -400,7 +418,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 : "border-neutral-300 bg-white text-black hover:border-black"
             )}
           >
-            <span>{favorited ? "Favorited" : "Favourite"}</span>
+            <span>{favorited ? t("storefront.product.favourited") : t("storefront.product.favourite")}</span>
             <Heart className={cn("size-4 transition-transform active:scale-95 duration-200", favorited && "fill-black stroke-black")} />
           </button>
         </div>
@@ -420,7 +438,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               className="flex justify-between items-center w-full group text-left cursor-pointer"
             >
               <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
-                Size & Fit
+                {t("storefront.product.sizeAndFit")}
               </h3>
               {openSections.sizeAndFit ? (
                 <ChevronUp className="size-4 text-ink/70" />
@@ -431,11 +449,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
             {openSections.sizeAndFit && (
               <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
-                  <li>{"Model is wearing size M and is 6'1\" (185cm approx.)"}</li>
-                  <li>Loose fit: roomy and relaxed</li>
+                  <li>{t("storefront.product.modelSize")}</li>
+                  <li>{t("storefront.product.looseFit")}</li>
                   <li>
                     <a className="underline hover:text-[#b85a3c] transition-colors" href="#">
-                      Size Guide
+                      {t("storefront.product.sizeGuide")}
                     </a>
                   </li>
                 </ul>
@@ -452,7 +470,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 className="flex justify-between items-center w-full group text-left cursor-pointer"
               >
                 <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
-                  Material & Care
+                  {t("storefront.product.materialCare")}
                 </h3>
                 {openSections.materialAndCare ? (
                   <ChevronUp className="size-4 text-ink/70" />
@@ -465,12 +483,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   <div className="space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
                     {product.material && (
                       <p>
-                        <span className="font-medium text-ink">Material:</span> {product.material}
+                        <span className="font-medium text-ink">{t("storefront.product.material")}</span> {product.material}
                       </p>
                     )}
                     {product.care && (
                       <p>
-                        <span className="font-medium text-ink">Care Instructions:</span> {product.care}
+                        <span className="font-medium text-ink">{t("storefront.product.care")}</span> {product.care}
                       </p>
                     )}
                   </div>
@@ -487,7 +505,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               className="flex justify-between items-center w-full group text-left cursor-pointer"
             >
               <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
-                Free Delivery and Returns
+                {t("storefront.product.deliveryTitle")}
               </h3>
               {openSections.delivery ? (
                 <ChevronUp className="size-4 text-ink/70" />
@@ -498,19 +516,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
             {openSections.delivery && (
               <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <p className="text-xs font-light tracking-wide text-on-surface-variant/80 mb-3 leading-relaxed">
-                  Your order of 500,000đ or more gets free standard delivery.
+                  {t("storefront.product.deliveryThreshold")}
                 </p>
                 <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
-                  <li>Standard delivered 4-5 Business Days</li>
-                  <li>Express delivered 2-4 Business Days</li>
+                  <li>{t("storefront.product.standardDelivery")}</li>
+                  <li>{t("storefront.product.expressDelivery")}</li>
                 </ul>
                 <p className="mt-3 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
-                  Orders are processed and delivered Monday-Friday (excluding public holidays)
+                  {t("storefront.product.deliverySchedule")}
                 </p>
                 <p className="mt-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
-                  Vela Members enjoy{" "}
+                  {t("storefront.product.memberReturnsPrefix")}{" "}
                   <a className="underline hover:text-[#b85a3c] transition-colors" href="#">
-                    free returns
+                    {t("storefront.product.freeReturns")}
                   </a>
                   .
                 </p>
@@ -526,7 +544,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               className="flex justify-between items-center w-full group text-left cursor-pointer"
             >
               <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
-                Reviews ({reviewCount})
+                {t("storefront.product.reviews", { count: reviewCount })}
               </h3>
               <div className="flex items-center gap-4">
                 <RatingStars
@@ -552,13 +570,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   </div>
                 ) : reviewsQuery.isError ? (
                   <p className="text-xs font-light leading-relaxed text-on-surface-variant/80">
-                    Không thể tải đánh giá lúc này. Vui lòng thử lại sau.
+                    {t("storefront.product.reviewError")}
                   </p>
                 ) : productReviews.length === 0 ? (
                   <div className="space-y-2">
-                    <p className="text-sm font-semibold text-ink">Chưa có đánh giá</p>
+                    <p className="text-sm font-semibold text-ink">{t("storefront.product.noReviews")}</p>
                     <p className="text-xs font-light tracking-wide text-on-surface-variant/80 max-w-sm leading-relaxed">
-                      Hãy là người đầu tiên chia sẻ trải nghiệm về {product.name}.
+                      {t("storefront.product.noReviewsDescription", { product: product.name })}
                     </p>
                   </div>
                 ) : (
@@ -572,7 +590,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
                           activeClassName="text-[#b85a3c]"
                         />
                         <p className="mt-1 text-[10px] uppercase tracking-wider text-on-surface-variant/65">
-                          {reviewCount} đánh giá
+                          {t(
+                            reviewCount === 1
+                              ? "storefront.product.oneReview"
+                              : "storefront.product.manyReviews",
+                            { count: reviewCount },
+                          )}
                         </p>
                       </div>
                     </div>
@@ -588,14 +611,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
                               <p className="text-xs font-semibold text-ink">{review.userName}</p>
                               {review.createdAt && (
                                 <time className="text-[10px] text-on-surface-variant/55">
-                                  {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                                  {new Date(review.createdAt).toLocaleDateString(getIntlLocale(activeLocale))}
                                 </time>
                               )}
                             </div>
                             <RatingStars rating={review.rating} sizeClassName="size-3" className="gap-0.5" />
                           </div>
                           <p className="text-xs font-light leading-relaxed text-on-surface-variant/85">
-                            {review.comment || "Khách hàng không để lại bình luận."}
+                            {review.comment || t("storefront.product.noComment")}
                           </p>
                         </article>
                       ))}

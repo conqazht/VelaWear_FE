@@ -6,43 +6,48 @@ import { useCalendarController } from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/react/daygrid";
 import interactionPlugin from "@fullcalendar/react/interaction";
 import listPlugin from "@fullcalendar/react/list";
+import viLocale from "@fullcalendar/react/locales/vi";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
-import { differenceInCalendarDays, endOfMonth, format, startOfMonth } from "date-fns";
+import { differenceInCalendarDays, endOfMonth, startOfMonth } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, XIcon } from "lucide-react";
 
 import { EventCalendarViews } from "@/components/calendar/event-calendar-views";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getIntlLocale } from "@/lib/i18n";
 
 import { demoEvents } from "./events-data";
-
-const views = [
-  { value: "dayGridMonth", label: "Month" },
-  { value: "timeGridWeek", label: "Week" },
-  { value: "timeGridDay", label: "Day" },
-];
-
-const calendars = [
-  { value: "all", label: "All calendars" },
-  { value: "work", label: "Work" },
-  { value: "personal", label: "Personal" },
-  { value: "team", label: "Team" },
-  { value: "focus", label: "Focus time" },
-];
 
 const plugins = [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin];
 
 export function Calendar() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const monthFormatter = new Intl.DateTimeFormat(intlLocale, { month: "long", year: "numeric" });
+  const views = [
+    { value: "dayGridMonth", label: t("admin.workflows.calendar.month") },
+    { value: "timeGridWeek", label: t("admin.workflows.calendar.week") },
+    { value: "timeGridDay", label: t("admin.workflows.calendar.day") },
+  ];
+  const calendars = [
+    { value: "all", label: t("admin.workflows.calendar.allCalendars") },
+    { value: "work", label: t("admin.workflows.calendar.work") },
+    { value: "personal", label: t("admin.workflows.calendar.personal") },
+    { value: "team", label: t("admin.workflows.calendar.team") },
+    { value: "focus", label: t("admin.workflows.calendar.focusTime") },
+  ];
   const controller = useCalendarController();
   const [eventCount, setEventCount] = React.useState(0);
-  const [selectedCalendar, setSelectedCalendar] = React.useState(calendars[0].value);
+  const [selectedCalendar, setSelectedCalendar] = React.useState("all");
   const [dateInfo, setDateInfo] = React.useState(() => {
     const now = new Date("2024-04-15T12:00:00Z");
 
     return {
-      title: format(now, "MMMM yyyy"),
+      title: monthFormatter.format(now),
       days: differenceInCalendarDays(endOfMonth(now), startOfMonth(now)) + 1,
     };
   });
@@ -55,7 +60,10 @@ export function Calendar() {
         <div className="flex min-w-0 shrink-0 flex-col gap-1">
           <div className="font-medium text-lg leading-none">{title}</div>
           <p className="text-muted-foreground text-sm">
-            {days} days - {eventCount} events
+            {t("admin.workflows.calendar.summary", {
+              days: numberFormatter.format(days),
+              events: numberFormatter.format(eventCount),
+            })}
           </p>
         </div>
 
@@ -82,13 +90,23 @@ export function Calendar() {
             </SelectContent>
           </Select>
           <ButtonGroup>
-            <Button size="icon" variant="outline" onClick={() => controller.prev()}>
+            <Button
+              aria-label={t("admin.workflows.calendar.previous")}
+              size="icon"
+              variant="outline"
+              onClick={() => controller.prev()}
+            >
               <ChevronLeft />
             </Button>
             <Button variant="outline" onClick={() => controller.today()}>
-              Today
+              {t("admin.workflows.calendar.today")}
             </Button>
-            <Button size="icon" variant="outline" onClick={() => controller.next()}>
+            <Button
+              aria-label={t("admin.workflows.calendar.next")}
+              size="icon"
+              variant="outline"
+              onClick={() => controller.next()}
+            >
               <ChevronRight />
             </Button>
           </ButtonGroup>
@@ -114,7 +132,7 @@ export function Calendar() {
           </Select>
           <Button>
             <Plus />
-            Add event
+            {t("admin.workflows.calendar.addEvent")}
           </Button>
         </div>
       </div>
@@ -122,6 +140,8 @@ export function Calendar() {
       <EventCalendarViews
         controller={controller}
         initialView={views[0].value}
+        locale={locale}
+        locales={[viLocale]}
         plugins={[...plugins]}
         popoverCloseContent={() => <XIcon className="size-5 text-muted-foreground group-hover:text-foreground" />}
         events={demoEvents}

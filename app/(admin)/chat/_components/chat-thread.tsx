@@ -17,6 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from "@/components/ui/bubble";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatDate } from "@/lib/i18n/format";
 import { cn, getInitials } from "@/lib/utils";
 
 import { type Message as ChatMessage, type Contact, currentUser } from "./data";
@@ -56,6 +58,8 @@ interface ChatThreadProps {
 }
 
 export function ChatThread({ contact, messages, onOpenContact, onBack, showBackButton, className }: ChatThreadProps) {
+  const { locale, t } = useI18n();
+
   return (
     <div className={cn("flex h-full flex-col py-3", className)}>
       <div className="flex flex-col gap-3">
@@ -66,7 +70,7 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
                 variant="ghost"
                 size="icon-sm"
                 className="md:hidden"
-                aria-label="Back to conversations"
+                aria-label={t("admin.communications.chat.thread.back")}
                 onClick={onBack}
               >
                 <ArrowLeft />
@@ -84,45 +88,79 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
 
           <div className="flex items-center gap-1">
             <Tooltip>
-              <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Call" />}>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("admin.communications.chat.thread.call")}
+                  />
+                }
+              >
                 <PhoneCall />
               </TooltipTrigger>
-              <TooltipContent>Call</TooltipContent>
+              <TooltipContent>{t("admin.communications.chat.thread.call")}</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Tag" />}>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("admin.communications.chat.thread.tag")}
+                  />
+                }
+              >
                 <Tag />
               </TooltipTrigger>
-              <TooltipContent>Tag</TooltipContent>
+              <TooltipContent>{t("admin.communications.chat.thread.tag")}</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Snooze" />}>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("admin.communications.chat.thread.snooze")}
+                  />
+                }
+              >
                 <AlarmClock />
               </TooltipTrigger>
-              <TooltipContent>Snooze</TooltipContent>
+              <TooltipContent>{t("admin.communications.chat.thread.snooze")}</TooltipContent>
             </Tooltip>
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label="More actions" />}>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("admin.communications.chat.thread.more")}
+                  />
+                }
+              >
                 <MoreHorizontal />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuGroup>
                   <DropdownMenuItem onSelect={onOpenContact}>
                     <UserRound />
-                    View profile
+                    {t("admin.communications.chat.thread.viewProfile")}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Copy />
-                    Copy email
+                    {t("admin.communications.chat.thread.copyEmail")}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Flag />
-                    Mark priority
+                    {t("admin.communications.chat.thread.markPriority")}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem variant="destructive">Block contact</DropdownMenuItem>
+                  <DropdownMenuItem variant="destructive">
+                    {t("admin.communications.chat.thread.block")}
+                  </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -137,7 +175,9 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
           <MessageScrollerViewport>
             <MessageScrollerContent className="gap-6 px-2 py-8">
               <Marker variant="separator">
-                <MarkerContent>May 6, 2026</MarkerContent>
+                <MarkerContent>
+                  {formatDate(new Date(2026, 4, 6), locale, { dateStyle: "long" })}
+                </MarkerContent>
               </Marker>
 
               {messages.map((message) => {
@@ -170,7 +210,12 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
                           <Bubble variant={isOutbound ? "default" : "muted"} align={message.align}>
                             <BubbleContent>{message.text}</BubbleContent>
                             {message.reaction ? (
-                              <BubbleReactions aria-label={`Reaction: ${message.reaction}`} align={reactionAlign}>
+                              <BubbleReactions
+                                aria-label={t("admin.communications.chat.thread.reaction", {
+                                  reaction: message.reaction,
+                                })}
+                                align={reactionAlign}
+                              >
                                 <span>{message.reaction}</span>
                               </BubbleReactions>
                             ) : null}
@@ -195,18 +240,22 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
             className="w-full justify-start gap-2 border-b px-3 **:data-[slot=tabs-trigger]:border-x-0 **:data-[slot=tabs-trigger]:px-6 group-data-horizontal/tabs:h-10"
           >
             <TabsTrigger value="reply" className="flex-none px-1">
-              Reply
+              {t("admin.communications.chat.thread.reply")}
             </TabsTrigger>
             <TabsTrigger value="note" className="flex-none px-1">
-              Internal note
+              {t("admin.communications.chat.thread.internalNote")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="reply" className="m-0">
-            <MessageComposer placeholder="Type your message..." />
+            <MessageComposer
+              placeholder={t("admin.communications.chat.thread.messagePlaceholder")}
+            />
           </TabsContent>
           <TabsContent value="note" className="m-0">
-            <MessageComposer placeholder="Write an internal note..." />
+            <MessageComposer
+              placeholder={t("admin.communications.chat.thread.notePlaceholder")}
+            />
           </TabsContent>
         </Tabs>
       </div>
@@ -215,6 +264,8 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
 }
 
 function MessageComposer({ placeholder }: { placeholder: string }) {
+  const { t } = useI18n();
+
   return (
     <form
       className="w-full"
@@ -228,24 +279,51 @@ function MessageComposer({ placeholder }: { placeholder: string }) {
           className="min-h-14 px-3 py-2.5 text-sm ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"
         />
         <InputGroupAddon align="block-end">
-          <InputGroupButton aria-label="Format" type="button" size="icon-sm">
+          <InputGroupButton
+            aria-label={t("admin.communications.chat.thread.format")}
+            type="button"
+            size="icon-sm"
+          >
             <Type />
           </InputGroupButton>
-          <InputGroupButton aria-label="Emoji" type="button" size="icon-sm">
+          <InputGroupButton
+            aria-label={t("admin.communications.chat.thread.emoji")}
+            type="button"
+            size="icon-sm"
+          >
             <Smile />
           </InputGroupButton>
-          <InputGroupButton aria-label="Attach file" type="button" size="icon-sm">
+          <InputGroupButton
+            aria-label={t("admin.communications.chat.thread.attach")}
+            type="button"
+            size="icon-sm"
+          >
             <Paperclip />
           </InputGroupButton>
-          <InputGroupButton aria-label="Insert link" type="button" size="icon-sm">
+          <InputGroupButton
+            aria-label={t("admin.communications.chat.thread.insertLink")}
+            type="button"
+            size="icon-sm"
+          >
             <Link />
           </InputGroupButton>
-          <InputGroupButton aria-label="AI assist" type="button" size="icon-sm" variant="outline">
+          <InputGroupButton
+            aria-label={t("admin.communications.chat.thread.aiAssist")}
+            type="button"
+            size="icon-sm"
+            variant="outline"
+          >
             <Sparkles />
           </InputGroupButton>
-          <InputGroupButton type="submit" variant="default" size="icon-sm" className="ml-auto">
+          <InputGroupButton
+            type="submit"
+            variant="default"
+            size="icon-sm"
+            className="ml-auto"
+            aria-label={t("admin.communications.chat.thread.send")}
+          >
             <Send />
-            <span className="sr-only">Send</span>
+            <span className="sr-only">{t("admin.communications.chat.thread.send")}</span>
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>

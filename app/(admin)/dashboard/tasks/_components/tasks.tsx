@@ -17,6 +17,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   Pagination,
   PaginationContent,
@@ -28,9 +29,10 @@ import {
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-import { columns } from "./columns";
+import { useTaskColumns } from "./columns";
 import type { Task } from "./data";
 import { TasksToolbar } from "./tasks-toolbar";
 
@@ -54,6 +56,9 @@ function getPageNumbers(currentPage: number, pageCount: number) {
 }
 
 export function Tasks({ data }: TasksProps) {
+  const { locale, t } = useI18n();
+  const columns = useTaskColumns();
+  const numberFormatter = new Intl.NumberFormat(getIntlLocale(locale));
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -126,7 +131,7 @@ export function Tasks({ data }: TasksProps) {
           ) : (
             <TableRow>
               <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                No results.
+                {t("admin.workflows.common.noResults")}
               </TableCell>
             </TableRow>
           )}
@@ -134,12 +139,16 @@ export function Tasks({ data }: TasksProps) {
       </Table>
       <div className="flex flex-col gap-3 border-t px-4 py-4 md:flex-row md:items-center md:justify-between">
         <div className="text-muted-foreground text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
+          {t("admin.workflows.common.selectedRows", {
+            selected: numberFormatter.format(table.getFilteredSelectedRowModel().rows.length),
+            total: numberFormatter.format(table.getFilteredRowModel().rows.length),
+          })}
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6 lg:gap-8">
           <div className="flex items-center gap-2">
-            <p className="font-medium text-muted-foreground text-sm">Rows per page</p>
+            <p className="font-medium text-muted-foreground text-sm">
+              {t("admin.workflows.common.rowsPerPage")}
+            </p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -153,7 +162,7 @@ export function Tasks({ data }: TasksProps) {
                 <SelectGroup>
                   {[10, 20, 30, 40, 50].map((pageSize) => (
                     <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
+                      {numberFormatter.format(pageSize)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -161,14 +170,17 @@ export function Tasks({ data }: TasksProps) {
             </Select>
           </div>
           <div className="flex w-24 items-center justify-start font-medium text-sm sm:justify-center">
-            Page {currentPage} of {pageCount}
+            {t("admin.workflows.common.pageOf", {
+              page: numberFormatter.format(currentPage),
+              total: numberFormatter.format(pageCount),
+            })}
           </div>
           <Pagination className="mx-0 w-auto justify-start sm:justify-end">
             <PaginationContent className="gap-1">
               <PaginationItem className="hidden lg:block">
                 <PaginationLink
                   href="#"
-                  aria-label="Go to first page"
+                  aria-label={t("admin.workflows.common.goFirstPage")}
                   aria-disabled={!canPreviousPage}
                   className={cn(!canPreviousPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {
@@ -182,7 +194,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  text="Prev"
+                  text={t("pagination.previous")}
                   aria-disabled={!canPreviousPage}
                   className={cn(!canPreviousPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {
@@ -206,7 +218,7 @@ export function Tasks({ data }: TasksProps) {
                       table.setPageIndex(pageNumber - 1);
                     }}
                   >
-                    {pageNumber}
+                    {numberFormatter.format(pageNumber)}
                   </PaginationLink>
                 </PaginationItem>
               ))}
@@ -218,6 +230,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem>
                 <PaginationNext
                   href="#"
+                  text={t("pagination.next")}
                   aria-disabled={!canNextPage}
                   className={cn(!canNextPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {
@@ -229,7 +242,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem className="hidden lg:block">
                 <PaginationLink
                   href="#"
-                  aria-label="Go to last page"
+                  aria-label={t("admin.workflows.common.goLastPage")}
                   aria-disabled={!canNextPage}
                   className={cn(!canNextPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {

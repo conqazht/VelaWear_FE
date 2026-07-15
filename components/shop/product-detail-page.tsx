@@ -8,18 +8,17 @@ import { ProductDetailClient } from "@/components/shop/product-detail-client";
 import { RelatedProducts } from "@/components/shop/related-products";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStatus } from "@/components/errors/storefront-status";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
-import { getActiveLocale } from "@/lib/i18n";
 
 export function ProductDetailPage({ slug }: { slug: string }) {
+  const { locale: activeLocale, t } = useI18n();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isMissing, setIsMissing] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
-
-  const activeLocale = getActiveLocale();
 
   useEffect(() => {
     let isMounted = true;
@@ -71,20 +70,20 @@ export function ProductDetailPage({ slug }: { slug: string }) {
         <StorefrontApiStatus
           error={loadError}
           onRetry={() => setRetryKey((value) => value + 1)}
-          resourceLabel="sản phẩm"
+          resourceLabel={t("storefront.product.resource")}
           returnHref="/collection"
           variant="panel"
         />
       ) : (
         <StorefrontStatus
           status={404}
-          eyebrow="VELA WEAR / SẢN PHẨM"
-          title="Thiết kế này không còn trong bộ sưu tập"
+          eyebrow={t("storefront.product.missingEyebrow")}
+          title={t("storefront.product.missingTitle")}
           description={isMissing
-            ? "Sản phẩm có thể đã ngừng hiển thị hoặc đường dẫn đã thay đổi. Hãy khám phá những thiết kế đang có tại Vela."
-            : "Không tìm thấy thông tin sản phẩm bạn đang tìm kiếm."}
-          primaryAction={{ label: "Xem bộ sưu tập", href: "/collection" }}
-          secondaryAction={{ label: "Về trang chủ", href: "/" }}
+            ? t("storefront.product.missingDescription")
+            : t("storefront.product.missingGeneric")}
+          primaryAction={{ label: t("storefront.product.viewCollection"), href: "/collection" }}
+          secondaryAction={{ label: t("storefront.product.backHome"), href: "/" }}
           variant="panel"
         />
       )}
@@ -137,18 +136,20 @@ function ProductDetailLoadingFallback() {
 }
 
 function ProductDetailContent({ product }: { product: Product }) {
+  const { t } = useI18n();
+
   return (
     <>
       <div className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
-          Home
+          {t("storefront.common.home")}
         </Link>
         <span>/</span>
         <Link
           href="/collection"
           className="font-medium text-[#1c1a18] underline decoration-[#1c1a18]/20 underline-offset-4 hover:text-[#b85a3c]"
         >
-          Collections
+          {t("storefront.common.collections")}
         </Link>
         <span>/</span>
         <span className="max-w-[200px] truncate text-[#1c1a18]/40">
@@ -169,26 +170,23 @@ function ProductDetailContent({ product }: { product: Product }) {
       <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
         <div className="md:pr-6 text-left">
           <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
-            Craft & Sustainability
+            {t("storefront.product.craftEyebrow")}
           </span>
           <h2 className="mb-6 font-serif text-2xl font-light leading-tight tracking-[0.05em] text-[#1c1a18] md:text-4xl">
-            Woven with Intention.
+            {t("storefront.product.craftTitle")}
           </h2>
           <p className="mb-4 text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
-            Chúng tôi tìm thấy hạt mầm lanh thô mộc từ những nông trại hữu cơ
-            tại Pháp. Sợi lanh được đan cài bền bỉ với cotton tự nhiên để tạo
-            phom thanh thoát.
+            {t("storefront.product.craftParagraph1")}
           </p>
           <p className="text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
-            Lớp lót tơ được khâu tay tinh tế, tối ưu sự thoáng khí và giữ cảm
-            giác mềm dịu với làn da suốt cả ngày.
+            {t("storefront.product.craftParagraph2")}
           </p>
         </div>
 
         <div className="relative aspect-[16/10] overflow-hidden rounded-sm border border-[#1c1a18]/5 bg-[#efebe4]">
           <FashionImage
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuC__H_4LMn9OWi2bzyNpIzC4gWHb9Br_Vet75TFD7uxaguWkP7KSCSFBLXNsS2sP9erYbXRbGKE-izIYXYHiCo87L58iNU80wrzteP0YK5eZku6Lz5B-IOD3xArSTTCzfPAA-ZRZG79PT-WF8sCzihhElmNZoDXZ5TId8uv0DiWfTf6mSGt7kD4f9droH6eKaw_bVH_JBVY_po65000LIfGEqogroLcKbqgTs6UpJpKEmzanAdDuAzI44Si0MQ5dp-RPTuzCoD8ICi6"
-            alt="Linen weave close-up detail texture"
+            alt={t("storefront.product.craftImageAlt")}
           />
         </div>
       </section>
@@ -197,14 +195,16 @@ function ProductDetailContent({ product }: { product: Product }) {
 }
 
 function ProductDetailFixture() {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-10">
       <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
-        <span>Home</span>
+        <span>{t("storefront.common.home")}</span>
         <span>/</span>
-        <span className="font-medium text-[#1c1a18]">Collections</span>
+        <span className="font-medium text-[#1c1a18]">{t("storefront.common.collections")}</span>
         <span>/</span>
-        <span>Tailored Linen Blazer</span>
+        <span>{t("storefront.product.fixtureName")}</span>
       </div>
 
       <div className="mx-auto grid w-full gap-10 xl:max-w-[1180px] xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:max-w-[1220px] 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
@@ -220,8 +220,8 @@ function ProductDetailFixture() {
 
         <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
           <div className="space-y-3">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#b85a3c]">Atelier Collection</p>
-            <h1 className="font-serif text-4xl font-light tracking-wide text-[#1c1a18]">Tailored Linen Blazer</h1>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[#b85a3c]">{t("storefront.product.fixtureCollection")}</p>
+            <h1 className="font-serif text-4xl font-light tracking-wide text-[#1c1a18]">{t("storefront.product.fixtureName")}</h1>
           </div>
           <div className="mb-6 mt-6 h-8 w-48 bg-[#efe7dc]" />
           <div className="mb-8 h-px w-full bg-[#1c1a18]/10" />
@@ -252,13 +252,13 @@ function ProductDetailFixture() {
       <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
         <div className="space-y-4">
           <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
-            Craft & Sustainability
+            {t("storefront.product.craftEyebrow")}
           </span>
           <h2 className="font-serif text-2xl font-light leading-tight tracking-[0.05em] text-[#1c1a18] md:text-4xl">
-            Woven with Intention.
+            {t("storefront.product.craftTitle")}
           </h2>
           <p className="text-sm leading-7 text-[#1c1a18]/65">
-            Natural fibers and considered construction define the Vela Wear approach.
+            {t("storefront.product.fixtureDescription")}
           </p>
         </div>
         <div className="aspect-[16/10] bg-[#efebe4]" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,6 +31,8 @@ type PermissionFormProps = {
 };
 
 export function PermissionForm({ values, onChange, moduleOptions }: PermissionFormProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof PermissionFormValues>(key: Key, value: PermissionFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -37,7 +40,7 @@ export function PermissionForm({ values, onChange, moduleOptions }: PermissionFo
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="permission-name">Permission name</FieldLabel>
+        <FieldLabel htmlFor="permission-name">{t("admin.commerce.permissions.form.name")}</FieldLabel>
         <Input
           id="permission-name"
           value={values.name}
@@ -46,12 +49,14 @@ export function PermissionForm({ values, onChange, moduleOptions }: PermissionFo
           placeholder="VIEW_PRODUCTS"
           required
         />
-        <FieldDescription>Use a clear action-oriented identifier, typically in uppercase snake case.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.permissions.form.nameHelp")}</FieldDescription>
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="permission-method">HTTP method</FieldLabel>
+          <FieldLabel htmlFor="permission-method">
+            {t("admin.commerce.permissions.form.httpMethod")}
+          </FieldLabel>
           <Select
             value={values.method}
             onValueChange={(value) => update("method", value as PermissionMethod)}
@@ -70,7 +75,9 @@ export function PermissionForm({ values, onChange, moduleOptions }: PermissionFo
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="permission-module">Module</FieldLabel>
+          <FieldLabel htmlFor="permission-module">
+            {t("admin.commerce.permissions.form.module")}
+          </FieldLabel>
           <Input
             id="permission-module"
             list="permission-module-options"
@@ -89,7 +96,9 @@ export function PermissionForm({ values, onChange, moduleOptions }: PermissionFo
       </div>
 
       <Field>
-        <FieldLabel htmlFor="permission-api-path">API path</FieldLabel>
+        <FieldLabel htmlFor="permission-api-path">
+          {t("admin.commerce.permissions.form.apiPath")}
+        </FieldLabel>
         <Input
           id="permission-api-path"
           value={values.apiPath}
@@ -100,7 +109,7 @@ export function PermissionForm({ values, onChange, moduleOptions }: PermissionFo
           required
         />
         <FieldDescription>
-          Enter the backend route pattern exactly. Path variables such as {"{id}"} are supported.
+          {t("admin.commerce.permissions.form.apiPathHelp", { example: "{id}" })}
         </FieldDescription>
       </Field>
     </FieldGroup>

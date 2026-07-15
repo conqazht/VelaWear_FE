@@ -14,10 +14,9 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
   downloadCsv,
-  formatAdminDate,
-  formatCurrency,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
@@ -27,6 +26,7 @@ import type {
   CreateAdminCouponRequest,
   UpdateAdminCouponRequest,
 } from "@/lib/api/admin-commerce";
+import { formatCurrency, formatDate, formatNumber } from "@/lib/i18n/format";
 import {
   useAdminCouponsQuery,
   useCreateAdminCouponMutation,
@@ -43,16 +43,19 @@ import {
 
 const ALL_FILTER = "ALL";
 
-const COUPON_STATUS_LABELS: Record<CouponStatus, string> = {
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-  EXPIRED: "Expired",
-};
+const COUPON_STATUS_MESSAGE_KEYS = {
+  ACTIVE: "admin.commerce.coupons.status.active",
+  INACTIVE: "admin.commerce.coupons.status.inactive",
+  EXPIRED: "admin.commerce.coupons.status.expired",
+} as const;
 
-const COUPON_TYPE_LABELS: Record<CouponType, string> = {
-  PERCENTAGE: "Percentage",
-  FIXED_AMOUNT: "Fixed amount",
-};
+const COUPON_TYPE_MESSAGE_KEYS = {
+  PERCENTAGE: "admin.commerce.coupons.type.percentage",
+  FIXED_AMOUNT: "admin.commerce.coupons.type.fixedAmount",
+} as const;
+
+const COUPON_STATUSES: CouponStatus[] = ["ACTIVE", "INACTIVE", "EXPIRED"];
+const COUPON_TYPES: CouponType[] = ["PERCENTAGE", "FIXED_AMOUNT"];
 
 function getStatusVariant(status: CouponStatus) {
   if (status === "ACTIVE") return "default" as const;
@@ -60,11 +63,11 @@ function getStatusVariant(status: CouponStatus) {
   return "secondary" as const;
 }
 
-function formatCouponValue(coupon: AdminCoupon) {
+function formatCouponValue(coupon: AdminCoupon, locale: ReturnType<typeof useI18n>["locale"]) {
   if (coupon.type === "PERCENTAGE") {
-    return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(coupon.value)}%`;
+    return `${formatNumber(coupon.value, locale, { maximumFractionDigits: 2 })}%`;
   }
-  return formatCurrency(coupon.value);
+  return formatCurrency(coupon.value, locale);
 }
 
 function toFormValues(coupon: AdminCoupon): CouponFormValues {
@@ -86,6 +89,7 @@ function parseOptionalNumber(value: string) {
 }
 
 export function CouponsManagement() {
+  const { locale, t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -137,27 +141,27 @@ export function CouponsManagement() {
     const endDate = new Date(formValues.endDate);
 
     if (!editingCoupon && !code) {
-      toast.error("Enter a coupon code before saving.");
+      toast.error(t("admin.commerce.coupons.validation.code"));
       return;
     }
     if (!Number.isFinite(value) || value < 0 || !Number.isFinite(minOrderAmount) || minOrderAmount < 0) {
-      toast.error("Coupon value and minimum order must be valid non-negative numbers.");
+      toast.error(t("admin.commerce.coupons.validation.amounts"));
       return;
     }
     if (formValues.type === "PERCENTAGE" && value > 100) {
-      toast.error("A percentage coupon cannot exceed 100%.");
+      toast.error(t("admin.commerce.coupons.validation.percentage"));
       return;
     }
     if (maxDiscount !== null && (!Number.isFinite(maxDiscount) || maxDiscount < 0)) {
-      toast.error("Maximum discount must be a non-negative number.");
+      toast.error(t("admin.commerce.coupons.validation.maxDiscount"));
       return;
     }
     if (usageLimit !== null && (!Number.isInteger(usageLimit) || usageLimit < 0)) {
-      toast.error("Usage limit must be a non-negative whole number.");
+      toast.error(t("admin.commerce.coupons.validation.usageLimit"));
       return;
     }
     if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || endDate <= startDate) {
-      toast.error("End date must be later than start date.");
+      toast.error(t("admin.commerce.coupons.validation.dates"));
       return;
     }
 
@@ -177,7 +181,7 @@ export function CouponsManagement() {
         { id: editingCoupon.id, request: commonRequest },
         {
           onSuccess: () => {
-            toast.success(`${editingCoupon.code} was updated.`);
+            toast.success(t("admin.commerce.coupons.updated", { code: editingCoupon.code }));
             setFormOpen(false);
             setEditingCoupon(null);
           },
@@ -190,7 +194,7 @@ export function CouponsManagement() {
     const request: CreateAdminCouponRequest = { ...commonRequest, code };
     createMutation.mutate(request, {
       onSuccess: () => {
-        toast.success(`${code} was created.`);
+        toast.success(t("admin.commerce.coupons.created", { code }));
         setPage(1);
         setFormOpen(false);
       },
@@ -201,14 +205,14 @@ export function CouponsManagement() {
   function handleDelete() {
     if (!deleteCoupon) return;
     if (deleteCoupon.usedCount > 0) {
-      toast.error("Used coupons cannot be deleted. Set the coupon to inactive instead.");
+      toast.error(t("admin.commerce.coupons.usedCannotDelete"));
       return;
     }
 
     const { id, code } = deleteCoupon;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success(`${code} was deleted.`);
+        toast.success(t("admin.commerce.coupons.deleted", { code }));
         setDeleteCoupon(null);
         setPage(1);
       },
@@ -219,7 +223,7 @@ export function CouponsManagement() {
   const columns: ManagementColumn<AdminCoupon>[] = [
     {
       key: "code",
-      header: "Coupon",
+      header: t("admin.commerce.coupons.column.coupon"),
       className: "min-w-44",
       cell: (coupon) => (
         <div className="flex items-center gap-3">
@@ -228,70 +232,98 @@ export function CouponsManagement() {
           </div>
           <div>
             <p className="font-mono font-medium">{coupon.code}</p>
-            <p className="text-muted-foreground text-xs">{COUPON_TYPE_LABELS[coupon.type]}</p>
+            <p className="text-muted-foreground text-xs">
+              {t(COUPON_TYPE_MESSAGE_KEYS[coupon.type])}
+            </p>
           </div>
         </div>
       ),
     },
     {
       key: "discount",
-      header: "Discount",
+      header: t("admin.commerce.coupons.column.discount"),
       className: "whitespace-nowrap tabular-nums",
       cell: (coupon) => (
         <div className="space-y-0.5">
-          <p className="font-medium">{formatCouponValue(coupon)}</p>
-          <p className="text-muted-foreground text-xs">Min. {formatCurrency(coupon.minOrderAmount)}</p>
+          <p className="font-medium">{formatCouponValue(coupon, locale)}</p>
+          <p className="text-muted-foreground text-xs">
+            {t("admin.commerce.coupons.minimum", {
+              amount: formatCurrency(coupon.minOrderAmount, locale),
+            })}
+          </p>
         </div>
       ),
     },
     {
       key: "usage",
-      header: "Usage",
+      header: t("admin.commerce.coupons.column.usage"),
       className: "whitespace-nowrap tabular-nums",
       cell: (coupon) => (
         <div className="space-y-0.5">
           <p className="font-medium">
-            {coupon.usedCount} / {coupon.usageLimit ?? "∞"}
+            {formatNumber(coupon.usedCount, locale)} /{" "}
+            {coupon.usageLimit === null ? "∞" : formatNumber(coupon.usageLimit, locale)}
           </p>
           <p className="text-muted-foreground text-xs">
-            {coupon.usedCount > 0 ? "Protected from deletion" : "Not used yet"}
+            {coupon.usedCount > 0
+              ? t("admin.commerce.coupons.protected")
+              : t("admin.commerce.coupons.notUsed")}
           </p>
         </div>
       ),
     },
     {
       key: "validity",
-      header: "Validity",
+      header: t("admin.commerce.coupons.column.validity"),
       className: "whitespace-nowrap",
       cell: (coupon) => (
         <div className="space-y-0.5">
-          <p>{formatAdminDate(coupon.startDate)}</p>
-          <p className="text-muted-foreground text-xs">to {formatAdminDate(coupon.endDate)}</p>
+          <p>{formatDate(coupon.startDate, locale)}</p>
+          <p className="text-muted-foreground text-xs">
+            {t("admin.commerce.coupons.validTo", {
+              date: formatDate(coupon.endDate, locale),
+            })}
+          </p>
         </div>
       ),
     },
     {
       key: "status",
-      header: "Status",
+      header: t("admin.commerce.common.status"),
       cell: (coupon) => (
-        <Badge variant={getStatusVariant(coupon.status)}>{COUPON_STATUS_LABELS[coupon.status]}</Badge>
+        <Badge variant={getStatusVariant(coupon.status)}>
+          {t(COUPON_STATUS_MESSAGE_KEYS[coupon.status])}
+        </Badge>
       ),
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (coupon) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon-sm" aria-label={`Edit ${coupon.code}`} onClick={() => openEditForm(coupon)}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.commerce.coupons.editNamed", { code: coupon.code })}
+            onClick={() => openEditForm(coupon)}
+          >
             <Pencil />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={coupon.usedCount > 0 ? `${coupon.code} cannot be deleted because it has been used` : `Delete ${coupon.code}`}
-            title={coupon.usedCount > 0 ? "Used coupons cannot be deleted" : `Delete ${coupon.code}`}
+            aria-label={
+              coupon.usedCount > 0
+                ? t("admin.commerce.coupons.usedDeleteAria", { code: coupon.code })
+                : t("admin.commerce.coupons.deleteNamed", { code: coupon.code })
+            }
+            title={
+              coupon.usedCount > 0
+                ? t("admin.commerce.coupons.usedDeleteTitle")
+                : t("admin.commerce.coupons.deleteNamed", { code: coupon.code })
+            }
             disabled={coupon.usedCount > 0}
             onClick={() => setDeleteCoupon(coupon)}
           >
@@ -305,8 +337,8 @@ export function CouponsManagement() {
   return (
     <>
       <ResourcePage
-        title="Coupons"
-        description="Create and schedule promotions. Coupons with usage history are retained and should be marked inactive instead of deleted."
+        title={t("admin.commerce.coupons.title")}
+        description={t("admin.commerce.coupons.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -314,7 +346,7 @@ export function CouponsManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search coupon codes..."
+        searchPlaceholder={t("admin.commerce.coupons.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -326,11 +358,14 @@ export function CouponsManagement() {
         }}
         filters={[
           {
-            label: "Status",
+            label: t("admin.commerce.common.status"),
             value: statusFilter,
             options: [
-              { label: "All statuses", value: ALL_FILTER },
-              ...Object.entries(COUPON_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+              { label: t("admin.commerce.common.allStatuses"), value: ALL_FILTER },
+              ...COUPON_STATUSES.map((value) => ({
+                value,
+                label: t(COUPON_STATUS_MESSAGE_KEYS[value]),
+              })),
             ],
             onValueChange: (value) => {
               setStatusFilter(value ?? ALL_FILTER);
@@ -338,11 +373,14 @@ export function CouponsManagement() {
             },
           },
           {
-            label: "Type",
+            label: t("admin.commerce.coupons.filter.type"),
             value: typeFilter,
             options: [
-              { label: "All types", value: ALL_FILTER },
-              ...Object.entries(COUPON_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+              { label: t("admin.commerce.coupons.filter.allTypes"), value: ALL_FILTER },
+              ...COUPON_TYPES.map((value) => ({
+                value,
+                label: t(COUPON_TYPE_MESSAGE_KEYS[value]),
+              })),
             ],
             onValueChange: (value) => {
               setTypeFilter(value ?? ALL_FILTER);
@@ -350,7 +388,7 @@ export function CouponsManagement() {
             },
           },
         ]}
-        primaryAction={{ label: "Add coupon", onClick: openCreateForm }}
+        primaryAction={{ label: t("admin.commerce.coupons.add"), onClick: openCreateForm }}
         onRefresh={() => void couponsQuery.refetch()}
         onExport={() =>
           downloadCsv(
@@ -358,7 +396,7 @@ export function CouponsManagement() {
             rows.map((coupon) => ({
               id: coupon.id,
               code: coupon.code,
-              type: coupon.type,
+              type: t(COUPON_TYPE_MESSAGE_KEYS[coupon.type]),
               value: coupon.value,
               minOrderAmount: coupon.minOrderAmount,
               maxDiscount: coupon.maxDiscount,
@@ -366,15 +404,15 @@ export function CouponsManagement() {
               usedCount: coupon.usedCount,
               startDate: coupon.startDate,
               endDate: coupon.endDate,
-              status: coupon.status,
+              status: t(COUPON_STATUS_MESSAGE_KEYS[coupon.status]),
             }))
           )
         }
         isLoading={couponsQuery.isPending}
         isFetching={couponsQuery.isFetching}
         error={couponsQuery.isError ? couponsQuery.error : null}
-        emptyTitle="No coupons found"
-        emptyDescription="Create a coupon or adjust the current search and filters."
+        emptyTitle={t("admin.commerce.coupons.emptyTitle")}
+        emptyDescription={t("admin.commerce.coupons.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -382,11 +420,19 @@ export function CouponsManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingCoupon ? "Edit coupon" : "Add coupon"}
-        description="Set discount rules, usage limits, availability dates, and lifecycle status."
+        title={
+          editingCoupon
+            ? t("admin.commerce.coupons.edit")
+            : t("admin.commerce.coupons.add")
+        }
+        description={t("admin.commerce.coupons.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
-        submitLabel={editingCoupon ? "Save coupon" : "Create coupon"}
+        submitLabel={
+          editingCoupon
+            ? t("admin.commerce.coupons.save")
+            : t("admin.commerce.coupons.create")
+        }
       >
         <CouponForm values={formValues} onChange={setFormValues} isEditing={Boolean(editingCoupon)} />
       </ResourceFormSheet>
@@ -396,8 +442,8 @@ export function CouponsManagement() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteCoupon(null);
         }}
-        resourceName={deleteCoupon?.code ?? "coupon"}
-        description="Only unused coupons can be deleted. This action permanently removes the coupon."
+        resourceName={deleteCoupon?.code ?? t("admin.commerce.coupons.resource")}
+        description={t("admin.commerce.coupons.deleteDescription")}
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />

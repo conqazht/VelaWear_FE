@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   getBrands,
   getCategories,
@@ -18,8 +19,10 @@ import type { PageParams } from "@/lib/api/types";
 import { queryKeys } from "./keys";
 
 export function useProductsQuery(filters: ProductFilters = {}) {
+  const { locale } = useI18n();
+
   return useQuery({
-    queryKey: queryKeys.products.list(filters),
+    queryKey: queryKeys.products.list(filters, locale),
     queryFn: () => getProducts(filters),
     placeholderData: keepPreviousData,
     staleTime: 30_000,
@@ -27,10 +30,13 @@ export function useProductsQuery(filters: ProductFilters = {}) {
   });
 }
 
-export function useProductQuery(id: number | string) {
+export function useProductQuery(id: number | string, localeOverride?: string) {
+  const { locale } = useI18n();
+  const resolvedLocale = localeOverride ?? locale;
+
   return useQuery({
-    queryKey: queryKeys.products.detail(id),
-    queryFn: () => getProduct(id),
+    queryKey: queryKeys.products.detail(id, resolvedLocale),
+    queryFn: () => getProduct(id, resolvedLocale),
     enabled: Boolean(id),
     staleTime: 5_000,
     refetchInterval: 15_000,
@@ -39,8 +45,10 @@ export function useProductQuery(id: number | string) {
 }
 
 export function useCategoriesQuery(params: PageParams = {}) {
+  const { locale } = useI18n();
+
   return useQuery({
-    queryKey: queryKeys.catalog.categories(params),
+    queryKey: queryKeys.catalog.categories(params, locale),
     queryFn: () => getCategories(params),
   });
 }

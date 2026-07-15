@@ -1,4 +1,7 @@
 import type { PriceSource, Pricing } from "@/lib/api/types";
+import type { Locale } from "@/lib/i18n";
+import { localizeFixtureProduct } from "@/lib/i18n/fixture-products";
+import { formatCurrency } from "@/lib/i18n/format";
 
 export interface CartItem {
   id: string;
@@ -93,10 +96,40 @@ export function getCategoryLabel(
   return labels[category] ?? categoryFallbackLabels[locale];
 }
 
+const productBadgeLabels = {
+  en: {
+    new: "New",
+    sale: "Sale",
+    seasonal: "Seasonal Pick",
+    loved: "Most Loved",
+  },
+  vi: {
+    new: "Mới",
+    sale: "Giảm giá",
+    seasonal: "Gợi ý theo mùa",
+    loved: "Được yêu thích nhất",
+  },
+} as const;
+
+export function getProductBadgeLabel(badge: string, locale: Locale): string {
+  const normalized = badge.trim().toLocaleLowerCase();
+  const key = normalized === "new" || normalized === "mới"
+    ? "new"
+    : normalized === "sale" || normalized === "giảm giá"
+      ? "sale"
+      : normalized === "seasonal pick" || normalized === "gợi ý theo mùa"
+        ? "seasonal"
+        : normalized === "most loved" || normalized === "được yêu thích nhất"
+          ? "loved"
+          : null;
+
+  return key ? productBadgeLabels[locale][key] : badge;
+}
+
 export const categoryTabs = ["ALL", "AO", "QUAN", "PHU KIEN"];
 
-export const money = (value: number) => {
-  return `${value.toLocaleString("vi-VN")}đ`;
+export const money = (value: number, locale: Locale = "vi") => {
+  return formatCurrency(value, locale);
 };
 
 export const getProductById = (id: string) =>
@@ -237,11 +270,11 @@ export const PRODUCTS: Product[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCyQTGTpgHC2eDqWMGK8dR2RuHmPVKLBqYH20_WPIANN1bFcjjQ6-8kTI1SelzlScRo5881xkzSzOBJRYoe4ZCEbMWsPzeqydM2SbOliSQPh-TPL_WAoL7rp27x_yaBc-ZZBSe4qIc8o50jRXY4h5IFZJ21Ep5UAt5H3zV7d7ZI6AN8NcMV5aJx-vFgKR5CPdNAdoRcnsqs45aaesgReQqVl56pF2YS22-Wh2E_Zas8zX_4oPiVWTDcAc2IF3klxwGDZ2T1uIGDaNRi",
     category: "AO",
-    badge: "MỚI",
+    badge: "New",
     color: "Sage",
     size: "M",
     description:
-      "Chất liệu linen dệt mộc cực thoáng, đường may giấu chỉ vô cùng tinh tế và chỉ chu. Áo giặt vài lần vẫn giữ phom rủ rất đẹp. Màu sắc ấm áp, dễ chịu.",
+      "Exceptionally breathable rustic-woven linen with meticulous hidden stitching. It keeps its elegant drape after repeated washes and comes in a warm, easy-to-style shade.",
   },
   {
     id: "pleated-wool-trousers",
@@ -250,11 +283,11 @@ export const PRODUCTS: Product[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCvP7H8zQsUizbqeLCsGS0Hu3mLducId6DXvb0dwq-5VgHnm48wp8zWIsynRu5pIR4AE4ZUhPlPSHf9alsJK-GVFz9dFe37X68bqSV9t-gpzqZyUpJAdJHK4AHznxt5LgUBtExaHWPDISobXgESuMFsgJMBzFURdBOCeueSSZ7Q7B1_aD2VjnljK_qtpicDlBuOzhZDko34wB7-_XXWfDzX5u_afVC_XmAI3fffbOtgtuAo9ocnrGaHo3-afBhVIzN3nKWUEXl3bzA6",
     category: "QUAN",
-    badge: "MỚI",
+    badge: "New",
     color: "Charcoal",
     size: "S",
     description:
-      "Quần tây ly xếp phom đứng tuyệt đẹp. Từng nếp gấp ly được ép tỉ mỉ và đứng dáng cực kỳ tôn dáng. Chất vải pha len nhẹ mặc rất dễ chịu, thích hợp cho cả công sở lẫn dạo phố cuối tuần.",
+      "Beautifully structured pleated trousers. Every fold is carefully pressed to hold its shape and flatter the silhouette. The lightweight wool blend is comfortable for work and relaxed weekends alike.",
   },
   {
     id: "the-heritage-tote",
@@ -268,7 +301,7 @@ export const PRODUCTS: Product[] = [
     color: "Terracotta",
     size: "OS",
     description:
-      "Chiếc túi tote da thật cực kỳ dày dặn, da mềm mại tự nhiên và mùi hương mộc mạc tinh tế. Kích thước vừa vặn cho máy tính và tài liệu, quai xách chắc chắn vô cùng thanh thoát.",
+      "A substantial genuine-leather tote with a naturally soft hand and refined, earthy character. It is sized for a laptop and documents, with sturdy yet elegant handles.",
   },
   {
     id: "merino-wool-coat",
@@ -280,7 +313,7 @@ export const PRODUCTS: Product[] = [
     color: "Charcoal",
     size: "M",
     description:
-      "Chiếc áo khoác mang lại cảm giác cực kỳ ấm áp và sang trọng. Chất len merino mềm mướt không tì vết, phom dáng rủ tự nhiên chuẩn phong cách rủ tinh tế. Đây thực sự là khoản đầu tư xứng đáng cho tủ đồ mùa đông.",
+      "An exceptionally warm and luxurious coat. Impeccably soft merino wool and a natural drape create a refined silhouette—an enduring winter wardrobe investment.",
   },
 ];
 
@@ -394,8 +427,7 @@ export function mapBackendProduct(
     categoryName?: string | null;
     categorySlug?: string | null;
   },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  locale: string = "vi"
+  locale: Locale = "vi"
 ): Product {
   // Find local match by matching originalSlug, slug, or name
   const match = PRODUCTS.find(
@@ -405,6 +437,7 @@ export function mapBackendProduct(
       p.id === bp.slug.replace(/-[0-9]+$/, "") ||
       p.name.toLowerCase() === bp.name.toLowerCase()
   );
+  const localizedMatch = match ? localizeFixtureProduct(match, locale) : undefined;
 
   const colorImages = (bp.colorImages ?? []).map((group) => {
     const images = Array.from(new Set(group.images.map(resolveImageUrl)));
@@ -435,7 +468,7 @@ export function mapBackendProduct(
     id: bp.slug,
     realId: bp.id,
     name: bp.name,
-    description: bp.description || (match ? match.description : ""),
+    description: bp.description || localizedMatch?.description || "",
     price: bp.pricing?.effectivePrice ?? bp.price ?? 0,
     originalPrice:
       bp.pricing && bp.pricing.listPrice > bp.pricing.effectivePrice
@@ -447,9 +480,9 @@ export function mapBackendProduct(
         ? "Flash Sale"
         : bp.pricing?.priceSource === "STANDARD_SALE"
           ? "Sale"
-          : match?.badge,
+          : localizedMatch?.badge,
     pricing: bp.pricing ?? undefined,
-    color: colorImages[0]?.colorName || (match ? match.color : "Black"),
+    color: colorImages[0]?.colorName || localizedMatch?.color || (locale === "vi" ? "Đen" : "Black"),
     size: match ? match.size : "M",
     category: bp.categoryName || (match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN")),
     seoTitle: bp.seoTitle,

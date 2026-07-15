@@ -14,9 +14,9 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
   downloadCsv,
-  formatAdminDateTime,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
@@ -24,6 +24,7 @@ import type {
   CreateAdminPermissionRequest,
   UpdateAdminPermissionRequest,
 } from "@/lib/api/admin-rbac";
+import { formatDateTime } from "@/lib/i18n/format";
 import {
   useAdminPermissionsQuery,
   useCreateAdminPermissionMutation,
@@ -62,6 +63,7 @@ function toFormValues(permission: AdminPermission): PermissionFormValues {
 }
 
 export function PermissionsManagement() {
+  const { locale, t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -116,11 +118,11 @@ export function PermissionsManagement() {
     };
 
     if (!request.name || !request.apiPath || !request.module) {
-      toast.error("Complete every permission field before saving.");
+      toast.error(t("admin.commerce.permissions.validation.complete"));
       return;
     }
     if (!request.apiPath.startsWith("/")) {
-      toast.error("API path must start with a forward slash.");
+      toast.error(t("admin.commerce.permissions.validation.path"));
       return;
     }
 
@@ -130,7 +132,7 @@ export function PermissionsManagement() {
         { id: editingPermission.id, request: updateRequest },
         {
           onSuccess: () => {
-            toast.success(`${request.name} was updated.`);
+            toast.success(t("admin.commerce.permissions.updated", { name: request.name }));
             setEditingPermission(null);
             setFormOpen(false);
           },
@@ -142,7 +144,7 @@ export function PermissionsManagement() {
 
     createMutation.mutate(request, {
       onSuccess: () => {
-        toast.success(`${request.name} was created.`);
+        toast.success(t("admin.commerce.permissions.created", { name: request.name }));
         setPage(1);
         setFormOpen(false);
       },
@@ -156,7 +158,7 @@ export function PermissionsManagement() {
     const { id, name } = deletePermission;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success(`${name} was deleted.`);
+        toast.success(t("admin.commerce.permissions.deleted", { name }));
         setDeletePermission(null);
         setPage(1);
       },
@@ -167,7 +169,7 @@ export function PermissionsManagement() {
   const columns: ManagementColumn<AdminPermission>[] = [
     {
       key: "name",
-      header: "Permission",
+      header: t("admin.commerce.permissions.column.permission"),
       className: "min-w-56",
       cell: (permission) => (
         <div className="flex items-center gap-3">
@@ -180,7 +182,7 @@ export function PermissionsManagement() {
     },
     {
       key: "endpoint",
-      header: "Endpoint",
+      header: t("admin.commerce.permissions.column.endpoint"),
       className: "min-w-80",
       cell: (permission) => (
         <div className="flex items-center gap-2">
@@ -193,18 +195,18 @@ export function PermissionsManagement() {
     },
     {
       key: "module",
-      header: "Module",
+      header: t("admin.commerce.permissions.column.module"),
       cell: (permission) => <Badge variant="outline">{permission.module}</Badge>,
     },
     {
       key: "updatedAt",
-      header: "Updated",
+      header: t("admin.commerce.common.updated"),
       className: "whitespace-nowrap text-muted-foreground",
-      cell: (permission) => formatAdminDateTime(permission.updatedAt),
+      cell: (permission) => formatDateTime(permission.updatedAt, locale),
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (permission) => (
@@ -212,7 +214,7 @@ export function PermissionsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Edit ${permission.name}`}
+            aria-label={t("admin.commerce.common.editNamed", { name: permission.name })}
             onClick={() => openEditForm(permission)}
           >
             <Pencil />
@@ -220,7 +222,7 @@ export function PermissionsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Delete ${permission.name}`}
+            aria-label={t("admin.commerce.common.deleteNamed", { name: permission.name })}
             onClick={() => setDeletePermission(permission)}
           >
             <Trash2 />
@@ -233,8 +235,8 @@ export function PermissionsManagement() {
   return (
     <>
       <ResourcePage
-        title="Permissions"
-        description="Manage method-and-path rules used by backend role-based access control. Changes can affect access immediately."
+        title={t("admin.commerce.permissions.title")}
+        description={t("admin.commerce.permissions.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -242,7 +244,7 @@ export function PermissionsManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search permission names..."
+        searchPlaceholder={t("admin.commerce.permissions.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -254,10 +256,10 @@ export function PermissionsManagement() {
         }}
         filters={[
           {
-            label: "Method",
+            label: t("admin.commerce.permissions.method"),
             value: methodFilter,
             options: [
-              { label: "All methods", value: ALL_FILTER },
+              { label: t("admin.commerce.permissions.allMethods"), value: ALL_FILTER },
               ...PERMISSION_METHODS.map((method) => ({ label: method, value: method })),
             ],
             onValueChange: (value) => {
@@ -266,10 +268,10 @@ export function PermissionsManagement() {
             },
           },
           {
-            label: "Module",
+            label: t("admin.commerce.permissions.module"),
             value: moduleFilter,
             options: [
-              { label: "All modules", value: ALL_FILTER },
+              { label: t("admin.commerce.permissions.allModules"), value: ALL_FILTER },
               ...moduleOptions.map((module) => ({ label: module, value: module })),
             ],
             onValueChange: (value) => {
@@ -278,7 +280,7 @@ export function PermissionsManagement() {
             },
           },
         ]}
-        primaryAction={{ label: "Add permission", onClick: openCreateForm }}
+        primaryAction={{ label: t("admin.commerce.permissions.add"), onClick: openCreateForm }}
         onRefresh={() => void permissionsQuery.refetch()}
         onExport={() =>
           downloadCsv(
@@ -297,8 +299,8 @@ export function PermissionsManagement() {
         isLoading={permissionsQuery.isPending}
         isFetching={permissionsQuery.isFetching}
         error={permissionsQuery.isError ? permissionsQuery.error : null}
-        emptyTitle="No permissions found"
-        emptyDescription="Add a permission or adjust the name, method, and module filters."
+        emptyTitle={t("admin.commerce.permissions.emptyTitle")}
+        emptyDescription={t("admin.commerce.permissions.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -306,11 +308,19 @@ export function PermissionsManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingPermission ? "Edit permission" : "Add permission"}
-        description="A permission matches one HTTP method and one backend API path pattern."
+        title={
+          editingPermission
+            ? t("admin.commerce.permissions.edit")
+            : t("admin.commerce.permissions.add")
+        }
+        description={t("admin.commerce.permissions.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
-        submitLabel={editingPermission ? "Save permission" : "Create permission"}
+        submitLabel={
+          editingPermission
+            ? t("admin.commerce.permissions.save")
+            : t("admin.commerce.permissions.create")
+        }
       >
         <PermissionForm values={formValues} onChange={setFormValues} moduleOptions={moduleOptions} />
       </ResourceFormSheet>
@@ -320,8 +330,8 @@ export function PermissionsManagement() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeletePermission(null);
         }}
-        resourceName={deletePermission?.name ?? "permission"}
-        description="Deleting this permission removes it from assigned roles and may revoke access immediately."
+        resourceName={deletePermission?.name ?? t("admin.commerce.permissions.resource")}
+        description={t("admin.commerce.permissions.deleteDescription")}
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />

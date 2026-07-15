@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { Card } from "@/components/ui/card";
@@ -22,16 +23,37 @@ import {
   getOrderStatusHistories,
 } from "@/lib/api/commerce";
 import { cancelOrder } from "@/lib/checkout-api";
+import { formatDateTime } from "@/lib/i18n/format";
 import { money } from "@/lib/vela-data";
 
-const statusLabels: Record<string, string> = {
-  PENDING: "Chờ xác nhận",
-  CONFIRMED: "Đã xác nhận",
-  PROCESSING: "Đang chuẩn bị",
-  SHIPPED: "Đang giao",
-  DELIVERED: "Đã giao",
-  CANCELLED: "Đã huỷ",
-};
+const statusLabelKeys = {
+  PENDING: "account.orders.status.pending",
+  CONFIRMED: "account.orders.status.confirmed",
+  PROCESSING: "account.orders.status.processing",
+  SHIPPING: "account.orders.status.shipping",
+  SHIPPED: "account.orders.status.shipped",
+  COMPLETED: "account.orders.status.completed",
+  DELIVERED: "account.orders.status.delivered",
+  CANCELLED: "account.orders.status.cancelled",
+  REFUNDED: "account.orders.status.refunded",
+} as const;
+
+const paymentMethodKeys = {
+  COD: "account.order.paymentMethod.cod",
+  SEPAY: "sale.payment.method.sepay",
+  VNPAY: "account.order.paymentMethod.vnpay",
+  MOMO: "account.order.paymentMethod.momo",
+  BANK_TRANSFER: "account.order.paymentMethod.bankTransfer",
+} as const;
+
+const paymentStatusKeys = {
+  UNPAID: "account.order.paymentStatus.unpaid",
+  PENDING: "account.order.paymentStatus.pending",
+  PAID: "account.order.paymentStatus.paid",
+  FAILED: "account.order.paymentStatus.failed",
+  REFUNDED: "account.order.paymentStatus.refunded",
+  REFUND_PENDING: "sale.payment.status.refundPending",
+} as const;
 
 const statusClasses: Record<string, string> = {
   PENDING: "border-amber-200 bg-amber-50 text-amber-700",
@@ -42,27 +64,17 @@ const statusClasses: Record<string, string> = {
   CANCELLED: "border-red-200 bg-red-50 text-red-700",
 };
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "—"
-    : date.toLocaleString("vi-VN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-};
-
-const getErrorMessage = (error: unknown) => {
+const getErrorMessage = (error: unknown, fallback: string) => {
   const apiError = error as {
     response?: { data?: { message?: string } };
     message?: string;
   };
-  return apiError.response?.data?.message ?? apiError.message ?? "Không thể tải đơn hàng.";
+  return apiError.response?.data?.message ?? apiError.message ?? fallback;
 };
 
 export default function OrderDetailsClient({ code }: { code: string }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { locale, t } = useI18n();
   const queryClient = useQueryClient();
   const orderQuery = useQuery({
     queryKey: ["orders", "code", code],
@@ -87,10 +99,32 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     },
   });
   const histories = historiesQuery.data?.result ?? [];
-  const error = cancelMutation.error ? getErrorMessage(cancelMutation.error) : null;
+  const error = cancelMutation.error
+    ? getErrorMessage(cancelMutation.error, t("account.order.cancelError"))
+    : null;
+  const getStatusLabel = (status?: string | null) => {
+    if (!status) return t("account.order.initialStatus");
+    const normalizedStatus = status.toUpperCase();
+    const key = statusLabelKeys[normalizedStatus as keyof typeof statusLabelKeys];
+    return key ? t(key) : status;
+  };
+  const getPaymentMethodLabel = (method?: string | null) => {
+    if (!method) return t("account.order.notAvailable");
+    const normalizedMethod = method.toUpperCase();
+    const key = paymentMethodKeys[normalizedMethod as keyof typeof paymentMethodKeys];
+    return key ? t(key) : method;
+  };
+  const getPaymentStatusLabel = (status?: string | null) => {
+    if (!status) return t("account.order.notAvailable");
+    const normalizedStatus = status.toUpperCase();
+    const key = paymentStatusKeys[normalizedStatus as keyof typeof paymentStatusKeys];
+    return key ? t(key) : status;
+  };
+  const displayDateTime = (value?: string | null) =>
+    value ? formatDateTime(value, locale) : t("account.order.notAvailable");
 
   const handleCancel = async () => {
-    if (!order || !window.confirm("Bạn chắc chắn muốn huỷ đơn hàng này?")) return;
+    if (!order || !window.confirm(t("account.order.cancelConfirm"))) return;
 
     try {
       await cancelMutation.mutateAsync(order.id);
@@ -121,12 +155,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
       <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 py-24">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
-          <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">Đăng nhập để xem đơn hàng</h2>
+          <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">{t("account.signIn.orderTitle")}</h2>
           <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
-            Bạn cần đăng nhập tài khoản Vela Member để xem chi tiết đơn đặt hàng này.
+            {t("account.signIn.orderDescription")}
           </p>
           <Link href="/sign-in" className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]">
-            Đăng nhập ngay
+            {t("account.signIn.action")}
           </Link>
         </Card>
       </div>
@@ -139,9 +173,9 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         <StorefrontApiStatus
           error={orderQuery.error}
           onRetry={() => void orderQuery.refetch()}
-          resourceLabel="đơn hàng"
+          resourceLabel={t("account.order.title")}
           returnHref="/profile?tab=orders"
-          returnLabel="Về lịch sử đơn hàng"
+          returnLabel={t("account.order.historyAction")}
           variant="panel"
         />
       </div>
@@ -153,11 +187,11 @@ export default function OrderDetailsClient({ code }: { code: string }) {
       <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
         <StorefrontStatus
           status={404}
-          eyebrow="VELA MEMBER / ĐƠN HÀNG"
-          title="Không tìm thấy đơn hàng này"
-          description="Mã đơn có thể không còn hợp lệ hoặc đường dẫn đã thay đổi. Bạn có thể quay lại lịch sử để chọn một đơn hàng khác."
-          primaryAction={{ label: "Về lịch sử đơn hàng", href: "/profile?tab=orders" }}
-          secondaryAction={{ label: "Tiếp tục mua sắm", href: "/collection" }}
+          eyebrow={t("account.order.notFoundEyebrow")}
+          title={t("account.order.notFoundTitle")}
+          description={t("account.order.notFoundDescription")}
+          primaryAction={{ label: t("account.order.historyAction"), href: "/profile?tab=orders" }}
+          secondaryAction={{ label: t("account.order.shopAction"), href: "/collection" }}
           variant="panel"
         />
       </div>
@@ -169,11 +203,11 @@ export default function OrderDetailsClient({ code }: { code: string }) {
       <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
         <StorefrontStatus
           status={403}
-          eyebrow="VELA MEMBER / QUYỀN TRUY CẬP"
-          title="Đơn hàng này không thuộc tài khoản của bạn"
-          description="Bạn đã đăng nhập nhưng tài khoản hiện tại không có quyền xem thông tin của đơn hàng này."
-          primaryAction={{ label: "Về đơn hàng của tôi", href: "/profile?tab=orders" }}
-          secondaryAction={{ label: "Về trang chủ", href: "/" }}
+          eyebrow={t("account.order.forbiddenEyebrow")}
+          title={t("account.order.forbiddenTitle")}
+          description={t("account.order.forbiddenDescription")}
+          primaryAction={{ label: t("account.order.myOrdersAction"), href: "/profile?tab=orders" }}
+          secondaryAction={{ label: t("account.order.homeAction"), href: "/" }}
           variant="panel"
         />
       </div>
@@ -186,9 +220,9 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         <StorefrontApiStatus
           error={historiesQuery.error}
           onRetry={() => void historiesQuery.refetch()}
-          resourceLabel="lịch sử trạng thái đơn hàng"
+          resourceLabel={t("account.order.historyResource")}
           returnHref="/profile?tab=orders"
-          returnLabel="Về lịch sử đơn hàng"
+          returnLabel={t("account.order.historyAction")}
           variant="panel"
         />
       </div>
@@ -203,19 +237,19 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <main className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <Link href="/profile?tab=orders" className="mb-8 inline-flex text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/55 hover:text-[#1c1a18]">← Đơn hàng của tôi</Link>
+        <Link href="/profile?tab=orders" className="mb-8 inline-flex text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/55 hover:text-[#1c1a18]">← {t("account.order.back")}</Link>
 
         <header className="mb-10 flex flex-col justify-between gap-6 border-b border-[#1c1a18]/10 pb-8 md:flex-row md:items-end">
           <div>
-            <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18] md:text-5xl">Chi tiết đơn hàng</h1>
+            <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18] md:text-5xl">{t("account.order.title")}</h1>
             <div className="flex flex-wrap items-center gap-3 text-sm text-[#1c1a18]/70">
-              <span>Mã đơn: <strong className="font-semibold text-[#1c1a18]">{order.orderCode}</strong></span>
+              <span>{t("account.order.code", { code: order.orderCode })}</span>
               <span>•</span>
-              <span>{formatDateTime(order.createdAt)}</span>
+              <span>{displayDateTime(order.createdAt)}</span>
             </div>
           </div>
           <span className={`w-fit rounded-sm border px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest ${statusClasses[order.status] ?? statusClasses.PENDING}`}>
-            {statusLabels[order.status] ?? order.status}
+            {getStatusLabel(order.status)}
           </span>
         </header>
 
@@ -224,7 +258,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="flex flex-col gap-8 lg:col-span-8">
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">Sản phẩm đã đặt ({order.items?.length ?? 0})</h2>
+              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">{t("account.order.items", { count: order.items?.length ?? 0 })}</h2>
               {order.items?.length ? (
                 <div className="divide-y divide-[#1c1a18]/8">
                   {order.items.map((item) => (
@@ -238,18 +272,26 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                           <div className="text-right">
                             {item.listPrice && item.listPrice > item.price ? (
                               <span className="block text-xs text-[#1c1a18]/35 line-through">
-                                {money(item.listPrice * item.quantity)}
+                                {money(item.listPrice * item.quantity, locale)}
                               </span>
                             ) : null}
-                            <span className="whitespace-nowrap font-medium">{money(item.subtotal)}</span>
+                            <span className="whitespace-nowrap font-medium">{money(item.subtotal, locale)}</span>
                           </div>
                         </div>
                         {item.variantName && <p className="mt-1 text-xs text-[#1c1a18]/60">{item.variantName}</p>}
-                        <p className="mt-1 text-xs text-[#1c1a18]/45">SKU: {item.sku} · {money(item.price)} × {item.quantity}</p>
+                        <p className="mt-1 text-xs text-[#1c1a18]/45">
+                          {t("account.order.itemDetails", {
+                            sku: item.sku,
+                            price: money(item.price, locale),
+                            quantity: item.quantity,
+                          })}
+                        </p>
                         {item.priceSource && item.priceSource !== "BASE" ? (
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[#8f2f20]">
                             <span className="rounded-full bg-[#8f2f20]/8 px-2 py-1">
-                              {item.priceSource === "FLASH_SALE" ? "Flash Sale" : "Standard Sale"}
+                              {item.priceSource === "FLASH_SALE"
+                                ? t("storefront.sale.type.flash")
+                                : t("storefront.sale.type.standard")}
                             </span>
                             {item.saleCampaignName || item.saleCampaignCode ? (
                               <span>
@@ -263,29 +305,29 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                   ))}
                 </div>
               ) : (
-                <p className="py-8 text-center text-sm text-[#1c1a18]/50">Đơn hàng chưa có thông tin sản phẩm.</p>
+                <p className="py-8 text-center text-sm text-[#1c1a18]/50">{t("account.order.noItems")}</p>
               )}
               {order.items?.some((item) => item.priceSource && item.priceSource !== "BASE") ? (
                 <p className="mt-6 border-t border-[#1c1a18]/8 pt-4 text-[11px] leading-5 text-[#1c1a18]/50">
-                  Giá và campaign ở trên là dữ liệu được chụp tại thời điểm tạo đơn, nên không thay đổi khi campaign kết thúc hoặc được chỉnh sửa.
+                  {t("sale.order.snapshotNotice")}
                 </p>
               ) : null}
             </Card>
 
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">Lịch sử trạng thái</h2>
+              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">{t("account.order.statusHistory")}</h2>
               <div className="space-y-5">
                 <div className="flex gap-4">
                   <CheckCircle2 className="mt-0.5 size-5 text-emerald-600" />
-                  <div><p className="text-sm font-medium">Đã tạo đơn hàng</p><p className="mt-1 text-xs text-[#1c1a18]/50">{formatDateTime(order.createdAt)}</p></div>
+                  <div><p className="text-sm font-medium">{t("account.order.created")}</p><p className="mt-1 text-xs text-[#1c1a18]/50">{displayDateTime(order.createdAt)}</p></div>
                 </div>
                 {histories.map((history) => (
                   <div key={history.id} className="flex gap-4">
                     <Clock3 className="mt-0.5 size-5 text-[#b85a3c]" />
                     <div>
-                      <p className="text-sm font-medium">{statusLabels[history.fromStatus ?? ""] ?? history.fromStatus ?? "Khởi tạo"} → {statusLabels[history.toStatus] ?? history.toStatus}</p>
+                      <p className="text-sm font-medium">{t("account.order.statusChange", { from: getStatusLabel(history.fromStatus), to: getStatusLabel(history.toStatus) })}</p>
                       {history.reason && <p className="mt-1 text-xs text-[#1c1a18]/65">{history.reason}</p>}
-                      <p className="mt-1 text-xs text-[#1c1a18]/50">{formatDateTime(history.createdAt)}</p>
+                      <p className="mt-1 text-xs text-[#1c1a18]/50">{displayDateTime(history.createdAt)}</p>
                     </div>
                   </div>
                 ))}
@@ -293,44 +335,47 @@ export default function OrderDetailsClient({ code }: { code: string }) {
             </Card>
 
             <div className="flex flex-wrap gap-3">
-              {canCancel && <button type="button" disabled={cancelMutation.isPending} onClick={handleCancel} className="rounded-sm border border-red-200 px-6 py-3 text-xs font-bold uppercase tracking-widest text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">{cancelMutation.isPending ? "Đang huỷ..." : "Huỷ đơn hàng"}</button>}
-              <Link href="/help" className="rounded-sm border border-[#1c1a18]/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[#1c1a18] hover:bg-[#f7f4ef]">Yêu cầu hỗ trợ</Link>
+              {canCancel && <button type="button" disabled={cancelMutation.isPending} onClick={handleCancel} className="rounded-sm border border-red-200 px-6 py-3 text-xs font-bold uppercase tracking-widest text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">{cancelMutation.isPending ? t("account.order.cancelling") : t("account.order.cancel")}</button>}
+              <Link href="/help" className="rounded-sm border border-[#1c1a18]/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[#1c1a18] hover:bg-[#f7f4ef]">{t("account.order.support")}</Link>
             </div>
           </div>
 
           <div className="flex flex-col gap-6 lg:col-span-4">
             <Card className="rounded-md border-none bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest">Tổng thanh toán</h2>
+              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest">{t("account.order.summary")}</h2>
               <div className="mb-6 flex flex-col gap-4 border-b border-[#1c1a18]/10 pb-6 text-sm text-[#1c1a18]/70">
-                <div className="flex justify-between"><span>Tạm tính</span><span>{money(Number(order.subtotal ?? 0))}</span></div>
-                <div className="flex justify-between"><span>Phí vận chuyển</span><span>{Number(order.shippingFee) > 0 ? money(Number(order.shippingFee)) : "Miễn phí"}</span></div>
-                <div className="flex justify-between text-[#b85a3c]"><span>Khuyến mãi</span><span>-{money(Number(order.discountAmount ?? 0))}</span></div>
+                <div className="flex justify-between"><span>{t("account.order.subtotal")}</span><span>{money(Number(order.subtotal ?? 0), locale)}</span></div>
+                <div className="flex justify-between"><span>{t("account.order.shippingFee")}</span><span>{Number(order.shippingFee) > 0 ? money(Number(order.shippingFee), locale) : t("account.order.free")}</span></div>
+                <div className="flex justify-between text-[#b85a3c]"><span>{t("account.order.discount")}</span><span>-{money(Number(order.discountAmount ?? 0), locale)}</span></div>
               </div>
-              <div className="flex items-end justify-between"><span className="text-sm font-semibold">Tổng cộng</span><span className="font-serif text-2xl">{money(Number(order.finalAmount ?? 0))}</span></div>
+              <div className="flex items-end justify-between"><span className="text-sm font-semibold">{t("account.order.total")}</span><span className="font-serif text-2xl">{money(Number(order.finalAmount ?? 0), locale)}</span></div>
             </Card>
 
             <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
-              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"><Truck className="size-4 text-[#1c1a18]/40" />Thông tin giao hàng</h2>
+              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"><Truck className="size-4 text-[#1c1a18]/40" aria-hidden="true" />{t("account.order.shipping")}</h2>
               <div className="space-y-1.5 text-[13px] text-[#1c1a18]/70"><p className="font-semibold text-[#1c1a18]">{order.receiverName}</p><p>{order.receiverPhone}</p><p className="pt-2 leading-relaxed">{order.receiverAddress}</p></div>
             </Card>
 
             <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
-              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"><CreditCard className="size-4 text-[#1c1a18]/40" />Thanh toán</h2>
-              <p className="text-sm font-medium">{order.paymentMethod ?? "—"}</p>
-              <p className="mt-1 text-xs text-[#1c1a18]/55">{order.paymentStatus ?? "—"}</p>
+              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
+                <CreditCard className="size-4 text-[#1c1a18]/40" aria-hidden="true" />
+                {t("account.order.payment")}
+              </h2>
+              <p className="text-sm font-medium">{getPaymentMethodLabel(order.paymentMethod)}</p>
+              <p className="mt-1 text-xs text-[#1c1a18]/55">{getPaymentStatusLabel(order.paymentStatus)}</p>
               {order.paymentDueAt ? (
                 <div className="mt-4 space-y-2 border-t border-[#1c1a18]/8 pt-4 text-xs text-[#1c1a18]/65">
                   <p className="flex items-center justify-between gap-3">
-                    <span>Hạn thanh toán</span>
+                    <span>{t("sale.order.paymentDue")}</span>
                     <strong className="text-right font-medium text-[#1c1a18]">
-                      {formatDateTime(order.paymentDueAt)}
+                      {displayDateTime(order.paymentDueAt)}
                     </strong>
                   </p>
                   {order.reservationExpiresAt ? (
                     <p className="flex items-center justify-between gap-3">
-                      <span>Giữ tài nguyên đến</span>
+                      <span>{t("sale.order.reservationExpires")}</span>
                       <strong className="text-right font-medium text-[#1c1a18]">
-                        {formatDateTime(order.reservationExpiresAt)}
+                        {displayDateTime(order.reservationExpiresAt)}
                       </strong>
                     </p>
                   ) : null}
@@ -339,16 +384,18 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               {order.resourcesReleasedAt ? (
                 <div className="mt-4 rounded-sm border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
                   <p className="flex items-start gap-2 font-semibold">
-                    <Clock3 className="mt-0.5 size-4 shrink-0" />
-                    Stock, quota và lượt mua đã được nhả lúc {formatDateTime(order.resourcesReleasedAt)}.
+                    <Clock3 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    {t("sale.order.resourcesReleasedAt", {
+                      time: displayDateTime(order.resourcesReleasedAt),
+                    })}
                   </p>
                   <p className="mt-1 pl-6">
-                    Thanh toán đến muộn không tự khôi phục đơn; hệ thống sẽ xử lý theo trạng thái thanh toán hiện tại.
+                    {t("sale.order.latePaymentNotice")}
                   </p>
                 </div>
               ) : order.reservationExpiresAt && order.paymentStatus !== "PAID" ? (
                 <p className="mt-4 rounded-sm border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-                  Đơn online chỉ giữ stock, quota và lượt mua đến mốc ở trên. Trạng thái chính thức do backend xác nhận.
+                  {t("sale.order.reservationNotice")}
                 </p>
               ) : null}
             </Card>
@@ -378,20 +425,22 @@ export function OrderDetailsLoadingFallback() {
 }
 
 function OrderDetailsLoadingFixture() {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-10">
       <header className="border-b border-[#1c1a18]/10 pb-8">
-        <h1 className="font-serif text-5xl">Chi tiết đơn hàng</h1>
-        <p className="mt-4">Mã đơn: VW-CONGANH-0000</p>
+        <h1 className="font-serif text-5xl">{t("account.order.title")}</h1>
+        <p className="mt-4">{t("account.order.code", { code: "VW-CONGANH-0000" })}</p>
       </header>
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
         <div className="space-y-8 lg:col-span-8">
-          <section className="min-h-72 rounded-md bg-white p-8"><h2>Sản phẩm đã đặt</h2></section>
-          <section className="min-h-64 rounded-md bg-white p-8"><h2>Lịch sử trạng thái</h2></section>
+          <section className="min-h-72 rounded-md bg-white p-8"><h2>{t("account.order.items", { count: 1 })}</h2></section>
+          <section className="min-h-64 rounded-md bg-white p-8"><h2>{t("account.order.statusHistory")}</h2></section>
         </div>
         <aside className="space-y-6 lg:col-span-4">
-          <section className="min-h-64 rounded-md bg-white p-6"><h2>Tổng thanh toán</h2></section>
-          <section className="min-h-40 rounded-md bg-white p-6"><h2>Thông tin giao hàng</h2></section>
+          <section className="min-h-64 rounded-md bg-white p-6"><h2>{t("account.order.summary")}</h2></section>
+          <section className="min-h-40 rounded-md bg-white p-6"><h2>{t("account.order.shipping")}</h2></section>
         </aside>
       </div>
     </div>

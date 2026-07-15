@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   User as UserIcon,
   CreditCard,
@@ -20,31 +20,53 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card } from "@/components/ui/card";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { OtpEntry } from "@/components/auth/otp-entry";
 import { changeEmail, changePassword } from "@/lib/auth-otp-api";
-import { emailSchema, strongPasswordSchema } from "@/lib/validations";
+import { formatDate } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n";
+import { createEmailSchema, createStrongPasswordSchema } from "@/lib/validations";
 
-const changeEmailSchema = z.object({ email: emailSchema });
-type ChangeEmailFormValues = z.infer<typeof changeEmailSchema>;
+const createChangeEmailSchema = (locale: Locale) =>
+  z.object({ email: createEmailSchema(locale) });
+type ChangeEmailFormValues = z.infer<ReturnType<typeof createChangeEmailSchema>>;
 
-const changePasswordSchema = z
-  .object({
-    currentPassword: z.string().optional(),
-    newPassword: strongPasswordSchema,
-    confirmPassword: z.string({ message: "Required" }).min(1, "Required"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
+const createChangePasswordSchema = (
+  locale: Locale,
+  requiredMessage: string,
+  mismatchMessage: string,
+) =>
+  z
+    .object({
+      currentPassword: z.string().optional(),
+      newPassword: createStrongPasswordSchema(locale),
+      confirmPassword: z.string({ message: requiredMessage }).min(1, requiredMessage),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: mismatchMessage,
+      path: ["confirmPassword"],
+    });
+type ChangePasswordFormValues = z.infer<ReturnType<typeof createChangePasswordSchema>>;
+
+type SuccessMessage = "email" | "password" | "passwordCreated";
 
 export default function MemberSettings() {
   const { user, isAuthenticated, checkSession } = useAuth();
+  const { locale, t } = useI18n();
+  const changeEmailSchema = useMemo(() => createChangeEmailSchema(locale), [locale]);
+  const changePasswordSchema = useMemo(
+    () =>
+      createChangePasswordSchema(
+        locale,
+        t("account.password.confirmRequired"),
+        t("account.password.mismatch"),
+      ),
+    [locale, t],
+  );
   const [requestedEmail, setRequestedEmail] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<SuccessMessage | null>(null);
   const [isPasswordEditing, setIsPasswordEditing] = useState(false);
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
   const [passwordSubmitError, setPasswordSubmitError] = useState<string | null>(null);
@@ -101,7 +123,7 @@ export default function MemberSettings() {
 
       setRequestedEmail(null);
       resetFlow();
-      setSuccessMessage("Your email has been successfully updated.");
+      setSuccessMessage("email");
     },
   });
 
@@ -120,7 +142,7 @@ export default function MemberSettings() {
       message?: string;
     };
 
-    return apiError.response?.data?.message ?? apiError.message ?? "Could not update password. Please try again.";
+    return apiError.response?.data?.message ?? apiError.message ?? t("account.password.updateError");
   };
 
   const handleSubmitPassword = async (data: ChangePasswordFormValues) => {
@@ -129,7 +151,7 @@ export default function MemberSettings() {
     if (hasPassword && !data.currentPassword?.trim()) {
       setPasswordFieldError("currentPassword", {
         type: "manual",
-        message: "Current password is required",
+        message: t("account.password.currentRequired"),
       });
       return;
     }
@@ -143,11 +165,7 @@ export default function MemberSettings() {
       await checkSession();
       resetPasswordForm();
       setIsPasswordEditing(false);
-      setSuccessMessage(
-        hasPassword
-          ? "Your password has been successfully updated."
-          : "Password created. You can now sign in with email and password."
-      );
+      setSuccessMessage(hasPassword ? "password" : "passwordCreated");
     } catch (error) {
       setPasswordSubmitError(getApiErrorMessage(error));
     } finally {
@@ -168,16 +186,16 @@ export default function MemberSettings() {
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
-            Đăng nhập để xem cài đặt
+            {t("account.signIn.settingsTitle")}
           </h2>
           <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
-            Bạn cần đăng nhập tài khoản Vela Member để cấu hình thông tin cá nhân.
+            {t("account.signIn.settingsDescription")}
           </p>
           <Link
             href="/sign-in"
             className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
           >
-            Đăng nhập ngay
+            {t("account.signIn.action")}
           </Link>
         </Card>
       </div>
@@ -185,21 +203,21 @@ export default function MemberSettings() {
   }
 
   const subTabs = [
-    { id: "profile", label: "Profile", href: "/profile" },
-    { id: "orders", label: "Orders", href: "/profile?tab=orders" },
-    { id: "favourites", label: "Favourites", href: "/profile?tab=favourites" },
-    { id: "settings", label: "Settings", href: "/profile/settings" },
+    { id: "profile", label: t("account.tabs.profile"), href: "/profile" },
+    { id: "orders", label: t("account.tabs.orders"), href: "/profile?tab=orders" },
+    { id: "favourites", label: t("account.tabs.favourites"), href: "/profile?tab=favourites" },
+    { id: "settings", label: t("account.tabs.settings"), href: "/profile/settings" },
   ];
 
   const sidebarLinks = [
-    { id: "account", label: "Account Details", icon: UserIcon, active: true },
-    { id: "payment", label: "Payment Methods", icon: CreditCard, active: false },
-    { id: "addresses", label: "Delivery Addresses", icon: Truck, active: false },
-    { id: "preferences", label: "Shop Preferences", icon: Sliders, active: false },
-    { id: "communication", label: "Communication Preferences", icon: Mail, active: false },
-    { id: "visibility", label: "Profile Visibility", icon: Eye, active: false },
-    { id: "linked", label: "Linked Accounts", icon: Link2, active: false },
-    { id: "privacy", label: "Privacy", icon: Shield, active: false },
+    { id: "account", label: t("account.sidebar.account"), icon: UserIcon, active: true },
+    { id: "payment", label: t("account.sidebar.payment"), icon: CreditCard, active: false },
+    { id: "addresses", label: t("account.sidebar.addresses"), icon: Truck, active: false },
+    { id: "preferences", label: t("account.sidebar.preferences"), icon: Sliders, active: false },
+    { id: "communication", label: t("account.sidebar.communication"), icon: Mail, active: false },
+    { id: "visibility", label: t("account.sidebar.visibility"), icon: Eye, active: false },
+    { id: "linked", label: t("account.sidebar.linked"), icon: Link2, active: false },
+    { id: "privacy", label: t("account.sidebar.privacy"), icon: Shield, active: false },
   ];
 
   return (
@@ -230,7 +248,7 @@ export default function MemberSettings() {
       <main className="flex-grow max-w-[1280px] w-full mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row gap-12">
         {/* Sidebar Navigation */}
         <aside className="w-full md:w-64 flex-shrink-0 text-left">
-          <h1 className="font-serif text-3xl font-light text-ink mb-8">Settings</h1>
+          <h1 className="font-serif text-3xl font-light text-ink mb-8">{t("account.settings.title")}</h1>
           <nav className="flex flex-col gap-2">
             {sidebarLinks.map((link) => {
               const Icon = link.icon;
@@ -253,13 +271,13 @@ export default function MemberSettings() {
 
         {/* Right Content Area */}
         <section className="flex-grow max-w-3xl text-left">
-          <h2 className="font-serif text-2xl md:text-3xl text-ink font-light mb-10">Account Details</h2>
+          <h2 className="font-serif text-2xl md:text-3xl text-ink font-light mb-10">{t("account.sidebar.account")}</h2>
           <div className="flex flex-col gap-8">
             {/* Email Field Form */}
             <form onSubmit={handleSubmit(handleRequestChangeEmailOtp)} className="flex flex-col gap-2">
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
-                  Email*
+                  {t("account.profile.email")}
                 </label>
                 <input
                   className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
@@ -278,7 +296,13 @@ export default function MemberSettings() {
               )}
 
               {successMessage && (
-                <p className="text-xs text-green-600 font-medium">{successMessage}</p>
+                <p className="text-xs text-green-600 font-medium">
+                  {successMessage === "email"
+                    ? t("account.settings.emailUpdated")
+                    : successMessage === "password"
+                      ? t("account.password.updateSuccess")
+                      : t("account.password.createSuccess")}
+                </p>
               )}
 
               {newEmail !== user.email && !showOtpStep && (
@@ -288,7 +312,7 @@ export default function MemberSettings() {
                     disabled={isOtpSubmitting}
                     className="px-6 py-2.5 bg-[#964025] hover:bg-[#87391f] text-white text-xs font-semibold rounded-sm tracking-wider uppercase disabled:opacity-50 cursor-pointer border-0"
                   >
-                    Verify & Update Email
+                    {t("account.settings.verifyEmail")}
                   </button>
                 </div>
               )}
@@ -309,8 +333,8 @@ export default function MemberSettings() {
                     resetField("email", { defaultValue: user.email });
                     setRequestedEmail(null);
                   }}
-                  cancelLabel="Cancel"
-                  actionLabel="Confirm Code"
+                  cancelLabel={t("account.settings.cancel")}
+                  actionLabel={t("account.settings.confirmCode")}
                 />
               )}
             </form>
@@ -324,12 +348,12 @@ export default function MemberSettings() {
                 <div className="flex justify-between items-start gap-6">
                   <div className="flex flex-col gap-2">
                     <span className="text-sm font-medium text-ink">
-                      {hasPassword ? "Password" : "Create password"}
+                      {hasPassword ? t("account.profile.password") : t("account.password.createTitle")}
                     </span>
                     <span className="text-sm text-[#55423d]/60">
                       {hasPassword
-                        ? "Change your password with your current password."
-                        : "Your account was created with Google. Add a password to also sign in with email."}
+                        ? t("account.password.changeDescription")
+                        : t("account.password.createDescription")}
                     </span>
                   </div>
                   {!isPasswordEditing && (
@@ -342,7 +366,7 @@ export default function MemberSettings() {
                         setIsPasswordEditing(true);
                       }}
                     >
-                      {hasPassword ? "Edit" : "Set password"}
+                      {hasPassword ? t("account.profile.edit") : t("account.password.set")}
                     </button>
                   )}
                 </div>
@@ -352,7 +376,7 @@ export default function MemberSettings() {
                     {hasPassword && (
                       <div className="relative">
                         <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
-                          Current Password*
+                          {t("account.password.current")}
                         </label>
                         <input
                           className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
@@ -371,7 +395,7 @@ export default function MemberSettings() {
 
                     <div className="relative">
                       <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
-                        New Password*
+                        {t("account.password.new")}
                       </label>
                       <input
                         className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
@@ -389,7 +413,7 @@ export default function MemberSettings() {
 
                     <div className="relative">
                       <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
-                        Confirm New Password*
+                        {t("account.password.confirm")}
                       </label>
                       <input
                         className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all disabled:opacity-50"
@@ -416,14 +440,14 @@ export default function MemberSettings() {
                         onClick={handleCancelPasswordChange}
                         className="px-5 py-2.5 border border-hairline/80 rounded-sm text-xs font-semibold uppercase tracking-wider text-ink hover:border-primary transition-colors disabled:opacity-50"
                       >
-                        Cancel
+                        {t("account.settings.cancel")}
                       </button>
                       <button
                         type="submit"
                         disabled={isPasswordSubmitting}
                         className="px-6 py-2.5 bg-[#964025] hover:bg-[#87391f] text-white text-xs font-semibold rounded-sm tracking-wider uppercase disabled:opacity-50 cursor-pointer border-0"
                       >
-                        {hasPassword ? "Update Password" : "Create Password"}
+                        {hasPassword ? t("account.password.update") : t("account.password.create")}
                       </button>
                     </div>
                   </div>
@@ -433,7 +457,7 @@ export default function MemberSettings() {
               {/* Date of Birth Field */}
               <div className="relative">
                 <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/40 uppercase select-none">
-                  Date of Birth*
+                  {t("account.profile.birthDate")}
                 </label>
                 <div className="relative flex items-center">
                   <input
@@ -442,8 +466,8 @@ export default function MemberSettings() {
                     type="text"
                     defaultValue={
                       user.birthDate
-                        ? new Date(user.birthDate).toLocaleDateString("vi-VN")
-                        : "07 / 09 / 2005"
+                        ? formatDate(user.birthDate, locale, { dateStyle: "short" })
+                        : formatDate("2005-09-07", locale, { dateStyle: "short" })
                     }
                   />
                   <Calendar className="absolute right-4 text-[#55423d]/45 w-5 h-5 pointer-events-none" />
@@ -452,15 +476,15 @@ export default function MemberSettings() {
 
               {/* Location Dropdown */}
               <div className="mt-4">
-                <h3 className="text-sm font-semibold text-ink mb-4">Location</h3>
+                <h3 className="text-sm font-semibold text-ink mb-4">{t("account.settings.location")}</h3>
                 <div className="relative">
                   <label className="absolute -top-2.5 left-3 bg-canvas px-1 text-[11px] font-medium tracking-widest text-[#55423d]/80 uppercase">
-                    Country/Region*
+                    {t("account.settings.country")}
                   </label>
                   <select className="w-full bg-transparent border border-hairline rounded-sm px-4 py-4 text-sm text-ink focus:outline-hidden focus:border-primary transition-all appearance-none cursor-pointer">
-                    <option value="vn">Vietnam</option>
-                    <option value="us">United States</option>
-                    <option value="uk">United Kingdom</option>
+                    <option value="vn">{t("account.settings.country.vietnam")}</option>
+                    <option value="us">{t("account.settings.country.us")}</option>
+                    <option value="uk">{t("account.settings.country.uk")}</option>
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#55423d] w-5 h-5" />
                 </div>
@@ -468,12 +492,12 @@ export default function MemberSettings() {
 
               {/* Delete Account */}
               <div className="mt-8 border-t border-b border-hairline/60 py-6 flex justify-between items-center">
-                <span className="text-sm font-medium text-ink">Delete Account</span>
+                <span className="text-sm font-medium text-ink">{t("account.profile.deleteAccount")}</span>
                 <button
                   className="px-6 py-2 border border-hairline/80 rounded-full text-xs font-semibold text-ink hover:border-red-600 hover:text-red-600 transition-colors"
                   type="button"
                 >
-                  Delete
+                  {t("account.profile.delete")}
                 </button>
               </div>
 
@@ -484,7 +508,7 @@ export default function MemberSettings() {
                   disabled
                   type="button"
                 >
-                  Save
+                  {t("account.profile.save")}
                 </button>
               </div>
             </div>

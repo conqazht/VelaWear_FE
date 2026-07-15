@@ -3,8 +3,10 @@
 import { Ellipsis } from "lucide-react";
 import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { getIntlLocale } from "@/lib/i18n";
 
 const qualitySeries = [
   { date: "2026-04-01T00:00:00.000Z", actualQuality: 0.4, baselineQuality: -1.2 },
@@ -93,17 +95,6 @@ const qualitySeries = [
   { date: "2026-04-28T16:00:00.000Z", actualQuality: 4.8, baselineQuality: 4.8 },
 ];
 
-const chartConfig = {
-  actualQuality: {
-    color: "var(--chart-3)",
-    label: "Actual quality",
-  },
-  baselineQuality: {
-    color: "var(--muted-foreground)",
-    label: "Baseline quality",
-  },
-} satisfies ChartConfig;
-
 const chartData = qualitySeries.map((item, index) => ({
   ...item,
   dayIndex: 1 + (index * 27) / (qualitySeries.length - 1),
@@ -111,17 +102,31 @@ const chartData = qualitySeries.map((item, index) => ({
 
 const weeklyTicks = [4, 11, 18, 25];
 
-function formatWeek(value: number) {
-  const weekIndex = weeklyTicks.indexOf(value);
-
-  return weekIndex >= 0 ? `Week ${weekIndex + 1}` : "";
-}
-
 export function TrafficQuality() {
+  const { locale, t } = useI18n();
+  const percentFormatter = new Intl.NumberFormat(getIntlLocale(locale), {
+    maximumFractionDigits: 1,
+    style: "percent",
+  });
+  const chartConfig = {
+    actualQuality: {
+      color: "var(--chart-3)",
+      label: t("admin.dashboardsA.analytics.actualQuality"),
+    },
+    baselineQuality: {
+      color: "var(--muted-foreground)",
+      label: t("admin.dashboardsA.analytics.baselineQuality"),
+    },
+  } satisfies ChartConfig;
+  const formatWeek = (value: number) => {
+    const weekIndex = weeklyTicks.indexOf(value);
+    return weekIndex >= 0 ? t("admin.dashboardsA.analytics.week", { week: weekIndex + 1 }) : "";
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">Traffic Quality</CardTitle>
+        <CardTitle className="font-normal">{t("admin.dashboardsA.analytics.trafficQuality")}</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -145,14 +150,19 @@ export function TrafficQuality() {
             <YAxis
               axisLine={false}
               domain={[-6, 6]}
-              tickFormatter={(value) => `${value}%`}
+              tickFormatter={(value) => percentFormatter.format(Number(value) / 100)}
               tickLine={false}
               tickMargin={10}
               width={34}
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent className="w-40" labelFormatter={() => "Traffic quality"} />}
+              content={
+                <ChartTooltipContent
+                  className="w-40"
+                  labelFormatter={() => t("admin.dashboardsA.analytics.trafficQuality")}
+                />
+              }
             />
             <Line
               dataKey="baselineQuality"

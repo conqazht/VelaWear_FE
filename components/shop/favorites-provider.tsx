@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 import { useRouter } from "next/navigation";
 import { useQueries } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   useCreateWishlistMutation,
   useDeleteWishlistMutation,
@@ -11,7 +12,6 @@ import {
 } from "@/lib/queries/commerce";
 import { getProduct } from "@/lib/api/catalog";
 import { getApiErrorStatus } from "@/lib/api/errors";
-import { getActiveLocale } from "@/lib/i18n";
 import { queryKeys } from "@/lib/queries/keys";
 import { mapBackendProduct, Product } from "@/lib/vela-data";
 import { useNotification } from "./notification-provider";
@@ -30,13 +30,29 @@ interface FavoritesContextValue {
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated } = useAuth();
+  const accountKey = isAuthenticated && user ? `user-${user.id}` : "anonymous";
+
+  return (
+    <AccountFavoritesProvider key={accountKey}>
+      {children}
+    </AccountFavoritesProvider>
+  );
+}
+
+function AccountFavoritesProvider({ children }: { children: React.ReactNode }) {
   const [optimisticFavorites, setOptimisticFavorites] = useState<Product[]>([]);
   const [optimisticRemovedProductIds, setOptimisticRemovedProductIds] = useState<Set<number>>(new Set());
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const { showAddedToFavorites } = useNotification();
-  const activeLocale = getActiveLocale();
-  const wishlistsQuery = useWishlistsQuery({ size: 100 }, isAuthenticated);
+  const { locale: activeLocale } = useI18n();
+  const wishlistUserId = isAuthenticated ? user?.id : undefined;
+  const wishlistsQuery = useWishlistsQuery(
+    wishlistUserId,
+    { size: 100 },
+    isAuthenticated
+  );
   const createWishlistMutation = useCreateWishlistMutation();
   const deleteWishlistMutation = useDeleteWishlistMutation();
 
@@ -59,8 +75,8 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const wishlistProductQueries = useQueries({
     queries: wishlistProductIds.map((productId) => ({
-      queryKey: queryKeys.products.detail(productId),
-      queryFn: () => getProduct(productId),
+      queryKey: queryKeys.products.detail(productId, activeLocale),
+      queryFn: () => getProduct(productId, activeLocale),
       enabled: typeof user?.id === "number",
     })),
   });

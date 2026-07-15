@@ -5,12 +5,14 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Product } from "@/lib/vela-data";
 import { HomeProductCard } from "./home-product-card";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface HorizontalSliderProps {
   products: Product[];
 }
 
 export function HorizontalSlider({ products }: HorizontalSliderProps) {
+  const { t } = useI18n();
   const sliderRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -64,7 +66,7 @@ export function HorizontalSlider({ products }: HorizontalSliderProps) {
           }`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          aria-label="Scroll left"
+          aria-label={t("carousel.scrollLeft")}
         >
           <ChevronLeft className="w-5 h-5" />
         </motion.button>
@@ -80,7 +82,7 @@ export function HorizontalSlider({ products }: HorizontalSliderProps) {
           }`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          aria-label="Scroll right"
+          aria-label={t("carousel.scrollRight")}
         >
           <ChevronRight className="w-5 h-5" />
         </motion.button>

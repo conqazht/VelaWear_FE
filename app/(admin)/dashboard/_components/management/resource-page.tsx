@@ -7,6 +7,7 @@ import { Download, Plus, RefreshCw, Search } from "lucide-react";
 
 import { getApiErrorMessage, getApiErrorStatus } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { AnimatedStatus } from "@/components/errors/animated-status";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export type ManagementColumn<T> = {
@@ -83,36 +85,45 @@ export function ResourcePage<T extends { id: number }>({
   isLoading = false,
   isFetching = false,
   error,
-  emptyTitle = "No results found",
-  emptyDescription = "Try adjusting your search or filters.",
+  emptyTitle,
+  emptyDescription,
 }: ResourcePageProps<T>) {
+  const { locale, t } = useI18n();
+  const numberFormatter = React.useMemo(
+    () => new Intl.NumberFormat(getIntlLocale(locale)),
+    [locale],
+  );
+  const resolvedEmptyTitle = emptyTitle ?? t("admin.shell.resource.emptyTitle");
+  const resolvedEmptyDescription = emptyDescription ?? t("admin.shell.resource.emptyDescription");
   const ActionIcon = primaryAction?.icon ?? Plus;
   const safePageCount = Math.max(pageCount, 1);
   const currentPage = Math.min(Math.max(page, 1), safePageCount);
   const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = total === 0 ? 0 : Math.min(currentPage * pageSize, total);
   const errorStatus = error ? getApiErrorStatus(error) : null;
-  const errorMessage = error ? getApiErrorMessage(error) : null;
+  const errorMessage = error
+    ? getApiErrorMessage(error, t("admin.shell.resource.unexpectedError"))
+    : null;
   const statusScene =
     errorStatus === 403
       ? {
           code: "403",
-          title: "This resource is outside your access",
-          description: "Your account is signed in, but it does not have permission to view this management data.",
+          title: t("admin.shell.resource.forbiddenTitle"),
+          description: t("admin.shell.resource.forbiddenDescription"),
           accent: "#ffb59f",
         }
       : errorStatus === 404
         ? {
             code: "404",
-            title: "This management resource was not found",
-            description: "The endpoint or resource may have moved. Refresh once, then return to the dashboard if it remains unavailable.",
+            title: t("admin.shell.resource.notFoundTitle"),
+            description: t("admin.shell.resource.notFoundDescription"),
             accent: "#f7f4ef",
           }
         : errorStatus !== null && errorStatus >= 500
           ? {
               code: String(errorStatus),
-              title: "The server could not complete this request",
-              description: "Vela Wear is temporarily unable to load this management data. Your filters and current page are still preserved.",
+              title: t("admin.shell.resource.serverErrorTitle"),
+              description: t("admin.shell.resource.serverErrorDescription"),
               accent: "#ff8f78",
             }
           : null;
@@ -128,7 +139,7 @@ export function ResourcePage<T extends { id: number }>({
               <Search className="size-3.5" />
             </InputGroupAddon>
             <InputGroupInput
-              aria-label={`Search ${title.toLowerCase()}`}
+              aria-label={t("admin.shell.resource.search", { resource: title })}
               className="h-8"
               placeholder={searchPlaceholder}
               value={searchValue}
@@ -138,12 +149,12 @@ export function ResourcePage<T extends { id: number }>({
           {onRefresh ? (
             <Button variant="outline" size="sm" onClick={onRefresh} disabled={isFetching}>
               <RefreshCw className={cn(isFetching && "animate-spin")} />
-              Refresh
+              {t("admin.shell.resource.refresh")}
             </Button>
           ) : null}
           {onExport ? (
             <Button variant="outline" size="sm" onClick={onExport} disabled={rows.length === 0}>
-              <Download /> Export page
+              <Download /> {t("admin.shell.resource.exportPage")}
             </Button>
           ) : null}
           {primaryAction ? (
@@ -171,10 +182,10 @@ export function ResourcePage<T extends { id: number }>({
             variant="panel"
             primaryAction={
               canRetry
-                ? { label: "Try again", onClick: onRefresh }
-                : { label: "Back to dashboard", href: "/dashboard/default" }
+                ? { label: t("admin.shell.resource.tryAgain"), onClick: onRefresh }
+                : { label: t("admin.shell.resource.backDashboard"), href: "/dashboard/default" }
             }
-            secondaryAction={{ label: "Return to storefront", href: "/" }}
+            secondaryAction={{ label: t("admin.shell.resource.returnStorefront"), href: "/" }}
           />
         </CardContent>
       </Card>
@@ -209,7 +220,7 @@ export function ResourcePage<T extends { id: number }>({
         {errorMessage ? (
           <div className="px-4">
             <Alert variant="destructive">
-              <AlertTitle>Unable to load {title.toLowerCase()}</AlertTitle>
+              <AlertTitle>{t("admin.shell.resource.unableToLoad", { resource: title })}</AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           </div>
@@ -254,8 +265,8 @@ export function ResourcePage<T extends { id: number }>({
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-40 text-center">
                     <div className="mx-auto flex max-w-sm flex-col items-center gap-1">
-                      <p className="font-medium">{emptyTitle}</p>
-                      <p className="text-muted-foreground text-sm">{emptyDescription}</p>
+                      <p className="font-medium">{resolvedEmptyTitle}</p>
+                      <p className="text-muted-foreground text-sm">{resolvedEmptyDescription}</p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -268,10 +279,14 @@ export function ResourcePage<T extends { id: number }>({
 
         <div className="flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-muted-foreground text-sm tabular-nums">
-            Showing {start} to {end} of {total}
+            {t("admin.shell.resource.showing", {
+              start: numberFormatter.format(start),
+              end: numberFormatter.format(end),
+              total: numberFormatter.format(total),
+            })}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground text-sm">Rows per page</span>
+            <span className="text-muted-foreground text-sm">{t("admin.shell.resource.rowsPerPage")}</span>
             <Select value={`${pageSize}`} onValueChange={(value) => onPageSizeChange(Number(value))}>
               <SelectTrigger size="sm" className="w-20">
                 <SelectValue />
@@ -285,7 +300,10 @@ export function ResourcePage<T extends { id: number }>({
               </SelectContent>
             </Select>
             <span className="min-w-24 text-center text-muted-foreground text-sm tabular-nums">
-              Page {currentPage} of {safePageCount}
+              {t("admin.shell.resource.pageOf", {
+                page: numberFormatter.format(currentPage),
+                pageCount: numberFormatter.format(safePageCount),
+              })}
             </span>
             <Button
               variant="outline"
@@ -293,7 +311,7 @@ export function ResourcePage<T extends { id: number }>({
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1 || isFetching}
             >
-              Previous
+              {t("admin.shell.resource.previous")}
             </Button>
             <Button
               variant="outline"
@@ -301,7 +319,7 @@ export function ResourcePage<T extends { id: number }>({
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= safePageCount || isFetching}
             >
-              Next
+              {t("admin.shell.resource.next")}
             </Button>
           </div>
         </div>

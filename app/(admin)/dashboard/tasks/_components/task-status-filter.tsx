@@ -4,6 +4,7 @@
 import type { Table } from "@tanstack/react-table";
 import { ListFilter, X } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,6 +24,14 @@ interface TaskStatusFilterProps<TData> {
 }
 
 export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>) {
+  const { t } = useI18n();
+  const statusNames: Record<string, string> = {
+    backlog: t("admin.workflows.tasks.statusBacklog"),
+    canceled: t("admin.workflows.tasks.statusCanceled"),
+    done: t("admin.workflows.tasks.statusDone"),
+    "in progress": t("admin.workflows.tasks.statusInProgress"),
+    todo: t("admin.workflows.tasks.statusTodo"),
+  };
   const column = table.getColumn("status");
 
   if (!column) {
@@ -60,7 +69,7 @@ export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>)
         }
       >
         <ListFilter data-icon="inline-start" />
-        Status
+        {t("admin.workflows.common.status")}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-50">
         <DropdownMenuGroup>
@@ -75,7 +84,7 @@ export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>)
                 onSelect={(event) => event.preventDefault()}
               >
                 <status.icon className="text-muted-foreground" />
-                {status.label}
+                {statusNames[status.value] ?? status.label}
               </DropdownMenuCheckboxItem>
             );
           })}
@@ -86,7 +95,7 @@ export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>)
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={clearFilter} className="justify-center text-center">
                 <X />
-                Clear filters
+                {t("admin.workflows.common.clearFilters")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

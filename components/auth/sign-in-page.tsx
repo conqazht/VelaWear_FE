@@ -1,28 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 
 import { AnimatedAuthShell } from "@/components/auth/animated-auth-shell";
 import { FloatingInput } from "@/components/auth/floating-input";
 import { useAuth } from "@/components/auth/auth-provider";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type {
   AuthSceneFocus,
   AuthSceneStatus,
 } from "@/components/auth/auth-motion-scene";
 import { getSafeInternalRedirect } from "@/lib/auth/post-auth-redirect";
 import { getPostSignInPath, getRoleSessionLabel } from "@/lib/auth/roles";
-import { signInSchema } from "@/lib/validations";
+import { getAuthRoleMessageKey } from "@/lib/i18n/messages/auth-errors";
+import { createSignInSchema } from "@/lib/validations";
 
-type SignInFormValues = z.infer<typeof signInSchema>;
+type SignInFormValues = { email: string; password: string };
 
 export function SignInPage() {
+  const { locale, t } = useI18n();
+  const signInSchema = useMemo(() => createSignInSchema(locale), [locale]);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,14 +62,9 @@ export function SignInPage() {
       setSceneStatus("success");
       await new Promise((resolve) => setTimeout(resolve, 2000));
       router.replace(redirectTo ?? getPostSignInPath(profile));
-    } catch (err: unknown) {
+    } catch {
       setSessionRoleLabel(null);
-      const errorObj = err as { response?: { data?: { message?: string } } };
-      if (errorObj.response?.data?.message) {
-        setApiError(errorObj.response.data.message);
-      } else {
-        setApiError("Invalid email or password. Please try again.");
-      }
+      setApiError(t("auth.signIn.invalidCredentials"));
       setSceneStatus("error");
       setTimeout(() => setSceneStatus("idle"), 850);
     }
@@ -89,16 +87,16 @@ export function SignInPage() {
       focus={sceneFocus}
       passwordVisible={showPassword}
       status={sceneStatus}
-      title="Sign In"
-      description="Enter your email and password to access your account."
+      title={t("auth.signIn.title")}
+      description={t("auth.signIn.description")}
       footer={
         <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d]">
-          New to Vela Wear?{" "}
+          {t("auth.signIn.newMember")} {" "}
           <Link
             href="/register"
             className="font-medium text-[#964025] underline decoration-[#964025]/30 underline-offset-2 transition-colors hover:text-[#87391f]"
           >
-            Join the Vela Community
+            {t("auth.signIn.joinCommunity")}
           </Link>
         </p>
       }
@@ -113,7 +111,7 @@ export function SignInPage() {
         <div>
           <FloatingInput
             id="email"
-            label="Email*"
+            label={t("auth.common.email")}
             autoComplete="email"
             type="email"
             error={!!errors.email}
@@ -127,14 +125,16 @@ export function SignInPage() {
             }}
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
         <div>
           <FloatingInput
             id="password"
-            label="Password*"
+            label={t("auth.common.password")}
             autoComplete="current-password"
             type={showPassword ? "text" : "password"}
             error={!!errors.password}
@@ -156,7 +156,7 @@ export function SignInPage() {
                   setSceneFocus("password");
                   setTimeout(() => setFocus("password"), 0);
                 }}
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={t(showPassword ? "auth.common.hidePassword" : "auth.common.showPassword")}
                 className="cursor-pointer p-1 transition-opacity hover:opacity-85"
               >
                 {showPassword ? (
@@ -168,14 +168,16 @@ export function SignInPage() {
             }
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+              {errors.password.message}
+            </p>
           )}
           <div className="mt-2 flex justify-end">
             <Link
               href="/forgot-password"
               className="text-sm leading-[1.55] text-[#1c1a18] transition-colors hover:text-[#964025]"
             >
-              Forgot Password?
+              {t("auth.signIn.forgotPassword")}
             </Link>
           </div>
         </div>
@@ -186,14 +188,18 @@ export function SignInPage() {
         >
           {isSubmitting
             ? sessionRoleLabel
-              ? `Checking ${sessionRoleLabel} session...`
-              : "Signing In..."
-            : "Sign In"}
+              ? t("auth.common.checkingSession", {
+                  role: t(getAuthRoleMessageKey(sessionRoleLabel)),
+                })
+              : t("auth.signIn.submitting")
+            : t("auth.common.signIn")}
         </button>
 
         <div className="relative flex items-center mt-2">
           <div className="flex-grow border-t border-[#1c1a18]/10"></div>
-          <span className="flex-shrink-0 mx-4 text-xs uppercase tracking-wider text-[#1c1a18]/50">Or</span>
+          <span className="flex-shrink-0 mx-4 text-xs uppercase tracking-wider text-[#1c1a18]/50">
+            {t("auth.common.or")}
+          </span>
           <div className="flex-grow border-t border-[#1c1a18]/10"></div>
         </div>
 

@@ -30,8 +30,8 @@ export function getProducts(filters: ProductFilters = {}) {
   return apiGet<ResultPaginationDTO<Product>>("/products", filters);
 }
 
-export function getProduct(id: number | string) {
-  return apiGet<Product>(`/products/${id}`);
+export function getProduct(id: number | string, locale?: string) {
+  return apiGet<Product>(`/products/${id}`, { locale });
 }
 
 export function getCategories(params: PageParams = {}) {
@@ -61,8 +61,9 @@ export function getProductsForRender(filters: ProductFilters = {}) {
   });
 }
 
-export function getProductForRender(id: number | string) {
+export function getProductForRender(id: number | string, locale?: string) {
   return serverApiGet<Product>(`/products/${id}`, {
+    query: { locale },
     next: { revalidate: 5 },
   });
 }

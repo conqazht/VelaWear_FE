@@ -7,6 +7,14 @@ import type {
   UpdateAdminSaleCampaignRequest,
 } from "@/lib/api/admin-sales";
 import type { AdminProductVariant } from "@/lib/api/admin-commerce";
+import {
+  interpolateMessage,
+  type MessageVariables,
+} from "@/lib/i18n/define-messages";
+import {
+  salesAdminManagementMessages,
+  type SalesAdminManagementTranslationKey,
+} from "@/lib/i18n/messages/sales-admin-management";
 
 export type SaleCampaignFormItem = {
   id?: number;
@@ -38,6 +46,18 @@ export type SaleCampaignFormValues = {
 export type SaleCampaignValidationResult =
   | { valid: true }
   | { valid: false; step: 1 | 2; message: string };
+
+export type SaleCampaignFormTranslator = (
+  key: SalesAdminManagementTranslationKey,
+  variables?: MessageVariables,
+) => string;
+
+function defaultFormTranslator(
+  key: SalesAdminManagementTranslationKey,
+  variables?: MessageVariables,
+) {
+  return interpolateMessage(salesAdminManagementMessages.en[key], variables);
+}
 
 export function toLocalDateTimeInput(value: string | Date) {
   const date = value instanceof Date ? value : new Date(value);
@@ -139,10 +159,16 @@ export function getSaleCampaignPhase(
 
 export function validateSaleCampaignForm(
   values: SaleCampaignFormValues,
-  options: { displayOnly?: boolean } = {},
+  options: { displayOnly?: boolean; t?: SaleCampaignFormTranslator } = {},
 ): SaleCampaignValidationResult {
+  const t = options.t ?? defaultFormTranslator;
+
   if (!values.name.trim()) {
-    return { valid: false, step: 1, message: "Enter a campaign name." };
+    return {
+      valid: false,
+      step: 1,
+      message: t("admin.sales.management.validation.nameRequired"),
+    };
   }
   if (values.bannerUrl.trim()) {
     try {
@@ -154,7 +180,7 @@ export function validateSaleCampaignForm(
       return {
         valid: false,
         step: 1,
-        message: "Banner URL must be a valid http or https URL.",
+        message: t("admin.sales.management.validation.bannerUrl"),
       };
     }
   }
@@ -165,28 +191,31 @@ export function validateSaleCampaignForm(
     return {
       valid: false,
       step: 1,
-      message:
-        "Campaign code must contain 3–50 uppercase letters, numbers, dashes, or underscores.",
+      message: t("admin.sales.management.validation.code"),
     };
   }
 
   const startsAt = new Date(values.startsAt);
   const endsAt = new Date(values.endsAt);
   if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
-    return { valid: false, step: 1, message: "Choose a valid schedule." };
+    return {
+      valid: false,
+      step: 1,
+      message: t("admin.sales.management.validation.schedule"),
+    };
   }
   if (endsAt <= startsAt) {
     return {
       valid: false,
       step: 1,
-      message: "End time must be later than start time.",
+      message: t("admin.sales.management.validation.scheduleOrder"),
     };
   }
   if (values.items.length === 0) {
     return {
       valid: false,
       step: 2,
-      message: "Select at least one product variant.",
+      message: t("admin.sales.management.validation.itemRequired"),
     };
   }
 
@@ -196,7 +225,9 @@ export function validateSaleCampaignForm(
       return {
         valid: false,
         step: 2,
-        message: `Variant ${item.sku} is selected more than once.`,
+        message: t("admin.sales.management.validation.duplicateVariant", {
+          sku: item.sku,
+        }),
       };
     }
     variantIds.add(item.variantId);
@@ -210,7 +241,9 @@ export function validateSaleCampaignForm(
       return {
         valid: false,
         step: 2,
-        message: `${item.sku} needs a sale price above 0 and below its reference price.`,
+        message: t("admin.sales.management.validation.salePrice", {
+          sku: item.sku,
+        }),
       };
     }
 
@@ -220,14 +253,18 @@ export function validateSaleCampaignForm(
         return {
           valid: false,
           step: 2,
-          message: `${item.sku} needs a positive whole-number quota.`,
+          message: t("admin.sales.management.validation.quotaPositive", {
+            sku: item.sku,
+          }),
         };
       }
       if (quota < item.reservedQuantity + item.soldQuantity) {
         return {
           valid: false,
           step: 2,
-          message: `${item.sku} quota cannot be lower than its reserved and sold quantity.`,
+          message: t("admin.sales.management.validation.quotaUsed", {
+            sku: item.sku,
+          }),
         };
       }
 
@@ -241,7 +278,9 @@ export function validateSaleCampaignForm(
           return {
             valid: false,
             step: 2,
-            message: `${item.sku} customer limit must be between 1 and its quota.`,
+            message: t("admin.sales.management.validation.customerLimit", {
+              sku: item.sku,
+            }),
           };
         }
       }

@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type { SaleCampaignType } from "@/lib/api/admin-sales";
 
 import type { SaleCampaignFormValues } from "../_data/sale-campaign-form";
@@ -29,6 +30,8 @@ export function CampaignDetailsStep({
   displayDisabled,
   typeAndScheduleDisabled,
 }: CampaignDetailsStepProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof SaleCampaignFormValues>(
     key: Key,
     value: SaleCampaignFormValues[Key],
@@ -52,23 +55,27 @@ export function CampaignDetailsStep({
     <div className="grid gap-6">
       <div className="grid gap-5 lg:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="sale-code">Campaign code</FieldLabel>
+          <FieldLabel htmlFor="sale-code">
+            {t("admin.sales.editor.details.code.label")}
+          </FieldLabel>
           <Input
             id="sale-code"
             value={values.code}
             onChange={(event) => update("code", event.target.value.toUpperCase())}
-            placeholder="SUMMER_2026"
+            placeholder={t("admin.sales.editor.details.code.placeholder")}
             maxLength={50}
             disabled={codeDisabled}
             required
           />
           <FieldDescription>
-            Permanent identifier using uppercase letters, numbers, dashes, or underscores.
+            {t("admin.sales.editor.details.code.description")}
           </FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="sale-type">Campaign type</FieldLabel>
+          <FieldLabel htmlFor="sale-type">
+            {t("admin.sales.editor.details.type.label")}
+          </FieldLabel>
           <Select
             value={values.type}
             onValueChange={(value) => updateType(value as SaleCampaignType)}
@@ -78,25 +85,31 @@ export function CampaignDetailsStep({
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
-              <SelectItem value="STANDARD">Standard sale</SelectItem>
-              <SelectItem value="FLASH">Flash sale</SelectItem>
+              <SelectItem value="STANDARD">
+                {t("admin.sales.editor.type.standard")}
+              </SelectItem>
+              <SelectItem value="FLASH">
+                {t("admin.sales.editor.type.flash")}
+              </SelectItem>
             </SelectContent>
           </Select>
           <FieldDescription>
             {values.type === "FLASH"
-              ? "Flash sales require quota and may set a per-customer limit."
-              : "Standard sales run on schedule without quota."}
+              ? t("admin.sales.editor.details.type.flashDescription")
+              : t("admin.sales.editor.details.type.standardDescription")}
           </FieldDescription>
         </Field>
       </div>
 
       <Field>
-        <FieldLabel htmlFor="sale-name">Campaign name</FieldLabel>
+        <FieldLabel htmlFor="sale-name">
+          {t("admin.sales.editor.details.name.label")}
+        </FieldLabel>
         <Input
           id="sale-name"
           value={values.name}
           onChange={(event) => update("name", event.target.value)}
-          placeholder="Summer Essentials"
+          placeholder={t("admin.sales.editor.details.name.placeholder")}
           maxLength={150}
           disabled={displayDisabled}
           required
@@ -104,12 +117,14 @@ export function CampaignDetailsStep({
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="sale-description">Description</FieldLabel>
+        <FieldLabel htmlFor="sale-description">
+          {t("admin.sales.editor.details.description.label")}
+        </FieldLabel>
         <Textarea
           id="sale-description"
           value={values.description}
           onChange={(event) => update("description", event.target.value)}
-          placeholder="Internal and storefront campaign description"
+          placeholder={t("admin.sales.editor.details.description.placeholder")}
           maxLength={2_000}
           disabled={displayDisabled}
           rows={4}
@@ -117,23 +132,27 @@ export function CampaignDetailsStep({
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="sale-banner">Banner URL</FieldLabel>
+        <FieldLabel htmlFor="sale-banner">
+          {t("admin.sales.editor.details.banner.label")}
+        </FieldLabel>
         <Input
           id="sale-banner"
           type="url"
           value={values.bannerUrl}
           onChange={(event) => update("bannerUrl", event.target.value)}
-          placeholder="https://cdn.example.com/summer-sale.jpg"
+          placeholder={t("admin.sales.editor.details.banner.placeholder")}
           disabled={displayDisabled}
         />
         <FieldDescription>
-          Optional storefront artwork. Use an absolute HTTP or HTTPS URL.
+          {t("admin.sales.editor.details.banner.description")}
         </FieldDescription>
       </Field>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="sale-starts-at">Starts at</FieldLabel>
+          <FieldLabel htmlFor="sale-starts-at">
+            {t("admin.sales.editor.details.startsAt.label")}
+          </FieldLabel>
           <Input
             id="sale-starts-at"
             type="datetime-local"
@@ -142,11 +161,15 @@ export function CampaignDetailsStep({
             disabled={typeAndScheduleDisabled}
             required
           />
-          <FieldDescription>Entered in your local timezone and sent as UTC.</FieldDescription>
+          <FieldDescription>
+            {t("admin.sales.editor.details.startsAt.description")}
+          </FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="sale-ends-at">Ends at</FieldLabel>
+          <FieldLabel htmlFor="sale-ends-at">
+            {t("admin.sales.editor.details.endsAt.label")}
+          </FieldLabel>
           <Input
             id="sale-ends-at"
             type="datetime-local"
@@ -155,7 +178,9 @@ export function CampaignDetailsStep({
             disabled={typeAndScheduleDisabled}
             required
           />
-          <FieldDescription>The end instant is exclusive.</FieldDescription>
+          <FieldDescription>
+            {t("admin.sales.editor.details.endsAt.description")}
+          </FieldDescription>
         </Field>
       </div>
     </div>

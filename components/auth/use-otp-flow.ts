@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { normalizeOtpError, requestOtp, verifyOtp, OtpPurpose } from "@/lib/auth-otp-api";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface UseOtpFlowProps {
   email: string;
@@ -8,6 +9,7 @@ interface UseOtpFlowProps {
 }
 
 export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps) {
+  const { t } = useI18n();
   const [showOtpStep, setShowOtpStep] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [cooldown, setCooldown] = useState(0);
@@ -31,8 +33,8 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
       setCooldown(result.cooldownSeconds ?? 60);
       return true;
     } catch (err: unknown) {
-      const normalizedError = normalizeOtpError(err, "Failed to send verification code. Please try again.");
-      setError(normalizedError.message);
+      const normalizedError = normalizeOtpError(err, t("auth.otp.sendFailed"));
+      setError(getLocalizedOtpError(normalizedError.kind, t));
       if (normalizedError.cooldownSeconds) {
         setCooldown(normalizedError.cooldownSeconds);
       }
@@ -40,7 +42,7 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
     } finally {
       setIsSubmitting(false);
     }
-  }, [email, purpose]);
+  }, [email, purpose, t]);
 
   const handleVerifyOtp = useCallback(
     async (e?: React.FormEvent) => {
@@ -57,16 +59,16 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
           try {
             await onVerifySuccess();
           } catch (successErr: unknown) {
-            const normalizedError = normalizeOtpError(successErr, "An error occurred. Please try again.");
-            setError(normalizedError.message);
+            const normalizedError = normalizeOtpError(successErr, t("auth.otp.actionFailed"));
+            setError(getLocalizedOtpError(normalizedError.kind, t));
             if (normalizedError.cooldownSeconds) {
               setCooldown(normalizedError.cooldownSeconds);
             }
           }
         }
       } catch (err: unknown) {
-        const normalizedError = normalizeOtpError(err, "Invalid or expired verification code.");
-        setError(normalizedError.message);
+        const normalizedError = normalizeOtpError(err, t("auth.otp.invalid"));
+        setError(getLocalizedOtpError(normalizedError.kind, t));
         if (normalizedError.cooldownSeconds) {
           setCooldown(normalizedError.cooldownSeconds);
         }
@@ -74,7 +76,7 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
         setIsSubmitting(false);
       }
     },
-    [email, purpose, otpCode, onVerifySuccess]
+    [email, purpose, otpCode, onVerifySuccess, t]
   );
 
   const resetFlow = useCallback(() => {
@@ -96,4 +98,24 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
     handleVerifyOtp,
     resetFlow,
   };
+}
+
+function getLocalizedOtpError(
+  kind: ReturnType<typeof normalizeOtpError>["kind"],
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  switch (kind) {
+    case "cooldown":
+      return t("auth.otp.cooldownError");
+    case "expired":
+      return t("auth.otp.expiredError");
+    case "attempts_exhausted":
+      return t("auth.otp.attemptsError");
+    case "validation":
+      return t("auth.otp.validationError");
+    case "service":
+      return t("auth.otp.serviceError");
+    default:
+      return t("auth.otp.genericError");
+  }
 }

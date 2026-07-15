@@ -24,6 +24,7 @@ import {
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { AnimatedStatus } from "@/components/errors/animated-status";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,39 +83,6 @@ type CloneDraftValues = {
   endsAt: string;
 };
 
-const ACTION_COPY: Record<
-  LifecycleAction,
-  { title: string; description: string; label: string; destructive?: boolean }
-> = {
-  DELETE: {
-    title: "Delete draft campaign?",
-    description:
-      "This permanently deletes the draft and its configured items. Published campaigns cannot be deleted.",
-    label: "Delete draft",
-    destructive: true,
-  },
-  CANCEL: {
-    title: "Cancel upcoming campaign?",
-    description:
-      "The campaign will no longer start. Its history remains available in read-only mode.",
-    label: "Cancel campaign",
-    destructive: true,
-  },
-  END: {
-    title: "End live campaign now?",
-    description:
-      "New checkouts will stop receiving this price. Existing valid reservations keep their payment window.",
-    label: "End campaign",
-    destructive: true,
-  },
-  END_AND_CLONE: {
-    title: "End and create a new draft?",
-    description:
-      "The live campaign ends now and a draft copy is created for a future schedule. Current reservations remain valid.",
-    label: "End & clone",
-  },
-};
-
 function phaseVariant(phase: SaleCampaignPhase) {
   if (phase === "LIVE") return "default" as const;
   if (phase === "UPCOMING") return "secondary" as const;
@@ -122,11 +90,14 @@ function phaseVariant(phase: SaleCampaignPhase) {
 }
 
 function EditorLoading() {
+  const { t } = useI18n();
+
   return (
     <Card>
       <CardContent className="flex min-h-80 items-center justify-center">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" /> Loading sale campaign...
+          <Loader2 className="size-4 animate-spin" />
+          {t("admin.sales.editor.loading")}
         </div>
       </CardContent>
     </Card>
@@ -134,6 +105,7 @@ function EditorLoading() {
 }
 
 export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
+  const { t } = useI18n();
   const campaignQuery = useAdminSaleCampaignQuery(campaignId);
   const variantsQuery = useAdminProductVariantsQuery({
     page: 1,
@@ -149,11 +121,14 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
     return (
       <AnimatedStatus
         code="404"
-        title="Sale campaign was not found"
-        description="The campaign identifier in this URL is invalid."
+        title={t("admin.sales.editor.notFound.title")}
+        description={t("admin.sales.editor.notFound.description")}
         variant="panel"
         accent="#f7f4ef"
-        primaryAction={{ label: "Back to campaigns", href: "/dashboard/sales" }}
+        primaryAction={{
+          label: t("admin.sales.editor.backToCampaigns"),
+          href: "/dashboard/sales",
+        }}
       />
     );
   }
@@ -166,21 +141,21 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Unable to load sale campaign</CardTitle>
+          <CardTitle>{t("admin.sales.editor.loadError.title")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <Alert variant="destructive">
-            <AlertTitle>Request failed</AlertTitle>
+            <AlertTitle>{t("admin.sales.editor.loadError.requestFailed")}</AlertTitle>
             <AlertDescription>
               {getApiErrorMessage(campaignQuery.error)}
             </AlertDescription>
           </Alert>
           <div className="flex gap-2">
             <Button onClick={() => void campaignQuery.refetch()}>
-              <RefreshCw /> Try again
+              <RefreshCw /> {t("admin.sales.editor.tryAgain")}
             </Button>
             <Button variant="outline" render={<Link href="/dashboard/sales" />}>
-              Back to campaigns
+              {t("admin.sales.editor.backToCampaigns")}
             </Button>
           </div>
         </CardContent>
@@ -223,6 +198,7 @@ function SaleCampaignEditorForm({
   onRefresh,
 }: SaleCampaignEditorFormProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [values, setValues] = useState<SaleCampaignFormValues>(() =>
     campaign ? saleCampaignToFormValues(campaign) : createEmptySaleCampaignForm(),
@@ -231,7 +207,9 @@ function SaleCampaignEditorForm({
     useState<LifecycleAction | null>(null);
   const [cloneDraft, setCloneDraft] = useState<CloneDraftValues>(() => ({
     code: campaign ? `${campaign.code}_NEXT`.slice(0, 50) : "",
-    name: campaign ? `${campaign.name} (next)` : "",
+    name: campaign
+      ? t("admin.sales.editor.clone.defaultName", { name: campaign.name })
+      : "",
     startsAt: campaign ? toLocalDateTimeInput(campaign.endsAt) : "",
     endsAt: campaign
       ? toLocalDateTimeInput(
@@ -257,6 +235,20 @@ function SaleCampaignEditorForm({
   const endAndCloneMutation = useEndAndCloneAdminSaleCampaignMutation();
 
   const phase = campaign ? getSaleCampaignPhase(campaign) : null;
+  const statusLabel = campaign
+    ? campaign.status === "DRAFT"
+      ? t("admin.sales.management.status.draft")
+      : campaign.status === "PUBLISHED"
+        ? t("admin.sales.management.status.published")
+        : t("admin.sales.management.status.cancelled")
+    : null;
+  const phaseLabel = phase
+    ? phase === "UPCOMING"
+      ? t("admin.sales.management.phase.upcoming")
+      : phase === "LIVE"
+        ? t("admin.sales.management.phase.live")
+        : t("admin.sales.management.phase.ended")
+    : null;
   const isDraft = campaign?.status === "DRAFT";
   const isPublishedUpcoming =
     campaign?.status === "PUBLISHED" && phase === "UPCOMING";
@@ -281,6 +273,7 @@ function SaleCampaignEditorForm({
     if (nextStep > step && nextStep > 1) {
       const validation = validateSaleCampaignForm(values, {
         displayOnly: isLive,
+        t,
       });
       if (!validation.valid && validation.step < nextStep) {
         setStep(validation.step);
@@ -294,6 +287,7 @@ function SaleCampaignEditorForm({
   async function saveCampaign(publishAfterSave: boolean) {
     const validation = validateSaleCampaignForm(values, {
       displayOnly: isLive,
+      t,
     });
     if (!validation.valid) {
       setStep(validation.step);
@@ -312,7 +306,9 @@ function SaleCampaignEditorForm({
             version: campaign.version,
           },
         });
-        toast.success(`${saved.name} display details were updated.`);
+        toast.success(
+          t("admin.sales.editor.toast.displayUpdated", { name: saved.name }),
+        );
         return;
       }
 
@@ -325,7 +321,9 @@ function SaleCampaignEditorForm({
 
       if (!publishAfterSave) {
         toast.success(
-          campaign ? `${saved.name} was updated.` : `${saved.name} was saved as a draft.`,
+          campaign
+            ? t("admin.sales.editor.toast.updated", { name: saved.name })
+            : t("admin.sales.editor.toast.draftSaved", { name: saved.name }),
         );
         if (!campaign) router.replace(`/dashboard/sales/${saved.id}`);
         return;
@@ -336,11 +334,15 @@ function SaleCampaignEditorForm({
           id: saved.id,
           version: saved.version,
         });
-        toast.success(`${published.name} was published.`);
+        toast.success(
+          t("admin.sales.editor.toast.published", { name: published.name }),
+        );
         router.replace(`/dashboard/sales/${published.id}`);
       } catch (error) {
         toast.error(
-          `Campaign changes were saved, but publishing failed. ${getApiErrorMessage(error)}`,
+          t("admin.sales.editor.toast.publishFailed", {
+            error: getApiErrorMessage(error),
+          }),
         );
         router.replace(`/dashboard/sales/${saved.id}`);
       }
@@ -356,31 +358,37 @@ function SaleCampaignEditorForm({
     try {
       if (lifecycleAction === "DELETE") {
         await deleteMutation.mutateAsync(campaign.id);
-        toast.success(`${campaign.name} was deleted.`);
+        toast.success(
+          t("admin.sales.editor.toast.deleted", { name: campaign.name }),
+        );
         router.replace("/dashboard/sales");
       } else if (lifecycleAction === "CANCEL") {
         const cancelled = await cancelMutation.mutateAsync({
           id: campaign.id,
           version: campaign.version,
         });
-        toast.success(`${cancelled.name} was cancelled.`);
+        toast.success(
+          t("admin.sales.editor.toast.cancelled", { name: cancelled.name }),
+        );
       } else if (lifecycleAction === "END") {
         const ended = await endMutation.mutateAsync({
           id: campaign.id,
           version: campaign.version,
         });
-        toast.success(`${ended.name} ended.`);
+        toast.success(
+          t("admin.sales.editor.toast.ended", { name: ended.name }),
+        );
       } else {
         const code = cloneDraft.code.trim().toUpperCase();
         const name = cloneDraft.name.trim();
         const startsAt = new Date(cloneDraft.startsAt);
         const endsAt = new Date(cloneDraft.endsAt);
         if (!/^[A-Z0-9][A-Z0-9_-]{2,49}$/.test(code)) {
-          toast.error("Clone code must contain 3–50 uppercase letters, numbers, dashes, or underscores.");
+          toast.error(t("admin.sales.editor.validation.cloneCode"));
           return;
         }
         if (!name) {
-          toast.error("Enter a name for the cloned campaign.");
+          toast.error(t("admin.sales.editor.validation.cloneName"));
           return;
         }
         if (
@@ -388,7 +396,7 @@ function SaleCampaignEditorForm({
           Number.isNaN(endsAt.getTime()) ||
           endsAt <= startsAt
         ) {
-          toast.error("Choose a valid future schedule for the cloned campaign.");
+          toast.error(t("admin.sales.editor.validation.cloneSchedule"));
           return;
         }
         const clone = await endAndCloneMutation.mutateAsync({
@@ -401,7 +409,7 @@ function SaleCampaignEditorForm({
             endsAt: endsAt.toISOString(),
           },
         });
-        toast.success("Campaign ended and a new draft was created.");
+        toast.success(t("admin.sales.editor.toast.cloned"));
         router.replace(`/dashboard/sales/${clone.id}`);
       }
       setLifecycleAction(null);
@@ -416,7 +424,7 @@ function SaleCampaignEditorForm({
     if (!campaign || !quotaItem) return;
     const additionalQuantity = Number(additionalQuota);
     if (!Number.isInteger(additionalQuantity) || additionalQuantity <= 0) {
-      toast.error("Quota increase must be a positive whole number.");
+      toast.error(t("admin.sales.editor.validation.quotaIncrease"));
       return;
     }
 
@@ -427,7 +435,10 @@ function SaleCampaignEditorForm({
         request: { additionalQuantity, version: campaign.version },
       });
       toast.success(
-        `${quotaItem.sku} quota increased by ${additionalQuantity}.`,
+        t("admin.sales.editor.toast.quotaIncreased", {
+          sku: quotaItem.sku,
+          count: additionalQuantity,
+        }),
       );
       setQuotaItem(null);
       setAdditionalQuota("1");
@@ -447,28 +458,30 @@ function SaleCampaignEditorForm({
             variant="outline"
             size="icon-sm"
             render={<Link href="/dashboard/sales" />}
-            aria-label="Back to sale campaigns"
+            aria-label={t("admin.sales.editor.backAria")}
           >
             <ArrowLeft />
           </Button>
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-heading text-2xl font-semibold">
-                {campaign ? campaign.name : "Create sale campaign"}
+                {campaign ? campaign.name : t("admin.sales.editor.createTitle")}
               </h1>
               {campaign ? (
                 <>
                   <Badge variant={campaign.status === "CANCELLED" ? "destructive" : "outline"}>
-                    {campaign.status}
+                    {statusLabel}
                   </Badge>
-                  {phase ? <Badge variant={phaseVariant(phase)}>{phase}</Badge> : null}
+                  {phase ? (
+                    <Badge variant={phaseVariant(phase)}>{phaseLabel}</Badge>
+                  ) : null}
                 </>
               ) : null}
             </div>
             <p className="mt-1 max-w-2xl text-muted-foreground text-sm">
               {campaign
-                ? "Manage the schedule, eligible variants, sale prices, and lifecycle from one workflow."
-                : "Configure a scheduled Standard or quota-controlled Flash sale."}
+                ? t("admin.sales.editor.editDescription")
+                : t("admin.sales.editor.createDescription")}
             </p>
           </div>
         </div>
@@ -480,7 +493,7 @@ function SaleCampaignEditorForm({
               onClick={() => setLifecycleAction("DELETE")}
               disabled={isSaving || isLifecyclePending}
             >
-              <Trash2 /> Delete draft
+              <Trash2 /> {t("admin.sales.editor.action.deleteDraft")}
             </Button>
           ) : null}
           {isPublishedUpcoming ? (
@@ -489,7 +502,7 @@ function SaleCampaignEditorForm({
               onClick={() => setLifecycleAction("CANCEL")}
               disabled={isSaving || isLifecyclePending}
             >
-              <Ban /> Cancel campaign
+              <Ban /> {t("admin.sales.editor.action.cancelCampaign")}
             </Button>
           ) : null}
           {isLive ? (
@@ -499,14 +512,14 @@ function SaleCampaignEditorForm({
                 onClick={() => setLifecycleAction("END_AND_CLONE")}
                 disabled={isSaving || isLifecyclePending}
               >
-                <CopyPlus /> End & clone
+                <CopyPlus /> {t("admin.sales.editor.action.endAndClone")}
               </Button>
               <Button
                 variant="destructive"
                 onClick={() => setLifecycleAction("END")}
                 disabled={isSaving || isLifecyclePending}
               >
-                <Square /> End now
+                <Square /> {t("admin.sales.editor.action.endNow")}
               </Button>
             </>
           ) : null}
@@ -516,18 +529,18 @@ function SaleCampaignEditorForm({
       {isLive ? (
         <Alert>
           <LockKeyhole />
-          <AlertTitle>Live-safe editing is active</AlertTitle>
+          <AlertTitle>{t("admin.sales.editor.liveAlert.title")}</AlertTitle>
           <AlertDescription>
-            Name, description, and banner remain editable. Schedule, variants, and prices are locked; Flash quota can only increase.
+            {t("admin.sales.editor.liveAlert.description")}
           </AlertDescription>
         </Alert>
       ) : null}
       {isReadOnly ? (
         <Alert>
           <LockKeyhole />
-          <AlertTitle>This campaign is read-only</AlertTitle>
+          <AlertTitle>{t("admin.sales.editor.readOnlyAlert.title")}</AlertTitle>
           <AlertDescription>
-            Ended and cancelled campaigns are retained for pricing and order history.
+            {t("admin.sales.editor.readOnlyAlert.description")}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -538,10 +551,10 @@ function SaleCampaignEditorForm({
         <CardHeader className="border-b">
           <CardTitle>
             {step === 1
-              ? "Campaign details"
+              ? t("admin.sales.editor.section.details")
               : step === 2
-                ? "Products, prices, and limits"
-                : "Review campaign"}
+                ? t("admin.sales.editor.section.products")
+                : t("admin.sales.editor.section.review")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -590,7 +603,7 @@ function SaleCampaignEditorForm({
               onClick={() => setStep((current) => Math.max(1, current - 1) as 1 | 2 | 3)}
               disabled={step === 1 || isSaving}
             >
-              <ArrowLeft /> Previous
+              <ArrowLeft /> {t("admin.sales.editor.navigation.previous")}
             </Button>
             <Button
               type="button"
@@ -598,7 +611,7 @@ function SaleCampaignEditorForm({
               onClick={() => goToStep(Math.min(3, step + 1) as 1 | 2 | 3)}
               disabled={step === 3 || isSaving}
             >
-              Next <ArrowRight />
+              {t("admin.sales.editor.navigation.next")} <ArrowRight />
             </Button>
           </div>
 
@@ -611,7 +624,7 @@ function SaleCampaignEditorForm({
                   disabled={isSaving || isLifecyclePending}
                 >
                   {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
-                  Save draft
+                  {t("admin.sales.editor.saveDraft")}
                 </Button>
               ) : null}
               {isPublishedUpcoming || isLive ? (
@@ -620,7 +633,9 @@ function SaleCampaignEditorForm({
                   disabled={isSaving || isLifecyclePending}
                 >
                   {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
-                  {isLive ? "Save display" : "Save changes"}
+                  {isLive
+                    ? t("admin.sales.editor.saveDisplay")
+                    : t("admin.sales.editor.saveChanges")}
                 </Button>
               ) : null}
               {(!campaign || isDraft) && !isLive ? (
@@ -629,7 +644,7 @@ function SaleCampaignEditorForm({
                   disabled={isSaving || isLifecyclePending}
                 >
                   {isSaving ? <Loader2 className="animate-spin" /> : <Rocket />}
-                  Save & publish
+                  {t("admin.sales.editor.saveAndPublish")}
                 </Button>
               ) : null}
             </div>
@@ -672,12 +687,16 @@ function LiveQuotaManager({
   onIncrease: (item: AdminSaleCampaignItem) => void;
   disabled: boolean;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="grid gap-3 rounded-xl border p-4">
       <div>
-        <h2 className="font-heading font-medium">Live quota controls</h2>
+        <h2 className="font-heading font-medium">
+          {t("admin.sales.editor.liveQuota.title")}
+        </h2>
         <p className="mt-1 text-muted-foreground text-sm">
-          Quota can only increase while a Flash campaign is live.
+          {t("admin.sales.editor.liveQuota.description")}
         </p>
       </div>
       <Separator />
@@ -692,9 +711,16 @@ function LiveQuotaManager({
               <p className="font-mono text-muted-foreground text-xs">{item.sku}</p>
             </div>
             <div className="text-sm tabular-nums sm:text-right">
-              <p>{item.quota ?? 0} quota</p>
+              <p>
+                {t("admin.sales.editor.liveQuota.quota", {
+                  count: item.quota ?? 0,
+                })}
+              </p>
               <p className="text-muted-foreground text-xs">
-                {item.reservedQuantity} reserved · {item.soldQuantity} sold
+                {t("admin.sales.editor.liveQuota.breakdown", {
+                  reserved: item.reservedQuantity,
+                  sold: item.soldQuantity,
+                })}
               </p>
             </div>
             <Button
@@ -704,7 +730,7 @@ function LiveQuotaManager({
               onClick={() => onIncrease(item)}
               disabled={disabled}
             >
-              <Plus /> Increase
+              <Plus /> {t("admin.sales.editor.liveQuota.increase")}
             </Button>
           </div>
         ))}
@@ -730,19 +756,53 @@ function LifecycleDialog({
   cloneDraft: CloneDraftValues;
   onCloneDraftChange: (values: CloneDraftValues) => void;
 }) {
-  const copy = action ? ACTION_COPY[action] : null;
+  const { t } = useI18n();
+  const actionCopies = {
+    DELETE: {
+      title: t("admin.sales.editor.lifecycle.delete.title"),
+      description: t("admin.sales.editor.lifecycle.delete.description"),
+      label: t("admin.sales.editor.lifecycle.delete.confirm"),
+      destructive: true,
+    },
+    CANCEL: {
+      title: t("admin.sales.editor.lifecycle.cancel.title"),
+      description: t("admin.sales.editor.lifecycle.cancel.description"),
+      label: t("admin.sales.editor.lifecycle.cancel.confirm"),
+      destructive: true,
+    },
+    END: {
+      title: t("admin.sales.editor.lifecycle.end.title"),
+      description: t("admin.sales.editor.lifecycle.end.description"),
+      label: t("admin.sales.editor.lifecycle.end.confirm"),
+      destructive: true,
+    },
+    END_AND_CLONE: {
+      title: t("admin.sales.editor.lifecycle.clone.title"),
+      description: t("admin.sales.editor.lifecycle.clone.description"),
+      label: t("admin.sales.editor.lifecycle.clone.confirm"),
+      destructive: false,
+    },
+  } satisfies Record<
+    LifecycleAction,
+    { title: string; description: string; label: string; destructive: boolean }
+  >;
+  const copy = action ? actionCopies[action] : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{copy?.title ?? "Confirm action"}</DialogTitle>
+          <DialogTitle>
+            {copy?.title ?? t("admin.sales.editor.lifecycle.confirmTitle")}
+          </DialogTitle>
           <DialogDescription>{copy?.description}</DialogDescription>
         </DialogHeader>
         {action === "END_AND_CLONE" ? (
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <label htmlFor="clone-code" className="font-medium text-sm">New campaign code</label>
+              <label htmlFor="clone-code" className="font-medium text-sm">
+                {t("admin.sales.editor.clone.code")}
+              </label>
               <Input
                 id="clone-code"
                 value={cloneDraft.code}
@@ -757,7 +817,9 @@ function LifecycleDialog({
               />
             </div>
             <div className="grid gap-2">
-              <label htmlFor="clone-name" className="font-medium text-sm">New campaign name</label>
+              <label htmlFor="clone-name" className="font-medium text-sm">
+                {t("admin.sales.editor.clone.name")}
+              </label>
               <Input
                 id="clone-name"
                 value={cloneDraft.name}
@@ -770,7 +832,9 @@ function LifecycleDialog({
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <label htmlFor="clone-start" className="font-medium text-sm">Starts at</label>
+                <label htmlFor="clone-start" className="font-medium text-sm">
+                  {t("admin.sales.editor.clone.startsAt")}
+                </label>
                 <Input
                   id="clone-start"
                   type="datetime-local"
@@ -782,7 +846,9 @@ function LifecycleDialog({
                 />
               </div>
               <div className="grid gap-2">
-                <label htmlFor="clone-end" className="font-medium text-sm">Ends at</label>
+                <label htmlFor="clone-end" className="font-medium text-sm">
+                  {t("admin.sales.editor.clone.endsAt")}
+                </label>
                 <Input
                   id="clone-end"
                   type="datetime-local"
@@ -798,7 +864,7 @@ function LifecycleDialog({
         ) : null}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            Keep campaign
+            {t("admin.sales.editor.lifecycle.keepCampaign")}
           </Button>
           <Button
             variant={copy?.destructive ? "destructive" : "default"}
@@ -806,7 +872,7 @@ function LifecycleDialog({
             disabled={pending}
           >
             {pending ? <Loader2 className="animate-spin" /> : null}
-            {copy?.label ?? "Confirm"}
+            {copy?.label ?? t("admin.sales.editor.lifecycle.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -829,6 +895,7 @@ function QuotaIncreaseDialog({
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }) {
+  const { locale, t } = useI18n();
   const currentQuota = item?.quota ?? 0;
   const nextQuota = currentQuota + (Number(value) || 0);
 
@@ -836,14 +903,16 @@ function QuotaIncreaseDialog({
     <Dialog open={item !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Increase Flash quota</DialogTitle>
+          <DialogTitle>{t("admin.sales.editor.quotaDialog.title")}</DialogTitle>
           <DialogDescription>
-            Increase quota for {item?.sku ?? "this variant"}. Existing quota cannot be reduced while live.
+            {t("admin.sales.editor.quotaDialog.description", {
+              sku: item?.sku ?? t("admin.sales.editor.quotaDialog.thisVariant"),
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <label htmlFor="additional-quota" className="font-medium text-sm">
-            Additional quantity
+            {t("admin.sales.editor.quotaDialog.additionalQuantity")}
           </label>
           <Input
             id="additional-quota"
@@ -855,21 +924,29 @@ function QuotaIncreaseDialog({
             disabled={pending}
           />
           <p className="text-muted-foreground text-sm tabular-nums">
-            {currentQuota} current + {Number(value) || 0} = {nextQuota} new quota
+            {t("admin.sales.editor.quotaDialog.calculation", {
+              current: currentQuota,
+              additional: Number(value) || 0,
+              next: nextQuota,
+            })}
           </p>
           {item ? (
             <p className="text-muted-foreground text-xs">
-              Sale price {formatCurrency(item.promotionalPrice)} · {item.reservedQuantity} reserved · {item.soldQuantity} sold
+              {t("admin.sales.editor.quotaDialog.details", {
+                price: formatCurrency(item.promotionalPrice, locale),
+                reserved: item.reservedQuantity,
+                sold: item.soldQuantity,
+              })}
             </p>
           ) : null}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
-            Cancel
+            {t("admin.sales.editor.quotaDialog.cancel")}
           </Button>
           <Button onClick={onConfirm} disabled={pending}>
             {pending ? <Loader2 className="animate-spin" /> : <Plus />}
-            Increase quota
+            {t("admin.sales.editor.quotaDialog.increase")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -23,7 +23,7 @@ type StatusCodeRainProps = {
   code: string;
   color?: string;
   compact?: boolean;
-  hint?: string;
+  hint: string;
   hintTone?: "light" | "dark";
 };
 
@@ -106,7 +106,7 @@ export function StatusCodeRain({
   code,
   color = "#f7f4ef",
   compact = false,
-  hint = "Click anywhere to drop the code",
+  hint,
   hintTone = "light",
 }: StatusCodeRainProps) {
   const containerRef = useRef<HTMLDivElement>(null);

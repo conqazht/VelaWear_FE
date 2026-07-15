@@ -5,6 +5,7 @@ import { Package, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { formatCurrency } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -54,8 +55,8 @@ type VariantGroup = {
 function optionLabel(item: {
   colorName?: string | null;
   sizeName?: string | null;
-}) {
-  return [item.colorName, item.sizeName].filter(Boolean).join(" / ") || "Default";
+}, defaultLabel: string) {
+  return [item.colorName, item.sizeName].filter(Boolean).join(" / ") || defaultLabel;
 }
 
 export function ProductVariantPicker({
@@ -67,6 +68,7 @@ export function ProductVariantPicker({
   isLoading,
   error,
 }: ProductVariantPickerProps) {
+  const { locale, t } = useI18n();
   const [searchValue, setSearchValue] = useState("");
   const [bulkMode, setBulkMode] = useState<BulkPriceMode>("PERCENTAGE");
   const [bulkValue, setBulkValue] = useState("10");
@@ -96,7 +98,7 @@ export function ProductVariantPicker({
   }
 
   const groups = Array.from(groupsByProduct.values()).sort((left, right) =>
-    left.productName.localeCompare(right.productName),
+    left.productName.localeCompare(right.productName, locale),
   );
 
   function toggleVariant(variant: AdminProductVariant, checked: boolean) {
@@ -135,11 +137,11 @@ export function ProductVariantPicker({
   function applyBulkPrice() {
     const value = Number(bulkValue);
     if (!Number.isFinite(value) || value <= 0) {
-      toast.error("Enter a positive value before applying a bulk price.");
+      toast.error(t("admin.sales.management.picker.bulkPositive"));
       return;
     }
     if (bulkMode === "PERCENTAGE" && value >= 100) {
-      toast.error("Percentage discount must be greater than 0 and below 100.");
+      toast.error(t("admin.sales.management.picker.bulkPercentageRange"));
       return;
     }
 
@@ -163,12 +165,18 @@ export function ProductVariantPicker({
       <div className="grid gap-4 rounded-xl border p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="font-heading font-medium">Choose product variants</h2>
+            <h2 className="font-heading font-medium">
+              {t("admin.sales.management.picker.chooseTitle")}
+            </h2>
             <p className="mt-1 text-muted-foreground text-sm">
-              A campaign can contain variants from one or many products.
+              {t("admin.sales.management.picker.chooseDescription")}
             </p>
           </div>
-          <Badge variant="secondary">{items.length} selected</Badge>
+          <Badge variant="secondary">
+            {t("admin.sales.management.picker.selectedCount", {
+              count: items.length,
+            })}
+          </Badge>
         </div>
 
         <InputGroup className="w-full sm:max-w-md">
@@ -178,8 +186,8 @@ export function ProductVariantPicker({
           <InputGroupInput
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search products, SKU, color, or size..."
-            aria-label="Search available product variants"
+            placeholder={t("admin.sales.management.picker.searchPlaceholder")}
+            aria-label={t("admin.sales.management.picker.searchAria")}
           />
         </InputGroup>
 
@@ -192,11 +200,11 @@ export function ProductVariantPicker({
         <div className="max-h-[32rem] overflow-y-auto rounded-lg border">
           {isLoading ? (
             <p className="p-6 text-center text-muted-foreground text-sm">
-              Loading sellable variants...
+              {t("admin.sales.management.picker.loading")}
             </p>
           ) : groups.length === 0 ? (
             <p className="p-6 text-center text-muted-foreground text-sm">
-              No active variants match this search.
+              {t("admin.sales.management.picker.empty")}
             </p>
           ) : (
             <div className="divide-y">
@@ -217,7 +225,10 @@ export function ProductVariantPicker({
                           toggleProduct(group, Boolean(checked))
                         }
                         disabled={disabled}
-                        aria-label={`Select all variants of ${group.productName}`}
+                        aria-label={t(
+                          "admin.sales.management.picker.selectAllAria",
+                          { name: group.productName },
+                        )}
                       />
                       <Package className="size-4 text-muted-foreground" />
                       <span className="min-w-0 flex-1 truncate font-medium">
@@ -239,21 +250,27 @@ export function ProductVariantPicker({
                               toggleVariant(variant, Boolean(checked))
                             }
                             disabled={disabled}
-                            aria-label={`Select ${variant.sku}`}
+                            aria-label={t(
+                              "admin.sales.management.picker.selectVariantAria",
+                              { sku: variant.sku },
+                            )}
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate font-mono text-xs">
                               {variant.sku}
                             </span>
                             <span className="block text-muted-foreground text-xs">
-                              {optionLabel({
-                                colorName: variant.color?.name,
-                                sizeName: variant.size?.name,
-                              })}
+                              {optionLabel(
+                                {
+                                  colorName: variant.color?.name,
+                                  sizeName: variant.size?.name,
+                                },
+                                t("admin.sales.management.picker.defaultOption"),
+                              )}
                             </span>
                           </span>
                           <span className="whitespace-nowrap font-medium text-sm tabular-nums">
-                            {formatCurrency(variant.price)}
+                            {formatCurrency(variant.price, locale)}
                           </span>
                         </label>
                       ))}
@@ -269,9 +286,11 @@ export function ProductVariantPicker({
       <div className="grid gap-4 rounded-xl border p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h2 className="font-heading font-medium">Sale pricing</h2>
+            <h2 className="font-heading font-medium">
+              {t("admin.sales.management.picker.pricingTitle")}
+            </h2>
             <p className="mt-1 text-muted-foreground text-sm">
-              Set an absolute sale price per variant. Bulk percentage is converted before saving.
+              {t("admin.sales.management.picker.pricingDescription")}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
@@ -280,12 +299,19 @@ export function ProductVariantPicker({
               onValueChange={(value) => setBulkMode(value as BulkPriceMode)}
               disabled={disabled || items.length === 0}
             >
-              <SelectTrigger className="sm:w-44" aria-label="Bulk price mode">
+              <SelectTrigger
+                className="sm:w-44"
+                aria-label={t("admin.sales.management.picker.bulkModeAria")}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="end" alignItemWithTrigger={false}>
-                <SelectItem value="PERCENTAGE">Discount percent</SelectItem>
-                <SelectItem value="FIXED_PRICE">Fixed sale price</SelectItem>
+                <SelectItem value="PERCENTAGE">
+                  {t("admin.sales.management.picker.discountPercent")}
+                </SelectItem>
+                <SelectItem value="FIXED_PRICE">
+                  {t("admin.sales.management.picker.fixedPrice")}
+                </SelectItem>
               </SelectContent>
             </Select>
             <Input
@@ -299,8 +325,8 @@ export function ProductVariantPicker({
               disabled={disabled || items.length === 0}
               aria-label={
                 bulkMode === "PERCENTAGE"
-                  ? "Bulk discount percentage"
-                  : "Bulk fixed sale price"
+                  ? t("admin.sales.management.picker.bulkPercentageAria")
+                  : t("admin.sales.management.picker.bulkFixedPriceAria")
               }
             />
             <Button
@@ -309,7 +335,7 @@ export function ProductVariantPicker({
               onClick={applyBulkPrice}
               disabled={disabled || items.length === 0}
             >
-              Apply to selected
+              {t("admin.sales.management.picker.applySelected")}
             </Button>
           </div>
         </div>
@@ -318,18 +344,32 @@ export function ProductVariantPicker({
           <Table className={type === "FLASH" ? "min-w-[1050px]" : "min-w-[760px]"}>
             <TableHeader>
               <TableRow>
-                <TableHead>Product / variant</TableHead>
-                <TableHead className="text-right">Reference price</TableHead>
-                <TableHead className="w-48">Sale price</TableHead>
+                <TableHead>
+                  {t("admin.sales.management.picker.column.productVariant")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t("admin.sales.management.picker.column.referencePrice")}
+                </TableHead>
+                <TableHead className="w-48">
+                  {t("admin.sales.management.picker.column.salePrice")}
+                </TableHead>
                 {type === "FLASH" ? (
                   <>
-                    <TableHead className="w-36">Quota</TableHead>
-                    <TableHead className="w-44">Limit / customer</TableHead>
-                    <TableHead>Used</TableHead>
+                    <TableHead className="w-36">
+                      {t("admin.sales.management.picker.column.quota")}
+                    </TableHead>
+                    <TableHead className="w-44">
+                      {t("admin.sales.management.picker.column.customerLimit")}
+                    </TableHead>
+                    <TableHead>
+                      {t("admin.sales.management.picker.column.used")}
+                    </TableHead>
                   </>
                 ) : null}
                 <TableHead className="w-12">
-                  <span className="sr-only">Remove</span>
+                  <span className="sr-only">
+                    {t("admin.sales.management.picker.column.remove")}
+                  </span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -340,7 +380,7 @@ export function ProductVariantPicker({
                     colSpan={type === "FLASH" ? 7 : 4}
                     className="h-28 text-center text-muted-foreground"
                   >
-                    Select one or more variants above.
+                    {t("admin.sales.management.picker.selectPrompt")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -349,11 +389,15 @@ export function ProductVariantPicker({
                     <TableCell>
                       <p className="max-w-64 truncate font-medium">{item.productName}</p>
                       <p className="text-muted-foreground text-xs">
-                        <span className="font-mono">{item.sku}</span> · {optionLabel(item)}
+                        <span className="font-mono">{item.sku}</span> ·{" "}
+                        {optionLabel(
+                          item,
+                          t("admin.sales.management.picker.defaultOption"),
+                        )}
                       </p>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
-                      {formatCurrency(item.referencePrice)}
+                      {formatCurrency(item.referencePrice, locale)}
                     </TableCell>
                     <TableCell>
                       <Input
@@ -368,7 +412,10 @@ export function ProductVariantPicker({
                           })
                         }
                         disabled={disabled}
-                        aria-label={`Sale price for ${item.sku}`}
+                        aria-label={t(
+                          "admin.sales.management.picker.salePriceAria",
+                          { sku: item.sku },
+                        )}
                       />
                     </TableCell>
                     {type === "FLASH" ? (
@@ -383,7 +430,10 @@ export function ProductVariantPicker({
                               updateItem(item.variantId, { quota: event.target.value })
                             }
                             disabled={disabled}
-                            aria-label={`Quota for ${item.sku}`}
+                            aria-label={t(
+                              "admin.sales.management.picker.quotaAria",
+                              { sku: item.sku },
+                            )}
                           />
                         </TableCell>
                         <TableCell>
@@ -391,7 +441,7 @@ export function ProductVariantPicker({
                             type="number"
                             min="1"
                             step="1"
-                            placeholder="No limit"
+                            placeholder={t("admin.sales.management.picker.noLimit")}
                             value={item.maxPerCustomer}
                             onChange={(event) =>
                               updateItem(item.variantId, {
@@ -399,11 +449,17 @@ export function ProductVariantPicker({
                               })
                             }
                             disabled={disabled}
-                            aria-label={`Customer limit for ${item.sku}`}
+                            aria-label={t(
+                              "admin.sales.management.picker.customerLimitAria",
+                              { sku: item.sku },
+                            )}
                           />
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-muted-foreground tabular-nums">
-                          {item.reservedQuantity} reserved · {item.soldQuantity} sold
+                          {t("admin.sales.management.picker.usedBreakdown", {
+                            reserved: item.reservedQuantity,
+                            sold: item.soldQuantity,
+                          })}
                         </TableCell>
                       </>
                     ) : null}
@@ -420,7 +476,9 @@ export function ProductVariantPicker({
                           )
                         }
                         disabled={disabled}
-                        aria-label={`Remove ${item.sku}`}
+                        aria-label={t("admin.sales.management.picker.removeAria", {
+                          sku: item.sku,
+                        })}
                       >
                         <Trash2 />
                       </Button>

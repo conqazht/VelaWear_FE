@@ -5,7 +5,7 @@ import { AuthLoader } from "@/components/auth/auth-loader";
 
 export default function OAuth2CallbackPage() {
   return (
-    <Suspense fallback={<AuthLoader message="Đang hoàn tất đăng nhập..." />}>
+    <Suspense fallback={<AuthLoader mode="oauth" />}>
       <OAuth2CallbackClient />
     </Suspense>
   );

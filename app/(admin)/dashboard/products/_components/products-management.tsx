@@ -15,11 +15,10 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
   downloadCsv,
-  formatAdminDateTime,
-  formatCurrency,
   getApiErrorMessage,
   resolveAdminAssetUrl,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ import {
   updateAdminProduct,
   updateAdminProductVariant,
 } from "@/lib/api/admin-commerce";
+import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
 import type {
   AdminCatalogOption,
   AdminProduct,
@@ -62,12 +62,14 @@ import {
 
 const ALL_FILTER = "ALL";
 
-const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
-  DRAFT: "Draft",
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-  OUT_OF_STOCK: "Out of stock",
-};
+const PRODUCT_STATUS_MESSAGE_KEYS = {
+  DRAFT: "admin.commerce.products.status.draft",
+  ACTIVE: "admin.commerce.products.status.active",
+  INACTIVE: "admin.commerce.products.status.inactive",
+  OUT_OF_STOCK: "admin.commerce.products.status.outOfStock",
+} as const;
+
+const PRODUCT_STATUSES: ProductStatus[] = ["DRAFT", "ACTIVE", "INACTIVE", "OUT_OF_STOCK"];
 
 function getStatusVariant(status: ProductStatus) {
   if (status === "ACTIVE") return "default" as const;
@@ -115,38 +117,43 @@ function toVariantRequest(
   };
 }
 
-function getVariantValidationError(variants: ProductVariantFormValue[]) {
-  if (variants.length === 0) return "Add at least one product variant before saving.";
+function getVariantValidationError(
+  variants: ProductVariantFormValue[],
+  t: ReturnType<typeof useI18n>["t"]
+) {
+  if (variants.length === 0) return t("admin.commerce.products.validation.addVariant");
 
   const skus = new Set<string>();
   const combinations = new Set<string>();
 
   for (const [index, variant] of variants.entries()) {
-    const label = `Variant ${index + 1}`;
+    const number = index + 1;
     const sku = variant.sku.trim();
     const price = Number(variant.price);
     const stock = Number(variant.stockQuantity);
 
-    if (!sku) return `${label} requires a SKU.`;
-    if (skus.has(sku.toLowerCase())) return `SKU ${sku} is duplicated in this product.`;
+    if (!sku) return t("admin.commerce.products.validation.skuRequired", { number });
+    if (skus.has(sku.toLowerCase())) {
+      return t("admin.commerce.products.validation.duplicateSku", { sku });
+    }
     skus.add(sku.toLowerCase());
 
     if (variant.price.trim() === "" || !Number.isFinite(price) || price < 0) {
-      return `${label} price must be a non-negative number.`;
+      return t("admin.commerce.products.validation.price", { number });
     }
     if (variant.stockQuantity.trim() === "" || !Number.isInteger(stock) || stock < 0) {
-      return `${label} stock must be a non-negative whole number.`;
+      return t("admin.commerce.products.validation.stock", { number });
     }
     if (stock === 0 && variant.status === "ACTIVE") {
-      return `${label} cannot be active while its stock is 0.`;
+      return t("admin.commerce.products.validation.zeroStockActive", { number });
     }
     if (stock > 0 && variant.status === "OUT_OF_STOCK") {
-      return `${label} has stock available, so choose a status other than Out of stock.`;
+      return t("admin.commerce.products.validation.stockAvailable", { number });
     }
 
     const combination = `${variant.colorId || "none"}:${variant.sizeId || "none"}`;
     if (combinations.has(combination)) {
-      return `${label} repeats a color and size combination already used above.`;
+      return t("admin.commerce.products.validation.duplicateOptions", { number });
     }
     combinations.add(combination);
   }
@@ -213,6 +220,7 @@ function mergeVariantRequest(
 }
 
 export function ProductsManagement() {
+  const { locale, t } = useI18n();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -244,8 +252,9 @@ export function ProductsManagement() {
     status: statusFilter === ALL_FILTER ? undefined : (statusFilter as ProductStatus),
     categoryId: categoryFilter === ALL_FILTER ? undefined : Number(categoryFilter),
     brandId: brandFilter === ALL_FILTER ? undefined : Number(brandFilter),
+    locale,
   });
-  const categoriesQuery = useAdminCategoriesQuery();
+  const categoriesQuery = useAdminCategoriesQuery({ locale });
   const brandsQuery = useAdminBrandsQuery();
   const colorsQuery = useAdminColorsQuery({ page: 1, size: 2000, sort: "sortOrder,asc" });
   const sizesQuery = useAdminSizesQuery({ page: 1, size: 2000, sort: "sortOrder,asc" });
@@ -265,7 +274,9 @@ export function ProductsManagement() {
   ) {
     productCategoryOptions.push({
       id: editingProduct.categoryId,
-      name: editingProduct.categoryName ?? `Archived category #${editingProduct.categoryId}`,
+      name:
+        editingProduct.categoryName ??
+        t("admin.commerce.products.archivedCategory", { id: editingProduct.categoryId }),
     });
   }
   if (
@@ -274,7 +285,7 @@ export function ProductsManagement() {
   ) {
     productBrandOptions.push({
       id: editingProduct.brandId,
-      name: `Archived brand #${editingProduct.brandId}`,
+      name: t("admin.commerce.products.archivedBrand", { id: editingProduct.brandId }),
     });
   }
   const brandNames = new Map(brands.map((brand) => [brand.id, brand.name]));
@@ -313,7 +324,9 @@ export function ProductsManagement() {
       setFormTab("details");
       setFormOpen(true);
     } catch (error) {
-      toast.error(`Unable to load product variants. ${getApiErrorMessage(error)}`);
+      toast.error(
+        `${t("admin.commerce.products.loadVariantsFailed")} ${getApiErrorMessage(error)}`
+      );
     } finally {
       setLoadingVariantProductId(null);
     }
@@ -429,16 +442,16 @@ export function ProductsManagement() {
       (!editingProduct && !slug)
     ) {
       setFormTab("details");
-      toast.error("Complete the required product fields before saving.");
+      toast.error(t("admin.commerce.products.validation.complete"));
       return;
     }
     if (!editingProduct && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
       setFormTab("details");
-      toast.error("Use a lowercase URL-safe slug with words separated by hyphens.");
+      toast.error(t("admin.commerce.products.validation.slug"));
       return;
     }
 
-    const variantValidationError = getVariantValidationError(variantValues);
+    const variantValidationError = getVariantValidationError(variantValues, t);
     if (variantValidationError) {
       setFormTab("variants");
       toast.error(variantValidationError);
@@ -449,7 +462,7 @@ export function ProductsManagement() {
       variantValues.some((variant) => variant.status === "ACTIVE")
     ) {
       setFormTab("variants");
-      toast.error("Active variants require the parent product to be active as well.");
+      toast.error(t("admin.commerce.products.validation.activeParent"));
       return;
     }
 
@@ -468,7 +481,7 @@ export function ProductsManagement() {
         !brands.some((brand) => brand.id === brandId))
     ) {
       setFormTab("details");
-      toast.error("Choose an available category and brand before changing product details.");
+      toast.error(t("admin.commerce.products.validation.catalog"));
       return;
     }
 
@@ -510,8 +523,13 @@ export function ProductsManagement() {
 
       toast.success(
         createdDuringSave
-          ? `${name} and ${variantValues.length} variant${variantValues.length === 1 ? "" : "s"} were created.`
-          : `${name} and its variants were updated.`
+          ? variantValues.length === 1
+            ? t("admin.commerce.products.createdOne", { name })
+            : t("admin.commerce.products.createdMany", {
+                name,
+                count: variantValues.length,
+              })
+          : t("admin.commerce.products.updated", { name })
       );
       setPage(1);
       setFormOpen(false);
@@ -519,13 +537,13 @@ export function ProductsManagement() {
     } catch (error) {
       const message = getApiErrorMessage(error);
       if (wasCreating && !product) {
-        toast.error(`Unable to create ${name}. ${message}`);
+        toast.error(`${t("admin.commerce.products.createFailed", { name })} ${message}`);
       } else if (createdDuringSave && !productStatusSaved) {
-        toast.error(`${name} was kept as a draft, but the variant workflow did not finish. ${message}`);
+        toast.error(`${t("admin.commerce.products.draftPartial", { name })} ${message}`);
       } else if (createdDuringSave) {
-        toast.error(`${name} was created, but some variant statuses did not finish updating. ${message}`);
+        toast.error(`${t("admin.commerce.products.createdPartial", { name })} ${message}`);
       } else {
-        toast.error(`The save did not finish; completed variant changes were kept. ${message}`);
+        toast.error(`${t("admin.commerce.products.savePartial")} ${message}`);
       }
     } finally {
       await Promise.allSettled([
@@ -559,11 +577,13 @@ export function ProductsManagement() {
         await updateAdminProductVariant(variant.id, { ...request, status: "INACTIVE" });
       }
       await deleteMutation.mutateAsync(id);
-      toast.success(`${name} and its active variants were archived.`);
+      toast.success(t("admin.commerce.products.archived", { name }));
       setArchiveProduct(null);
       setPage(1);
     } catch (error) {
-      toast.error(`The archive workflow did not finish. ${getApiErrorMessage(error)}`);
+      toast.error(
+        `${t("admin.commerce.products.archivePartial")} ${getApiErrorMessage(error)}`
+      );
     } finally {
       await Promise.allSettled([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.productVariants.root }),
@@ -580,7 +600,7 @@ export function ProductsManagement() {
   const columns: ManagementColumn<AdminProduct>[] = [
     {
       key: "product",
-      header: "Product",
+      header: t("admin.commerce.products.column.product"),
       className: "min-w-72",
       cell: (product) => (
         <div className="flex items-center gap-3">
@@ -599,38 +619,48 @@ export function ProductsManagement() {
     },
     {
       key: "catalog",
-      header: "Category / brand",
+      header: t("admin.commerce.products.column.catalog"),
       cell: (product) => (
         <div className="space-y-0.5">
-          <p>{product.categoryName ?? `Category #${product.categoryId}`}</p>
+          <p>
+            {product.categoryName ??
+              t("admin.commerce.products.categoryId", { id: product.categoryId })}
+          </p>
           <p className="text-muted-foreground text-xs">
-            {brandNames.get(product.brandId) ?? `Brand #${product.brandId}`}
+            {brandNames.get(product.brandId) ??
+              t("admin.commerce.products.brandId", { id: product.brandId })}
           </p>
         </div>
       ),
     },
     {
       key: "price",
-      header: "Variant price",
+      header: t("admin.commerce.products.column.price"),
       className: "whitespace-nowrap tabular-nums",
-      cell: (product) => <span className="font-medium">{formatCurrency(product.price)}</span>,
+      cell: (product) => (
+        <span className="font-medium">
+          {product.price === null ? "—" : formatCurrency(product.price, locale)}
+        </span>
+      ),
     },
     {
       key: "status",
-      header: "Status",
+      header: t("admin.commerce.common.status"),
       cell: (product) => (
-        <Badge variant={getStatusVariant(product.status)}>{PRODUCT_STATUS_LABELS[product.status]}</Badge>
+        <Badge variant={getStatusVariant(product.status)}>
+          {t(PRODUCT_STATUS_MESSAGE_KEYS[product.status])}
+        </Badge>
       ),
     },
     {
       key: "updatedAt",
-      header: "Updated",
+      header: t("admin.commerce.common.updated"),
       className: "whitespace-nowrap text-muted-foreground",
-      cell: (product) => formatAdminDateTime(product.updatedAt),
+      cell: (product) => formatDateTime(product.updatedAt, locale),
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (product) => (
@@ -638,7 +668,7 @@ export function ProductsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Edit ${product.name}`}
+            aria-label={t("admin.commerce.products.editNamed", { name: product.name })}
             disabled={loadingVariantProductId !== null}
             onClick={() => void openEditForm(product)}
           >
@@ -647,7 +677,7 @@ export function ProductsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Archive ${product.name}`}
+            aria-label={t("admin.commerce.products.archiveNamed", { name: product.name })}
             disabled={loadingVariantProductId !== null}
             onClick={() => setArchiveProduct(product)}
           >
@@ -661,8 +691,8 @@ export function ProductsManagement() {
   return (
     <>
       <ResourcePage
-        title="Products"
-        description="Manage catalog details, sellable variants, pricing, and inventory from one product workflow."
+        title={t("admin.commerce.products.title")}
+        description={t("admin.commerce.products.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -670,7 +700,7 @@ export function ProductsManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search product names..."
+        searchPlaceholder={t("admin.commerce.products.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -682,11 +712,14 @@ export function ProductsManagement() {
         }}
         filters={[
           {
-            label: "Status",
+            label: t("admin.commerce.common.status"),
             value: statusFilter,
             options: [
-              { label: "All statuses", value: ALL_FILTER },
-              ...Object.entries(PRODUCT_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+              { label: t("admin.commerce.common.allStatuses"), value: ALL_FILTER },
+              ...PRODUCT_STATUSES.map((value) => ({
+                value,
+                label: t(PRODUCT_STATUS_MESSAGE_KEYS[value]),
+              })),
             ],
             onValueChange: (value) => {
               setStatusFilter(value ?? ALL_FILTER);
@@ -694,10 +727,10 @@ export function ProductsManagement() {
             },
           },
           {
-            label: "Category",
+            label: t("admin.commerce.products.filter.category"),
             value: categoryFilter,
             options: [
-              { label: "All categories", value: ALL_FILTER },
+              { label: t("admin.commerce.products.filter.allCategories"), value: ALL_FILTER },
               ...categories.map((category) => ({ label: category.name, value: String(category.id) })),
             ],
             onValueChange: (value) => {
@@ -706,10 +739,10 @@ export function ProductsManagement() {
             },
           },
           {
-            label: "Brand",
+            label: t("admin.commerce.products.filter.brand"),
             value: brandFilter,
             options: [
-              { label: "All brands", value: ALL_FILTER },
+              { label: t("admin.commerce.products.filter.allBrands"), value: ALL_FILTER },
               ...brands.map((brand) => ({ label: brand.name, value: String(brand.id) })),
             ],
             onValueChange: (value) => {
@@ -719,7 +752,7 @@ export function ProductsManagement() {
           },
         ]}
         primaryAction={{
-          label: "Add product",
+          label: t("admin.commerce.products.add"),
           onClick: openCreateForm,
           disabled: loadingVariantProductId !== null,
         }}
@@ -734,7 +767,7 @@ export function ProductsManagement() {
               category: product.categoryName,
               brand: brandNames.get(product.brandId),
               price: product.price,
-              status: product.status,
+              status: t(PRODUCT_STATUS_MESSAGE_KEYS[product.status]),
               updatedAt: product.updatedAt,
             }))
           )
@@ -742,8 +775,8 @@ export function ProductsManagement() {
         isLoading={productsQuery.isPending}
         isFetching={productsQuery.isFetching}
         error={productsQuery.isError ? productsQuery.error : null}
-        emptyTitle="No products found"
-        emptyDescription="Add a product or adjust the current search and catalog filters."
+        emptyTitle={t("admin.commerce.products.emptyTitle")}
+        emptyDescription={t("admin.commerce.products.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -751,8 +784,12 @@ export function ProductsManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingProduct ? "Edit product" : "Add product"}
-        description="Save the product details together with every SKU, price, color, size, and stock quantity."
+        title={
+          editingProduct
+            ? t("admin.commerce.products.edit")
+            : t("admin.commerce.products.add")
+        }
+        description={t("admin.commerce.products.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
         submitDisabled={
@@ -763,13 +800,21 @@ export function ProductsManagement() {
           categories.length === 0 ||
           brands.length === 0
         }
-        submitLabel={editingProduct ? "Save product" : "Create product"}
+        submitLabel={
+          editingProduct
+            ? t("admin.commerce.products.save")
+            : t("admin.commerce.products.create")
+        }
         contentClassName="sm:max-w-4xl"
       >
         <Tabs value={formTab} onValueChange={setFormTab} className="gap-5">
           <TabsList variant="line" className="w-full justify-start">
-            <TabsTrigger value="details">Product details</TabsTrigger>
-            <TabsTrigger value="variants">Variants & inventory ({variantValues.length})</TabsTrigger>
+            <TabsTrigger value="details">
+              {t("admin.commerce.products.tab.details")}
+            </TabsTrigger>
+            <TabsTrigger value="variants">
+              {t("admin.commerce.products.tab.variants", { count: variantValues.length })}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="details">
             <ProductForm
@@ -812,9 +857,9 @@ export function ProductsManagement() {
         onOpenChange={(open) => {
           if (!open && !isArchiveWorkflowPending && !deleteMutation.isPending) setArchiveProduct(null);
         }}
-        resourceName={archiveProduct?.name ?? "product"}
-        actionLabel="Archive"
-        description="This first disables active variants, then softly archives the product. Existing order history is preserved."
+        resourceName={archiveProduct?.name ?? t("admin.commerce.products.resource")}
+        actionLabel={t("admin.commerce.products.archive")}
+        description={t("admin.commerce.products.archiveDescription")}
         onConfirm={handleArchive}
         isPending={isArchiveWorkflowPending || deleteMutation.isPending}
       />
