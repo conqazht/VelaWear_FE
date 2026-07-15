@@ -46,7 +46,9 @@ import type {
   SaleCampaignPhase,
 } from "@/lib/api/admin-sales";
 import type { AdminProductVariant } from "@/lib/api/admin-commerce";
+import type { GeminiContentModel } from "@/lib/api/admin-translation-suggestions";
 import { useAdminProductVariantsQuery } from "@/lib/queries/admin-commerce";
+import { useSaleCampaignEnglishSuggestionMutation } from "@/lib/queries/admin-translation-suggestions";
 import {
   useAdminSaleCampaignQuery,
   useAdminSaleCampaignTranslationsQuery,
@@ -245,6 +247,7 @@ function SaleCampaignEditorForm({
   const increaseQuotaMutation = useIncreaseAdminSaleQuotaMutation();
   const endMutation = useEndAdminSaleCampaignMutation();
   const endAndCloneMutation = useEndAndCloneAdminSaleCampaignMutation();
+  const englishSuggestionMutation = useSaleCampaignEnglishSuggestionMutation();
 
   const phase = campaign ? getSaleCampaignPhase(campaign) : null;
   const statusLabel = campaign
@@ -276,7 +279,8 @@ function SaleCampaignEditorForm({
     translationMutation.isPending ||
     deleteTranslationMutation.isPending ||
     publishMutation.isPending ||
-    displayMutation.isPending;
+    displayMutation.isPending ||
+    englishSuggestionMutation.isPending;
   const isLifecyclePending =
     deleteMutation.isPending ||
     cancelMutation.isPending ||
@@ -299,6 +303,33 @@ function SaleCampaignEditorForm({
       }
     }
     setStep(nextStep);
+  }
+
+  async function generateEnglishContent(model: GeminiContentModel) {
+    try {
+      const suggestion = await englishSuggestionMutation.mutateAsync({
+        model,
+        name: values.name.trim(),
+        description: values.description.trim() || null,
+      });
+      const name = suggestion.name.trim();
+      if (suggestion.localeCode !== "en" || !name) {
+        toast.error(t("admin.contentGeneration.invalidResponse"));
+        return;
+      }
+
+      setValues((current) => ({
+        ...current,
+        englishName: name,
+        englishDescription: suggestion.description ?? "",
+      }));
+      setContentLocale("en");
+      toast.success(t("admin.contentGeneration.success"));
+    } catch (error) {
+      toast.error(
+        `${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`,
+      );
+    }
   }
 
   async function saveTranslations(saved: AdminSaleCampaign) {
@@ -597,7 +628,11 @@ function SaleCampaignEditorForm({
         </Alert>
       ) : null}
 
-      <CampaignStepper currentStep={step} onStepChange={goToStep} />
+      <CampaignStepper
+        currentStep={step}
+        onStepChange={goToStep}
+        disabled={englishSuggestionMutation.isPending}
+      />
 
       <Card>
         <CardHeader className="border-b">
@@ -619,6 +654,9 @@ function SaleCampaignEditorForm({
               typeAndScheduleDisabled={!canEditAll}
               contentLocale={contentLocale}
               onContentLocaleChange={setContentLocale}
+              isGeneratingEnglish={englishSuggestionMutation.isPending}
+              interactionDisabled={englishSuggestionMutation.isPending}
+              onGenerateEnglish={generateEnglishContent}
             />
           ) : step === 2 ? (
             <div className="grid gap-6">

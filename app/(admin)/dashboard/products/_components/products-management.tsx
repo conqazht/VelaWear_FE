@@ -60,7 +60,10 @@ import {
   useUpdateAdminProductVariantStatusMutation,
 } from "@/lib/queries/admin-commerce";
 import type { Locale } from "@/lib/i18n";
+import type { GeminiContentModel } from "@/lib/api/admin-translation-suggestions";
 import { invalidatePublicQueries } from "@/lib/queries/public-cache";
+import { useProductEnglishSuggestionMutation } from "@/lib/queries/admin-translation-suggestions";
+import { toAsciiUrlSlug } from "@/lib/url-slug";
 import {
   getProductStatusToggleState,
   getProductStatusToggleTarget,
@@ -324,6 +327,7 @@ export function ProductsManagement() {
   const deleteMutation = useDeleteAdminProductMutation();
   const statusMutation = useUpdateAdminProductStatusMutation();
   const variantStatusMutation = useUpdateAdminProductVariantStatusMutation();
+  const englishSuggestionMutation = useProductEnglishSuggestionMutation();
 
   const rows = productsQuery.data?.result ?? [];
   const meta = productsQuery.data?.meta;
@@ -354,7 +358,7 @@ export function ProductsManagement() {
     });
   }
   const brandNames = new Map(brands.map((brand) => [brand.id, brand.name]));
-  const isSaving = isWorkflowSaving;
+  const isSaving = isWorkflowSaving || englishSuggestionMutation.isPending;
 
   function openCreateForm() {
     variantWorkflowCheckpointRef.current = null;
@@ -491,6 +495,53 @@ export function ProductsManagement() {
     }
 
     return checkpoint;
+  }
+
+  async function generateEnglishContent(model: GeminiContentModel) {
+    const source = formValues.translations.vi;
+    const nullable = (value: string) => value.trim() || null;
+
+    try {
+      const suggestion = await englishSuggestionMutation.mutateAsync({
+        model,
+        name: source.name.trim(),
+        shortDescription: nullable(source.shortDescription),
+        description: nullable(source.description),
+        material: nullable(source.material),
+        careInstruction: nullable(source.careInstruction),
+        seoTitle: nullable(source.seoTitle),
+        seoDescription: nullable(source.seoDescription),
+      });
+      const name = suggestion.name.trim();
+      const slug = toAsciiUrlSlug(name);
+      if (suggestion.localeCode !== "en" || !name || !slug) {
+        toast.error(t("admin.contentGeneration.invalidResponse"));
+        return;
+      }
+
+      setFormValues((current) => ({
+        ...current,
+        translations: {
+          ...current.translations,
+          en: {
+            name,
+            slug,
+            shortDescription: suggestion.shortDescription ?? "",
+            description: suggestion.description ?? "",
+            material: suggestion.material ?? "",
+            careInstruction: suggestion.careInstruction ?? "",
+            seoTitle: suggestion.seoTitle ?? "",
+            seoDescription: suggestion.seoDescription ?? "",
+          },
+        },
+      }));
+      setContentLocale("en");
+      toast.success(t("admin.contentGeneration.success"));
+    } catch (error) {
+      toast.error(
+        `${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`,
+      );
+    }
   }
 
   async function saveProduct() {
@@ -1008,6 +1059,8 @@ export function ProductsManagement() {
                     ? getApiErrorMessage(brandsQuery.error)
                     : null
               }
+              isGeneratingEnglish={englishSuggestionMutation.isPending}
+              onGenerateEnglish={generateEnglishContent}
             />
           </TabsContent>
           <TabsContent value="variants">

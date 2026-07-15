@@ -1,6 +1,7 @@
 "use client";
 
 import { ContentLocaleTabs } from "@/app/(admin)/dashboard/_components/management/content-locale-tabs";
+import { EnglishContentGenerator } from "@/app/(admin)/dashboard/_components/management/english-content-generator";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -13,6 +14,8 @@ import type {
   CategoryTranslation,
 } from "@/lib/api/admin-commerce";
 import type { Locale } from "@/lib/i18n";
+import type { GeminiContentModel } from "@/lib/api/admin-translation-suggestions";
+import { shouldAutoUpdateSlug, toAsciiUrlSlug } from "@/lib/url-slug";
 
 const ROOT_CATEGORY_VALUE = "ROOT";
 
@@ -88,6 +91,8 @@ type CategoryFormProps = {
   editingCategoryId: number | null;
   isCatalogLoading?: boolean;
   catalogError?: string | null;
+  isGeneratingEnglish: boolean;
+  onGenerateEnglish: (model: GeminiContentModel) => void | Promise<void>;
 };
 
 export function CategoryForm({
@@ -99,6 +104,8 @@ export function CategoryForm({
   editingCategoryId,
   isCatalogLoading = false,
   catalogError,
+  isGeneratingEnglish,
+  onGenerateEnglish,
 }: CategoryFormProps) {
   const { t } = useI18n();
   const isEditing = editingCategoryId !== null;
@@ -130,11 +137,20 @@ export function CategoryForm({
     key: keyof CategoryTranslationFormValue,
     value: string,
   ) {
+    const currentTranslation = values.translations[locale];
+    const nextTranslation = { ...currentTranslation, [key]: value };
+    if (
+      locale === "en" &&
+      key === "name" &&
+      shouldAutoUpdateSlug(currentTranslation.name, currentTranslation.slug)
+    ) {
+      nextTranslation.slug = toAsciiUrlSlug(value);
+    }
     onChange({
       ...values,
       translations: {
         ...values.translations,
-        [locale]: { ...values.translations[locale], [key]: value },
+        [locale]: nextTranslation,
       },
     });
   }
@@ -144,6 +160,14 @@ export function CategoryForm({
     const prefix = `category-${locale}`;
     return (
       <>
+        {locale === "en" ? (
+          <EnglishContentGenerator
+            hasEnglishContent={!isCategoryTranslationEmpty(values.translations.en)}
+            sourceReady={Boolean(values.translations.vi.name.trim())}
+            isPending={isGeneratingEnglish}
+            onGenerate={onGenerateEnglish}
+          />
+        ) : null}
         <div className="grid gap-5 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor={`${prefix}-name`}>{t("admin.commerce.categories.form.name")}</FieldLabel>

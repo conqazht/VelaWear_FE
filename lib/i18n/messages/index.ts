@@ -1,4 +1,5 @@
 import { adminShellMessages } from "./admin-shell";
+import { adminContentGenerationMessages } from "./admin-content-generation";
 import { adminCommerceUiMessages } from "./admin-commerce-ui";
 import { adminCommunicationsMessages } from "./admin-communications";
 import { adminDashboardsAMessages } from "./admin-dashboards-a";
@@ -20,6 +21,7 @@ import { testimonialMessages } from "./testimonials";
 export const messages = {
   en: {
     ...adminShellMessages.en,
+    ...adminContentGenerationMessages.en,
     ...adminCommerceUiMessages.en,
     ...adminCommunicationsMessages.en,
     ...adminDashboardsAMessages.en,
@@ -40,6 +42,7 @@ export const messages = {
   },
   vi: {
     ...adminShellMessages.vi,
+    ...adminContentGenerationMessages.vi,
     ...adminCommerceUiMessages.vi,
     ...adminCommunicationsMessages.vi,
     ...adminDashboardsAMessages.vi,
