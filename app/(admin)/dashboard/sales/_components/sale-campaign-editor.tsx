@@ -42,12 +42,14 @@ import { Separator } from "@/components/ui/separator";
 import type {
   AdminSaleCampaign,
   AdminSaleCampaignItem,
+  SaleCampaignTranslation,
   SaleCampaignPhase,
 } from "@/lib/api/admin-sales";
 import type { AdminProductVariant } from "@/lib/api/admin-commerce";
 import { useAdminProductVariantsQuery } from "@/lib/queries/admin-commerce";
 import {
   useAdminSaleCampaignQuery,
+  useAdminSaleCampaignTranslationsQuery,
   useCancelAdminSaleCampaignMutation,
   useCreateAdminSaleCampaignMutation,
   useDeleteAdminSaleCampaignMutation,
@@ -56,16 +58,18 @@ import {
   useIncreaseAdminSaleQuotaMutation,
   usePublishAdminSaleCampaignMutation,
   useUpdateAdminSaleCampaignMutation,
+  useUpdateAdminSaleCampaignTranslationsMutation,
+  useDeleteAdminSaleCampaignTranslationMutation,
   useUpdateAdminSaleDisplayMutation,
 } from "@/lib/queries/admin-sales";
 
 import {
   createEmptySaleCampaignForm,
   getSaleCampaignPhase,
+  saveSaleCampaignWithTranslations,
   saleCampaignToFormValues,
-  toCreateSaleCampaignRequest,
+  serializeSaleCampaignTranslations,
   toLocalDateTimeInput,
-  toUpdateSaleCampaignRequest,
   validateSaleCampaignForm,
   type SaleCampaignFormValues,
 } from "../_data/sale-campaign-form";
@@ -107,6 +111,7 @@ function EditorLoading() {
 export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
   const { t } = useI18n();
   const campaignQuery = useAdminSaleCampaignQuery(campaignId);
+  const translationsQuery = useAdminSaleCampaignTranslationsQuery(campaignId);
   const variantsQuery = useAdminProductVariantsQuery({
     page: 1,
     size: 2_000,
@@ -133,11 +138,11 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
     );
   }
 
-  if (campaignId !== undefined && campaignQuery.isPending) {
+  if (campaignId !== undefined && (campaignQuery.isPending || translationsQuery.isPending)) {
     return <EditorLoading />;
   }
 
-  if (campaignId !== undefined && campaignQuery.isError) {
+  if (campaignId !== undefined && (campaignQuery.isError || translationsQuery.isError)) {
     return (
       <Card>
         <CardHeader>
@@ -147,11 +152,11 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
           <Alert variant="destructive">
             <AlertTitle>{t("admin.sales.editor.loadError.requestFailed")}</AlertTitle>
             <AlertDescription>
-              {getApiErrorMessage(campaignQuery.error)}
+              {getApiErrorMessage(campaignQuery.error ?? translationsQuery.error)}
             </AlertDescription>
           </Alert>
           <div className="flex gap-2">
-            <Button onClick={() => void campaignQuery.refetch()}>
+            <Button onClick={() => void Promise.all([campaignQuery.refetch(), translationsQuery.refetch()])}>
               <RefreshCw /> {t("admin.sales.editor.tryAgain")}
             </Button>
             <Button variant="outline" render={<Link href="/dashboard/sales" />}>
@@ -172,18 +177,20 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
     <SaleCampaignEditorForm
       key={formKey}
       campaign={campaign}
+      translations={translationsQuery.data?.translations ?? []}
       availableVariants={variantsQuery.data?.result ?? []}
       variantsLoading={variantsQuery.isPending}
       variantsError={
         variantsQuery.isError ? getApiErrorMessage(variantsQuery.error) : null
       }
-      onRefresh={() => void campaignQuery.refetch()}
+      onRefresh={() => void Promise.all([campaignQuery.refetch(), translationsQuery.refetch()])}
     />
   );
 }
 
 type SaleCampaignEditorFormProps = {
   campaign?: AdminSaleCampaign;
+  translations: SaleCampaignTranslation[];
   availableVariants: AdminProductVariant[];
   variantsLoading: boolean;
   variantsError: string | null;
@@ -192,6 +199,7 @@ type SaleCampaignEditorFormProps = {
 
 function SaleCampaignEditorForm({
   campaign,
+  translations,
   availableVariants,
   variantsLoading,
   variantsError,
@@ -201,8 +209,10 @@ function SaleCampaignEditorForm({
   const { t } = useI18n();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [values, setValues] = useState<SaleCampaignFormValues>(() =>
-    campaign ? saleCampaignToFormValues(campaign) : createEmptySaleCampaignForm(),
+    campaign ? saleCampaignToFormValues(campaign, translations) : createEmptySaleCampaignForm(),
   );
+  const [persistedCampaign, setPersistedCampaign] = useState<AdminSaleCampaign | null>(null);
+  const [contentLocale, setContentLocale] = useState<"vi" | "en">("vi");
   const [lifecycleAction, setLifecycleAction] =
     useState<LifecycleAction | null>(null);
   const [cloneDraft, setCloneDraft] = useState<CloneDraftValues>(() => ({
@@ -226,6 +236,8 @@ function SaleCampaignEditorForm({
 
   const createMutation = useCreateAdminSaleCampaignMutation();
   const updateMutation = useUpdateAdminSaleCampaignMutation();
+  const translationMutation = useUpdateAdminSaleCampaignTranslationsMutation();
+  const deleteTranslationMutation = useDeleteAdminSaleCampaignTranslationMutation();
   const publishMutation = usePublishAdminSaleCampaignMutation();
   const deleteMutation = useDeleteAdminSaleCampaignMutation();
   const cancelMutation = useCancelAdminSaleCampaignMutation();
@@ -261,6 +273,8 @@ function SaleCampaignEditorForm({
   const isSaving =
     createMutation.isPending ||
     updateMutation.isPending ||
+    translationMutation.isPending ||
+    deleteTranslationMutation.isPending ||
     publishMutation.isPending ||
     displayMutation.isPending;
   const isLifecyclePending =
@@ -277,11 +291,42 @@ function SaleCampaignEditorForm({
       });
       if (!validation.valid && validation.step < nextStep) {
         setStep(validation.step);
+        if (validation.step === 1) {
+          setContentLocale(values.englishDescription.trim() && !values.englishName.trim() ? "en" : "vi");
+        }
         toast.error(validation.message);
         return;
       }
     }
     setStep(nextStep);
+  }
+
+  async function saveTranslations(saved: AdminSaleCampaign) {
+    const requestedTranslations = serializeSaleCampaignTranslations(values);
+
+    const updated = await translationMutation.mutateAsync({
+      id: saved.id,
+      request: { version: saved.version, translations: requestedTranslations },
+    });
+    let version = updated.version;
+    let savedTranslations = updated.translations;
+    if (
+      !values.englishName.trim() &&
+      savedTranslations.some((translation) => translation.localeCode === "en")
+    ) {
+      const deleted = await deleteTranslationMutation.mutateAsync({
+        id: saved.id,
+        locale: "en",
+        version,
+      });
+      version = deleted.version;
+      savedTranslations = deleted.translations;
+    }
+    return {
+      ...saved,
+      version,
+      translationLocales: savedTranslations.map((translation) => translation.localeCode),
+    };
   }
 
   async function saveCampaign(publishAfterSave: boolean) {
@@ -291,33 +336,40 @@ function SaleCampaignEditorForm({
     });
     if (!validation.valid) {
       setStep(validation.step);
+      if (validation.step === 1) {
+        setContentLocale(values.englishDescription.trim() && !values.englishName.trim() ? "en" : "vi");
+      }
       toast.error(validation.message);
       return;
     }
 
     try {
-      if (isLive && campaign) {
-        const saved = await displayMutation.mutateAsync({
-          id: campaign.id,
+      const campaignForSave = persistedCampaign ?? campaign;
+      if (isLive && campaignForSave) {
+        const displaySaved = await displayMutation.mutateAsync({
+          id: campaignForSave.id,
           request: {
             name: values.name.trim(),
             description: values.description.trim() || null,
             bannerUrl: values.bannerUrl.trim() || null,
-            version: campaign.version,
+            version: campaignForSave.version,
           },
         });
-        toast.success(
-          t("admin.sales.editor.toast.displayUpdated", { name: saved.name }),
-        );
+        setPersistedCampaign(displaySaved);
+        const saved = await saveTranslations(displaySaved);
+        setPersistedCampaign(saved);
+        toast.success(t("admin.sales.editor.toast.displayUpdated", { name: saved.name }));
         return;
       }
 
-      const saved = campaign
-        ? await updateMutation.mutateAsync({
-            id: campaign.id,
-            request: toUpdateSaleCampaignRequest(values, campaign.version),
-          })
-        : await createMutation.mutateAsync(toCreateSaleCampaignRequest(values));
+      const saved = await saveSaleCampaignWithTranslations({
+        campaign: campaignForSave,
+        values,
+        createCampaign: (request) => createMutation.mutateAsync(request),
+        updateCampaign: (input) => updateMutation.mutateAsync(input),
+        saveTranslations,
+        onBasePersisted: setPersistedCampaign,
+      });
 
       if (!publishAfterSave) {
         toast.success(
@@ -562,9 +614,11 @@ function SaleCampaignEditorForm({
             <CampaignDetailsStep
               values={values}
               onChange={setValues}
-              codeDisabled={Boolean(campaign) || !canEditAll}
+              codeDisabled={Boolean(campaign || persistedCampaign) || !canEditAll}
               displayDisabled={!canEditDisplay}
               typeAndScheduleDisabled={!canEditAll}
+              contentLocale={contentLocale}
+              onContentLocaleChange={setContentLocale}
             />
           ) : step === 2 ? (
             <div className="grid gap-6">

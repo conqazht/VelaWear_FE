@@ -16,6 +16,20 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.common.editNamed": "Edit {name}",
     "admin.commerce.common.deleteNamed": "Delete {name}",
     "admin.commerce.common.openActions": "Open actions for {name}",
+    "admin.commerce.translation.vietnamese": "Vietnamese",
+    "admin.commerce.translation.english": "English",
+    "admin.commerce.translation.complete": "Complete",
+    "admin.commerce.translation.missing": "Missing",
+    "admin.commerce.translation.viRequired":
+      "Complete the required Vietnamese fields before saving.",
+    "admin.commerce.translation.enOptional":
+      "English is optional. Leave every English field empty to use the Vietnamese fallback.",
+    "admin.commerce.translation.enPartial":
+      "Complete the required English fields, or clear every English field to use fallback.",
+    "admin.commerce.translation.loadFailed": "Unable to load raw translations.",
+    "admin.commerce.translation.statusUpdated": "Status updated for {name}.",
+    "admin.commerce.translation.statusFailed": "Unable to update status for {name}.",
+    "admin.commerce.translation.toggleAria": "Toggle status for {name}",
 
     "admin.commerce.users.title": "Users",
     "admin.commerce.users.description":
@@ -211,9 +225,14 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.categories.form.namePlaceholder": "e.g. Tailoring",
     "admin.commerce.categories.form.slug": "Slug",
     "admin.commerce.categories.form.slugImmutable":
-      "The backend treats a category slug as immutable after creation.",
+      "Translation slugs are editable and unique within each language.",
     "admin.commerce.categories.form.slugHelp":
-      "Use a unique, lowercase URL-safe slug. It cannot be changed later.",
+      "Use a unique, lowercase URL-safe slug for this language.",
+    "admin.commerce.categories.form.description": "Description",
+    "admin.commerce.categories.form.descriptionPlaceholder":
+      "Describe this category for customers.",
+    "admin.commerce.categories.form.seoTitle": "SEO title",
+    "admin.commerce.categories.form.seoDescription": "SEO description",
     "admin.commerce.categories.form.sortOrder": "Sort order",
     "admin.commerce.categories.form.sortOrderHelp":
       "Lower values appear first when the catalog is sorted.",
@@ -403,12 +422,22 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.form.namePlaceholder": "e.g. Structured linen blazer",
     "admin.commerce.products.form.slug": "Slug",
     "admin.commerce.products.form.slugImmutable":
-      "The backend treats a product slug as immutable after creation.",
+      "Translation slugs are editable and unique within each language.",
     "admin.commerce.products.form.slugHelp":
-      "Use a unique, URL-safe slug. It cannot be changed later.",
+      "Use a unique, URL-safe slug for this language.",
     "admin.commerce.products.form.description": "Description",
     "admin.commerce.products.form.descriptionPlaceholder":
       "Describe materials, fit, and product details.",
+    "admin.commerce.products.form.shortDescription": "Short description",
+    "admin.commerce.products.form.shortDescriptionPlaceholder":
+      "A concise summary for cards and search results.",
+    "admin.commerce.products.form.material": "Material",
+    "admin.commerce.products.form.materialPlaceholder": "e.g. European linen",
+    "admin.commerce.products.form.careInstruction": "Care instructions",
+    "admin.commerce.products.form.careInstructionPlaceholder":
+      "Explain washing, drying, and storage care.",
+    "admin.commerce.products.form.seoTitle": "SEO title",
+    "admin.commerce.products.form.seoDescription": "SEO description",
     "admin.commerce.products.form.status": "Catalog status",
     "admin.commerce.products.form.statusHelp":
       "Product visibility is independent from each variant's stock and selling status.",
@@ -590,6 +619,20 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.common.editNamed": "Sửa {name}",
     "admin.commerce.common.deleteNamed": "Xóa {name}",
     "admin.commerce.common.openActions": "Mở thao tác cho {name}",
+    "admin.commerce.translation.vietnamese": "Tiếng Việt",
+    "admin.commerce.translation.english": "English",
+    "admin.commerce.translation.complete": "Đã đủ",
+    "admin.commerce.translation.missing": "Còn thiếu",
+    "admin.commerce.translation.viRequired":
+      "Hoàn thành các trường tiếng Việt bắt buộc trước khi lưu.",
+    "admin.commerce.translation.enOptional":
+      "English là tùy chọn. Để trống toàn bộ trường English để dùng nội dung tiếng Việt dự phòng.",
+    "admin.commerce.translation.enPartial":
+      "Hoàn thành các trường English bắt buộc, hoặc xóa toàn bộ trường English để dùng nội dung dự phòng.",
+    "admin.commerce.translation.loadFailed": "Không thể tải bản dịch thô.",
+    "admin.commerce.translation.statusUpdated": "Đã cập nhật trạng thái cho {name}.",
+    "admin.commerce.translation.statusFailed": "Không thể cập nhật trạng thái cho {name}.",
+    "admin.commerce.translation.toggleAria": "Bật hoặc tắt trạng thái của {name}",
 
     "admin.commerce.users.title": "Người dùng",
     "admin.commerce.users.description":
@@ -785,9 +828,14 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.categories.form.namePlaceholder": "ví dụ: May đo",
     "admin.commerce.categories.form.slug": "Slug",
     "admin.commerce.categories.form.slugImmutable":
-      "Backend coi slug danh mục là không thể thay đổi sau khi tạo.",
+      "Slug bản dịch có thể chỉnh sửa và là duy nhất trong từng ngôn ngữ.",
     "admin.commerce.categories.form.slugHelp":
-      "Dùng slug URL duy nhất và viết thường. Không thể thay đổi slug sau này.",
+      "Dùng slug URL duy nhất, viết thường cho ngôn ngữ này.",
+    "admin.commerce.categories.form.description": "Mô tả",
+    "admin.commerce.categories.form.descriptionPlaceholder":
+      "Mô tả danh mục này cho khách hàng.",
+    "admin.commerce.categories.form.seoTitle": "Tiêu đề SEO",
+    "admin.commerce.categories.form.seoDescription": "Mô tả SEO",
     "admin.commerce.categories.form.sortOrder": "Thứ tự sắp xếp",
     "admin.commerce.categories.form.sortOrderHelp":
       "Giá trị nhỏ hơn xuất hiện trước khi catalog được sắp xếp.",
@@ -978,12 +1026,22 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.form.namePlaceholder": "ví dụ: Áo blazer linen có cấu trúc",
     "admin.commerce.products.form.slug": "Slug",
     "admin.commerce.products.form.slugImmutable":
-      "Backend coi slug sản phẩm là không thể thay đổi sau khi tạo.",
+      "Slug bản dịch có thể chỉnh sửa và là duy nhất trong từng ngôn ngữ.",
     "admin.commerce.products.form.slugHelp":
-      "Dùng slug URL duy nhất và an toàn. Không thể thay đổi slug sau này.",
+      "Dùng slug URL duy nhất và an toàn cho ngôn ngữ này.",
     "admin.commerce.products.form.description": "Mô tả",
     "admin.commerce.products.form.descriptionPlaceholder":
       "Mô tả chất liệu, kiểu dáng và thông tin sản phẩm.",
+    "admin.commerce.products.form.shortDescription": "Mô tả ngắn",
+    "admin.commerce.products.form.shortDescriptionPlaceholder":
+      "Tóm tắt ngắn gọn cho thẻ sản phẩm và kết quả tìm kiếm.",
+    "admin.commerce.products.form.material": "Chất liệu",
+    "admin.commerce.products.form.materialPlaceholder": "ví dụ: linen châu Âu",
+    "admin.commerce.products.form.careInstruction": "Hướng dẫn bảo quản",
+    "admin.commerce.products.form.careInstructionPlaceholder":
+      "Hướng dẫn giặt, phơi và bảo quản sản phẩm.",
+    "admin.commerce.products.form.seoTitle": "Tiêu đề SEO",
+    "admin.commerce.products.form.seoDescription": "Mô tả SEO",
     "admin.commerce.products.form.status": "Trạng thái catalog",
     "admin.commerce.products.form.statusHelp":
       "Khả năng hiển thị sản phẩm độc lập với tồn kho và trạng thái bán của từng biến thể.",

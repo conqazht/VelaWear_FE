@@ -19,6 +19,8 @@ import {
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { getCatalogStatusToggleTarget } from "@/lib/admin-status-toggle";
 import type {
   AdminBrand,
   AdminCatalogStatus,
@@ -31,6 +33,7 @@ import {
   useCreateAdminBrandMutation,
   useDeleteAdminBrandMutation,
   useUpdateAdminBrandMutation,
+  useUpdateAdminBrandStatusMutation,
 } from "@/lib/queries/admin-commerce";
 
 import { BrandForm, EMPTY_BRAND_FORM, type BrandFormValues } from "./brand-form";
@@ -78,6 +81,7 @@ export function BrandsManagement() {
   const createMutation = useCreateAdminBrandMutation();
   const updateMutation = useUpdateAdminBrandMutation();
   const deleteMutation = useDeleteAdminBrandMutation();
+  const statusMutation = useUpdateAdminBrandStatusMutation();
 
   const rows = brandsQuery.data?.result ?? [];
   const meta = brandsQuery.data?.meta;
@@ -93,6 +97,16 @@ export function BrandsManagement() {
     setEditingBrand(brand);
     setFormValues(toFormValues(brand));
     setFormOpen(true);
+  }
+
+  function toggleBrandStatus(brand: AdminBrand, checked: boolean) {
+    statusMutation.mutate(
+      { id: brand.id, status: getCatalogStatusToggleTarget(checked) },
+      {
+        onSuccess: () => toast.success(t("admin.commerce.translation.statusUpdated", { name: brand.name })),
+        onError: () => toast.error(t("admin.commerce.translation.statusFailed", { name: brand.name })),
+      },
+    );
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -204,9 +218,18 @@ export function BrandsManagement() {
       key: "status",
       header: t("admin.commerce.common.status"),
       cell: (brand) => (
-        <Badge variant={getStatusVariant(brand.status)}>
-          {t(BRAND_STATUS_MESSAGE_KEYS[brand.status])}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Switch
+            size="sm"
+            checked={brand.status === "ACTIVE"}
+            disabled={statusMutation.isPending}
+            aria-label={t("admin.commerce.translation.toggleAria", { name: brand.name })}
+            onCheckedChange={(checked) => toggleBrandStatus(brand, checked)}
+          />
+          <Badge variant={getStatusVariant(brand.status)}>
+            {t(BRAND_STATUS_MESSAGE_KEYS[brand.status])}
+          </Badge>
+        </div>
       ),
     },
     {
