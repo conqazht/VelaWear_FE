@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { BrandMark } from "@/components/shop/brand-mark";
 import { FloatingInput } from "@/components/auth/floating-input";
 import { cn } from "@/lib/utils";
@@ -33,12 +34,16 @@ export function OtpEntry({
   onVerify,
   onResend,
   onCancel,
-  cancelLabel = "Change email",
-  actionLabel = "Verify & Continue",
+  cancelLabel,
+  actionLabel,
   inline = false,
   plain = false,
   children,
 }: OtpEntryProps) {
+  const { t } = useI18n();
+  const resolvedCancelLabel = cancelLabel ?? t("auth.otp.changeEmail");
+  const resolvedActionLabel = actionLabel ?? t("auth.otp.verifyContinue");
+
   const formContent = (
     <form onSubmit={onVerify} className="flex flex-col gap-6">
       {error && (
@@ -49,7 +54,7 @@ export function OtpEntry({
 
       <FloatingInput
         id="otpCode"
-        label="Verification Code*"
+        label={t("auth.otp.verificationCode")}
         type="text"
         inputMode="numeric"
         autoComplete="one-time-code"
@@ -67,7 +72,7 @@ export function OtpEntry({
           onClick={onCancel}
           className="text-[#55423d] hover:text-[#964025] underline cursor-pointer bg-transparent border-0"
         >
-          {cancelLabel}
+          {resolvedCancelLabel}
         </button>
         <button
           type="button"
@@ -75,7 +80,9 @@ export function OtpEntry({
           onClick={onResend}
           className="text-[#964025] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer bg-transparent border-0"
         >
-          {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Code"}
+          {cooldown > 0
+            ? t("auth.otp.resendIn", { seconds: cooldown })
+            : t("auth.otp.resend")}
         </button>
       </div>
 
@@ -85,7 +92,7 @@ export function OtpEntry({
           disabled={isSubmitting}
           className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
         >
-          {isSubmitting ? "Verifying..." : actionLabel}
+          {isSubmitting ? t("auth.otp.verifying") : resolvedActionLabel}
         </button>
       </div>
     </form>
@@ -99,21 +106,25 @@ export function OtpEntry({
     <div className={cn("w-full text-left", !inline && "max-w-[460px] bg-[#efe7dc] p-6 md:p-8 rounded")}>
       {!inline && (
         <div className="mb-6 text-center">
-          <Link href="/" className="inline-block transition-opacity hover:opacity-90">
+          <Link
+            href="/"
+            aria-label={t("auth.common.homeAria")}
+            className="inline-block transition-opacity hover:opacity-90"
+          >
             <BrandMark className="mx-auto" />
           </Link>
           <h1 className="mt-3 font-serif text-[32px] leading-[1.18] tracking-[-0.0125em] text-[#1c1a18]">
-            Verify your Email
+            {t("auth.otp.title")}
           </h1>
           <p className="mt-2 text-sm leading-[1.55] text-[#55423d]">
-            We sent a 6-digit verification code to <span className="font-semibold">{email}</span>.
+            {t("auth.otp.sent", { email })}
           </p>
         </div>
       )}
 
       {inline && (
         <p className="text-xs text-[#55423d] mb-2">
-          Please enter the 6-digit verification code sent to <span className="font-semibold">{email}</span>.
+          {t("auth.otp.prompt", { email })}
         </p>
       )}
 

@@ -11,15 +11,18 @@ import {
   Minus,
   Paperclip,
 } from "lucide-react";
+import { parse } from "date-fns";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { getIntlLocale } from "@/lib/i18n";
 import { cn, getInitials } from "@/lib/utils";
 
 import { tagTones } from "./data";
-import type { ColumnId, Task, TaskInsightLabel, TaskPriority } from "./types";
+import type { ColumnId, Task, TaskInsightLabel, TaskPriority, TaskTeam } from "./types";
 
 const taskInsightIcons: Record<TaskInsightLabel, LucideIcon> = {
   Attachments: Paperclip,
@@ -57,6 +60,35 @@ export function TaskCard({
   columnId?: ColumnId;
   isOverlay?: boolean;
 }) {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
+  const dueDate = parse(task.dueDate, "MMM d", new Date(2024, 0, 1));
+  const formattedDueDate = Number.isNaN(dueDate.getTime())
+    ? task.dueDate
+    : new Intl.DateTimeFormat(intlLocale, { day: "numeric", month: "short" }).format(dueDate);
+  const priorityNames: Record<TaskPriority, string> = {
+    High: t("admin.workflows.common.high"),
+    Low: t("admin.workflows.common.low"),
+    Medium: t("admin.workflows.common.medium"),
+  };
+  const teamNames: Record<TaskTeam, string> = {
+    Backend: t("admin.workflows.kanban.backend"),
+    Data: t("admin.workflows.kanban.data"),
+    Design: t("admin.workflows.kanban.design"),
+    Docs: t("admin.workflows.kanban.docs"),
+    "Finance Ops": t("admin.workflows.kanban.financeOps"),
+    Platform: t("admin.workflows.kanban.platform"),
+    Product: t("admin.workflows.kanban.product"),
+    QA: t("admin.workflows.kanban.qa"),
+    Security: t("admin.workflows.kanban.security"),
+  };
+  const insightLabels: Record<TaskInsightLabel, (count: string) => string> = {
+    Attachments: (count) => t("admin.workflows.kanban.attachments", { count }),
+    Comments: (count) => t("admin.workflows.kanban.comments", { count }),
+    Documents: (count) => t("admin.workflows.kanban.documents", { count }),
+  };
   const isDone = columnId === "shipped";
   const showBuildingDetails = columnId === "building" && typeof task.progress === "number";
   const owner = task.owner;
@@ -80,7 +112,7 @@ export function TaskCard({
             )}
           >
             <PriorityIcon data-icon="inline-start" />
-            {task.priority}
+            {priorityNames[task.priority]}
           </Badge>
         </div>
         <p className="line-clamp-2 text-muted-foreground text-sm leading-5">{task.description}</p>
@@ -97,7 +129,7 @@ export function TaskCard({
           </div>
 
           <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
-            <span className="truncate text-sm">{task.dueDate}</span>
+            <span className="truncate text-sm">{formattedDueDate}</span>
             <CalendarDays className="size-3" />
           </div>
         </div>
@@ -107,14 +139,14 @@ export function TaskCard({
         <div className="flex flex-col gap-3">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-muted-foreground text-xs">
-              <span className="leading-none">Progress</span>
-              <span className="tabular-nums leading-none">{task.progress}%</span>
+              <span className="leading-none">{t("admin.workflows.kanban.progress")}</span>
+              <span className="tabular-nums leading-none">{percentFormatter.format(task.progress / 100)}</span>
             </div>
             <Progress value={task.progress} />
           </div>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground text-sm">Owner</span>
+              <span className="text-muted-foreground text-sm">{t("admin.workflows.kanban.owner")}</span>
               <div className="flex items-center gap-1.5">
                 <span className="truncate text-muted-foreground text-sm">{owner.name}</span>
                 <Avatar className={cn("size-5 after:rounded-sm", owner.tone)}>
@@ -124,20 +156,20 @@ export function TaskCard({
             </div>
 
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground text-sm">Due date</span>
+              <span className="text-muted-foreground text-sm">{t("admin.workflows.kanban.dueDate")}</span>
               <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="truncate text-sm">{task.dueDate}</span>
+                <span className="truncate text-sm">{formattedDueDate}</span>
                 <CalendarDays className="size-3" />
               </span>
             </div>
 
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground text-sm">Team</span>
+              <span className="text-muted-foreground text-sm">{t("admin.workflows.kanban.team")}</span>
               <Badge
                 variant="secondary"
                 className={cn("rounded-md border-transparent px-2 font-medium", tagTones[task.team])}
               >
-                {task.team}
+                {teamNames[task.team]}
               </Badge>
             </div>
           </div>
@@ -150,7 +182,7 @@ export function TaskCard({
         {isDone ? (
           <div className="flex items-center gap-1 font-medium text-green-700 text-sm dark:text-green-600">
             <BadgeCheck className="size-4" />
-            Done
+            {t("admin.workflows.kanban.done")}
           </div>
         ) : null}
 
@@ -160,9 +192,13 @@ export function TaskCard({
               const Icon = taskInsightIcons[insight.label];
 
               return (
-                <span key={insight.label} className="flex items-center gap-1.5 text-sm">
+                <span
+                  key={insight.label}
+                  aria-label={insightLabels[insight.label](numberFormatter.format(insight.count))}
+                  className="flex items-center gap-1.5 text-sm"
+                >
                   <Icon className="size-3.5" />
-                  {insight.count}
+                  {numberFormatter.format(insight.count)}
                 </span>
               );
             })}

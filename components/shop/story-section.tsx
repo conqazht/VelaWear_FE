@@ -4,60 +4,54 @@ import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { ScrollReveal } from "./scroll-reveal";
+import { useI18n } from "@/components/providers/i18n-provider";
 
-interface ArchiveCard {
-  id: string;
-  category: string;
-  title: string;
-  image: string;
-  link: string;
-  gridClass: string;
-}
-
-const ARCHIVE_ITEMS: ArchiveCard[] = [
+const ARCHIVE_ITEMS = [
   {
     id: "01",
-    category: "Chuyên Đề Merino",
-    title: "The Wool & Draping Study",
+    categoryKey: "storefront.story.item1Category",
+    titleKey: "storefront.story.item1Title",
     image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200&auto=format&fit=crop",
     link: "/collection",
     gridClass: "md:col-span-2 aspect-[4/3] md:aspect-[2.1/1]",
   },
   {
     id: "02",
-    category: "Tiểu Luận May Đo",
-    title: "Minimalist Tailoring Essays",
+    categoryKey: "storefront.story.item2Category",
+    titleKey: "storefront.story.item2Title",
     image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop",
     link: "/collection",
     gridClass: "aspect-[3/4] md:aspect-[1/1.25]",
   },
   {
     id: "03",
-    category: "Vật Liệu Hữu Cơ",
-    title: "The Botanical Dye Archive",
+    categoryKey: "storefront.story.item3Category",
+    titleKey: "storefront.story.item3Title",
     image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=800&auto=format&fit=crop",
     link: "/collection",
     gridClass: "aspect-[3/4] md:aspect-[1/1.25]",
   },
   {
     id: "04",
-    category: "Kỹ Nghệ Thủ Công",
-    title: "Artisan Seams & Structure",
+    categoryKey: "storefront.story.item4Category",
+    titleKey: "storefront.story.item4Title",
     image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=800&auto=format&fit=crop",
     link: "/collection",
     gridClass: "aspect-[3/4] md:aspect-[1/1.25]",
   },
   {
     id: "05",
-    category: "Sợi Dệt Tự Nhiên",
-    title: "The Heritage Silk Drapes",
+    categoryKey: "storefront.story.item5Category",
+    titleKey: "storefront.story.item5Title",
     image: "https://images.unsplash.com/photo-1608748010899-18f300247112?q=80&w=800&auto=format&fit=crop",
     link: "/collection",
     gridClass: "aspect-[3/4] md:aspect-[1/1.25]",
   },
-];
+] as const;
 
 export function StorySection() {
+  const { t } = useI18n();
+
   return (
     <section className="bg-[#efe7dc]/40 text-[#1c1a18] py-24 md:py-32 overflow-hidden relative border-y border-[#e3dccf]/50">
       {/* Decorative typo watermark */}
@@ -73,21 +67,24 @@ export function StorySection() {
             <div className="flex items-center gap-2 mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <span className="text-[11px] font-semibold uppercase tracking-[2.5px] text-[#b5573a]">
-                Tư liệu thiết kế
+                {t("storefront.story.eyebrow")}
               </span>
             </div>
             <h2 className="font-serif text-4xl md:text-6xl font-light leading-tight tracking-tight mb-6 text-[#1c1a18]">
-              The Vela Archives.
+              {t("storefront.story.title")}
             </h2>
             <p className="text-sm md:text-base leading-relaxed text-[#8a857c] font-light max-w-xl">
-              Khám phá các chuyên đề nghiên cứu sâu sắc của chúng tôi về chất liệu tự nhiên, cấu trúc phom dáng may đo tinh xảo và nghệ thuật dệt thủ công trường tồn.
+              {t("storefront.story.description")}
             </p>
           </ScrollReveal>
         </div>
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {ARCHIVE_ITEMS.map((item, index) => (
+          {ARCHIVE_ITEMS.map((item, index) => {
+            const title = t(item.titleKey);
+
+            return (
             <ScrollReveal
               key={item.id}
               direction="up"
@@ -103,7 +100,7 @@ export function StorySection() {
                   <motion.img
                     suppressHydrationWarning
                     src={item.image}
-                    alt={item.title}
+                    alt={title}
                     className="w-full h-full object-cover select-none filter brightness-[0.85] contrast-[1.05]"
                     referrerPolicy="no-referrer"
                     variants={{
@@ -122,13 +119,13 @@ export function StorySection() {
                         {item.id}
                       </span>
                       <span className="text-[10px] uppercase tracking-[1.5px] text-[#ffb59f] font-medium">
-                        {item.category}
+                        {t(item.categoryKey)}
                       </span>
                     </div>
 
                     <div className="flex items-end justify-between gap-4">
                       <h3 className="font-serif text-xl md:text-2xl text-white font-light tracking-tight group-hover:text-[#ffb59f] transition-colors duration-300">
-                        {item.title}
+                        {title}
                       </h3>
 
                       {/* Floating Arrow Icon */}
@@ -146,7 +143,8 @@ export function StorySection() {
                 </motion.div>
               </Link>
             </ScrollReveal>
-          ))}
+            );
+          })}
         </div>
 
       </div>

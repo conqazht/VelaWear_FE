@@ -1,7 +1,11 @@
+"use client";
+
 import { ArrowUpRight } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getIntlLocale } from "@/lib/i18n";
 
 const categories = [
   {
@@ -25,30 +29,46 @@ const products = [
   {
     name: "Linen Overshirt",
     category: "Apparel",
-    share: "31%",
-    sales: "$14,820",
+    share: 0.31,
+    sales: 14_820,
   },
   {
     name: "Everyday Tote",
     category: "Accessories",
-    share: "24%",
-    sales: "$11,460",
+    share: 0.24,
+    sales: 11_460,
   },
   {
     name: "Ceramic Planter",
     category: "Home",
-    share: "18%",
-    sales: "$8,930",
+    share: 0.18,
+    sales: 8930,
   },
 ] as const;
 
 export function TopProducts() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
+    currency: "USD",
+    maximumFractionDigits: 0,
+    style: "currency",
+  });
+  const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
+  const categoryLabels: Record<string, string> = {
+    Accessories: t("admin.dashboardsA.ecommerce.accessories"),
+    Apparel: t("admin.dashboardsA.ecommerce.apparel"),
+    Home: t("admin.dashboardsA.ecommerce.home"),
+  };
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Top Products</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("admin.dashboardsA.ecommerce.topProducts")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          73% of sales
+          {t("admin.dashboardsA.ecommerce.salesShare", { percent: percentFormatter.format(0.73) })}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -57,7 +77,11 @@ export function TopProducts() {
 
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <div aria-label="Sales by category" className="flex h-2 gap-1 overflow-hidden bg-muted" role="img">
+          <div
+            aria-label={t("admin.dashboardsA.ecommerce.salesByCategory")}
+            className="flex h-2 gap-1 overflow-hidden bg-muted"
+            role="img"
+          >
             {categories.map((category) => (
               <div
                 aria-hidden="true"
@@ -75,7 +99,9 @@ export function TopProducts() {
             {categories.map((category) => (
               <div className="flex items-center gap-1" key={category.name}>
                 <span aria-hidden="true" className="size-2 rounded-full" style={{ backgroundColor: category.color }} />
-                <span className="text-muted-foreground text-xs">{category.name}</span>
+                <span className="text-muted-foreground text-xs">
+                  {categoryLabels[category.name] ?? category.name}
+                </span>
               </div>
             ))}
           </div>
@@ -84,18 +110,22 @@ export function TopProducts() {
         <Separator />
 
         <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-3">
-          <div className="text-muted-foreground text-xs">Products</div>
-          <div className="text-muted-foreground text-xs">Share</div>
-          <div className="text-muted-foreground text-xs">Sales</div>
+          <div className="text-muted-foreground text-xs">{t("admin.dashboardsA.ecommerce.products")}</div>
+          <div className="text-muted-foreground text-xs">{t("admin.dashboardsA.ecommerce.share")}</div>
+          <div className="text-muted-foreground text-xs">{t("admin.dashboardsA.ecommerce.sales")}</div>
 
           {products.map((product) => (
             <div className="contents text-sm" key={product.name}>
               <div className="min-w-0">
                 <div className="truncate font-medium">{product.name}</div>
-                <div className="text-muted-foreground text-xs">{product.category}</div>
+                <div className="text-muted-foreground text-xs">
+                  {categoryLabels[product.category] ?? product.category}
+                </div>
               </div>
-              <div className="self-center text-muted-foreground tabular-nums">{product.share}</div>
-              <div className="self-center font-medium tabular-nums">{product.sales}</div>
+              <div className="self-center text-muted-foreground tabular-nums">
+                {percentFormatter.format(product.share)}
+              </div>
+              <div className="self-center font-medium tabular-nums">{currencyFormatter.format(product.sales)}</div>
             </div>
           ))}
         </div>

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ScrollReveal } from "./scroll-reveal";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export interface Category {
   id: string;
@@ -18,6 +19,8 @@ interface FeaturedCategoriesProps {
 }
 
 export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
+  const { t } = useI18n();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
       {categories.map((category, index) => (
@@ -56,7 +59,7 @@ export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
 
                 {/* Animated CTA */}
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[1.5px] text-[#f7f4ef]/90 group-hover:text-white transition-colors pb-1 relative">
-                  <span>Shop Now</span>
+                  <span>{t("storefront.home.shopNow")}</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-300" />
 
                   {/* Underline expansion */}

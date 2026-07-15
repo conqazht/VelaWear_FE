@@ -13,6 +13,8 @@ import {
 } from "@/lib/auth/post-auth-redirect";
 import { getPostSignInPath, getRoleSessionLabel } from "@/lib/auth/roles";
 import { queryKeys } from "@/lib/queries/keys";
+import { useI18n } from "@/components/providers/i18n-provider";
+import { getAuthRoleMessageKey } from "@/lib/i18n/messages/auth-errors";
 
 let activeOAuthExchange: {
   code: string;
@@ -32,6 +34,7 @@ function exchangeOAuth2CodeOnce(code: string) {
 }
 
 export function OAuth2CallbackClient() {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -81,9 +84,12 @@ export function OAuth2CallbackClient() {
     <AuthLoader
       message={
         sessionRoleLabel
-          ? `Checking ${sessionRoleLabel} session...`
-          : "Đang hoàn tất đăng nhập..."
+          ? t("auth.common.checkingSession", {
+              role: t(getAuthRoleMessageKey(sessionRoleLabel)),
+            })
+          : t("auth.oauth.completing")
       }
+      mode="oauth"
     />
   );
 }

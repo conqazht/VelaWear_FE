@@ -3,8 +3,10 @@
 import { Ellipsis } from "lucide-react";
 import { Bar, BarChart, type BarShapeProps, XAxis, YAxis } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { getIntlLocale } from "@/lib/i18n";
 
 const realtimeData = [
   { minute: 1, visitors: 0 },
@@ -38,13 +40,6 @@ const realtimeData = [
   { minute: 29, visitors: 0 },
   { minute: 30, visitors: 4 },
 ];
-
-const chartConfig = {
-  visitors: {
-    color: "var(--chart-3)",
-    label: "Visitors",
-  },
-} satisfies ChartConfig;
 
 function RealtimeBarShape(props: BarShapeProps) {
   const { height, payload, width, x, y } = props;
@@ -89,10 +84,19 @@ function RealtimeBarShape(props: BarShapeProps) {
 }
 
 export function RealtimeVisitors() {
+  const { locale, t } = useI18n();
+  const numberFormatter = new Intl.NumberFormat(getIntlLocale(locale));
+  const chartConfig = {
+    visitors: {
+      color: "var(--chart-3)",
+      label: t("admin.dashboardsA.analytics.visitors"),
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">Realtime Visitors</CardTitle>
+        <CardTitle className="font-normal">{t("admin.dashboardsA.analytics.realtimeVisitors")}</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -101,45 +105,48 @@ export function RealtimeVisitors() {
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-end justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl tabular-nums leading-none tracking-tight">24</span>
-            <span className="text-muted-foreground text-sm">per minute</span>
+            <span className="text-2xl tabular-nums leading-none tracking-tight">{numberFormatter.format(24)}</span>
+            <span className="text-muted-foreground text-sm">{t("admin.dashboardsA.analytics.perMinute")}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-500 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-green-500" />
             </span>
-            <span>Live</span>
+            <span>{t("admin.dashboardsA.analytics.live")}</span>
           </div>
         </div>
         <ChartContainer config={chartConfig} className="h-36 w-full">
           <BarChart data={realtimeData} margin={{ bottom: 0, left: 0, right: 0, top: 0 }} barCategoryGap={3}>
             <XAxis dataKey="minute" hide />
             <YAxis hide domain={[0, 22]} />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel formatter={(value) => numberFormatter.format(Number(value))} />}
+            />
             <Bar dataKey="visitors" fill="var(--color-visitors)" shape={RealtimeBarShape} />
           </BarChart>
         </ChartContainer>
         <div className="grid grid-cols-2">
           <div className="flex items-center gap-3 border-border/50 border-r border-b pt-1 pr-5 pb-4">
             <span aria-hidden="true" className="flag:US shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">United States</span>
-            <span className="text-sm tabular-nums">14</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.unitedStates")}</span>
+            <span className="text-sm tabular-nums">{numberFormatter.format(14)}</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-b pt-1 pb-4 pl-5">
             <span aria-hidden="true" className="flag:GB shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">United Kingdom</span>
-            <span className="text-sm tabular-nums">4</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.unitedKingdom")}</span>
+            <span className="text-sm tabular-nums">{numberFormatter.format(4)}</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-r pt-4 pr-5 pb-1">
             <span aria-hidden="true" className="flag:CA shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Canada</span>
-            <span className="text-sm tabular-nums">3</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.canada")}</span>
+            <span className="text-sm tabular-nums">{numberFormatter.format(3)}</span>
           </div>
           <div className="flex items-center gap-3 pt-4 pb-1 pl-5">
             <span aria-hidden="true" className="flag:IN shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">India</span>
-            <span className="text-sm tabular-nums">3</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.india")}</span>
+            <span className="text-sm tabular-nums">{numberFormatter.format(3)}</span>
           </div>
         </div>
       </CardContent>

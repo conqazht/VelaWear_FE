@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { format, parseISO } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,14 +13,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getIntlLocale } from "@/lib/i18n";
 
 import type { OrderRow } from "./schema";
 
-function formatOrderDate(date: string) {
-  return format(parseISO(date), "h:mm a, d MMM yyyy");
-}
-
-function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
+function PaymentBadge({ label, status }: { label: string; status: OrderRow["payment"] }) {
   if (status === "Paid") {
     return (
       <Badge
@@ -28,7 +25,7 @@ function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
         variant="outline"
       >
         <span className="size-1.5 rounded-full bg-current" />
-        Paid
+        {label}
       </Badge>
     );
   }
@@ -37,7 +34,7 @@ function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
     return (
       <Badge variant="destructive">
         <span className="size-1.5 rounded-full bg-current" />
-        Refunded
+        {label}
       </Badge>
     );
   }
@@ -48,12 +45,12 @@ function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
       variant="outline"
     >
       <span className="size-1.5 rounded-full bg-current" />
-      Pending
+      {label}
     </Badge>
   );
 }
 
-function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
+function FulfillmentBadge({ label, status }: { label: string; status: OrderRow["fulfillment"] }) {
   if (status === "Fulfilled") {
     return (
       <Badge
@@ -61,7 +58,7 @@ function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
         variant="outline"
       >
         <span className="size-1.5 rounded-full bg-current" />
-        Fulfilled
+        {label}
       </Badge>
     );
   }
@@ -70,7 +67,7 @@ function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
     return (
       <Badge variant="destructive">
         <span className="size-1.5 rounded-full bg-current" />
-        Returned
+        {label}
       </Badge>
     );
   }
@@ -78,18 +75,41 @@ function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
   return (
     <Badge variant="destructive">
       <span className="size-1.5 rounded-full bg-current" />
-      Unfulfilled
+      {label}
     </Badge>
   );
 }
 
-export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
+export function useRecentOrdersColumns(): ColumnDef<OrderRow>[] {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const currencyFormatter = new Intl.NumberFormat(intlLocale, { currency: "USD", style: "currency" });
+  const dateFormatter = new Intl.DateTimeFormat(intlLocale, {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const paymentLabels = {
+    Paid: t("admin.dashboardsA.common.paid"),
+    Pending: t("admin.dashboardsA.common.pending"),
+    Refunded: t("admin.dashboardsA.common.refunded"),
+  };
+  const fulfillmentLabels = {
+    Fulfilled: t("admin.dashboardsA.common.fulfilled"),
+    Returned: t("admin.dashboardsA.common.returned"),
+    Unfulfilled: t("admin.dashboardsA.common.unfulfilled"),
+  };
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
       <div className="w-10">
         <Checkbox
-          aria-label="Select all orders"
+          aria-label={t("admin.dashboardsA.ecommerce.selectAllOrders")}
           checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         />
@@ -98,7 +118,7 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
     cell: ({ row }) => (
       <div className="w-10">
         <Checkbox
-          aria-label={`Select order ${row.original.id}`}
+          aria-label={t("admin.dashboardsA.ecommerce.selectOrder", { id: row.original.id })}
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
         />
@@ -109,26 +129,32 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
   },
   {
     accessorKey: "id",
-    header: "Order",
+    header: t("admin.dashboardsA.ecommerce.order"),
     cell: ({ row }) => (
       <div className="flex flex-col gap-0.5">
         <div className="font-medium leading-none">{row.original.id}</div>
-        <div className="text-muted-foreground text-xs">{row.original.items}</div>
+        <div className="text-muted-foreground text-xs">
+          {(() => {
+            const count = Number.parseInt(row.original.items, 10);
+            const key = count === 1 ? "admin.dashboardsA.ecommerce.item" : "admin.dashboardsA.ecommerce.items";
+            return t(key, { count: numberFormatter.format(count) });
+          })()}
+        </div>
       </div>
     ),
     enableHiding: false,
   },
   {
     accessorKey: "customer",
-    header: "Customer",
+    header: t("admin.dashboardsA.ecommerce.customer"),
   },
   {
     id: "statusSummary",
-    header: "Status",
+    header: t("admin.dashboardsA.common.status"),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <PaymentBadge status={row.original.payment} />
-        <FulfillmentBadge status={row.original.fulfillment} />
+        <PaymentBadge label={paymentLabels[row.original.payment]} status={row.original.payment} />
+        <FulfillmentBadge label={fulfillmentLabels[row.original.fulfillment]} status={row.original.fulfillment} />
       </div>
     ),
     filterFn: (row, _columnId, value) => {
@@ -158,29 +184,43 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
   },
   {
     accessorKey: "total",
-    header: () => <div className="w-28">Total</div>,
-    cell: ({ row }) => <div className="w-28 tabular-nums">{row.original.total}</div>,
+    header: () => <div className="w-28">{t("admin.dashboardsA.ecommerce.total")}</div>,
+    cell: ({ row }) => (
+      <div className="w-28 tabular-nums">
+        {currencyFormatter.format(Number(row.original.total.replace(/[^0-9.-]/g, "")))}
+      </div>
+    ),
   },
   {
     accessorKey: "date",
-    header: () => <div className="w-44">Date</div>,
-    cell: ({ row }) => <div className="w-44 text-muted-foreground">{formatOrderDate(row.original.date)}</div>,
+    header: () => <div className="w-44">{t("admin.dashboardsA.ecommerce.date")}</div>,
+    cell: ({ row }) => (
+      <div className="w-44 text-muted-foreground">{dateFormatter.format(new Date(row.original.date))}</div>
+    ),
   },
   {
     id: "actions",
-    header: () => <div className="flex w-full justify-end">Actions</div>,
+    header: () => <div className="flex w-full justify-end">{t("admin.dashboardsA.ecommerce.actions")}</div>,
     cell: () => (
       <div className="flex w-full justify-end">
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button aria-label="Open order actions" size="icon-sm" variant="ghost" />}>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label={t("admin.dashboardsA.ecommerce.openOrderActions")}
+                size="icon-sm"
+                variant="ghost"
+              />
+            }
+          >
             <MoreHorizontal />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuLabel>Order Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("admin.dashboardsA.ecommerce.orderActions")}</DropdownMenuLabel>
             <DropdownMenuGroup>
-              <DropdownMenuItem>View order</DropdownMenuItem>
-              <DropdownMenuItem>Contact customer</DropdownMenuItem>
-              <DropdownMenuItem>Copy order ID</DropdownMenuItem>
+              <DropdownMenuItem>{t("admin.dashboardsA.ecommerce.viewOrder")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("admin.dashboardsA.ecommerce.contactCustomer")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("admin.dashboardsA.ecommerce.copyOrderId")}</DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -189,4 +229,5 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
     enableHiding: false,
     enableSorting: false,
   },
-];
+  ];
+}

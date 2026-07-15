@@ -2,27 +2,32 @@
 
 import { Palette, Ruler } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { ColorsManagement } from "./colors-management";
 import { SizesManagement } from "./sizes-management";
 
 export function AttributesManagement() {
+  const { t } = useI18n();
+
   return (
     <Tabs defaultValue="colors" className="gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-semibold text-2xl tracking-tight">Colors & sizes</h1>
+          <h1 className="font-semibold text-2xl tracking-tight">
+            {t("admin.commerce.attributes.title")}
+          </h1>
           <p className="mt-1 max-w-2xl text-muted-foreground text-sm">
-            Maintain the reusable attributes available when creating product variants.
+            {t("admin.commerce.attributes.description")}
           </p>
         </div>
-        <TabsList aria-label="Product attribute type">
+        <TabsList aria-label={t("admin.commerce.attributes.type")}>
           <TabsTrigger value="colors">
-            <Palette /> Colors
+            <Palette /> {t("admin.commerce.attributes.colors")}
           </TabsTrigger>
           <TabsTrigger value="sizes">
-            <Ruler /> Sizes
+            <Ruler /> {t("admin.commerce.attributes.sizes")}
           </TabsTrigger>
         </TabsList>
       </div>

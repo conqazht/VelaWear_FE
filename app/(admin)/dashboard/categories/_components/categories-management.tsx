@@ -14,9 +14,9 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-page";
 import {
   downloadCsv,
-  formatAdminDateTime,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
@@ -25,6 +25,7 @@ import type {
   CreateAdminCategoryRequest,
   UpdateAdminCategoryRequest,
 } from "@/lib/api/admin-commerce";
+import { formatDateTime } from "@/lib/i18n/format";
 import {
   useAdminCategoriesQuery,
   useCreateAdminCategoryMutation,
@@ -39,12 +40,11 @@ import {
 } from "./category-form";
 
 const ALL_FILTER = "ALL";
-const ADMIN_LOCALE = "vi";
 
-const CATEGORY_STATUS_LABELS: Record<AdminCatalogStatus, string> = {
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-};
+const CATEGORY_STATUS_MESSAGE_KEYS = {
+  ACTIVE: "admin.commerce.common.active",
+  INACTIVE: "admin.commerce.common.inactive",
+} as const;
 
 function getStatusVariant(status: AdminCatalogStatus) {
   return status === "ACTIVE" ? ("default" as const) : ("secondary" as const);
@@ -79,6 +79,7 @@ function createsCategoryCycle(
 }
 
 export function CategoriesManagement() {
+  const { locale, t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -95,13 +96,13 @@ export function CategoriesManagement() {
     sort: "sortOrder,asc",
     name: deferredSearch || undefined,
     status: statusFilter === ALL_FILTER ? undefined : (statusFilter as AdminCatalogStatus),
-    locale: ADMIN_LOCALE,
+    locale,
   });
   const parentCategoriesQuery = useAdminCategoriesQuery({
     page: 1,
     size: 2000,
     sort: "sortOrder,asc",
-    locale: ADMIN_LOCALE,
+    locale,
   });
   const createMutation = useCreateAdminCategoryMutation();
   const updateMutation = useUpdateAdminCategoryMutation();
@@ -134,26 +135,26 @@ export function CategoriesManagement() {
     const parentId = formValues.parentId === "" ? null : Number(formValues.parentId);
 
     if (!name || formValues.sortOrder.trim() === "") {
-      toast.error("Complete the category name and sort order before saving.");
+      toast.error(t("admin.commerce.categories.validation.complete"));
       return;
     }
     if (!Number.isInteger(sortOrder) || sortOrder < 0) {
-      toast.error("Sort order must be a non-negative whole number.");
+      toast.error(t("admin.commerce.categories.validation.sortOrder"));
       return;
     }
     if (parentId !== null && (!Number.isInteger(parentId) || parentId <= 0)) {
-      toast.error("Choose a valid parent category.");
+      toast.error(t("admin.commerce.categories.validation.parent"));
       return;
     }
     if (parentId !== null && !parentCategories.some((category) => category.id === parentId)) {
-      toast.error("The selected parent category is no longer available.");
+      toast.error(t("admin.commerce.categories.validation.parentUnavailable"));
       return;
     }
     if (
       editingCategory &&
       createsCategoryCycle(parentCategories, editingCategory.id, parentId)
     ) {
-      toast.error("Choose a parent outside this category's own hierarchy.");
+      toast.error(t("admin.commerce.categories.validation.cycle"));
       return;
     }
 
@@ -169,7 +170,7 @@ export function CategoriesManagement() {
         { id: editingCategory.id, request: commonRequest },
         {
           onSuccess: () => {
-            toast.success(`${name} was updated.`);
+            toast.success(t("admin.commerce.categories.updated", { name }));
             setEditingCategory(null);
             setFormOpen(false);
           },
@@ -180,11 +181,11 @@ export function CategoriesManagement() {
     }
 
     if (!slug) {
-      toast.error("Enter a slug before creating the category.");
+      toast.error(t("admin.commerce.categories.validation.slugRequired"));
       return;
     }
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-      toast.error("Use a lowercase URL-safe slug with words separated by hyphens.");
+      toast.error(t("admin.commerce.categories.validation.slugFormat"));
       return;
     }
 
@@ -194,7 +195,7 @@ export function CategoriesManagement() {
     };
     createMutation.mutate(request, {
       onSuccess: () => {
-        toast.success(`${name} was created.`);
+        toast.success(t("admin.commerce.categories.created", { name }));
         setPage(1);
         setFormOpen(false);
       },
@@ -208,7 +209,7 @@ export function CategoriesManagement() {
     const { id, name } = deleteCategory;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success(`${name} was archived.`);
+        toast.success(t("admin.commerce.categories.archived", { name }));
         setDeleteCategory(null);
         setPage(1);
       },
@@ -219,7 +220,7 @@ export function CategoriesManagement() {
   const columns: ManagementColumn<AdminCategory>[] = [
     {
       key: "category",
-      header: "Category",
+      header: t("admin.commerce.categories.column.category"),
       className: "min-w-64",
       cell: (category) => (
         <div className="flex items-center gap-3">
@@ -237,39 +238,42 @@ export function CategoriesManagement() {
     },
     {
       key: "parent",
-      header: "Parent",
+      header: t("admin.commerce.categories.column.parent"),
       className: "min-w-44",
       cell: (category) =>
         category.parentId === null ? (
-          <Badge variant="outline">Top level</Badge>
+          <Badge variant="outline">{t("admin.commerce.categories.topLevel")}</Badge>
         ) : (
-          <span>{parentNames.get(category.parentId) ?? `Category #${category.parentId}`}</span>
+          <span>
+            {parentNames.get(category.parentId) ??
+              t("admin.commerce.categories.categoryId", { id: category.parentId })}
+          </span>
         ),
     },
     {
       key: "sortOrder",
-      header: "Sort order",
+      header: t("admin.commerce.categories.column.sortOrder"),
       className: "whitespace-nowrap tabular-nums",
       cell: (category) => category.sortOrder,
     },
     {
       key: "status",
-      header: "Status",
+      header: t("admin.commerce.common.status"),
       cell: (category) => (
         <Badge variant={getStatusVariant(category.status)}>
-          {CATEGORY_STATUS_LABELS[category.status]}
+          {t(CATEGORY_STATUS_MESSAGE_KEYS[category.status])}
         </Badge>
       ),
     },
     {
       key: "updatedAt",
-      header: "Updated",
+      header: t("admin.commerce.common.updated"),
       className: "whitespace-nowrap text-muted-foreground",
-      cell: (category) => formatAdminDateTime(category.updatedAt),
+      cell: (category) => formatDateTime(category.updatedAt, locale),
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (category) => (
@@ -277,7 +281,7 @@ export function CategoriesManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Edit ${category.name}`}
+            aria-label={t("admin.commerce.common.editNamed", { name: category.name })}
             onClick={() => openEditForm(category)}
           >
             <Pencil />
@@ -285,7 +289,7 @@ export function CategoriesManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Archive ${category.name}`}
+            aria-label={t("admin.commerce.categories.archiveNamed", { name: category.name })}
             onClick={() => setDeleteCategory(category)}
           >
             <Archive />
@@ -298,8 +302,8 @@ export function CategoriesManagement() {
   return (
     <>
       <ResourcePage
-        title="Categories"
-        description="Manage the Vietnamese catalog hierarchy, storefront visibility, and display order."
+        title={t("admin.commerce.categories.title")}
+        description={t("admin.commerce.categories.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -307,7 +311,7 @@ export function CategoriesManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search category names..."
+        searchPlaceholder={t("admin.commerce.categories.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -319,11 +323,14 @@ export function CategoriesManagement() {
         }}
         filters={[
           {
-            label: "Status",
+            label: t("admin.commerce.common.status"),
             value: statusFilter,
             options: [
-              { label: "All statuses", value: ALL_FILTER },
-              ...Object.entries(CATEGORY_STATUS_LABELS).map(([value, label]) => ({ value, label })),
+              { label: t("admin.commerce.common.allStatuses"), value: ALL_FILTER },
+              ...Object.entries(CATEGORY_STATUS_MESSAGE_KEYS).map(([value, key]) => ({
+                value,
+                label: t(key),
+              })),
             ],
             onValueChange: (value) => {
               setStatusFilter(value ?? ALL_FILTER);
@@ -331,7 +338,7 @@ export function CategoriesManagement() {
             },
           },
         ]}
-        primaryAction={{ label: "Add category", onClick: openCreateForm }}
+        primaryAction={{ label: t("admin.commerce.categories.add"), onClick: openCreateForm }}
         onRefresh={() =>
           void Promise.all([categoriesQuery.refetch(), parentCategoriesQuery.refetch()])
         }
@@ -341,11 +348,14 @@ export function CategoriesManagement() {
             rows.map((category) => ({
               id: category.id,
               parentId: category.parentId,
-              parent: category.parentId === null ? "Top level" : parentNames.get(category.parentId),
+              parent:
+                category.parentId === null
+                  ? t("admin.commerce.categories.topLevel")
+                  : parentNames.get(category.parentId),
               name: category.name,
               slug: category.originalSlug || category.slug,
               sortOrder: category.sortOrder,
-              status: category.status,
+              status: t(CATEGORY_STATUS_MESSAGE_KEYS[category.status]),
               createdAt: category.createdAt,
               updatedAt: category.updatedAt,
             }))
@@ -354,8 +364,8 @@ export function CategoriesManagement() {
         isLoading={categoriesQuery.isPending}
         isFetching={categoriesQuery.isFetching || parentCategoriesQuery.isFetching}
         error={categoriesQuery.isError ? categoriesQuery.error : null}
-        emptyTitle="No categories found"
-        emptyDescription="Add a category or adjust the current name and status filters."
+        emptyTitle={t("admin.commerce.categories.emptyTitle")}
+        emptyDescription={t("admin.commerce.categories.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -363,12 +373,20 @@ export function CategoriesManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingCategory ? "Edit category" : "Add category"}
-        description="Configure the Vietnamese category name, hierarchy, display order, and catalog status."
+        title={
+          editingCategory
+            ? t("admin.commerce.categories.edit")
+            : t("admin.commerce.categories.add")
+        }
+        description={t("admin.commerce.categories.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
         submitDisabled={parentCategoriesQuery.isPending || parentCategoriesQuery.isError}
-        submitLabel={editingCategory ? "Save category" : "Create category"}
+        submitLabel={
+          editingCategory
+            ? t("admin.commerce.categories.save")
+            : t("admin.commerce.categories.create")
+        }
       >
         <CategoryForm
           values={formValues}
@@ -389,9 +407,9 @@ export function CategoriesManagement() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteCategory(null);
         }}
-        resourceName={deleteCategory?.name ?? "category"}
-        actionLabel="Archive"
-        description="Archiving hides this category from catalog lists. Existing child categories and products may continue to reference it."
+        resourceName={deleteCategory?.name ?? t("admin.commerce.categories.resource")}
+        actionLabel={t("admin.commerce.categories.archive")}
+        description={t("admin.commerce.categories.archiveDescription")}
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />

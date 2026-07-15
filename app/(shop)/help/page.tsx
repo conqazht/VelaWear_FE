@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Search, Truck, RotateCcw, Ruler, CreditCard, Plus, Minus } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export default function HelpCenter() {
+  const { t } = useI18n();
   const [activeTopic, setActiveTopic] = useState("overview");
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,53 +15,53 @@ export default function HelpCenter() {
   };
 
   const helpTopics = [
-    { id: "overview", label: "Overview" },
-    { id: "shipping", label: "Shipping & Delivery" },
-    { id: "returns", label: "Returns & Exchanges" },
-    { id: "size", label: "Size & Fit" },
-    { id: "care", label: "Product Care" },
-    { id: "contact", label: "Contact Us" },
+    { id: "overview", label: t("help.topic.overview") },
+    { id: "shipping", label: t("help.topic.shipping") },
+    { id: "returns", label: t("help.topic.returns") },
+    { id: "size", label: t("help.topic.size") },
+    { id: "care", label: t("help.topic.care") },
+    { id: "contact", label: t("help.topic.contact") },
   ];
 
   const categories = [
     {
       id: "cat-shipping",
-      title: "Shipping & Delivery",
-      description: "Information on delivery times, costs, and international shipping.",
+      title: t("help.category.shipping.title"),
+      description: t("help.category.shipping.description"),
       icon: Truck,
     },
     {
       id: "cat-returns",
-      title: "Returns",
-      description: "Our return policy, how to initiate a return, and refund processing times.",
+      title: t("help.category.returns.title"),
+      description: t("help.category.returns.description"),
       icon: RotateCcw,
     },
     {
       id: "cat-size",
-      title: "Size Guide",
-      description: "Detailed measurements and fit advice for all our garments.",
+      title: t("help.category.size.title"),
+      description: t("help.category.size.description"),
       icon: Ruler,
     },
     {
       id: "cat-payments",
-      title: "Payment Options",
-      description: "Accepted payment methods, secure checkout, and billing inquiries.",
+      title: t("help.category.payment.title"),
+      description: t("help.category.payment.description"),
       icon: CreditCard,
     },
   ];
 
   const faqs = [
     {
-      question: "How long does standard shipping take?",
-      answer: "Standard shipping typically takes 3-5 business days within the contiguous United States. International orders usually arrive within 10-14 business days, depending on customs clearance. You will receive a tracking number via email once your order has shipped.",
+      question: t("help.faq.shipping.question"),
+      answer: t("help.faq.shipping.answer"),
     },
     {
-      question: "Can I modify or cancel my order after placing it?",
-      answer: "We begin processing orders immediately to ensure prompt delivery. Unfortunately, we cannot modify or cancel orders once they have been placed. However, you can return unwanted items following our standard return policy once you receive them.",
+      question: t("help.faq.change.question"),
+      answer: t("help.faq.change.answer"),
     },
     {
-      question: "What is your return policy for sale items?",
-      answer: "Items purchased on final sale cannot be returned or exchanged. Regular sale items can be returned within 14 days of delivery for store credit only. Please ensure all items are unworn, unwashed, and have original tags attached.",
+      question: t("help.faq.sale.question"),
+      answer: t("help.faq.sale.answer"),
     },
   ];
 
@@ -76,7 +78,7 @@ export default function HelpCenter() {
         {/* Header & Search */}
         <header className="text-center mb-16 md:mb-20 max-w-2xl mx-auto flex flex-col items-center">
           <h1 className="font-serif text-3xl md:text-display-xl text-ink font-light leading-tight tracking-[-0.02em] mb-8">
-            How can we assist you?
+            {t("help.title")}
           </h1>
           <div className="relative w-full shadow-sm rounded-sm overflow-hidden border border-hairline">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50">
@@ -87,7 +89,8 @@ export default function HelpCenter() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-surface-container-lowest py-4 pl-12 pr-4 font-sans text-sm text-ink placeholder-[#55423d]/50 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all p-0 border-none"
-              placeholder="Search for answers..."
+              placeholder={t("help.search")}
+              aria-label={t("help.search")}
             />
           </div>
         </header>
@@ -98,7 +101,7 @@ export default function HelpCenter() {
           {/* Sidebar Navigation */}
           <aside className="w-full lg:w-1/4 sticky top-28 hidden lg:block select-none">
             <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#55423d]/60 mb-6">
-              Help Topics
+              {t("help.topics")}
             </h3>
             <nav className="flex flex-col gap-4">
               {helpTopics.map((topic) => (
@@ -143,7 +146,7 @@ export default function HelpCenter() {
                 })}
                 {filteredCategories.length === 0 && (
                   <p className="col-span-2 text-center text-[#55423d]/60 py-8 text-sm italic">
-                    No results found matching your search.
+                    {t("help.noResults")}
                   </p>
                 )}
               </div>
@@ -152,7 +155,7 @@ export default function HelpCenter() {
             {/* FAQ Accordion */}
             <section className="border-t border-hairline/30 pt-12">
               <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight mb-8 border-b border-hairline pb-4">
-                Frequently Asked Questions
+                {t("help.faq.title")}
               </h2>
               
               <div className="flex flex-col">
@@ -162,6 +165,8 @@ export default function HelpCenter() {
                     <div key={index} className="flex flex-col border-b border-hairline/50">
                       <button
                         onClick={() => toggleFaq(index)}
+                        aria-expanded={isOpen}
+                        aria-label={t(isOpen ? "help.faq.collapse" : "help.faq.expand", { question: faq.question })}
                         className="w-full flex justify-between items-center py-5 text-left focus:outline-none hover:text-primary transition-colors group"
                       >
                         <span className="font-sans text-sm md:text-base font-medium text-ink group-hover:text-primary transition-colors">
@@ -190,16 +195,16 @@ export default function HelpCenter() {
             {/* Contact CTA */}
             <section className="bg-surface-dark text-on-dark p-8 md:p-12 text-center flex flex-col items-center justify-center rounded-sm shadow-xl select-none">
               <h2 className="font-serif text-2xl md:text-3xl text-white font-light mb-4 tracking-tight">
-                Still need help?
+                {t("help.contact.title")}
               </h2>
               <p className="text-sm md:text-base text-on-dark/75 leading-relaxed font-light mb-8 max-w-md">
-                Our customer concierge team is available Monday through Friday, 9am to 6pm EST to assist with your editorial styling and order inquiries.
+                {t("help.contact.description")}
               </p>
               <a
                 href="mailto:concierge@velawear.com"
                 className="inline-block bg-primary text-on-primary font-serif uppercase text-xs md:text-sm tracking-[0.15em] px-8 py-4 rounded-sm hover:bg-[#8f4329] active:scale-95 transition-all duration-300"
               >
-                Contact Concierge
+                {t("help.contact.action")}
               </a>
             </section>
 

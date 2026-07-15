@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import { Clock3, Inbox, Mail, MessageCircle, Phone, Send, Star, User } from "lucide-react";
 
+import type { Locale } from "@/lib/i18n";
+
 export type Conversation = {
   id: number;
   group: "Pinned" | "Today" | "Yesterday";
@@ -1259,4 +1261,150 @@ export const conversations: Conversation[] = [
 export const currentUser = {
   name: "Arham Khan",
   email: "arham.khan@weblabs.studio",
+};
+
+type LocalizedConversationCopy = Pick<Conversation, "subject" | "preview" | "time"> & {
+  contact: Pick<Contact, "role" | "location" | "status" | "qualifiedAt" | "tags">;
+  messages: Array<Pick<Message, "align" | "text" | "time">>;
+};
+
+const vietnameseConversationCopies: LocalizedConversationCopy[] = [
+  {
+    subject: "Cần đổi kích cỡ cho đơn hàng vừa nhận",
+    preview: "Mình muốn đổi sang cỡ M vì sản phẩm hiện tại hơi rộng.",
+    time: "Vừa xong",
+    contact: {
+      role: "Quản lý vận hành",
+      location: "TP. Hồ Chí Minh, Việt Nam",
+      status: "Khách hàng",
+      qualifiedAt: "5 thg 3, 2026",
+      tags: ["Đổi hàng", "Ưu tiên"],
+    },
+    messages: [
+      { align: "start", text: "Chào bạn, mình vừa nhận áo nhưng cỡ L hơi rộng. Mình có thể đổi sang cỡ M không?", time: "10 phút trước" },
+      { align: "end", text: "Được nhé. Bạn cho mình xin mã đơn hàng để kiểm tra tồn kho cỡ M.", time: "8 phút trước" },
+      { align: "start", text: "Mã đơn của mình là VW-2048. Sản phẩm vẫn còn nguyên tem.", time: "6 phút trước" },
+      { align: "end", text: "Cỡ M vẫn còn hàng. Mình đã tạo yêu cầu đổi và gửi hướng dẫn qua email cho bạn.", time: "3 phút trước" },
+      { align: "start", text: "Mình đã nhận được email rồi, cảm ơn bạn hỗ trợ rất nhanh.", time: "1 phút trước" },
+    ],
+  },
+  {
+    subject: "Đơn hàng bị ghi nhận thanh toán hai lần",
+    preview: "Nhờ kiểm tra và hoàn lại giao dịch bị trùng giúp mình.",
+    time: "5 phút",
+    contact: {
+      role: "Trưởng nhóm tài chính",
+      location: "Hà Nội, Việt Nam",
+      status: "Khách hàng VIP",
+      qualifiedAt: "18 thg 1, 2026",
+      tags: ["Thanh toán", "Doanh nghiệp"],
+    },
+    messages: [
+      { align: "start", text: "Mình thấy cùng một đơn hàng bị trừ tiền hai lần trong sáng nay.", time: "12 phút trước" },
+      { align: "end", text: "Cảm ơn bạn đã báo. Mình đang đối chiếu hai mã giao dịch với hóa đơn.", time: "9 phút trước" },
+      { align: "start", text: "Nếu đúng là giao dịch trùng, bạn giúp mình hoàn lại khoản thứ hai nhé.", time: "7 phút trước" },
+      { align: "end", text: "Đã xác nhận giao dịch trùng. Yêu cầu hoàn tiền đã được tạo và biên nhận đã gửi qua email.", time: "4 phút trước" },
+      { align: "start", text: "Tuyệt vời, mình sẽ thông báo lại cho bộ phận kế toán.", time: "2 phút trước" },
+    ],
+  },
+  {
+    subject: "Tư vấn chất liệu và độ vừa của sản phẩm",
+    preview: "Mình cần chọn cỡ phù hợp trước khi đặt áo khoác.",
+    time: "12 phút",
+    contact: {
+      role: "Nhà sáng tạo nội dung",
+      location: "Đà Nẵng, Việt Nam",
+      status: "Khách hàng tiềm năng",
+      qualifiedAt: "2 thg 4, 2026",
+      tags: ["Tư vấn", "Sản phẩm"],
+    },
+    messages: [
+      { align: "start", text: "Áo khoác linen này có form rộng hay ôm vậy bạn?", time: "20 phút trước" },
+      { align: "end", text: "Mẫu này có form thoải mái nhẹ. Nếu bạn thích vừa người, mình khuyên chọn đúng cỡ thường mặc.", time: "17 phút trước" },
+      { align: "start", text: "Mình cao 1m68 và thường mặc cỡ S. Chất liệu có dễ nhăn không?", time: "13 phút trước" },
+      { align: "end", text: "Cỡ S sẽ phù hợp. Vải linen pha giúp giảm nhăn và vẫn giữ độ thoáng.", time: "9 phút trước" },
+      { align: "start", text: "Cảm ơn bạn, mình sẽ đặt cỡ S.", time: "6 phút trước" },
+    ],
+  },
+  {
+    subject: "Kiểm tra tiến độ giao hàng",
+    preview: "Đơn hàng chưa cập nhật trạng thái từ hôm qua.",
+    time: "1 giờ",
+    contact: {
+      role: "Chuyên viên mua hàng",
+      location: "Cần Thơ, Việt Nam",
+      status: "Khách hàng",
+      qualifiedAt: "21 thg 2, 2026",
+      tags: ["Vận chuyển", "Theo dõi đơn"],
+    },
+    messages: [
+      { align: "start", text: "Đơn của mình chưa cập nhật kể từ khi rời kho hôm qua, bạn kiểm tra giúp nhé.", time: "1 giờ trước" },
+      { align: "end", text: "Mình đang kiểm tra trực tiếp với đơn vị vận chuyển và sẽ phản hồi ngay.", time: "55 phút trước" },
+      { align: "start", text: "Mình cần nhận trước chiều mai, liệu có kịp không?", time: "48 phút trước" },
+      { align: "end", text: "Đơn đang ở bưu cục gần bạn và dự kiến giao trong sáng mai.", time: "35 phút trước" },
+      { align: "start", text: "Vậy là kịp rồi, cảm ơn bạn.", time: "30 phút trước" },
+    ],
+  },
+  {
+    subject: "Không truy cập được tài khoản quản lý",
+    preview: "Quyền truy cập bị mất sau khi vai trò được cập nhật.",
+    time: "Hôm qua",
+    contact: {
+      role: "Quản trị hệ thống",
+      location: "Hải Phòng, Việt Nam",
+      status: "Đã xác minh",
+      qualifiedAt: "12 thg 12, 2025",
+      tags: ["Tài khoản", "Phân quyền"],
+    },
+    messages: [
+      { align: "start", text: "Sau khi đổi vai trò hôm qua, mình không còn mở được trang quản lý.", time: "Hôm qua" },
+      { align: "end", text: "Mình sẽ kiểm tra quyền hiệu lực và lịch sử thay đổi của tài khoản.", time: "Hôm qua" },
+      { align: "start", text: "Mình đã thử đăng xuất rồi đăng nhập lại nhưng vẫn gặp lỗi.", time: "Hôm qua" },
+      { align: "end", text: "Đã tìm thấy một quyền bị thiếu. Mình vừa khôi phục và làm mới phiên đăng nhập của bạn.", time: "Hôm qua" },
+      { align: "start", text: "Mình truy cập lại được rồi. Cảm ơn bạn.", time: "Hôm qua" },
+    ],
+  },
+  {
+    subject: "Góp ý về trải nghiệm mua sắm",
+    preview: "Bộ lọc kích cỡ mới rất hữu ích trên điện thoại.",
+    time: "2 ngày",
+    contact: {
+      role: "Chuyên viên trải nghiệm khách hàng",
+      location: "Huế, Việt Nam",
+      status: "Khách hàng thân thiết",
+      qualifiedAt: "9 thg 11, 2025",
+      tags: ["Góp ý", "Trải nghiệm"],
+    },
+    messages: [
+      { align: "start", text: "Mình muốn góp ý là bộ lọc kích cỡ mới trên điện thoại dùng rất thuận tiện.", time: "2 ngày trước" },
+      { align: "end", text: "Cảm ơn bạn. Điều gì trong trải nghiệm mới hữu ích nhất với bạn?", time: "2 ngày trước" },
+      { align: "start", text: "Các lựa chọn rõ ràng và mình không phải tải lại trang khi đổi bộ lọc.", time: "2 ngày trước" },
+      { align: "end", text: "Phản hồi này rất hữu ích. Mình sẽ chuyển lời khen đến nhóm sản phẩm.", time: "2 ngày trước" },
+      { align: "start", text: "Mong đội ngũ tiếp tục phát huy nhé.", time: "2 ngày trước" },
+    ],
+  },
+];
+
+const vietnameseConversations = conversations.map((conversation, index) => {
+  const copy = vietnameseConversationCopies[index % vietnameseConversationCopies.length];
+
+  return {
+    ...conversation,
+    subject: copy.subject,
+    preview: copy.preview,
+    time: copy.time,
+    contact: {
+      ...conversation.contact,
+      ...copy.contact,
+    },
+    messages: conversation.messages.map((message, messageIndex) => ({
+      ...message,
+      ...copy.messages[messageIndex % copy.messages.length],
+    })),
+  };
+});
+
+export const conversationsByLocale: Record<Locale, Conversation[]> = {
+  en: conversations,
+  vi: vietnameseConversations,
 };

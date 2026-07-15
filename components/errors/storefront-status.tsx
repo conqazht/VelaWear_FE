@@ -1,32 +1,59 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useI18n } from "@/components/providers/i18n-provider";
+import type { TranslationKey } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 import { StatusCodeRain } from "./status-code-rain";
 
-type StorefrontStatusAction =
+type StorefrontStatusActionLabel =
+  | { label: string; labelKey?: never }
+  | { label?: never; labelKey: TranslationKey };
+
+type StorefrontStatusAction = StorefrontStatusActionLabel &
+  (
+    | { href: string; onClick?: never }
+    | { onClick: () => void; href?: never }
+  );
+
+type ResolvedStorefrontStatusAction =
   | { label: string; href: string; onClick?: never }
   | { label: string; onClick: () => void; href?: never };
 
+type StorefrontStatusCopy = {
+  atelier: string;
+  editorial: string;
+  eyebrow: string;
+  rainHint: string;
+  referenceText?: string;
+  statusNumberText?: string;
+};
+
 type StorefrontStatusProps = {
   status: number;
-  title: string;
-  description: string;
+  title?: string;
+  titleKey?: TranslationKey;
+  description?: string;
+  descriptionKey?: TranslationKey;
   primaryAction: StorefrontStatusAction;
   eyebrow?: string;
   secondaryAction?: StorefrontStatusAction;
   reference?: string;
   variant?: "page" | "panel";
   className?: string;
+  headerAccessory?: ReactNode;
+  standaloneCopy?: StorefrontStatusCopy;
 };
 
 function StorefrontStatusActionLink({
   action,
   primary,
 }: {
-  action: StorefrontStatusAction;
+  action: ResolvedStorefrontStatusAction;
   primary: boolean;
 }) {
   const className = cn(
@@ -51,17 +78,78 @@ function StorefrontStatusActionLink({
   );
 }
 
-export function StorefrontStatus({
+function resolveLiteralAction(action: StorefrontStatusAction): ResolvedStorefrontStatusAction {
+  return { ...action, label: action.label ?? action.labelKey } as ResolvedStorefrontStatusAction;
+}
+
+function LocalizedStorefrontStatus(props: StorefrontStatusProps) {
+  const { t } = useI18n();
+  const { status, reference } = props;
+  const resolveAction = (action: StorefrontStatusAction): ResolvedStorefrontStatusAction => ({
+    ...action,
+    label: action.label ?? t(action.labelKey),
+  }) as ResolvedStorefrontStatusAction;
+
+  return (
+    <StorefrontStatusView
+      {...props}
+      title={props.title ?? (props.titleKey ? t(props.titleKey) : String(status))}
+      description={props.description ?? (props.descriptionKey ? t(props.descriptionKey) : "")}
+      primaryAction={resolveAction(props.primaryAction)}
+      secondaryAction={props.secondaryAction ? resolveAction(props.secondaryAction) : undefined}
+      headerAccessory={props.headerAccessory ?? <LanguageSwitcher showIcon={false} />}
+      copy={{
+        atelier: t("errors.common.atelier"),
+        editorial: t("errors.common.editorial"),
+        eyebrow: props.eyebrow ?? t("errors.common.eyebrow", { status }),
+        rainHint: t("errors.common.rainHint"),
+        referenceText: reference
+          ? t("errors.common.reference", { reference })
+          : undefined,
+        statusNumberText: t("errors.common.number", { number: status }),
+      }}
+    />
+  );
+}
+
+export function StorefrontStatus(props: StorefrontStatusProps) {
+  if (!props.standaloneCopy) return <LocalizedStorefrontStatus {...props} />;
+
+  return (
+    <StorefrontStatusView
+      {...props}
+      title={props.title ?? String(props.status)}
+      description={props.description ?? ""}
+      primaryAction={resolveLiteralAction(props.primaryAction)}
+      secondaryAction={props.secondaryAction ? resolveLiteralAction(props.secondaryAction) : undefined}
+      copy={props.standaloneCopy}
+    />
+  );
+}
+
+type StorefrontStatusViewProps = Omit<
+  StorefrontStatusProps,
+  "descriptionKey" | "standaloneCopy" | "titleKey" | "primaryAction" | "secondaryAction"
+> & {
+  title: string;
+  description: string;
+  primaryAction: ResolvedStorefrontStatusAction;
+  secondaryAction?: ResolvedStorefrontStatusAction;
+  copy: StorefrontStatusCopy;
+};
+
+function StorefrontStatusView({
   status,
   title,
   description,
   primaryAction,
-  eyebrow = `Vela Wear / Trạng thái ${status}`,
   secondaryAction,
   reference,
   variant = "page",
   className,
-}: StorefrontStatusProps) {
+  headerAccessory,
+  copy,
+}: StorefrontStatusViewProps) {
   const compact = variant === "panel";
   const code = String(status);
   const titleId = `storefront-status-${status}-title`;
@@ -85,7 +173,7 @@ export function StorefrontStatus({
         code={code}
         color="#b5573a"
         compact={compact}
-        hint="Chạm để thả mã lỗi"
+        hint={copy.rainHint}
         hintTone="dark"
       />
 
@@ -97,9 +185,12 @@ export function StorefrontStatus({
           >
             Vela Wear
           </Link>
-          <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#55423d]/65">
-            Digital atelier
-          </span>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="hidden text-[10px] font-medium uppercase tracking-[0.24em] text-[#55423d]/65 sm:inline">
+              {copy.atelier}
+            </span>
+            {headerAccessory}
+          </div>
         </div>
       ) : null}
 
@@ -130,7 +221,7 @@ export function StorefrontStatus({
         </div>
 
         <div className={cn(compact ? "text-center sm:text-left" : "text-center md:text-left")}>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#964025]">{eyebrow}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#964025]">{copy.eyebrow}</p>
           <div className={cn("bg-[#b5573a]", compact ? "mx-auto my-4 h-px w-12 sm:mx-0" : "mx-auto my-5 h-px w-16 md:mx-0")} />
           <h1
             id={titleId}
@@ -152,7 +243,7 @@ export function StorefrontStatus({
 
           {reference ? (
             <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#55423d]/50">
-              Mã tham chiếu {reference}
+              {copy.referenceText}
             </p>
           ) : null}
 
@@ -170,12 +261,12 @@ export function StorefrontStatus({
 
       {!compact ? (
         <div className="relative z-10 flex items-center justify-between border-t border-[#e3dccf] pt-5 text-[10px] uppercase tracking-[0.2em] text-[#55423d]/55">
-          <span>Editorial essentials</span>
-          <span aria-hidden="true">No. {code}</span>
+          <span>{copy.editorial}</span>
+          <span aria-hidden="true">{copy.statusNumberText ?? `# ${code}`}</span>
         </div>
       ) : null}
     </section>
   );
 }
 
-export type { StorefrontStatusAction, StorefrontStatusProps };
+export type { StorefrontStatusAction, StorefrontStatusCopy, StorefrontStatusProps };

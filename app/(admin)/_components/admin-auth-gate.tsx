@@ -6,6 +6,8 @@ import { LockKeyhole } from "lucide-react";
 import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,7 +33,8 @@ function AdminSessionLoadingFrame() {
       <main className="min-w-0">
         <header className="flex h-12 items-center justify-between border-b px-4 lg:px-6">
           <Skeleton className="h-7 w-40" />
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher showIcon={false} />
             <Skeleton className="size-8" />
             <Skeleton className="size-8" />
           </div>
@@ -77,6 +80,7 @@ function AdminSessionSkeleton() {
 
 export function AdminAuthGate({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { t } = useI18n();
 
   if (isLoading) {
     return <AdminSessionSkeleton />;
@@ -84,20 +88,21 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="relative flex min-h-screen items-center justify-center bg-background p-6">
+        <LanguageSwitcher className="absolute right-5 top-5" />
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-muted">
               <LockKeyhole className="size-5" />
             </div>
-            <CardTitle>Admin sign-in required</CardTitle>
+            <CardTitle>{t("admin.shell.auth.signInTitle")}</CardTitle>
             <CardDescription>
-              Sign in with an authorized Vela Wear account before opening the administration workspace.
+              {t("admin.shell.auth.signInDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/sign-in" className={cn(buttonVariants(), "w-full")}>
-              Go to sign in
+              {t("admin.shell.auth.signInAction")}
             </Link>
           </CardContent>
         </Card>
@@ -107,25 +112,29 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
 
   if (!canAccessManagement(user)) {
     const roleNames = getUserRoleNames(user);
+    const currentRoleDescription =
+      roleNames.length > 0
+        ? t(roleNames.length === 1 ? "admin.shell.auth.currentRole" : "admin.shell.auth.currentRoles", {
+            roles: roleNames.join(", "),
+          })
+        : t("admin.shell.auth.noRole");
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="relative flex min-h-screen items-center justify-center bg-background p-6">
+        <LanguageSwitcher className="absolute right-5 top-5" />
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-muted">
               <LockKeyhole className="size-5" />
             </div>
-            <CardTitle>Management access required</CardTitle>
+            <CardTitle>{t("admin.shell.auth.accessTitle")}</CardTitle>
             <CardDescription>
-              This workspace is available to admin, manager, and staff accounts.
-              {roleNames.length > 0
-                ? ` Your current ${roleNames.length === 1 ? "role is" : "roles are"} ${roleNames.join(", ")}.`
-                : " Your account has no assigned management role."}
+              {t("admin.shell.auth.accessDescription")} {currentRoleDescription}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/" className={cn(buttonVariants(), "w-full")}>
-              Return to storefront
+              {t("admin.shell.auth.returnStorefront")}
             </Link>
           </CardContent>
         </Card>

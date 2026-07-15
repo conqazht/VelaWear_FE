@@ -3,6 +3,7 @@
 import { addHours, endOfToday, format, parseISO, subHours } from "date-fns";
 import { Area, CartesianGrid, ComposedChart, Line, XAxis } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getIntlLocale } from "@/lib/i18n";
 
 const chartValues = [
   { newCustomers: 23840, activeAccounts: 6630, returningUsers: 4880 },
@@ -214,46 +216,56 @@ const chartData = chartValues.map((point, index) => ({
   ...point,
 }));
 
-const chartConfig = {
-  newCustomers: {
-    label: "New Customers",
-    color: "var(--chart-1)",
-  },
-  activeAccounts: {
-    label: "Active Accounts",
-    color: "var(--chart-2)",
-  },
-  returningUsers: {
-    label: "Returning Users",
-    color: "var(--chart-3)",
-  },
-} satisfies ChartConfig;
-
-const performancePeriodItems = [{ value: "quarter", label: "3 months" }] as const;
-
-const performanceSegmentItems = [
-  { value: "all", label: "All segments" },
-  { value: "paid", label: "Paid" },
-  { value: "organic", label: "Organic" },
-] as const;
-
 export function PerformanceOverview() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const axisDateFormatter = new Intl.DateTimeFormat(intlLocale, { day: "numeric", month: "short" });
+  const tooltipDateFormatter = new Intl.DateTimeFormat(intlLocale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const chartConfig = {
+    newCustomers: {
+      label: t("admin.dashboardsA.default.newCustomers"),
+      color: "var(--chart-1)",
+    },
+    activeAccounts: {
+      label: t("admin.dashboardsA.default.activeAccounts"),
+      color: "var(--chart-2)",
+    },
+    returningUsers: {
+      label: t("admin.dashboardsA.default.returningUsers"),
+      color: "var(--chart-3)",
+    },
+  } satisfies ChartConfig;
+  const performancePeriodItems = [
+    { value: "quarter", label: t("admin.dashboardsA.common.last3Months") },
+  ] as const;
+  const performanceSegmentItems = [
+    { value: "all", label: t("admin.dashboardsA.common.allSegments") },
+    { value: "paid", label: t("admin.dashboardsA.common.paid") },
+    { value: "organic", label: t("admin.dashboardsA.common.organic") },
+  ] as const;
+
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle className="leading-none">Customer Activity</CardTitle>
+        <CardTitle className="leading-none">{t("admin.dashboardsA.default.customerActivity")}</CardTitle>
         <CardDescription>
-          <span className="@[540px]/card:block hidden">Customer activity for the last 3 months</span>
-          <span className="@[540px]/card:hidden">Last 3 months</span>
+          <span className="@[540px]/card:block hidden">
+            {t("admin.dashboardsA.default.customerActivityDescription")}
+          </span>
+          <span className="@[540px]/card:hidden">{t("admin.dashboardsA.common.last3Months")}</span>
         </CardDescription>
         <CardAction className="flex items-center gap-2">
           <Select defaultValue="quarter" items={performancePeriodItems}>
             <SelectTrigger size="sm" className="w-28">
-              <SelectValue placeholder="3 months" />
+              <SelectValue placeholder={t("admin.dashboardsA.common.last3Months")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Period</SelectLabel>
+                <SelectLabel>{t("admin.dashboardsA.common.period")}</SelectLabel>
                 {performancePeriodItems.map((item) => (
                   <SelectItem key={item.value} value={item.value}>
                     {item.label}
@@ -265,11 +277,11 @@ export function PerformanceOverview() {
 
           <Select defaultValue="all" items={performanceSegmentItems}>
             <SelectTrigger size="sm" className="w-32">
-              <SelectValue placeholder="All segments" />
+              <SelectValue placeholder={t("admin.dashboardsA.common.allSegments")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Segments</SelectLabel>
+                <SelectLabel>{t("admin.dashboardsA.common.segments")}</SelectLabel>
                 {performanceSegmentItems.map((item) => (
                   <SelectItem key={item.value} value={item.value}>
                     {item.label}
@@ -280,7 +292,7 @@ export function PerformanceOverview() {
           </Select>
 
           <Button variant="outline" size="sm">
-            View report
+            {t("admin.dashboardsA.common.viewReport")}
           </Button>
         </CardAction>
       </CardHeader>
@@ -302,12 +314,7 @@ export function PerformanceOverview() {
               axisLine={false}
               tickMargin={8}
               minTickGap={48}
-              tickFormatter={(value) =>
-                parseISO(value).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
-              }
+              tickFormatter={(value) => axisDateFormatter.format(parseISO(value))}
             />
 
             <ChartTooltip
@@ -316,7 +323,7 @@ export function PerformanceOverview() {
                 <ChartTooltipContent
                   className="w-50"
                   indicator="line"
-                  labelFormatter={(value) => format(parseISO(value), "d MMMM yyyy")}
+                  labelFormatter={(value) => tooltipDateFormatter.format(parseISO(value))}
                 />
               }
             />

@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { useI18n } from "@/components/providers/i18n-provider";
+import { localizeFixtureProduct } from "@/lib/i18n/fixture-products";
 import { cn } from "@/lib/utils";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
-import { getActiveLocale } from "@/lib/i18n";
-import { ProductToolbar, ProductGrid, ProductLayoutMain, commonSortOptions } from "@/components/shop/product-layout-components";
+import { ProductToolbar, ProductGrid, ProductLayoutMain, useCommonSortOptions } from "@/components/shop/product-layout-components";
 import {
   useCategoriesQuery,
   useProductsQuery,
@@ -71,6 +72,8 @@ function FilterGroups({
   hasActiveFilters,
   isMobile = false,
 }: FilterGroupsProps) {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-8">
       {/* Category Section */}
@@ -80,7 +83,7 @@ function FilterGroups({
           onClick={() => toggleSection("category")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Danh mục</span>
+          <span>{t("storefront.catalog.category")}</span>
           {expandedSections.category ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -128,7 +131,7 @@ function FilterGroups({
           onClick={() => toggleSection("size")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Kích cỡ</span>
+          <span>{t("storefront.catalog.size")}</span>
           {expandedSections.size ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -175,7 +178,7 @@ function FilterGroups({
           onClick={() => toggleSection("color")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Màu sắc</span>
+          <span>{t("storefront.catalog.color")}</span>
           {expandedSections.color ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -226,7 +229,7 @@ function FilterGroups({
           onClick={() => toggleSection("price")}
           className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
         >
-          <span>Khoảng giá (đ)</span>
+          <span>{t("storefront.catalog.priceRange")}</span>
           {expandedSections.price ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
         <AnimatePresence initial={false}>
@@ -241,7 +244,7 @@ function FilterGroups({
               <div className="pt-4 flex items-center gap-3">
                 <Input
                   type="number"
-                  placeholder="Từ"
+                  placeholder={t("storefront.catalog.minimum")}
                   value={minPrice}
                   onChange={(e) => {
                     setMinPrice(e.target.value);
@@ -252,7 +255,7 @@ function FilterGroups({
                 <span className="text-xs text-[#1c1a18]/40">—</span>
                 <Input
                   type="number"
-                  placeholder="Đến"
+                  placeholder={t("storefront.catalog.maximum")}
                   value={maxPrice}
                   onChange={(e) => {
                     setMaxPrice(e.target.value);
@@ -273,7 +276,7 @@ function FilterGroups({
           onClick={clearAllFilters}
           className="w-full py-2.5 border border-[#b5573a] text-[#b5573a] hover:bg-[#b5573a] hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider rounded-none cursor-pointer"
         >
-          Clear All Filters
+          {t("storefront.common.clearAllFilters")}
         </button>
       )}
     </div>
@@ -281,6 +284,12 @@ function FilterGroups({
 }
 
 export function CollectionClient({ products: initialProducts }: { products: Product[] }) {
+  const { locale: activeLocale, t } = useI18n();
+  const localizedInitialProducts = useMemo(
+    () => initialProducts.map((product) => localizeFixtureProduct(product, activeLocale)),
+    [activeLocale, initialProducts],
+  );
+  const sortOptions = useCommonSortOptions();
   const collectionScrollAnchorRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const filterMotionIntent: "show" | "hide" = "show";
@@ -314,10 +323,9 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
   const [page, setPage] = useState(1);
   const size = 12;
 
-  const activeLocale = getActiveLocale();
   const categoriesQuery = useCategoriesQuery({ size: 100, locale: activeLocale });
-  const colorsQuery = useColorsQuery({ size: 100 });
-  const sizesQuery = useSizesQuery({ size: 100 });
+  const colorsQuery = useColorsQuery({ size: 100, locale: activeLocale });
+  const sizesQuery = useSizesQuery({ size: 100, locale: activeLocale });
   const allProductsQuery = useProductsQuery({
     size: 1000,
     sort: "createdAt,desc",
@@ -355,8 +363,8 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     () =>
       productsQuery.data?.result?.map((product) =>
         mapBackendProduct(product, activeLocale)
-      ) ?? (!productsQuery.isError && page === 1 && selectedCategoryId === "ALL" && !selectedColorId && !selectedSizeId && !minPrice && !maxPrice ? initialProducts.slice(0, size) : []),
-    [activeLocale, initialProducts, productsQuery.data, productsQuery.isError, page, selectedCategoryId, selectedColorId, selectedSizeId, minPrice, maxPrice, size]
+      ) ?? (!productsQuery.isError && page === 1 && selectedCategoryId === "ALL" && !selectedColorId && !selectedSizeId && !minPrice && !maxPrice ? localizedInitialProducts.slice(0, size) : []),
+    [activeLocale, localizedInitialProducts, productsQuery.data, productsQuery.isError, page, selectedCategoryId, selectedColorId, selectedSizeId, minPrice, maxPrice, size]
   );
 
   const meta = productsQuery.data?.meta;
@@ -527,13 +535,13 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
         name="collection-catalog"
         loading={isInitialLoading}
         fallback={<CollectionCatalogLoadingFallback />}
-        fixture={<CollectionCatalogFixture products={products.length > 0 ? products : initialProducts.slice(0, size)} />}
+        fixture={<CollectionCatalogFixture products={products.length > 0 ? products : localizedInitialProducts.slice(0, size)} />}
       >
         {productsQuery.isError ? (
           <StorefrontApiStatus
             error={productsQuery.error}
             onRetry={() => void productsQuery.refetch()}
-            resourceLabel="bộ sưu tập"
+            resourceLabel={t("storefront.catalog.resource")}
             returnHref="/"
             variant="panel"
           />
@@ -548,7 +556,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
             setMobileFiltersOpen={setMobileFiltersOpen}
             sortBy={sortBy}
             setSortBy={setSortBy}
-            sortOptions={commonSortOptions}
+            sortOptions={sortOptions}
           />
 
           {/* Main Content Area */}
@@ -562,7 +570,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
             {products.length === 0 ? (
               <div className="py-20 text-center select-none min-h-[580px] flex items-center justify-center">
                 <p className="text-sm text-[#1c1a18]/50">
-                  Không tìm thấy sản phẩm nào trong danh mục này.
+                  {t("storefront.catalog.noProducts")}
                 </p>
               </div>
             ) : (
@@ -576,11 +584,13 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
                 {/* Pagination Controls */}
                 {meta && meta.pages > 1 && (
                   <div className="border-b border-[#1c1a18]/10 pb-4 pt-4">
-                    <Pagination className="select-none">
+                    <Pagination aria-label={t("storefront.pagination.label")} className="select-none">
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
                             href="#"
+                            text={t("storefront.pagination.previous")}
+                            aria-label={t("storefront.pagination.previousAria")}
                             onClick={(e) => {
                               e.preventDefault();
                               goToPage(page - 1);
@@ -595,6 +605,8 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
                         <PaginationItem>
                           <PaginationNext
                             href="#"
+                            text={t("storefront.pagination.next")}
+                            aria-label={t("storefront.pagination.nextAria")}
                             onClick={(e) => {
                               e.preventDefault();
                               goToPage(page + 1);
@@ -635,7 +647,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
               className="fixed right-0 top-0 h-full w-[85vw] max-w-sm bg-[#f7f4ef] z-50 p-6 overflow-y-auto flex flex-col shadow-2xl md:hidden"
             >
               <div className="flex items-center justify-between border-b border-[#1c1a18]/10 pb-4 mb-6">
-                <h2 className="font-serif text-2xl font-light text-[#1c1a18]">Bộ lọc</h2>
+                <h2 className="font-serif text-2xl font-light text-[#1c1a18]">{t("storefront.common.filters")}</h2>
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
@@ -655,14 +667,14 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
                   onClick={clearAllFilters}
                   className="flex-1 py-3 border border-[#1c1a18] text-[#1c1a18] text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#1c1a18]/5 rounded-none cursor-pointer"
                 >
-                  Xóa tất cả
+                  {t("storefront.common.clearAll")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
                   className="flex-1 py-3 bg-[#1c1a18] text-white text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#b5573a] rounded-none cursor-pointer"
                 >
-                  Áp dụng
+                  {t("storefront.common.apply")}
                 </button>
               </div>
             </motion.div>
@@ -681,6 +693,7 @@ function CollectionCatalogLoadingFallback() {
 
 function CollectionCatalogFixture({ products }: { products: Product[] }) {
   const fixtureProducts = products.slice(0, 6);
+  const sortOptions = useCommonSortOptions();
 
   return (
     <div className="w-full">
@@ -691,7 +704,7 @@ function CollectionCatalogFixture({ products }: { products: Product[] }) {
         setMobileFiltersOpen={() => undefined}
         sortBy="featured"
         setSortBy={() => undefined}
-        sortOptions={commonSortOptions}
+        sortOptions={sortOptions}
       />
 
       <ProductLayoutMain

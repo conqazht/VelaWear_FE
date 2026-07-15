@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -45,11 +46,18 @@ type ProductVariantsFormProps = {
 
 const NONE = "NONE";
 
-const VARIANT_STATUSES: Array<{ value: ProductVariantStatus; label: string }> = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "OUT_OF_STOCK", label: "Out of stock" },
-  { value: "DISCONTINUED", label: "Discontinued" },
+const VARIANT_STATUS_MESSAGE_KEYS = {
+  ACTIVE: "admin.commerce.products.status.active",
+  INACTIVE: "admin.commerce.products.status.inactive",
+  OUT_OF_STOCK: "admin.commerce.products.status.outOfStock",
+  DISCONTINUED: "admin.commerce.products.variantStatus.discontinued",
+} as const;
+
+const VARIANT_STATUSES: ProductVariantStatus[] = [
+  "ACTIVE",
+  "INACTIVE",
+  "OUT_OF_STOCK",
+  "DISCONTINUED",
 ];
 
 export function ProductVariantsForm({
@@ -60,6 +68,8 @@ export function ProductVariantsForm({
   isCatalogLoading = false,
   catalogError,
 }: ProductVariantsFormProps) {
+  const { t } = useI18n();
+
   function updateVariant<Key extends keyof ProductVariantFormValue>(
     index: number,
     key: Key,
@@ -95,19 +105,21 @@ export function ProductVariantsForm({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="font-medium text-base">Product variants & inventory</h3>
+          <h3 className="font-medium text-base">
+            {t("admin.commerce.products.variants.title")}
+          </h3>
           <p className="mt-1 text-muted-foreground text-sm">
-            Add every sellable SKU with its color, size, price, and available stock.
+            {t("admin.commerce.products.variants.description")}
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-          <Plus /> Add variant
+          <Plus /> {t("admin.commerce.products.variants.add")}
         </Button>
       </div>
 
       {catalogError ? (
         <Alert variant="destructive">
-          <AlertTitle>Variant options unavailable</AlertTitle>
+          <AlertTitle>{t("admin.commerce.products.variants.unavailable")}</AlertTitle>
           <AlertDescription>{catalogError}</AlertDescription>
         </Alert>
       ) : null}
@@ -117,14 +129,20 @@ export function ProductVariantsForm({
           <section key={variant.key} className="rounded-lg border bg-muted/10 p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <p className="font-medium text-sm">Variant {index + 1}</p>
-                {variant.id ? <p className="text-muted-foreground text-xs">ID #{variant.id}</p> : null}
+                <p className="font-medium text-sm">
+                  {t("admin.commerce.products.variants.label", { number: index + 1 })}
+                </p>
+                {variant.id ? (
+                  <p className="text-muted-foreground text-xs">
+                    {t("admin.commerce.products.variants.id", { id: variant.id })}
+                  </p>
+                ) : null}
               </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Remove variant ${index + 1}`}
+                aria-label={t("admin.commerce.products.variants.remove", { number: index + 1 })}
                 disabled={variants.length === 1}
                 onClick={() => removeVariant(index)}
               >
@@ -134,7 +152,9 @@ export function ProductVariantsForm({
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <Field className="md:col-span-2">
-                <FieldLabel htmlFor={`variant-${variant.key}-sku`}>SKU</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-sku`}>
+                  {t("admin.commerce.products.variants.sku")}
+                </FieldLabel>
                 <Input
                   id={`variant-${variant.key}-sku`}
                   value={variant.sku}
@@ -146,17 +166,21 @@ export function ProductVariantsForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-color`}>Color</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-color`}>
+                  {t("admin.commerce.products.variants.color")}
+                </FieldLabel>
                 <Select
                   value={variant.colorId || NONE}
                   onValueChange={(value) => updateVariant(index, "colorId", value === NONE ? "" : (value ?? ""))}
                   disabled={isCatalogLoading}
                 >
                   <SelectTrigger id={`variant-${variant.key}-color`} className="w-full">
-                    <SelectValue placeholder="No color" />
+                    <SelectValue placeholder={t("admin.commerce.products.variants.noColor")} />
                   </SelectTrigger>
                   <SelectContent align="start" alignItemWithTrigger={false}>
-                    <SelectItem value={NONE}>No color</SelectItem>
+                    <SelectItem value={NONE}>
+                      {t("admin.commerce.products.variants.noColor")}
+                    </SelectItem>
                     {colors.map((color) => (
                       <SelectItem key={color.id} value={String(color.id)}>
                         {color.name}
@@ -167,17 +191,21 @@ export function ProductVariantsForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-size`}>Size</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-size`}>
+                  {t("admin.commerce.products.variants.size")}
+                </FieldLabel>
                 <Select
                   value={variant.sizeId || NONE}
                   onValueChange={(value) => updateVariant(index, "sizeId", value === NONE ? "" : (value ?? ""))}
                   disabled={isCatalogLoading}
                 >
                   <SelectTrigger id={`variant-${variant.key}-size`} className="w-full">
-                    <SelectValue placeholder="No size" />
+                    <SelectValue placeholder={t("admin.commerce.products.variants.noSize")} />
                   </SelectTrigger>
                   <SelectContent align="start" alignItemWithTrigger={false}>
-                    <SelectItem value={NONE}>No size</SelectItem>
+                    <SelectItem value={NONE}>
+                      {t("admin.commerce.products.variants.noSize")}
+                    </SelectItem>
                     {sizes.map((size) => (
                       <SelectItem key={size.id} value={String(size.id)}>
                         {size.name}
@@ -188,7 +216,9 @@ export function ProductVariantsForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-price`}>Price</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-price`}>
+                  {t("admin.commerce.products.variants.price")}
+                </FieldLabel>
                 <Input
                   id={`variant-${variant.key}-price`}
                   type="number"
@@ -203,7 +233,9 @@ export function ProductVariantsForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-sale-price`}>Sale price</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-sale-price`}>
+                  {t("admin.commerce.products.variants.salePrice")}
+                </FieldLabel>
                 <Input
                   id={`variant-${variant.key}-sale-price`}
                   type="number"
@@ -212,12 +244,14 @@ export function ProductVariantsForm({
                   inputMode="decimal"
                   value={variant.salePrice}
                   onChange={(event) => updateVariant(index, "salePrice", event.target.value)}
-                  placeholder="Optional"
+                  placeholder={t("admin.commerce.products.variants.optional")}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-stock`}>Stock</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-stock`}>
+                  {t("admin.commerce.products.variants.stock")}
+                </FieldLabel>
                 <Input
                   id={`variant-${variant.key}-stock`}
                   type="number"
@@ -231,7 +265,9 @@ export function ProductVariantsForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-status`}>Status</FieldLabel>
+                <FieldLabel htmlFor={`variant-${variant.key}-status`}>
+                  {t("admin.commerce.products.variants.status")}
+                </FieldLabel>
                 <Select
                   value={variant.status}
                   onValueChange={(value) => updateVariant(index, "status", value as ProductVariantStatus)}
@@ -241,8 +277,8 @@ export function ProductVariantsForm({
                   </SelectTrigger>
                   <SelectContent align="start" alignItemWithTrigger={false}>
                     {VARIANT_STATUSES.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
+                      <SelectItem key={status} value={status}>
+                        {t(VARIANT_STATUS_MESSAGE_KEYS[status])}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -254,7 +290,7 @@ export function ProductVariantsForm({
       </div>
 
       <FieldDescription>
-        Color and size are optional for one-size products. SKU must be unique across the catalog.
+        {t("admin.commerce.products.variants.help")}
       </FieldDescription>
     </div>
   );

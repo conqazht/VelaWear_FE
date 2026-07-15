@@ -1,32 +1,40 @@
-import { format, isToday, isYesterday, subDays } from "date-fns";
+"use client";
+
+import { subDays } from "date-fns";
 import { BookOpen, FileText } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/i18n/format";
 
 const today = new Date("2024-04-15T12:00:00Z");
 
-function formatNoteDate(date: Date) {
-  if (isToday(date)) return "Today";
-  if (isYesterday(date)) return "Yesterday";
-  return format(date, "MMM d");
-}
-
-const recentNotes = [
-  { title: "Design principles that scale", date: formatNoteDate(today), icon: FileText },
-  { title: `Content ideas – ${format(today, "MMMM")}`, date: formatNoteDate(subDays(today, 1)), icon: FileText },
-  { title: "Lessons from the week", date: formatNoteDate(subDays(today, 4)), icon: FileText },
-  { title: "Books I’m Reading", date: formatNoteDate(subDays(today, 5)), icon: BookOpen },
-] as const;
-
 export function RecentNotesCard() {
+  const { locale, t } = useI18n();
+  const formatNoteDate = (daysAgo: number) => {
+    if (daysAgo === 0) return t("admin.productivity.notes.today");
+    if (daysAgo === 1) return t("admin.productivity.notes.yesterday");
+    return formatDate(subDays(today, daysAgo), locale, { month: "short", day: "numeric" });
+  };
+  const recentNotes = [
+    { title: t("admin.productivity.notes.design"), date: formatNoteDate(0), icon: FileText },
+    {
+      title: t("admin.productivity.notes.content", { month: formatDate(today, locale, { month: "long" }) }),
+      date: formatNoteDate(1),
+      icon: FileText,
+    },
+    { title: t("admin.productivity.notes.lessons"), date: formatNoteDate(4), icon: FileText },
+    { title: t("admin.productivity.notes.books"), date: formatNoteDate(5), icon: BookOpen },
+  ];
+
   return (
     <Card className="shadow-xs">
       <CardHeader>
-        <CardTitle>Recent Notes</CardTitle>
+        <CardTitle>{t("admin.productivity.notes.title")}</CardTitle>
         <CardAction>
           <Button variant="ghost" size="sm" className="text-muted-foreground">
-            View all
+            {t("admin.productivity.viewAll")}
           </Button>
         </CardAction>
       </CardHeader>

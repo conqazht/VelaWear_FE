@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 
-import { format, subMinutes } from "date-fns";
+import { subMinutes } from "date-fns";
 import { ArrowUpRight } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type ChartConfig,
@@ -15,6 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { getIntlLocale } from "@/lib/i18n";
 
 const trafficIntervalMinutes = 15;
 
@@ -126,40 +128,48 @@ function getTrafficData() {
   }));
 }
 
-const trafficConfig = {
-  visitors: {
-    label: "Visitors",
-    color: "var(--chart-3)",
-  },
-  anomalies: {
-    label: "Anomalies",
-    color: "var(--destructive)",
-  },
-} satisfies ChartConfig;
-
-function formatTrafficTooltipLabel(value: string) {
-  return format(new Date(value), "h:mm a, do MMMM yyyy");
-}
-
 export function StoreTraffic() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const compactFormatter = new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 1, notation: "compact" });
+  const tooltipDateFormatter = new Intl.DateTimeFormat(intlLocale, {
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const trafficConfig = {
+    visitors: {
+      label: t("admin.dashboardsA.ecommerce.visitors"),
+      color: "var(--chart-3)",
+    },
+    anomalies: {
+      label: t("admin.dashboardsA.ecommerce.anomalies"),
+      color: "var(--destructive)",
+    },
+  } satisfies ChartConfig;
   const [trafficData] = useState(() => getTrafficData());
   const firstTrafficTimestamp = trafficData[0].timestamp;
   const lastTrafficTimestamp = trafficData.at(-1)?.timestamp ?? "";
 
   function formatTrafficTick(value: string) {
     if (value === firstTrafficTimestamp) {
-      return "24h ago";
+      return t("admin.dashboardsA.ecommerce.hoursAgo");
     }
 
-    return value === lastTrafficTimestamp ? "now" : "";
+    return value === lastTrafficTimestamp ? t("admin.dashboardsA.ecommerce.now") : "";
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Store Traffic</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("admin.dashboardsA.ecommerce.storeTraffic")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          12.9K visits
+          {t("admin.dashboardsA.ecommerce.visitCount", { count: compactFormatter.format(12_900) })}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -187,7 +197,12 @@ export function StoreTraffic() {
             />
             <YAxis axisLine={false} domain={[0, 650]} tickLine={false} tickMargin={6} width={36} yAxisId="traffic" />
             <ChartTooltip
-              content={<ChartTooltipContent labelFormatter={(value) => formatTrafficTooltipLabel(String(value))} />}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(value) => tooltipDateFormatter.format(new Date(String(value)))}
+                  formatter={(value) => numberFormatter.format(Number(value))}
+                />
+              }
               cursor={{ stroke: "var(--border)", strokeDasharray: "4 4" }}
             />
             <ChartLegend align="right" verticalAlign="top" className="justify-end" content={<ChartLegendContent />} />

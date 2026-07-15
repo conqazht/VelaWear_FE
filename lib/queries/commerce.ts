@@ -37,11 +37,15 @@ export function useUserCartQuery(userId?: number) {
   });
 }
 
-export function useWishlistsQuery(params: PageParams = {}, enabled = true) {
+export function useWishlistsQuery(
+  userId: number | undefined,
+  params: PageParams = {},
+  enabled = true
+) {
   return useQuery({
-    queryKey: queryKeys.wishlists.list(params),
+    queryKey: queryKeys.wishlists.list(userId, params),
     queryFn: () => getMyWishlists(params),
-    enabled,
+    enabled: enabled && typeof userId === "number",
   });
 }
 

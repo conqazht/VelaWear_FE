@@ -4,6 +4,7 @@
 import type { Table } from "@tanstack/react-table";
 import { Settings2, X } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +26,12 @@ interface TasksToolbarProps<TData> {
 }
 
 export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
+  const { t } = useI18n();
+  const columnLabels: Record<string, string> = {
+    priority: t("admin.workflows.common.priority"),
+    status: t("admin.workflows.common.status"),
+    title: t("admin.workflows.tasks.title"),
+  };
   const isFiltered = table.getState().columnFilters.length > 0;
   const searchValue = (table.getColumn("title")?.getFilterValue() as string | undefined) ?? "";
   const hideableColumns = table
@@ -36,7 +43,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
-          placeholder="Filter tasks..."
+          placeholder={t("admin.workflows.tasks.filterPlaceholder")}
           value={searchValue}
           onChange={(event) => {
             table.getColumn("title")?.setFilterValue(event.target.value);
@@ -55,7 +62,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
             }}
           >
             <X data-icon="inline-start" />
-            Reset
+            {t("admin.workflows.common.reset")}
           </Button>
         )}
       </div>
@@ -71,10 +78,10 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
             }
           >
             <Settings2 data-icon="inline-start" />
-            View
+            {t("admin.workflows.tasks.view")}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-38">
-            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("admin.workflows.tasks.toggleColumns")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               {hideableColumns.map((column) => (
@@ -84,7 +91,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
-                  {column.id}
+                  {columnLabels[column.id] ?? column.id}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuGroup>

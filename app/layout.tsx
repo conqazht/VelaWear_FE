@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import React from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { BoneyardRegistry } from "@/components/providers/boneyard-registry";
+import { I18nProvider } from "@/components/providers/i18n-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { CartProvider } from "@/components/shop/cart-provider";
 import { NotificationProvider } from "@/components/shop/notification-provider";
 import { FavoritesProvider } from "@/components/shop/favorites-provider";
+import {
+  LOCALE_BOOTSTRAP_SCRIPT,
+  LOCALE_COOKIE_KEY,
+  parseLocale,
+} from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,23 +28,36 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
+      data-locale="vi"
       className="h-full antialiased"
       suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOTSTRAP_SCRIPT }} />
         <BoneyardRegistry />
         <React.Suspense fallback={null}>
-          <QueryProvider>
-            <AuthProvider>
-              <CartProvider>
-                <NotificationProvider>
-                  <FavoritesProvider>{children}</FavoritesProvider>
-                </NotificationProvider>
-              </CartProvider>
-            </AuthProvider>
-          </QueryProvider>
+          <LocalizedAppProviders>{children}</LocalizedAppProviders>
         </React.Suspense>
       </body>
     </html>
+  );
+}
+
+async function LocalizedAppProviders({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const initialLocale = parseLocale(cookieStore.get(LOCALE_COOKIE_KEY)?.value);
+
+  return (
+    <QueryProvider>
+      <I18nProvider initialLocale={initialLocale}>
+        <AuthProvider>
+          <CartProvider>
+            <NotificationProvider>
+              <FavoritesProvider>{children}</FavoritesProvider>
+            </NotificationProvider>
+          </CartProvider>
+        </AuthProvider>
+      </I18nProvider>
+    </QueryProvider>
   );
 }

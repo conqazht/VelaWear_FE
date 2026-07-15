@@ -16,6 +16,7 @@ import {
   downloadCsv,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import type {
   AdminSize,
@@ -39,6 +40,7 @@ function toFormValues(size: AdminSize): SizeFormValues {
 }
 
 export function SizesManagement() {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -82,11 +84,11 @@ export function SizesManagement() {
     const sortOrder = Number(sortOrderText);
 
     if (!name) {
-      toast.error("Enter a size name before saving.");
+      toast.error(t("admin.commerce.attributes.sizes.validation.name"));
       return;
     }
     if (!/^\d+$/.test(sortOrderText) || !Number.isSafeInteger(sortOrder) || sortOrder < 0) {
-      toast.error("Sort order must be a nonnegative whole number.");
+      toast.error(t("admin.commerce.attributes.validation.sortOrder"));
       return;
     }
 
@@ -101,7 +103,7 @@ export function SizesManagement() {
         { id: editingSize.id, request: updateRequest },
         {
           onSuccess: () => {
-            toast.success(`${name} was updated.`);
+            toast.success(t("admin.commerce.attributes.updated", { name }));
             setEditingSize(null);
             setFormOpen(false);
           },
@@ -113,7 +115,7 @@ export function SizesManagement() {
 
     createMutation.mutate(request, {
       onSuccess: () => {
-        toast.success(`${name} was created.`);
+        toast.success(t("admin.commerce.attributes.created", { name }));
         setPage(1);
         setFormOpen(false);
       },
@@ -127,7 +129,7 @@ export function SizesManagement() {
     const { id, name } = deleteSize;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success(`${name} was deleted.`);
+        toast.success(t("admin.commerce.attributes.deleted", { name }));
         setDeleteSize(null);
         setPage(1);
       },
@@ -138,7 +140,7 @@ export function SizesManagement() {
   const columns: ManagementColumn<AdminSize>[] = [
     {
       key: "name",
-      header: "Size",
+      header: t("admin.commerce.attributes.sizes.column.size"),
       className: "min-w-64",
       cell: (size) => (
         <div className="flex items-center gap-3">
@@ -151,13 +153,13 @@ export function SizesManagement() {
     },
     {
       key: "sortOrder",
-      header: "Sort order",
+      header: t("admin.commerce.attributes.sortOrder"),
       className: "tabular-nums text-muted-foreground",
       cell: (size) => size.sortOrder ?? "—",
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (size) => (
@@ -165,7 +167,7 @@ export function SizesManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Edit ${size.name}`}
+            aria-label={t("admin.commerce.common.editNamed", { name: size.name })}
             onClick={() => openEditForm(size)}
           >
             <Pencil />
@@ -173,7 +175,7 @@ export function SizesManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Delete ${size.name}`}
+            aria-label={t("admin.commerce.common.deleteNamed", { name: size.name })}
             onClick={() => setDeleteSize(size)}
           >
             <Trash2 />
@@ -186,8 +188,8 @@ export function SizesManagement() {
   return (
     <>
       <ResourcePage
-        title="Sizes"
-        description="Manage the size labels and ordering available to product variants across the catalog."
+        title={t("admin.commerce.attributes.sizes")}
+        description={t("admin.commerce.attributes.sizes.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -195,7 +197,7 @@ export function SizesManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search size names..."
+        searchPlaceholder={t("admin.commerce.attributes.sizes.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -205,7 +207,11 @@ export function SizesManagement() {
           setPageSize(size);
           setPage(1);
         }}
-        primaryAction={{ label: "Add size", icon: Ruler, onClick: openCreateForm }}
+        primaryAction={{
+          label: t("admin.commerce.attributes.sizes.add"),
+          icon: Ruler,
+          onClick: openCreateForm,
+        }}
         onRefresh={() => void sizesQuery.refetch()}
         onExport={() =>
           downloadCsv(
@@ -220,8 +226,8 @@ export function SizesManagement() {
         isLoading={sizesQuery.isPending}
         isFetching={sizesQuery.isFetching}
         error={sizesQuery.isError ? sizesQuery.error : null}
-        emptyTitle="No sizes found"
-        emptyDescription="Add a size or adjust the current search."
+        emptyTitle={t("admin.commerce.attributes.sizes.emptyTitle")}
+        emptyDescription={t("admin.commerce.attributes.sizes.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -229,11 +235,19 @@ export function SizesManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingSize ? "Edit size" : "Add size"}
-        description="Set the customer-facing size label and its display order."
+        title={
+          editingSize
+            ? t("admin.commerce.attributes.sizes.edit")
+            : t("admin.commerce.attributes.sizes.add")
+        }
+        description={t("admin.commerce.attributes.sizes.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
-        submitLabel={editingSize ? "Save size" : "Create size"}
+        submitLabel={
+          editingSize
+            ? t("admin.commerce.attributes.sizes.save")
+            : t("admin.commerce.attributes.sizes.create")
+        }
       >
         <SizeForm values={formValues} onChange={setFormValues} />
       </ResourceFormSheet>
@@ -243,8 +257,8 @@ export function SizesManagement() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteSize(null);
         }}
-        resourceName={deleteSize?.name ?? "size"}
-        description="Deletion only succeeds when no active or archived product variant references this size. The backend rejects referenced sizes."
+        resourceName={deleteSize?.name ?? t("admin.commerce.attributes.sizes.resource")}
+        description={t("admin.commerce.attributes.sizes.deleteDescription")}
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />

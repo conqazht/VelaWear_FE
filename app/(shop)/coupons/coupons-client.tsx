@@ -9,18 +9,14 @@ import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useMyCouponsQuery } from "@/lib/queries/commerce";
 import type { Coupon } from "@/lib/api/types";
 import { money } from "@/lib/vela-data";
+import { useI18n } from "@/components/providers/i18n-provider";
+import type { Locale } from "@/lib/i18n";
+import { formatDate } from "@/lib/i18n/format";
 
-const formatCouponValue = (coupon: Coupon) =>
+const formatCouponValue = (coupon: Coupon, locale: Locale) =>
   coupon.type.includes("PERCENT")
     ? `${coupon.value}%`
-    : money(Number(coupon.value || 0));
-
-const formatDisplayDate = (value?: string | null, locale = "vi-VN") => {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(locale);
-};
+    : money(Number(coupon.value || 0), locale);
 
 const getUsagePercentage = (coupon: Coupon) => {
   if (!coupon.usageLimit || coupon.usageLimit <= 0) return null;
@@ -28,6 +24,7 @@ const getUsagePercentage = (coupon: Coupon) => {
 };
 
 export function CouponsClient() {
+  const { locale, t } = useI18n();
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const couponsQuery = useMyCouponsQuery(isAuthenticated);
   const coupons = couponsQuery.data?.availableCoupons ?? [];
@@ -47,7 +44,7 @@ export function CouponsClient() {
     return (
       <Skeleton name="coupons-page" loading={isAuthLoading} fallback={<CouponsLoadingFallback />} fixture={<CouponsLoadingFixture />}>
       <div className="bg-canvas text-ink min-h-[100dvh] pt-[120px] px-6 flex items-center justify-center">
-        <p className="text-sm font-medium uppercase tracking-wider text-[#1c1a18]/60">Vui lòng đăng nhập để xem mã giảm giá.</p>
+        <p className="text-sm font-medium uppercase tracking-wider text-[#1c1a18]/60">{t("coupons.signIn")}</p>
       </div>
       </Skeleton>
     );
@@ -59,19 +56,19 @@ export function CouponsClient() {
         <section className="flex flex-col gap-6 text-left">
           <div className="border-b border-[#1c1a18]/10 pb-4 flex justify-between items-end">
             <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
-              Mã giảm giá
+              {t("coupons.title")}
             </h2>
             <span className="text-xs text-[#55423d]/65">
-              Bạn đang có <span className="font-semibold text-[#1c1a18] font-numeric">{coupons.length}</span> mã khả dụng
+              {t("coupons.availableCount", { count: coupons.length })}
             </span>
           </div>
 
           {!couponsQuery.isLoading && !couponsQuery.isError && (
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <CouponStat label="Mã khả dụng" value={coupons.length.toString()} icon={<Ticket className="size-4" />} />
-              <CouponStat label="Lượt đã dùng" value={usageHistory.length.toString()} icon={<History className="size-4" />} />
-              <CouponStat label="Đã tiết kiệm" value={money(totalSavings)} icon={<PiggyBank className="size-4" />} />
-              <CouponStat label="Sắp hết hạn" value={expiringSoon.toString()} icon={<CalendarClock className="size-4" />} />
+              <CouponStat label={t("coupons.stat.available")} value={coupons.length.toString()} icon={<Ticket className="size-4" />} />
+              <CouponStat label={t("coupons.stat.used")} value={usageHistory.length.toString()} icon={<History className="size-4" />} />
+              <CouponStat label={t("coupons.stat.saved")} value={money(totalSavings, locale)} icon={<PiggyBank className="size-4" />} />
+              <CouponStat label={t("coupons.stat.expiring")} value={expiringSoon.toString()} icon={<CalendarClock className="size-4" />} />
             </div>
           )}
 
@@ -79,7 +76,7 @@ export function CouponsClient() {
           <StorefrontApiStatus
             error={couponsQuery.error}
             onRetry={() => void couponsQuery.refetch()}
-            resourceLabel="mã giảm giá"
+            resourceLabel={t("coupons.resource")}
             returnHref="/collection"
             variant="panel"
           />
@@ -95,12 +92,12 @@ export function CouponsClient() {
         ) : coupons.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center bg-white border border-[#1c1a18]/5 rounded-md shadow-sm">
             <Ticket className="w-12 h-12 text-[#1c1a18]/20 mb-6" strokeWidth={1} />
-            <h2 className="font-serif text-2xl text-[#1c1a18] font-light mb-3">Không có mã giảm giá</h2>
+            <h2 className="font-serif text-2xl text-[#1c1a18] font-light mb-3">{t("coupons.emptyTitle")}</h2>
             <p className="text-sm text-[#1c1a18]/60 max-w-md mx-auto">
-              Hiện tại bạn chưa có mã giảm giá nào. Hãy thường xuyên kiểm tra hoặc mua sắm để nhận thêm ưu đãi.
+              {t("coupons.emptyDescription")}
             </p>
             <Link href="/" className="mt-8 px-8 py-3.5 bg-[#1c1a18] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#b85a3c] transition-colors">
-              Khám phá sản phẩm
+              {t("coupons.explore")}
             </Link>
           </div>
         ) : (
@@ -119,10 +116,14 @@ export function CouponsClient() {
                 <div className="pb-8">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#b85a3c]">
-                      {coupon.type.replaceAll("_", " ")}
+                      {coupon.type.includes("PERCENT") ? t("coupons.type.percentage") : t("coupons.type.fixed")}
                     </p>
                     <span className="rounded-sm bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-700">
-                      {coupon.status === "ACTIVE" ? "Khả dụng" : coupon.status}
+                      {{
+                        ACTIVE: t("coupons.status.available"),
+                        INACTIVE: t("coupons.status.inactive"),
+                        EXPIRED: t("coupons.status.expired"),
+                      }[coupon.status.toUpperCase()] ?? coupon.status}
                     </span>
                   </div>
                   <h3 className="font-serif text-2xl font-light tracking-tight text-[#1c1a18]">
@@ -132,30 +133,30 @@ export function CouponsClient() {
 
                 <div className="pt-8 flex flex-col gap-1 relative z-10">
                   <p className="text-3xl font-semibold text-[#1c1a18] font-numeric mb-2">
-                    {formatCouponValue(coupon)}
+                    {formatCouponValue(coupon, locale)}
                   </p>
                   <p className="text-xs text-[#1c1a18]/60">
-                    Đơn tối thiểu {money(Number(coupon.minOrderAmount ?? 0))}
+                    {t("coupons.minimum", { amount: money(Number(coupon.minOrderAmount ?? 0), locale) })}
                   </p>
                   {coupon.maxDiscount && (
                     <p className="text-xs text-[#1c1a18]/60">
-                      Giảm tối đa {money(Number(coupon.maxDiscount))}
+                      {t("coupons.maximum", { amount: money(Number(coupon.maxDiscount), locale) })}
                     </p>
                   )}
 
                   <div className="mt-6 flex items-center justify-between gap-3 text-[11px] text-[#1c1a18]/50 font-medium">
-                    <p>HSD: {formatDisplayDate(coupon.endDate) || "Không thời hạn"}</p>
+                    <p>{t("coupons.expires", { date: coupon.endDate ? formatDate(coupon.endDate, locale) : t("coupons.noExpiry") })}</p>
                     <p>
                       {usagePercentage === null
-                        ? "Không giới hạn lượt dùng"
-                        : `Đã sử dụng ${usagePercentage}%`}
+                        ? t("coupons.unlimited")
+                        : t("coupons.usedPercentage", { percentage: usagePercentage })}
                     </p>
                   </div>
                   {usagePercentage !== null && (
                     <div
                       className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#1c1a18]/8"
                       role="progressbar"
-                      aria-label={`Mức sử dụng mã ${coupon.code}`}
+                      aria-label={t("coupons.usageLabel", { code: coupon.code })}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-valuenow={usagePercentage}
@@ -179,19 +180,19 @@ export function CouponsClient() {
             <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
               <div>
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#b85a3c]">
-                  Hoạt động gần đây
+                  {t("coupons.recent")}
                 </p>
                 <h2 className="font-serif text-2xl font-light tracking-tight text-[#1c1a18] md:text-3xl">
-                  Lịch sử sử dụng coupon
+                  {t("coupons.history")}
                 </h2>
               </div>
-              <span className="text-xs text-[#55423d]/65">{usageHistory.length} lượt sử dụng</span>
+              <span className="text-xs text-[#55423d]/65">{t("coupons.historyCount", { count: usageHistory.length })}</span>
             </div>
 
             {usageHistory.length === 0 ? (
               <div className="rounded-md border border-[#1c1a18]/5 bg-white py-14 text-center">
                 <History className="mx-auto mb-4 size-9 text-[#1c1a18]/20" strokeWidth={1.25} />
-                <p className="text-sm text-[#1c1a18]/55">Bạn chưa sử dụng coupon cho đơn hàng nào.</p>
+                <p className="text-sm text-[#1c1a18]/55">{t("coupons.noHistory")}</p>
               </div>
             ) : (
               <div className="overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white">
@@ -205,17 +206,17 @@ export function CouponsClient() {
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-sm font-semibold text-[#1c1a18]">{usage.coupon.code}</span>
                         <span className="rounded-sm bg-[#b85a3c]/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#9e452c]">
-                          Đã dùng
+                          {t("coupons.usedBadge")}
                         </span>
                       </div>
                       <p className="mt-2 text-xs text-[#1c1a18]/55">
-                        Đơn {usage.orderCode} · {formatDisplayDate(usage.usedAt)}
+                        {t("coupons.order", { code: usage.orderCode, date: formatDate(usage.usedAt, locale) })}
                       </p>
                     </div>
                     <div className="sm:text-right">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-[#1c1a18]/45">Đã giảm</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-[#1c1a18]/45">{t("coupons.discount")}</p>
                       <p className="mt-1 font-numeric text-base font-semibold text-emerald-700">
-                        −{money(Number(usage.discountAmount || 0))}
+                        −{money(Number(usage.discountAmount || 0), locale)}
                       </p>
                     </div>
                   </Link>
@@ -252,14 +253,16 @@ function CouponsLoadingFallback() {
 }
 
 function CouponsLoadingFixture() {
+  const { locale, t } = useI18n();
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
         <article key={index} className="min-h-72 rounded-md border border-[#1c1a18]/10 bg-white p-8">
-          <p className="text-xs uppercase tracking-widest">Phần trăm</p>
+          <p className="text-xs uppercase tracking-widest">{t("coupons.type.percentage")}</p>
           <h3 className="mt-4 font-serif text-2xl">VELA20</h3>
           <p className="mt-16 text-3xl font-semibold">20%</p>
-          <p className="mt-3 text-xs">Đơn tối thiểu 500.000 ₫</p>
+          <p className="mt-3 text-xs">{t("coupons.minimum", { amount: money(500000, locale) })}</p>
         </article>
       ))}
     </div>

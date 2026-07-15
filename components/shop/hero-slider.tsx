@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export interface HeroSlide {
   id: string;
@@ -23,6 +24,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   const [direction, setDirection] = useState<"left" | "right">("right");
   const [isAutoplay, setIsAutoplay] = useState(true);
   const router = useRouter();
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!isAutoplay) return;
@@ -142,7 +144,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          aria-label="Previous slide"
+          aria-label={t("storefront.home.previousSlide")}
         >
           <ChevronLeft className="w-5 h-5" />
         </motion.button>
@@ -152,7 +154,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          aria-label="Next slide"
+          aria-label={t("storefront.home.nextSlide")}
         >
           <ChevronRight className="w-5 h-5" />
         </motion.button>
@@ -169,7 +171,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
               setCurrent(i);
             }}
             className="group relative py-2 px-1 focus:outline-none cursor-pointer"
-            aria-label={`Go to slide ${i + 1}`}
+            aria-label={t("storefront.home.goToSlide", { number: i + 1 })}
           >
             <div
               className={`h-1.5 rounded-full transition-all duration-500 ease-out ${

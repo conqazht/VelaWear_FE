@@ -24,11 +24,13 @@ import {
   Users,
 } from "lucide-react";
 
+import type { AdminShellTranslationKey } from "@/lib/i18n/messages/admin-shell";
+
 export type NavBadge = "new" | "soon";
 
 export interface NavSubItem {
   id: string;
-  title: string;
+  titleKey: AdminShellTranslationKey;
   url: string;
   icon?: LucideIcon;
   badge?: NavBadge;
@@ -38,7 +40,7 @@ export interface NavSubItem {
 
 interface NavItemBase {
   id: string;
-  title: string;
+  titleKey: AdminShellTranslationKey;
   icon?: LucideIcon;
   badge?: NavBadge;
   disabled?: boolean;
@@ -58,66 +60,66 @@ export type NavMainItem = NavMainLinkItem | NavMainParentItem;
 
 export interface NavGroup {
   id: number;
-  label?: string;
+  labelKey?: AdminShellTranslationKey;
   items: NavMainItem[];
 }
 
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "Management",
+    labelKey: "admin.shell.navigation.management",
     items: [
       {
         id: "users",
-        title: "Users",
+        titleKey: "admin.shell.navigation.users",
         url: "/dashboard/users",
         icon: Users,
       },
       {
         id: "roles",
-        title: "Roles",
+        titleKey: "admin.shell.navigation.roles",
         url: "/dashboard/roles",
         icon: Lock,
       },
       {
         id: "permissions",
-        title: "Permissions",
+        titleKey: "admin.shell.navigation.permissions",
         url: "/dashboard/permissions",
         icon: KeyRound,
       },
       {
         id: "products",
-        title: "Products",
+        titleKey: "admin.shell.navigation.products",
         url: "/dashboard/products",
         icon: Package,
       },
       {
         id: "categories",
-        title: "Categories",
+        titleKey: "admin.shell.navigation.categories",
         url: "/dashboard/categories",
         icon: FolderTree,
       },
       {
         id: "brands",
-        title: "Brands",
+        titleKey: "admin.shell.navigation.brands",
         url: "/dashboard/brands",
         icon: Tags,
       },
       {
         id: "attributes",
-        title: "Colors & Sizes",
+        titleKey: "admin.shell.navigation.attributes",
         url: "/dashboard/attributes",
         icon: Palette,
       },
       {
         id: "orders",
-        title: "Orders",
+        titleKey: "admin.shell.navigation.orders",
         url: "/dashboard/orders",
         icon: ClipboardList,
       },
       {
         id: "coupons",
-        title: "Coupons",
+        titleKey: "admin.shell.navigation.coupons",
         url: "/dashboard/coupons",
         icon: TicketPercent,
       },
@@ -125,47 +127,47 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 2,
-    label: "Dashboards",
+    labelKey: "admin.shell.navigation.dashboards",
     items: [
       {
         id: "default",
-        title: "Default",
+        titleKey: "admin.shell.navigation.default",
         url: "/dashboard/default",
         icon: LayoutDashboard,
       },
       {
         id: "crm",
-        title: "CRM",
+        titleKey: "admin.shell.navigation.crm",
         url: "/dashboard/crm",
         icon: ChartBar,
       },
       {
         id: "finance",
-        title: "Finance",
+        titleKey: "admin.shell.navigation.finance",
         url: "/dashboard/finance",
         icon: Banknote,
       },
       {
         id: "analytics",
-        title: "Analytics",
+        titleKey: "admin.shell.navigation.analytics",
         url: "/dashboard/analytics",
         icon: Gauge,
       },
       {
         id: "productivity",
-        title: "Productivity",
+        titleKey: "admin.shell.navigation.productivity",
         url: "/dashboard/productivity",
         icon: ListTodo,
       },
       {
         id: "ecommerce",
-        title: "E-commerce",
+        titleKey: "admin.shell.navigation.ecommerce",
         url: "/dashboard/ecommerce",
         icon: ShoppingBag,
       },
       {
         id: "infrastructure",
-        title: "Infrastructure",
+        titleKey: "admin.shell.navigation.infrastructure",
         url: "/dashboard/infrastructure",
         icon: Server,
         badge: "new",
@@ -174,42 +176,42 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 3,
-    label: "Pages",
+    labelKey: "admin.shell.navigation.pages",
     items: [
       {
         id: "email",
-        title: "Email",
+        titleKey: "admin.shell.navigation.email",
         url: "/dashboard/mail",
         icon: Mail,
       },
       {
         id: "chat",
-        title: "Chat",
+        titleKey: "admin.shell.navigation.chat",
         url: "/dashboard/chat",
         icon: MessageSquare,
       },
       {
         id: "calendar",
-        title: "Calendar",
+        titleKey: "admin.shell.navigation.calendar",
         url: "/dashboard/calendar",
         icon: Calendar,
       },
       {
         id: "kanban",
-        title: "Kanban",
+        titleKey: "admin.shell.navigation.kanban",
         url: "/dashboard/kanban",
         icon: Kanban,
       },
       {
         id: "tasks",
-        title: "Tasks",
+        titleKey: "admin.shell.navigation.tasks",
         url: "/dashboard/tasks",
         icon: CheckSquare,
         badge: "new",
       },
       {
         id: "invoice",
-        title: "Invoice",
+        titleKey: "admin.shell.navigation.invoice",
         url: "/dashboard/invoice",
         icon: ReceiptText,
       },

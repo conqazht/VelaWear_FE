@@ -14,9 +14,9 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
   downloadCsv,
-  formatAdminDateTime,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
@@ -25,6 +25,7 @@ import type {
   CreateAdminBrandRequest,
   UpdateAdminBrandRequest,
 } from "@/lib/api/admin-commerce";
+import { formatDateTime } from "@/lib/i18n/format";
 import {
   useAdminBrandsQuery,
   useCreateAdminBrandMutation,
@@ -36,10 +37,10 @@ import { BrandForm, EMPTY_BRAND_FORM, type BrandFormValues } from "./brand-form"
 
 const ALL_FILTER = "ALL";
 
-const BRAND_STATUS_LABELS: Record<AdminCatalogStatus, string> = {
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-};
+const BRAND_STATUS_MESSAGE_KEYS = {
+  ACTIVE: "admin.commerce.common.active",
+  INACTIVE: "admin.commerce.common.inactive",
+} as const;
 
 function getStatusVariant(status: AdminCatalogStatus) {
   return status === "ACTIVE" ? ("default" as const) : ("secondary" as const);
@@ -55,6 +56,7 @@ function toFormValues(brand: AdminBrand): BrandFormValues {
 }
 
 export function BrandsManagement() {
+  const { locale, t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -101,23 +103,23 @@ export function BrandsManagement() {
     const description = formValues.description.trim() || null;
 
     if (!name) {
-      toast.error("Enter a brand name before saving.");
+      toast.error(t("admin.commerce.brands.validation.nameRequired"));
       return;
     }
     if (name.length > 150) {
-      toast.error("Brand names cannot exceed 150 characters.");
+      toast.error(t("admin.commerce.brands.validation.nameLength"));
       return;
     }
     if (!editingBrand && !slug) {
-      toast.error("Enter a brand slug before saving.");
+      toast.error(t("admin.commerce.brands.validation.slugRequired"));
       return;
     }
     if (!editingBrand && slug.length > 180) {
-      toast.error("Brand slugs cannot exceed 180 characters.");
+      toast.error(t("admin.commerce.brands.validation.slugLength"));
       return;
     }
     if (!editingBrand && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-      toast.error("Use a lowercase URL-safe slug with words separated by hyphens.");
+      toast.error(t("admin.commerce.brands.validation.slugFormat"));
       return;
     }
 
@@ -132,7 +134,7 @@ export function BrandsManagement() {
         { id: editingBrand.id, request: commonRequest },
         {
           onSuccess: () => {
-            toast.success(`${name} was updated.`);
+            toast.success(t("admin.commerce.brands.updated", { name }));
             setFormOpen(false);
             setEditingBrand(null);
             setPage(1);
@@ -149,7 +151,7 @@ export function BrandsManagement() {
     };
     createMutation.mutate(request, {
       onSuccess: () => {
-        toast.success(`${name} was created.`);
+        toast.success(t("admin.commerce.brands.created", { name }));
         setFormOpen(false);
         setPage(1);
       },
@@ -163,7 +165,7 @@ export function BrandsManagement() {
     const { id, name } = deleteBrand;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success(`${name} was archived.`);
+        toast.success(t("admin.commerce.brands.archived", { name }));
         setDeleteBrand(null);
         setPage(1);
       },
@@ -174,7 +176,7 @@ export function BrandsManagement() {
   const columns: ManagementColumn<AdminBrand>[] = [
     {
       key: "brand",
-      header: "Brand",
+      header: t("admin.commerce.brands.column.brand"),
       className: "min-w-64",
       cell: (brand) => (
         <div className="flex items-center gap-3">
@@ -190,32 +192,32 @@ export function BrandsManagement() {
     },
     {
       key: "description",
-      header: "Description",
+      header: t("admin.commerce.common.description"),
       className: "min-w-72",
       cell: (brand) => (
         <p className="max-w-md truncate text-muted-foreground">
-          {brand.description || "No description"}
+          {brand.description || t("admin.commerce.common.noDescription")}
         </p>
       ),
     },
     {
       key: "status",
-      header: "Status",
+      header: t("admin.commerce.common.status"),
       cell: (brand) => (
         <Badge variant={getStatusVariant(brand.status)}>
-          {BRAND_STATUS_LABELS[brand.status]}
+          {t(BRAND_STATUS_MESSAGE_KEYS[brand.status])}
         </Badge>
       ),
     },
     {
       key: "updatedAt",
-      header: "Updated",
+      header: t("admin.commerce.common.updated"),
       className: "whitespace-nowrap text-muted-foreground",
-      cell: (brand) => formatAdminDateTime(brand.updatedAt),
+      cell: (brand) => formatDateTime(brand.updatedAt, locale),
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (brand) => (
@@ -223,7 +225,7 @@ export function BrandsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Edit ${brand.name}`}
+            aria-label={t("admin.commerce.common.editNamed", { name: brand.name })}
             onClick={() => openEditForm(brand)}
           >
             <Pencil />
@@ -231,7 +233,7 @@ export function BrandsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Archive ${brand.name}`}
+            aria-label={t("admin.commerce.brands.archiveNamed", { name: brand.name })}
             onClick={() => setDeleteBrand(brand)}
           >
             <Archive />
@@ -244,8 +246,8 @@ export function BrandsManagement() {
   return (
     <>
       <ResourcePage
-        title="Brands"
-        description="Manage product brands, their catalog visibility, and public descriptions."
+        title={t("admin.commerce.brands.title")}
+        description={t("admin.commerce.brands.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -253,7 +255,7 @@ export function BrandsManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search brand names..."
+        searchPlaceholder={t("admin.commerce.brands.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -265,13 +267,13 @@ export function BrandsManagement() {
         }}
         filters={[
           {
-            label: "Status",
+            label: t("admin.commerce.common.status"),
             value: statusFilter,
             options: [
-              { label: "All statuses", value: ALL_FILTER },
-              ...Object.entries(BRAND_STATUS_LABELS).map(([value, label]) => ({
+              { label: t("admin.commerce.common.allStatuses"), value: ALL_FILTER },
+              ...Object.entries(BRAND_STATUS_MESSAGE_KEYS).map(([value, key]) => ({
                 value,
-                label,
+                label: t(key),
               })),
             ],
             onValueChange: (value) => {
@@ -280,7 +282,7 @@ export function BrandsManagement() {
             },
           },
         ]}
-        primaryAction={{ label: "Add brand", onClick: openCreateForm }}
+        primaryAction={{ label: t("admin.commerce.brands.add"), onClick: openCreateForm }}
         onRefresh={() => void brandsQuery.refetch()}
         onExport={() =>
           downloadCsv(
@@ -290,7 +292,7 @@ export function BrandsManagement() {
               name: brand.name,
               slug: brand.slug,
               description: brand.description,
-              status: brand.status,
+              status: t(BRAND_STATUS_MESSAGE_KEYS[brand.status]),
               createdAt: brand.createdAt,
               updatedAt: brand.updatedAt,
             }))
@@ -299,8 +301,8 @@ export function BrandsManagement() {
         isLoading={brandsQuery.isPending}
         isFetching={brandsQuery.isFetching}
         error={brandsQuery.isError ? brandsQuery.error : null}
-        emptyTitle="No brands found"
-        emptyDescription="Create a brand or adjust the current search and status filter."
+        emptyTitle={t("admin.commerce.brands.emptyTitle")}
+        emptyDescription={t("admin.commerce.brands.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -308,11 +310,13 @@ export function BrandsManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingBrand ? "Edit brand" : "Add brand"}
-        description="Set the catalog name, immutable slug, description, and lifecycle status."
+        title={editingBrand ? t("admin.commerce.brands.edit") : t("admin.commerce.brands.add")}
+        description={t("admin.commerce.brands.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
-        submitLabel={editingBrand ? "Save brand" : "Create brand"}
+        submitLabel={
+          editingBrand ? t("admin.commerce.brands.save") : t("admin.commerce.brands.create")
+        }
       >
         <BrandForm
           values={formValues}
@@ -326,9 +330,9 @@ export function BrandsManagement() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteBrand(null);
         }}
-        resourceName={deleteBrand?.name ?? "brand"}
-        actionLabel="Archive"
-        description="This archives the brand from active catalog lists. Existing product references are retained."
+        resourceName={deleteBrand?.name ?? t("admin.commerce.brands.resource")}
+        actionLabel={t("admin.commerce.brands.archive")}
+        description={t("admin.commerce.brands.archiveDescription")}
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />

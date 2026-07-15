@@ -3,8 +3,9 @@
 import { Sparkles, Leaf, ShieldCheck, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { PRODUCTS, mapBackendProduct } from "@/lib/vela-data";
-import { getActiveLocale } from "@/lib/i18n";
+import { useI18n } from "@/components/providers/i18n-provider";
+import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
+import { mapBackendProduct } from "@/lib/vela-data";
 import { useProductsQuery, useCategoriesQuery } from "@/lib/queries/catalog";
 
 // Import new modular subcomponents
@@ -17,46 +18,53 @@ import { Testimonials } from "./testimonials";
 import { Newsletter } from "./newsletter";
 import { ScrollReveal } from "./scroll-reveal";
 
-const HERO_SLIDES = [
-  {
-    id: "slide-1",
-    title: "Vela Wear — Bộ sưu tập Thu 2026",
-    subtitle: "Mùa Thu 2026",
-    image: "/images/home/hero-autumn-2026.avif",
-    ctaText: "Khám phá ngay",
-  },
-  {
-    id: "slide-2",
-    title: "Nét Đẹp Của Sự Tĩnh Lặng",
-    subtitle: "Lookbook 2026",
-    image: "/images/home/hero-lookbook-2026.jpg",
-    ctaText: "Xem Lookbook",
-  },
-];
-
-const STATIC_CATEGORIES = [
+const STATIC_CATEGORY_MEDIA = [
   {
     id: "cat-1",
-    name: "Essentials",
+    nameKey: "storefront.home.categoryEssentials",
     image: "/images/categories/essentials.jpg",
     link: "/collection",
   },
   {
     id: "cat-2",
-    name: "Accessories",
+    nameKey: "storefront.home.categoryAccessories",
     image: "/images/categories/accessories.jpg",
     link: "/collection",
   },
   {
     id: "cat-3",
-    name: "Outerwear",
+    nameKey: "storefront.home.categoryOuterwear",
     image: "/images/categories/outerwear.png",
     link: "/collection",
   },
-];
+] as const;
 
 export function HomePage() {
-  const activeLocale = getActiveLocale();
+  const { locale: activeLocale, t } = useI18n();
+  const heroSlides = [
+    {
+      id: "slide-1",
+      title: t("storefront.home.heroAutumnTitle"),
+      subtitle: t("storefront.home.heroAutumnSubtitle"),
+      image: "/images/home/hero-autumn-2026.avif",
+      ctaText: t("storefront.home.heroAutumnCta"),
+    },
+    {
+      id: "slide-2",
+      title: t("storefront.home.heroLookbookTitle"),
+      subtitle: t("storefront.home.heroLookbookSubtitle"),
+      image: "/images/home/hero-lookbook-2026.jpg",
+      ctaText: t("storefront.home.heroLookbookCta"),
+    },
+  ];
+  const staticCategories = useMemo(
+    () =>
+      STATIC_CATEGORY_MEDIA.map((category) => ({
+        ...category,
+        name: t(category.nameKey),
+      })),
+    [t],
+  );
   
   // Fetch newest products for trending
   const productsQuery = useProductsQuery({ size: 10, sort: "createdAt,desc", locale: activeLocale });
@@ -68,9 +76,10 @@ export function HomePage() {
     }
     // Fallback to static if backend fails or empty
     const trendingProductIds = ["classic-linen-shirt", "pleated-wool-trousers", "the-heritage-tote", "merino-wool-coat"];
+    const fixtureProducts = getLocalizedFixtureProducts(activeLocale);
     return trendingProductIds
-      .map(id => PRODUCTS.find(p => p.id === id))
-      .filter((p): p is typeof PRODUCTS[number] => !!p);
+      .map(id => fixtureProducts.find(p => p.id === id))
+      .filter((p): p is (typeof fixtureProducts)[number] => !!p);
   }, [productsQuery.data, activeLocale]);
 
   const featuredCategories = useMemo(() => {
@@ -78,28 +87,28 @@ export function HomePage() {
       return categoriesQuery.data.result.slice(0, 3).map((cat, index) => ({
         id: `cat-${cat.id}`,
         name: cat.name,
-        image: STATIC_CATEGORIES[index % STATIC_CATEGORIES.length].image, // keep premium static images
+        image: staticCategories[index % staticCategories.length].image, // keep premium static images
         link: `/collection`,
       }));
     }
-    return STATIC_CATEGORIES;
-  }, [categoriesQuery.data]);
+    return staticCategories;
+  }, [categoriesQuery.data, staticCategories]);
 
   return (
     <div className="min-h-screen bg-[#f7f4ef] text-[#1c1a18] flex flex-col selection:bg-[#b5573a] selection:text-white">
       <main className="flex-1">
         {/* 1. Hero Slider Banner */}
-        <HeroSlider slides={HERO_SLIDES} />
+        <HeroSlider slides={heroSlides} />
 
         {/* 2. Featured Categories Section */}
         <section id="categories" className="max-w-[1800px] mx-auto px-6 md:px-16 py-20 md:py-28">
           <div className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <ScrollReveal direction="right" className="max-w-xl">
               <span className="text-[11px] font-semibold uppercase tracking-[2px] text-[#b5573a] block mb-3">
-                Danh mục nổi bật
+                {t("storefront.home.featuredEyebrow")}
               </span>
               <h2 className="font-serif text-3.5xl md:text-5xl font-light tracking-tight">
-                Bộ sưu tập đặc tuyển
+                {t("storefront.home.featuredTitle")}
               </h2>
             </ScrollReveal>
             <ScrollReveal direction="left" delay={0.2}>
@@ -107,7 +116,7 @@ export function HomePage() {
                 href="/collection"
                 className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[1px] text-[#1c1a18] hover:text-[#b5573a] transition-colors"
               >
-                Xem toàn bộ danh mục
+                {t("storefront.home.viewAllCategories")}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
               </Link>
             </ScrollReveal>
@@ -127,14 +136,14 @@ export function HomePage() {
           <div className="max-w-[1800px] mx-auto px-6 md:px-16 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <ScrollReveal direction="right" className="max-w-xl">
               <span className="text-[11px] font-semibold uppercase tracking-[2px] text-[#b5573a] block mb-3">
-                Mùa này có gì hot
+                {t("storefront.home.trendingEyebrow")}
               </span>
               <h2 className="font-serif text-3.5xl md:text-5xl font-light tracking-tight">
-                Xu hướng thịnh hành
+                {t("storefront.home.trendingTitle")}
               </h2>
             </ScrollReveal>
             <ScrollReveal direction="left" delay={0.2} className="text-[#8a857c] text-xs font-medium uppercase tracking-[1px] hidden sm:block">
-              Lướt ngang để xem thêm hoặc sử dụng nút bấm
+              {t("storefront.home.trendingHint")}
             </ScrollReveal>
           </div>
 
@@ -149,13 +158,13 @@ export function HomePage() {
         <section className="max-w-[1800px] mx-auto px-6 md:px-16 py-20 md:py-28">
           <ScrollReveal direction="up" className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-[11px] font-semibold uppercase tracking-[2px] text-[#b5573a] block mb-3">
-              Giá trị di sản
+              {t("storefront.home.heritageEyebrow")}
             </span>
             <h2 className="font-serif text-3.5xl md:text-5xl font-light tracking-tight">
-              Sự tinh tuyển trong từng thớ vải
+              {t("storefront.home.heritageTitle")}
             </h2>
             <p className="text-[#8a857c] text-sm md:text-base mt-4 font-light">
-              Chúng tôi kiến tạo thời trang tối giản dựa trên ba triết lý trường tồn cùng năm tháng.
+              {t("storefront.home.heritageDescription")}
             </p>
           </ScrollReveal>
 
@@ -168,10 +177,10 @@ export function HomePage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-xl md:text-2xl font-medium text-[#1c1a18] mb-3">
-                    Chất liệu thượng hạng
+                    {t("storefront.home.materialsTitle")}
                   </h3>
                   <p className="text-sm leading-relaxed text-[#3d3a36] font-light">
-                    Sử dụng 100% len merino tự nhiên, sợi bông hữu cơ đạt chuẩn quốc tế và lụa dệt thủ công mang lại sự mềm mại, thoáng mát vượt bậc cho làn da.
+                    {t("storefront.home.materialsDescription")}
                   </p>
                 </div>
               </div>
@@ -185,10 +194,10 @@ export function HomePage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-xl md:text-2xl font-medium text-[#1c1a18] mb-3">
-                    Độc bản & Bền vững
+                    {t("storefront.home.sustainableTitle")}
                   </h3>
                   <p className="text-sm leading-relaxed text-[#3d3a36] font-light">
-                    Mỗi sản phẩm đều mang triết lý Eco-conscious, hạn chế hoá chất tẩy nhuộm độc hại, tối ưu hoá vòng đời sử dụng để bảo vệ hệ sinh thái Trái Đất.
+                    {t("storefront.home.sustainableDescription")}
                   </p>
                 </div>
               </div>
@@ -202,10 +211,10 @@ export function HomePage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-xl md:text-2xl font-medium text-[#1c1a18] mb-3">
-                    Nghệ thuật may đo
+                    {t("storefront.home.tailoringTitle")}
                   </h3>
                   <p className="text-sm leading-relaxed text-[#3d3a36] font-light">
-                    Được gia công bởi các nghệ nhân lành nghề bậc nhất với kỹ nghệ khâu giấu chỉ tinh tế, phom dáng rủ tự nhiên tôn vinh nét quyến rũ tĩnh lặng.
+                    {t("storefront.home.tailoringDescription")}
                   </p>
                 </div>
               </div>

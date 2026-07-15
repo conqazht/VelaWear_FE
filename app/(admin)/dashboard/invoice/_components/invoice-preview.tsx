@@ -5,6 +5,7 @@ import { Skeleton } from "boneyard-js/react";
 
 import { Download, Printer } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 
@@ -18,6 +19,7 @@ function handlePrint() {
 }
 
 export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
+  const { t } = useI18n();
   const previewBodyRef = React.useRef<HTMLDivElement>(null);
   const paperLayout = useVisibleCenterPosition(previewBodyRef, {
     height: INVOICE_PAPER_HEIGHT,
@@ -30,15 +32,15 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
       <PrintInvoice invoice={invoice} />
       <div className="flex flex-col rounded-xl border bg-card">
         <div className="flex items-center justify-between px-4 py-4">
-          <h2 className="font-medium text-lg">Preview</h2>
+          <h2 className="font-medium text-lg">{t("admin.workflows.invoice.preview")}</h2>
           <ButtonGroup>
             <Button type="button" variant="outline" onClick={handlePrint}>
               <Printer data-icon="inline-start" />
-              Print
+              {t("admin.workflows.invoice.print")}
             </Button>
             <Button type="button" variant="outline">
               <Download data-icon="inline-start" />
-              Download PDF
+              {t("admin.workflows.invoice.downloadPdf")}
             </Button>
           </ButtonGroup>
         </div>
@@ -88,11 +90,16 @@ function InvoicePreviewLoadingFallback() {
 }
 
 function InvoicePreviewLoadingFixture() {
+  const { t } = useI18n();
+
   return (
     <article className="mx-auto min-h-full max-w-[min(100%,48rem)] space-y-8 rounded-sm bg-white p-10">
-      <h2 className="text-3xl font-semibold">Invoice</h2>
+      <h2 className="text-3xl font-semibold">{t("admin.workflows.invoice.invoice")}</h2>
       <div className="h-px bg-border" />
-      <section className="grid grid-cols-2 gap-8"><p>Bill to</p><p>Invoice details</p></section>
+      <section className="grid grid-cols-2 gap-8">
+        <p>{t("admin.workflows.invoice.billTo")}</p>
+        <p>{t("admin.workflows.invoice.invoiceDetails")}</p>
+      </section>
       <div className="h-64 rounded border" />
     </article>
   );

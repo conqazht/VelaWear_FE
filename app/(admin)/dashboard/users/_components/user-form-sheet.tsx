@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import {
   ResourceFormSheet,
 } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -64,6 +65,7 @@ export function UserFormSheet({
   onClose,
   onSubmit,
 }: UserFormSheetProps) {
+  const { t } = useI18n();
   const [values, setValues] = useState<UserFormValues>({
     fullName: user?.fullName ?? "",
     email: user?.email ?? "",
@@ -90,7 +92,7 @@ export function UserFormSheet({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (values.roles.length === 0) {
-      setRolesValidationError("Select at least one role.");
+      setRolesValidationError(t("admin.commerce.users.form.rolesRequired"));
       return;
     }
     void onSubmit(values);
@@ -102,26 +104,36 @@ export function UserFormSheet({
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      title={mode === "create" ? "Add user" : `Edit ${user?.fullName ?? "user"}`}
+      title={
+        mode === "create"
+          ? t("admin.commerce.users.form.addTitle")
+          : t("admin.commerce.users.form.editTitle", {
+              name: user?.fullName ?? t("admin.commerce.users.resource"),
+            })
+      }
       description={
         mode === "create"
-          ? "Create an account and assign its initial access roles."
-          : "Update profile details and replace the user's assigned roles."
+          ? t("admin.commerce.users.form.createDescription")
+          : t("admin.commerce.users.form.editDescription")
       }
       onSubmit={handleSubmit}
       isPending={isPending}
-      submitLabel={mode === "create" ? "Create user" : "Save changes"}
+      submitLabel={
+        mode === "create"
+          ? t("admin.commerce.users.form.create")
+          : t("admin.commerce.common.saveChanges")
+      }
     >
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Unable to save user</AlertTitle>
+          <AlertTitle>{t("admin.commerce.users.form.unableSave")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="user-full-name">Full name</FieldLabel>
+          <FieldLabel htmlFor="user-full-name">{t("admin.commerce.users.form.fullName")}</FieldLabel>
           <Input
             id="user-full-name"
             value={values.fullName}
@@ -138,7 +150,7 @@ export function UserFormSheet({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="user-email">Email address</FieldLabel>
+          <FieldLabel htmlFor="user-email">{t("admin.commerce.users.form.email")}</FieldLabel>
           <Input
             id="user-email"
             type="email"
@@ -156,14 +168,16 @@ export function UserFormSheet({
           />
           {mode === "edit" ? (
             <FieldDescription>
-              Email changes are not supported by the admin user endpoint.
+              {t("admin.commerce.users.form.emailImmutable")}
             </FieldDescription>
           ) : null}
         </Field>
 
         {mode === "create" ? (
           <Field>
-            <FieldLabel htmlFor="user-password">Temporary password</FieldLabel>
+            <FieldLabel htmlFor="user-password">
+              {t("admin.commerce.users.form.temporaryPassword")}
+            </FieldLabel>
             <Input
               id="user-password"
               type="password"
@@ -179,13 +193,13 @@ export function UserFormSheet({
               autoComplete="new-password"
               required
             />
-            <FieldDescription>Use between 8 and 100 characters.</FieldDescription>
+            <FieldDescription>{t("admin.commerce.users.form.passwordHelp")}</FieldDescription>
           </Field>
         ) : null}
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor="user-birth-date">Birth date</FieldLabel>
+            <FieldLabel htmlFor="user-birth-date">{t("admin.commerce.users.form.birthDate")}</FieldLabel>
             <Input
               id="user-birth-date"
               type="date"
@@ -201,7 +215,7 @@ export function UserFormSheet({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="user-gender">Gender</FieldLabel>
+            <FieldLabel htmlFor="user-gender">{t("admin.commerce.users.form.gender")}</FieldLabel>
             <Select
               value={values.gender}
               onValueChange={(value) =>
@@ -215,16 +229,16 @@ export function UserFormSheet({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="start" alignItemWithTrigger={false}>
-                <SelectItem value="MALE">Male</SelectItem>
-                <SelectItem value="FEMALE">Female</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
+                <SelectItem value="MALE">{t("admin.commerce.users.gender.male")}</SelectItem>
+                <SelectItem value="FEMALE">{t("admin.commerce.users.gender.female")}</SelectItem>
+                <SelectItem value="OTHER">{t("admin.commerce.users.gender.other")}</SelectItem>
               </SelectContent>
             </Select>
           </Field>
         </div>
 
         <Field>
-          <FieldLabel htmlFor="user-avatar">Avatar URL</FieldLabel>
+          <FieldLabel htmlFor="user-avatar">{t("admin.commerce.users.form.avatarUrl")}</FieldLabel>
           <Input
             id="user-avatar"
             type="text"
@@ -239,25 +253,25 @@ export function UserFormSheet({
             placeholder="/uploads/avatars/user.png"
           />
           <FieldDescription>
-            Optional image URL or backend-relative upload path, up to 500 characters.
+            {t("admin.commerce.users.form.avatarHelp")}
           </FieldDescription>
         </Field>
       </FieldGroup>
 
       <FieldSet>
-        <FieldLegend variant="label">Roles</FieldLegend>
+        <FieldLegend variant="label">{t("admin.commerce.users.form.roles")}</FieldLegend>
         <FieldDescription>
-          Saving replaces the complete role list. The backend requires at least one role.
+          {t("admin.commerce.users.form.rolesHelp")}
         </FieldDescription>
 
         {rolesError ? (
           <Alert variant="destructive">
-            <AlertTitle>Unable to load roles</AlertTitle>
+            <AlertTitle>{t("admin.commerce.users.form.unableLoadRoles")}</AlertTitle>
             <AlertDescription>{rolesError}</AlertDescription>
           </Alert>
         ) : isRolesLoading ? (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Loader2 className="size-4 animate-spin" /> Loading roles...
+            <Loader2 className="size-4 animate-spin" /> {t("admin.commerce.users.form.loadingRoles")}
           </div>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
@@ -270,12 +284,12 @@ export function UserFormSheet({
                       toggleRole(role.name, Boolean(checked))
                     }
                     disabled={isPending}
-                    aria-label={`Assign ${role.name} role`}
+                    aria-label={t("admin.commerce.users.form.assignRole", { name: role.name })}
                   />
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium">{role.name}</span>
                     <span className="text-muted-foreground line-clamp-1 text-xs">
-                      {role.description || "No description"}
+                      {role.description || t("admin.commerce.common.noDescription")}
                     </span>
                   </span>
                 </Field>

@@ -4,9 +4,11 @@ import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export function SiteFooter() {
   const isLandingPage = usePathname() === "/";
+  const { t } = useI18n();
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -60,10 +62,10 @@ export function SiteFooter() {
               Vela.
             </h2>
             <p className="font-serif italic text-[#b5573a] text-lg md:text-xl tracking-wide mb-6">
-              The Art of Slow Living
+              {t("storefront.footer.tagline")}
             </p>
             <p className="text-[#a89e93] text-sm leading-relaxed max-w-sm font-light">
-              Một studio thiết kế và may tailor thời trang tối giản độc lập. Chúng tôi chọn lọc chất liệu tự nhiên, chế tác tỉ mỉ và đồng hành cùng phong cách sống tĩnh lặng bền vững.
+              {t("storefront.footer.description")}
             </p>
           </motion.div>
 
@@ -72,7 +74,7 @@ export function SiteFooter() {
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <h4 className="text-[11px] font-semibold uppercase tracking-[2px] text-white">
-                Collection
+                {t("storefront.footer.collection")}
               </h4>
             </div>
             <ul className="flex flex-col gap-4">
@@ -81,7 +83,7 @@ export function SiteFooter() {
                   href="/collection"
                   className="group inline-flex items-center gap-1.5 text-sm text-[#a89e93] hover:text-[#ffb59f] transition-colors font-light"
                 >
-                  Autumn Collection
+                  {t("storefront.footer.autumnCollection")}
                   <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               </li>
@@ -90,7 +92,7 @@ export function SiteFooter() {
                   href="/collection"
                   className="group inline-flex items-center gap-1.5 text-sm text-[#a89e93] hover:text-[#ffb59f] transition-colors font-light"
                 >
-                  Minimalist Tailoring
+                  {t("storefront.footer.minimalistTailoring")}
                   <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               </li>
@@ -99,7 +101,7 @@ export function SiteFooter() {
                   href="/collection"
                   className="group inline-flex items-center gap-1.5 text-sm text-[#a89e93] hover:text-[#ffb59f] transition-colors font-light"
                 >
-                  Slow Weaving Study
+                  {t("storefront.footer.slowWeaving")}
                   <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               </li>
@@ -111,23 +113,23 @@ export function SiteFooter() {
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <h4 className="text-[11px] font-semibold uppercase tracking-[2px] text-white">
-                Studio
+                {t("storefront.footer.studio")}
               </h4>
             </div>
             <ul className="flex flex-col gap-4">
               <li>
                 <Link href="/help" className="text-sm text-[#a89e93] hover:text-[#ffb59f] transition-colors font-light">
-                  About Our Vision
+                  {t("storefront.footer.vision")}
                 </Link>
               </li>
               <li>
                 <Link href="/help" className="text-sm text-[#a89e93] hover:text-[#ffb59f] transition-colors font-light">
-                  Sustainable Ethics
+                  {t("storefront.footer.ethics")}
                 </Link>
               </li>
               <li>
                 <Link href="/help" className="text-sm text-[#a89e93] hover:text-[#ffb59f] transition-colors font-light">
-                  Craft Journal
+                  {t("storefront.footer.journal")}
                 </Link>
               </li>
             </ul>
@@ -138,7 +140,7 @@ export function SiteFooter() {
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
               <h4 className="text-[11px] font-semibold uppercase tracking-[2px] text-white">
-                Contact
+                {t("storefront.footer.contact")}
               </h4>
             </div>
             <ul className="flex flex-col gap-4">
@@ -151,7 +153,7 @@ export function SiteFooter() {
                 +84 (0) 902 345 678
               </li>
               <li className="text-sm text-[#a89e93] font-light">
-                Hanoi Studio, Vietnam
+                {t("storefront.footer.location")}
               </li>
             </ul>
           </motion.div>
@@ -162,14 +164,14 @@ export function SiteFooter() {
           variants={itemVariants}
           className="mt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-[#a89e93]/50 font-light"
         >
-          <p>© 2026 VELA WEAR. ALL RIGHTS RESERVED.</p>
+          <p>{t("storefront.footer.rights")}</p>
           
           <div className="flex items-center gap-8">
-            <a href="#" className="hover:text-white transition-colors">Instagram</a>
+            <a href="#" className="hover:text-white transition-colors">{t("storefront.footer.instagram")}</a>
             <span className="w-1 h-1 rounded-full bg-white/10" />
-            <a href="#" className="hover:text-white transition-colors">Pinterest</a>
+            <a href="#" className="hover:text-white transition-colors">{t("storefront.footer.pinterest")}</a>
             <span className="w-1 h-1 rounded-full bg-white/10" />
-            <a href="#" className="hover:text-white transition-colors">Facebook</a>
+            <a href="#" className="hover:text-white transition-colors">{t("storefront.footer.facebook")}</a>
           </div>
         </motion.div>
       </motion.div>

@@ -2,7 +2,10 @@ import { Suspense, type ReactNode } from "react";
 import { cacheLife } from "next/cache";
 import { connection } from "next/server";
 
-import { ProfileNavigation } from "@/components/shop/profile-navigation";
+import {
+  AccountContentLoadingFallback,
+  ProfileNavigation,
+} from "@/components/shop/profile-navigation";
 import { SiteFooter } from "@/components/shop/site-footer";
 import { SiteHeader } from "@/components/shop/site-header";
 
@@ -44,13 +47,7 @@ export async function CachedProfileNavigation() {
 export function PersonalizedRouteBoundary({ children }: { children: ReactNode }) {
   return (
     <Suspense
-      fallback={
-        <div
-          aria-busy="true"
-          aria-label="Đang chuẩn bị nội dung tài khoản"
-          className="min-h-[calc(100dvh-172px)] bg-canvas"
-        />
-      }
+      fallback={<AccountContentLoadingFallback />}
     >
       <RequestTimeAccountContent>{children}</RequestTimeAccountContent>
     </Suspense>

@@ -1,55 +1,58 @@
 "use client";
 
-import { addDays, format, set } from "date-fns";
+import { addDays, set } from "date-fns";
 import { ChevronRight, Zap } from "lucide-react";
 import { siClaude, siLinear, siResend } from "simple-icons";
 
 import { SimpleIcon } from "@/components/simple-icon";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { formatCurrency, formatDate } from "@/lib/i18n/format";
 
 const transactions = [
   {
     id: 1,
-    title: "Claude Pro Subscription",
-    date: format(set(addDays(new Date("2024-04-15T12:00:00Z"), 2), { hours: 14, minutes: 45 }), "hh.mm a '•' MMMM dd, yyyy"),
+    titleKey: "admin.finance.bills.claude",
+    date: set(addDays(new Date("2024-04-15T12:00:00Z"), 2), { hours: 14, minutes: 45 }),
     icon: siClaude,
   },
   {
     id: 2,
-    title: "Resend Pro Team",
-    date: format(set(addDays(new Date("2024-04-15T12:00:00Z"), 4), { hours: 7, minutes: 0 }), "hh.mm a '•' MMMM dd, yyyy"),
+    titleKey: "admin.finance.bills.resend",
+    date: set(addDays(new Date("2024-04-15T12:00:00Z"), 4), { hours: 7, minutes: 0 }),
     icon: siResend,
   },
   {
     id: 3,
-    title: "Linear Plus Plan",
-    date: format(set(addDays(new Date("2024-04-15T12:00:00Z"), 10), { hours: 7, minutes: 0 }), "hh.mm a '•' MMMM dd, yyyy"),
+    titleKey: "admin.finance.bills.linear",
+    date: set(addDays(new Date("2024-04-15T12:00:00Z"), 10), { hours: 7, minutes: 0 }),
     icon: siLinear,
   },
-];
+] as const;
 
 export function UpcomingTransactions() {
+  const { locale, t } = useI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Upcoming Bills & Payments</CardTitle>
+        <CardTitle className="font-normal">{t("admin.finance.bills.title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <h2 className="flex items-baseline text-3xl leading-none tracking-tight">
-              <span className="font-normal">$1,245</span>
-              <span className="text-muted-foreground text-xl">.00</span>
+              <span className="font-normal">{formatCurrency(1245, locale, "USD")}</span>
             </h2>
             <p className="text-muted-foreground text-sm leading-none">
-              You have <span className="font-medium text-foreground">3</span> bills due this month
+              {t("admin.finance.bills.due", { count: transactions.length })}
             </p>
           </div>
           <div className="flex w-max items-center gap-2 rounded-md border border-border bg-muted/70 px-2 py-1.5 text-sm">
-            <Zap className="size-4 fill-primary text-primary" />
+            <Zap className="size-4 fill-primary text-primary" aria-hidden="true" />
             <span className="text-muted-foreground">
-              Autopay will process <span className="font-medium text-foreground">$145.00</span> today
+              {t("admin.finance.bills.autopay", { amount: formatCurrency(145, locale, "USD") })}
             </span>
           </div>
         </div>
@@ -63,8 +66,8 @@ export function UpcomingTransactions() {
                 </div>
               </ItemMedia>
               <ItemContent>
-                <ItemTitle>{transaction.title}</ItemTitle>
-                <ItemDescription>{transaction.date}</ItemDescription>
+                <ItemTitle>{t(transaction.titleKey)}</ItemTitle>
+                <ItemDescription>{formatDate(transaction.date, locale, { dateStyle: "long", timeStyle: "short" })}</ItemDescription>
               </ItemContent>
               <ItemActions>
                 <ChevronRight className="size-5 text-muted-foreground" />

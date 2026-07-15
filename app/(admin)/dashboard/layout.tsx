@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
 
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -58,6 +59,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               <SearchDialog />
             </div>
             <div className="flex items-center gap-2">
+              <LanguageSwitcher showIcon={false} />
               <LayoutControls />
               <ThemeSwitcher />
             </div>

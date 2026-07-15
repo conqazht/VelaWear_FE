@@ -2,28 +2,14 @@
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getIntlLocale } from "@/lib/i18n";
 
 const pipelineChartValues = [34, 38, 31, 47, 42, 51, 44, 40, 58, 46, 43, 49] as const;
-
-const pipelineChartConfig = {
-  qualified: {
-    label: "Qualified",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
-
-const pipelineRangeItems = [
-  { value: "last-30-days", label: "Last 30 days" },
-  { value: "last-quarter", label: "Last quarter" },
-  { value: "last-12-months", label: "Last 12 months" },
-] as const;
-
-const axisMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "short" });
-const tooltipMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "2-digit" });
 
 function getRollingMonthData(values: readonly number[]) {
   return values.map((qualified, index) => {
@@ -38,6 +24,23 @@ function getRollingMonthData(values: readonly number[]) {
 }
 
 export function PipelineActivity() {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
+  const axisMonthFormatter = new Intl.DateTimeFormat(intlLocale, { month: "short" });
+  const tooltipMonthFormatter = new Intl.DateTimeFormat(intlLocale, { month: "short", year: "2-digit" });
+  const pipelineChartConfig = {
+    qualified: {
+      label: t("admin.dashboardsA.crm.qualified"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+  const pipelineRangeItems = [
+    { value: "last-30-days", label: t("admin.dashboardsA.common.last30Days") },
+    { value: "last-quarter", label: t("admin.dashboardsA.common.lastQuarter") },
+    { value: "last-12-months", label: t("admin.dashboardsA.common.last12Months") },
+  ] as const;
   const pipelineChartData = getRollingMonthData(pipelineChartValues);
   const totalQualified = pipelineChartData.reduce((sum, item) => sum + item.qualified, 0);
   const discoveryCallsBooked = 184;
@@ -47,11 +50,11 @@ export function PipelineActivity() {
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
       <Card className="xl:col-span-12">
         <CardHeader>
-          <CardTitle>Qualified Lead Flow</CardTitle>
+          <CardTitle>{t("admin.dashboardsA.crm.qualifiedLeadFlow")}</CardTitle>
           <CardAction>
             <Select defaultValue="last-12-months" items={pipelineRangeItems}>
               <SelectTrigger size="sm" className="min-w-40">
-                <SelectValue placeholder="Select range" />
+                <SelectValue placeholder={t("admin.dashboardsA.common.selectRange")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -120,22 +123,32 @@ export function PipelineActivity() {
             <div className="flex flex-col gap-5 rounded-lg p-4 lg:col-span-4">
               <div className="flex flex-col gap-1">
                 <div className="font-medium text-4xl tabular-nums leading-none">
-                  {totalQualified} <span className="font-normal text-lg text-muted-foreground">leads</span>
+                  {numberFormatter.format(totalQualified)}{" "}
+                  <span className="font-normal text-lg text-muted-foreground">
+                    {t("admin.dashboardsA.crm.leads")}
+                  </span>
                 </div>
-                <p className="text-muted-foreground text-sm">Total qualified leads captured over the last 12 months.</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("admin.dashboardsA.crm.qualifiedLeadsDescription")}
+                </p>
               </div>
 
               <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3">
                 <div className="text-[11px] text-muted-foreground uppercase tracking-widest">
-                  Discovery Calls Booked
+                  {t("admin.dashboardsA.crm.discoveryCalls")}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <div className="font-medium text-2xl tabular-nums leading-none">
-                    {discoveryCallsBooked} <span className="font-normal text-muted-foreground text-sm">meetings</span>
+                    {numberFormatter.format(discoveryCallsBooked)}{" "}
+                    <span className="font-normal text-muted-foreground text-sm">
+                      {t("admin.dashboardsA.crm.meetings")}
+                    </span>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    {discoveryProgress}% of qualified leads booked a first call.
+                    {t("admin.dashboardsA.crm.bookedLeadPercent", {
+                      percent: percentFormatter.format(discoveryProgress / 100),
+                    })}
                   </p>
                 </div>
 
@@ -145,8 +158,16 @@ export function PipelineActivity() {
                     className="h-2.5 bg-chart-2/12 *:data-[slot='progress-indicator']:bg-chart-2"
                   />
                   <div className="flex items-center justify-between text-xs">
-                    <div className="font-medium tabular-nums">{discoveryCallsBooked} booked</div>
-                    <div className="text-muted-foreground tabular-nums">{totalQualified} qualified</div>
+                    <div className="font-medium tabular-nums">
+                      {t("admin.dashboardsA.crm.booked", {
+                        count: numberFormatter.format(discoveryCallsBooked),
+                      })}
+                    </div>
+                    <div className="text-muted-foreground tabular-nums">
+                      {t("admin.dashboardsA.crm.qualifiedCount", {
+                        count: numberFormatter.format(totalQualified),
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>

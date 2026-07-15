@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { getApiErrorStatus } from "@/lib/api/errors";
 import { createSignInHref } from "@/lib/auth/post-auth-redirect";
+import type { TranslationKey } from "@/lib/i18n/messages";
 
 import {
   StorefrontStatus,
@@ -27,16 +29,45 @@ type StatusContent = {
   secondaryAction?: StorefrontStatusAction;
 };
 
+const RESOURCE_KEYS: Record<string, TranslationKey> = {
+  "kết quả tìm kiếm": "errors.resource.searchResults",
+  "mã giảm giá": "errors.resource.coupons",
+  "bộ sưu tập": "errors.resource.collection",
+  "đánh giá của bạn": "errors.resource.reviews",
+  "địa chỉ giao hàng": "errors.resource.addresses",
+  "lịch sử đơn hàng": "errors.resource.orders",
+  "danh sách yêu thích": "errors.resource.favorites",
+  "đơn hàng": "errors.resource.order",
+  "lịch sử trạng thái đơn hàng": "errors.resource.orderStatus",
+  "sản phẩm": "errors.resource.product",
+};
+
+const RETURN_LABEL_KEYS: Record<string, TranslationKey> = {
+  "Tiếp tục mua sắm": "errors.common.continueShopping",
+  "Về lịch sử đơn hàng": "errors.common.orderHistory",
+};
+
 export function StorefrontApiStatus({
   error,
   onRetry,
-  resourceLabel = "nội dung này",
+  resourceLabel,
   returnHref = "/",
-  returnLabel = "Tiếp tục mua sắm",
+  returnLabel,
   variant = "panel",
   className,
 }: StorefrontApiStatusProps) {
+  const { t } = useI18n();
   const status = getApiErrorStatus(error) ?? 500;
+  const localizedResource = resourceLabel
+    ? RESOURCE_KEYS[resourceLabel]
+      ? t(RESOURCE_KEYS[resourceLabel])
+      : resourceLabel
+    : t("errors.resource.default");
+  const localizedReturnLabel = returnLabel
+    ? RETURN_LABEL_KEYS[returnLabel]
+      ? t(RETURN_LABEL_KEYS[returnLabel])
+      : returnLabel
+    : t("errors.common.continueShopping");
 
   useEffect(() => {
     if (status !== 401) return;
@@ -50,38 +81,38 @@ export function StorefrontApiStatus({
   if (status === 401) return null;
 
   const returnAction: StorefrontStatusAction = {
-    label: returnLabel,
+    label: localizedReturnLabel,
     href: returnHref,
   };
   const retryAction: StorefrontStatusAction | undefined = onRetry
-    ? { label: "Thử lại", onClick: onRetry }
+    ? { label: t("errors.common.retry"), onClick: onRetry }
     : undefined;
 
   let content: StatusContent;
 
   if (status === 403) {
     content = {
-      title: "Nội dung này chưa dành cho bạn",
-      description: `Tài khoản hiện tại không có quyền xem ${resourceLabel}. Bạn có thể quay lại cửa hàng hoặc đăng nhập bằng tài khoản phù hợp.`,
+      title: t("errors.api.forbiddenTitle"),
+      description: t("errors.api.forbiddenDescription", { resource: localizedResource }),
       primaryAction: returnAction,
     };
   } else if (status === 404) {
     content = {
-      title: "Không tìm thấy nội dung",
-      description: `Chúng tôi không tìm thấy ${resourceLabel}. Nội dung có thể đã được chuyển, đổi tên hoặc không còn hiển thị.`,
+      title: t("errors.api.notFoundTitle"),
+      description: t("errors.api.notFoundDescription", { resource: localizedResource }),
       primaryAction: returnAction,
     };
   } else if (status >= 500) {
     content = {
-      title: "Có một nhịp ngắt quãng",
-      description: `Kết nối đến ${resourceLabel} đang bị gián đoạn. Vela Wear đã ghi nhận và bạn có thể thử lại sau ít phút.`,
+      title: t("errors.api.serverTitle"),
+      description: t("errors.api.serverDescription", { resource: localizedResource }),
       primaryAction: retryAction ?? returnAction,
       secondaryAction: retryAction ? returnAction : undefined,
     };
   } else {
     content = {
-      title: "Yêu cầu chưa thể hoàn tất",
-      description: `Chúng tôi chưa thể tải ${resourceLabel} ở thời điểm này. Vui lòng kiểm tra lại thông tin và thử thêm một lần nữa.`,
+      title: t("errors.api.genericTitle"),
+      description: t("errors.api.genericDescription", { resource: localizedResource }),
       primaryAction: retryAction ?? returnAction,
       secondaryAction: retryAction ? returnAction : undefined,
     };

@@ -1,32 +1,35 @@
+import { getActiveLocale, getIntlLocale, type Locale } from "@/lib/i18n";
+import { adminShellMessages } from "@/lib/i18n/messages/admin-shell";
+
 export { getApiErrorStatus } from "@/lib/api/errors";
 
-export function formatAdminDate(value?: string | null) {
+export function formatAdminDate(value?: string | null, locale: Locale = getActiveLocale()) {
   if (!value) return "—";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     dateStyle: "medium",
   }).format(date);
 }
 
-export function formatAdminDateTime(value?: string | null) {
+export function formatAdminDateTime(value?: string | null, locale: Locale = getActiveLocale()) {
   if (!value) return "—";
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
-export function formatCurrency(value?: number | null) {
+export function formatCurrency(value?: number | null, locale: Locale = getActiveLocale()) {
   if (value === null || value === undefined) return "—";
 
-  return new Intl.NumberFormat("vi-VN", {
+  return new Intl.NumberFormat(getIntlLocale(locale), {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
@@ -71,7 +74,10 @@ export function downloadCsv(filename: string, rows: Array<Record<string, string 
   URL.revokeObjectURL(url);
 }
 
-export function getApiErrorMessage(error: unknown) {
+export function getApiErrorMessage(
+  error: unknown,
+  fallbackMessage = adminShellMessages[getActiveLocale()]["admin.shell.resource.unexpectedError"],
+) {
   if (typeof error === "object" && error !== null) {
     const maybeAxiosError = error as {
       response?: { data?: { message?: string; data?: Record<string, string> } };
@@ -86,5 +92,5 @@ export function getApiErrorMessage(error: unknown) {
     if (maybeAxiosError.message) return maybeAxiosError.message;
   }
 
-  return "An unexpected error occurred. Please try again.";
+  return fallbackMessage;
 }

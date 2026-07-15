@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,12 +27,16 @@ type BrandFormProps = {
   isEditing: boolean;
 };
 
-const BRAND_STATUSES: Array<{ value: AdminCatalogStatus; label: string }> = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-];
+const BRAND_STATUS_MESSAGE_KEYS = {
+  ACTIVE: "admin.commerce.common.active",
+  INACTIVE: "admin.commerce.common.inactive",
+} as const;
+
+const BRAND_STATUSES: AdminCatalogStatus[] = ["ACTIVE", "INACTIVE"];
 
 export function BrandForm({ values, onChange, isEditing }: BrandFormProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof BrandFormValues>(key: Key, value: BrandFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -39,7 +44,7 @@ export function BrandForm({ values, onChange, isEditing }: BrandFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="brand-name">Brand name</FieldLabel>
+        <FieldLabel htmlFor="brand-name">{t("admin.commerce.brands.form.name")}</FieldLabel>
         <Input
           id="brand-name"
           value={values.name}
@@ -49,11 +54,11 @@ export function BrandForm({ values, onChange, isEditing }: BrandFormProps) {
           autoComplete="off"
           required
         />
-        <FieldDescription>Use the public-facing brand name, up to 150 characters.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.brands.form.nameHelp")}</FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="brand-slug">Slug</FieldLabel>
+        <FieldLabel htmlFor="brand-slug">{t("admin.commerce.categories.form.slug")}</FieldLabel>
         <Input
           id="brand-slug"
           value={values.slug}
@@ -66,25 +71,25 @@ export function BrandForm({ values, onChange, isEditing }: BrandFormProps) {
         />
         <FieldDescription>
           {isEditing
-            ? "Brand slugs are immutable after creation."
-            : "Use lowercase letters, numbers, and hyphens for a unique URL-safe slug."}
+            ? t("admin.commerce.brands.form.slugImmutable")
+            : t("admin.commerce.brands.form.slugHelp")}
         </FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="brand-description">Description</FieldLabel>
+        <FieldLabel htmlFor="brand-description">{t("admin.commerce.common.description")}</FieldLabel>
         <Textarea
           id="brand-description"
           value={values.description}
           onChange={(event) => update("description", event.target.value)}
-          placeholder="Optional notes or a public description for this brand."
+          placeholder={t("admin.commerce.brands.form.descriptionPlaceholder")}
           className="min-h-28 resize-y"
         />
-        <FieldDescription>Optional; leave blank when the brand does not need a description.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.brands.form.descriptionHelp")}</FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="brand-status">Status</FieldLabel>
+        <FieldLabel htmlFor="brand-status">{t("admin.commerce.common.status")}</FieldLabel>
         <Select
           value={values.status}
           onValueChange={(value) => update("status", value as AdminCatalogStatus)}
@@ -94,13 +99,13 @@ export function BrandForm({ values, onChange, isEditing }: BrandFormProps) {
           </SelectTrigger>
           <SelectContent align="start" alignItemWithTrigger={false}>
             {BRAND_STATUSES.map((status) => (
-              <SelectItem key={status.value} value={status.value}>
-                {status.label}
+              <SelectItem key={status} value={status}>
+                {t(BRAND_STATUS_MESSAGE_KEYS[status])}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <FieldDescription>Inactive brands remain available for historical records.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.brands.form.statusHelp")}</FieldDescription>
       </Field>
     </FieldGroup>
   );

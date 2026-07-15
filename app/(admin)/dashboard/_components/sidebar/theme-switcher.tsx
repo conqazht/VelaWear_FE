@@ -3,12 +3,19 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 const THEME_CYCLE = ["light", "dark", "system"] as const;
+const THEME_LABEL_KEYS = {
+  light: "admin.shell.preferences.light",
+  dark: "admin.shell.preferences.dark",
+  system: "admin.shell.preferences.system",
+} as const;
 
 export function ThemeSwitcher() {
+  const { t } = useI18n();
   const { themeMode, setPreference } = usePreferencesStore(
     useShallow((state) => ({
       themeMode: state.values.theme_mode,
@@ -24,7 +31,11 @@ export function ThemeSwitcher() {
   };
 
   return (
-    <Button size="icon" onClick={cycleTheme} aria-label={`Current theme: ${themeMode}. Click to cycle themes`}>
+    <Button
+      size="icon"
+      onClick={cycleTheme}
+      aria-label={t("admin.shell.theme.current", { theme: t(THEME_LABEL_KEYS[themeMode]) })}
+    >
       {/* SYSTEM */}
       <Monitor className="hidden [html[data-theme-mode=system]_&]:block" />
 
