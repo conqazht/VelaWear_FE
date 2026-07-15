@@ -15,48 +15,8 @@
       "route": "/dashboard/users",
       "wait": 1000
     },
-    "collection-catalog": {
-      "route": "/collection",
-      "wait": 1000
-    },
-    "product-detail": {
-      "route": "/products/linen-blazer",
-      "wait": 1000
-    },
-    "cart-page": {
-      "route": "/cart",
-      "wait": 1000
-    },
-    "favorites-page": {
-      "route": "/favorites",
-      "wait": 1000
-    },
-    "search-results": {
-      "route": "/search?q=shirt",
-      "wait": 1000
-    },
-    "reviews-page": {
-      "route": "/reviews",
-      "wait": 1000
-    },
-    "coupons-page": {
-      "route": "/coupons",
-      "wait": 1000
-    },
-    "order-details": {
-      "route": "/profile/orders/VW-CONGANH-1001",
-      "wait": 1000
-    },
     "profile-addresses": {
       "route": "/profile",
-      "wait": 0
-    },
-    "profile-orders": {
-      "route": "/profile?tab=orders",
-      "wait": 0
-    },
-    "profile-favourites": {
-      "route": "/profile?tab=favourites",
       "wait": 0
     },
     "checkout-province-select": {

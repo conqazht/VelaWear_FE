@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Skeleton } from "boneyard-js/react";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
 import { RelatedProducts } from "@/components/shop/related-products";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
 
@@ -56,14 +56,22 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     };
   }, [slug, activeLocale, retryKey]);
 
+  if (isLoading) {
+    return (
+      <div
+        className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]"
+        aria-busy="true"
+      >
+        <span role="status" className="sr-only">
+          {t("common.loading")}
+        </span>
+        <ProductDetailLoadingFallback />
+      </div>
+    );
+  }
+
   return (
-    <Skeleton
-      name="product-detail"
-      loading={isLoading}
-      className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]"
-      fallback={<ProductDetailLoadingFallback />}
-      fixture={<ProductDetailFixture />}
-    >
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       {product ? (
         <ProductDetailContent product={product} />
       ) : loadError ? (
@@ -87,50 +95,117 @@ export function ProductDetailPage({ slug }: { slug: string }) {
           variant="panel"
         />
       )}
-    </Skeleton>
+    </div>
   );
 }
-
 function ProductDetailLoadingFallback() {
   return (
-    <div className="mx-auto grid w-full gap-10 xl:max-w-[1180px] xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:max-w-[1220px] 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
-      <div className="flex gap-4 select-none justify-start xl:w-[631px]">
-        <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="aspect-[4/5] animate-pulse bg-[#efe7dc]" />
+    <div aria-hidden="true">
+      <div className="mb-10 flex items-center gap-2">
+        <Skeleton className="h-2.5 w-12 rounded-none bg-[#efe7dc]" />
+        <Skeleton className="h-2.5 w-2 rounded-none bg-[#efe7dc]" />
+        <Skeleton className="h-2.5 w-20 rounded-none bg-[#efe7dc]" />
+        <Skeleton className="h-2.5 w-2 rounded-none bg-[#efe7dc]" />
+        <Skeleton className="h-2.5 w-28 rounded-none bg-[#efe7dc]" />
+      </div>
+
+      <div className="mb-24 grid grid-cols-1 items-start gap-10 xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
+        <div className="flex justify-start gap-4 select-none xl:w-[631px]">
+          <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton
+                key={index}
+                className="aspect-[4/5] rounded-none bg-[#efe7dc]"
+              />
+            ))}
+          </div>
+
+          <Skeleton className="aspect-[4/5] flex-1 rounded-none border border-[#1c1a18]/5 bg-[#efe7dc] xl:h-[668.75px] xl:w-[535px] xl:flex-none" />
+        </div>
+
+        <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
+          <Skeleton className="mb-2 h-3 w-40 rounded-none bg-[#efe7dc]" />
+          <Skeleton className="mb-4 h-10 w-full max-w-[320px] rounded-none bg-[#efe7dc]" />
+          <div className="mb-6 flex items-center gap-3">
+            <Skeleton className="h-8 w-32 rounded-none bg-[#efe7dc]" />
+            <Skeleton className="h-4 w-20 rounded-none bg-[#efe7dc]" />
+          </div>
+          <Skeleton className="mb-8 h-px w-full rounded-none bg-[#1c1a18]/10" />
+
+          <div className="mb-8">
+            <Skeleton className="mb-4 h-3 w-28 rounded-none bg-[#efe7dc]" />
+            <div className="flex gap-4">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  className="size-8 rounded-full bg-[#efe7dc]"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-10">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <Skeleton className="h-3 w-10 rounded-none bg-[#efe7dc]" />
+              <Skeleton className="h-3 w-20 rounded-none bg-[#efe7dc]" />
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  className="h-[50px] rounded-sm bg-[#efe7dc]"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-14 w-full rounded-full bg-[#1c1a18]/20" />
+            <Skeleton className="h-14 w-full rounded-full bg-[#efe7dc]" />
+          </div>
+        </div>
+      </div>
+
+      <section className="mt-16 border-t border-[#1c1a18]/10 pt-16">
+        <div className="mb-8 flex items-center justify-between">
+          <Skeleton className="h-8 w-52 rounded-none bg-[#efe7dc]" />
+          <div className="flex gap-2">
+            <Skeleton className="size-10 rounded-full bg-[#efe7dc]" />
+            <Skeleton className="size-10 rounded-full bg-[#efe7dc]" />
+          </div>
+        </div>
+
+        <div className="flex gap-6 overflow-hidden pb-4 px-1">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="min-w-[240px] flex-none space-y-3 sm:min-w-[280px] md:min-w-[320px]"
+            >
+              <Skeleton className="aspect-[3/4] w-full rounded-none bg-[#efe7dc]" />
+              <Skeleton className="h-5 w-3/4 rounded-none bg-[#efe7dc]" />
+              <Skeleton className="h-3 w-2/5 rounded-none bg-[#efe7dc]" />
+              <Skeleton className="h-4 w-1/3 rounded-none bg-[#efe7dc]" />
+            </div>
           ))}
         </div>
+      </section>
 
-        <div className="relative aspect-[4/5] flex-1 animate-pulse overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc] xl:h-[668.75px] xl:w-[535px] xl:flex-none" />
-      </div>
-
-      <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
-        <div className="mb-2 h-3 w-40 animate-pulse bg-[#efe7dc]" />
-        <div className="mb-4 h-12 w-full max-w-[320px] animate-pulse bg-[#efe7dc]" />
-        <div className="mb-6 h-8 w-48 animate-pulse bg-[#efe7dc]" />
-        <div className="mb-8 h-px w-full bg-[#1c1a18]/10" />
-        <div className="mb-8">
-          <div className="mb-4 h-3 w-28 animate-pulse bg-[#efe7dc]" />
-          <div className="flex gap-4">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-8 w-8 rounded-full animate-pulse bg-[#efe7dc]" />
-            ))}
+      <section className="mt-16 grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2">
+        <div className="space-y-4 md:pr-6">
+          <Skeleton className="h-3 w-28 rounded-none bg-[#efe7dc]" />
+          <Skeleton className="h-10 w-4/5 rounded-none bg-[#efe7dc]" />
+          <div className="space-y-2.5">
+            <Skeleton className="h-3 w-full rounded-none bg-[#efe7dc]" />
+            <Skeleton className="h-3 w-11/12 rounded-none bg-[#efe7dc]" />
+            <Skeleton className="h-3 w-4/5 rounded-none bg-[#efe7dc]" />
+          </div>
+          <div className="space-y-2.5 pt-1">
+            <Skeleton className="h-3 w-full rounded-none bg-[#efe7dc]" />
+            <Skeleton className="h-3 w-3/4 rounded-none bg-[#efe7dc]" />
           </div>
         </div>
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div className="h-3 w-10 animate-pulse bg-[#efe7dc]" />
-            <div className="h-3 w-20 animate-pulse bg-[#efe7dc]" />
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-[50px] animate-pulse bg-[#efe7dc]" />
-            ))}
-          </div>
-        </div>
-        <div className="h-[68px] w-full animate-pulse rounded-full bg-[#efe7dc]" />
-        <div className="mt-5 h-[60px] w-full animate-pulse rounded-full bg-[#efe7dc]" />
-      </div>
+        <Skeleton className="aspect-[16/10] w-full rounded-sm bg-[#efebe4]" />
+      </section>
     </div>
   );
 }
@@ -191,78 +266,5 @@ function ProductDetailContent({ product }: { product: Product }) {
         </div>
       </section>
     </>
-  );
-}
-
-function ProductDetailFixture() {
-  const { t } = useI18n();
-
-  return (
-    <div className="space-y-10">
-      <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
-        <span>{t("storefront.common.home")}</span>
-        <span>/</span>
-        <span className="font-medium text-[#1c1a18]">{t("storefront.common.collections")}</span>
-        <span>/</span>
-        <span>{t("storefront.product.fixtureName")}</span>
-      </div>
-
-      <div className="mx-auto grid w-full gap-10 xl:max-w-[1180px] xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:max-w-[1220px] 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
-        <div className="flex gap-4 select-none justify-start xl:w-[631px]">
-          <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="aspect-[4/5] bg-[#efe7dc]" />
-            ))}
-          </div>
-
-          <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc] xl:h-[668.75px] xl:w-[535px] xl:flex-none" />
-        </div>
-
-        <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
-          <div className="space-y-3">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#b85a3c]">{t("storefront.product.fixtureCollection")}</p>
-            <h1 className="font-serif text-4xl font-light tracking-wide text-[#1c1a18]">{t("storefront.product.fixtureName")}</h1>
-          </div>
-          <div className="mb-6 mt-6 h-8 w-48 bg-[#efe7dc]" />
-          <div className="mb-8 h-px w-full bg-[#1c1a18]/10" />
-          <div className="mb-8">
-            <div className="mb-4 h-3 w-28 bg-[#efe7dc]" />
-            <div className="flex gap-4">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="h-8 w-8 rounded-full bg-[#efe7dc]" />
-              ))}
-            </div>
-          </div>
-          <div className="mb-10">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div className="h-3 w-10 bg-[#efe7dc]" />
-              <div className="h-3 w-20 bg-[#efe7dc]" />
-            </div>
-            <div className="grid grid-cols-4 gap-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="h-[50px] bg-[#efe7dc]" />
-              ))}
-            </div>
-          </div>
-          <div className="h-[68px] rounded-full bg-[#1c1a18]" />
-          <div className="mt-5 h-[60px] rounded-full bg-[#efe7dc]" />
-        </div>
-      </div>
-
-      <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
-        <div className="space-y-4">
-          <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
-            {t("storefront.product.craftEyebrow")}
-          </span>
-          <h2 className="font-serif text-2xl font-light leading-tight tracking-[0.05em] text-[#1c1a18] md:text-4xl">
-            {t("storefront.product.craftTitle")}
-          </h2>
-          <p className="text-sm leading-7 text-[#1c1a18]/65">
-            {t("storefront.product.fixtureDescription")}
-          </p>
-        </div>
-        <div className="aspect-[16/10] bg-[#efebe4]" />
-      </section>
-    </div>
   );
 }

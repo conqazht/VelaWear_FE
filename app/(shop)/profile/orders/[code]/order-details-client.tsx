@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Skeleton } from "boneyard-js/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircle2,
@@ -18,6 +17,7 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getOrderByCode,
   getOrderStatusHistories,
@@ -138,15 +138,11 @@ export default function OrderDetailsClient({ code }: { code: string }) {
 
   if (isPageLoading) {
     return (
-      <Skeleton
-        name="order-details"
-        loading
-        className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16"
-        fallback={<OrderDetailsLoadingFallback />}
-        fixture={<OrderDetailsLoadingFixture />}
-      >
-        <OrderDetailsLoadingFixture />
-      </Skeleton>
+      <div className="min-h-screen bg-canvas text-ink" aria-busy="true">
+        <main className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
+          <OrderDetailsLoadingFallback />
+        </main>
+      </div>
     );
   }
 
@@ -408,40 +404,111 @@ export default function OrderDetailsClient({ code }: { code: string }) {
 
 export function OrderDetailsLoadingFallback() {
   return (
-    <div className="space-y-10" aria-hidden="true">
-      <div className="h-28 rounded-md bg-white" />
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
-        <div className="space-y-8 lg:col-span-8">
-          <div className="h-72 rounded-md bg-white" />
-          <div className="h-64 rounded-md bg-white" />
-        </div>
-        <div className="space-y-6 lg:col-span-4">
-          <div className="h-64 rounded-md bg-white" />
-          <div className="h-40 rounded-md bg-white" />
-        </div>
-      </div>
-    </div>
-  );
-}
+    <div aria-hidden="true">
+      <Skeleton className="mb-8 h-3 w-28" />
 
-function OrderDetailsLoadingFixture() {
-  const { t } = useI18n();
-
-  return (
-    <div className="space-y-10">
-      <header className="border-b border-[#1c1a18]/10 pb-8">
-        <h1 className="font-serif text-5xl">{t("account.order.title")}</h1>
-        <p className="mt-4">{t("account.order.code", { code: "VW-CONGANH-0000" })}</p>
+      <header className="mb-10 flex flex-col justify-between gap-6 border-b border-[#1c1a18]/10 pb-8 md:flex-row md:items-end">
+        <div className="space-y-4">
+          <Skeleton className="h-9 w-56 md:h-12 md:w-72" />
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="size-1 rounded-full" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        </div>
+        <Skeleton className="h-8 w-24 rounded-sm" />
       </header>
+
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
-        <div className="space-y-8 lg:col-span-8">
-          <section className="min-h-72 rounded-md bg-white p-8"><h2>{t("account.order.items", { count: 1 })}</h2></section>
-          <section className="min-h-64 rounded-md bg-white p-8"><h2>{t("account.order.statusHistory")}</h2></section>
+        <div className="flex flex-col gap-8 lg:col-span-8">
+          <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
+            <Skeleton className="mb-6 h-3 w-24" />
+            <div className="divide-y divide-[#1c1a18]/8">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <div key={index} className="flex gap-5 py-5 first:pt-0 last:pb-0">
+                  <Skeleton className="aspect-[3/4] w-20 flex-shrink-0 rounded-sm md:w-24" />
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
+                    <div className="flex justify-between gap-4">
+                      <Skeleton className="h-5 w-2/5" />
+                      <Skeleton className="h-4 w-20" />
+                    </div>
+                    <Skeleton className="mt-3 h-3 w-28" />
+                    <Skeleton className="mt-2 h-3 w-4/5" />
+                    <Skeleton className="mt-3 h-5 w-20 rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
+            <Skeleton className="mb-6 h-3 w-32" />
+            <div className="space-y-5">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex gap-4">
+                  <Skeleton className="size-5 flex-shrink-0 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/5" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <div className="flex flex-wrap gap-3">
+            <Skeleton className="h-10 w-32 rounded-sm" />
+            <Skeleton className="h-10 w-28 rounded-sm" />
+          </div>
         </div>
-        <aside className="space-y-6 lg:col-span-4">
-          <section className="min-h-64 rounded-md bg-white p-6"><h2>{t("account.order.summary")}</h2></section>
-          <section className="min-h-40 rounded-md bg-white p-6"><h2>{t("account.order.shipping")}</h2></section>
-        </aside>
+
+        <div className="flex flex-col gap-6 lg:col-span-4">
+          <Card className="rounded-md border-none bg-white p-6 shadow-sm">
+            <Skeleton className="mb-6 h-3 w-24" />
+            <div className="mb-6 space-y-4 border-b border-[#1c1a18]/10 pb-6">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex items-center justify-between gap-4">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-end justify-between gap-4">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-7 w-28" />
+            </div>
+          </Card>
+
+          <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
+            <div className="mb-5 flex items-center gap-2">
+              <Skeleton className="size-4 rounded-sm" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="mt-3 h-3 w-28" />
+            <Skeleton className="mt-2 h-3 w-full" />
+            <Skeleton className="mt-2 h-3 w-4/5" />
+          </Card>
+
+          <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
+            <div className="mb-5 flex items-center gap-2">
+              <Skeleton className="size-4 rounded-sm" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="mt-2 h-3 w-24" />
+            <div className="mt-4 space-y-3 border-t border-[#1c1a18]/8 pt-4">
+              <div className="flex items-center justify-between gap-4">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-28" />
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

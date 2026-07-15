@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Skeleton } from "boneyard-js/react";
 import { X, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -531,13 +531,9 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
 
   return (
     <>
-      <Skeleton
-        name="collection-catalog"
-        loading={isInitialLoading}
-        fallback={<CollectionCatalogLoadingFallback />}
-        fixture={<CollectionCatalogFixture products={products.length > 0 ? products : localizedInitialProducts.slice(0, size)} />}
-      >
-        {productsQuery.isError ? (
+      {isInitialLoading ? (
+        <CollectionCatalogLoading />
+      ) : productsQuery.isError ? (
           <StorefrontApiStatus
             error={productsQuery.error}
             onRetry={() => void productsQuery.refetch()}
@@ -623,8 +619,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
             )}
           </ProductLayoutMain>
         </div>
-        )}
-      </Skeleton>
+      )}
 
       {/* Mobile Filters Drawer */}
       <AnimatePresence>
@@ -685,51 +680,31 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
   );
 }
 
-function CollectionCatalogLoadingFallback() {
+function CollectionCatalogLoading() {
   return (
-    <ProductCardSkeletonGrid imageAspect="square" />
-  );
-}
-
-function CollectionCatalogFixture({ products }: { products: Product[] }) {
-  const fixtureProducts = products.slice(0, 6);
-  const sortOptions = useCommonSortOptions();
-
-  return (
-    <div className="w-full">
-      <ProductToolbar
-        totalProducts={fixtureProducts.length || 12}
-        showFilters={false}
-        setShowFilters={() => undefined}
-        setMobileFiltersOpen={() => undefined}
-        sortBy="featured"
-        setSortBy={() => undefined}
-        sortOptions={sortOptions}
-      />
-
-      <ProductLayoutMain
-        showFilters={false}
-        sidebarContent={<div className="min-h-[520px] border-r border-[#1c1a18]/10" />}
-        id="collection-layout-fixture"
-      >
-        {fixtureProducts.length > 0 ? (
-          <ProductGrid>
-            {fixtureProducts.map((product) => (
-              <ProductCard key={product.id} product={product} imageAspect="collection" />
-            ))}
-          </ProductGrid>
-        ) : (
-          <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="space-y-3">
-                <div className="aspect-square bg-[#efe7dc]" />
-                <div className="h-4 w-3/4 bg-[#efe7dc]" />
-                <div className="h-4 w-1/3 bg-[#efe7dc]" />
-              </div>
-            ))}
+    <div className="w-full" aria-busy="true">
+      <div aria-hidden="true">
+        <div className="sticky top-[var(--header-visible-height)] z-30 mb-6 flex items-center justify-between py-3">
+          <Skeleton className="hidden h-3 w-24 bg-[#efe7dc] md:block" />
+          <Skeleton className="h-8 w-24 rounded-none bg-[#efe7dc] md:hidden" />
+          <div className="flex items-center gap-4 md:gap-6">
+            <Skeleton className="hidden h-3 w-24 bg-[#efe7dc] md:block" />
+            <Skeleton className="h-3 w-32 bg-[#efe7dc]" />
           </div>
-        )}
-      </ProductLayoutMain>
+        </div>
+
+        <ProductLayoutMain
+          showFilters={false}
+          sidebarContent={null}
+          id="collection-loading-layout"
+        >
+          <ProductCardSkeletonGrid
+            count={6}
+            imageAspect="square"
+            gridClassName="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
+          />
+        </ProductLayoutMain>
+      </div>
     </div>
   );
 }

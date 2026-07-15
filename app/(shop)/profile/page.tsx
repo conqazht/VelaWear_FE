@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Skeleton } from "boneyard-js/react";
+import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
 import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/product-card";
@@ -16,6 +15,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { money } from "@/lib/vela-data";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -249,7 +249,6 @@ export default function MemberProfile() {
 
   if (!isAuthenticated || !user) {
     return (
-      <ProfileSignedOutBoundary tab={activeSubTab}>
       <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
@@ -267,7 +266,6 @@ export default function MemberProfile() {
           </Link>
         </Card>
       </div>
-      </ProfileSignedOutBoundary>
     );
   }
 
@@ -604,14 +602,14 @@ export default function MemberProfile() {
                   <div>
                     <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.addresses.title")}</h2>
                     {addressesQuery.isLoading ? (
-                      <Skeleton
+                      <BoneyardSkeleton
                         name="profile-addresses"
                         loading
                         fallback={<ProfileAddressesLoadingFallback />}
                         fixture={<ProfileAddressesLoadingFixture />}
                       >
                         <ProfileAddressesLoadingFixture />
-                      </Skeleton>
+                      </BoneyardSkeleton>
                     ) : addressesQuery.isError ? (
                       <StorefrontApiStatus
                         error={addressesQuery.error}
@@ -872,13 +870,9 @@ export default function MemberProfile() {
               </div>
             )}
 
-            <Skeleton
-              name="profile-orders"
-              loading={ordersQuery.isLoading}
-              fallback={<ProfileOrdersLoadingFallback />}
-              fixture={<ProfileOrdersLoadingFixture />}
-            >
-            {ordersQuery.isError ? (
+            {ordersQuery.isLoading ? (
+              <ProfileOrdersLoading />
+            ) : ordersQuery.isError ? (
               <StorefrontApiStatus
                 error={ordersQuery.error}
                 onRetry={() => void ordersQuery.refetch()}
@@ -943,7 +937,6 @@ export default function MemberProfile() {
                 })}
               </div>
             )}
-            </Skeleton>
           </section>
         )}
 
@@ -958,13 +951,9 @@ export default function MemberProfile() {
                 {t(favorites.length === 1 ? "account.favourites.count.one" : "account.favourites.count.many", { count: favorites.length })}
               </span>
             </div>
-            <Skeleton
-              name="profile-favourites"
-              loading={favoritesLoading}
-              fallback={<ProfileFavouritesLoadingFallback />}
-              fixture={<ProfileFavouritesLoadingFixture />}
-            >
-            {favoritesError ? (
+            {favoritesLoading ? (
+              <ProfileFavouritesLoading />
+            ) : favoritesError ? (
               <StorefrontApiStatus
                 error={favoritesError}
                 onRetry={retryFavorites}
@@ -1018,7 +1007,6 @@ export default function MemberProfile() {
                 ))}
               </div>
             )}
-            </Skeleton>
           </section>
         )}
 
@@ -1201,46 +1189,76 @@ export default function MemberProfile() {
 function ProfileAddressesLoadingFallback() {
   return (
     <div className="grid gap-4 md:grid-cols-2" aria-hidden="true">
-      <div className="h-36 rounded-md bg-white" />
-      <div className="h-36 rounded-md bg-white" />
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="min-h-36 rounded-md border border-hairline/45 bg-white p-5">
+          <div className="flex items-center justify-between gap-4">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-5 w-16 rounded-sm" />
+          </div>
+          <Skeleton className="mt-4 h-3 w-24" />
+          <Skeleton className="mt-3 h-3 w-full max-w-72" />
+          <Skeleton className="mt-2 h-3 w-2/3" />
+        </div>
+      ))}
     </div>
   );
 }
 
 function ProfileTabLoading({ tab }: { tab: ProfileTabId }) {
-  if (tab === "orders") {
-    return (
-      <Skeleton name="profile-orders" loading fallback={<ProfileOrdersLoadingFallback />} fixture={<ProfileOrdersLoadingFixture />}>
-        <ProfileOrdersLoadingFixture />
-      </Skeleton>
-    );
-  }
-
-  if (tab === "favourites") {
-    return (
-      <Skeleton name="profile-favourites" loading fallback={<ProfileFavouritesLoadingFallback />} fixture={<ProfileFavouritesLoadingFixture />}>
-        <ProfileFavouritesLoadingFixture />
-      </Skeleton>
-    );
-  }
-
   return (
-    <Skeleton name="profile-addresses" loading fallback={<ProfileAddressesLoadingFallback />} fixture={<ProfileAddressesLoadingFixture />}>
-      <ProfileAddressesLoadingFixture />
-    </Skeleton>
+    <div className="flex min-h-screen flex-col bg-canvas text-ink" aria-busy="true">
+      <main className="flex w-full flex-grow flex-col gap-10 px-6 py-10 md:px-16 md:py-16">
+        <section className="flex flex-col gap-6 text-left">
+          <div className="flex items-end justify-between border-b border-hairline pb-4">
+            <Skeleton className="h-8 w-44 md:h-9 md:w-56" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          {tab === "orders" ? (
+            <ProfileOrdersLoading />
+          ) : tab === "favourites" ? (
+            <ProfileFavouritesLoading />
+          ) : (
+            <ProfileOverviewLoading />
+          )}
+        </section>
+      </main>
+    </div>
   );
 }
 
-function ProfileSignedOutBoundary({ tab, children }: { tab: ProfileTabId; children: ReactNode }) {
-  if (tab === "orders") {
-    return <Skeleton name="profile-orders" loading={false} fallback={<ProfileOrdersLoadingFallback />} fixture={<ProfileOrdersLoadingFixture />}>{children}</Skeleton>;
-  }
-
-  if (tab === "favourites") {
-    return <Skeleton name="profile-favourites" loading={false} fallback={<ProfileFavouritesLoadingFallback />} fixture={<ProfileFavouritesLoadingFixture />}>{children}</Skeleton>;
-  }
-
-  return <Skeleton name="profile-addresses" loading={false} fallback={<ProfileAddressesLoadingFallback />} fixture={<ProfileAddressesLoadingFixture />}>{children}</Skeleton>;
+function ProfileOverviewLoading() {
+  return (
+    <div className="mt-2 flex flex-col gap-12 text-left md:flex-row md:gap-40 lg:gap-56" aria-hidden="true">
+      <aside className="w-full flex-shrink-0 space-y-2 md:w-52">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-3 px-4 py-3">
+            <Skeleton className="size-4 rounded-sm" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        ))}
+      </aside>
+      <div className="w-full max-w-2xl space-y-8">
+        <div className="flex items-center gap-5">
+          <Skeleton className="size-20 rounded-full" />
+          <div className="space-y-3">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="space-y-2">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-11 w-full rounded-sm" />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-end border-t border-hairline pt-8">
+          <Skeleton className="h-10 w-28 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ProfileAddressesLoadingFixture() {
@@ -1258,48 +1276,49 @@ function ProfileAddressesLoadingFixture() {
   );
 }
 
-function ProfileOrdersLoadingFallback() {
+function ProfileOrdersLoading() {
   return (
-    <div className="space-y-4" aria-hidden="true">
-      {Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-32 rounded-md bg-white" />)}
-    </div>
-  );
-}
-
-function ProfileOrdersLoadingFixture() {
-  const { locale, t } = useI18n();
-
-  return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-8" aria-hidden="true">
       {Array.from({ length: 3 }).map((_, index) => (
-        <article key={index} className="min-h-32 rounded-md border border-[#1c1a18]/10 bg-white p-6">
-          <div className="flex justify-between"><h3 className="font-medium">VW-CONGANH-000{index + 1}</h3><span>{t("account.orders.status.confirmed")}</span></div>
-          <p className="mt-6 text-sm">{t("account.fixture.oneItem", { amount: money(1499000, locale) })}</p>
-        </article>
+        <div
+          key={index}
+          className="flex flex-col justify-between gap-6 rounded-sm border border-hairline/60 bg-surface-card/30 p-6 md:flex-row"
+        >
+          <div className="flex min-w-0 gap-4">
+            <Skeleton className="size-20 flex-shrink-0 rounded-sm" />
+            <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
+              <Skeleton className="h-4 w-44 max-w-full" />
+              <Skeleton className="h-3 w-56 max-w-full" />
+              <Skeleton className="h-3 w-72 max-w-full" />
+              <Skeleton className="h-3 w-32 max-w-full" />
+            </div>
+          </div>
+          <div className="flex flex-row items-center justify-between gap-3 border-t border-hairline/40 pt-4 md:flex-col md:items-end md:justify-center md:border-t-0 md:pt-0">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-5 w-20 rounded-sm" />
+          </div>
+        </div>
       ))}
     </div>
   );
 }
 
-function ProfileFavouritesLoadingFallback() {
+function ProfileFavouritesLoading() {
   return (
-    <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4" aria-hidden="true">
-      {Array.from({ length: 4 }).map((_, index) => <div key={index} className="aspect-[3/4] rounded-sm bg-white" />)}
-    </div>
-  );
-}
-
-function ProfileFavouritesLoadingFixture() {
-  const { locale, t } = useI18n();
-
-  return (
-    <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" aria-hidden="true">
       {Array.from({ length: 4 }).map((_, index) => (
-        <article key={index} className="space-y-3">
-          <div className="aspect-[3/4] rounded-sm bg-white" />
-          <h3 className="font-medium">{t("account.fixture.product")}</h3>
-          <p className="text-sm">{money(1499000, locale)}</p>
-        </article>
+        <div key={index} className="h-full overflow-hidden rounded-md border border-transparent bg-white">
+          <div className="relative aspect-square">
+            <Skeleton className="absolute inset-0 size-full rounded-none" />
+            <Skeleton className="absolute right-4 top-4 size-8 rounded-full bg-white/80" />
+          </div>
+          <div className="flex flex-col items-start px-4 pb-6 pt-5">
+            <Skeleton className="mb-2 h-3 w-20" />
+            <Skeleton className="h-5 w-4/5" />
+            <Skeleton className="mt-4 h-4 w-24" />
+            <Skeleton className="mt-5 h-10 w-full rounded-sm" />
+          </div>
+        </div>
       ))}
     </div>
   );

@@ -33,6 +33,12 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-15
 
+### Thay skeleton Boneyard động bằng skeleton theo layout thật
+- **Date/Time**: 2026-07-15T23:24:00+07:00
+- **Implementation**: Thay Boneyard ở Product Detail, Search, Collection, Cart, Favorites, Reviews, Coupons, Profile Orders/Favourites và Order Details bằng skeleton normal-flow theo đúng grid thật. Mỗi card/row vẫn có bone riêng cho ảnh, nút, nhãn, tên, giá và CTA; breakpoint của product grid được đồng bộ 1/2/3 cột. Giữ Boneyard cho dashboard/admin và Profile Addresses vì các layout này có geometry ổn định. Thu gọn registry từ 13 xuống 3 fixture và xóa 10 file bones không còn dùng.
+- **Verification**: `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54 pass; production build pass 68 route. Browser QA ở 1440x900 và 390x844 xác nhận skeleton Product Detail/Search cùng các màn Cart, Favorites, Reviews và Profile Orders bám đúng layout, không bị co chiều cao hoặc overflow ngang.
+- **Known Follow-ups**: Các wrapper Boneyard fallback-only ở checkout province/ward, invoice preview và mail layout chưa có generated bones; hiện không gây lỗi geometry và có thể được giản lược riêng khi chỉnh các màn đó.
+
 ### Đồng bộ trang Sale với grid và card của Collection
 - **Date/Time**: 2026-07-15T22:36:16+07:00
 - **Implementation**: Redesign có mục tiêu cho `/sale` và `/flash-sale`: dùng cùng container `max-w-[1800px]`, breadcrumb/heading, `ProductGrid` 1/2/3 cột, ảnh vuông, khoảng cách và card shell của Collection. Tách `ProductCardShell` dùng chung cho catalog và `SaleProductCard` chuyên giữ giá khuyến mãi, quota, giới hạn mỗi khách, sold-out/upcoming cùng CTA chọn biến thể. Campaign chuyển từ card bo lớn có shadow sang section phẳng có border; banner, type/phase/code, coupon advisory, server-clock countdown, query cadence và boundary invalidation được giữ nguyên. Loading dùng square grid skeleton cùng breakpoint; error dùng `StorefrontApiStatus`; empty state bỏ nested card.
