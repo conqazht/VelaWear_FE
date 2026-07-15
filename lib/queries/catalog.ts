@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/components/providers/i18n-provider";
 import {
   getBrands,
@@ -24,7 +24,8 @@ export function useProductsQuery(filters: ProductFilters = {}) {
   return useQuery({
     queryKey: queryKeys.products.list(filters, locale),
     queryFn: () => getProducts(filters),
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) =>
+      previousQuery?.queryKey[2] === locale ? previousData : undefined,
     staleTime: 30_000,
     refetchOnWindowFocus: true,
   });

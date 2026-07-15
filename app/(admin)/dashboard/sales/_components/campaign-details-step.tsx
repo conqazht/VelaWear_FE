@@ -1,5 +1,6 @@
 "use client";
 
+import { ContentLocaleTabs } from "@/app/(admin)/dashboard/_components/management/content-locale-tabs";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { SaleCampaignType } from "@/lib/api/admin-sales";
+import type { Locale } from "@/lib/i18n";
 
 import type { SaleCampaignFormValues } from "../_data/sale-campaign-form";
 
@@ -21,6 +23,8 @@ type CampaignDetailsStepProps = {
   codeDisabled: boolean;
   displayDisabled: boolean;
   typeAndScheduleDisabled: boolean;
+  contentLocale: Locale;
+  onContentLocaleChange: (locale: Locale) => void;
 };
 
 export function CampaignDetailsStep({
@@ -29,6 +33,8 @@ export function CampaignDetailsStep({
   codeDisabled,
   displayDisabled,
   typeAndScheduleDisabled,
+  contentLocale,
+  onContentLocaleChange,
 }: CampaignDetailsStepProps) {
   const { t } = useI18n();
 
@@ -101,35 +107,38 @@ export function CampaignDetailsStep({
         </Field>
       </div>
 
-      <Field>
-        <FieldLabel htmlFor="sale-name">
-          {t("admin.sales.editor.details.name.label")}
-        </FieldLabel>
-        <Input
-          id="sale-name"
-          value={values.name}
-          onChange={(event) => update("name", event.target.value)}
-          placeholder={t("admin.sales.editor.details.name.placeholder")}
-          maxLength={150}
-          disabled={displayDisabled}
-          required
-        />
-      </Field>
-
-      <Field>
-        <FieldLabel htmlFor="sale-description">
-          {t("admin.sales.editor.details.description.label")}
-        </FieldLabel>
-        <Textarea
-          id="sale-description"
-          value={values.description}
-          onChange={(event) => update("description", event.target.value)}
-          placeholder={t("admin.sales.editor.details.description.placeholder")}
-          maxLength={2_000}
-          disabled={displayDisabled}
-          rows={4}
-        />
-      </Field>
+      <ContentLocaleTabs
+        value={contentLocale}
+        onValueChange={onContentLocaleChange}
+        complete={{ vi: Boolean(values.name.trim()), en: Boolean(values.englishName.trim()) }}
+      >
+        {{
+          vi: (
+            <>
+              <Field>
+                <FieldLabel htmlFor="sale-name-vi">{t("admin.sales.editor.details.name.label")}</FieldLabel>
+                <Input id="sale-name-vi" value={values.name} onChange={(event) => update("name", event.target.value)} placeholder={t("admin.sales.editor.details.name.placeholder")} maxLength={150} disabled={displayDisabled} required />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="sale-description-vi">{t("admin.sales.editor.details.description.label")}</FieldLabel>
+                <Textarea id="sale-description-vi" value={values.description} onChange={(event) => update("description", event.target.value)} placeholder={t("admin.sales.editor.details.description.placeholder")} maxLength={2_000} disabled={displayDisabled} rows={4} />
+              </Field>
+            </>
+          ),
+          en: (
+            <>
+              <Field>
+                <FieldLabel htmlFor="sale-name-en">{t("admin.sales.editor.details.name.label")}</FieldLabel>
+                <Input id="sale-name-en" value={values.englishName} onChange={(event) => update("englishName", event.target.value)} placeholder={t("admin.sales.editor.details.name.placeholder")} maxLength={150} disabled={displayDisabled} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="sale-description-en">{t("admin.sales.editor.details.description.label")}</FieldLabel>
+                <Textarea id="sale-description-en" value={values.englishDescription} onChange={(event) => update("englishDescription", event.target.value)} placeholder={t("admin.sales.editor.details.description.placeholder")} maxLength={2_000} disabled={displayDisabled} rows={4} />
+              </Field>
+            </>
+          ),
+        }}
+      </ContentLocaleTabs>
 
       <Field>
         <FieldLabel htmlFor="sale-banner">

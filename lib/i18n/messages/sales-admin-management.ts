@@ -104,6 +104,8 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.removeAria": "Remove {sku}",
 
     "admin.sales.management.validation.nameRequired": "Enter a campaign name.",
+    "admin.sales.management.validation.englishPartial":
+      "Enter an English campaign name, or clear the English description to use Vietnamese fallback.",
     "admin.sales.management.validation.bannerUrl":
       "Banner URL must be a valid http or https URL.",
     "admin.sales.management.validation.code":
@@ -227,6 +229,8 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.removeAria": "Bỏ chọn {sku}",
 
     "admin.sales.management.validation.nameRequired": "Nhập tên chiến dịch.",
+    "admin.sales.management.validation.englishPartial":
+      "Nhập tên chiến dịch English, hoặc xóa mô tả English để dùng nội dung tiếng Việt dự phòng.",
     "admin.sales.management.validation.bannerUrl":
       "URL banner phải là địa chỉ http hoặc https hợp lệ.",
     "admin.sales.management.validation.code":

@@ -69,6 +69,15 @@ describe("SaleLanding", () => {
       "href",
       "/sale",
     );
+    expect(usePublicSalesQueryMock).toHaveBeenCalledWith({
+      type: "FLASH",
+      locale: "en",
+    });
+    expect(document.title).toBe("Flash Sale | VELA WEAR");
+    expect(document.querySelector('meta[name="description"]')).toHaveAttribute(
+      "content",
+      "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
+    );
   });
 
   it("hiển thị hết hàng khi quota còn nhưng availableQuantity bằng 0", () => {

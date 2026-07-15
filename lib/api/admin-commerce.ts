@@ -1,4 +1,7 @@
-import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api/client";
+import apiClient from "@/lib/api-client";
+import { apiDelete, apiGet, apiPost, apiPut, unwrapApiResponse } from "@/lib/api/client";
+import type { ApiResponse } from "@/lib/api/types";
+import type { Locale } from "@/lib/i18n";
 
 export type AdminPagination = {
   page: number;
@@ -42,6 +45,27 @@ export type AdminProduct = {
   categoryName: string | null;
   categorySlug: string | null;
   price: number | null;
+  translationLocales?: Locale[];
+};
+
+export type ProductTranslation = {
+  localeCode: Locale;
+  name: string;
+  slug: string;
+  shortDescription: string | null;
+  description: string | null;
+  material: string | null;
+  careInstruction: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+};
+
+export type ProductTranslationBatchRequest = {
+  translations: ProductTranslation[];
+};
+
+export type ProductTranslationsResponse = {
+  translations: ProductTranslation[];
 };
 
 export type AdminProductListParams = AdminPageParams & {
@@ -93,6 +117,24 @@ export type AdminCategory = {
   status: AdminCatalogStatus;
   createdAt: string;
   updatedAt: string;
+  translationLocales?: Locale[];
+};
+
+export type CategoryTranslation = {
+  localeCode: Locale;
+  name: string;
+  slug: string;
+  description: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+};
+
+export type CategoryTranslationBatchRequest = {
+  translations: CategoryTranslation[];
+};
+
+export type CategoryTranslationsResponse = {
+  translations: CategoryTranslation[];
 };
 
 export type AdminCategoryListParams = AdminPageParams & {
@@ -304,6 +346,32 @@ export function updateAdminProduct(id: number, request: UpdateAdminProductReques
   return apiPut<AdminProduct, UpdateAdminProductRequest>(`/products/${id}`, request);
 }
 
+export function getAdminProductTranslations(id: number) {
+  return apiGet<ProductTranslationsResponse>(`/products/${id}/translations`);
+}
+
+export function updateAdminProductTranslations(
+  id: number,
+  request: ProductTranslationBatchRequest,
+) {
+  return apiPut<ProductTranslationsResponse, ProductTranslationBatchRequest>(
+    `/products/${id}/translations`,
+    request,
+  );
+}
+
+export function deleteAdminProductTranslation(id: number, locale: Locale) {
+  return apiDelete<void>(`/products/${id}/translations/${encodeURIComponent(locale)}`);
+}
+
+export async function updateAdminProductStatus(id: number, status: ProductStatus) {
+  const response = await apiClient.patch<ApiResponse<AdminProduct>>(
+    `/products/${id}/status`,
+    { status },
+  );
+  return unwrapApiResponse(response);
+}
+
 export function deleteAdminProduct(id: number) {
   return apiDelete<void>(`/products/${id}`);
 }
@@ -324,6 +392,32 @@ export function updateAdminCategory(id: number, request: UpdateAdminCategoryRequ
   return apiPut<AdminCategory, UpdateAdminCategoryRequest>(`/categories/${id}`, request);
 }
 
+export function getAdminCategoryTranslations(id: number) {
+  return apiGet<CategoryTranslationsResponse>(`/categories/${id}/translations`);
+}
+
+export function updateAdminCategoryTranslations(
+  id: number,
+  request: CategoryTranslationBatchRequest,
+) {
+  return apiPut<CategoryTranslationsResponse, CategoryTranslationBatchRequest>(
+    `/categories/${id}/translations`,
+    request,
+  );
+}
+
+export function deleteAdminCategoryTranslation(id: number, locale: Locale) {
+  return apiDelete<void>(`/categories/${id}/translations/${encodeURIComponent(locale)}`);
+}
+
+export async function updateAdminCategoryStatus(id: number, status: AdminCatalogStatus) {
+  const response = await apiClient.patch<ApiResponse<AdminCategory>>(
+    `/categories/${id}/status`,
+    { status },
+  );
+  return unwrapApiResponse(response);
+}
+
 export function deleteAdminCategory(id: number) {
   return apiDelete<void>(`/categories/${id}`);
 }
@@ -342,6 +436,14 @@ export function createAdminBrand(request: CreateAdminBrandRequest) {
 
 export function updateAdminBrand(id: number, request: UpdateAdminBrandRequest) {
   return apiPut<AdminBrand, UpdateAdminBrandRequest>(`/brands/${id}`, request);
+}
+
+export async function updateAdminBrandStatus(id: number, status: AdminCatalogStatus) {
+  const response = await apiClient.patch<ApiResponse<AdminBrand>>(
+    `/brands/${id}/status`,
+    { status },
+  );
+  return unwrapApiResponse(response);
 }
 
 export function deleteAdminBrand(id: number) {
@@ -411,6 +513,17 @@ export function updateAdminProductVariant(
     `/product-variants/${id}`,
     request
   );
+}
+
+export async function updateAdminProductVariantStatus(
+  id: number,
+  status: ProductVariantStatus,
+) {
+  const response = await apiClient.patch<ApiResponse<AdminProductVariant>>(
+    `/product-variants/${id}/status`,
+    { status },
+  );
+  return unwrapApiResponse(response);
 }
 
 export function deleteAdminProductVariant(id: number) {

@@ -1,12 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createEmptySaleCampaignForm,
+  saveSaleCampaignWithTranslations,
+  serializeSaleCampaignTranslations,
   toCreateSaleCampaignRequest,
   validateSaleCampaignForm,
 } from "@/app/(admin)/dashboard/sales/_data/sale-campaign-form";
 import { interpolateMessage } from "@/lib/i18n/define-messages";
 import { salesAdminManagementMessages } from "@/lib/i18n/messages/sales-admin-management";
+import type { AdminSaleCampaign } from "@/lib/api/admin-sales";
 
 function validValues() {
   const values = createEmptySaleCampaignForm();
@@ -86,5 +89,108 @@ describe("sale campaign admin form", () => {
 
     expect(request.startsAt).toMatch(/Z$/);
     expect(request.endsAt).toMatch(/Z$/);
+  });
+
+  it("không chặn lưu khi bỏ trống toàn bộ English", () => {
+    const values = validValues();
+
+    expect(validateSaleCampaignForm(values)).toEqual({ valid: true });
+    expect(serializeSaleCampaignTranslations(values)).toEqual([
+      {
+        localeCode: "vi",
+        name: "Summer 2026",
+        description: null,
+      },
+    ]);
+  });
+
+  it("trim và serialize đủ bản dịch Sale khi có English", () => {
+    const values = validValues();
+    values.name = "  Hè 2026  ";
+    values.description = "  Ưu đãi mùa hè  ";
+    values.englishName = "  Summer 2026  ";
+    values.englishDescription = "  Summer offers  ";
+
+    expect(serializeSaleCampaignTranslations(values)).toEqual([
+      {
+        localeCode: "vi",
+        name: "Hè 2026",
+        description: "Ưu đãi mùa hè",
+      },
+      {
+        localeCode: "en",
+        name: "Summer 2026",
+        description: "Summer offers",
+      },
+    ]);
+  });
+
+  it("chặn mô tả English bị nhập dở nhưng chưa có tên", () => {
+    const values = validValues();
+    values.englishDescription = "Summer offers";
+
+    expect(validateSaleCampaignForm(values)).toMatchObject({
+      valid: false,
+      step: 1,
+    });
+  });
+
+  it("retry translation failure updates the persisted campaign without a second POST", async () => {
+    const values = validValues();
+    const baseCampaign = {
+      id: 91,
+      code: values.code,
+      name: values.name,
+      description: null,
+      bannerUrl: null,
+      type: "STANDARD" as const,
+      status: "DRAFT" as const,
+      startsAt: new Date(values.startsAt).toISOString(),
+      endsAt: new Date(values.endsAt).toISOString(),
+      version: 1,
+      items: [],
+      createdAt: "2026-07-15T00:00:00.000Z",
+      updatedAt: "2026-07-15T00:00:00.000Z",
+    };
+    const createCampaign = vi.fn().mockResolvedValue(baseCampaign);
+    const updateCampaign = vi.fn().mockResolvedValue({
+      ...baseCampaign,
+      version: 2,
+    });
+    const saveTranslations = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("translation unavailable"))
+      .mockResolvedValueOnce({ ...baseCampaign, version: 3 });
+    let persistedCampaign: AdminSaleCampaign | undefined;
+    const onBasePersisted = (saved: AdminSaleCampaign) => {
+      persistedCampaign = saved;
+    };
+
+    await expect(
+      saveSaleCampaignWithTranslations({
+        campaign: persistedCampaign,
+        values,
+        createCampaign,
+        updateCampaign,
+        saveTranslations,
+        onBasePersisted,
+      }),
+    ).rejects.toThrow("translation unavailable");
+    expect(persistedCampaign?.id).toBe(91);
+
+    await saveSaleCampaignWithTranslations({
+      campaign: persistedCampaign,
+      values,
+      createCampaign,
+      updateCampaign,
+      saveTranslations,
+      onBasePersisted,
+    });
+
+    expect(createCampaign).toHaveBeenCalledOnce();
+    expect(updateCampaign).toHaveBeenCalledOnce();
+    expect(updateCampaign).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 91 }),
+    );
   });
 });
