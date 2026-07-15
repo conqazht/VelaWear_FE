@@ -331,8 +331,6 @@ export const adminCommerceUiMessages = defineMessages(
       "SKU {sku} is duplicated in this product.",
     "admin.commerce.products.validation.price":
       "Variant {number} price must be a non-negative number.",
-    "admin.commerce.products.validation.salePrice":
-      "Variant {number} sale price must be greater than 0 and lower than its regular price.",
     "admin.commerce.products.validation.stock":
       "Variant {number} stock must be a non-negative whole number.",
     "admin.commerce.products.validation.zeroStockActive":
@@ -428,7 +426,6 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.variants.size": "Size",
     "admin.commerce.products.variants.noSize": "No size",
     "admin.commerce.products.variants.price": "Price",
-    "admin.commerce.products.variants.salePrice": "Sale price",
     "admin.commerce.products.variants.optional": "Optional",
     "admin.commerce.products.variants.stock": "Stock",
     "admin.commerce.products.variants.status": "Status",
@@ -909,8 +906,6 @@ export const adminCommerceUiMessages = defineMessages(
       "SKU {sku} bị trùng trong sản phẩm này.",
     "admin.commerce.products.validation.price":
       "Giá của biến thể {number} phải là số không âm.",
-    "admin.commerce.products.validation.salePrice":
-      "Giá khuyến mãi của biến thể {number} phải lớn hơn 0 và nhỏ hơn giá niêm yết.",
     "admin.commerce.products.validation.stock":
       "Tồn kho của biến thể {number} phải là số nguyên không âm.",
     "admin.commerce.products.validation.zeroStockActive":
@@ -1006,7 +1001,6 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.variants.size": "Kích cỡ",
     "admin.commerce.products.variants.noSize": "Không có kích cỡ",
     "admin.commerce.products.variants.price": "Giá",
-    "admin.commerce.products.variants.salePrice": "Giá khuyến mãi",
     "admin.commerce.products.variants.optional": "Không bắt buộc",
     "admin.commerce.products.variants.stock": "Tồn kho",
     "admin.commerce.products.variants.status": "Trạng thái",

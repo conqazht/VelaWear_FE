@@ -2,6 +2,7 @@ export type ApiResponse<T> = {
   statusCode: number;
   message: string;
   data: T;
+  code?: string;
   error?: string;
   timestamp?: string;
 };
@@ -24,6 +25,28 @@ export type PageParams = {
 };
 
 export type Id = number | string;
+
+export type SaleCampaignType = "STANDARD" | "FLASH";
+export type SaleCampaignStatus = "DRAFT" | "PUBLISHED" | "CANCELLED";
+export type SaleCampaignPhase = "UPCOMING" | "LIVE" | "ENDED";
+export type PriceSource = "BASE" | "STANDARD_SALE" | "FLASH_SALE";
+
+export type Pricing = {
+  listPrice: number;
+  effectivePrice: number;
+  priceSource: PriceSource;
+  campaignId?: number | null;
+  campaignItemId?: number | null;
+  campaignCode?: string | null;
+  campaignName?: string | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  remainingQuota?: number | null;
+  maxPerCustomer?: number | null;
+  customerRemaining?: number | null;
+  couponEligible?: boolean;
+  availableQuantity?: number | null;
+};
 
 export type Gender = "MALE" | "FEMALE" | "OTHER";
 
@@ -60,7 +83,7 @@ export type Product = {
   originalSlug?: string;
   description: string;
   price?: number | null;
-  salePrice?: number | null;
+  pricing?: Pricing | null;
   thumbnail?: string | null;
   image?: string | null;
   status?: string;
@@ -84,13 +107,58 @@ export type CatalogEntity = {
 
 export type ProductVariant = {
   id: number;
-  productId?: number;
-  sku?: string;
-  price?: number;
-  salePrice?: number | null;
-  stockQuantity?: number;
-  color?: CatalogEntity | null;
-  size?: CatalogEntity | null;
+  product: Pick<CatalogEntity, "id" | "name"> | null;
+  sku: string;
+  price: number;
+  pricing?: Pricing | null;
+  stockQuantity: number;
+  status: string;
+  color: CatalogEntity | null;
+  size: CatalogEntity | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type SaleCampaignItem = {
+  id: number;
+  campaignId?: number;
+  variantId: number;
+  productId: number;
+  productName: string;
+  productSlug?: string | null;
+  sku: string;
+  image?: string | null;
+  color?: string | null;
+  size?: string | null;
+  referencePrice: number;
+  promotionalPrice: number;
+  stockQuantity: number;
+  availableQuantity: number;
+  quota?: number | null;
+  reservedQuantity?: number | null;
+  soldQuantity?: number | null;
+  remainingQuota?: number | null;
+  maxPerCustomer?: number | null;
+};
+
+export type SaleCampaign = {
+  id: number;
+  code: string;
+  name: string;
+  description?: string | null;
+  bannerUrl?: string | null;
+  type: SaleCampaignType;
+  status: SaleCampaignStatus;
+  phase: SaleCampaignPhase;
+  startsAt: string;
+  endsAt: string;
+  version?: number;
+  items: SaleCampaignItem[];
+};
+
+export type PublicSalesResult = {
+  serverTime: string;
+  campaigns: SaleCampaign[];
 };
 
 export type CartApiItem = {
@@ -104,6 +172,18 @@ export type CartApiItem = {
   color?: string | null;
   size?: string | null;
   price: number;
+  listPrice?: number;
+  pricing?: Pricing | null;
+  priceSource?: PriceSource;
+  campaignId?: number | null;
+  campaignItemId?: number | null;
+  campaignCode?: string | null;
+  campaignName?: string | null;
+  campaignEndsAt?: string | null;
+  remainingQuota?: number | null;
+  maxPerCustomer?: number | null;
+  customerRemaining?: number | null;
+  availableQuantity?: number | null;
   quantity: number;
 };
 
@@ -139,6 +219,9 @@ export type Order = {
   receiverAddress?: string;
   paymentMethod?: string;
   paymentStatus?: string;
+  paymentDueAt?: string | null;
+  reservationExpiresAt?: string | null;
+  resourcesReleasedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
   items?: OrderItem[];
@@ -152,6 +235,11 @@ export type OrderItem = {
   sku: string;
   image?: string | null;
   price: number;
+  listPrice?: number;
+  priceSource?: PriceSource;
+  saleCampaignItemId?: number | null;
+  saleCampaignCode?: string | null;
+  saleCampaignName?: string | null;
   quantity: number;
   subtotal: number;
   status: string;

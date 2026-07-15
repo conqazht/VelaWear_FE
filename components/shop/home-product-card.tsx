@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Heart, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -15,12 +16,19 @@ interface HomeProductCardProps {
 }
 
 export function HomeProductCard({ product }: HomeProductCardProps) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
   const { locale, t } = useI18n();
 
   const favorited = isFavorite(product.id);
+  const flashUnavailable =
+    product.pricing?.priceSource === "FLASH_SALE" &&
+    product.pricing.remainingQuota != null &&
+    product.pricing.remainingQuota <= 0;
+  const requiresVariantSelection =
+    product.pricing != null && product.pricing.priceSource !== "BASE";
 
   const displayCategory = getCategoryLabel(product.category, locale);
 
@@ -80,18 +88,27 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
         {/* Add to Cart Overlay */}
         <div className="absolute inset-x-0 bottom-0 overflow-hidden translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
           <motion.button
+            disabled={flashUnavailable}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (requiresVariantSelection) {
+                router.push(`/products/${product.id}`);
+                return;
+              }
               addToCart(product, product.color || "Sand", product.size || "M");
               showAddedToBag(product, product.size || "M", product.color || "Sand");
             }}
-            className="w-full py-4 bg-[#f7f4ef]/95 hover:bg-[#b5573a] hover:text-white text-[#1c1a18] font-medium text-xs tracking-[1px] uppercase transition-colors duration-300 rounded-none cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-4 bg-[#f7f4ef]/95 hover:bg-[#b5573a] hover:text-white text-[#1c1a18] font-medium text-xs tracking-[1px] uppercase transition-colors duration-300 rounded-none cursor-pointer flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-[#1c1a18]/70 disabled:text-white"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <ShoppingBag className="w-4 h-4" />
-            {t("storefront.common.addToBag")}
+            {flashUnavailable
+              ? t("storefront.sale.flashSoldOut")
+              : requiresVariantSelection
+                ? t("storefront.sale.selectVariant")
+                : t("storefront.common.addToBag")}
           </motion.button>
         </div>
       </div>

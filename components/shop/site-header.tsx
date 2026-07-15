@@ -288,14 +288,12 @@ export function SiteHeader() {
   const navigationItems = [
     {
       label: t("storefront.nav.sale"),
-      href: "/collection",
+      href: "/sale",
       featuredTitle: t("storefront.nav.saleTitle"),
       featuredDesc: t("storefront.nav.saleDescription"),
       subItems: [
-        { label: t("storefront.nav.saleTops"), href: "/collection" },
-        { label: t("storefront.nav.saleTrousers"), href: "/collection" },
-        { label: t("storefront.nav.saleAccessories"), href: "/collection" },
-        { label: t("storefront.nav.flashSale"), href: "/collection" },
+        { label: t("storefront.nav.sale"), href: "/sale" },
+        { label: t("storefront.nav.flashSale"), href: "/flash-sale" },
       ],
     },
     {

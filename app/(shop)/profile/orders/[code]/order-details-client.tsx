@@ -21,8 +21,8 @@ import { Card } from "@/components/ui/card";
 import {
   getOrderByCode,
   getOrderStatusHistories,
-  updateOrder,
 } from "@/lib/api/commerce";
+import { cancelOrder } from "@/lib/checkout-api";
 import { formatDateTime } from "@/lib/i18n/format";
 import { money } from "@/lib/vela-data";
 
@@ -40,6 +40,7 @@ const statusLabelKeys = {
 
 const paymentMethodKeys = {
   COD: "account.order.paymentMethod.cod",
+  SEPAY: "sale.payment.method.sepay",
   VNPAY: "account.order.paymentMethod.vnpay",
   MOMO: "account.order.paymentMethod.momo",
   BANK_TRANSFER: "account.order.paymentMethod.bankTransfer",
@@ -51,6 +52,7 @@ const paymentStatusKeys = {
   PAID: "account.order.paymentStatus.paid",
   FAILED: "account.order.paymentStatus.failed",
   REFUNDED: "account.order.paymentStatus.refunded",
+  REFUND_PENDING: "sale.payment.status.refundPending",
 } as const;
 
 const statusClasses: Record<string, string> = {
@@ -91,7 +93,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     enabled: hasAccess,
   });
   const cancelMutation = useMutation({
-    mutationFn: (orderId: number) => updateOrder(orderId, { status: "CANCELLED" }),
+    mutationFn: (orderId: number) => cancelOrder(orderId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
@@ -227,7 +229,10 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     );
   }
 
-  const canCancel = ["PENDING", "CONFIRMED"].includes(order.status);
+  const canCancel =
+    order.status === "PENDING" &&
+    order.paymentStatus !== "PAID" &&
+    !order.resourcesReleasedAt;
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -264,10 +269,37 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                       <div className="flex min-w-0 flex-1 flex-col justify-center">
                         <div className="flex justify-between gap-4">
                           <h3 className="font-medium text-[#1c1a18]">{item.productName}</h3>
-                          <span className="whitespace-nowrap font-medium">{money(item.subtotal, locale)}</span>
+                          <div className="text-right">
+                            {item.listPrice && item.listPrice > item.price ? (
+                              <span className="block text-xs text-[#1c1a18]/35 line-through">
+                                {money(item.listPrice * item.quantity, locale)}
+                              </span>
+                            ) : null}
+                            <span className="whitespace-nowrap font-medium">{money(item.subtotal, locale)}</span>
+                          </div>
                         </div>
                         {item.variantName && <p className="mt-1 text-xs text-[#1c1a18]/60">{item.variantName}</p>}
-                        <p className="mt-1 text-xs text-[#1c1a18]/45">{t("account.order.itemDetails", { sku: item.sku, price: money(item.price, locale), quantity: item.quantity })}</p>
+                        <p className="mt-1 text-xs text-[#1c1a18]/45">
+                          {t("account.order.itemDetails", {
+                            sku: item.sku,
+                            price: money(item.price, locale),
+                            quantity: item.quantity,
+                          })}
+                        </p>
+                        {item.priceSource && item.priceSource !== "BASE" ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[#8f2f20]">
+                            <span className="rounded-full bg-[#8f2f20]/8 px-2 py-1">
+                              {item.priceSource === "FLASH_SALE"
+                                ? t("storefront.sale.type.flash")
+                                : t("storefront.sale.type.standard")}
+                            </span>
+                            {item.saleCampaignName || item.saleCampaignCode ? (
+                              <span>
+                                {item.saleCampaignName ?? item.saleCampaignCode}
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ))}
@@ -275,6 +307,11 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               ) : (
                 <p className="py-8 text-center text-sm text-[#1c1a18]/50">{t("account.order.noItems")}</p>
               )}
+              {order.items?.some((item) => item.priceSource && item.priceSource !== "BASE") ? (
+                <p className="mt-6 border-t border-[#1c1a18]/8 pt-4 text-[11px] leading-5 text-[#1c1a18]/50">
+                  {t("sale.order.snapshotNotice")}
+                </p>
+              ) : null}
             </Card>
 
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
@@ -320,8 +357,47 @@ export default function OrderDetailsClient({ code }: { code: string }) {
             </Card>
 
             <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
-              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"><CreditCard className="size-4 text-[#1c1a18]/40" aria-hidden="true" />{t("account.order.payment")}</h2>
-              <p className="text-sm font-medium">{getPaymentMethodLabel(order.paymentMethod)}</p><p className="mt-1 text-xs text-[#1c1a18]/55">{getPaymentStatusLabel(order.paymentStatus)}</p>
+              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
+                <CreditCard className="size-4 text-[#1c1a18]/40" aria-hidden="true" />
+                {t("account.order.payment")}
+              </h2>
+              <p className="text-sm font-medium">{getPaymentMethodLabel(order.paymentMethod)}</p>
+              <p className="mt-1 text-xs text-[#1c1a18]/55">{getPaymentStatusLabel(order.paymentStatus)}</p>
+              {order.paymentDueAt ? (
+                <div className="mt-4 space-y-2 border-t border-[#1c1a18]/8 pt-4 text-xs text-[#1c1a18]/65">
+                  <p className="flex items-center justify-between gap-3">
+                    <span>{t("sale.order.paymentDue")}</span>
+                    <strong className="text-right font-medium text-[#1c1a18]">
+                      {displayDateTime(order.paymentDueAt)}
+                    </strong>
+                  </p>
+                  {order.reservationExpiresAt ? (
+                    <p className="flex items-center justify-between gap-3">
+                      <span>{t("sale.order.reservationExpires")}</span>
+                      <strong className="text-right font-medium text-[#1c1a18]">
+                        {displayDateTime(order.reservationExpiresAt)}
+                      </strong>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+              {order.resourcesReleasedAt ? (
+                <div className="mt-4 rounded-sm border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
+                  <p className="flex items-start gap-2 font-semibold">
+                    <Clock3 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    {t("sale.order.resourcesReleasedAt", {
+                      time: displayDateTime(order.resourcesReleasedAt),
+                    })}
+                  </p>
+                  <p className="mt-1 pl-6">
+                    {t("sale.order.latePaymentNotice")}
+                  </p>
+                </div>
+              ) : order.reservationExpiresAt && order.paymentStatus !== "PAID" ? (
+                <p className="mt-4 rounded-sm border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                  {t("sale.order.reservationNotice")}
+                </p>
+              ) : null}
             </Card>
           </div>
         </div>

@@ -42,7 +42,6 @@ export type AdminProduct = {
   categoryName: string | null;
   categorySlug: string | null;
   price: number | null;
-  salePrice: number | null;
 };
 
 export type AdminProductListParams = AdminPageParams & {
@@ -199,7 +198,6 @@ export type AdminProductVariant = {
   product: AdminProductVariantReference;
   sku: string;
   price: number;
-  salePrice: number | null;
   stockQuantity: number;
   color: AdminProductVariantReference | null;
   size: AdminProductVariantReference | null;
@@ -216,8 +214,6 @@ export type AdminProductVariantListParams = AdminPageParams & {
   status?: ProductVariantStatus;
   priceFrom?: number;
   priceTo?: number;
-  salePriceFrom?: number;
-  salePriceTo?: number;
   stockFrom?: number;
   stockTo?: number;
   createdFrom?: string;
@@ -228,7 +224,6 @@ export type CreateAdminProductVariantRequest = {
   productId: number;
   sku: string;
   price: number;
-  salePrice: number | null;
   stockQuantity: number | null;
   colorId: number | null;
   sizeId: number | null;

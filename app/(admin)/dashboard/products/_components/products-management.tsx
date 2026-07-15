@@ -95,7 +95,6 @@ function toVariantFormValue(variant: AdminProductVariant): ProductVariantFormVal
     id: variant.id,
     sku: variant.sku,
     price: String(variant.price),
-    salePrice: variant.salePrice === null ? "" : String(variant.salePrice),
     stockQuantity: String(variant.stockQuantity),
     colorId: variant.color ? String(variant.color.id) : "",
     sizeId: variant.size ? String(variant.size.id) : "",
@@ -111,7 +110,6 @@ function toVariantRequest(
     productId,
     sku: variant.sku.trim(),
     price: Number(variant.price),
-    salePrice: variant.salePrice.trim() === "" ? null : Number(variant.salePrice),
     stockQuantity: Number(variant.stockQuantity),
     colorId: variant.colorId ? Number(variant.colorId) : null,
     sizeId: variant.sizeId ? Number(variant.sizeId) : null,
@@ -132,7 +130,6 @@ function getVariantValidationError(
     const number = index + 1;
     const sku = variant.sku.trim();
     const price = Number(variant.price);
-    const salePrice = variant.salePrice.trim() === "" ? null : Number(variant.salePrice);
     const stock = Number(variant.stockQuantity);
 
     if (!sku) return t("admin.commerce.products.validation.skuRequired", { number });
@@ -143,9 +140,6 @@ function getVariantValidationError(
 
     if (variant.price.trim() === "" || !Number.isFinite(price) || price < 0) {
       return t("admin.commerce.products.validation.price", { number });
-    }
-    if (salePrice !== null && (!Number.isFinite(salePrice) || salePrice <= 0 || salePrice >= price)) {
-      return t("admin.commerce.products.validation.salePrice", { number });
     }
     if (variant.stockQuantity.trim() === "" || !Number.isInteger(stock) || stock < 0) {
       return t("admin.commerce.products.validation.stock", { number });
@@ -175,7 +169,6 @@ function variantRequestsEqual(
     left.productId === right.productId &&
     left.sku === right.sku &&
     left.price === right.price &&
-    left.salePrice === right.salePrice &&
     left.stockQuantity === right.stockQuantity &&
     left.colorId === right.colorId &&
     left.sizeId === right.sizeId &&
@@ -207,10 +200,6 @@ function mergeVariantRequest(
     productId,
     sku: desiredRequest.sku !== baselineRequest.sku ? desiredRequest.sku : currentRequest.sku,
     price: desiredRequest.price !== baselineRequest.price ? desiredRequest.price : currentRequest.price,
-    salePrice:
-      desiredRequest.salePrice !== baselineRequest.salePrice
-        ? desiredRequest.salePrice
-        : currentRequest.salePrice,
     stockQuantity:
       desiredRequest.stockQuantity !== baselineRequest.stockQuantity
         ? desiredRequest.stockQuantity
@@ -648,19 +637,11 @@ export function ProductsManagement() {
       key: "price",
       header: t("admin.commerce.products.column.price"),
       className: "whitespace-nowrap tabular-nums",
-      cell: (product) =>
-        product.salePrice !== null ? (
-          <div className="space-y-0.5">
-            <p className="font-medium">{formatCurrency(product.salePrice, locale)}</p>
-            <p className="text-muted-foreground text-xs line-through">
-              {product.price === null ? "—" : formatCurrency(product.price, locale)}
-            </p>
-          </div>
-        ) : (
-          <span className="font-medium">
-            {product.price === null ? "—" : formatCurrency(product.price, locale)}
-          </span>
-        ),
+      cell: (product) => (
+        <span className="font-medium">
+          {product.price === null ? "—" : formatCurrency(product.price, locale)}
+        </span>
+      ),
     },
     {
       key: "status",
@@ -786,7 +767,6 @@ export function ProductsManagement() {
               category: product.categoryName,
               brand: brandNames.get(product.brandId),
               price: product.price,
-              salePrice: product.salePrice,
               status: t(PRODUCT_STATUS_MESSAGE_KEYS[product.status]),
               updatedAt: product.updatedAt,
             }))

@@ -37,18 +37,41 @@ function getPersistableCartItems(cart: CartItem[]) {
 function mapServerCartItems(serverCart: ApiCart, locale: Locale): CartItem[] {
   const defaultLabel = commonMessages[locale]["common.default"];
 
-  return (serverCart.items ?? []).map((item) => ({
-    id: `variant-${item.variantId}`,
-    productId: item.productId ?? undefined,
-    productSlug: item.productSlug ?? undefined,
-    name: item.productName,
-    price: Number(item.price ?? 0),
-    color: item.color ?? defaultLabel,
-    size: item.size ?? defaultLabel,
-    image: resolveImageUrl(item.image),
-    quantity: item.quantity,
-    variantId: item.variantId,
-  }));
+  return (serverCart.items ?? []).map((item) => {
+    const pricing = item.pricing;
+
+    return {
+      id: `variant-${item.variantId}`,
+      productId: item.productId ?? undefined,
+      productSlug: item.productSlug ?? undefined,
+      name: item.productName,
+      price: Number(item.price ?? pricing?.effectivePrice ?? 0),
+      listPrice:
+        item.listPrice == null && pricing?.listPrice == null
+          ? undefined
+          : Number(item.listPrice ?? pricing?.listPrice),
+      priceSource: pricing?.priceSource ?? item.priceSource,
+      campaignId: pricing?.campaignId ?? item.campaignId ?? undefined,
+      campaignItemId:
+        pricing?.campaignItemId ?? item.campaignItemId ?? undefined,
+      campaignCode: pricing?.campaignCode ?? item.campaignCode ?? undefined,
+      campaignName: pricing?.campaignName ?? item.campaignName ?? undefined,
+      campaignEndsAt: pricing?.endsAt ?? item.campaignEndsAt ?? undefined,
+      remainingQuota:
+        pricing?.remainingQuota ?? item.remainingQuota ?? undefined,
+      maxPerCustomer:
+        pricing?.maxPerCustomer ?? item.maxPerCustomer ?? undefined,
+      customerRemaining:
+        pricing?.customerRemaining ?? item.customerRemaining ?? undefined,
+      availableQuantity:
+        pricing?.availableQuantity ?? item.availableQuantity ?? undefined,
+      color: item.color ?? defaultLabel,
+      size: item.size ?? defaultLabel,
+      image: resolveImageUrl(item.image),
+      quantity: item.quantity,
+      variantId: item.variantId,
+    };
+  });
 }
 
 function indexCartByVariant(cart: CartItem[]) {
@@ -118,6 +141,17 @@ function applyLocalizedCartCopy(
       productSlug: localizedItem.productSlug ?? item.productSlug,
       name: localizedItem.name,
       price: localizedItem.price,
+      listPrice: localizedItem.listPrice,
+      priceSource: localizedItem.priceSource,
+      campaignId: localizedItem.campaignId,
+      campaignItemId: localizedItem.campaignItemId,
+      campaignCode: localizedItem.campaignCode,
+      campaignName: localizedItem.campaignName,
+      campaignEndsAt: localizedItem.campaignEndsAt,
+      remainingQuota: localizedItem.remainingQuota,
+      maxPerCustomer: localizedItem.maxPerCustomer,
+      customerRemaining: localizedItem.customerRemaining,
+      availableQuantity: localizedItem.availableQuantity,
       color: localizedItem.color,
       size: localizedItem.size,
       image: localizedItem.image,
@@ -133,6 +167,7 @@ interface CartContextValue {
   updateQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
+  refreshCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -169,6 +204,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return applyLocalizedCartCopy(storedCart, localizedCartCopy.items);
   }, [isAuthenticated, locale, localizedCartCopy, storedCart, userId]);
 
+  const refreshCart = useCallback(async () => {
+    if (!isAuthenticated || userId === undefined) return;
+
+    while (true) {
+      const requestedLocale = getActiveLocale();
+      const serverCart = await getMyCart();
+      if (requestedLocale !== getActiveLocale()) continue;
+
+      const serverItems = mapServerCartItems(serverCart, requestedLocale);
+      const unresolvedItems = useCartStore
+        .getState()
+        .cart.filter((item) => item.variantId === undefined);
+
+      setLocalizedCartCopy({
+        userId,
+        locale: requestedLocale,
+        items: serverItems,
+      });
+      useCartStore.setState({ cart: [...serverItems, ...unresolvedItems] });
+      return;
+    }
+  }, [isAuthenticated, userId]);
+
   const clearScheduledCartSync = useCallback(() => {
     if (syncTimeoutRef.current === null) return;
     window.clearTimeout(syncTimeoutRef.current);
@@ -182,9 +240,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         syncTimeoutRef.current = null;
         if (syncedUserIdRef.current !== targetUserId) return;
 
+        const requestedLocale = getActiveLocale();
+        const cartAtRequestStart = useCartStore.getState().cart;
         void replaceMyCartItems({
-          items: getPersistableCartItems(useCartStore.getState().cart),
-        });
+          items: getPersistableCartItems(cartAtRequestStart),
+        })
+          .then((canonicalCart) => {
+            if (
+              syncedUserIdRef.current !== targetUserId ||
+              requestedLocale !== getActiveLocale()
+            ) {
+              return;
+            }
+
+            const canonicalItems = mapServerCartItems(
+              canonicalCart,
+              requestedLocale
+            );
+            setLocalizedCartCopy({
+              userId: targetUserId,
+              locale: requestedLocale,
+              items: canonicalItems,
+            });
+            useCartStore.setState((state) => ({
+              cart: mergeServerCartWithLatestState(
+                canonicalItems,
+                cartAtRequestStart,
+                state.cart
+              ),
+            }));
+          })
+          .catch(() => {
+            // Checkout remains authoritative; transient cart sync failures are surfaced there.
+          });
       }, 250);
     },
     [clearScheduledCartSync]
@@ -343,8 +431,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateQuantity,
       removeItem,
       clearCart,
+      refreshCart,
     };
-  }, [addToCart, cart, clearCart, removeItem, updateQuantity]);
+  }, [addToCart, cart, clearCart, refreshCart, removeItem, updateQuantity]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
