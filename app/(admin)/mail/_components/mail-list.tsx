@@ -1,9 +1,10 @@
-import { differenceInDays } from "date-fns/differenceInDays";
-import { format } from "date-fns/format";
-import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
+"use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getIntlLocale, type Locale } from "@/lib/i18n";
+import { formatDate } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
 import type { Mail } from "./data";
@@ -21,11 +22,18 @@ interface MailListProps {
 }
 
 export function MailList({ groups, onSelectMail }: MailListProps) {
+  const { locale, t } = useI18n();
   const [mail, setMail] = useMail();
+  const isEmpty = groups.every((group) => group.items.length === 0);
 
   return (
     <ScrollArea className="**:data-[slot=scroll-area-viewport]:scroll-fade min-h-0 flex-1">
       <div className="flex flex-col gap-1.5 pt-0">
+        {isEmpty ? (
+          <p className="px-4 py-8 text-center text-muted-foreground text-sm">
+            {t("admin.communications.mail.inbox.empty")}
+          </p>
+        ) : null}
         {groups.map((group) => (
           <section key={group.id} className="flex flex-col gap-1.5">
             <div className="mx-3 text-muted-foreground text-xs">
@@ -85,7 +93,7 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                             mail.selected === item.id && "text-foreground",
                           )}
                         >
-                          {formatMailDate(item.receivedAt)}
+                          {formatMailDate(item.receivedAt, locale)}
                         </div>
                       </div>
 
@@ -102,12 +110,24 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
   );
 }
 
-function formatMailDate(date: string) {
+function formatMailDate(date: string, locale: Locale) {
   const mailDate = new Date(date);
+  const differenceInMilliseconds = mailDate.getTime() - Date.now();
+  const absoluteDifference = Math.abs(differenceInMilliseconds);
+  const formatter = new Intl.RelativeTimeFormat(getIntlLocale(locale), { numeric: "auto" });
 
-  if (differenceInDays(new Date("2024-04-15T12:00:00Z"), mailDate) <= 3) {
-    return formatDistanceToNow(mailDate, { addSuffix: true });
+  if (absoluteDifference < 60_000) {
+    return formatter.format(Math.round(differenceInMilliseconds / 1000), "second");
+  }
+  if (absoluteDifference < 3_600_000) {
+    return formatter.format(Math.round(differenceInMilliseconds / 60_000), "minute");
+  }
+  if (absoluteDifference < 86_400_000) {
+    return formatter.format(Math.round(differenceInMilliseconds / 3_600_000), "hour");
+  }
+  if (absoluteDifference < 259_200_000) {
+    return formatter.format(Math.round(differenceInMilliseconds / 86_400_000), "day");
   }
 
-  return format(mailDate, "d MMM yyyy");
+  return formatDate(mailDate, locale);
 }

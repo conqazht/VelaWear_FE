@@ -9,8 +9,8 @@ export interface InfrastructureEnvironment {
   };
   environment: "Expired" | "Production" | "Staging";
   status: "Online" | "Unhealthy";
-  latency: string;
-  uptime: string;
+  latencyMs: number;
+  uptime: { days: number; hours: number };
   server: string;
   countryCode: string;
   plan: string;
@@ -40,8 +40,8 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         },
         environment: "Expired",
         status: "Unhealthy",
-        latency: "86ms",
-        uptime: "8d 23h",
+        latencyMs: 86,
+        uptime: { days: 8, hours: 23 },
         server: "Hetzner Cloud",
         countryCode: "DE",
         plan: "CX33, Falkenstein",
@@ -61,8 +61,8 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         },
         environment: "Production",
         status: "Online",
-        latency: "246ms",
-        uptime: "9d 23h",
+        latencyMs: 246,
+        uptime: { days: 9, hours: 23 },
         server: "AWS",
         countryCode: "NL",
         plan: "eu-west-1, Amsterdam",
@@ -76,8 +76,8 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         },
         environment: "Staging",
         status: "Online",
-        latency: "110ms",
-        uptime: "9d 23h",
+        latencyMs: 110,
+        uptime: { days: 9, hours: 23 },
         server: "Azure",
         countryCode: "EE",
         plan: "North Europe, Tallinn",
@@ -97,8 +97,8 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         },
         environment: "Production",
         status: "Online",
-        latency: "25ms",
-        uptime: "10d 23h",
+        latencyMs: 25,
+        uptime: { days: 10, hours: 23 },
         server: "Bare Metal / Custom",
         countryCode: "DE",
         plan: "EX101, Falkenstein",

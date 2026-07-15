@@ -3,6 +3,7 @@
 import type { FormEvent, ReactNode } from "react";
 import { Loader2, Trash2 } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,9 +48,12 @@ export function ResourceFormSheet({
   onSubmit,
   isPending = false,
   submitDisabled = false,
-  submitLabel = "Save changes",
+  submitLabel,
   contentClassName,
 }: ResourceFormSheetProps) {
+  const { t } = useI18n();
+  const resolvedSubmitLabel = submitLabel ?? t("admin.shell.form.saveChanges");
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className={cn("w-full gap-0 sm:max-w-xl", contentClassName)}>
@@ -65,11 +69,11 @@ export function ResourceFormSheet({
           </div>
           <SheetFooter className="border-t bg-muted/30 sm:flex-row sm:justify-end">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-              Cancel
+              {t("admin.shell.form.cancel")}
             </Button>
             <Button type="submit" disabled={isPending || submitDisabled}>
               {isPending ? <Loader2 className="animate-spin" /> : null}
-              {submitLabel}
+              {resolvedSubmitLabel}
             </Button>
           </SheetFooter>
         </form>
@@ -93,10 +97,13 @@ export function DeleteResourceDialog({
   onOpenChange,
   resourceName,
   description,
-  actionLabel = "Delete",
+  actionLabel,
   onConfirm,
   isPending = false,
 }: DeleteResourceDialogProps) {
+  const { t } = useI18n();
+  const resolvedActionLabel = actionLabel ?? t("admin.shell.delete.action");
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -104,16 +111,18 @@ export function DeleteResourceDialog({
           <AlertDialogMedia>
             <Trash2 />
           </AlertDialogMedia>
-          <AlertDialogTitle>{actionLabel} {resourceName}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t("admin.shell.delete.title", { action: resolvedActionLabel, resource: resourceName })}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {description ?? "This action cannot be undone and may affect related records."}
+            {description ?? t("admin.shell.delete.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{t("admin.shell.form.cancel")}</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={onConfirm} disabled={isPending}>
             {isPending ? <Loader2 className="animate-spin" /> : <Trash2 />}
-            {actionLabel}
+            {resolvedActionLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

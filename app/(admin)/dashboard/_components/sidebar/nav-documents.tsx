@@ -2,6 +2,7 @@
 
 import { Ellipsis, Folder, Forward, type LucideIcon, Trash2 } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,10 +30,11 @@ export function NavDocuments({
   }[];
 }) {
   const { isMobile } = useSidebar();
+  const { t } = useI18n();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Documents</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("admin.shell.navigation.documents")}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
@@ -51,7 +53,7 @@ export function NavDocuments({
                 render={<SidebarMenuAction showOnHover className="rounded-sm data-popup-open:bg-accent" />}
               >
                 <Ellipsis />
-                <span className="sr-only">More</span>
+                <span className="sr-only">{t("admin.shell.navigation.more")}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-24 rounded-lg"
@@ -60,16 +62,16 @@ export function NavDocuments({
               >
                 <DropdownMenuItem>
                   <Folder />
-                  <span>Open</span>
+                  <span>{t("admin.shell.navigation.open")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Forward />
-                  <span>Share</span>
+                  <span>{t("admin.shell.navigation.share")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
                   <Trash2 />
-                  <span>Delete</span>
+                  <span>{t("admin.shell.navigation.delete")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -78,7 +80,7 @@ export function NavDocuments({
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <Ellipsis className="text-sidebar-foreground/70" />
-            <span>More</span>
+            <span>{t("admin.shell.navigation.more")}</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

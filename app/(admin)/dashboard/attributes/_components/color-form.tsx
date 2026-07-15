@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -21,6 +22,8 @@ type ColorFormProps = {
 };
 
 export function ColorForm({ values, onChange }: ColorFormProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof ColorFormValues>(key: Key, value: ColorFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -30,19 +33,19 @@ export function ColorForm({ values, onChange }: ColorFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="color-name">Color name</FieldLabel>
+        <FieldLabel htmlFor="color-name">{t("admin.commerce.attributes.colors.form.name")}</FieldLabel>
         <Input
           id="color-name"
           value={values.name}
           onChange={(event) => update("name", event.target.value)}
           maxLength={80}
-          placeholder="Midnight Black"
+          placeholder={t("admin.commerce.attributes.colors.form.namePlaceholder")}
           required
         />
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="color-hex-code">Hex code</FieldLabel>
+        <FieldLabel htmlFor="color-hex-code">{t("admin.commerce.attributes.colors.form.hex")}</FieldLabel>
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
@@ -60,11 +63,11 @@ export function ColorForm({ values, onChange }: ColorFormProps) {
             required
           />
         </div>
-        <FieldDescription>Enter a six-digit hexadecimal color in #RRGGBB format.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.attributes.colors.form.hexHelp")}</FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="color-sort-order">Sort order</FieldLabel>
+        <FieldLabel htmlFor="color-sort-order">{t("admin.commerce.attributes.sortOrder")}</FieldLabel>
         <Input
           id="color-sort-order"
           type="number"
@@ -75,7 +78,7 @@ export function ColorForm({ values, onChange }: ColorFormProps) {
           onChange={(event) => update("sortOrder", event.target.value)}
           required
         />
-        <FieldDescription>Lower values appear first in attribute option lists.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.attributes.sortOrderHelp")}</FieldDescription>
       </Field>
     </FieldGroup>
   );

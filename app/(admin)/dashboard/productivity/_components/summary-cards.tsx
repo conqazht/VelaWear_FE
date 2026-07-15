@@ -1,14 +1,34 @@
+"use client";
+
 import { ArrowRight, Clock3, Focus, TrendingUp } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const summaryCards = [
-  { title: "Today", value: "4", description: "tasks scheduled", icon: Clock3 },
-  { title: "This Week", value: "68%", description: "progress", icon: TrendingUp },
-  { title: "Focus", value: "Deep Work", description: "2 hours remaining", icon: Focus },
-] as const;
+import { formatNumber } from "@/lib/i18n/format";
 
 export function SummaryCards() {
+  const { locale, t } = useI18n();
+  const summaryCards = [
+    {
+      title: t("admin.productivity.summary.today"),
+      value: formatNumber(4, locale),
+      description: t("admin.productivity.summary.tasksScheduled"),
+      icon: Clock3,
+    },
+    {
+      title: t("admin.productivity.summary.week"),
+      value: formatNumber(0.68, locale, { style: "percent" }),
+      description: t("admin.productivity.summary.progress"),
+      icon: TrendingUp,
+    },
+    {
+      title: t("admin.productivity.summary.focus"),
+      value: t("admin.productivity.summary.deepWork"),
+      description: t("admin.productivity.summary.hoursRemaining", { hours: 2 }),
+      icon: Focus,
+    },
+  ];
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {summaryCards.map((item) => (

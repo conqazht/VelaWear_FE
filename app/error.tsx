@@ -12,10 +12,10 @@ export default function ErrorPage({
   return (
     <StorefrontStatus
       status={500}
-      title="Trải nghiệm cần một nhịp nghỉ"
-      description="Một lỗi ngoài dự kiến đã làm gián đoạn trang này. Hãy thử tải lại hoặc quay về cửa hàng trong lúc chúng tôi khôi phục kết nối."
-      primaryAction={{ label: "Thử lại", onClick: unstable_retry }}
-      secondaryAction={{ label: "Về trang chủ", href: "/" }}
+      titleKey="errors.rootError.title"
+      descriptionKey="errors.rootError.description"
+      primaryAction={{ labelKey: "errors.common.retry", onClick: unstable_retry }}
+      secondaryAction={{ labelKey: "errors.common.home", href: "/" }}
       reference={error.digest}
     />
   );

@@ -11,9 +11,9 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-page";
 import {
   downloadCsv,
-  formatAdminDate,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { AdminRole } from "@/lib/api/admin-rbac";
+import { formatDate } from "@/lib/i18n/format";
 import {
   useAdminRoleQuery,
   useAdminRolesQuery,
@@ -40,6 +41,7 @@ type RoleFormMode = "create" | "edit";
 const PROTECTED_ROLE_NAMES = new Set(["ADMIN", "MANAGER", "STAFF", "USER"]);
 
 export function Roles() {
+  const { locale, t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -100,13 +102,13 @@ export function Roles() {
     try {
       if (formMode === "create") {
         await createMutation.mutateAsync(request);
-        toast.success("Role created", {
-          description: `${request.name} is ready for user assignment.`,
+        toast.success(t("admin.commerce.roles.created"), {
+          description: t("admin.commerce.roles.createdDescription", { name: request.name }),
         });
       } else if (activeRole) {
         await updateMutation.mutateAsync({ id: activeRole.id, request });
-        toast.success("Role updated", {
-          description: `${request.name} was updated successfully.`,
+        toast.success(t("admin.commerce.roles.updated"), {
+          description: t("admin.commerce.roles.updatedDescription", { name: request.name }),
         });
       }
       closeForm(true);
@@ -119,13 +121,13 @@ export function Roles() {
     if (!deleteTarget) return;
     try {
       await deleteMutation.mutateAsync(deleteTarget.id);
-      toast.success("Role deleted", {
-        description: `${deleteTarget.name} and its user/permission links were removed.`,
+      toast.success(t("admin.commerce.roles.deleted"), {
+        description: t("admin.commerce.roles.deletedDescription", { name: deleteTarget.name }),
       });
       if (rows.length === 1 && page > 1) setPage((current) => current - 1);
       setDeleteTarget(null);
     } catch (error) {
-      toast.error("Unable to delete role", {
+      toast.error(t("admin.commerce.roles.unableDelete"), {
         description: getApiErrorMessage(error),
       });
     }
@@ -134,42 +136,44 @@ export function Roles() {
   const columns: ManagementColumn<AdminRole>[] = [
     {
       key: "name",
-      header: "Role",
+      header: t("admin.commerce.roles.column.role"),
       cell: (role) => (
         <div className="min-w-44">
           <p className="font-medium">{role.name}</p>
-          <p className="text-muted-foreground text-xs tabular-nums">ID {role.id}</p>
+          <p className="text-muted-foreground text-xs tabular-nums">
+            {t("admin.commerce.roles.id", { id: role.id })}
+          </p>
         </div>
       ),
     },
     {
       key: "description",
-      header: "Description",
+      header: t("admin.commerce.common.description"),
       className: "max-w-md",
       cell: (role) => (
         <p className="text-muted-foreground line-clamp-2 text-sm">
-          {role.description || "No description"}
+          {role.description || t("admin.commerce.common.noDescription")}
         </p>
       ),
     },
     {
       key: "access",
-      header: "Access map",
-      cell: () => <Badge variant="outline">Available in details</Badge>,
+      header: t("admin.commerce.roles.column.accessMap"),
+      cell: () => <Badge variant="outline">{t("admin.commerce.roles.availableDetails")}</Badge>,
     },
     {
       key: "createdAt",
-      header: "Created",
-      cell: (role) => <span className="text-sm">{formatAdminDate(role.createdAt)}</span>,
+      header: t("admin.commerce.common.created"),
+      cell: (role) => <span className="text-sm">{formatDate(role.createdAt, locale)}</span>,
     },
     {
       key: "updatedAt",
-      header: "Updated",
-      cell: (role) => <span className="text-sm">{formatAdminDate(role.updatedAt)}</span>,
+      header: t("admin.commerce.common.updated"),
+      cell: (role) => <span className="text-sm">{formatDate(role.updatedAt, locale)}</span>,
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-16",
       className: "text-right",
       cell: (role) => {
@@ -182,7 +186,7 @@ export function Roles() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Open actions for ${role.name}`}
+                aria-label={t("admin.commerce.common.openActions", { name: role.name })}
               />
             }
           >
@@ -191,7 +195,7 @@ export function Roles() {
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => openEdit(role)}>
-                <Pencil /> Edit and inspect access
+                <Pencil /> {t("admin.commerce.roles.editInspect")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -200,7 +204,10 @@ export function Roles() {
               disabled={isProtectedRole}
               onClick={() => setDeleteTarget(role)}
             >
-              <Trash2 /> {isProtectedRole ? "Core role is protected" : "Delete role"}
+              <Trash2 />
+              {isProtectedRole
+                ? t("admin.commerce.roles.protected")
+                : t("admin.commerce.roles.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
           </DropdownMenu>
@@ -212,8 +219,8 @@ export function Roles() {
   return (
     <>
       <ResourcePage
-        title="Roles"
-        description="Create named access roles and inspect the permissions currently assigned by the backend."
+        title={t("admin.commerce.roles.title")}
+        description={t("admin.commerce.roles.description")}
         rows={rows}
         columns={columns}
         total={meta.total}
@@ -222,7 +229,9 @@ export function Roles() {
         pageCount={meta.pages}
         searchValue={searchValue}
         searchPlaceholder={
-          searchField === "description" ? "Search descriptions..." : "Search role names..."
+          searchField === "description"
+            ? t("admin.commerce.roles.searchDescriptions")
+            : t("admin.commerce.roles.searchNames")
         }
         onSearchChange={(value) => {
           setSearchValue(value);
@@ -235,11 +244,11 @@ export function Roles() {
         }}
         filters={[
           {
-            label: "Search by",
+            label: t("admin.commerce.roles.searchBy"),
             value: searchField,
             options: [
-              { label: "Name", value: "name" },
-              { label: "Description", value: "description" },
+              { label: t("admin.commerce.roles.name"), value: "name" },
+              { label: t("admin.commerce.common.description"), value: "description" },
             ],
             onValueChange: (value) => {
               setSearchField((value as SearchField | null) ?? "name");
@@ -247,7 +256,7 @@ export function Roles() {
             },
           },
         ]}
-        primaryAction={{ label: "Create role", onClick: openCreate, icon: Plus }}
+        primaryAction={{ label: t("admin.commerce.roles.create"), onClick: openCreate, icon: Plus }}
         onRefresh={() => void rolesQuery.refetch()}
         onExport={() =>
           downloadCsv("vela-roles.csv", rows.map((role) => ({
@@ -261,8 +270,8 @@ export function Roles() {
         isLoading={rolesQuery.isPending}
         isFetching={rolesQuery.isFetching}
         error={rolesQuery.isError ? rolesQuery.error : null}
-        emptyTitle="No roles found"
-        emptyDescription="Try another search or create a role for your access model."
+        emptyTitle={t("admin.commerce.roles.emptyTitle")}
+        emptyDescription={t("admin.commerce.roles.emptyDescription")}
       />
 
       {formMode ? (
@@ -286,8 +295,8 @@ export function Roles() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteTarget(null);
         }}
-        resourceName={deleteTarget?.name ?? "role"}
-        description="This hard-deletes the role and cascades every user-role and role-permission link. The backend does not protect system roles or the last administrator."
+        resourceName={deleteTarget?.name ?? t("admin.commerce.roles.resource")}
+        description={t("admin.commerce.roles.deleteDescription")}
         onConfirm={() => void handleDelete()}
         isPending={deleteMutation.isPending}
       />

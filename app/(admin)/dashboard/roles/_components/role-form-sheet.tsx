@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 
 import { ResourceFormSheet } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -46,6 +47,7 @@ export function RoleFormSheet({
   onClose,
   onSubmit,
 }: RoleFormSheetProps) {
+  const { t } = useI18n();
   const [values, setValues] = useState<RoleFormValues>({
     name: role?.name ?? "",
     description: role?.description ?? "",
@@ -62,26 +64,36 @@ export function RoleFormSheet({
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      title={mode === "create" ? "Create role" : `Edit ${role?.name ?? "role"}`}
+      title={
+        mode === "create"
+          ? t("admin.commerce.roles.create")
+          : t("admin.commerce.roles.form.editTitle", {
+              name: role?.name ?? t("admin.commerce.roles.resource"),
+            })
+      }
       description={
         mode === "create"
-          ? "Create a named access role for user assignment."
-          : "Update the role name and its operational description."
+          ? t("admin.commerce.roles.form.createDescription")
+          : t("admin.commerce.roles.form.editDescription")
       }
       onSubmit={handleSubmit}
       isPending={isPending}
-      submitLabel={mode === "create" ? "Create role" : "Save changes"}
+      submitLabel={
+        mode === "create"
+          ? t("admin.commerce.roles.create")
+          : t("admin.commerce.common.saveChanges")
+      }
     >
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Unable to save role</AlertTitle>
+          <AlertTitle>{t("admin.commerce.roles.form.unableSave")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="role-name">Role name</FieldLabel>
+          <FieldLabel htmlFor="role-name">{t("admin.commerce.roles.form.name")}</FieldLabel>
           <Input
             id="role-name"
             value={values.name}
@@ -94,12 +106,12 @@ export function RoleFormSheet({
             required
           />
           <FieldDescription>
-            Users are assigned by this exact name, including capitalization.
+            {t("admin.commerce.roles.form.nameHelp")}
           </FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="role-description">Description</FieldLabel>
+          <FieldLabel htmlFor="role-description">{t("admin.commerce.common.description")}</FieldLabel>
           <Textarea
             id="role-description"
             value={values.description}
@@ -110,36 +122,41 @@ export function RoleFormSheet({
               }))
             }
             maxLength={255}
-            placeholder="Describe what this role is used for."
+            placeholder={t("admin.commerce.roles.form.descriptionPlaceholder")}
           />
-          <FieldDescription>{values.description.length}/255 characters</FieldDescription>
+          <FieldDescription>
+            {t("admin.commerce.roles.form.characters", { count: values.description.length })}
+          </FieldDescription>
         </Field>
       </FieldGroup>
 
       <FieldSet>
-        <FieldLegend variant="label">Assigned permissions</FieldLegend>
+        <FieldLegend variant="label">{t("admin.commerce.roles.form.assignedPermissions")}</FieldLegend>
         <Alert>
-          <AlertTitle>Read-only access map</AlertTitle>
+          <AlertTitle>{t("admin.commerce.roles.form.readOnlyMap")}</AlertTitle>
           <AlertDescription>
-            The backend exposes assigned permissions on role details, but does not yet provide an endpoint to add or remove them.
+            {t("admin.commerce.roles.form.readOnlyDescription")}
           </AlertDescription>
         </Alert>
 
         {mode === "create" ? (
           <p className="text-muted-foreground text-sm">
-            New roles are created without permissions until the backend supports role-permission assignment.
+            {t("admin.commerce.roles.form.newWithoutPermissions")}
           </p>
         ) : permissionsError ? (
           <Alert variant="destructive">
-            <AlertTitle>Unable to load assigned permissions</AlertTitle>
+            <AlertTitle>{t("admin.commerce.roles.form.unableLoadPermissions")}</AlertTitle>
             <AlertDescription>{permissionsError}</AlertDescription>
           </Alert>
         ) : isPermissionsLoading ? (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Loader2 className="size-4 animate-spin" /> Loading permissions...
+            <Loader2 className="size-4 animate-spin" />
+            {t("admin.commerce.roles.form.loadingPermissions")}
           </div>
         ) : permissions.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No permissions are assigned.</p>
+          <p className="text-muted-foreground text-sm">
+            {t("admin.commerce.roles.form.noPermissions")}
+          </p>
         ) : (
           <div className="space-y-3">
             {Array.from(new Set(permissions.map((permission) => permission.module)))

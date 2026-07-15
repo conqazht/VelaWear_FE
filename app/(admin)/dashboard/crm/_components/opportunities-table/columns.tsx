@@ -4,9 +4,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import type { OpportunityRow } from "./schema";
@@ -31,57 +33,79 @@ function getHealthScore(health: OpportunityRow["health"]) {
   }
 }
 
-export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
+export function useOpportunitiesColumns(): ColumnDef<OpportunityRow>[] {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const numberFormatter = new Intl.NumberFormat(intlLocale);
+  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
+    currency: "USD",
+    maximumFractionDigits: 0,
+    style: "currency",
+  });
+  const stageLabels: Record<string, string> = {
+    Discovery: t("admin.dashboardsA.crm.discovery"),
+    Negotiation: t("admin.dashboardsA.crm.negotiation"),
+    "Proposal Sent": t("admin.dashboardsA.crm.proposalSent"),
+    Qualified: t("admin.dashboardsA.crm.qualified"),
+  };
+  const healthLabels: Record<string, string> = {
+    "At Risk": t("admin.dashboardsA.crm.atRisk"),
+    "Needs Review": t("admin.dashboardsA.crm.needsReview"),
+    "On Hold": t("admin.dashboardsA.crm.onHold"),
+    "On Track": t("admin.dashboardsA.crm.onTrack"),
+  };
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
         checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected()}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all opportunities"
+        aria-label={t("admin.dashboardsA.crm.selectAllOpportunities")}
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label={`Select ${row.original.account}`}
+        aria-label={t("admin.dashboardsA.crm.selectOpportunity", { account: row.original.account })}
       />
     ),
     enableHiding: false,
   },
   {
     accessorKey: "id",
-    header: "ID",
+    header: t("admin.dashboardsA.crm.id"),
     cell: ({ row }) => <div className="text-sm tracking-tight">{row.original.id}</div>,
     enableHiding: false,
   },
   {
     accessorKey: "account",
-    header: "Account",
+    header: t("admin.dashboardsA.crm.account"),
     cell: ({ row }) => <div className="font-medium text-sm">{row.original.account}</div>,
   },
   {
     accessorKey: "stage",
-    header: "Stage",
+    header: t("admin.dashboardsA.crm.stage"),
     cell: ({ row }) => (
       <Badge variant="outline" className="rounded-full px-2.5">
-        {row.original.stage}
+        {stageLabels[row.original.stage] ?? row.original.stage}
       </Badge>
     ),
     filterFn: "equalsString",
   },
   {
     accessorKey: "priority",
-    header: "Priority",
-    cell: ({ row }) => <div className="text-sm">{row.original.priority}</div>,
+    header: t("admin.dashboardsA.crm.priority"),
+    cell: ({ row }) => <div className="text-sm">{numberFormatter.format(row.original.priority)}</div>,
   },
   {
     accessorKey: "health",
-    header: "Health",
+    header: t("admin.dashboardsA.crm.health"),
     cell: ({ row }) => (
-      <div className="flex items-end gap-0.5" title={row.original.health}>
-        <span className="sr-only">{row.original.health}</span>
+      <div className="flex items-end gap-0.5" title={healthLabels[row.original.health] ?? row.original.health}>
+        <span className="sr-only">{healthLabels[row.original.health] ?? row.original.health}</span>
         {healthStripSlots.map((slot) => (
           <div
             key={`${row.original.id}-${slot.id}`}
@@ -97,12 +121,16 @@ export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
   },
   {
     accessorKey: "value",
-    header: "Value",
-    cell: ({ row }) => <div className="font-medium text-sm tabular-nums">{row.original.value}</div>,
+    header: t("admin.dashboardsA.crm.value"),
+    cell: ({ row }) => (
+      <div className="font-medium text-sm tabular-nums">
+        {currencyFormatter.format(Number(row.original.value.replace(/[^0-9.-]/g, "")))}
+      </div>
+    ),
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Edit</div>,
+    header: () => <div className="text-right">{t("admin.dashboardsA.crm.edit")}</div>,
     cell: () => (
       <div className="text-right">
         <Button
@@ -111,10 +139,11 @@ export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
           className="size-8 rounded-full text-muted-foreground hover:bg-transparent focus-visible:bg-transparent"
         >
           <Pencil />
-          <span className="sr-only">Edit opportunity</span>
+          <span className="sr-only">{t("admin.dashboardsA.crm.editOpportunity")}</span>
         </Button>
       </div>
     ),
     enableHiding: false,
   },
-];
+  ];
+}

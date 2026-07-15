@@ -4,9 +4,10 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import Image from "next/image";
 import Link from "next/link";
 import { X, Check, CheckCircle2, ArrowRight } from "lucide-react";
-import { Product, money, categoryLabels } from "@/lib/vela-data";
+import { Product, money, getCategoryLabel } from "@/lib/vela-data";
 import { useCart } from "./cart-provider";
 import { usePathname, useRouter } from "next/navigation";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 type NotificationType = "bag" | "favorites";
 
@@ -26,6 +27,7 @@ interface NotificationContextValue {
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const { locale, t } = useI18n();
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,12 +101,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     <Check className="size-3.5 stroke-[3px]" />
                   </div>
                   <h2 className="font-sans text-lg font-bold text-ink leading-none mt-0.5">
-                    Added to Bag
+                    {t("notification.addedToBag")}
                   </h2>
                 </div>
                 <button
                   onClick={closeNotification}
-                  aria-label="Close notification"
+                  aria-label={t("notification.close")}
                   className="size-8 flex items-center justify-center text-ink/60 transition-colors hover:text-primary rounded-full hover:bg-surface-card"
                 >
                   <X className="size-4" />
@@ -129,13 +131,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                       {notification.product.name}
                     </h3>
                     <p className="text-xs text-on-surface-variant/75 mt-1">
-                      {categoryLabels[notification.product.category] ?? notification.product.category}
+                      {getCategoryLabel(notification.product.category, locale)}
                     </p>
                     <p className="text-xs text-on-surface-variant/75 mt-0.5">
-                      Size {notification.size}
+                      {t("common.size")} {notification.size}
                     </p>
                     <p className="font-sans text-sm font-bold text-ink mt-1.5 font-numeric">
-                      {money(notification.product.price)}
+                      {money(notification.product.price, locale)}
                     </p>
                   </div>
                 </div>
@@ -147,14 +149,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     onClick={closeNotification}
                     className="w-full bg-canvas text-ink text-center font-semibold text-xs tracking-wider uppercase py-3.5 px-6 border border-ink hover:bg-surface-card transition-colors duration-200 rounded-sm"
                   >
-                    VIEW BAG ({itemCount})
+                    {t("notification.viewBag", { count: itemCount })}
                   </Link>
                   <Link
                     href="/checkout"
                     onClick={closeNotification}
                     className="w-full bg-primary-container text-on-primary text-center font-semibold text-xs tracking-wider uppercase py-3.5 px-6 hover:bg-[#964025] transition-colors duration-200 rounded-sm"
                   >
-                    CHECKOUT
+                    {t("notification.checkout")}
                   </Link>
                 </div>
               </div>
@@ -167,12 +169,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="text-emerald-600 size-5 flex-shrink-0" />
                   <h2 className="font-sans text-base font-semibold text-ink m-0 mt-0.5">
-                    Added to Favorites
+                    {t("notification.addedToFavorites")}
                   </h2>
                 </div>
                 <button
                   onClick={closeNotification}
-                  aria-label="Close notification"
+                  aria-label={t("notification.close")}
                   className="text-on-surface-variant/70 hover:text-ink transition-colors p-1 rounded-sm hover:bg-surface-card/50"
                 >
                   <X className="size-4" />
@@ -194,16 +196,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 {/* Product Details */}
                 <div className="flex flex-col justify-center flex-grow">
                   <p className="text-[9px] font-semibold text-on-surface-variant/80 uppercase tracking-widest mb-1.5">
-                    {categoryLabels[notification.product.category] ?? notification.product.category}
+                    {getCategoryLabel(notification.product.category, locale)}
                   </p>
                   <h3 className="font-sans text-sm font-semibold text-ink leading-snug mb-1">
                     {notification.product.name}
                   </h3>
                   <p className="text-xs text-on-surface-variant/75 mb-2.5">
-                    Size: {notification.size}
+                    {t("common.size")}: {notification.size}
                   </p>
                   <p className="font-sans text-sm font-bold text-ink mt-auto font-numeric">
-                    {money(notification.product.price)}
+                    {money(notification.product.price, locale)}
                   </p>
                 </div>
               </div>
@@ -217,7 +219,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                   }}
                   className="w-full text-on-dark font-semibold text-xs tracking-wider uppercase py-4 hover:bg-surface-dark/95 transition-colors border-none cursor-pointer flex items-center justify-center gap-2 bg-primary-container rounded-sm"
                 >
-                  VIEW FAVOURITES
+                  {t("notification.viewFavorites")}
                   <ArrowRight className="size-4" />
                 </button>
               </div>

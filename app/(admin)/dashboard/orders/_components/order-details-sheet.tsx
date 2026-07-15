@@ -7,11 +7,10 @@ import { toast } from "sonner";
 
 import { ResourceFormSheet } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
-  formatAdminDateTime,
-  formatCurrency,
   getApiErrorMessage,
   resolveAdminAssetUrl,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,19 @@ import {
   type AdminOrderStatusHistoryFilters,
   type UpdateAdminOrderRequest,
 } from "@/lib/api/admin-orders";
+import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
 import {
   useAdminOrderQuery,
   useAdminOrderStatusHistoriesQuery,
   useUpdateAdminOrderMutation,
 } from "@/lib/queries/admin-orders";
 
-import { formatStatusLabel, OrderStatusBadge, PaymentStatusBadge } from "./order-status-badge";
+import {
+  getOrderStatusLabel,
+  getPaymentMethodLabel,
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "./order-status-badge";
 
 const HISTORY_FILTERS: AdminOrderStatusHistoryFilters = {
   page: 1,
@@ -67,6 +72,7 @@ function isOrderStatus(value: string | null): value is AdminOrderStatus {
 }
 
 export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: OrderDetailsSheetProps) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState<OrderDraft | null>(null);
   const orderQuery = useAdminOrderQuery(orderId, open);
   const historyQuery = useAdminOrderStatusHistoriesQuery(orderId, HISTORY_FILTERS, open);
@@ -105,7 +111,7 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
     if (currentDraft.status !== order.status) request.status = currentDraft.status;
 
     if (Object.keys(request).length === 0) {
-      toast.info("No order changes to save.");
+      toast.info(t("admin.commerce.orders.details.noChanges"));
       return;
     }
 
@@ -113,7 +119,9 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
       { id: order.id, request },
       {
         onSuccess: (updatedOrder) => {
-          toast.success(`Order ${updatedOrder.orderCode} was updated.`);
+          toast.success(
+            t("admin.commerce.orders.details.updated", { code: updatedOrder.orderCode })
+          );
           handleOpenChange(false);
         },
         onError: (error) => {
@@ -127,21 +135,25 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
     <ResourceFormSheet
       open={open}
       onOpenChange={handleOpenChange}
-      title={orderCode ? `Order ${orderCode}` : "Order details"}
-      description="Review the customer, delivery, items, totals, and update order processing states."
+      title={
+        orderCode
+          ? t("admin.commerce.orders.details.titleCode", { code: orderCode })
+          : t("admin.commerce.orders.details.title")
+      }
+      description={t("admin.commerce.orders.details.description")}
       onSubmit={handleSubmit}
       isPending={orderQuery.isLoading || updateMutation.isPending}
-      submitLabel="Save order"
+      submitLabel={t("admin.commerce.orders.details.save")}
     >
       {orderQuery.isLoading ? <OrderDetailsSkeleton /> : null}
 
       {orderQuery.isError ? (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load this order</AlertTitle>
+          <AlertTitle>{t("admin.commerce.orders.details.loadError")}</AlertTitle>
           <AlertDescription className="space-y-3">
             <p>{getApiErrorMessage(orderQuery.error)}</p>
             <Button type="button" size="sm" variant="outline" onClick={() => void orderQuery.refetch()}>
-              Try again
+              {t("admin.commerce.orders.details.tryAgain")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -149,7 +161,7 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
 
       {updateMutation.isError ? (
         <Alert variant="destructive">
-          <AlertTitle>Unable to save order</AlertTitle>
+          <AlertTitle>{t("admin.commerce.orders.details.saveError")}</AlertTitle>
           <AlertDescription>{getApiErrorMessage(updateMutation.error)}</AlertDescription>
         </Alert>
       ) : null}
@@ -157,14 +169,16 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
       {order && currentDraft ? (
         <>
           <Alert>
-            <AlertTitle>Controlled status workflow</AlertTitle>
+            <AlertTitle>{t("admin.commerce.orders.details.workflowTitle")}</AlertTitle>
             <AlertDescription>
-              Only forward transitions are available. Payment status is managed separately and cannot be overridden here.
+              {t("admin.commerce.orders.details.workflowDescription")}
             </AlertDescription>
           </Alert>
           <section className="grid gap-4 sm:grid-cols-2">
             <Field>
-              <FieldLabel htmlFor="order-status">Order status</FieldLabel>
+              <FieldLabel htmlFor="order-status">
+                {t("admin.commerce.orders.details.orderStatus")}
+              </FieldLabel>
               <Select
                 value={currentDraft.status}
                 onValueChange={(value) => {
@@ -177,7 +191,7 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
               <SelectContent align="start" alignItemWithTrigger={false}>
                   {availableOrderStatuses.map((status) => (
                     <SelectItem key={status} value={status}>
-                      {formatStatusLabel(status)}
+                      {getOrderStatusLabel(status, t)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -185,12 +199,12 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
             </Field>
 
             <Field>
-              <FieldLabel>Payment status</FieldLabel>
+              <FieldLabel>{t("admin.commerce.orders.details.paymentStatus")}</FieldLabel>
               <div className="flex h-9 items-center rounded-md border px-3">
                 <PaymentStatusBadge status={order.paymentStatus} />
               </div>
               <p className="text-muted-foreground text-xs">
-                Payment state is read-only here to avoid bypassing the payment workflow.
+                {t("admin.commerce.orders.details.paymentReadonly")}
               </p>
             </Field>
           </section>
@@ -206,18 +220,47 @@ export function OrderDetailsSheet({ orderId, orderCode, open, onOpenChange }: Or
 }
 
 function OrderOverview({ order }: { order: AdminOrder }) {
+  const { locale, t } = useI18n();
+
   return (
     <section className="space-y-3">
       <div>
-        <h3 className="font-medium">Customer & delivery</h3>
-        <p className="text-muted-foreground text-sm">Order placed {formatAdminDateTime(order.createdAt)}</p>
+        <h3 className="font-medium">{t("admin.commerce.orders.overview.title")}</h3>
+        <p className="text-muted-foreground text-sm">
+          {t("admin.commerce.orders.overview.placed", {
+            date: formatDateTime(order.createdAt, locale),
+          })}
+        </p>
       </div>
       <div className="grid gap-3 rounded-lg border p-4 text-sm">
-        <DetailLine icon={UserRound} label="Customer" value={order.userFullName || `User #${order.userId}`} />
-        <DetailLine icon={Mail} label="Email" value={order.userEmail} />
-        <DetailLine icon={UserRound} label="Receiver" value={order.receiverName} />
-        <DetailLine icon={Phone} label="Phone" value={order.receiverPhone} />
-        <DetailLine icon={MapPin} label="Address" value={order.receiverAddress} />
+        <DetailLine
+          icon={UserRound}
+          label={t("admin.commerce.orders.overview.customer")}
+          value={
+            order.userFullName ||
+            t("admin.commerce.orders.overview.userId", { id: order.userId })
+          }
+        />
+        <DetailLine
+          icon={Mail}
+          label={t("admin.commerce.orders.overview.email")}
+          value={order.userEmail}
+        />
+        <DetailLine
+          icon={UserRound}
+          label={t("admin.commerce.orders.overview.receiver")}
+          value={order.receiverName}
+        />
+        <DetailLine
+          icon={Phone}
+          label={t("admin.commerce.orders.overview.phone")}
+          value={order.receiverPhone}
+        />
+        <DetailLine
+          icon={MapPin}
+          label={t("admin.commerce.orders.overview.address")}
+          value={order.receiverAddress}
+        />
       </div>
     </section>
   );
@@ -242,21 +285,30 @@ function DetailLine({
 }
 
 function OrderItems({ order }: { order: AdminOrder }) {
+  const { locale, t } = useI18n();
+  const unitCount = order.items.reduce((total, item) => total + item.quantity, 0);
+
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-medium">Items</h3>
+        <h3 className="font-medium">{t("admin.commerce.orders.items.title")}</h3>
         <span className="text-muted-foreground text-sm tabular-nums">
-          {order.items.reduce((total, item) => total + item.quantity, 0)} units
+          {unitCount === 1
+            ? t("admin.commerce.orders.items.unitOne")
+            : t("admin.commerce.orders.items.unitMany", { count: unitCount })}
         </span>
       </div>
       <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead>Product</TableHead>
-              <TableHead className="text-center">Qty</TableHead>
-              <TableHead className="text-right">Subtotal</TableHead>
+              <TableHead>{t("admin.commerce.orders.items.product")}</TableHead>
+              <TableHead className="text-center">
+                {t("admin.commerce.orders.items.quantity")}
+              </TableHead>
+              <TableHead className="text-right">
+                {t("admin.commerce.orders.items.subtotal")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -285,14 +337,14 @@ function OrderItems({ order }: { order: AdminOrder }) {
                   </TableCell>
                   <TableCell className="text-center tabular-nums">{item.quantity}</TableCell>
                   <TableCell className="text-right font-medium tabular-nums">
-                    {formatCurrency(item.subtotal)}
+                    {formatCurrency(item.subtotal, locale)}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={3} className="h-20 text-center text-muted-foreground">
-                  No order items found.
+                  {t("admin.commerce.orders.items.empty")}
                 </TableCell>
               </TableRow>
             )}
@@ -304,20 +356,25 @@ function OrderItems({ order }: { order: AdminOrder }) {
 }
 
 function OrderTotals({ order }: { order: AdminOrder }) {
+  const { locale, t } = useI18n();
+
   return (
     <section className="space-y-3">
-      <h3 className="font-medium">Payment summary</h3>
+      <h3 className="font-medium">{t("admin.commerce.orders.totals.title")}</h3>
       <div className="space-y-2 rounded-lg border p-4 text-sm">
-        <TotalLine label="Subtotal" value={order.subtotal} />
-        <TotalLine label="Shipping" value={order.shippingFee} />
-        <TotalLine label="Discount" value={-Math.abs(order.discountAmount)} />
+        <TotalLine label={t("admin.commerce.orders.totals.subtotal")} value={order.subtotal} />
+        <TotalLine label={t("admin.commerce.orders.totals.shipping")} value={order.shippingFee} />
+        <TotalLine
+          label={t("admin.commerce.orders.totals.discount")}
+          value={-Math.abs(order.discountAmount)}
+        />
         <Separator />
         <div className="flex items-center justify-between gap-4 font-semibold text-base">
-          <span>Total</span>
-          <span className="tabular-nums">{formatCurrency(order.finalAmount)}</span>
+          <span>{t("admin.commerce.orders.totals.total")}</span>
+          <span className="tabular-nums">{formatCurrency(order.finalAmount, locale)}</span>
         </div>
         <p className="text-right text-muted-foreground text-xs">
-          {formatStatusLabel(order.paymentMethod || "Unknown method")}
+          {getPaymentMethodLabel(order.paymentMethod, t)}
         </p>
       </div>
     </section>
@@ -325,10 +382,12 @@ function OrderTotals({ order }: { order: AdminOrder }) {
 }
 
 function TotalLine({ label, value }: { label: string; value: number }) {
+  const { locale } = useI18n();
+
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className="tabular-nums">{formatCurrency(value)}</span>
+      <span className="tabular-nums">{formatCurrency(value, locale)}</span>
     </div>
   );
 }
@@ -340,13 +399,14 @@ function OrderHistory({
   order: AdminOrder;
   query: ReturnType<typeof useAdminOrderStatusHistoriesQuery>;
 }) {
+  const { locale, t } = useI18n();
   const histories = query.data?.result ?? [];
 
   return (
     <section className="space-y-3">
       <div className="flex items-center gap-2">
         <History className="size-4 text-muted-foreground" />
-        <h3 className="font-medium">Status history</h3>
+        <h3 className="font-medium">{t("admin.commerce.orders.history.title")}</h3>
       </div>
 
       {query.isLoading ? (
@@ -359,7 +419,7 @@ function OrderHistory({
 
       {query.isError ? (
         <Alert variant="destructive">
-          <AlertTitle>Status history unavailable</AlertTitle>
+          <AlertTitle>{t("admin.commerce.orders.history.unavailable")}</AlertTitle>
           <AlertDescription>{getApiErrorMessage(query.error)}</AlertDescription>
         </Alert>
       ) : null}
@@ -372,21 +432,29 @@ function OrderHistory({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground text-sm">
-                      {history.fromStatus ? `${formatStatusLabel(history.fromStatus)} →` : "Created as"}
+                      {history.fromStatus
+                        ? `${getOrderStatusLabel(history.fromStatus, t)} →`
+                        : t("admin.commerce.orders.history.createdAs")}
                     </span>
                     <OrderStatusBadge status={history.toStatus} />
                   </div>
-                  <span className="text-muted-foreground text-xs">{formatAdminDateTime(history.createdAt)}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {formatDateTime(history.createdAt, locale)}
+                  </span>
                 </div>
                 {history.reason ? <p className="text-muted-foreground text-sm">{history.reason}</p> : null}
                 {history.changedBy ? (
-                  <p className="text-muted-foreground text-xs">Changed by user #{history.changedBy}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {t("admin.commerce.orders.history.changedBy", { id: history.changedBy })}
+                  </p>
                 ) : null}
               </div>
             ))
           ) : (
             <div className="p-4 text-muted-foreground text-sm">
-              No recorded transitions. Current status: {formatStatusLabel(order.status)}.
+              {t("admin.commerce.orders.history.empty", {
+                status: getOrderStatusLabel(order.status, t),
+              })}
             </div>
           )}
         </div>

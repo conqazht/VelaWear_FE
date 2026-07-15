@@ -1,63 +1,55 @@
 "use client";
 
-import { useState, useEffect, useRef, type ComponentType, type SVGProps } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Compass, Sparkles, Sliders, Flower2 } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
+import { useI18n } from "@/components/providers/i18n-provider";
 
-interface Step {
-  id: string;
-  num: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
-}
-
-const STEPS: Step[] = [
+const STEPS = [
   {
     id: "step-1",
     num: "01",
-    title: "Sourcing Prime Materials",
-    subtitle: "Nguồn sợi bông hữu cơ & tơ mộc đạt chứng chỉ quốc tế",
-    description: "Bắt đầu từ vùng nguyên liệu chuẩn mực, chúng tôi chỉ tinh chọn các thớ sợi xơ dài mềm mướt nhất: len merino vùng cao nguyên khí hậu ôn hoà, tơ lụa tơ tằm dệt thủ công mộc mạc và bông cotton hữu cơ xơ dài cực mịn. Tất cả được thu hoạch theo phương thức luân canh tuần hoàn thân thiện bảo vệ Trái Đất.",
+    titleKey: "storefront.craft.step1Title",
+    subtitleKey: "storefront.craft.step1Subtitle",
+    descriptionKey: "storefront.craft.step1Description",
     image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop",
     icon: Flower2,
   },
   {
     id: "step-2",
     num: "02",
-    title: "Slow Artisan Weaving",
-    subtitle: "Nghệ thuật dệt chậm thủ công tối ưu hóa mật độ thớ vải",
-    description: "Sử dụng hệ máy dệt con thoi cổ điển dưới bàn tay tinh xảo của nghệ nhân lâu năm. Từng thớ vải được dệt tinh xảo với mật độ dệt thông thoáng rủ nhẹ tự nhiên nhưng kết cấu vô cùng chặt chẽ bền bỉ theo thời gian, lưu giữ nguyên vẹn hơi thở tự nhiên nguyên bản của thớ sợi.",
+    titleKey: "storefront.craft.step2Title",
+    subtitleKey: "storefront.craft.step2Subtitle",
+    descriptionKey: "storefront.craft.step2Description",
     image: "https://images.unsplash.com/photo-1608748010899-18f300247112?q=80&w=600&auto=format&fit=crop",
     icon: Compass,
   },
   {
     id: "step-3",
     num: "03",
-    title: "Precision Draping & Tailoring",
-    subtitle: "May đo khâu giấu chỉ tinh mỹ tôn phom dáng rủ tự nhiên",
-    description: "Công đoạn cắt may đo áp dụng kỹ nghệ khâu giấu chỉ độc quyền tạo cảm giác lướt êm dịu phẳng phiu trên làn da. Thiết kế tinh giản loại bỏ hoàn toàn các cấu trúc đệm lót cứng nhắc, tập trung tạo phom dáng rủ tự do, phóng khoáng, thanh lịch cho mọi chuyển động.",
+    titleKey: "storefront.craft.step3Title",
+    subtitleKey: "storefront.craft.step3Subtitle",
+    descriptionKey: "storefront.craft.step3Description",
     image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600&auto=format&fit=crop",
     icon: Sliders,
   },
   {
     id: "step-4",
     num: "04",
-    title: "Minimalist Fine Packaging",
-    subtitle: "Hộp giấy nén sợi thực vật nguyên chất không màng nhựa lót",
-    description: "Sản phẩm Vela Wear trao đến tay quý khách được gói gọn bằng tình yêu qua lớp giấy lụa mỏng nhẹ thơm tho và đặt trong hộp nén bột xơ thực vật thô ráp tự nhiên, hoàn toàn phân hủy sinh học trong 90 ngày. Từng chi tiết đều toát lên sự chu đáo, tôn quý tối giản.",
+    titleKey: "storefront.craft.step4Title",
+    subtitleKey: "storefront.craft.step4Subtitle",
+    descriptionKey: "storefront.craft.step4Description",
     image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?q=80&w=600&auto=format&fit=crop",
     icon: Sparkles,
   },
-];
+] as const;
 
 export function EditorialCraft() {
   const [activeStep, setActiveStep] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
 
   // Monitor scrolling to pin the viewport and advance steps on desktop
   useEffect(() => {
@@ -143,13 +135,13 @@ export function EditorialCraft() {
           <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
             <ScrollReveal direction="up">
               <span className="text-[10px] font-semibold uppercase tracking-[2.5px] text-[#b5573a] block mb-2">
-                Quy trình biên tập thủ công
+                {t("storefront.craft.eyebrow")}
               </span>
               <h2 className="font-serif text-3.5xl md:text-5xl font-light tracking-tight text-[#1c1a18]">
-                Nghệ Thuật Kiến Tạo Chậm
+                {t("storefront.craft.title")}
               </h2>
               <p className="text-[#8a857c] text-xs md:text-sm mt-3 font-light leading-relaxed">
-                Chiêm ngưỡng các công đoạn chế tác tỉ mỉ của Vela Wear. Hãy cuộn chuột xuống để tự động khám phá và lật mở từng chương thiết kế đặc trưng.
+                {t("storefront.craft.description")}
               </p>
             </ScrollReveal>
           </div>
@@ -190,10 +182,10 @@ export function EditorialCraft() {
                         
                         <div>
                           <p className="text-[9px] font-semibold uppercase tracking-[1px] text-[#8a857c]">
-                            {step.title}
+                            {t(step.titleKey)}
                           </p>
                           <h3 className="font-serif text-sm md:text-base font-medium text-[#1c1a18] mt-0.5">
-                            {step.subtitle}
+                            {t(step.subtitleKey)}
                           </h3>
                         </div>
                       </div>
@@ -221,7 +213,7 @@ export function EditorialCraft() {
                           className="overflow-hidden"
                         >
                           <p className="text-xs leading-relaxed text-[#3d3a36] font-light max-w-2xl pr-2 border-l border-[#b5573a] pl-4">
-                            {step.description}
+                            {t(step.descriptionKey)}
                           </p>
                         </motion.div>
                       )}
@@ -241,7 +233,7 @@ export function EditorialCraft() {
                     suppressHydrationWarning
                     key={activeStep}
                     src={STEPS[activeStep].image}
-                    alt={STEPS[activeStep].title}
+                    alt={t(STEPS[activeStep].titleKey)}
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}

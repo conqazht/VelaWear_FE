@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Search } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -30,44 +31,9 @@ type SearchItem = {
   newTab?: boolean;
 };
 
-const sidebarGroupLabels = new Set(sidebarItems.flatMap((group) => (group.label ? [group.label] : [])));
-
-function getSubItemGroup(groupLabel: string | undefined, itemTitle: string) {
-  return sidebarGroupLabels.has(itemTitle) ? (groupLabel ?? "Other") : itemTitle;
-}
-
-const searchItems: SearchItem[] = sidebarItems.flatMap((group) =>
-  group.items.flatMap((item) => {
-    if (item.subItems) {
-      return item.subItems.map((sub) => ({
-        id: sub.id,
-        group: getSubItemGroup(group.label, item.title),
-        label: sub.title,
-        url: sub.url,
-        icon: item.icon,
-        disabled: sub.disabled,
-        newTab: sub.newTab,
-      }));
-    }
-    return [
-      {
-        id: item.id,
-        group: group.label ?? "Other",
-        label: item.title,
-        url: item.url,
-        icon: item.icon,
-        disabled: item.disabled,
-        newTab: item.newTab,
-      },
-    ];
-  }),
-);
-
 function getAvailableItems(items: SearchItem[]) {
   return items.filter((item) => !item.disabled && !item.url.includes("coming-soon"));
 }
-
-const recommendations = getAvailableItems(searchItems);
 
 function groupBy(items: SearchItem[]) {
   const groups = [...new Set(items.map((item) => item.group))];
@@ -81,6 +47,47 @@ export function SearchDialog() {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const router = useRouter();
+  const { t } = useI18n();
+  const searchItems = React.useMemo<SearchItem[]>(() => {
+    const sidebarGroupKeys = new Set(
+      sidebarItems.flatMap((group) => (group.labelKey ? [group.labelKey] : [])),
+    );
+
+    return sidebarItems.flatMap((group) => {
+      const groupLabel = group.labelKey
+        ? t(group.labelKey)
+        : t("admin.shell.navigation.other");
+
+      return group.items.flatMap((item) => {
+        const itemTitle = t(item.titleKey);
+
+        if (item.subItems) {
+          return item.subItems.map((sub) => ({
+            id: sub.id,
+            group: sidebarGroupKeys.has(item.titleKey) ? groupLabel : itemTitle,
+            label: t(sub.titleKey),
+            url: sub.url,
+            icon: item.icon,
+            disabled: sub.disabled,
+            newTab: sub.newTab,
+          }));
+        }
+
+        return [
+          {
+            id: item.id,
+            group: groupLabel,
+            label: itemTitle,
+            url: item.url,
+            icon: item.icon,
+            disabled: item.disabled,
+            newTab: item.newTab,
+          },
+        ];
+      });
+    });
+  }, [t]);
+  const recommendations = React.useMemo(() => getAvailableItems(searchItems), [searchItems]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -135,19 +142,24 @@ export function SearchDialog() {
       <Button
         onClick={() => handleOpenChange(true)}
         variant="link"
+        aria-label={t("admin.shell.search.label")}
         className="px-0! font-normal text-muted-foreground hover:no-underline"
       >
         <Search data-icon="inline-start" />
-        Search
+        {t("admin.shell.search.label")}
         <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium text-[10px]">
           <span className="text-xs">⌘</span>J
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <Command>
-          <CommandInput placeholder="Search dashboards, users, and more…" value={query} onValueChange={setQuery} />
+          <CommandInput
+            placeholder={t("admin.shell.search.placeholder")}
+            value={query}
+            onValueChange={setQuery}
+          />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{t("admin.shell.search.empty")}</CommandEmpty>
             {query ? renderGroups(searchItems) : renderGroups(recommendations)}
           </CommandList>
         </Command>

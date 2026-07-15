@@ -2,11 +2,13 @@
 "use no memo";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { addMinutes, differenceInCalendarDays, endOfToday, format, parseISO } from "date-fns";
+import { addMinutes, differenceInCalendarDays, endOfToday, parseISO } from "date-fns";
 import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, LoaderIcon, UserRound } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getIntlLocale } from "@/lib/i18n";
 
 import type { RecentCustomerRow } from "./schema";
 
@@ -25,7 +27,34 @@ function billingIcon(billing: string) {
   }
 }
 
-export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
+export function useRecentCustomersColumns(): ColumnDef<RecentCustomerRow>[] {
+  const { locale, t } = useI18n();
+  const intlLocale = getIntlLocale(locale);
+  const dateFormatter = new Intl.DateTimeFormat(intlLocale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const timeFormatter = new Intl.DateTimeFormat(intlLocale, { hour: "numeric", minute: "2-digit" });
+  const statusLabels: Record<string, string> = {
+    Inactive: t("admin.dashboardsA.common.inactive"),
+    Subscribed: t("admin.dashboardsA.common.subscribed"),
+    Unsubscribed: t("admin.dashboardsA.common.unsubscribed"),
+  };
+  const billingLabels: Record<string, string> = {
+    Overdue: t("admin.dashboardsA.common.overdue"),
+    Paid: t("admin.dashboardsA.common.paid"),
+    Pending: t("admin.dashboardsA.common.pending"),
+    Trial: t("admin.dashboardsA.common.trial"),
+  };
+  const planLabels: Record<string, string> = {
+    Enterprise: t("admin.dashboardsA.common.planEnterprise"),
+    Growth: t("admin.dashboardsA.common.planGrowth"),
+    Pro: t("admin.dashboardsA.common.planPro"),
+    Starter: t("admin.dashboardsA.common.planStarter"),
+  };
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -33,7 +62,7 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
         <Checkbox
           checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all customers on this page"
+          aria-label={t("admin.dashboardsA.default.selectAllCustomers")}
         />
       </div>
     ),
@@ -42,7 +71,7 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label={`Select ${row.original.name}`}
+          aria-label={t("admin.dashboardsA.default.selectCustomer", { name: row.original.name })}
         />
       </div>
     ),
@@ -50,7 +79,7 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
   },
   {
     accessorKey: "name",
-    header: "Customer",
+    header: t("admin.dashboardsA.default.customer"),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
@@ -76,29 +105,29 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: t("admin.dashboardsA.common.status"),
     filterFn: "equalsString",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {row.original.status}
+        {statusLabels[row.original.status] ?? row.original.status}
       </Badge>
     ),
   },
   {
     accessorKey: "billing",
-    header: "Billing",
+    header: t("admin.dashboardsA.common.billing"),
     filterFn: "equalsString",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
         {billingIcon(row.original.billing)}
-        {row.original.billing}
+        {billingLabels[row.original.billing] ?? row.original.billing}
       </Badge>
     ),
   },
   {
     accessorKey: "plan",
-    header: "Plan",
-    cell: ({ row }) => <span className="text-sm">{row.original.plan}</span>,
+    header: t("admin.dashboardsA.default.plan"),
+    cell: ({ row }) => <span className="text-sm">{planLabels[row.original.plan] ?? row.original.plan}</span>,
   },
   {
     id: "joinedWindow",
@@ -114,17 +143,20 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
   },
   {
     accessorKey: "joined",
-    header: "Joined",
+    header: t("admin.dashboardsA.default.joined"),
     cell: ({ row }) => {
       const baseDate = parseISO(row.original.joined);
       const joinedAt = addMinutes(baseDate, 9 * 60 + (Number(row.original.id) % 12) * 17);
 
       return (
         <div className="grid gap-0.5">
-          <span className="text-sm">{format(joinedAt, "do MMMM yyyy")}</span>
-          <span className="text-muted-foreground text-xs">at {format(joinedAt, "h:mm a")}</span>
+          <span className="text-sm">{dateFormatter.format(joinedAt)}</span>
+          <span className="text-muted-foreground text-xs">
+            {t("admin.dashboardsA.default.joinedAt", { time: timeFormatter.format(joinedAt) })}
+          </span>
         </div>
       );
     },
   },
-];
+  ];
+}

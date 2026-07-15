@@ -3,12 +3,13 @@
 import * as React from "react";
 import { Skeleton } from "boneyard-js/react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useSidebar } from "@/components/ui/sidebar";
 import { setClientCookie } from "@/lib/cookie.client";
 
-import type { Mail } from "./data";
+import { type Mail, mailsByLocale } from "./data";
 import { MailInbox } from "./mail-inbox";
 import {
   DEFAULT_MAIL_LAYOUT,
@@ -20,11 +21,17 @@ import { MailView } from "./mail-view";
 import { useMail } from "./use-mail";
 
 interface MailProps {
-  mails: Mail[];
   defaultLayout: number[] | undefined;
 }
 
-export function MailComponent({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: MailProps) {
+interface MailLayoutProps {
+  mails: Mail[];
+  defaultLayout?: number[];
+}
+
+export function MailComponent({ defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: MailProps) {
+  const { locale } = useI18n();
+  const mails = mailsByLocale[locale];
   const { isMobile } = useSidebar();
   const isMounted = React.useSyncExternalStore(
     () => () => {},
@@ -58,15 +65,30 @@ function MailLoadingFallback() {
 }
 
 function MailLoadingFixture() {
+  const { t } = useI18n();
+
   return (
     <div className="grid size-full grid-cols-[18rem_1fr] overflow-hidden rounded-lg border">
-      <aside className="space-y-4 border-r p-4"><h2 className="text-xl font-semibold">Inbox</h2><div className="h-16 rounded border" /><div className="h-16 rounded border" /></aside>
-      <main className="space-y-6 p-8"><h2 className="text-2xl font-semibold">Message subject</h2><div className="h-px bg-border" /><p>Message content preview</p></main>
+      <aside className="space-y-4 border-r p-4">
+        <h2 className="text-xl font-semibold">
+          {t("admin.communications.mail.loading.inbox")}
+        </h2>
+        <div className="h-16 rounded border" />
+        <div className="h-16 rounded border" />
+      </aside>
+      <main className="space-y-6 p-8">
+        <h2 className="text-2xl font-semibold">
+          {t("admin.communications.mail.loading.subject")}
+        </h2>
+        <div className="h-px bg-border" />
+        <p>{t("admin.communications.mail.loading.preview")}</p>
+      </main>
     </div>
   );
 }
 
-function MailMobileLayout({ mails }: Pick<MailProps, "mails">) {
+function MailMobileLayout({ mails }: Pick<MailLayoutProps, "mails">) {
+  const { t } = useI18n();
   const [mail] = useMail();
   const [isMailOpen, setIsMailOpen] = React.useState(false);
   const selectedMail = mails.find((item) => item.id === mail.selected) || null;
@@ -77,8 +99,12 @@ function MailMobileLayout({ mails }: Pick<MailProps, "mails">) {
 
       <Drawer open={isMailOpen} onOpenChange={setIsMailOpen}>
         <DrawerContent>
-          <DrawerTitle className="sr-only">Mail message</DrawerTitle>
-          <DrawerDescription className="sr-only">Read the selected email message</DrawerDescription>
+          <DrawerTitle className="sr-only">
+            {t("admin.communications.mail.drawer.title")}
+          </DrawerTitle>
+          <DrawerDescription className="sr-only">
+            {t("admin.communications.mail.drawer.description")}
+          </DrawerDescription>
           <MailView mail={selectedMail} onClose={() => setIsMailOpen(false)} />
         </DrawerContent>
       </Drawer>
@@ -86,7 +112,7 @@ function MailMobileLayout({ mails }: Pick<MailProps, "mails">) {
   );
 }
 
-function MailDesktopLayout({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: MailProps) {
+function MailDesktopLayout({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: MailLayoutProps) {
   const [mail] = useMail();
 
   return (

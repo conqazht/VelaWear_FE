@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -19,6 +20,8 @@ type SizeFormProps = {
 };
 
 export function SizeForm({ values, onChange }: SizeFormProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof SizeFormValues>(key: Key, value: SizeFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -26,20 +29,20 @@ export function SizeForm({ values, onChange }: SizeFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="size-name">Size name</FieldLabel>
+        <FieldLabel htmlFor="size-name">{t("admin.commerce.attributes.sizes.form.name")}</FieldLabel>
         <Input
           id="size-name"
           value={values.name}
           onChange={(event) => update("name", event.target.value)}
           maxLength={50}
-          placeholder="Medium or M"
+          placeholder={t("admin.commerce.attributes.sizes.form.namePlaceholder")}
           required
         />
-        <FieldDescription>Use the exact label customers should see on product options.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.attributes.sizes.form.nameHelp")}</FieldDescription>
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="size-sort-order">Sort order</FieldLabel>
+        <FieldLabel htmlFor="size-sort-order">{t("admin.commerce.attributes.sortOrder")}</FieldLabel>
         <Input
           id="size-sort-order"
           type="number"
@@ -50,7 +53,7 @@ export function SizeForm({ values, onChange }: SizeFormProps) {
           onChange={(event) => update("sortOrder", event.target.value)}
           required
         />
-        <FieldDescription>Lower values appear first in attribute option lists.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.attributes.sortOrderHelp")}</FieldDescription>
       </Field>
     </FieldGroup>
   );

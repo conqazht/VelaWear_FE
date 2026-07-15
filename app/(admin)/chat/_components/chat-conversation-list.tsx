@@ -2,6 +2,7 @@
 
 import { ChevronDown, Filter, PanelRightClose, PanelRightOpen, Pin } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -20,7 +21,14 @@ interface ChatConversationListProps {
   className?: string;
 }
 
+const GROUP_MESSAGE_KEYS = {
+  Pinned: "admin.communications.chat.conversations.pinned",
+  Today: "admin.communications.chat.conversations.today",
+  Yesterday: "admin.communications.chat.conversations.yesterday",
+} as const;
+
 export function ChatConversationList({ conversations, onSelectConversation, className }: ChatConversationListProps) {
+  const { t } = useI18n();
   const [chat, setChat] = useChat();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -45,15 +53,26 @@ export function ChatConversationList({ conversations, onSelectConversation, clas
             variant="ghost"
             size="icon-sm"
             onClick={toggleSidebar}
+            aria-label={
+              isCollapsed
+                ? t("admin.communications.chat.conversations.expandSidebar")
+                : t("admin.communications.chat.conversations.collapseSidebar")
+            }
             className="[&_svg]:transition-transform [&_svg]:duration-300"
           >
             {isCollapsed ? <PanelRightClose /> : <PanelRightOpen />}
           </Button>
           <Separator orientation="vertical" className="mr-1.5 h-4 data-vertical:self-center" />
-          <h1 className="font-medium text-xl leading-none">Inbox</h1>
+          <h1 className="font-medium text-xl leading-none">
+            {t("admin.communications.chat.conversations.title")}
+          </h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon-sm">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.communications.chat.conversations.filter")}
+          >
             <Filter />
           </Button>
         </div>
@@ -64,28 +83,35 @@ export function ChatConversationList({ conversations, onSelectConversation, clas
       <Tabs defaultValue="all">
         <TabsList variant="line" className="w-full border-b px-0 **:data-[slot=tabs-trigger]:border-x-0">
           <TabsTrigger value="all">
-            All
+            {t("admin.communications.chat.conversations.all")}
             <span className="text-muted-foreground text-xs">(24)</span>
           </TabsTrigger>
           <TabsTrigger value="open">
-            Open
+            {t("admin.communications.chat.conversations.open")}
             <span className="text-muted-foreground text-xs">(18)</span>
           </TabsTrigger>
           <TabsTrigger value="snoozed">
-            Snoozed
+            {t("admin.communications.chat.conversations.snoozed")}
             <span className="text-muted-foreground text-xs">(2)</span>
           </TabsTrigger>
-          <TabsTrigger value="closed">Closed</TabsTrigger>
+          <TabsTrigger value="closed">
+            {t("admin.communications.chat.conversations.closed")}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
       <div className="flex min-h-0 flex-1 flex-col">
         <ScrollArea className="**:data-[slot=scroll-area-viewport]:scroll-fade h-full min-h-0 flex-1 overflow-hidden [&_[data-orientation=vertical][data-slot=scroll-area-scrollbar]]:w-1.5">
           <div className="flex flex-col gap-3 pt-0">
+            {conversationGroups.length === 0 ? (
+              <p className="px-4 py-8 text-center text-muted-foreground text-sm">
+                {t("admin.communications.chat.conversations.empty")}
+              </p>
+            ) : null}
             {conversationGroups.map(({ group, conversations }) => (
               <Collapsible key={group} defaultOpen>
                 <CollapsibleTrigger className="flex w-full items-center justify-between gap-1 px-3 py-2 font-medium text-muted-foreground text-xs hover:text-foreground [&[data-panel-open]>svg]:rotate-180">
-                  {group}
+                  {t(GROUP_MESSAGE_KEYS[group])}
                   <ChevronDown className="size-3 transition-transform" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>

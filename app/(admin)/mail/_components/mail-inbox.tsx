@@ -2,6 +2,8 @@
 
 import { Ellipsis, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +18,7 @@ interface MailInboxProps {
 }
 
 export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
+  const { t } = useI18n();
   const pinnedMails = mails.filter((mail) => mail.isPinned);
   const unpinnedMails = mails.filter((mail) => !mail.isPinned);
 
@@ -25,16 +28,31 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
         <div className="flex items-center">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 ml-1 h-4 data-vertical:self-center" />
-          <h1 className="font-medium text-xl leading-none">Inbox</h1>
+          <h1 className="font-medium text-xl leading-none">
+            {t("admin.communications.mail.inbox.title")}
+          </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="Filter inbox">
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher showIcon={false} className="mr-1" />
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.communications.mail.inbox.filter")}
+          >
             <SlidersHorizontal />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Refresh inbox">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.communications.mail.inbox.refresh")}
+          >
             <RotateCcw />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label="More inbox actions">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.communications.mail.inbox.more")}
+          >
             <Ellipsis />
           </Button>
         </div>
@@ -46,7 +64,10 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
 
       <div className="px-2">
         <InputGroup className="h-7 w-full rounded-md">
-          <InputGroupInput className="h-7" placeholder="Search..." />
+          <InputGroupInput
+            className="h-7"
+            placeholder={t("admin.communications.mail.inbox.search")}
+          />
           <InputGroupAddon>
             <Search />
           </InputGroupAddon>
@@ -58,12 +79,12 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
           groups={[
             {
               id: "pinned",
-              title: "Pinned",
+              title: t("admin.communications.mail.inbox.pinned"),
               items: pinnedMails,
             },
             {
               id: "inbox",
-              title: "Inbox",
+              title: t("admin.communications.mail.inbox.messages"),
               items: unpinnedMails,
             },
           ]}

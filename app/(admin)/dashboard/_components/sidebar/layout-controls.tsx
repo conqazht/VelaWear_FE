@@ -3,6 +3,7 @@
 import { Settings } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,7 +14,15 @@ import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } f
 import { THEME_PRESET_OPTIONS, type ThemeMode, type ThemePreset } from "@/lib/preferences/theme";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
+const THEME_PRESET_LABEL_KEYS = {
+  default: "admin.shell.preferences.preset.default",
+  brutalist: "admin.shell.preferences.preset.brutalist",
+  "soft-pop": "admin.shell.preferences.preset.softPop",
+  tangerine: "admin.shell.preferences.preset.tangerine",
+} as const;
+
 export function LayoutControls() {
+  const { t } = useI18n();
   const { values, resolvedThemeMode, setPreference, resetPreferences } = usePreferencesStore(
     useShallow((state) => ({
       values: state.values,
@@ -43,7 +52,7 @@ export function LayoutControls() {
             backgroundColor: (resolvedThemeMode ?? "light") === "dark" ? preset.primary.dark : preset.primary.light,
           }}
         />
-        {preset.label}
+        {t(THEME_PRESET_LABEL_KEYS[preset.value])}
       </span>
     ),
   }));
@@ -63,18 +72,18 @@ export function LayoutControls() {
 
   return (
     <Popover>
-      <PopoverTrigger render={<Button size="icon" />}>
+      <PopoverTrigger render={<Button size="icon" aria-label={t("admin.shell.preferences.open")} />}>
         <Settings />
       </PopoverTrigger>
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="font-medium text-sm leading-none">Preferences</h4>
-            <p className="text-muted-foreground text-xs">Customize your dashboard layout preferences.</p>
+            <h4 className="font-medium text-sm leading-none">{t("admin.shell.preferences.title")}</h4>
+            <p className="text-muted-foreground text-xs">{t("admin.shell.preferences.description")}</p>
           </div>
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Theme Preset</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.themePreset")}</Label>
               <Select
                 items={themePresetItems}
                 value={themePreset}
@@ -84,7 +93,7 @@ export function LayoutControls() {
                 }}
               >
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue className="items-center" placeholder="Preset" />
+                  <SelectValue className="items-center" placeholder={t("admin.shell.preferences.preset")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -98,7 +107,7 @@ export function LayoutControls() {
                                 resolvedThemeMode === "dark" ? preset.primary.dark : preset.primary.light,
                             }}
                           />
-                          {preset.label}
+                          {t(THEME_PRESET_LABEL_KEYS[preset.value])}
                         </span>
                       </SelectItem>
                     ))}
@@ -108,7 +117,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Fonts</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.fonts")}</Label>
               <Select
                 items={fontItems}
                 value={font}
@@ -118,7 +127,7 @@ export function LayoutControls() {
                 }}
               >
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue placeholder="Select font" />
+                  <SelectValue placeholder={t("admin.shell.preferences.selectFont")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -133,7 +142,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Theme Mode</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.themeMode")}</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -144,20 +153,35 @@ export function LayoutControls() {
                   setPreference("theme_mode", mode as ThemeMode);
                 }}
               >
-                <ToggleGroupItem value="light" aria-label="Toggle light">
-                  Light
+                <ToggleGroupItem
+                  value="light"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.light"),
+                  })}
+                >
+                  {t("admin.shell.preferences.light")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="dark" aria-label="Toggle dark">
-                  Dark
+                <ToggleGroupItem
+                  value="dark"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.dark"),
+                  })}
+                >
+                  {t("admin.shell.preferences.dark")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="system" aria-label="Toggle system">
-                  System
+                <ToggleGroupItem
+                  value="system"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.system"),
+                  })}
+                >
+                  {t("admin.shell.preferences.system")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Page Layout</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.pageLayout")}</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -168,17 +192,27 @@ export function LayoutControls() {
                   setPreference("content_layout", layout as ContentLayout);
                 }}
               >
-                <ToggleGroupItem value="centered" aria-label="Toggle centered">
-                  Centered
+                <ToggleGroupItem
+                  value="centered"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.centered"),
+                  })}
+                >
+                  {t("admin.shell.preferences.centered")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="full-width" aria-label="Toggle full-width">
-                  Full Width
+                <ToggleGroupItem
+                  value="full-width"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.fullWidth"),
+                  })}
+                >
+                  {t("admin.shell.preferences.fullWidth")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Navbar Behavior</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.navbarBehavior")}</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -189,17 +223,27 @@ export function LayoutControls() {
                   setPreference("navbar_style", style as NavbarStyle);
                 }}
               >
-                <ToggleGroupItem value="sticky" aria-label="Toggle sticky">
-                  Sticky
+                <ToggleGroupItem
+                  value="sticky"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.sticky"),
+                  })}
+                >
+                  {t("admin.shell.preferences.sticky")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="scroll" aria-label="Toggle scroll">
-                  Scroll
+                <ToggleGroupItem
+                  value="scroll"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.scroll"),
+                  })}
+                >
+                  {t("admin.shell.preferences.scroll")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Sidebar Style</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.sidebarStyle")}</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -210,20 +254,35 @@ export function LayoutControls() {
                   setPreference("sidebar_variant", nextVariant as SidebarVariant);
                 }}
               >
-                <ToggleGroupItem value="inset" aria-label="Toggle inset">
-                  Inset
+                <ToggleGroupItem
+                  value="inset"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.inset"),
+                  })}
+                >
+                  {t("admin.shell.preferences.inset")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="sidebar" aria-label="Toggle sidebar">
-                  Sidebar
+                <ToggleGroupItem
+                  value="sidebar"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.sidebar"),
+                  })}
+                >
+                  {t("admin.shell.preferences.sidebar")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="floating" aria-label="Toggle floating">
-                  Floating
+                <ToggleGroupItem
+                  value="floating"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.floating"),
+                  })}
+                >
+                  {t("admin.shell.preferences.floating")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Sidebar Collapse Mode</Label>
+              <Label className="font-medium text-xs">{t("admin.shell.preferences.sidebarCollapseMode")}</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -234,17 +293,27 @@ export function LayoutControls() {
                   setPreference("sidebar_collapsible", nextCollapsible as SidebarCollapsible);
                 }}
               >
-                <ToggleGroupItem value="icon" aria-label="Toggle icon">
-                  Icon
+                <ToggleGroupItem
+                  value="icon"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.icon"),
+                  })}
+                >
+                  {t("admin.shell.preferences.icon")}
                 </ToggleGroupItem>
-                <ToggleGroupItem value="offcanvas" aria-label="Toggle offcanvas">
-                  OffCanvas
+                <ToggleGroupItem
+                  value="offcanvas"
+                  aria-label={t("admin.shell.preferences.selectOption", {
+                    option: t("admin.shell.preferences.offcanvas"),
+                  })}
+                >
+                  {t("admin.shell.preferences.offcanvas")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <Button type="button" size="sm" variant="outline" className="w-full text-xs" onClick={resetPreferences}>
-              Restore Defaults
+              {t("admin.shell.preferences.restoreDefaults")}
             </Button>
           </div>
         </div>

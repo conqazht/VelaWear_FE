@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group";
 import {
   DropdownMenu,
@@ -57,12 +58,23 @@ interface KanbanProps {
 }
 
 export function Kanban({ initialBoard }: KanbanProps) {
+  const { t } = useI18n();
+  const columnTitles: Record<ColumnId, string> = {
+    building: t("admin.workflows.kanban.building"),
+    ideas: t("admin.workflows.kanban.ideas"),
+    planned: t("admin.workflows.kanban.planned"),
+    qa: t("admin.workflows.kanban.qa"),
+    shipped: t("admin.workflows.kanban.shipped"),
+  };
   const [board, setBoard] = React.useState<BoardState>(initialBoard);
   const [columnOrder, setColumnOrder] = React.useState<ColumnId[]>(columnIds);
   const [activeTask, setActiveTask] = React.useState<Task | null>(null);
   const [activeColumnId, setActiveColumnId] = React.useState<ColumnId | null>(null);
   const boardBeforeDrag = React.useRef<BoardState | null>(null);
-  const orderedColumns = columnOrder.flatMap((columnId) => columns.find((column) => column.id === columnId) ?? []);
+  const orderedColumns = columnOrder.flatMap((columnId) => {
+    const column = columns.find((item) => item.id === columnId);
+    return column ? [{ ...column, title: columnTitles[column.id] }] : [];
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -177,56 +189,56 @@ export function Kanban({ initialBoard }: KanbanProps) {
           <TabsList className="w-full *:data-[slot=tabs-trigger]:flex-1 sm:w-fit sm:*:data-[slot=tabs-trigger]:flex-none">
             <TabsTrigger value="board" className="gap-2">
               <KanbanIcon />
-              Board
+              {t("admin.workflows.kanban.board")}
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List />
-              List
+              {t("admin.workflows.kanban.list")}
             </TabsTrigger>
             <TabsTrigger value="table" className="gap-2">
               <Table2 />
-              Table
+              {t("admin.workflows.kanban.table")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">
           <InputGroup className="min-w-0 sm:w-64 2xl:w-48">
-            <InputGroupInput type="search" placeholder="Search tasks" />
+            <InputGroupInput type="search" placeholder={t("admin.workflows.kanban.searchTasks")} />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>
           </InputGroup>
           <Button variant="outline" className="w-full sm:w-auto">
             <SlidersHorizontal data-icon="inline-start" />
-            Filter
+            {t("admin.workflows.kanban.filter")}
           </Button>
           <Button variant="outline" className="w-full sm:w-auto">
             <ArrowUpDown data-icon="inline-start" />
-            Sort
+            {t("admin.workflows.kanban.sort")}
           </Button>
           <ButtonGroup className="w-full sm:w-fit">
             <Button className="flex-1 sm:flex-none">
               <Plus data-icon="inline-start" />
-              Add task
+              {t("admin.workflows.kanban.addTask")}
             </Button>
             <ButtonGroupSeparator />
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button aria-label="Open add task menu" />}>
+              <DropdownMenuTrigger render={<Button aria-label={t("admin.workflows.kanban.openAddMenu")} />}>
                 <ChevronDown />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>
                   <Upload />
-                  Import CSV
+                  {t("admin.workflows.kanban.importCsv")}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LayoutTemplate />
-                  Add from template
+                  {t("admin.workflows.kanban.addFromTemplate")}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Bot />
-                  Create automation
+                  {t("admin.workflows.kanban.createAutomation")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

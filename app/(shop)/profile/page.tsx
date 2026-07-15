@@ -13,12 +13,15 @@ import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { money } from "@/lib/vela-data";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n";
+import { createEmailSchema, createStrongPasswordSchema } from "@/lib/validations";
 import {
   useOrdersByUserQuery,
   useUpdateProfileMutation,
@@ -29,27 +32,21 @@ import type { Gender, UserAddress } from "@/lib/api/types";
 const profileTabIds = ["profile", "orders", "favourites", "coupons", "reviews"] as const;
 type ProfileTabId = (typeof profileTabIds)[number];
 
-const genderOptions: { value: Gender; label: string }[] = [
-  { value: "MALE", label: "Male" },
-  { value: "FEMALE", label: "Female" },
-  { value: "OTHER", label: "Other" },
-];
-
 const getProfileTabId = (tab: string | null): ProfileTabId =>
   profileTabIds.includes(tab as ProfileTabId) ? (tab as ProfileTabId) : "profile";
 
-const formatDisplayDate = (value?: string | null, locale = "vi-VN") => {
+const formatDisplayDate = (value: string | null | undefined, locale: Locale) => {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(locale);
+  return formatDate(date, locale);
 };
 
-const formatMemberSince = (value?: string | null) => {
-  if (!value) return "June 2026";
+const formatMemberSince = (value: string | null | undefined, locale: Locale) => {
+  if (!value) return formatDate("2026-06-01", locale, { month: "long", year: "numeric" });
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "June 2026";
-  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  if (Number.isNaN(date.getTime())) return formatDate("2026-06-01", locale, { month: "long", year: "numeric" });
+  return formatDate(date, locale, { month: "long", year: "numeric" });
 };
 
 const formatAddress = (address: UserAddress) =>
@@ -61,38 +58,41 @@ const formatAddress = (address: UserAddress) =>
     .filter(Boolean)
     .join(", ");
 
-const orderStatusMeta: Record<string, { label: string; badge: string; dot: string }> = {
+const orderStatusMeta: Record<string, { badge: string; dot: string }> = {
   PENDING: {
-    label: "Chờ xác nhận",
     badge: "bg-amber-100 text-amber-800",
     dot: "bg-amber-500",
   },
   CONFIRMED: {
-    label: "Đã xác nhận",
     badge: "bg-sky-100 text-sky-800",
     dot: "bg-sky-500",
   },
   SHIPPING: {
-    label: "Chờ giao hàng",
     badge: "bg-indigo-100 text-indigo-800",
     dot: "bg-indigo-500",
   },
   COMPLETED: {
-    label: "Đã nhận",
     badge: "bg-emerald-100 text-emerald-800",
     dot: "bg-emerald-500",
   },
   CANCELLED: {
-    label: "Đã huỷ",
     badge: "bg-rose-100 text-rose-800",
     dot: "bg-rose-500",
   },
   REFUNDED: {
-    label: "Trả hàng / hoàn tiền",
     badge: "bg-violet-100 text-violet-800",
     dot: "bg-violet-500",
   },
 };
+
+const orderStatusLabelKeys = {
+  PENDING: "account.orders.status.pending",
+  CONFIRMED: "account.orders.status.confirmed",
+  SHIPPING: "account.orders.status.shipping",
+  COMPLETED: "account.orders.status.completed",
+  CANCELLED: "account.orders.status.cancelled",
+  REFUNDED: "account.orders.status.refunded",
+} as const;
 
 const orderStatusOrder = [
   "PENDING",
@@ -105,6 +105,7 @@ const orderStatusOrder = [
 
 export default function MemberProfile() {
   const { user, isAuthenticated, isLoading: isAuthLoading, checkSession } = useAuth();
+  const { locale, t } = useI18n();
   const {
     favorites,
     toggleFavorite,
@@ -125,6 +126,7 @@ export default function MemberProfile() {
   const orderStats = orderStatusOrder.map((status) => ({
     status,
     ...orderStatusMeta[status],
+    label: t(orderStatusLabelKeys[status]),
     count: orders.filter((order) => order.status === status).length,
   }));
   const addresses = addressesQuery.data?.result ?? [];
@@ -160,7 +162,7 @@ export default function MemberProfile() {
   const [formModified, setFormModified] = useState({ fullName: false, email: false, gender: false, dob: false });
   const [isGenderOpen, setIsGenderOpen] = useState(false);
   const [isDobOpen, setIsDobOpen] = useState(false);
-  const [profileSaveMessage, setProfileSaveMessage] = useState<string | null>(null);
+  const [profileSaveMessage, setProfileSaveMessage] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
 
   const editForm = {
@@ -169,6 +171,17 @@ export default function MemberProfile() {
     gender: formModified.gender ? editFormDraft.gender : user?.gender ?? "",
     dob: formModified.dob ? editFormDraft.dob : user?.birthDate ?? "",
   };
+  const genderOptions: { value: Gender; label: string }[] = [
+    { value: "MALE", label: t("account.profile.gender.male") },
+    { value: "FEMALE", label: t("account.profile.gender.female") },
+    { value: "OTHER", label: t("account.profile.gender.other") },
+  ];
+  const emailValidation = createEmailSchema(locale).safeParse(editForm.email);
+  const passwordValidation = createStrongPasswordSchema(locale).safeParse(passwordForm.newPassword);
+  const isStrongPassword = passwordValidation.success;
+  const passwordValidationMessage = passwordValidation.success
+    ? null
+    : passwordValidation.error.issues[0]?.message;
 
   const isFormDirty = user ? (
     editForm.fullName.trim() !== (user.fullName || "") ||
@@ -186,11 +199,11 @@ export default function MemberProfile() {
       message?: string;
     };
 
-    return apiError.response?.data?.message ?? apiError.message ?? "Could not update profile. Please try again.";
+    return apiError.response?.data?.message ?? apiError.message ?? t("account.profile.saveError");
   };
 
   const handleSaveProfile = async () => {
-    setProfileSaveMessage(null);
+    setProfileSaveMessage(false);
     setProfileSaveError(null);
 
     if (!user || !isProfileFormValid) {
@@ -212,7 +225,7 @@ export default function MemberProfile() {
       setEditForm({ fullName: "", email: "", gender: "", dob: "" });
       setFormTouched({ fullName: false, email: false, gender: false, dob: false });
       setFormModified({ fullName: false, email: false, gender: false, dob: false });
-      setProfileSaveMessage("Your profile has been updated.");
+      setProfileSaveMessage(true);
     } catch (error) {
       setProfileSaveError(getApiErrorMessage(error));
     }
@@ -241,16 +254,16 @@ export default function MemberProfile() {
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
-            Đăng nhập để xem hồ sơ
+            {t("account.signIn.profileTitle")}
           </h2>
           <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
-            Bạn cần đăng nhập tài khoản Vela Member để xem lịch sử đơn hàng, sản phẩm yêu thích và cài đặt tài khoản.
+            {t("account.signIn.profileDescription")}
           </p>
           <Link
             href="/sign-in"
             className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
           >
-            Đăng nhập ngay
+            {t("account.signIn.action")}
           </Link>
         </Card>
       </div>
@@ -268,10 +281,10 @@ export default function MemberProfile() {
           <section className="flex flex-col gap-6 text-left">
             <div className="border-b border-hairline pb-4 flex justify-between items-end">
               <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
-                Your Profile
+                {t("account.profile.title")}
               </h2>
               <span className="text-xs text-[#55423d]/65">
-                Vela Member
+                {t("account.member")}
               </span>
             </div>
 
@@ -289,7 +302,7 @@ export default function MemberProfile() {
                     }`}
                   >
                     <User className="size-4" />
-                    Account Details
+                    {t("account.sidebar.account")}
                   </button>
                   <button 
                     onClick={() => setActiveProfileSidebarTab("delivery")}
@@ -300,7 +313,7 @@ export default function MemberProfile() {
                     }`}
                   >
                     <MapPin className="size-4" />
-                    Delivery Addresses
+                    {t("account.sidebar.addresses")}
                   </button>
                   <button 
                     onClick={() => setActiveProfileSidebarTab("visibility")}
@@ -311,7 +324,7 @@ export default function MemberProfile() {
                     }`}
                   >
                     <Eye className="size-4" />
-                    Profile Visibility
+                    {t("account.sidebar.visibility")}
                   </button>
                   <button 
                     onClick={() => setActiveProfileSidebarTab("communication")}
@@ -322,7 +335,7 @@ export default function MemberProfile() {
                     }`}
                   >
                     <Mail className="size-4" />
-                    Communication
+                    {t("account.sidebar.communication")}
                   </button>
                   <button 
                     onClick={() => setActiveProfileSidebarTab("privacy")}
@@ -333,7 +346,7 @@ export default function MemberProfile() {
                     }`}
                   >
                     <Shield className="size-4" />
-                    Privacy
+                    {t("account.sidebar.privacy")}
                   </button>
                 </nav>
               </aside>
@@ -342,7 +355,7 @@ export default function MemberProfile() {
               <div className="flex-1 max-w-xl">
                 {activeProfileSidebarTab === "account" && (
                   <div>
-                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Account Details</h2>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.sidebar.account")}</h2>
                     
                     <div className="flex flex-col gap-8">
                       {/* Name Input */}
@@ -351,7 +364,7 @@ export default function MemberProfile() {
                           <input 
                             type="text"
                             id="fullName"
-                            placeholder="Full Name*"
+                            placeholder={t("account.profile.fullName")}
                             value={editForm.fullName}
                             onChange={(e) => {
                               setEditForm(prev => ({ ...prev, fullName: e.target.value }));
@@ -373,11 +386,11 @@ export default function MemberProfile() {
                                 : "text-ink/70 peer-focus:text-ink/70"
                             }`}
                           >
-                            Full Name*
+                            {t("account.profile.fullName")}
                           </label>
                         </div>
                         {formTouched.fullName && formModified.fullName && editForm.fullName.trim() === "" && (
-                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter your full name.</p>
+                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.fullNameRequired")}</p>
                         )}
                       </div>
 
@@ -387,7 +400,7 @@ export default function MemberProfile() {
                           <input 
                             type="email"
                             id="email"
-                            placeholder="Email*"
+                            placeholder={t("account.profile.email")}
                             value={editForm.email}
                             readOnly
                             onChange={(e) => {
@@ -397,7 +410,7 @@ export default function MemberProfile() {
                             }}
                             onBlur={() => setFormTouched(prev => ({...prev, email: true}))}
                             className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                              formTouched.email && formModified.email && (editForm.email.trim() === "" || !editForm.email.includes("@"))
+                              formTouched.email && formModified.email && !emailValidation.success
                                 ? "border-red-600 focus:border-red-600"
                                 : "border-[#1c1a18]/20 focus:border-ink/60"
                             }`}
@@ -405,35 +418,35 @@ export default function MemberProfile() {
                           <label 
                             htmlFor="email"
                             className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                              formTouched.email && formModified.email && (editForm.email.trim() === "" || !editForm.email.includes("@"))
+                              formTouched.email && formModified.email && !emailValidation.success
                                 ? "text-red-600 peer-focus:text-red-600"
                                 : "text-ink/70 peer-focus:text-ink/70"
                             }`}
                           >
-                            Email*
+                            {t("account.profile.email")}
                           </label>
                         </div>
                         {formTouched.email && formModified.email && editForm.email.trim() === "" && (
-                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter your email.</p>
+                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailRequired")}</p>
                         )}
-                        {formTouched.email && formModified.email && editForm.email.trim() !== "" && !editForm.email.includes("@") && (
-                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter a valid email address.</p>
+                        {formTouched.email && formModified.email && editForm.email.trim() !== "" && !emailValidation.success && (
+                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailInvalid")}</p>
                         )}
                         <p className="text-xs text-ink/45 mt-1.5">
-                          Email changes are handled in account settings with OTP verification.
+                          {t("account.profile.emailSettingsNote")}
                         </p>
                       </div>
                       
                       {/* Password block (Readonly) */}
                       <div>
-                        <p className="text-sm font-medium text-ink mb-1">Password</p>
+                        <p className="text-sm font-medium text-ink mb-1">{t("account.profile.password")}</p>
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-2xl tracking-widest text-ink">................</p>
                           <button 
                             onClick={() => setIsEditPasswordOpen(true)}
                             className="text-sm font-medium text-ink underline underline-offset-4 hover:text-primary transition-colors cursor-pointer"
                           >
-                            Edit
+                            {t("account.profile.edit")}
                           </button>
                         </div>
                       </div>
@@ -485,11 +498,11 @@ export default function MemberProfile() {
                                 : "text-ink/70"
                             }`}
                           >
-                            Gender*
+                            {t("account.profile.gender")}
                           </label>
                         </div>
                         {formTouched.gender && formModified.gender && editForm.gender === "" && (
-                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please select your gender.</p>
+                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.genderRequired")}</p>
                         )}
                       </div>
                       
@@ -500,7 +513,7 @@ export default function MemberProfile() {
                             type="text"
                             id="dob"
                             placeholder=""
-                            value={editForm.dob ? format(new Date(editForm.dob), "dd/MM/yyyy") : ""}
+                            value={editForm.dob ? formatDate(editForm.dob, locale, { day: "2-digit", month: "2-digit", year: "numeric" }) : ""}
                             readOnly
                             onBlur={() => setFormTouched(prev => ({...prev, dob: true}))}
                             className={`peer !w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out cursor-default ${
@@ -511,6 +524,7 @@ export default function MemberProfile() {
                           />
                           <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
                             <PopoverTrigger
+                              aria-label={t("account.profile.openCalendar")}
                               className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#1c1a18]/5 rounded-md transition-colors cursor-pointer text-ink/70 hover:text-ink outline-none"
                             >
                               <CalendarDays className="size-4" />
@@ -545,19 +559,19 @@ export default function MemberProfile() {
                                 : "text-ink/70"
                             }`}
                           >
-                            Date of Birth*
+                            {t("account.profile.birthDate")}
                           </label>
                         </div>
                         {formTouched.dob && formModified.dob && editForm.dob.trim() === "" && (
-                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter your date of birth.</p>
+                          <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.birthDateRequired")}</p>
                         )}
                       </div>
                       
                       {/* Delete Account */}
                       <div className="flex justify-between items-center border-t border-[#1c1a18]/10 pt-8">
-                        <p className="text-sm font-medium text-ink">Delete Account</p>
+                        <p className="text-sm font-medium text-ink">{t("account.profile.deleteAccount")}</p>
                         <button className="px-6 py-2 rounded-full border border-[#1c1a18]/30 text-sm font-medium text-ink hover:border-[#1c1a18] transition-colors cursor-pointer">
-                          Delete
+                          {t("account.profile.delete")}
                         </button>
                       </div>
 
@@ -565,7 +579,7 @@ export default function MemberProfile() {
                         <p className="text-sm text-red-600">{profileSaveError}</p>
                       )}
                       {profileSaveMessage && (
-                        <p className="text-sm text-emerald-700">{profileSaveMessage}</p>
+                        <p className="text-sm text-emerald-700">{t("account.profile.saveSuccess")}</p>
                       )}
                       
                       {/* Save Button */}
@@ -579,7 +593,7 @@ export default function MemberProfile() {
                               : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed"
                           }`}
                         >
-                          {updateProfileMutation.isPending ? "Saving..." : "Save"}
+                          {updateProfileMutation.isPending ? t("account.profile.saving") : t("account.profile.save")}
                         </button>
                       </div>
                     </div>
@@ -588,7 +602,7 @@ export default function MemberProfile() {
                 
                 {activeProfileSidebarTab === "delivery" && (
                   <div>
-                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Delivery Addresses</h2>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.addresses.title")}</h2>
                     {addressesQuery.isLoading ? (
                       <Skeleton
                         name="profile-addresses"
@@ -602,17 +616,17 @@ export default function MemberProfile() {
                       <StorefrontApiStatus
                         error={addressesQuery.error}
                         onRetry={() => void addressesQuery.refetch()}
-                        resourceLabel="địa chỉ giao hàng"
+                        resourceLabel={t("account.addresses.resource")}
                         returnHref="/collection"
                         variant="panel"
                       />
                     ) : addresses.length === 0 ? (
                       <div className="py-16 text-center flex flex-col items-center gap-6 bg-surface-card/30 border border-[#1c1a18]/15 rounded-md">
                         <p className="text-sm text-ink/70 font-light max-w-md">
-                          Bạn chưa có địa chỉ giao hàng nào.
+                          {t("account.addresses.empty")}
                         </p>
                         <button className="inline-flex py-3.5 px-10 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors cursor-pointer">
-                          Thêm địa chỉ mới
+                          {t("account.addresses.add")}
                         </button>
                       </div>
                     ) : (
@@ -630,15 +644,15 @@ export default function MemberProfile() {
                                   </h3>
                                   {address.isDefault && (
                                     <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
-                                      Default
+                                      {t("account.addresses.default")}
                                     </span>
                                   )}
                                 </div>
                                 <p className="mt-1 text-sm text-ink/65">
-                                  {address.phone ?? "Chưa cập nhật số điện thoại"}
+                                  {address.phone ?? t("account.addresses.noPhone")}
                                 </p>
                                 <p className="mt-2 text-sm leading-relaxed text-ink/70">
-                                  {formatAddress(address) || "Chưa cập nhật địa chỉ"}
+                                  {formatAddress(address) || t("account.addresses.noAddress")}
                                 </p>
                               </div>
                             </div>
@@ -651,72 +665,72 @@ export default function MemberProfile() {
                 
                 {activeProfileSidebarTab === "visibility" && (
                   <div>
-                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Profile Visibility</h2>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.visibility.title")}</h2>
                     <p className="text-sm text-ink/70 font-light mb-8 max-w-md">
-                      Your Vela Wear profile represents you on product reviews and across the Vela family of apps.
+                      {t("account.visibility.description")}
                     </p>
                     
                     <div className="flex items-center gap-5 md:gap-6 text-left mb-12">
                       <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#efe7dc] border border-hairline flex items-center justify-center text-ink text-2xl md:text-3xl font-serif font-light shadow-inner flex-shrink-0 relative">
                         {user.fullName ? user.fullName.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
-                        <button className="absolute bottom-0 right-0 bg-white border border-hairline rounded-full p-1.5 shadow-sm hover:scale-105 transition-transform flex items-center justify-center">
+                        <button aria-label={t("account.visibility.editAvatar")} className="absolute bottom-0 right-0 bg-white border border-hairline rounded-full p-1.5 shadow-sm hover:scale-105 transition-transform flex items-center justify-center">
                           <PencilLine className="size-3.5 text-ink" />
                         </button>
                       </div>
                       <div className="flex flex-col justify-center">
-                        <h3 className="text-sm font-medium text-ink mb-1">Profile Display</h3>
+                        <h3 className="text-sm font-medium text-ink mb-1">{t("account.visibility.display")}</h3>
                         <p className="text-sm text-ink/60 mb-1.5">{user.fullName}</p>
                         <p className="text-xs text-ink/50 font-light">
-                          Vela Member Since {formatMemberSince(user.createdAt)}
+                          {t("account.visibility.memberSince", { date: formatMemberSince(user.createdAt, locale) })}
                         </p>
                       </div>
                     </div>
 
                     <div className="border-t border-[#1c1a18]/10 pt-8 mb-8">
-                      <h3 className="text-base font-medium text-ink mb-4">Product Review Visibility</h3>
+                      <h3 className="text-base font-medium text-ink mb-4">{t("account.visibility.reviewTitle")}</h3>
                       <p className="text-sm text-ink/70 font-light mb-6">
-                        Choose how you will appear on any Vela product reviews you complete. Changing these settings will also affect your visibility for connecting with friends. <button className="font-semibold underline underline-offset-4">Learn More</button>
+                        {t("account.visibility.reviewDescription")} <button className="font-semibold underline underline-offset-4">{t("account.visibility.learnMore")}</button>
                       </p>
                       <div className="flex flex-col gap-4">
                         <label className="flex items-center gap-3 cursor-pointer group">
                           <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${reviewVisibility === "private" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                             {reviewVisibility === "private" && <div className="size-2.5 bg-ink rounded-full" />}
                           </div>
-                          <span className="text-sm text-ink">Private: Profile visible to only you</span>
+                          <span className="text-sm text-ink">{t("account.visibility.private")}</span>
                           <input type="radio" className="hidden" checked={reviewVisibility === "private"} onChange={() => setReviewVisibility("private")} />
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
                           <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${reviewVisibility === "social" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                             {reviewVisibility === "social" && <div className="size-2.5 bg-ink rounded-full" />}
                           </div>
-                          <span className="text-sm text-ink">Social: Profile visible to friends</span>
+                          <span className="text-sm text-ink">{t("account.visibility.social")}</span>
                           <input type="radio" className="hidden" checked={reviewVisibility === "social"} onChange={() => setReviewVisibility("social")} />
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
                           <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${reviewVisibility === "public" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                             {reviewVisibility === "public" && <div className="size-2.5 bg-ink rounded-full" />}
                           </div>
-                          <span className="text-sm text-ink">Public: Everyone can view profile</span>
+                          <span className="text-sm text-ink">{t("account.visibility.public")}</span>
                           <input type="radio" className="hidden" checked={reviewVisibility === "public"} onChange={() => setReviewVisibility("public")} />
                         </label>
                       </div>
                     </div>
 
                     <div className="pt-2 mb-8">
-                      <h3 className="text-base font-medium text-ink mb-4">Location Sharing</h3>
+                      <h3 className="text-base font-medium text-ink mb-4">{t("account.visibility.locationTitle")}</h3>
                       <div className="flex flex-col gap-4">
                         <label className="flex items-center gap-3 cursor-pointer group">
                           <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${locationSharing === "friends" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                             {locationSharing === "friends" && <div className="size-2.5 bg-ink rounded-full" />}
                           </div>
-                          <span className="text-sm text-ink">Share my location with friends only</span>
+                          <span className="text-sm text-ink">{t("account.visibility.locationFriends")}</span>
                           <input type="radio" className="hidden" checked={locationSharing === "friends"} onChange={() => setLocationSharing("friends")} />
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
                           <div className={`size-5 rounded-full border flex items-center justify-center transition-colors ${locationSharing === "dont_share" ? "border-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                             {locationSharing === "dont_share" && <div className="size-2.5 bg-ink rounded-full" />}
                           </div>
-                          <span className="text-sm text-ink">Don&apos;t share my location</span>
+                          <span className="text-sm text-ink">{t("account.visibility.locationNone")}</span>
                           <input type="radio" className="hidden" checked={locationSharing === "dont_share"} onChange={() => setLocationSharing("dont_share")} />
                         </label>
                       </div>
@@ -724,7 +738,7 @@ export default function MemberProfile() {
 
                     <div className="flex justify-end pt-4">
                       <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
-                        Save
+                        {t("account.profile.save")}
                       </button>
                     </div>
                   </div>
@@ -732,26 +746,26 @@ export default function MemberProfile() {
 
                 {activeProfileSidebarTab === "communication" && (
                   <div>
-                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Communication Preferences</h2>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.communication.title")}</h2>
                     
                     <div className="mb-8">
-                      <h3 className="text-base font-medium text-ink mb-3">General Communication</h3>
+                      <h3 className="text-base font-medium text-ink mb-3">{t("account.communication.general")}</h3>
                       <p className="text-sm text-ink/70 font-light mb-6">
-                        Get updates on products, offers and your Member benefits.
+                        {t("account.communication.description")}
                       </p>
                       
                       <label className="flex items-center gap-3 cursor-pointer group">
                         <div className={`size-5 rounded-sm border flex items-center justify-center transition-colors ${emailUpdates ? "border-ink bg-ink" : "border-ink/30 group-hover:border-ink/60"}`}>
                           {emailUpdates && <Check className="size-3.5 text-white" />}
                         </div>
-                        <span className="text-sm text-ink">Yes, send me emails.</span>
+                        <span className="text-sm text-ink">{t("account.communication.email")}</span>
                         <input type="checkbox" className="hidden" checked={emailUpdates} onChange={() => setEmailUpdates(!emailUpdates)} />
                       </label>
                     </div>
 
                     <div className="flex justify-end pt-4">
                       <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
-                        Save
+                        {t("account.profile.save")}
                       </button>
                     </div>
                   </div>
@@ -759,13 +773,13 @@ export default function MemberProfile() {
 
                 {activeProfileSidebarTab === "privacy" && (
                   <div>
-                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">Privacy</h2>
+                    <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.privacy.title")}</h2>
                     
                     <p className="text-sm text-ink/70 font-light mb-4 max-w-lg">
-                      We use your data to serve you relevant ads and measure how well they perform. This includes data about how you use our site and apps. You can control how your data is used for advertising by adjusting your privacy settings below.
+                      {t("account.privacy.description")}
                     </p>
                     <p className="text-sm text-ink/70 font-light mb-8">
-                      For more information, see our Privacy Policy. <button className="font-medium underline underline-offset-4 text-ink">Vela Privacy Policy</button>
+                      {t("account.privacy.policyLead")} <button className="font-medium underline underline-offset-4 text-ink">{t("account.privacy.policy")}</button>
                     </p>
                     
                     <div className="border-t border-[#1c1a18]/10 pt-6 mb-6">
@@ -774,9 +788,9 @@ export default function MemberProfile() {
                           {privacySettings.personalisedAds && <Check className="size-3.5 text-white" />}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-ink mb-1.5">Personalised advertising</span>
-                          <span className="text-sm text-ink/60 font-light mb-2">Allows sharing of data about how you use our site and apps with advertising partners.</span>
-                          <button className="text-sm font-medium underline underline-offset-4 text-ink/70 hover:text-ink text-left w-fit">Learn more about personalised advertising</button>
+                          <span className="text-sm font-medium text-ink mb-1.5">{t("account.privacy.personalisedAds")}</span>
+                          <span className="text-sm text-ink/60 font-light mb-2">{t("account.privacy.personalisedAdsDescription")}</span>
+                          <button className="text-sm font-medium underline underline-offset-4 text-ink/70 hover:text-ink text-left w-fit">{t("account.privacy.personalisedAdsLearn")}</button>
                         </div>
                         <input type="checkbox" className="hidden" checked={privacySettings.personalisedAds} onChange={() => setPrivacySettings(prev => ({...prev, personalisedAds: !prev.personalisedAds}))} />
                       </label>
@@ -788,9 +802,9 @@ export default function MemberProfile() {
                           {privacySettings.profileAds && <Check className="size-3.5 text-white" />}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-ink mb-1.5">Profile-based personalised advertising</span>
-                          <span className="text-sm text-ink/60 font-light mb-2">Allows sharing of your email address and phone number with advertising partners to personalise advertising based on your interests.</span>
-                          <button className="text-sm font-medium underline underline-offset-4 text-ink/70 hover:text-ink text-left w-fit">Learn more about profile-based advertising</button>
+                          <span className="text-sm font-medium text-ink mb-1.5">{t("account.privacy.profileAds")}</span>
+                          <span className="text-sm text-ink/60 font-light mb-2">{t("account.privacy.profileAdsDescription")}</span>
+                          <button className="text-sm font-medium underline underline-offset-4 text-ink/70 hover:text-ink text-left w-fit">{t("account.privacy.profileAdsLearn")}</button>
                         </div>
                         <input type="checkbox" className="hidden" checked={privacySettings.profileAds} onChange={() => setPrivacySettings(prev => ({...prev, profileAds: !prev.profileAds}))} />
                       </label>
@@ -802,8 +816,8 @@ export default function MemberProfile() {
                           {privacySettings.workoutData && <Check className="size-3.5 text-white" />}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-ink mb-1.5">Use workout data</span>
-                          <span className="text-sm text-ink/60 font-light mb-2">Use my workout data to give me adaptive training plans, personalised product recommendations and special event invitations.</span>
+                          <span className="text-sm font-medium text-ink mb-1.5">{t("account.privacy.workoutData")}</span>
+                          <span className="text-sm text-ink/60 font-light mb-2">{t("account.privacy.workoutDataDescription")}</span>
                         </div>
                         <input type="checkbox" className="hidden" checked={privacySettings.workoutData} onChange={() => setPrivacySettings(prev => ({...prev, workoutData: !prev.workoutData}))} />
                       </label>
@@ -811,7 +825,7 @@ export default function MemberProfile() {
 
                     <div className="flex justify-end pt-4">
                       <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
-                        Save
+                        {t("account.profile.save")}
                       </button>
                     </div>
                   </div>
@@ -826,10 +840,10 @@ export default function MemberProfile() {
           <section className="flex flex-col gap-6 text-left">
             <div className="border-b border-hairline pb-4 flex justify-between items-end">
               <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
-                Order History
+                {t("account.orders.title")}
               </h2>
               <span className="text-xs text-[#55423d]/65">
-                {orders.length} {orders.length === 1 ? "order" : "orders"} placed
+                {t(orders.length === 1 ? "account.orders.count.one" : "account.orders.count.many", { count: orders.length })}
               </span>
             </div>
 
@@ -868,27 +882,29 @@ export default function MemberProfile() {
               <StorefrontApiStatus
                 error={ordersQuery.error}
                 onRetry={() => void ordersQuery.refetch()}
-                resourceLabel="lịch sử đơn hàng"
+                resourceLabel={t("account.orders.resource")}
                 returnHref="/collection"
                 variant="panel"
               />
             ) : orders.length === 0 ? (
               <div className="py-12 text-center select-none bg-surface-card/10 border border-hairline/20 rounded-sm">
-                <p className="text-sm text-[#1c1a18]/50 mb-6">Bạn chưa thực hiện đơn đặt hàng nào.</p>
+                <p className="text-sm text-[#1c1a18]/50 mb-6">{t("account.orders.empty")}</p>
                 <Link
                   href="/collection"
                   className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c] transition-colors"
                 >
-                  Mua sắm ngay
+                  {t("account.orders.shopNow")}
                 </Link>
               </div>
             ) : (
               <div className="flex flex-col gap-8">
                 {orders.map((order) => {
-                  const status = orderStatusMeta[order.status] ?? {
-                    label: order.status,
+                  const statusMeta = orderStatusMeta[order.status] ?? {
                     badge: "bg-slate-100 text-slate-800",
+                    dot: "bg-slate-500",
                   };
+                  const statusKey = orderStatusLabelKeys[order.status as keyof typeof orderStatusLabelKeys];
+                  const statusLabel = statusKey ? t(statusKey) : order.status;
 
                   return (
                     <Link
@@ -901,22 +917,25 @@ export default function MemberProfile() {
                           <span className="font-serif text-xl font-light text-ink/40">V</span>
                         </div>
                         <div className="flex flex-col justify-center">
-                          <h3 className="font-sans text-sm font-semibold text-ink">Đơn hàng {order.orderCode}</h3>
+                          <h3 className="font-sans text-sm font-semibold text-ink">{t("account.orders.order", { code: order.orderCode })}</h3>
                           <p className="text-xs text-[#55423d]/75 mt-0.5">
-                            Người nhận: {order.receiverName} • SĐT: {order.receiverPhone}
+                            {t("account.orders.receiver", {
+                              name: order.receiverName ?? t("account.order.notAvailable"),
+                              phone: order.receiverPhone ?? t("account.order.notAvailable"),
+                            })}
                           </p>
                           <p className="text-xs text-[#55423d]/75">
-                            Địa chỉ: {order.receiverAddress}
+                            {t("account.orders.address", { address: order.receiverAddress ?? t("account.order.notAvailable") })}
                           </p>
                           <p className="text-xs text-[#55423d]/50 mt-1">
-                            Đặt ngày {formatDisplayDate(order.createdAt)}
+                            {t("account.orders.placedOn", { date: formatDisplayDate(order.createdAt, locale) })}
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-row md:flex-col justify-between md:justify-center md:items-end gap-2 border-t md:border-t-0 pt-4 md:pt-0 border-hairline/40">
-                        <div className="text-sm font-bold text-ink">{money(Number(order.finalAmount ?? order.subtotal ?? 0))}</div>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${status.badge}`}>
-                          {status.label}
+                        <div className="text-sm font-bold text-ink">{money(Number(order.finalAmount ?? order.subtotal ?? 0), locale)}</div>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${statusMeta.badge}`}>
+                          {statusLabel}
                         </span>
                       </div>
                     </Link>
@@ -933,10 +952,10 @@ export default function MemberProfile() {
           <section className="flex flex-col gap-6 text-left">
             <div className="border-b border-hairline pb-4 flex justify-between items-end">
               <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
-                Your Favourites
+                {t("account.favourites.title")}
               </h2>
               <span className="text-xs text-[#55423d]/65">
-                {favorites.length} {favorites.length === 1 ? "item" : "items"} saved
+                {t(favorites.length === 1 ? "account.favourites.count.one" : "account.favourites.count.many", { count: favorites.length })}
               </span>
             </div>
             <Skeleton
@@ -949,20 +968,20 @@ export default function MemberProfile() {
               <StorefrontApiStatus
                 error={favoritesError}
                 onRetry={retryFavorites}
-                resourceLabel="danh sách yêu thích"
+                resourceLabel={t("account.favourites.resource")}
                 returnHref="/collection"
                 variant="panel"
               />
             ) : favorites.length === 0 ? (
               <div className="py-16 text-center flex flex-col items-center gap-6">
                 <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
-                  Danh sách yêu thích của bạn đang trống. Hãy khám phá các sản phẩm tuyệt vời của Vela Wear để thêm vào danh sách yêu thích.
+                  {t("account.favourites.empty")}
                 </p>
                 <Link
                   href="/collection"
                   className="inline-flex bg-primary-container text-on-primary text-xs font-semibold uppercase tracking-widest py-3.5 px-8 hover:bg-[#964025] transition-colors duration-200 rounded-sm shadow-sm"
                 >
-                  Khám phá Collections
+                  {t("account.favourites.explore")}
                 </Link>
               </div>
             ) : (
@@ -977,6 +996,7 @@ export default function MemberProfile() {
                           e.preventDefault();
                           toggleFavorite(product);
                         }}
+                        aria-label={t("account.favourites.remove", { product: product.name })}
                         className="flex items-center justify-center size-8 rounded-full bg-white shadow-sm hover:scale-110 transition-transform"
                       >
                         <Heart className="size-4 text-[#b85a3c] fill-[#b85a3c]" />
@@ -987,11 +1007,11 @@ export default function MemberProfile() {
                         onClick={(e) => {
                           e.preventDefault();
                           addToCart(product);
-                          showAddedToBag(product, product.size || "M", product.color || "Default");
+                          showAddedToBag(product, product.size || "M", product.color || t("account.favourites.defaultOption"));
                         }}
                         className="w-full py-3 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
                       >
-                        Add to Bag
+                        {t("account.favourites.addToBag")}
                       </button>
                     }
                   />
@@ -1011,17 +1031,21 @@ export default function MemberProfile() {
             <div 
               className="bg-canvas rounded-2xl w-full max-w-[500px] p-6 md:p-8 relative shadow-xl"
               onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="password-dialog-title"
             >
               {/* Close Button */}
               <button 
                 onClick={() => setIsEditPasswordOpen(false)}
+                aria-label={t("account.password.close")}
                 className="absolute top-6 right-6 p-2 bg-[#1c1a18]/5 rounded-full hover:bg-[#1c1a18]/10 transition-colors cursor-pointer"
               >
                 <X className="size-5 text-ink" />
               </button>
 
-              <h2 className="text-2xl font-serif font-light text-ink tracking-tight mb-8">
-                {user?.hasPassword !== false ? "Edit Password" : "Create Password"}
+              <h2 id="password-dialog-title" className="text-2xl font-serif font-light text-ink tracking-tight mb-8">
+                {user?.hasPassword !== false ? t("account.password.editTitle") : t("account.password.createTitle")}
               </h2>
 
               <div className="flex flex-col gap-6">
@@ -1032,7 +1056,7 @@ export default function MemberProfile() {
                     <input 
                       type="password"
                       id="currentPassword"
-                      placeholder="Current Password*"
+                      placeholder={t("account.password.current")}
                       value={passwordForm.currentPassword}
                       onChange={(e) => {
                         setPasswordForm(prev => ({...prev, currentPassword: e.target.value}));
@@ -1054,11 +1078,11 @@ export default function MemberProfile() {
                           : "text-ink/70 peer-focus:text-ink/70"
                       }`}
                     >
-                      Current Password*
+                      {t("account.password.current")}
                     </label>
                   </div>
                   {passwordTouched.current && passwordModified.current && passwordForm.currentPassword.length === 0 && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter your current password.</p>
+                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.password.currentRequired")}</p>
                   )}
                 </div>
                 )}
@@ -1069,7 +1093,7 @@ export default function MemberProfile() {
                     <input 
                       type="password"
                       id="newPassword"
-                      placeholder="New Password*"
+                      placeholder={t("account.password.new")}
                       value={passwordForm.newPassword}
                       onChange={(e) => {
                         setPasswordForm(prev => ({...prev, newPassword: e.target.value}));
@@ -1078,7 +1102,7 @@ export default function MemberProfile() {
                       }}
                       onBlur={() => setPasswordTouched(prev => ({...prev, new: true}))}
                       className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                        passwordTouched.new && passwordModified.new && passwordForm.newPassword.length < 8
+                        passwordTouched.new && passwordModified.new && !isStrongPassword
                           ? "border-red-600 focus:border-red-600"
                           : "border-[#1c1a18]/20 focus:border-ink/60"
                       }`}
@@ -1086,19 +1110,16 @@ export default function MemberProfile() {
                     <label 
                       htmlFor="newPassword"
                       className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                        passwordTouched.new && passwordModified.new && passwordForm.newPassword.length < 8
+                        passwordTouched.new && passwordModified.new && !isStrongPassword
                           ? "text-red-600 peer-focus:text-red-600"
                           : "text-ink/70 peer-focus:text-ink/70"
                       }`}
                     >
-                      New Password*
+                      {t("account.password.new")}
                     </label>
                   </div>
-                  {passwordTouched.new && passwordModified.new && passwordForm.newPassword.length > 0 && passwordForm.newPassword.length < 8 && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Password must be at least 8 characters.</p>
-                  )}
-                  {passwordTouched.new && passwordModified.new && passwordForm.newPassword.length === 0 && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">Please enter a new password.</p>
+                  {passwordTouched.new && passwordModified.new && !isStrongPassword && (
+                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{passwordValidationMessage ?? t("account.password.newRequired")}</p>
                   )}
                 </div>
 
@@ -1108,7 +1129,7 @@ export default function MemberProfile() {
                     <input 
                       type="password"
                       id="confirmPassword"
-                      placeholder="Confirm New Password*"
+                      placeholder={t("account.password.confirm")}
                       value={passwordForm.confirmPassword}
                       onChange={(e) => {
                         setPasswordForm(prev => ({...prev, confirmPassword: e.target.value}));
@@ -1130,23 +1151,23 @@ export default function MemberProfile() {
                           : "text-ink/70 peer-focus:text-ink/70"
                       }`}
                     >
-                      Confirm New Password*
+                      {t("account.password.confirm")}
                     </label>
                   </div>
                   {passwordTouched.confirm && passwordModified.confirm && passwordForm.confirmPassword.length > 0 && passwordForm.confirmPassword !== passwordForm.newPassword && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-300">Passwords do not match.</p>
+                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-300">{t("account.password.mismatch")}</p>
                   )}
                   {passwordTouched.confirm && passwordModified.confirm && passwordForm.confirmPassword.length === 0 && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-300">Please confirm your new password.</p>
+                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-300">{t("account.password.confirmRequired")}</p>
                   )}
                 </div>
               </div>
 
               <div className="mt-8 mb-12 pl-2">
-                <p className="text-ink/70 text-sm mb-2">Password requirements:</p>
-                <div className={`flex items-center gap-2 text-sm ${passwordForm.newPassword.length >= 8 ? "text-green-700" : "text-ink/70"}`}>
-                  {passwordForm.newPassword.length >= 8 ? <Check className="size-4" /> : <X className="size-4" />}
-                  <span>Minimum of 8 characters</span>
+                <p className="text-ink/70 text-sm mb-2">{t("account.password.requirements")}</p>
+                <div className={`flex items-center gap-2 text-sm ${isStrongPassword ? "text-green-700" : "text-ink/70"}`}>
+                  {isStrongPassword ? <Check className="size-4" /> : <X className="size-4" />}
+                  <span>{t("account.password.strongRequirement")}</span>
                 </div>
               </div>
 
@@ -1154,18 +1175,18 @@ export default function MemberProfile() {
                 <button 
                   disabled={
                     user?.hasPassword !== false 
-                      ? passwordForm.currentPassword.length === 0 || passwordForm.newPassword.length < 8 || passwordForm.newPassword !== passwordForm.confirmPassword
-                      : passwordForm.newPassword.length < 8 || passwordForm.newPassword !== passwordForm.confirmPassword
+                      ? passwordForm.currentPassword.length === 0 || !isStrongPassword || passwordForm.newPassword !== passwordForm.confirmPassword
+                      : !isStrongPassword || passwordForm.newPassword !== passwordForm.confirmPassword
                   }
                   className={`px-8 py-2.5 rounded-full border text-sm font-medium transition-colors cursor-pointer ${
                     (user?.hasPassword !== false 
-                      ? passwordForm.currentPassword.length > 0 && passwordForm.newPassword.length >= 8 && passwordForm.newPassword === passwordForm.confirmPassword
-                      : passwordForm.newPassword.length >= 8 && passwordForm.newPassword === passwordForm.confirmPassword)
+                      ? passwordForm.currentPassword.length > 0 && isStrongPassword && passwordForm.newPassword === passwordForm.confirmPassword
+                      : isStrongPassword && passwordForm.newPassword === passwordForm.confirmPassword)
                       ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90"
                       : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed pointer-events-none"
                   }`}
                 >
-                  {user?.hasPassword !== false ? "Save" : "Create Password"}
+                  {user?.hasPassword !== false ? t("account.profile.save") : t("account.password.create")}
                 </button>
               </div>
             </div>
@@ -1223,12 +1244,14 @@ function ProfileSignedOutBoundary({ tab, children }: { tab: ProfileTabId; childr
 }
 
 function ProfileAddressesLoadingFixture() {
+  const { t } = useI18n();
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {Array.from({ length: 2 }).map((_, index) => (
         <article key={index} className="min-h-36 rounded-md border border-[#1c1a18]/10 bg-white p-5">
-          <h3 className="font-medium">Công Anh</h3>
-          <p className="mt-3 text-sm">12 Nguyễn Huệ, Bến Nghé, TP. Hồ Chí Minh</p>
+          <h3 className="font-medium">{t("account.fixture.addressName")}</h3>
+          <p className="mt-3 text-sm">{t("account.fixture.address")}</p>
         </article>
       ))}
     </div>
@@ -1244,12 +1267,14 @@ function ProfileOrdersLoadingFallback() {
 }
 
 function ProfileOrdersLoadingFixture() {
+  const { locale, t } = useI18n();
+
   return (
     <div className="space-y-4">
       {Array.from({ length: 3 }).map((_, index) => (
         <article key={index} className="min-h-32 rounded-md border border-[#1c1a18]/10 bg-white p-6">
-          <div className="flex justify-between"><h3 className="font-medium">VW-CONGANH-000{index + 1}</h3><span>Đã xác nhận</span></div>
-          <p className="mt-6 text-sm">1 sản phẩm · 1.499.000 ₫</p>
+          <div className="flex justify-between"><h3 className="font-medium">VW-CONGANH-000{index + 1}</h3><span>{t("account.orders.status.confirmed")}</span></div>
+          <p className="mt-6 text-sm">{t("account.fixture.oneItem", { amount: money(1499000, locale) })}</p>
         </article>
       ))}
     </div>
@@ -1265,13 +1290,15 @@ function ProfileFavouritesLoadingFallback() {
 }
 
 function ProfileFavouritesLoadingFixture() {
+  const { locale, t } = useI18n();
+
   return (
     <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
         <article key={index} className="space-y-3">
           <div className="aspect-[3/4] rounded-sm bg-white" />
-          <h3 className="font-medium">Sản phẩm Vela Wear</h3>
-          <p className="text-sm">1.499.000 ₫</p>
+          <h3 className="font-medium">{t("account.fixture.product")}</h3>
+          <p className="text-sm">{money(1499000, locale)}</p>
         </article>
       ))}
     </div>

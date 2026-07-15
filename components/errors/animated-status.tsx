@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
 
 import { StatusCodeRain } from "./status-code-rain";
@@ -50,7 +51,7 @@ export function AnimatedStatus({
   code,
   title,
   description,
-  eyebrow = "Vela Wear / System status",
+  eyebrow,
   primaryAction,
   secondaryAction,
   accent = "#ffb59f",
@@ -58,6 +59,7 @@ export function AnimatedStatus({
   variant = "page",
   className,
 }: AnimatedStatusProps) {
+  const { t } = useI18n();
   const compact = variant === "panel";
   const titleId = `status-${code.replaceAll(/[^a-zA-Z0-9]/g, "-")}-title`;
 
@@ -78,11 +80,16 @@ export function AnimatedStatus({
         }}
       />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]" />
-      <StatusCodeRain code={code} color={accent} compact={compact} />
+      <StatusCodeRain
+        code={code}
+        color={accent}
+        compact={compact}
+        hint={t("status.dropHint")}
+      />
 
       <div className={cn("relative z-10 mx-auto text-center", compact ? "max-w-lg px-6 py-12" : "max-w-xl")}>
         <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.3em] text-white/48">
-          {eyebrow}
+          {eyebrow ?? t("status.system")}
         </p>
         <p
           className={cn(
@@ -103,7 +110,7 @@ export function AnimatedStatus({
 
         {reference ? (
           <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/34">
-            Reference {reference}
+            {t("status.reference", { reference })}
           </p>
         ) : null}
 

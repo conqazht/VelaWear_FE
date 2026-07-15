@@ -2,9 +2,23 @@
 
 import { motion } from "motion/react";
 
-export function AuthLoader({ message = "Đang xác thực thông tin..." }: { message?: string }) {
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useI18n } from "@/components/providers/i18n-provider";
+
+export function AuthLoader({
+  message,
+  mode = "authenticating",
+}: {
+  message?: string;
+  mode?: "authenticating" | "oauth";
+}) {
+  const { t } = useI18n();
+  const resolvedMessage =
+    message ?? t(mode === "oauth" ? "auth.oauth.completing" : "auth.loader.authenticating");
+
   return (
-    <main className="grid min-h-[100dvh] place-items-center bg-white px-6">
+    <main className="relative grid min-h-[100dvh] place-items-center bg-white px-6">
+      <LanguageSwitcher className="absolute right-5 top-5 z-10" />
       <div className="flex flex-col items-center gap-10">
         <div className="flex flex-col items-center">
           <motion.div
@@ -37,7 +51,7 @@ export function AuthLoader({ message = "Đang xác thực thông tin..." }: { me
           transition={{ delay: 0.6, duration: 0.8 }}
           className="font-numeric text-[10px] font-bold uppercase tracking-[0.2em] text-[#1c1a18]/40"
         >
-          {message}
+          {resolvedMessage}
         </motion.p>
       </div>
     </main>

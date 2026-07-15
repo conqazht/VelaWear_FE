@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { BadgeCheck, Bell, Check, CreditCard, LogOut } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ export function AccountSwitcher({
   }>;
 }) {
   const [activeUser, setActiveUser] = useState(users[0]);
+  const { t } = useI18n();
 
   if (!activeUser) {
     return null;
@@ -70,21 +72,21 @@ export function AccountSwitcher({
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheck />
-            Account
+            {t("admin.shell.account.account")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard />
-            Billing
+            {t("admin.shell.account.billing")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Bell />
-            Notifications
+            {t("admin.shell.account.notifications")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <LogOut />
-          Log out
+          {t("admin.shell.account.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

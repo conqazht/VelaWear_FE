@@ -10,6 +10,7 @@ import {
   type AuthSceneStatus,
 } from "@/components/auth/auth-motion-scene";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { BrandMark } from "@/components/shop/brand-mark";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,8 @@ export function AnimatedAuthShell({
   description,
   panelClassName,
 }: AnimatedAuthShellProps) {
+  const { t } = useI18n();
+
   return (
     <AuthShell className="h-[100dvh] w-[100vw] overflow-hidden p-4 bg-[#f7f4ef]">
       <div className="grid h-full w-full gap-4 lg:grid-cols-[1fr_minmax(0,560px)] justify-center">
@@ -73,6 +76,7 @@ export function AnimatedAuthShell({
             <div className="mb-7 text-center">
               <Link
                 href="/"
+                aria-label={t("auth.common.homeAria")}
                 className="inline-block transition-opacity hover:opacity-90"
               >
                 <BrandMark className="mx-auto" />

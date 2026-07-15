@@ -16,6 +16,7 @@ import {
   downloadCsv,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import type {
   AdminColor,
@@ -47,6 +48,7 @@ function getSafeHexCode(value: string | null) {
 }
 
 export function ColorsManagement() {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchValue, setSearchValue] = useState("");
@@ -91,15 +93,15 @@ export function ColorsManagement() {
     const sortOrder = Number(sortOrderText);
 
     if (!name) {
-      toast.error("Enter a color name before saving.");
+      toast.error(t("admin.commerce.attributes.colors.validation.name"));
       return;
     }
     if (!HEX_CODE_PATTERN.test(hexCode)) {
-      toast.error("Hex code must use the #RRGGBB format.");
+      toast.error(t("admin.commerce.attributes.colors.validation.hex"));
       return;
     }
     if (!/^\d+$/.test(sortOrderText) || !Number.isSafeInteger(sortOrder) || sortOrder < 0) {
-      toast.error("Sort order must be a nonnegative whole number.");
+      toast.error(t("admin.commerce.attributes.validation.sortOrder"));
       return;
     }
 
@@ -115,7 +117,7 @@ export function ColorsManagement() {
         { id: editingColor.id, request: updateRequest },
         {
           onSuccess: () => {
-            toast.success(`${name} was updated.`);
+            toast.success(t("admin.commerce.attributes.updated", { name }));
             setEditingColor(null);
             setFormOpen(false);
           },
@@ -127,7 +129,7 @@ export function ColorsManagement() {
 
     createMutation.mutate(request, {
       onSuccess: () => {
-        toast.success(`${name} was created.`);
+        toast.success(t("admin.commerce.attributes.created", { name }));
         setPage(1);
         setFormOpen(false);
       },
@@ -141,7 +143,7 @@ export function ColorsManagement() {
     const { id, name } = deleteColor;
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        toast.success(`${name} was deleted.`);
+        toast.success(t("admin.commerce.attributes.deleted", { name }));
         setDeleteColor(null);
         setPage(1);
       },
@@ -152,7 +154,7 @@ export function ColorsManagement() {
   const columns: ManagementColumn<AdminColor>[] = [
     {
       key: "name",
-      header: "Color",
+      header: t("admin.commerce.attributes.colors.column.color"),
       className: "min-w-64",
       cell: (color) => {
         const safeHexCode = getSafeHexCode(color.hexCode);
@@ -166,7 +168,9 @@ export function ColorsManagement() {
             />
             <div className="min-w-0">
               <p className="truncate font-medium">{color.name}</p>
-              <p className="font-mono text-muted-foreground text-xs">{safeHexCode ?? "No valid hex"}</p>
+              <p className="font-mono text-muted-foreground text-xs">
+                {safeHexCode ?? t("admin.commerce.attributes.colors.noValidHex")}
+              </p>
             </div>
           </div>
         );
@@ -174,19 +178,19 @@ export function ColorsManagement() {
     },
     {
       key: "hexCode",
-      header: "Hex code",
+      header: t("admin.commerce.attributes.colors.column.hex"),
       className: "font-mono text-muted-foreground",
       cell: (color) => color.hexCode?.toUpperCase() ?? "—",
     },
     {
       key: "sortOrder",
-      header: "Sort order",
+      header: t("admin.commerce.attributes.sortOrder"),
       className: "tabular-nums text-muted-foreground",
       cell: (color) => color.sortOrder ?? "—",
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (color) => (
@@ -194,7 +198,7 @@ export function ColorsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Edit ${color.name}`}
+            aria-label={t("admin.commerce.common.editNamed", { name: color.name })}
             onClick={() => openEditForm(color)}
           >
             <Pencil />
@@ -202,7 +206,7 @@ export function ColorsManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Delete ${color.name}`}
+            aria-label={t("admin.commerce.common.deleteNamed", { name: color.name })}
             onClick={() => setDeleteColor(color)}
           >
             <Trash2 />
@@ -215,8 +219,8 @@ export function ColorsManagement() {
   return (
     <>
       <ResourcePage
-        title="Colors"
-        description="Manage the named color swatches available to product variants. Hex codes control the admin preview."
+        title={t("admin.commerce.attributes.colors")}
+        description={t("admin.commerce.attributes.colors.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -224,7 +228,7 @@ export function ColorsManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 0}
         searchValue={searchValue}
-        searchPlaceholder="Search color names..."
+        searchPlaceholder={t("admin.commerce.attributes.colors.search")}
         onSearchChange={(value) => {
           setSearchValue(value);
           setPage(1);
@@ -234,7 +238,11 @@ export function ColorsManagement() {
           setPageSize(size);
           setPage(1);
         }}
-        primaryAction={{ label: "Add color", icon: Palette, onClick: openCreateForm }}
+        primaryAction={{
+          label: t("admin.commerce.attributes.colors.add"),
+          icon: Palette,
+          onClick: openCreateForm,
+        }}
         onRefresh={() => void colorsQuery.refetch()}
         onExport={() =>
           downloadCsv(
@@ -250,8 +258,8 @@ export function ColorsManagement() {
         isLoading={colorsQuery.isPending}
         isFetching={colorsQuery.isFetching}
         error={colorsQuery.isError ? colorsQuery.error : null}
-        emptyTitle="No colors found"
-        emptyDescription="Add a color or adjust the current search."
+        emptyTitle={t("admin.commerce.attributes.colors.emptyTitle")}
+        emptyDescription={t("admin.commerce.attributes.colors.emptyDescription")}
       />
 
       <ResourceFormSheet
@@ -259,11 +267,19 @@ export function ColorsManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={editingColor ? "Edit color" : "Add color"}
-        description="Set the customer-facing name, exact hex value, and display order."
+        title={
+          editingColor
+            ? t("admin.commerce.attributes.colors.edit")
+            : t("admin.commerce.attributes.colors.add")
+        }
+        description={t("admin.commerce.attributes.colors.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
-        submitLabel={editingColor ? "Save color" : "Create color"}
+        submitLabel={
+          editingColor
+            ? t("admin.commerce.attributes.colors.save")
+            : t("admin.commerce.attributes.colors.create")
+        }
       >
         <ColorForm values={formValues} onChange={setFormValues} />
       </ResourceFormSheet>
@@ -273,8 +289,8 @@ export function ColorsManagement() {
         onOpenChange={(open) => {
           if (!open && !deleteMutation.isPending) setDeleteColor(null);
         }}
-        resourceName={deleteColor?.name ?? "color"}
-        description="Deletion only succeeds when no active or archived product variant references this color. The backend rejects referenced colors."
+        resourceName={deleteColor?.name ?? t("admin.commerce.attributes.colors.resource")}
+        description={t("admin.commerce.attributes.colors.deleteDescription")}
         onConfirm={handleDelete}
         isPending={deleteMutation.isPending}
       />

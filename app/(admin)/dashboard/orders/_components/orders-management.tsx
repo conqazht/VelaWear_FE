@@ -10,10 +10,9 @@ import {
 } from "@/app/(admin)/dashboard/_components/management/resource-page";
 import {
   downloadCsv,
-  formatAdminDateTime,
-  formatCurrency,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   ADMIN_ORDER_STATUSES,
@@ -23,16 +22,24 @@ import {
   type AdminOrderStatus,
   type AdminPaymentStatus,
 } from "@/lib/api/admin-orders";
+import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
 import { useAdminOrdersQuery } from "@/lib/queries/admin-orders";
 
 import { OrderDetailsSheet } from "./order-details-sheet";
-import { formatStatusLabel, OrderStatusBadge, PaymentStatusBadge } from "./order-status-badge";
+import {
+  getOrderStatusLabel,
+  getPaymentMethodLabel,
+  getPaymentStatusLabel,
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "./order-status-badge";
 
 type OrderSelection = Pick<AdminOrder, "id" | "orderCode">;
 type OrderStatusFilter = AdminOrderStatus | "ALL";
 type PaymentStatusFilter = AdminPaymentStatus | "ALL";
 
 export function OrdersManagement() {
+  const { locale, t } = useI18n();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -57,7 +64,7 @@ export function OrdersManagement() {
   const columns: ManagementColumn<AdminOrder>[] = [
     {
       key: "order",
-      header: "Order",
+      header: t("admin.commerce.orders.column.order"),
       cell: (order) => (
         <div className="grid gap-1">
           <Button
@@ -67,13 +74,15 @@ export function OrdersManagement() {
           >
             {order.orderCode}
           </Button>
-          <span className="text-muted-foreground text-xs">{formatAdminDateTime(order.createdAt)}</span>
+          <span className="text-muted-foreground text-xs">
+            {formatDateTime(order.createdAt, locale)}
+          </span>
         </div>
       ),
     },
     {
       key: "customer",
-      header: "Customer",
+      header: t("admin.commerce.orders.column.customer"),
       cell: (order) => (
         <div className="grid max-w-52 gap-0.5">
           <span className="truncate font-medium">{order.userFullName || order.receiverName || "—"}</span>
@@ -83,22 +92,24 @@ export function OrdersManagement() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t("admin.commerce.common.status"),
       cell: (order) => <OrderStatusBadge status={order.status} />,
     },
     {
       key: "payment",
-      header: "Payment",
+      header: t("admin.commerce.orders.column.payment"),
       cell: (order) => (
         <div className="grid gap-1">
           <PaymentStatusBadge status={order.paymentStatus} />
-          <span className="text-muted-foreground text-xs">{formatStatusLabel(order.paymentMethod || "Unknown")}</span>
+          <span className="text-muted-foreground text-xs">
+            {getPaymentMethodLabel(order.paymentMethod, t)}
+          </span>
         </div>
       ),
     },
     {
       key: "recipient",
-      header: "Recipient",
+      header: t("admin.commerce.orders.column.recipient"),
       cell: (order) => (
         <div className="grid max-w-44 gap-0.5">
           <span className="truncate">{order.receiverName || "—"}</span>
@@ -108,20 +119,24 @@ export function OrdersManagement() {
     },
     {
       key: "total",
-      header: "Total",
+      header: t("admin.commerce.orders.column.total"),
       headerClassName: "text-right",
       className: "text-right",
-      cell: (order) => <span className="font-medium tabular-nums">{formatCurrency(order.finalAmount)}</span>,
+      cell: (order) => (
+        <span className="font-medium tabular-nums">
+          {formatCurrency(order.finalAmount, locale)}
+        </span>
+      ),
     },
     {
       key: "actions",
-      header: <span className="sr-only">Actions</span>,
+      header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       className: "text-right",
       cell: (order) => (
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={`View order ${order.orderCode}`}
+          aria-label={t("admin.commerce.orders.view", { code: order.orderCode })}
           onClick={() => setSelectedOrder({ id: order.id, orderCode: order.orderCode })}
         >
           <Eye />
@@ -132,11 +147,14 @@ export function OrdersManagement() {
 
   const filters: ManagementFilter[] = [
     {
-      label: "Status",
+      label: t("admin.commerce.common.status"),
       value: status,
       options: [
-        { label: "All", value: "ALL" },
-        ...ADMIN_ORDER_STATUSES.map((value) => ({ label: formatStatusLabel(value), value })),
+        { label: t("admin.commerce.common.all"), value: "ALL" },
+        ...ADMIN_ORDER_STATUSES.map((value) => ({
+          label: getOrderStatusLabel(value, t),
+          value,
+        })),
       ],
       onValueChange: (value) => {
         if (value === "ALL" || ADMIN_ORDER_STATUSES.some((option) => option === value)) {
@@ -146,11 +164,14 @@ export function OrdersManagement() {
       },
     },
     {
-      label: "Payment",
+      label: t("admin.commerce.orders.filter.payment"),
       value: paymentStatus,
       options: [
-        { label: "All", value: "ALL" },
-        ...ADMIN_PAYMENT_STATUSES.map((value) => ({ label: formatStatusLabel(value), value })),
+        { label: t("admin.commerce.common.all"), value: "ALL" },
+        ...ADMIN_PAYMENT_STATUSES.map((value) => ({
+          label: getPaymentStatusLabel(value, t),
+          value,
+        })),
       ],
       onValueChange: (value) => {
         if (value === "ALL" || ADMIN_PAYMENT_STATUSES.some((option) => option === value)) {
@@ -163,15 +184,15 @@ export function OrdersManagement() {
 
   const authenticationError =
     !isAuthLoading && !isAuthenticated
-      ? "Authentication is required to manage orders. Please sign in with an authorized admin account."
+      ? t("admin.commerce.orders.authenticationRequired")
       : null;
   const queryError = ordersQuery.isError ? ordersQuery.error : null;
 
   return (
     <>
       <ResourcePage
-        title="Orders"
-        description="Review customer orders, payment state, fulfillment progress, and order history."
+        title={t("admin.commerce.orders.title")}
+        description={t("admin.commerce.orders.description")}
         rows={rows}
         columns={columns}
         total={meta?.total ?? 0}
@@ -179,7 +200,7 @@ export function OrdersManagement() {
         pageSize={pageSize}
         pageCount={meta?.pages ?? 1}
         searchValue={search}
-        searchPlaceholder="Search order code..."
+        searchPlaceholder={t("admin.commerce.orders.search")}
         onSearchChange={(value) => {
           setSearch(value);
           setPage(1);
@@ -198,9 +219,9 @@ export function OrdersManagement() {
               orderCode: order.orderCode,
               customer: order.userFullName,
               email: order.userEmail,
-              status: order.status,
-              paymentMethod: order.paymentMethod,
-              paymentStatus: order.paymentStatus,
+              status: getOrderStatusLabel(order.status, t),
+              paymentMethod: getPaymentMethodLabel(order.paymentMethod, t),
+              paymentStatus: getPaymentStatusLabel(order.paymentStatus, t),
               finalAmount: order.finalAmount,
               receiverName: order.receiverName,
               receiverPhone: order.receiverPhone,
@@ -211,8 +232,8 @@ export function OrdersManagement() {
         isLoading={isAuthLoading || (isAuthenticated && ordersQuery.isLoading)}
         isFetching={ordersQuery.isFetching}
         error={authenticationError ?? queryError}
-        emptyTitle="No orders found"
-        emptyDescription="Try a different order code or status filter."
+        emptyTitle={t("admin.commerce.orders.emptyTitle")}
+        emptyDescription={t("admin.commerce.orders.emptyDescription")}
       />
 
       <OrderDetailsSheet

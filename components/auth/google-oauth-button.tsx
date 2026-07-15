@@ -1,6 +1,7 @@
 "use client";
 
 import { startGoogleOAuthLogin } from "@/lib/auth/google-oauth";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
 
 type GoogleOAuthButtonProps = {
@@ -11,12 +12,16 @@ type GoogleOAuthButtonProps = {
 
 export function GoogleOAuthButton({
   className,
-  label = "Continue with Google",
+  label,
   redirectTo,
 }: GoogleOAuthButtonProps) {
+  const { t } = useI18n();
+  const resolvedLabel = label ?? t("auth.google.continue");
+
   return (
     <button
       type="button"
+      aria-label={resolvedLabel}
       onClick={() => startGoogleOAuthLogin(redirectTo)}
       className={cn(
         "flex h-12 w-full items-center justify-center gap-2.5 rounded-[12px] border border-[#1c1a18]/20 bg-transparent text-sm font-medium text-[#1c1a18] transition-colors hover:bg-black/5 cursor-pointer",
@@ -24,7 +29,7 @@ export function GoogleOAuthButton({
       )}
     >
       <GoogleMark />
-      {label}
+      {resolvedLabel}
     </button>
   );
 }

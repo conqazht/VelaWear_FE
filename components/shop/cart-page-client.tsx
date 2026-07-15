@@ -10,11 +10,14 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { useCart } from "@/components/shop/cart-provider";
-import { money, PRODUCTS } from "@/lib/vela-data";
+import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
+import { money } from "@/lib/vela-data";
 import { RelatedProducts } from "@/components/shop/related-products";
 import { useCartStore } from "@/store/cart-store";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export function CartPageClient() {
+  const { locale, t } = useI18n();
   const { cart, subtotal, updateQuantity, removeItem } = useCart();
   const hasHydrated = useCartHydration();
   const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
@@ -32,20 +35,20 @@ export function CartPageClient() {
       {/* Breadcrumbs */}
       <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
-          Home
+          {t("common.home")}
         </Link>
         <span>/</span>
-        <span className="font-medium text-[#1c1a18]">Cart</span>
+        <span className="font-medium text-[#1c1a18]">{t("cart.title")}</span>
       </div>
 
       <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
-            Cart
+            {t("cart.title")}
           </h1>
           {cart.length > 0 && (
             <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
-              {cart.length} unique designs handpicked
+              {t("cart.savedCount", { count: cart.length })}
             </p>
           )}
         </div>
@@ -53,7 +56,7 @@ export function CartPageClient() {
           href="/collection"
           className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c] hover:underline animate-none"
         >
-          ← Continue Shopping
+          ← {t("cart.continueShopping")}
         </Link>
       </div>
 
@@ -61,14 +64,13 @@ export function CartPageClient() {
         <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[50vh] flex flex-col justify-start pt-16 items-center">
           <ShoppingBag className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
           <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
-            Giỏ hàng của bạn đang trống. Hãy quay lại cửa hàng để chọn thêm
-            nhiều sản phẩm dệt lanh thủ công độc đáo nhé.
+            {t("cart.emptyDescription")}
           </p>
           <Link
             href="/collection"
             className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b85a3c]"
           >
-            Xem tất cả sản phẩm
+            {t("cart.shopAll")}
           </Link>
         </div>
       ) : (
@@ -82,7 +84,7 @@ export function CartPageClient() {
                 <Link
                   href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
                   className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28"
-                  aria-label={`View ${item.name}`}
+                  aria-label={t("cart.viewProduct", { product: item.name })}
                 >
                   <FashionImage src={item.image} alt={item.name} />
                 </Link>
@@ -97,16 +99,16 @@ export function CartPageClient() {
                         {item.name}
                       </Link>
                       <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
-                        {money(item.price * item.quantity)}
+                        {money(item.price * item.quantity, locale)}
                       </span>
                     </div>
                     <p className="mt-2 flex gap-4 text-[11px] uppercase tracking-wider text-[#1c1a18]/60">
                       <span>
-                        Color:{" "}
+                        {t("common.color")}:{" "}
                         <strong className="text-[#1c1a18]">{item.color}</strong>
                       </span>
                       <span>
-                        Size:{" "}
+                        {t("common.size")}:{" "}
                         <strong className="text-[#1c1a18]">{item.size}</strong>
                       </span>
                     </p>
@@ -120,7 +122,7 @@ export function CartPageClient() {
                         size="icon"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1}
-                        aria-label="Decrease quantity"
+                        aria-label={t("cart.decreaseQuantity")}
                         className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
                       >
                         <Minus className="size-3" />
@@ -133,7 +135,7 @@ export function CartPageClient() {
                         variant="ghost"
                         size="icon"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        aria-label="Increase quantity"
+                        aria-label={t("cart.increaseQuantity")}
                         className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
                       >
                         <Plus className="size-3" />
@@ -147,7 +149,7 @@ export function CartPageClient() {
                       className="h-8 rounded-sm text-[10px] font-bold uppercase tracking-widest text-[#b85a3c] hover:bg-[#efebe4]"
                     >
                       <Trash2 className="size-3.5" />
-                      Remove
+                      {t("cart.remove")}
                     </Button>
                   </div>
                 </div>
@@ -157,32 +159,32 @@ export function CartPageClient() {
 
           <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
             <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
-              Order Summary
+              {t("cart.orderSummary")}
             </h2>
             <div className="space-y-4 text-xs tracking-wide">
               <div className="flex justify-between text-[#1c1a18]/65">
-                <span>Subtotal</span>
+                <span>{t("cart.subtotal")}</span>
                 <span className="font-semibold text-[#1c1a18] font-numeric">
-                  {money(subtotal)}
+                  {money(subtotal, locale)}
                 </span>
               </div>
               <div className="flex justify-between text-[#1c1a18]/65">
-                <span>Standard Shipping</span>
+                <span>{t("cart.standardShipping")}</span>
                 <span className="font-semibold text-[#1c1a18]">
-                  {shipping === 0 ? "Complimentary" : money(shipping)}
+                  {shipping === 0 ? t("common.complimentary") : money(shipping, locale)}
                 </span>
               </div>
               <div className="flex justify-between text-[#1c1a18]/65">
-                <span>Estimated Taxes (8%)</span>
+                <span>{t("cart.estimatedTaxes")}</span>
                 <span className="font-semibold text-[#1c1a18] font-numeric">
-                  {money(taxes)}
+                  {money(taxes, locale)}
                 </span>
               </div>
               <Separator className="my-6 bg-[#1c1a18]/10" />
               <div className="flex justify-between text-sm font-semibold text-[#1c1a18] md:text-base">
-                <span>Total Amount</span>
+                <span>{t("cart.total")}</span>
                 <span className="font-serif text-lg tracking-wider font-numeric">
-                  {money(total)}
+                  {money(total, locale)}
                 </span>
               </div>
             </div>
@@ -190,8 +192,7 @@ export function CartPageClient() {
             <div className="mt-6 flex items-start gap-2.5 rounded-md bg-[#f7f4ef] p-3 text-[10px] leading-relaxed text-[#1c1a18]/65">
               <Tag className="mt-0.5 size-4 shrink-0 text-[#b85a3c]" />
               <span>
-                Complimentary premium dust bags and signature gift boxing
-                included in every VELA WEAR shipment.
+                {t("cart.giftPackaging")}
               </span>
             </div>
 
@@ -199,12 +200,12 @@ export function CartPageClient() {
               href="/checkout"
               className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#1c1a18] py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
             >
-              Proceed to Checkout
+              {t("cart.checkout")}
               <ArrowRight className="size-4" />
             </Link>
 
             <p className="mt-4 text-center text-[10px] uppercase leading-relaxed tracking-widest text-[#1c1a18]/50">
-              Miễn phí giao hàng cho đơn từ 500,000đ
+              {t("cart.freeShipping")}
             </p>
           </Card>
         </div>
@@ -234,7 +235,7 @@ function useCartHydration() {
       };
     },
     () => useCartStore.persist.hasHydrated(),
-    () => true
+    () => false
   );
 }
 
@@ -254,27 +255,28 @@ function CartPageLoadingFallback() {
 }
 
 function CartPageFixture() {
-  const fixtureItems = PRODUCTS.slice(0, 2);
+  const { locale, t } = useI18n();
+  const fixtureItems = getLocalizedFixtureProducts(locale).slice(0, 2);
 
   return (
     <>
       <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
-        <span>Home</span>
+        <span>{t("common.home")}</span>
         <span>/</span>
-        <span className="font-medium text-[#1c1a18]">Cart</span>
+        <span className="font-medium text-[#1c1a18]">{t("cart.title")}</span>
       </div>
 
       <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
-            Cart
+            {t("cart.title")}
           </h1>
           <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
-            2 unique designs handpicked
+            {t("cart.savedCount", { count: 2 })}
           </p>
         </div>
         <span className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c]">
-          Continue Shopping
+          {t("cart.continueShopping")}
         </span>
       </div>
 
@@ -295,11 +297,11 @@ function CartPageFixture() {
                       {item.name}
                     </h3>
                     <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
-                      {money(item.price)}
+                      {money(item.price, locale)}
                     </span>
                   </div>
                   <p className="text-[11px] uppercase tracking-wider text-[#1c1a18]/60">
-                    Color: {item.color} / Size: {item.size}
+                    {t("common.color")}: {item.color} / {t("common.size")}: {item.size}
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between border-t border-[#1c1a18]/5 pt-4">
@@ -313,21 +315,21 @@ function CartPageFixture() {
 
         <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
           <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
-            Order Summary
+            {t("cart.orderSummary")}
           </h2>
           <div className="space-y-4 text-xs tracking-wide">
             <div className="flex justify-between text-[#1c1a18]/65">
-              <span>Subtotal</span>
-              <span>{money(1200000)}</span>
+              <span>{t("cart.subtotal")}</span>
+              <span>{money(1200000, locale)}</span>
             </div>
             <div className="flex justify-between text-[#1c1a18]/65">
-              <span>Standard Shipping</span>
-              <span>Complimentary</span>
+              <span>{t("cart.standardShipping")}</span>
+              <span>{t("common.complimentary")}</span>
             </div>
             <Separator className="my-6 bg-[#1c1a18]/10" />
             <div className="flex justify-between text-sm font-semibold text-[#1c1a18]">
-              <span>Total Amount</span>
-              <span className="font-serif text-lg tracking-wider font-numeric">{money(1296000)}</span>
+              <span>{t("cart.total")}</span>
+              <span className="font-serif text-lg tracking-wider font-numeric">{money(1296000, locale)}</span>
             </div>
           </div>
           <div className="mt-8 h-12 rounded-sm bg-[#1c1a18]" />

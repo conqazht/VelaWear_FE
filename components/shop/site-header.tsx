@@ -9,6 +9,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useAuth } from "@/components/auth/auth-provider";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -22,7 +24,6 @@ import { NavigationMenu as BaseNavigationMenu } from "@base-ui/react/navigation-
 import { money } from "@/lib/vela-data";
 import { getProducts } from "@/lib/api/catalog";
 import { mapBackendProduct, type Product } from "@/lib/vela-data";
-import { getActiveLocale } from "@/lib/i18n";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
@@ -61,6 +62,7 @@ export function SiteHeader() {
   const { itemCount } = useCart();
   const { favorites } = useFavorites();
   const { user, isAuthenticated, signOut } = useAuth();
+  const { locale: activeLocale, t } = useI18n();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,7 +79,6 @@ export function SiteHeader() {
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
   const searchDebounceRef = useRef<number | null>(null);
   const searchRequestIdRef = useRef(0);
-  const activeLocale = getActiveLocale();
 
   if (searchPathname !== pathname) {
     setSearchPathname(pathname);
@@ -286,67 +287,67 @@ export function SiteHeader() {
 
   const navigationItems = [
     {
-      label: "Sale",
+      label: t("storefront.nav.sale"),
       href: "/collection",
-      featuredTitle: "Ưu Đãi Lên Đến 50%",
-      featuredDesc: "Áp dụng cho toàn bộ sản phẩm thuộc bộ sưu tập cũ và sản phẩm chọn lọc.",
+      featuredTitle: t("storefront.nav.saleTitle"),
+      featuredDesc: t("storefront.nav.saleDescription"),
       subItems: [
-        { label: "Sale Áo", href: "/collection" },
-        { label: "Sale Quần", href: "/collection" },
-        { label: "Sale Phụ Kiện", href: "/collection" },
-        { label: "Flash Sale", href: "/collection" },
+        { label: t("storefront.nav.saleTops"), href: "/collection" },
+        { label: t("storefront.nav.saleTrousers"), href: "/collection" },
+        { label: t("storefront.nav.saleAccessories"), href: "/collection" },
+        { label: t("storefront.nav.flashSale"), href: "/collection" },
       ],
     },
     {
-      label: "Collection",
+      label: t("storefront.nav.collection"),
       href: "/collection",
-      featuredTitle: "Mùa Hè 2026",
-      featuredDesc: "Tập trung vào phom dáng tối giản và các chất liệu tự nhiên như linen, organic cotton.",
+      featuredTitle: t("storefront.nav.collectionTitle"),
+      featuredDesc: t("storefront.nav.collectionDescription"),
       subItems: [
-        { label: "New Arrivals", href: "/collection" },
-        { label: "Artisan Linen", href: "/collection" },
-        { label: "Minimalist Tailoring", href: "/collection" },
-        { label: "Heritage Wool", href: "/collection" },
+        { label: t("storefront.nav.newArrivals"), href: "/collection" },
+        { label: t("storefront.nav.artisanLinen"), href: "/collection" },
+        { label: t("storefront.nav.minimalistTailoring"), href: "/collection" },
+        { label: t("storefront.nav.heritageWool"), href: "/collection" },
       ],
     },
     {
-      label: "Quần",
+      label: t("storefront.nav.trousers"),
       href: "/collection",
-      featuredTitle: "Chất Liệu Bền Vững",
-      featuredDesc: "Các thiết kế quần âu xếp ly tinh tế và quần relaxed thoải mái cho mọi hoạt động.",
+      featuredTitle: t("storefront.nav.trousersTitle"),
+      featuredDesc: t("storefront.nav.trousersDescription"),
       subItems: [
-        { label: "Quần Tây Ly Xếp", href: "/collection" },
-        { label: "Quần Âu Slim-fit", href: "/collection" },
-        { label: "Quần Trousers Relaxed", href: "/collection" },
-        { label: "Quần Shorts Linen", href: "/collection" },
+        { label: t("storefront.nav.pleatedTrousers"), href: "/collection" },
+        { label: t("storefront.nav.slimTrousers"), href: "/collection" },
+        { label: t("storefront.nav.relaxedTrousers"), href: "/collection" },
+        { label: t("storefront.nav.linenShorts"), href: "/collection" },
       ],
     },
     {
-      label: "Áo",
+      label: t("storefront.nav.tops"),
       href: "/collection",
-      featuredTitle: "Phom Dáng Phóng Khoáng",
-      featuredDesc: "Từ những chiếc áo thun signature chất dày dặn đến áo sơ mi linen bay bổng.",
+      featuredTitle: t("storefront.nav.topsTitle"),
+      featuredDesc: t("storefront.nav.topsDescription"),
       subItems: [
-        { label: "Áo Thun Signature", href: "/collection" },
-        { label: "Áo Sơ Mi Linen", href: "/collection" },
-        { label: "Áo Blazer Lịch Lãm", href: "/collection" },
-        { label: "Áo Khoác Nhẹ", href: "/collection" },
+        { label: t("storefront.nav.signatureTee"), href: "/collection" },
+        { label: t("storefront.nav.linenShirt"), href: "/collection" },
+        { label: t("storefront.nav.tailoredBlazer"), href: "/collection" },
+        { label: t("storefront.nav.lightJacket"), href: "/collection" },
       ],
     },
     {
-      label: "Phụ kiện",
+      label: t("storefront.nav.accessories"),
       href: "/collection",
-      featuredTitle: "Chi Tiết Hoàn Thiện",
-      featuredDesc: "Điểm nhấn tinh tế từ túi tote heritage vải canvas dày đến các phụ kiện da cao cấp.",
+      featuredTitle: t("storefront.nav.accessoriesTitle"),
+      featuredDesc: t("storefront.nav.accessoriesDescription"),
       subItems: [
-        { label: "Túi Canvas Heritage", href: "/collection" },
-        { label: "Thắt Lưng Da", href: "/collection" },
-        { label: "Ví Cầm Tay", href: "/collection" },
-        { label: "Mũ Vải Tối Giản", href: "/collection" },
+        { label: t("storefront.nav.canvasTote"), href: "/collection" },
+        { label: t("storefront.nav.leatherBelt"), href: "/collection" },
+        { label: t("storefront.nav.clutch"), href: "/collection" },
+        { label: t("storefront.nav.minimalCap"), href: "/collection" },
       ],
     },
     {
-      label: "Help",
+      label: t("storefront.nav.help"),
       href: "/help",
     },
   ];
@@ -376,7 +377,7 @@ export function SiteHeader() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`${burgerClass} transition-colors p-1`}
-              aria-label="Open menu"
+              aria-label={t("storefront.nav.openMenu")}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -410,7 +411,7 @@ export function SiteHeader() {
               >
                 <Image
                   src="/images/brand/vela-wear-logo.png"
-                  alt="Vela Wear Logo"
+                  alt={t("brand.logoAlt")}
                   width={512}
                   height={512}
                   style={logoStyle}
@@ -463,7 +464,7 @@ export function SiteHeader() {
                               }} />}
                               className="mt-6 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1 group/btn"
                             >
-                              Khám phá tất cả <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
+                              {t("storefront.nav.discoverAll")} <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
                             </BaseNavigationMenu.Link>
                           </div>
                           <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-2">
@@ -479,7 +480,7 @@ export function SiteHeader() {
                                 className="group/item flex flex-col justify-center rounded-xl p-4 transition-all duration-300 hover:bg-white/60 hover:shadow-[0_4px_12px_rgba(28,26,24,0.03)]"
                               >
                                 <p className="text-sm font-medium text-[#1c1a18] transition-colors group-hover/item:text-[#b5573a]">{sub.label}</p>
-                                <p className="mt-1.5 text-xs leading-5 text-[#1c1a18]/55">Khám phá bộ sưu tập</p>
+                                <p className="mt-1.5 text-xs leading-5 text-[#1c1a18]/55">{t("storefront.nav.exploreCollection")}</p>
                               </NavigationMenuLink>
                             ))}
                           </div>
@@ -516,12 +517,12 @@ export function SiteHeader() {
                 onSubmit={handleSearchSubmit}
                 className={`flex items-center ${searchBgClass} rounded-full px-4 py-2 gap-2.5 w-full border border-transparent focus-within:border-[#b5573a]/20`}
               >
-                <button type="submit" aria-label="Search" className="cursor-pointer focus:outline-none border-none p-0 bg-transparent flex items-center justify-center">
+                <button type="submit" aria-label={t("storefront.nav.search")} className="cursor-pointer focus:outline-none border-none p-0 bg-transparent flex items-center justify-center">
                   <Search className={`w-4 h-4 ${shouldBeTransparent ? "text-[#efe7dc]/80" : "text-[#8a857c]"}`} />
                 </button>
                 <input
                   type="text"
-                  placeholder="Tìm kiếm..."
+                  placeholder={t("storefront.nav.searchPlaceholder")}
                   value={searchQuery}
                   autoComplete="off"
                   autoCorrect="off"
@@ -549,7 +550,7 @@ export function SiteHeader() {
                       <>
                         <div className="px-4 py-3 border-b border-[#1c1a18]/10">
                           <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
-                            Gợi ý tìm kiếm
+                            {t("storefront.nav.searchSuggestions")}
                           </p>
                         </div>
                         <div className="max-h-96 overflow-auto">
@@ -579,14 +580,14 @@ export function SiteHeader() {
                                     {product.category}
                                   </p>
                                   <p className="mt-1 text-xs font-semibold text-[#b5573a] font-numeric">
-                                    {money(product.price)}
+                                    {money(product.price, activeLocale)}
                                   </p>
                                 </div>
                               </Link>
                             ))
                           ) : (
                             <div className="px-4 py-6 text-sm text-[#1c1a18]/60">
-                              Không tìm thấy sản phẩm phù hợp.
+                              {t("storefront.nav.noMatchingProducts")}
                             </div>
                           )}
                         </div>
@@ -596,7 +597,7 @@ export function SiteHeader() {
                             onClick={() => runSearch(searchQuery)}
                             className="w-full rounded-full border border-[#1c1a18]/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
                           >
-                            Xem thêm kết quả
+                            {t("storefront.nav.moreResults")}
                           </button>
                         </div>
                       </>
@@ -604,7 +605,7 @@ export function SiteHeader() {
                       <>
                         <div className="px-4 py-3 border-b border-[#1c1a18]/10 flex items-center justify-between gap-3">
                           <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
-                            Lịch sử tìm kiếm gần đây
+                            {t("storefront.nav.recentSearches")}
                           </p>
                           {searchHistory.length > 0 && (
                             <button
@@ -612,7 +613,7 @@ export function SiteHeader() {
                               onClick={() => setSearchHistory([])}
                               className="text-[10px] uppercase tracking-[0.16em] text-[#1c1a18]/40 hover:text-[#1c1a18]"
                             >
-                              Xóa
+                              {t("storefront.nav.clearSearches")}
                             </button>
                           )}
                         </div>
@@ -633,7 +634,7 @@ export function SiteHeader() {
                                 </button>
                                 <button
                                   type="button"
-                                  aria-label={`Xóa ${term}`}
+                                  aria-label={t("storefront.nav.deleteSearch", { term })}
                                   onClick={() => removeSearchHistoryItem(term)}
                                   className="grid size-4 place-items-center rounded-full text-[#1c1a18]/45 transition-colors hover:bg-[#1c1a18] hover:text-white"
                                 >
@@ -644,7 +645,7 @@ export function SiteHeader() {
                           </div>
                           {searchHistory.length === 0 && (
                             <div className="px-1 py-3 text-sm text-[#1c1a18]/60">
-                              Chưa có lịch sử tìm kiếm.
+                              {t("storefront.nav.noSearchHistory")}
                             </div>
                           )}
                         </div>
@@ -656,6 +657,11 @@ export function SiteHeader() {
             </div>
 
             <div className="flex items-center gap-3">
+              <LanguageSwitcher
+                className="hidden md:inline-flex"
+                inverted={shouldBeTransparent}
+              />
+
               {/* Wishlist Link */}
               <Link href="/favorites">
                 <motion.button
@@ -665,7 +671,7 @@ export function SiteHeader() {
                     backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
-                  aria-label="Wishlist"
+                  aria-label={t("storefront.nav.wishlist")}
                 >
                   <Heart className="w-4.5 h-4.5" />
                   {safeFavoritesCount > 0 && (
@@ -689,7 +695,7 @@ export function SiteHeader() {
                     backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
-                  aria-label="Shopping Bag"
+                  aria-label={t("storefront.nav.shoppingBag")}
                 >
                   <ShoppingBag className="w-4.5 h-4.5" />
                   {safeItemCount > 0 && (
@@ -710,7 +716,7 @@ export function SiteHeader() {
                   <div className="relative group">
                     <Link
                       href="/profile"
-                      aria-label="View Profile"
+                      aria-label={t("storefront.nav.viewProfile")}
                       className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-[#1c1a18] text-xs font-semibold group-hover:bg-[#b5573a] group-hover:text-white group-hover:border-[#b5573a] transition-all duration-300 flex-shrink-0 cursor-pointer`}
                     >
                       {safeUser.fullName
@@ -729,15 +735,15 @@ export function SiteHeader() {
                     {/* Dropdown Menu */}
                     <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-[#f7f4ef] rounded-[16px] border border-[#1c1a18]/10 shadow-[0_4px_16px_rgba(28,26,24,0.06)] overflow-hidden">
                       <div className="px-4 py-2.5 border-b border-[#1c1a18]/10">
-                        <span className="font-sans text-sm font-semibold text-[#1c1a18]">Account</span>
+                        <span className="font-sans text-sm font-semibold text-[#1c1a18]">{t("storefront.nav.account")}</span>
                       </div>
                       <div className="flex flex-col py-1">
-                        <Link href="/profile" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Profile</Link>
-                        <Link href="/profile?tab=orders" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Orders</Link>
-                        <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Favourites</Link>
-                        <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Coupons</Link>
-                        <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">Reviews</Link>
-                        <button onClick={() => { signOut(); router.push("/"); }} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">Log Out</button>
+                        <Link href="/profile" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.profile")}</Link>
+                        <Link href="/profile?tab=orders" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.orders")}</Link>
+                        <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.favourites")}</Link>
+                        <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.coupons")}</Link>
+                        <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.reviews")}</Link>
+                        <button onClick={() => { signOut(); router.push("/"); }} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
                       </div>
                     </div>
                   </div>
@@ -746,7 +752,7 @@ export function SiteHeader() {
                     href="/sign-in"
                     className={`text-[11px] font-semibold uppercase tracking-[1px] ${textClass} transition-colors ml-1`}
                   >
-                    Log In
+                    {t("storefront.nav.logIn")}
                   </Link>
                 )}
               </div>
@@ -779,13 +785,17 @@ export function SiteHeader() {
                 </Link>
               ))}
               <div className="h-[1px] bg-[#e3dccf] my-2" />
+
+              <div className="flex justify-center">
+                <LanguageSwitcher />
+              </div>
               
               {/* Mobile Search */}
               <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#efe7dc] rounded-full px-4 py-3 gap-3 w-full border border-transparent">
                 <Search className="w-5 h-5 text-[#8a857c]" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
+                  placeholder={t("storefront.nav.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-sm w-full text-[#1c1a18]"
@@ -800,7 +810,7 @@ export function SiteHeader() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
                   >
-                    View Profile ({safeUser.fullName})
+                    {t("storefront.nav.viewProfileName", { name: safeUser.fullName })}
                   </Link>
                   <button
                     onClick={() => {
@@ -810,7 +820,7 @@ export function SiteHeader() {
                     }}
                     className="text-sm font-semibold uppercase tracking-[1px] text-[#b5573a] text-center border border-[#b5573a]/40 py-4 rounded-[6px] hover:bg-[#b5573a]/10 transition-colors duration-300"
                   >
-                    Sign Out
+                    {t("storefront.nav.signOut")}
                   </button>
                 </div>
               ) : (
@@ -819,7 +829,7 @@ export function SiteHeader() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
                 >
-                  Log In
+                  {t("storefront.nav.logIn")}
                 </Link>
               )}
             </div>

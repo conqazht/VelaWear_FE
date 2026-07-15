@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ComponentProps } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   CheckCircle2,
   LockKeyhole,
@@ -31,13 +31,14 @@ import {
   type CheckoutRequest,
   type CheckoutResponse,
 } from "@/lib/checkout-api";
-import { checkoutSchema } from "@/lib/validations";
+import { checkoutSchema, createCheckoutSchema } from "@/lib/validations";
 import {
   getVietnamProvinces,
   getVietnamWards,
   type VietnamProvince,
   type VietnamWard,
 } from "@/lib/vietnam-address-api";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
@@ -52,8 +53,8 @@ function checkoutDetailsStorageKey(userId: number) {
 // ---------------------------------------------------------------------------
 
 const PAYMENT_METHODS = [
-  { value: "COD" as const, label: "Thanh toán khi nhận hàng (COD)", disabled: false },
-  { value: "BANK_TRANSFER" as const, label: "Chuyển khoản ngân hàng", disabled: false },
+  { value: "COD" as const, disabled: false },
+  { value: "BANK_TRANSFER" as const, disabled: false },
 ] as const;
 
 type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
@@ -63,6 +64,8 @@ type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
 // ---------------------------------------------------------------------------
 
 export function CheckoutPageClient() {
+  const { locale, t } = useI18n();
+  const localizedCheckoutSchema = useMemo(() => createCheckoutSchema(locale), [locale]);
   const { cart, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
 
@@ -84,7 +87,7 @@ export function CheckoutPageClient() {
     control,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema as never),
+    resolver: zodResolver(localizedCheckoutSchema as never),
     defaultValues: {
       email: "",
       phone: "",
@@ -106,7 +109,7 @@ export function CheckoutPageClient() {
     try {
       const storedValue = window.localStorage.getItem(checkoutDetailsStorageKey(user.id));
       if (storedValue) {
-        const parsedDetails = checkoutSchema.safeParse(JSON.parse(storedValue));
+        const parsedDetails = localizedCheckoutSchema.safeParse(JSON.parse(storedValue));
         if (parsedDetails.success) {
           setValue("email", parsedDetails.data.email);
           setValue("phone", parsedDetails.data.phone);
@@ -126,7 +129,7 @@ export function CheckoutPageClient() {
     const names = user.fullName.split(" ");
     setValue("firstName", names[0] || "");
     setValue("lastName", names.slice(1).join(" ") || "");
-  }, [user, setValue]);
+  }, [localizedCheckoutSchema, user, setValue]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -141,7 +144,7 @@ export function CheckoutPageClient() {
       .catch((error: unknown) => {
         if (!active) return;
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setAddressApiError("Không thể tải danh sách tỉnh/thành. Vui lòng thử lại.");
+        setAddressApiError(t("checkout.provinceLoadError"));
       })
       .finally(() => {
         if (active) setIsLoadingProvinces(false);
@@ -151,7 +154,7 @@ export function CheckoutPageClient() {
       active = false;
       controller.abort();
     };
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!selectedProvinceCode) {
@@ -171,14 +174,14 @@ export function CheckoutPageClient() {
         if (!active) return;
         if (error instanceof DOMException && error.name === "AbortError") return;
         setWards([]);
-        setAddressApiError("Không thể tải danh sách phường/xã. Vui lòng thử lại.");
+        setAddressApiError(t("checkout.wardLoadError"));
       });
 
     return () => {
       active = false;
       controller.abort();
     };
-  }, [selectedProvinceCode]);
+  }, [selectedProvinceCode, t]);
 
   const activeItemsList = cart;
 
@@ -201,7 +204,7 @@ export function CheckoutPageClient() {
     const selectedWard = wards.find((ward) => String(ward.code) === data.wardCode);
 
     if (!selectedProvince || !selectedWard) {
-      setAddressApiError("Vui lòng chọn đầy đủ tỉnh/thành và phường/xã.");
+      setAddressApiError(t("checkout.addressRequired"));
       return;
     }
 
@@ -232,10 +235,19 @@ export function CheckoutPageClient() {
     } catch (err: unknown) {
       const checkoutErr = extractCheckoutError(err);
 
+      const localizedError = {
+        validation: t("checkout.error.validation"),
+        insufficient_stock: t("checkout.error.insufficientStock"),
+        invalid_coupon: t("checkout.error.invalidCoupon"),
+        unauthenticated: t("checkout.error.unauthenticated"),
+        conflict: t("checkout.error.conflict"),
+        unknown: t("checkout.error.unknown"),
+      }[checkoutErr.kind];
+
       if (checkoutErr.kind === "invalid_coupon") {
-        setCouponError(checkoutErr.message);
+        setCouponError(localizedError);
       } else {
-        setApiError(checkoutErr.message);
+        setApiError(localizedError);
       }
     }
   };
@@ -246,16 +258,16 @@ export function CheckoutPageClient() {
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
-            Đăng nhập để thanh toán
+            {t("checkout.signInTitle")}
           </h2>
           <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
-            Bạn cần đăng nhập tài khoản Vela Member để tiến hành đặt hàng và nhận các ưu đãi thành viên.
+            {t("checkout.signInDescription")}
           </p>
           <Link
             href="/sign-in"
             className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
           >
-            Đăng nhập ngay
+            {t("checkout.signIn")}
           </Link>
         </Card>
       </div>
@@ -268,27 +280,26 @@ export function CheckoutPageClient() {
         <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
           <CheckCircle2 className="mb-6 size-14 text-[#b85a3c]" />
           <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
-            Đặt hàng thành công!
+            {t("checkout.successTitle")}
           </h1>
           <p className="mb-2 text-sm leading-relaxed text-[#1c1a18]/65">
-            Cám ơn bạn đã lựa chọn tin dùng thời trang tối giản của{" "}
-            <strong>VELA WEAR</strong>.
+            {t("checkout.successDescription", { brand: "VELA WEAR" })}
           </p>
           <p className="mb-2 text-xs font-semibold text-[#1c1a18]/50">
-            Mã đơn hàng của bạn:{" "}
+            {t("checkout.orderCode")}:{" "}
             <span className="font-serif text-sm tracking-wide text-black">
               {completedOrder.orderCode}
             </span>
           </p>
           <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] uppercase tracking-widest text-[#1c1a18]/45">
             <span>
-              Tổng:{" "}
+              {t("checkout.total")}:{" "}
               <strong className="text-[#1c1a18] font-numeric">
-                {money(completedOrder.finalAmount)}
+                {money(completedOrder.finalAmount, locale)}
               </strong>
             </span>
             <span>
-              Thanh toán:{" "}
+              {t("checkout.payment")}:{" "}
               <strong className="text-[#1c1a18]">
                 {completedOrder.paymentMethod === "COD"
                   ? "COD"
@@ -296,22 +307,28 @@ export function CheckoutPageClient() {
               </strong>
             </span>
             <span>
-              Trạng thái:{" "}
+              {t("checkout.status")}:{" "}
               <strong className="text-[#1c1a18]">
-                {completedOrder.status}
+                {{
+                  PENDING: t("order.status.pending"),
+                  CONFIRMED: t("order.status.confirmed"),
+                  PROCESSING: t("order.status.processing"),
+                  SHIPPING: t("order.status.shipping"),
+                  DELIVERED: t("order.status.delivered"),
+                  CANCELLED: t("order.status.cancelled"),
+                }[completedOrder.status.toUpperCase()] ?? completedOrder.status}
               </strong>
             </span>
           </div>
           <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
           <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
-            Thông tin giao nhận sẽ được cập nhật qua email{" "}
-            <strong>{completedOrder.receiverName}</strong>.
+            {t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}
           </p>
           <Link
             href="/"
             className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
           >
-            Quay lại trang chủ VELA WEAR
+            {t("checkout.backHome")}
           </Link>
         </Card>
       </div>
@@ -324,16 +341,16 @@ export function CheckoutPageClient() {
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
           <ShoppingBag className="mb-6 size-12 text-[#b85a3c]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
-            Giỏ hàng đang trống
+            {t("checkout.emptyTitle")}
           </h2>
           <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
-            Thêm sản phẩm vào giỏ hàng trước khi tiến hành thanh toán.
+            {t("checkout.emptyDescription")}
           </p>
           <Link
             href="/collection"
             className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
           >
-            Tiếp tục mua sắm
+            {t("cart.continueShopping")}
           </Link>
         </Card>
       </div>
@@ -344,13 +361,13 @@ export function CheckoutPageClient() {
     <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       <div className="mb-8 flex justify-between gap-4">
         <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-4xl">
-          Checkout
+          {t("checkout.title")}
         </h1>
         <Link
           href="/cart"
           className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c] hover:underline"
         >
-          ← View Cart
+          ← {t("checkout.viewCart")}
         </Link>
       </div>
 
@@ -365,10 +382,10 @@ export function CheckoutPageClient() {
 
           <Card className="space-y-8 rounded-md border-none bg-white p-6 py-6 shadow-sm">
             <div className="space-y-3">
-              <SectionTitle number="1" title="Contact Information" />
+              <SectionTitle number="1" title={t("checkout.contact")} />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <CheckoutInput
-                  label="Email Address *"
+                  label={t("checkout.email")}
                   type="email"
                   autoComplete="email"
                   placeholder="address@domain.com"
@@ -376,7 +393,7 @@ export function CheckoutPageClient() {
                   error={errors.email?.message}
                 />
                 <CheckoutInput
-                  label="Phone Number *"
+                  label={t("checkout.phone")}
                   type="tel"
                   autoComplete="tel"
                   placeholder="09xxx xxxxx"
@@ -387,38 +404,38 @@ export function CheckoutPageClient() {
             </div>
 
             <div className="space-y-3">
-              <SectionTitle number="2" title="Shipping Address" />
+              <SectionTitle number="2" title={t("checkout.shippingAddress")} />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <CheckoutInput
-                  label="First Name *"
+                  label={t("checkout.firstName")}
                   autoComplete="given-name"
-                  placeholder="Jon"
+                  placeholder={t("checkout.firstNamePlaceholder")}
                   {...register("firstName")}
                   error={errors.firstName?.message}
                 />
                 <CheckoutInput
-                  label="Last Name *"
+                  label={t("checkout.lastName")}
                   autoComplete="family-name"
-                  placeholder="Doe"
+                  placeholder={t("checkout.lastNamePlaceholder")}
                   {...register("lastName")}
                   error={errors.lastName?.message}
                 />
               </div>
               <CheckoutInput
-                label="Số nhà, tên đường *"
+                label={t("checkout.street")}
                 autoComplete="street-address"
-                placeholder="Ví dụ: 123 Nguyễn Huệ"
+                placeholder={t("checkout.streetPlaceholder")}
                 {...register("address")}
                 error={errors.address?.message}
               />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <FieldLabel>Tỉnh / Thành phố *</FieldLabel>
+                  <FieldLabel>{t("checkout.province")}</FieldLabel>
                   <Skeleton
                     name="checkout-province-select"
                     loading={isLoadingProvinces}
                     fallback={<AddressSelectLoadingFallback />}
-                    fixture={<AddressSelectLoadingFixture label="Chọn tỉnh/thành" />}
+                    fixture={<AddressSelectLoadingFixture label={t("checkout.selectProvince")} />}
                   >
                   <select
                     autoComplete="address-level1"
@@ -431,7 +448,7 @@ export function CheckoutPageClient() {
                     })}
                     className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <option value="">Chọn tỉnh/thành</option>
+                    <option value="">{t("checkout.selectProvince")}</option>
                     {provinces.map((province) => (
                       <option key={province.code} value={province.code}>
                         {province.name}
@@ -445,12 +462,12 @@ export function CheckoutPageClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <FieldLabel>Phường / Xã *</FieldLabel>
+                  <FieldLabel>{t("checkout.ward")}</FieldLabel>
                   <Skeleton
                     name="checkout-ward-select"
                     loading={isLoadingWards}
                     fallback={<AddressSelectLoadingFallback />}
-                    fixture={<AddressSelectLoadingFixture label="Chọn phường/xã" />}
+                    fixture={<AddressSelectLoadingFixture label={t("checkout.selectWard")} />}
                   >
                   <select
                     autoComplete="address-level2"
@@ -458,7 +475,7 @@ export function CheckoutPageClient() {
                     {...register("wardCode")}
                     className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <option value="">Chọn phường/xã</option>
+                    <option value="">{t("checkout.selectWard")}</option>
                     {wards.map((ward) => (
                       <option key={ward.code} value={ward.code}>
                         {ward.name}
@@ -480,7 +497,7 @@ export function CheckoutPageClient() {
             </div>
 
             <div className="space-y-3">
-              <SectionTitle number="3" title="Payment Method" />
+              <SectionTitle number="3" title={t("checkout.paymentMethod")} />
               <div className="space-y-3">
                 {PAYMENT_METHODS.map((method) => (
                   <label
@@ -506,7 +523,7 @@ export function CheckoutPageClient() {
                       {method.value === "COD" && (
                         <Truck className="size-4 text-[#1c1a18]/50" />
                       )}
-                      {method.label}
+                      {method.value === "COD" ? t("checkout.cod") : t("checkout.bankTransfer")}
                     </span>
                   </label>
                 ))}
@@ -522,12 +539,12 @@ export function CheckoutPageClient() {
             {isSubmitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                Đang xử lý đặt hàng...
+                {t("checkout.processing")}
               </>
             ) : (
               <>
                 <LockKeyhole className="size-4" />
-                Hoàn tất đặt hàng
+                {t("checkout.complete")}
               </>
             )}
           </Button>
@@ -535,7 +552,7 @@ export function CheckoutPageClient() {
 
         <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
           <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
-            Your Order Summary
+            {t("checkout.orderSummary")}
           </h2>
           <div className="no-scrollbar mb-8 max-h-[280px] space-y-4 overflow-y-auto pr-1">
             {activeItemsList.map((item) => (
@@ -548,11 +565,11 @@ export function CheckoutPageClient() {
                     {item.name}
                   </h4>
                   <p className="mt-1 truncate text-[9px] uppercase tracking-widest text-[#1c1a18]/50">
-                    Qty {item.quantity} / {item.size || "M"} / {item.color || "Oat"}
+                    {t("checkout.quantityShort", { count: item.quantity })} / {item.size || "M"} / {item.color || "Oat"}
                   </p>
                 </div>
                 <span className="font-serif text-xs font-semibold text-[#1c1a18] font-numeric">
-                  {money(item.price * item.quantity)}
+                  {money(item.price * item.quantity, locale)}
                 </span>
               </div>
             ))}
@@ -567,7 +584,7 @@ export function CheckoutPageClient() {
                   if (couponError) setCouponError(null);
                 }}
                 autoComplete="off"
-                placeholder="Nhập mã giảm giá"
+                placeholder={t("checkout.couponPlaceholder")}
                 className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold uppercase tracking-wider focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
               />
               <Button
@@ -579,7 +596,7 @@ export function CheckoutPageClient() {
                 }}
                 className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c]"
               >
-                Apply
+                {t("checkout.apply")}
               </Button>
             </div>
             {couponError && (
@@ -587,33 +604,33 @@ export function CheckoutPageClient() {
             )}
             {couponCode.trim() && !couponError && (
               <p className="mt-2 text-xs text-[#1c1a18]/50">
-                Mã &ldquo;{couponCode.trim().toUpperCase()}&rdquo; sẽ được áp dụng khi đặt hàng.
+                {t("checkout.couponPending", { code: couponCode.trim().toUpperCase() })}
               </p>
             )}
           </div>
 
           <div className="space-y-4 border-t border-[#1c1a18]/5 pt-6 text-xs tracking-wide">
-            <LedgerRow label="Subtotal" value={money(subtotal)} />
+            <LedgerRow label={t("cart.subtotal")} value={money(subtotal, locale)} />
             <LedgerRow
-              label="Shipping"
-              value={shippingFee === 0 ? "Complimentary" : money(shippingFee)}
+              label={t("checkout.shipping")}
+              value={shippingFee === 0 ? t("common.complimentary") : money(shippingFee, locale)}
             />
             {couponCode.trim() && (
               <LedgerRow
-                label="Coupon"
+                label={t("checkout.coupon")}
                 value={couponCode.trim().toUpperCase()}
                 highlight
               />
             )}
             <Separator className="my-4 bg-[#1c1a18]/10" />
             <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
-              <span>Estimated Total</span>
+              <span>{t("checkout.estimatedTotal")}</span>
               <span className="font-serif text-lg tracking-wider text-[#b85a3c] font-numeric">
-                {money(estimatedTotal)}
+                {money(estimatedTotal, locale)}
               </span>
             </div>
             <p className="text-[10px] leading-relaxed text-[#1c1a18]/40">
-              Giảm giá (nếu có) sẽ được áp dụng sau khi xác nhận mã coupon bởi hệ thống.
+              {t("checkout.discountNote")}
             </p>
           </div>
         </Card>

@@ -1,6 +1,8 @@
 import { Archive, CircleHelp, File, Inbox, Keyboard, type LucideIcon, Send, Star, Trash2 } from "lucide-react";
 import { siFigma, siGoogledocs, siGooglephotos } from "simple-icons";
 
+import type { Locale } from "@/lib/i18n";
+
 const arhamKhan = {
   name: "Arham Khan",
   email: "hello@arhamkhnz.com",
@@ -479,3 +481,48 @@ export const accounts = [
     email: "contact@weblabs.studio",
   },
 ];
+
+type LocalizedMailCopy = Pick<Mail, "subject" | "body" | "labels">;
+
+const vietnameseMailCopies: LocalizedMailCopy[] = [
+  {
+    subject: "Lịch họp dự án ngày mai",
+    body: "Chào bạn,\n\nChúng ta hãy họp vào ngày mai để rà soát tiến độ dự án và thống nhất các bước tiếp theo. Mình đã xem báo cáo mới nhất và có một vài đề xuất muốn trao đổi cùng đội ngũ.\n\nBạn vui lòng chuẩn bị các câu hỏi hoặc điểm cần làm rõ. Mong sớm gặp bạn trong cuộc họp.\n\nTrân trọng.",
+    labels: ["cuộc họp", "công việc", "quan trọng"],
+  },
+  {
+    subject: "Phản hồi về bản cập nhật dự án",
+    body: "Chào bạn,\n\nCảm ơn đội ngũ đã gửi bản cập nhật. Tiến độ hiện tại rất tích cực và các hạng mục chính đều được trình bày rõ ràng. Mình có một vài góp ý nhỏ trong tài liệu đính kèm.\n\nChúng ta có thể trao đổi thêm trong cuộc họp tiếp theo. Cảm ơn mọi người vì sự nỗ lực.\n\nTrân trọng.",
+    labels: ["công việc", "phản hồi"],
+  },
+  {
+    subject: "Xác nhận ngân sách chiến dịch mới",
+    body: "Chào bạn,\n\nBộ phận tài chính đã xem xét ngân sách cho chiến dịch sắp tới. Một số khoản phân bổ cần được điều chỉnh để phù hợp với kế hoạch triển khai mới.\n\nMình đã đính kèm bảng phân tích chi tiết. Bạn vui lòng xem qua trước buổi họp để chúng ta có thể chốt phương án.\n\nCảm ơn bạn.",
+    labels: ["công việc", "ngân sách"],
+  },
+  {
+    subject: "Cập nhật kế hoạch ra mắt bộ sưu tập",
+    body: "Chào cả đội,\n\nKế hoạch ra mắt bộ sưu tập vẫn đúng tiến độ. Phần nội dung và hình ảnh chính đã hoàn thành, trong khi đội vận hành đang kiểm tra những bước cuối cùng.\n\nMọi người vui lòng gửi các câu hỏi trước cuộc gọi chiều nay để chúng ta xử lý đầy đủ.\n\nTrân trọng.",
+    labels: ["ra mắt", "công việc", "ưu tiên"],
+  },
+  {
+    subject: "Đề nghị góp ý cho bản thiết kế mới",
+    body: "Chào bạn,\n\nMình gửi bạn bản thiết kế mới nhất để xin ý kiến. Đội ngũ đã cập nhật bố cục, khoảng cách và trạng thái trên thiết bị di động theo phản hồi vòng trước.\n\nBạn vui lòng đánh dấu trực tiếp những điểm cần chỉnh sửa. Mọi góp ý đều rất hữu ích trước khi bàn giao.\n\nCảm ơn bạn.",
+    labels: ["thiết kế", "phản hồi"],
+  },
+  {
+    subject: "Kế hoạch hoạt động gắn kết đội ngũ",
+    body: "Chào mọi người,\n\nChúng ta đang lên kế hoạch cho một hoạt động gắn kết vào tuần tới. Mục tiêu là cùng nhìn lại những cột mốc vừa qua và tạo thêm thời gian trao đổi giữa các nhóm.\n\nMọi người vui lòng phản hồi thời gian phù hợp và các lưu ý về ăn uống.\n\nHẹn gặp cả đội.",
+    labels: ["nội bộ", "sự kiện"],
+  },
+];
+
+const vietnameseMails = mails.map((mail, index) => ({
+  ...mail,
+  ...vietnameseMailCopies[index % vietnameseMailCopies.length],
+}));
+
+export const mailsByLocale: Record<Locale, Mail[]> = {
+  en: mails,
+  vi: vietnameseMails,
+};

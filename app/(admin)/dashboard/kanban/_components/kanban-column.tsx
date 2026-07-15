@@ -3,7 +3,9 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { GripVertical, MoreVertical, Plus } from "lucide-react";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { getIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { SortableTaskCard } from "./sortable-task-card";
@@ -15,6 +17,8 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
+  const { locale, t } = useI18n();
+  const formattedTaskCount = new Intl.NumberFormat(getIntlLocale(locale)).format(tasks.length);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({
     id: column.id,
     data: { type: "column", columnId: column.id },
@@ -40,7 +44,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
               variant="ghost"
               size="icon-xs"
               className="-ml-2 cursor-grab text-foreground/70 active:cursor-grabbing"
-              aria-label={`Drag ${column.title} column`}
+              aria-label={t("admin.workflows.kanban.dragColumn", { column: column.title })}
               {...attributes}
               {...listeners}
             >
@@ -49,14 +53,24 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
             <h2 className="truncate font-medium text-base leading-none">{column.title}</h2>
           </div>
           <p className="text-muted-foreground text-sm tabular-nums leading-none">
-            {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+            {t(tasks.length === 1 ? "admin.workflows.kanban.taskCountOne" : "admin.workflows.kanban.taskCount", {
+              count: formattedTaskCount,
+            })}
           </p>
         </div>
         <div className="-mr-2 flex items-center gap-0.5 text-muted-foreground">
-          <Button variant="ghost" size="icon-sm" aria-label={`Add task to ${column.title}`}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.workflows.kanban.addToColumn", { column: column.title })}
+          >
             <Plus />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={`${column.title} column actions`}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.workflows.kanban.columnActions", { column: column.title })}
+          >
             <MoreVertical />
           </Button>
         </div>

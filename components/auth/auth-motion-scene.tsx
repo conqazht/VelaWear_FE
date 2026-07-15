@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export type AuthSceneFocus = "none" | "email" | "password";
 export type AuthSceneStatus = "idle" | "success" | "error";
@@ -27,6 +28,7 @@ export function AuthMotionScene({
   status,
   mode,
 }: AuthMotionSceneProps) {
+  const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   const sceneRef = useRef<HTMLDivElement>(null);
   const target = useRef({ x: 0, y: 0 });
@@ -324,14 +326,14 @@ export function AuthMotionScene({
         <p className="font-serif text-[42px] leading-[0.98]">
           Vela
           <br />
-          Member
+          {t("auth.scene.member")}
         </p>
         <p className="mt-4 max-w-[190px] text-xs leading-5 text-white/70">
           {mode === "register"
-            ? "A quieter way into the wardrobe."
+            ? t("auth.scene.register")
             : mode === "forgot-password"
-            ? "Find your way back into the wardrobe."
-            : "Your wardrobe, waiting in soft light."}
+            ? t("auth.scene.forgotPassword")
+            : t("auth.scene.signIn")}
         </p>
       </div>
 

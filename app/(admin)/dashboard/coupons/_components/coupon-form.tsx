@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -48,18 +49,23 @@ type CouponFormProps = {
   isEditing: boolean;
 };
 
-const COUPON_TYPES: Array<{ value: CouponType; label: string }> = [
-  { value: "PERCENTAGE", label: "Percentage" },
-  { value: "FIXED_AMOUNT", label: "Fixed amount" },
-];
+const COUPON_TYPE_MESSAGE_KEYS = {
+  PERCENTAGE: "admin.commerce.coupons.type.percentage",
+  FIXED_AMOUNT: "admin.commerce.coupons.type.fixedAmount",
+} as const;
 
-const COUPON_STATUSES: Array<{ value: CouponStatus; label: string }> = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "EXPIRED", label: "Expired" },
-];
+const COUPON_STATUS_MESSAGE_KEYS = {
+  ACTIVE: "admin.commerce.coupons.status.active",
+  INACTIVE: "admin.commerce.coupons.status.inactive",
+  EXPIRED: "admin.commerce.coupons.status.expired",
+} as const;
+
+const COUPON_TYPES: CouponType[] = ["PERCENTAGE", "FIXED_AMOUNT"];
+const COUPON_STATUSES: CouponStatus[] = ["ACTIVE", "INACTIVE", "EXPIRED"];
 
 export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
+  const { t } = useI18n();
+
   function update<Key extends keyof CouponFormValues>(key: Key, value: CouponFormValues[Key]) {
     onChange({ ...values, [key]: value });
   }
@@ -67,7 +73,7 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="coupon-code">Coupon code</FieldLabel>
+        <FieldLabel htmlFor="coupon-code">{t("admin.commerce.coupons.form.code")}</FieldLabel>
         <Input
           id="coupon-code"
           value={values.code}
@@ -78,21 +84,23 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
           required
         />
         <FieldDescription>
-          {isEditing ? "Coupon codes are immutable after creation." : "Use a unique code up to 50 characters."}
+          {isEditing
+            ? t("admin.commerce.coupons.form.codeImmutable")
+            : t("admin.commerce.coupons.form.codeHelp")}
         </FieldDescription>
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="coupon-type">Discount type</FieldLabel>
+          <FieldLabel htmlFor="coupon-type">{t("admin.commerce.coupons.form.type")}</FieldLabel>
           <Select value={values.type} onValueChange={(value) => update("type", value as CouponType)}>
             <SelectTrigger id="coupon-type" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
               {COUPON_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
+                <SelectItem key={type} value={type}>
+                  {t(COUPON_TYPE_MESSAGE_KEYS[type])}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -101,7 +109,9 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
 
         <Field>
           <FieldLabel htmlFor="coupon-value">
-            {values.type === "PERCENTAGE" ? "Percentage value" : "Discount amount (VND)"}
+            {values.type === "PERCENTAGE"
+              ? t("admin.commerce.coupons.form.percentageValue")
+              : t("admin.commerce.coupons.form.discountAmount")}
           </FieldLabel>
           <Input
             id="coupon-value"
@@ -119,7 +129,9 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="coupon-minimum">Minimum order (VND)</FieldLabel>
+          <FieldLabel htmlFor="coupon-minimum">
+            {t("admin.commerce.coupons.form.minimum")}
+          </FieldLabel>
           <Input
             id="coupon-minimum"
             type="number"
@@ -129,11 +141,13 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
             onChange={(event) => update("minOrderAmount", event.target.value)}
             required
           />
-          <FieldDescription>Send 0 when there is no minimum order value.</FieldDescription>
+          <FieldDescription>{t("admin.commerce.coupons.form.minimumHelp")}</FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="coupon-maximum">Maximum discount (VND)</FieldLabel>
+          <FieldLabel htmlFor="coupon-maximum">
+            {t("admin.commerce.coupons.form.maximum")}
+          </FieldLabel>
           <Input
             id="coupon-maximum"
             type="number"
@@ -141,14 +155,16 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
             step="0.01"
             value={values.maxDiscount}
             onChange={(event) => update("maxDiscount", event.target.value)}
-            placeholder="No cap"
+            placeholder={t("admin.commerce.coupons.form.noCap")}
           />
-          <FieldDescription>Optional; leave blank for no discount cap.</FieldDescription>
+          <FieldDescription>{t("admin.commerce.coupons.form.maximumHelp")}</FieldDescription>
         </Field>
       </div>
 
       <Field>
-        <FieldLabel htmlFor="coupon-usage-limit">Usage limit</FieldLabel>
+        <FieldLabel htmlFor="coupon-usage-limit">
+          {t("admin.commerce.coupons.form.usageLimit")}
+        </FieldLabel>
         <Input
           id="coupon-usage-limit"
           type="number"
@@ -156,14 +172,16 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
           step="1"
           value={values.usageLimit}
           onChange={(event) => update("usageLimit", event.target.value)}
-          placeholder="Unlimited"
+          placeholder={t("admin.commerce.coupons.form.unlimited")}
         />
-        <FieldDescription>Optional; leave blank for unlimited uses.</FieldDescription>
+        <FieldDescription>{t("admin.commerce.coupons.form.usageLimitHelp")}</FieldDescription>
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="coupon-start-date">Starts at</FieldLabel>
+          <FieldLabel htmlFor="coupon-start-date">
+            {t("admin.commerce.coupons.form.startsAt")}
+          </FieldLabel>
           <Input
             id="coupon-start-date"
             type="datetime-local"
@@ -174,7 +192,9 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="coupon-end-date">Ends at</FieldLabel>
+          <FieldLabel htmlFor="coupon-end-date">
+            {t("admin.commerce.coupons.form.endsAt")}
+          </FieldLabel>
           <Input
             id="coupon-end-date"
             type="datetime-local"
@@ -186,15 +206,15 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
       </div>
 
       <Field>
-        <FieldLabel htmlFor="coupon-status">Status</FieldLabel>
+        <FieldLabel htmlFor="coupon-status">{t("admin.commerce.coupons.form.status")}</FieldLabel>
         <Select value={values.status} onValueChange={(value) => update("status", value as CouponStatus)}>
           <SelectTrigger id="coupon-status" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="start" alignItemWithTrigger={false}>
             {COUPON_STATUSES.map((status) => (
-              <SelectItem key={status.value} value={status.value}>
-                {status.label}
+              <SelectItem key={status} value={status}>
+                {t(COUPON_STATUS_MESSAGE_KEYS[status])}
               </SelectItem>
             ))}
           </SelectContent>

@@ -5,15 +5,15 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useI18n } from "@/components/providers/i18n-provider";
+import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
 import { useProductsQuery } from "@/lib/queries/catalog";
 import {
   getCategoryLabel,
   mapBackendProduct,
   money,
-  PRODUCTS,
   type Product,
 } from "@/lib/vela-data";
-import { getActiveLocale } from "@/lib/i18n";
 
 interface RelatedProductsProps {
   categoryId?: number;
@@ -29,8 +29,7 @@ export function RelatedProducts({
   const sliderRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const activeLocale = getActiveLocale();
+  const { locale: activeLocale, t } = useI18n();
 
   // Fetch products in the same category
   const productsQuery = useProductsQuery({
@@ -45,9 +44,10 @@ export function RelatedProducts({
       list = productsQuery.data.result.map((p) => mapBackendProduct(p, activeLocale));
     } else {
       // Fallback: get all static products of the same category
-      list = PRODUCTS.filter((p) => p.category === categoryCode);
+      const fixtureProducts = getLocalizedFixtureProducts(activeLocale);
+      list = fixtureProducts.filter((p) => p.category === categoryCode);
       if (list.length === 0) {
-        list = PRODUCTS;
+        list = fixtureProducts;
       }
     }
     // Filter out the current product
@@ -99,14 +99,14 @@ export function RelatedProducts({
       {/* Header Row */}
       <div className="flex items-center justify-between mb-8 select-none">
         <h2 className="font-serif text-2xl font-light tracking-wide text-[#1c1a18] md:text-3xl">
-          You Might Also Like
+          {t("storefront.product.related")}
         </h2>
         <div className="flex gap-2">
           <button
             onClick={() => scroll("left")}
             disabled={!canScrollLeft}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-[#efe7dc] text-[#1c1a18] border border-[#e3dccf]/30 hover:bg-[#b5573a] hover:text-white hover:border-[#b5573a] transition-colors duration-200 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-            aria-label="Scroll left"
+            aria-label={t("storefront.common.scrollLeft")}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -114,7 +114,7 @@ export function RelatedProducts({
             onClick={() => scroll("right")}
             disabled={!canScrollRight}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-[#efe7dc] text-[#1c1a18] border border-[#e3dccf]/30 hover:bg-[#b5573a] hover:text-white hover:border-[#b5573a] transition-colors duration-200 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-            aria-label="Scroll right"
+            aria-label={t("storefront.common.scrollRight")}
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -128,7 +128,7 @@ export function RelatedProducts({
         style={{ scrollbarWidth: "none" }}
       >
         {recommendedProducts.map((product) => {
-          const displayCategory = getCategoryLabel(product.category, "en");
+          const displayCategory = getCategoryLabel(product.category, activeLocale);
 
           return (
             <motion.div
@@ -171,11 +171,11 @@ export function RelatedProducts({
                 {/* Price */}
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm font-semibold text-[#1c1a18] font-numeric">
-                    {money(product.price)}
+                    {money(product.price, activeLocale)}
                   </span>
                   {product.originalPrice && product.originalPrice > product.price && (
                     <span className="text-xs text-[#8a857c] line-through font-numeric">
-                      {money(product.originalPrice)}
+                      {money(product.originalPrice, activeLocale)}
                     </span>
                   )}
                 </div>

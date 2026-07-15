@@ -4,10 +4,12 @@ import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Mail, ArrowRight } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const { t } = useI18n();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -39,12 +41,12 @@ export function Newsletter() {
 
           {/* Heading */}
           <h2 className="font-serif text-3.5xl md:text-5xl font-light leading-tight tracking-tight text-white mb-4">
-            Join the Vela Archive.
+            {t("storefront.newsletter.title")}
           </h2>
 
           {/* Subtitle */}
           <p className="text-[#a89e93] text-sm md:text-base leading-relaxed font-light mb-10 max-w-xl">
-            Nhận các bài tiểu luận hai tuần một lần về lối sống tối giản, quy trình dệt may bền vững, quyền truy cập sớm vào các bộ sưu tập giới hạn, và không có gì khác.
+            {t("storefront.newsletter.description")}
           </p>
 
           {/* Form */}
@@ -54,7 +56,7 @@ export function Newsletter() {
           >
             <input
               type="email"
-              placeholder="Địa chỉ email của bạn..."
+              placeholder={t("storefront.newsletter.placeholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-transparent border-none text-white placeholder-white/30 text-sm px-6 py-3.5 focus:outline-none focus:ring-0"
@@ -67,7 +69,7 @@ export function Newsletter() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <span>{subscribed ? "Đã Tham Gia" : "Đăng Ký"}</span>
+              <span>{subscribed ? t("storefront.newsletter.joined") : t("storefront.newsletter.join")}</span>
               <ArrowRight className="w-4 h-4 text-[#b5573a]" />
             </motion.button>
           </form>
@@ -82,7 +84,7 @@ export function Newsletter() {
                   exit={{ opacity: 0 }}
                   className="text-xs text-[#ffb59f] font-light"
                 >
-                  Cám ơn bạn. Thư xác nhận tư cách thành viên Vela Archive đã được gửi đi.
+                  {t("storefront.newsletter.success")}
                 </motion.p>
               )}
             </AnimatePresence>
