@@ -13,6 +13,7 @@ test(
   { tag: "@fullstack" },
   async ({ fullstackSession, page }) => {
     expect(fullstackSession.variantId).toBeGreaterThan(0);
+
     await page.goto("/checkout");
 
     const checkoutForm = page.locator('form:has(input[name="email"])');
@@ -25,7 +26,9 @@ test(
     await checkoutForm.locator('select[name="provinceCode"]').selectOption("79");
     await checkoutForm.locator('select[name="wardCode"]').selectOption("760");
 
-    const submitButton = checkoutForm.locator('button[type="submit"]');
+    const submitButton = checkoutForm.getByRole("button", {
+      name: /Hoàn tất đặt hàng|Complete order/i,
+    });
     await expect(submitButton).toBeEnabled();
 
     let checkoutPreviewRequestCount = 0;
@@ -38,6 +41,7 @@ test(
         checkoutRequestCount += 1;
       }
     });
+
     const checkoutResponse = page.waitForResponse((response) =>
       isCheckoutRequest(response.url(), response.request().method()),
     );
@@ -48,8 +52,9 @@ test(
     });
 
     const response = await checkoutResponse;
-    expect(response.status()).toBe(201);
     const responseBody = await response.json() as ApiEnvelope<{ orderId: number }>;
+
+    expect(response.status()).toBe(201);
     expect(responseBody.data.orderId).toBeGreaterThan(0);
     await expect(
       page.getByText(/Đặt hàng thành công|Order placed successfully/i),

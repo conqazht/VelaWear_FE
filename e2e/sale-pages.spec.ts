@@ -1,15 +1,28 @@
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/smoke";
 
-test.describe.configure({ mode: "serial" });
+async function expectEnglishFlashSale(page: Page) {
+  await expect(page.getByText(/Adding an item to your bag does not reserve/i)).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("data-locale", "en");
+  await expect(page).toHaveTitle("Flash Sale | VELA WEAR");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    "content",
+    "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
+  );
+}
 
 test("trang Standard Sale có nghiệp vụ coupon", { tag: "@smoke" }, async ({ page }) => {
   await page.goto("/sale");
+
   await expect(page.getByRole("heading", { name: "Sale", exact: true })).toBeVisible();
   await expect(page.getByText(/Standard Sale vẫn có thể dùng coupon/i)).toBeVisible();
 });
 
 test("trang Flash Sale nói rõ giỏ hàng không giữ suất", { tag: "@smoke" }, async ({ page }) => {
   await page.goto("/flash-sale");
+
   await expect(page.getByRole("heading", { name: "Flash Sale", exact: true })).toBeVisible();
   await expect(page.getByText(/Thêm vào giỏ không đồng nghĩa với giữ suất/i)).toBeVisible();
 });
@@ -19,25 +32,11 @@ test("Flash Sale giữ nội dung và metadata English sau reload", { tag: "@smo
 
   await page.getByRole("button", { name: "Chuyển ngôn ngữ sang Tiếng Anh" }).click();
 
-  await expect(page.getByText(/Adding an item to your bag does not reserve/i)).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator("html")).toHaveAttribute("data-locale", "en");
-  await expect(page).toHaveTitle("Flash Sale | VELA WEAR");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-    "content",
-    "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
-  );
+  await expectEnglishFlashSale(page);
 
   await page.reload();
 
-  await expect(page.getByText(/Adding an item to your bag does not reserve/i)).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator("html")).toHaveAttribute("data-locale", "en");
-  await expect(page).toHaveTitle("Flash Sale | VELA WEAR");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-    "content",
-    "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
-  );
+  await expectEnglishFlashSale(page);
   await expect(page.getByRole("button", { name: "Switch language to English" })).toHaveAttribute(
     "aria-pressed",
     "true",

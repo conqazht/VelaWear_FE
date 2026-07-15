@@ -47,6 +47,38 @@ và Sale trả dữ liệu rỗng để UI dùng fixture deterministic. Vì vậ
 thuộc backend hoặc dữ liệu mạng, nhưng vẫn thất bại nếu trang phát sinh JavaScript
 exception không được xử lý hoặc gọi một endpoint VelaWear chưa được allowlist rõ ràng.
 
+### Cách tổ chức code test
+
+Các spec dùng khoảng trắng để thể hiện ba pha Arrange, Act và Assert. Không cần thêm
+comment `// Arrange`, `// Act`, `// Assert` ở mọi test; một dòng trống giữa các pha đã
+đủ khi ý nghĩa rõ ràng. Race test dài dùng `test.step()` để report và trace cho biết
+đang dừng ở pha bootstrap, tạo cạnh tranh, nhả barrier hay kiểm tra trạng thái cuối.
+
+Page Object chỉ được tạo khi một giao diện thật sự được dùng lại:
+
+```text
+e2e/pages/
+├── profile.page.ts
+└── components/
+    └── auth-header.component.ts
+```
+
+`ProfilePage` gom thao tác mở profile và chờ bootstrap auth. `AuthHeaderComponent`
+gom các locator semantic cho profile, đăng nhập và đăng xuất. Request counter, route
+barrier, Web Lock snapshot và assertion thứ tự network vẫn nằm trong spec vì đó là
+invariant đang được kiểm tra, không phải hành vi chung của một page.
+
+Fixture `authenticatedSession` tạo session thật qua API và thu hồi session trong
+teardown. Nếu Bearer cleanup bị backend từ chối với `401`, fixture retry logout một
+lần không Bearer để backend vẫn có thể thu hồi refresh session từ cookie `HttpOnly`.
+Fixture `fullstackSession` tái sử dụng session này rồi chỉ bổ sung dữ liệu cart/checkout.
+
+Hiện chưa dùng POM Manager: suite chỉ có một page object và một component dùng lại,
+nên manager sẽ tăng indirection và coupling mà chưa giảm code. Chỉ cân nhắc manager
+hoặc lazy page fixture khi nhiều spec cùng cần ít nhất vài page object. Không dùng
+`page.waitForTimeout()` để làm test pass; ưu tiên locator theo role/label/test id,
+web-first assertion, response wait, `expect.poll()` và barrier xác định được.
+
 ### Full-stack
 
 ```bash

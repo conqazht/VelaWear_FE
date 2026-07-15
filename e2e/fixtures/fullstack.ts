@@ -37,7 +37,13 @@ type FullstackSession = {
   variantId: number;
 };
 
+type AuthenticatedSession = {
+  accessToken: string;
+  setCleanupAccessToken: (accessToken: string) => void;
+};
+
 type FullstackFixtures = {
+  authenticatedSession: AuthenticatedSession;
   fullstackSession: FullstackSession;
 };
 
@@ -58,10 +64,37 @@ export async function loginFullstackUser(api: APIRequestContext) {
   return loginBody.data.accessToken;
 }
 
+async function cleanupAuthenticatedSession(api: APIRequestContext, accessToken: string) {
+  try {
+    const logoutResponse = await api.post(`${fullstackApiUrl}/auth/logout`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (logoutResponse.status() === 401) {
+      await api.post(`${fullstackApiUrl}/auth/logout`);
+    }
+  } catch {
+    // Cleanup is best-effort so a stopped backend does not hide the original test result.
+  }
+}
+
 export const test = base.extend<FullstackFixtures>({
-  fullstackSession: async ({ context, page }, provide) => {
+  authenticatedSession: async ({ context }, provide) => {
+    let cleanupAccessToken = await loginFullstackUser(context.request);
+
+    await provide({
+      accessToken: cleanupAccessToken,
+      setCleanupAccessToken: (accessToken) => {
+        cleanupAccessToken = accessToken;
+      },
+    });
+
+    await cleanupAuthenticatedSession(context.request, cleanupAccessToken);
+  },
+
+  fullstackSession: async ({ authenticatedSession, context, page }, provide) => {
     const api = context.request;
-    const accessToken = await loginFullstackUser(api);
+    const { accessToken } = authenticatedSession;
 
     const variantsResponse = await api.get(
       `${fullstackApiUrl}/product-variants?sku=${encodeURIComponent(variantSku)}&size=100`,

@@ -1,22 +1,25 @@
 import { expect, test } from "./fixtures/smoke";
+import { AuthHeaderComponent } from "./pages/components/auth-header.component";
 
 function isApiRequest(url: string, method: string, pathname: string) {
   return method === "POST" && new URL(url).pathname === pathname;
 }
 
 test("trang chủ render shell và tìm kiếm từ header", { tag: "@smoke" }, async ({ page }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.locator("main section").first().hover();
+  const authHeader = new AuthHeaderComponent(page);
 
-  await expect(page.getByRole("link", { name: "Logo Vela Wear" }).first()).toBeVisible();
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await expect(authHeader.root.getByRole("link", { name: "Logo Vela Wear" })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Vela Wear — Bộ Sưu Tập Thu 2026" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Đăng nhập", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Giỏ hàng" })).toBeVisible();
+  await expect(authHeader.loginLink).toBeVisible();
+  await expect(authHeader.root.getByRole("button", { name: "Giỏ hàng" })).toBeVisible();
 
-  await page.getByPlaceholder("Tìm kiếm sản phẩm...").fill("linen shirt");
-  await page.getByPlaceholder("Tìm kiếm sản phẩm...").press("Enter");
+  const searchInput = page.getByPlaceholder("Tìm kiếm sản phẩm...");
+  await searchInput.fill("linen shirt");
+  await searchInput.press("Enter");
 
   await expect(page).toHaveURL((url) =>
     url.pathname === "/search" && url.searchParams.get("q") === "linen shirt"
@@ -35,6 +38,7 @@ test("form đăng nhập chặn dữ liệu rỗng trước khi gọi API", { ta
 
   await expect(page.getByLabel("Email*")).toBeVisible();
   await expect(page.getByLabel("Mật khẩu*")).toBeVisible();
+
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
 
   await expect(page.getByText("Không được để trống", { exact: true })).toHaveCount(2);
@@ -43,24 +47,29 @@ test("form đăng nhập chặn dữ liệu rỗng trước khi gọi API", { ta
 
 test("giỏ hàng cập nhật từ UI và còn nguyên sau reload", { tag: "@smoke" }, async ({ page }) => {
   const productName = "Áo sơ mi linen cổ điển";
+
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const productCard = page.getByRole("article", { name: productName });
+  const addToBag = productCard.getByRole("button", { name: "Thêm vào giỏ" });
+  const shoppingBag = page.getByRole("button", { name: "Giỏ hàng" });
+
   await productCard.scrollIntoViewIfNeeded();
   await productCard.hover();
-  const addToBag = productCard.getByRole("button", { name: "Thêm vào giỏ" });
   await expect(addToBag).toBeVisible();
+
   await addToBag.click();
 
-  const shoppingBag = page.getByRole("button", { name: "Giỏ hàng" });
   await expect(shoppingBag.getByText("1", { exact: true })).toBeVisible();
 
   await page.reload({ waitUntil: "domcontentloaded" });
 
   await expect(
-    page.getByRole("button", { name: "Giỏ hàng" }).getByText("1", { exact: true }),
+    shoppingBag.getByText("1", { exact: true }),
   ).toBeVisible();
-  await page.locator('header a[href="/cart"]').click();
+
+  await shoppingBag.click();
+
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole("heading", { name: "Giỏ hàng", exact: true })).toBeVisible();
   await expect(page.getByText(productName, { exact: true }).first()).toBeVisible();
