@@ -1,6 +1,7 @@
 "use client";
 
 import { ContentLocaleTabs } from "@/app/(admin)/dashboard/_components/management/content-locale-tabs";
+import { EnglishContentGenerator } from "@/app/(admin)/dashboard/_components/management/english-content-generator";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { SaleCampaignType } from "@/lib/api/admin-sales";
 import type { Locale } from "@/lib/i18n";
+import type { GeminiContentModel } from "@/lib/api/admin-translation-suggestions";
 
 import type { SaleCampaignFormValues } from "../_data/sale-campaign-form";
 
@@ -25,6 +27,9 @@ type CampaignDetailsStepProps = {
   typeAndScheduleDisabled: boolean;
   contentLocale: Locale;
   onContentLocaleChange: (locale: Locale) => void;
+  isGeneratingEnglish: boolean;
+  interactionDisabled?: boolean;
+  onGenerateEnglish: (model: GeminiContentModel) => void | Promise<void>;
 };
 
 export function CampaignDetailsStep({
@@ -35,6 +40,9 @@ export function CampaignDetailsStep({
   typeAndScheduleDisabled,
   contentLocale,
   onContentLocaleChange,
+  isGeneratingEnglish,
+  interactionDisabled = false,
+  onGenerateEnglish,
 }: CampaignDetailsStepProps) {
   const { t } = useI18n();
 
@@ -58,7 +66,10 @@ export function CampaignDetailsStep({
   }
 
   return (
-    <div className="grid gap-6">
+    <fieldset
+      disabled={interactionDisabled}
+      className="grid min-w-0 gap-6 border-0 p-0"
+    >
       <div className="grid gap-5 lg:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="sale-code">
@@ -127,6 +138,15 @@ export function CampaignDetailsStep({
           ),
           en: (
             <>
+              <EnglishContentGenerator
+                hasEnglishContent={Boolean(
+                  values.englishName.trim() || values.englishDescription.trim(),
+                )}
+                sourceReady={Boolean(values.name.trim())}
+                isPending={isGeneratingEnglish}
+                disabled={displayDisabled}
+                onGenerate={onGenerateEnglish}
+              />
               <Field>
                 <FieldLabel htmlFor="sale-name-en">{t("admin.sales.editor.details.name.label")}</FieldLabel>
                 <Input id="sale-name-en" value={values.englishName} onChange={(event) => update("englishName", event.target.value)} placeholder={t("admin.sales.editor.details.name.placeholder")} maxLength={150} disabled={displayDisabled} />
@@ -192,6 +212,6 @@ export function CampaignDetailsStep({
           </FieldDescription>
         </Field>
       </div>
-    </div>
+    </fieldset>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { ContentLocaleTabs } from "@/app/(admin)/dashboard/_components/management/content-locale-tabs";
+import { EnglishContentGenerator } from "@/app/(admin)/dashboard/_components/management/english-content-generator";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -13,6 +14,8 @@ import type {
   ProductTranslation,
 } from "@/lib/api/admin-commerce";
 import type { Locale } from "@/lib/i18n";
+import type { GeminiContentModel } from "@/lib/api/admin-translation-suggestions";
+import { shouldAutoUpdateSlug, toAsciiUrlSlug } from "@/lib/url-slug";
 
 export type ProductTranslationFormValue = {
   name: string;
@@ -88,6 +91,8 @@ type ProductFormProps = {
   brands: AdminCatalogOption[];
   isCatalogLoading?: boolean;
   catalogError?: string | null;
+  isGeneratingEnglish: boolean;
+  onGenerateEnglish: (model: GeminiContentModel) => void | Promise<void>;
 };
 
 const PRODUCT_STATUS_MESSAGE_KEYS = {
@@ -108,6 +113,8 @@ export function ProductForm({
   brands,
   isCatalogLoading = false,
   catalogError,
+  isGeneratingEnglish,
+  onGenerateEnglish,
 }: ProductFormProps) {
   const { t } = useI18n();
 
@@ -123,11 +130,20 @@ export function ProductForm({
     key: keyof ProductTranslationFormValue,
     value: string,
   ) {
+    const currentTranslation = values.translations[locale];
+    const nextTranslation = { ...currentTranslation, [key]: value };
+    if (
+      locale === "en" &&
+      key === "name" &&
+      shouldAutoUpdateSlug(currentTranslation.name, currentTranslation.slug)
+    ) {
+      nextTranslation.slug = toAsciiUrlSlug(value);
+    }
     onChange({
       ...values,
       translations: {
         ...values.translations,
-        [locale]: { ...values.translations[locale], [key]: value },
+        [locale]: nextTranslation,
       },
     });
   }
@@ -137,6 +153,14 @@ export function ProductForm({
     const idPrefix = `product-${locale}`;
     return (
       <>
+        {locale === "en" ? (
+          <EnglishContentGenerator
+            hasEnglishContent={!isProductTranslationEmpty(values.translations.en)}
+            sourceReady={Boolean(values.translations.vi.name.trim())}
+            isPending={isGeneratingEnglish}
+            onGenerate={onGenerateEnglish}
+          />
+        ) : null}
         <div className="grid gap-5 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor={`${idPrefix}-name`}>
