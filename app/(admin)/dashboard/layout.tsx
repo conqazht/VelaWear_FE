@@ -59,7 +59,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               <SearchDialog />
             </div>
             <div className="flex items-center gap-2">
-              <LanguageSwitcher showIcon={false} />
+              <LanguageSwitcher presentation="popover" />
               <LayoutControls />
               <ThemeSwitcher />
             </div>

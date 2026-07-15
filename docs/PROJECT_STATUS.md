@@ -33,6 +33,27 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-15
 
+### Đồng bộ trang Sale với grid và card của Collection
+- **Date/Time**: 2026-07-15T22:36:16+07:00
+- **Implementation**: Redesign có mục tiêu cho `/sale` và `/flash-sale`: dùng cùng container `max-w-[1800px]`, breadcrumb/heading, `ProductGrid` 1/2/3 cột, ảnh vuông, khoảng cách và card shell của Collection. Tách `ProductCardShell` dùng chung cho catalog và `SaleProductCard` chuyên giữ giá khuyến mãi, quota, giới hạn mỗi khách, sold-out/upcoming cùng CTA chọn biến thể. Campaign chuyển từ card bo lớn có shadow sang section phẳng có border; banner, type/phase/code, coupon advisory, server-clock countdown, query cadence và boundary invalidation được giữ nguyên. Loading dùng square grid skeleton cùng breakpoint; error dùng `StorefrontApiStatus`; empty state bỏ nested card.
+- **Artifacts**: Không thêm artifact vào repository; ảnh QA tạm được lưu ngoài worktree Codex.
+- **Verification**: Scoped ESLint, TypeScript và 10/10 test Sale/API pass; full `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); production build pass 68 route. Playwright QA mock trên `/sale` desktop 1440px và `/flash-sale` mobile 390px xác nhận lần lượt 3/1 cột, 6 card, không overflow và không có console warning/error.
+- **Known Follow-ups**: Kiểm tra lại crop của banner campaign thật nếu nội dung ảnh quan trọng nằm sát mép; layout hiện dùng `background-position: center` như trước.
+
+### Gỡ thử nghiệm chuyển động khỏi nhãn Sale
+- **Date/Time**: 2026-07-15T22:09:51+07:00
+- **Implementation**: Gỡ toàn bộ prototype editorial/misregistration/crossfade, component phụ, CSS animation và hai public Sale query chỉ phục vụ phần trăm trên header. Nhãn `Giảm giá`/`Sale` trở lại text điều hướng thông thường, dùng cùng hover underline có sẵn như các mục desktop khác và không tự chuyển động trên mobile.
+- **Artifacts**: Xóa toàn bộ ảnh QA của các prototype Sale đã bị loại bỏ.
+- **Verification**: Xác nhận không còn selector, component, data attribute, helper hay API query dành riêng cho motion Sale; nhãn desktop/mobile trở lại markup ban đầu. Scoped ESLint, TypeScript và unit test `sale-utils` 4/4 đều pass.
+- **Known Follow-ups**: Không có.
+
+### Thu gọn bộ đổi ngôn ngữ toàn ứng dụng và thêm lối về storefront trong Management
+- **Date/Time**: 2026-07-15T21:05:53+07:00
+- **Implementation**: Bổ sung chế độ popover cho `LanguageSwitcher`: nút trigger tròn 32px mở nhóm toggle VI/EN, hiển thị ngôn ngữ đang chọn bằng dấu check, đặt focus đúng lựa chọn hiện tại và tự đóng sau khi đổi. Popover trở thành mặc định trên storefront header desktop/mobile, auth, trạng thái lỗi dùng chung, dashboard, khung loading/auth, trang lỗi, Chat và Mail thuộc Management; segmented switcher vẫn còn như một presentation tùy chọn. Thêm liên kết `Quay lại cửa hàng` vào màn Management chưa đăng nhập và footer sidebar; liên kết vẫn còn tooltip khi sidebar thu gọn và hiển thị đầy đủ trong off-canvas mobile.
+- **Artifacts**: Các ảnh QA tạm đã được xóa theo yêu cầu; không lưu artifact cho thay đổi này.
+- **Verification**: Browser QA trên storefront desktop/mobile, trang đăng nhập, trạng thái Management guest và phiên ADMIN mock xác nhận trigger 32px, popover nằm trọn viewport, có semantics dialog cùng nhóm toggle button, VI ↔ EN cập nhật nội dung rồi tự đóng và console không có lỗi mới. Liên kết storefront hoạt động ở sidebar mở/thu gọn và mobile. Scoped ESLint, TypeScript và `git diff --check` pass; Vitest 54/54; full `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); production build pass với 68 routes.
+- **Known Follow-ups**: Inline `<script>` có sẵn trong `app/(admin)/layout.tsx` vẫn tạo một cảnh báo React ở Next dev khi render client; thay đổi này không thêm script và production build không bị ảnh hưởng.
+
 ### Chuẩn hóa cấu trúc Playwright bằng AAA và POM có chọn lọc
 - **Date/Time**: 2026-07-15 (Asia/Saigon)
 - **Implementation**: Chuẩn hóa khoảng trắng theo các pha Arrange–Act–Assert; chia hai race flow auth dài thành `test.step()` để trace chỉ rõ pha bootstrap, tạo cạnh tranh, nhả barrier và kiểm tra kết quả. Thêm `ProfilePage` và `AuthHeaderComponent` cho navigation/bootstrap cùng locator header dùng lại; giữ request counter, route barrier, Web Lock và network ordering trong spec. Thêm fixture `authenticatedSession` để login/cleanup session thật, retry logout không Bearer khi cleanup Bearer nhận `401`, rồi cho fixture checkout tái sử dụng session này. Không thêm POM Manager vì suite hiện mới có một page object và một component dùng lại.

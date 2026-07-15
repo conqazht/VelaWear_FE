@@ -28,7 +28,7 @@ export function ChatHeader() {
           </InputGroup>
         </div>
         <div className="flex items-center gap-1">
-          <LanguageSwitcher showIcon={false} className="mr-1" />
+          <LanguageSwitcher presentation="popover" className="mr-1 size-7" />
           <Button
             variant="ghost"
             size="icon-sm"

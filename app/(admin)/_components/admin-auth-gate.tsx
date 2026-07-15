@@ -34,7 +34,7 @@ function AdminSessionLoadingFrame() {
         <header className="flex h-12 items-center justify-between border-b px-4 lg:px-6">
           <Skeleton className="h-7 w-40" />
           <div className="flex items-center gap-2">
-            <LanguageSwitcher showIcon={false} />
+            <LanguageSwitcher presentation="popover" />
             <Skeleton className="size-8" />
             <Skeleton className="size-8" />
           </div>
@@ -89,7 +89,7 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-background p-6">
-        <LanguageSwitcher className="absolute right-5 top-5" />
+        <LanguageSwitcher presentation="popover" className="absolute right-5 top-5" />
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-muted">
@@ -100,9 +100,12 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
               {t("admin.shell.auth.signInDescription")}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid gap-2">
             <Link href="/sign-in" className={cn(buttonVariants(), "w-full")}>
               {t("admin.shell.auth.signInAction")}
+            </Link>
+            <Link href="/" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
+              {t("admin.shell.auth.returnStorefront")}
             </Link>
           </CardContent>
         </Card>
@@ -121,7 +124,7 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
 
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-background p-6">
-        <LanguageSwitcher className="absolute right-5 top-5" />
+        <LanguageSwitcher presentation="popover" className="absolute right-5 top-5" />
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-muted">

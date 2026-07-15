@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Command } from "lucide-react";
+import { Command, Store } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 import { resolveAdminAssetUrl } from "@/app/(admin)/dashboard/_components/management/resource-utils";
@@ -67,6 +67,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link href="/" />}
+              tooltip={t("admin.shell.navigation.storefront")}
+            >
+              <Store />
+              <span>{t("admin.shell.navigation.storefront")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <NavUser user={sidebarUser} onLogout={() => void handleLogout()} />
       </SidebarFooter>
     </Sidebar>
