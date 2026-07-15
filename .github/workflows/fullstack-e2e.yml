@@ -56,8 +56,8 @@ jobs:
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
+        # GitHub chỉ bắt đầu các step sau khi PostgreSQL báo sẵn sàng.
         options: >-
-          # GitHub chỉ bắt đầu các step sau khi PostgreSQL báo sẵn sàng.
           --health-cmd "pg_isready -U postgres -d velawear_e2e"
           --health-interval 5s
           --health-timeout 5s
@@ -66,8 +66,8 @@ jobs:
         image: redis:8.8.0
         ports:
           - 6379:6379
+        # Redis cũng phải trả lời PONG trước khi backend được khởi động.
         options: >-
-          # Redis cũng phải trả lời PONG trước khi backend được khởi động.
           --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 5s

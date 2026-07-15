@@ -33,7 +33,8 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
   const displayCategory = getCategoryLabel(product.category, locale);
 
   return (
-    <motion.div
+    <motion.article
+      aria-label={product.name}
       className="group relative flex flex-col bg-transparent overflow-hidden transition-all duration-300 pb-4"
       whileHover={{ y: -4 }}
     >
@@ -139,6 +140,6 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
           )}
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

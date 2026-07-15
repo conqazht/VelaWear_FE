@@ -5,6 +5,7 @@ import { createSignInHref } from "./auth/post-auth-redirect";
 let accessToken: string | null = null;
 let refreshPromise: Promise<string> | null = null;
 let sessionExpiryRedirectStarted = false;
+const authSessionLockName = "vela-auth-session";
 
 export function getAccessToken(): string | null {
   return accessToken;
@@ -32,25 +33,74 @@ const apiClient = axios.create({
   },
 });
 
-function refreshAccessTokenOnce() {
-  if (!refreshPromise) {
-    refreshPromise = axios
-      .post(
-        `${apiClient.defaults.baseURL}/auth/refresh`,
-        {},
-        { withCredentials: true }
-      )
-      .then((response) => {
-        const newAccessToken = response.data?.data?.accessToken;
-        if (!newAccessToken) {
-          throw new Error("Invalid refresh response format");
+async function requestFreshAccessToken() {
+  const response = await axios.post(
+    `${apiClient.defaults.baseURL}/auth/refresh`,
+    {},
+    { timeout: 15_000, withCredentials: true },
+  );
+  const newAccessToken = response.data?.data?.accessToken;
+  if (!newAccessToken) {
+    throw new Error("Invalid refresh response format");
+  }
+  setAccessToken(newAccessToken);
+  return newAccessToken as string;
+}
+
+export async function withAuthSessionLock<T>(operation: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== "undefined" && navigator.locks) {
+    return await navigator.locks.request(
+      authSessionLockName,
+      async () => await operation(),
+    );
+  }
+  return operation();
+}
+
+export async function logoutAuthSession(): Promise<void> {
+  await withAuthSessionLock(async () => {
+    const currentAccessToken = accessToken;
+    try {
+      try {
+        await axios.post(
+          `${apiClient.defaults.baseURL}/auth/logout`,
+          {},
+          {
+            headers: currentAccessToken
+              ? { Authorization: `Bearer ${currentAccessToken}` }
+              : undefined,
+            timeout: 15_000,
+            withCredentials: true,
+          },
+        );
+      } catch (error) {
+        if (
+          !currentAccessToken ||
+          !axios.isAxiosError(error) ||
+          error.response?.status !== 401
+        ) {
+          throw error;
         }
-        setAccessToken(newAccessToken);
-        return newAccessToken as string;
-      })
-      .finally(() => {
-        refreshPromise = null;
-      });
+
+        // Token hết hạn có thể bị Spring Security chặn trước controller. Retry không
+        // Bearer để controller vẫn thu hồi refresh cookie/session HttpOnly.
+        await axios.post(
+          `${apiClient.defaults.baseURL}/auth/logout`,
+          {},
+          { timeout: 15_000, withCredentials: true },
+        );
+      }
+    } finally {
+      setAccessToken(null);
+    }
+  });
+}
+
+export function refreshAccessTokenOnce(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = withAuthSessionLock(requestFreshAccessToken).finally(() => {
+      refreshPromise = null;
+    });
   }
 
   return refreshPromise;
@@ -77,10 +127,12 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     // Avoid infinite loop if refresh token endpoint itself returns 401
-    if (
-      originalRequest.url?.includes("/auth/refresh") ||
-      originalRequest.url?.includes("/auth/login")
-    ) {
+    if ([
+      "/auth/refresh",
+      "/auth/login",
+      "/auth/logout",
+      "/auth/oauth2/exchange",
+    ].some((pathname) => originalRequest.url?.includes(pathname))) {
       return Promise.reject(error);
     }
 

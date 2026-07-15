@@ -98,7 +98,7 @@ describe("apiClient concurrent 401 refresh", () => {
     expect(refreshPost).toHaveBeenCalledWith(
       "http://localhost:8080/api/v1/auth/refresh",
       {},
-      { withCredentials: true },
+      { timeout: 15_000, withCredentials: true },
     );
 
     refresh.resolve({
@@ -169,5 +169,34 @@ describe("apiClient concurrent 401 refresh", () => {
     });
 
     await expect(secondRequest).resolves.toMatchObject({ status: 200 });
+  });
+
+  it("logout retry không Bearer khi access token hết hạn", async () => {
+    const axiosModule = await import("axios");
+    const logoutPost = vi.spyOn(axiosModule.default, "post")
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } })
+      .mockResolvedValueOnce({} as AxiosResponse);
+    const apiClientModule = await import("@/lib/api-client");
+    apiClientModule.setAccessToken("expired-access-token");
+
+    await expect(apiClientModule.logoutAuthSession()).resolves.toBeUndefined();
+
+    expect(logoutPost).toHaveBeenCalledTimes(2);
+    expect(logoutPost).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:8080/api/v1/auth/logout",
+      {},
+      {
+        headers: { Authorization: "Bearer expired-access-token" },
+        timeout: 15_000,
+        withCredentials: true,
+      },
+    );
+    expect(logoutPost).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:8080/api/v1/auth/logout",
+      {},
+      { timeout: 15_000, withCredentials: true },
+    );
   });
 });

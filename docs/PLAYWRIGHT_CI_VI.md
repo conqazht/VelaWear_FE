@@ -12,6 +12,8 @@ checkout cả hai repository trong cùng một runner.
 | Nhiều request `401` dùng chung một lần refresh | Vitest với Axios interceptor thật | FE PR |
 | Search cũ trả về sau search mới | Vitest với deferred promise | FE PR |
 | Hai lần submit trong cùng browser tick | Vitest + Playwright | FE PR và full-stack |
+| Hard reload chỉ refresh một lần, logout chặn token cũ | Playwright full-stack | FE `main`, nightly, manual |
+| Hai tab cùng bootstrap không refresh chồng nhau | Web Locks + Playwright full-stack | FE `main`, nightly, manual |
 | Oversell, quota, coupon, idempotency transaction | JUnit + PostgreSQL/Redis Testcontainers | BE PR |
 | FE, cookie, Spring Boot và database hoạt động cùng nhau | Playwright full-stack | FE `main`, nightly, manual |
 
@@ -31,6 +33,20 @@ Smoke test có tag `@smoke`, tự khởi động Next.js và không yêu cầu S
 Mục tiêu là phát hiện route không render, lỗi JavaScript nghiêm trọng và nội dung
 cốt lõi biến mất. Bộ này chạy trên mọi pull request FE.
 
+Sáu case hiện tại kiểm tra:
+
+1. trang chủ, header và điều hướng tìm kiếm;
+2. validation đăng nhập chặn form rỗng trước khi gọi API;
+3. thêm sản phẩm từ UI, cập nhật badge và giữ guest cart sau reload;
+4. nội dung nghiệp vụ của trang Standard Sale;
+5. cảnh báo giỏ hàng không giữ suất của Flash Sale;
+6. chuyển VI sang EN bằng switcher thật, giữ locale và metadata sau reload.
+
+Fixture smoke chặn API VelaWear ở tầng browser: refresh của khách trả `401`, catalog
+và Sale trả dữ liệu rỗng để UI dùng fixture deterministic. Vì vậy job không phụ
+thuộc backend hoặc dữ liệu mạng, nhưng vẫn thất bại nếu trang phát sinh JavaScript
+exception không được xử lý hoặc gọi một endpoint VelaWear chưa được allowlist rõ ràng.
+
 ### Full-stack
 
 ```bash
@@ -38,7 +54,34 @@ pnpm test:e2e:fullstack
 ```
 
 Full-stack test có tag `@fullstack`, chạy Chromium với một worker và dùng backend
-thật tại `http://localhost:8080`. Test checkout:
+thật tại `http://localhost:8080`. Năm case hiện tại gồm session reload, bootstrap
+hai tab, refresh-vs-logout, logout/replay và checkout race.
+
+Bốn test auth:
+
+1. đăng nhập qua API để tạo cookie `HttpOnly`, mở profile rồi hard reload; xác nhận
+   reload chỉ gọi một `POST /auth/refresh`, cookie được rotate và UI vẫn nhận diện
+   người dùng;
+2. giữ request refresh của tab thứ nhất bằng barrier, mở tab thứ hai và xác nhận nó
+   chờ Web Lock thay vì gửi request chồng lên; sau khi nhả barrier, cả hai request
+   tuần tự đều nhận `200`, cookie tiếp tục rotate và cả hai tab vẫn đăng nhập;
+3. giữ refresh của tab A, logout từ tab B và xác nhận logout còn ở hàng đợi, chưa ra
+   network; sau khi refresh hoàn tất, logout chạy cuối, xóa cookie và thu hồi session;
+4. logout từ UI, xác nhận cookie bị xóa, access token bị blacklist, refresh không
+   cookie và replay token cũ
+   đều nhận `401`.
+
+`refreshPromise` vẫn gộp nhiều `401` trong cùng một tab thành một request. Web Lock
+`vela-auth-session` tuần tự hóa các thao tác đổi session cookie giữa các tab cùng origin:
+login/OAuth, refresh và logout không thể ghi đè cookie của nhau. Vì access token
+chỉ nằm trong memory của từng tab nên hai tab vẫn cần hai request nối tiếp
+`R0 → R1 → R2`, không phải dùng chung một access token. Redis CAS và integration
+test backend vẫn bắt buộc cho client khác origin, browser profile hoặc thiết bị khác.
+Logout thử gửi Bearer hiện tại để backend blacklist access token; nếu token đã hết
+hạn và Spring Security trả `401` trước controller, FE retry đúng một lần không Bearer
+để controller vẫn thu hồi refresh cookie/session HttpOnly.
+
+Test checkout:
 
 1. đăng nhập bằng tài khoản seed `user@velawear.local`;
 2. đặt một variant seed cố định vào cart qua API;
@@ -87,7 +130,7 @@ $env:SPRING_DATASOURCE_USERNAME = "postgres"
 $env:SPRING_DATASOURCE_PASSWORD = "postgres"
 $env:SPRING_DATA_REDIS_HOST = "localhost"
 $env:SPRING_DATA_REDIS_PORT = "6379"
-$env:JWT_ACCESS_TOKEN_SECRET_KEY = "local-e2e-access-secret-key-must-be-at-least-64-characters-long"
+$env:JWT_ACCESS_TOKEN_SECRET_KEY = "local-e2e-access-secret-key-must-be-at-least-64-characters-long!"
 $env:JWT_REFRESH_TOKEN_SECRET_KEY = "local-e2e-refresh-secret-key-must-be-at-least-64-characters-long"
 $env:JWT_ACCESS_TOKEN_EXPIRATION = "900"
 $env:JWT_REFRESH_TOKEN_EXPIRATION = "259200"
@@ -190,6 +233,7 @@ và truyền rõ hai ref.
 | --- | --- |
 | Backend không lên `UP` | `backend.log`, datasource/Redis/JWT environment |
 | Login được nhưng refresh thất bại | FE/API có cùng hostname `localhost`, cookie trong trace |
+| Login trả `500`, signer không hỗ trợ HS512 | JWT secret phải dài tối thiểu 64 byte; dùng đúng key local trong mục 3 |
 | Không checkout được BE | Secret `CROSS_REPO_READ_TOKEN` và quyền `Contents: read` |
 | Test checkout không thấy cart | API fixture, SKU seed và access token |
 | Test tỉnh/phường gọi internet | Playwright route fixture cho `provinces.open-api.vn` |

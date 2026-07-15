@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/smoke";
 
 test.describe.configure({ mode: "serial" });
 
@@ -14,16 +14,33 @@ test("trang Flash Sale nói rõ giỏ hàng không giữ suất", { tag: "@smoke
   await expect(page.getByText(/Thêm vào giỏ không đồng nghĩa với giữ suất/i)).toBeVisible();
 });
 
-test("Flash Sale đổi nội dung và metadata sang English", { tag: "@smoke" }, async ({ page }) => {
-  await page.addInitScript(() => {
-    window.localStorage.setItem("vela-locale", "en");
-  });
+test("Flash Sale giữ nội dung và metadata English sau reload", { tag: "@smoke" }, async ({ page }) => {
   await page.goto("/flash-sale");
 
+  await page.getByRole("button", { name: "Chuyển ngôn ngữ sang Tiếng Anh" }).click();
+
   await expect(page.getByText(/Adding an item to your bag does not reserve/i)).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("data-locale", "en");
   await expect(page).toHaveTitle("Flash Sale | VELA WEAR");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
     "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
   );
+
+  await page.reload();
+
+  await expect(page.getByText(/Adding an item to your bag does not reserve/i)).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.locator("html")).toHaveAttribute("data-locale", "en");
+  await expect(page).toHaveTitle("Flash Sale | VELA WEAR");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    "content",
+    "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
+  );
+  await expect(page.getByRole("button", { name: "Switch language to English" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem("vela-locale"))).toBe("en");
 });
