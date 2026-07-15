@@ -10,9 +10,8 @@ import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { localizeFixtureProduct } from "@/lib/i18n/fixture-products";
 import { cn } from "@/lib/utils";
-import { Product, mapBackendProduct } from "@/lib/vela-data";
+import { mapBackendProduct } from "@/lib/vela-data";
 import { ProductToolbar, ProductGrid, ProductLayoutMain, useCommonSortOptions } from "@/components/shop/product-layout-components";
 import {
   useCategoriesQuery,
@@ -283,12 +282,8 @@ function FilterGroups({
   );
 }
 
-export function CollectionClient({ products: initialProducts }: { products: Product[] }) {
+export function CollectionClient() {
   const { locale: activeLocale, t } = useI18n();
-  const localizedInitialProducts = useMemo(
-    () => initialProducts.map((product) => localizeFixtureProduct(product, activeLocale)),
-    [activeLocale, initialProducts],
-  );
   const sortOptions = useCommonSortOptions();
   const collectionScrollAnchorRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -363,14 +358,13 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
     () =>
       productsQuery.data?.result?.map((product) =>
         mapBackendProduct(product, activeLocale)
-      ) ?? (!productsQuery.isError && page === 1 && selectedCategoryId === "ALL" && !selectedColorId && !selectedSizeId && !minPrice && !maxPrice ? localizedInitialProducts.slice(0, size) : []),
-    [activeLocale, localizedInitialProducts, productsQuery.data, productsQuery.isError, page, selectedCategoryId, selectedColorId, selectedSizeId, minPrice, maxPrice, size]
+      ) ?? [],
+    [activeLocale, productsQuery.data]
   );
 
   const meta = productsQuery.data?.meta;
 
-  const isInitialLoading =
-    categoriesQuery.isLoading && productsQuery.isLoading && products.length === 0;
+  const isInitialLoading = productsQuery.isPending && productsQuery.data === undefined;
 
   const categoryIdsWithProducts = useMemo(() => {
     const ids = new Set<number>();
@@ -680,7 +674,7 @@ export function CollectionClient({ products: initialProducts }: { products: Prod
   );
 }
 
-function CollectionCatalogLoading() {
+export function CollectionCatalogLoading() {
   return (
     <div className="w-full" aria-busy="true">
       <div aria-hidden="true">

@@ -31,7 +31,22 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-07-16
+
+### Chuyển ảnh tĩnh storefront từ HTTPS sang asset local
+- **Date/Time**: 2026-07-16T00:19:04+07:00
+- **Implementation**: Tải 31 ảnh tĩnh duy nhất từ Unsplash và Google `aida-public`, chuyển thật sang WebP rồi lưu theo ngữ cảnh trong `public/images`. Thay 35 tham chiếu ở Home editorial/story/newsletter, Collection lookbook, Product Detail craftsmanship và toàn bộ fixture product/cart/checkout/detail; ảnh trùng nguồn dùng chung một file. Gỡ hai `remotePatterns` Unsplash/Google khỏi Next Image, đồng thời giữ pattern upload của backend và logic ảnh động từ API.
+- **Verification**: Không còn tham chiếu `images.unsplash.com` hoặc `lh3.googleusercontent.com` trong `app`, `components`, `lib`, `styles` và `next.config.ts`; 35 tham chiếu WebP map đủ 31 file, 31/31 file decode thành công, tổng dung lượng 1.11 MB. Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54; production build pass 68 route; Playwright storefront smoke 3/3. Browser QA production xác nhận Home tải 15/15 ảnh không lỗi và không có remote URL trong DOM; Collection dùng background local; asset craftsmanship Product Detail được phục vụ trực tiếp ở 512x512.
+- **Known Follow-ups**: Collection và Product Detail trả trạng thái dữ liệu 500 trong lần browser QA production dù backend products endpoint trực tiếp trả 200; đây không phải lỗi tải asset và cần audit data request riêng nếu vẫn tái hiện. Google Fonts và ảnh động do backend trả về không thuộc phạm vi local hóa ảnh tĩnh.
+
 ## 2026-07-15
+
+### Loại bỏ product fixture flash khi React Query còn pending
+- **Date/Time**: 2026-07-15T23:46:04+07:00
+- **Implementation**: Home Trending và Collection không còn render sản phẩm mẫu trước response API; cold query dùng skeleton chi tiết đúng carousel/grid rồi mới chuyển sang dữ liệu thật. Collection bỏ hẳn dependency `PRODUCTS` khỏi component tree và dùng chung một fallback grid cho cả Suspense lẫn React Query. Related Products được sửa cùng nguyên nhân: pending dùng carousel skeleton, fixture chỉ còn là fallback sau khi request đã kết thúc nhưng lỗi/rỗng; Home giữ chính sách fallback này để không phá demo/offline flow. Background refetch vẫn giữ API data hiện có nhờ React Query `placeholderData`.
+- **Hydration Audit**: Hero Slider tiếp tục truyền trực tiếp hai URL root-relative `/images/home/hero-autumn-2026.avif` và `/images/home/hero-lookbook-2026.jpg`; cả hai asset tồn tại trong `public/images/home`, không có source mismatch cần sửa.
+- **Verification**: Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54; TypeScript và production build 68 route pass; storefront Playwright smoke 3/3 pass trên production server sạch. Browser QA cold-load xác nhận Home có 0 fixture/0 product card khi 28 bone đang hiện, Collection có 0 fixture/0 product card khi 40 bone đang hiện; viewport 1440x900 và 390x844 không overflow.
+- **Known Follow-ups**: Full smoke hiện còn một test Sale locale cũ tìm aria-label `Chuyển ngôn ngữ sang Tiếng Anh` trước redesign popover; năm case còn lại pass trên server sạch. Cần cập nhật test đó theo thao tác mở language popover ở một thay đổi riêng.
 
 ### Thay skeleton Boneyard động bằng skeleton theo layout thật
 - **Date/Time**: 2026-07-15T23:24:00+07:00

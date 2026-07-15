@@ -13,7 +13,7 @@ const STEPS = [
     titleKey: "storefront.craft.step1Title",
     subtitleKey: "storefront.craft.step1Subtitle",
     descriptionKey: "storefront.craft.step1Description",
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop",
+    image: "/images/home/editorial/materials-and-draping.webp",
     icon: Flower2,
   },
   {
@@ -22,7 +22,7 @@ const STEPS = [
     titleKey: "storefront.craft.step2Title",
     subtitleKey: "storefront.craft.step2Subtitle",
     descriptionKey: "storefront.craft.step2Description",
-    image: "https://images.unsplash.com/photo-1608748010899-18f300247112?q=80&w=600&auto=format&fit=crop",
+    image: "/images/home/editorial/artisan-weaving.webp",
     icon: Compass,
   },
   {
@@ -31,7 +31,7 @@ const STEPS = [
     titleKey: "storefront.craft.step3Title",
     subtitleKey: "storefront.craft.step3Subtitle",
     descriptionKey: "storefront.craft.step3Description",
-    image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600&auto=format&fit=crop",
+    image: "/images/home/editorial/precision-tailoring.webp",
     icon: Sliders,
   },
   {
@@ -40,7 +40,7 @@ const STEPS = [
     titleKey: "storefront.craft.step4Title",
     subtitleKey: "storefront.craft.step4Subtitle",
     descriptionKey: "storefront.craft.step4Description",
-    image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?q=80&w=600&auto=format&fit=crop",
+    image: "/images/home/editorial/fine-packaging.webp",
     icon: Sparkles,
   },
 ] as const;

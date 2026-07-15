@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
 import { useProductsQuery } from "@/lib/queries/catalog";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCategoryLabel,
   mapBackendProduct,
@@ -42,7 +43,7 @@ export function RelatedProducts({
     let list: Product[] = [];
     if (productsQuery.data?.result && productsQuery.data.result.length > 0) {
       list = productsQuery.data.result.map((p) => mapBackendProduct(p, activeLocale));
-    } else {
+    } else if (!productsQuery.isPending) {
       // Fallback: get all static products of the same category
       const fixtureProducts = getLocalizedFixtureProducts(activeLocale);
       list = fixtureProducts.filter((p) => p.category === categoryCode);
@@ -52,7 +53,7 @@ export function RelatedProducts({
     }
     // Filter out the current product
     return list.filter((p) => p.id !== currentProductSlug).slice(0, 8);
-  }, [productsQuery.data, currentProductSlug, categoryCode, activeLocale]);
+  }, [productsQuery.data, productsQuery.isPending, currentProductSlug, categoryCode, activeLocale]);
 
   // Monitor scroll state
   const checkScroll = () => {
@@ -89,6 +90,10 @@ export function RelatedProducts({
       });
     }
   };
+
+  if (productsQuery.isPending && !productsQuery.data) {
+    return <RelatedProductsLoading title={t("storefront.product.related")} />;
+  }
 
   if (recommendedProducts.length === 0) {
     return null;
@@ -183,6 +188,47 @@ export function RelatedProducts({
             </motion.div>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+function RelatedProductsLoading({ title }: { title: string }) {
+  return (
+    <section
+      className="mt-16 w-full border-t border-[#1c1a18]/10 pt-16"
+      aria-busy="true"
+    >
+      <div className="mb-8 flex items-center justify-between select-none">
+        <h2 className="font-serif text-2xl font-light tracking-wide text-[#1c1a18] md:text-3xl">
+          {title}
+        </h2>
+        <div className="flex gap-2" aria-hidden="true">
+          <Skeleton className="size-10 rounded-full bg-[#efe7dc]" />
+          <Skeleton className="size-10 rounded-full bg-[#efe7dc]" />
+        </div>
+      </div>
+
+      <div
+        className="flex gap-6 overflow-hidden px-1 pb-4"
+        aria-hidden="true"
+      >
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="min-w-[240px] max-w-[340px] flex-none sm:min-w-[280px] md:min-w-[320px]"
+          >
+            <Skeleton className="aspect-[3/4] w-full rounded-none bg-[#efe7dc]" />
+            <div className="flex flex-col pt-4 text-left">
+              <Skeleton className="h-5 w-4/5 bg-[#efe7dc]" />
+              <Skeleton className="mt-2 h-3 w-2/5 bg-[#efe7dc]" />
+              <div className="mt-3 flex items-center gap-2">
+                <Skeleton className="h-4 w-20 bg-[#efe7dc]" />
+                <Skeleton className="h-3 w-16 bg-[#efe7dc]" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

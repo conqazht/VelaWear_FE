@@ -141,7 +141,7 @@ export const PRODUCTS: Product[] = [
     name: "Linen Blend Blazer",
     price: 2450000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCwRzAE6C185QzyiPxCpVjB15ObBSeOKabu2pDX2jtjCbTbeBZqlIWMfXtCkW3cIuCjgaYSQAIUMWMTpqCihesHuOM_YtttUXMe469suIteQ-q2RNfi6MNmbukPG747ouYpZq-jzJ75zPYVXA1kP4enS-NOjFwWOfMB-z1LSUPNFHhtKMMpeiWx7CtS5dgfN-_EfjAvCgxN8hdxayD8dsnAAUx91mkM9xDoSu6DUS01v59PW5xRuI81N4DOIe2cUXUeYHlAbxxxgMsJ",
+      "/images/fixtures/products/linen-blazer/card.webp",
     category: "AO",
     badge: "Seasonal Pick",
     color: "Sand",
@@ -154,7 +154,7 @@ export const PRODUCTS: Product[] = [
     name: "Silk Drape Blouse",
     price: 1800000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCEIQP1onvFftdIpPdfA7kqAlQHAu_SknPhkK5aWLKs_qCZofjj9eJjMQ50OnceZ_K-9sqSJrMgZMiESDSuM9SpXP0ozbdO-mvi6w4tYkdgZ_uaMuqIqA6HstQyT7ZhWTmv250PRjHGzPRAMB_tra-1_71ox25I_64a8N9NdhHRVMs9HAiyZACTaboO61z-holquWMxK0CL0tW12dXdlYR_hYalde3HrqLDwtpCiR9xlRuEixHCMSH1WWZMzGZZMS5dBCUAme6_L4XJ",
+      "/images/fixtures/products/silk-blouse/card.webp",
     category: "AO",
     badge: "Most Loved",
     color: "Cream",
@@ -168,7 +168,7 @@ export const PRODUCTS: Product[] = [
     price: 1440000,
     originalPrice: 1800000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC58QFuYm347f2m7MjhHsd2uXYjt-dAaH4FjsDOYeZsr-qOhwJXqIyk23MD0kIBUVwEanSVmrqDRQpkHZaS3R5yj-CQpAM7EqJ25kHsgG83wEArI9LWdJzcnO7b4m2ino_YJD-85mAywT7I7e4xaxctAEuOR1onfiC54OCsvwQx3759F8qemesRZPIhVboGWkHj7sGqU6u53viMZWFo1YUa7pTdX6DakZQgBi8KNW_6a2D4cOEsYCW7Fq-qKGWBPXVtDbYR4PFpCFA7",
+      "/images/fixtures/products/wide-trousers/card.webp",
     category: "QUAN",
     badge: "Sale",
     color: "Terracotta",
@@ -181,7 +181,7 @@ export const PRODUCTS: Product[] = [
     name: "Structured Leather Tote",
     price: 3200000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDZZXOEtNU4X4Zg1abxbttZhHHgH7B7FQBM94YaLOrnaelQB_9fDtmKTdyzMCnEXY6iEgkmTh30vOMrJQUhG0StULSPxvnwcoylPo1T7ySAAVijYo2H1FJ3n767TvM6tFDXtjV70QGz5s1zSdA2T-qnM2BL2q2eXqE5rE7t7wYYb2ILKVuC356nb7BrAR2F8ydBVN1gOEtu8vxTrYPz5FPcI3i2v4QfzTGw2GY7WHjIL2yq2jiZzv7uri3fvSdrWOBjLNduC6YsLzXa",
+      "/images/fixtures/products/leather-tote/card.webp",
     category: "PHU KIEN",
     badge: "New",
     color: "Tan",
@@ -194,7 +194,7 @@ export const PRODUCTS: Product[] = [
     name: "Signature Hemp Tee",
     price: 1100000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDfNYnfyjJqT5IK6-gECBXXaXH7OvMyrDVs0VDY1V2ugJ8EGaOI3QE6VHMt9FsgqadcUoGAHNPasTO1LUY3mT5X2-MxFdtSJMXEdQ4H6tYDuxJ1tMEg_j33_wvw7H4KCaD9Ugi9hbhwsc-wdmZKqyNs7W-zBAexhOEJPq_2O-C5NIqplH3fCe686i_B5zNOwUXCzhSdoOvmPTWUwKjXXlPeOBXkWCJIdS2Y1HmeIodoqCHpNvx0FPMn4s1hpPt2CYxTFbN--Uvdhsu4",
+      "/images/fixtures/products/signature-hemp-tee/card.webp",
     category: "AO",
     color: "Grey",
     size: "M",
@@ -206,7 +206,7 @@ export const PRODUCTS: Product[] = [
     name: "Artisan Linen Over-Shirt",
     price: 2450000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCSrgTdoRWZJbkKQzynjWGUgqd4EsHYX7DreGZITBty4xuDlf9gJsy3PWQB0NdIswRw4AuAUmKq8ZlVMrTFxg01FuRCizF37ctJit_hjK9z9xM-4KfO1hE78QpfMvQbZZJoHPO32FjLHZKfSNwVLOL4zeJ5-zppTV1MYVLVAleFQ-GSGMZYdvcuLHEMXwisK0pwBWT04_86wVnW7dn2-f5AJnzz3P0vQuC6Pi6t4RbDvX_h4RUXwH4BjI2YB-VA3SORr1xauomBk7gt",
+      "/images/fixtures/products/artisan-linen-overshirt/card.webp",
     category: "AO",
     color: "Terracotta",
     size: "S",
@@ -218,7 +218,7 @@ export const PRODUCTS: Product[] = [
     name: "Chunky Wool Knit",
     price: 3200000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDDRYFHFXysaR5FJOzW-aWS0MVH9Q-MP935ID62flHLEnjqkOVAPkY4ew8gwKnKx26Rkf1V9AKdIqeUlTjM6gusKyvO4ddmZd8asBMOj71Bua4L6ZDiW0g6m-_wBMx48hL0JeUzXB4qNtdlDa4I1kCYeKQpcegyQ78tG7VzaeuBolJ4YAMAvQSWKrWQK-KPsX3uVK5yywmrkKv1e89oGtSKaYyON55ezjkQmai-i_w-6wFumVzJOx92kFlx7bALi6ZvXNJzr04coVM3",
+      "/images/fixtures/products/chunky-wool-knit/card.webp",
     category: "AO",
     color: "Olive",
     size: "L",
@@ -230,7 +230,7 @@ export const PRODUCTS: Product[] = [
     name: "Oversized Linen Shirt",
     price: 1850000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDvD6_O2WzakyO8IPnMGU6P_cM8Vw9NjrYur9jiYbhdx1w2UpuW5w6crh8Z6WS0E8ONEyQr1-Cg5PaIAUEe5ojxO_wL44wdNSDQUKoC8Mc8PtHpYSenjRZHw2WBtjfPI27qwMt6mcoqCQthoz_31wpBeh2Cz1icAqPBuzSVz0-Ao0TTckpd7BSXLeP5zDBAcH7oT-ZaJRLW9ZxPwcQN1vuBFaimbR982BG_YcS_liGaXAtoyAPaIEDpsbxM2wE2OAIMQEuPr6lj94GJ",
+      "/images/fixtures/products/oversized-linen-shirt/card.webp",
     category: "AO",
     badge: "New",
     color: "Natural",
@@ -243,7 +243,7 @@ export const PRODUCTS: Product[] = [
     name: "Relaxed Trousers",
     price: 2100000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA1Ar8NwYBKgDLN-CUoceiU60_VaDlBu6uba0WJ4o3sZKL3PmtT0jy3BUJWVVrYe6c_hBzpPgt63jVyOhogA9ANIM5S0IgmktTyvBII5LosZ4JcZ9hSz6w9nMp8elA7AxTrE0qGrSR23Y-NaKfksmIAs39WkmopD4WEMj0lEtngMOv3I4RIot4w-ybtOaQZCH_yrPtlAxTvsFwlcFCKfcxTna_L5OcqMJYpExQBwuejMdwGaCyJl1VYDndtCQY_lg21tp2ZNAROvwgg",
+      "/images/fixtures/products/relaxed-trousers/card.webp",
     category: "QUAN",
     color: "Sand",
     size: "M",
@@ -255,7 +255,7 @@ export const PRODUCTS: Product[] = [
     name: "Lightweight Jacket",
     price: 1800000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAXhzUmIMa1Z-6qdYa4laL1bVCQkOVLP6JYCCHsIwkpuhkrmG-HjEOWxgbIZj7EFBmnpyT7QitLb1EzFH7yye_4JBjFjfk_E-igXsC75ceMaA1p6QjcIEPN3sBXe0NWDZaeps8GVkryB7SYmqbpcYLMHKMHvUU1wwL25rICYwM92YUtBv1wGBRFvG77ccK-3XbtNJYcXeVr78PcMdxphd7bIc4UioU-IjL-IUkkU2vVejUSGxtmiXMGNUm7onPjVgv5SETcIb-OZnLh",
+      "/images/fixtures/products/lightweight-jacket/card.webp",
     category: "AO",
     badge: "Sale",
     color: "Olive",
@@ -268,7 +268,7 @@ export const PRODUCTS: Product[] = [
     name: "Classic Linen Shirt",
     price: 550000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCyQTGTpgHC2eDqWMGK8dR2RuHmPVKLBqYH20_WPIANN1bFcjjQ6-8kTI1SelzlScRo5881xkzSzOBJRYoe4ZCEbMWsPzeqydM2SbOliSQPh-TPL_WAoL7rp27x_yaBc-ZZBSe4qIc8o50jRXY4h5IFZJ21Ep5UAt5H3zV7d7ZI6AN8NcMV5aJx-vFgKR5CPdNAdoRcnsqs45aaesgReQqVl56pF2YS22-Wh2E_Zas8zX_4oPiVWTDcAc2IF3klxwGDZ2T1uIGDaNRi",
+      "/images/fixtures/products/classic-linen-shirt/card.webp",
     category: "AO",
     badge: "New",
     color: "Sage",
@@ -281,7 +281,7 @@ export const PRODUCTS: Product[] = [
     name: "Pleated Wool Trousers",
     price: 1000000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCvP7H8zQsUizbqeLCsGS0Hu3mLducId6DXvb0dwq-5VgHnm48wp8zWIsynRu5pIR4AE4ZUhPlPSHf9alsJK-GVFz9dFe37X68bqSV9t-gpzqZyUpJAdJHK4AHznxt5LgUBtExaHWPDISobXgESuMFsgJMBzFURdBOCeueSSZ7Q7B1_aD2VjnljK_qtpicDlBuOzhZDko34wB7-_XXWfDzX5u_afVC_XmAI3fffbOtgtuAo9ocnrGaHo3-afBhVIzN3nKWUEXl3bzA6",
+      "/images/fixtures/products/pleated-wool-trousers/card.webp",
     category: "QUAN",
     badge: "New",
     color: "Charcoal",
@@ -295,7 +295,7 @@ export const PRODUCTS: Product[] = [
     price: 1600000,
     originalPrice: 1900000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCoYMTx73sE-zl-rrk3jPvaVd_aviVz5zLceFEuv_qsiBZ0vz3tWf27Y4bM3tKDRPWUDzVbW27UEQ7321iBNy9hj5FeoekgDPBRzmdvPUwTtUiPit_j3bnUld7t5DEEzvyPcUvLdCdnrk8SfaQH51KzYB2tNWGezSFzJVMhl_Um_ej-Htfj5ixSBPA7SfU5FD_jserlObo9OvUA7agoC_03nsUmacD6b7_nhyNV0PkA5Gzn9NBahxqHhxAgBy14QadlvpSwGsafxfga",
+      "/images/fixtures/products/the-heritage-tote/card.webp",
     category: "PHU KIEN",
     badge: "Sale",
     color: "Terracotta",
@@ -308,7 +308,7 @@ export const PRODUCTS: Product[] = [
     name: "Merino Wool Coat",
     price: 2400000,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC3rdhdd2Is5yjK5nAVVfW6P2sBr2eFbIuyGPXLzEMmaaz6S048ueY6FpMEhTXDQ70RHHoicQkL8NH1GrGzWkFHgtJ9AZY0aQHNRuQigIU9TZZSReu_xPV2W9m1jyi0ZDIFVUqm10oAVd9EW7Alu_gKcYdm8ZYDEkWqM2BRPBkIOA-Nb0PQlIzJj-OeG8i8Jlv6_nDIuYrw1eSjwgjtRvkjlxlOxMtc3rdT9__yYdd3YpOJXLlEPuMNJbUU88td1TYmIABgQLcnDhg4",
+      "/images/fixtures/products/merino-wool-coat/card.webp",
     category: "AO",
     color: "Charcoal",
     size: "M",
@@ -325,7 +325,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     color: "Oat",
     size: "M",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCYdVw6NSfqrb0akyMIBJweqH_ikdgR3YQiUUYJBsCQUj4ANphiX7BEBFbDXYP67O90q-SSuvlqJ0n0VemewPgKIKOoIvUY72IluuKzLbHsb7Fl4AtAL9kdQy6UDEMekEOO-Dq8TH4jEz7OGxihmIaerES3AN2U6XRn8H_pWmWDgelrO3w--9Tv5tMYDVUD6ElfZxtsIdMKrvTzREWpNAhSUUWuBVLJmBEvV-CDNLQ3LzCXQ74USh_v1gwOe3fbYjbI9EcusAYh-8Cd",
+      "/images/fixtures/cart/silk-coat.webp",
     quantity: 1,
     variantId: 1001,
   },
@@ -336,7 +336,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     color: "Charcoal",
     size: "32",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAqazprdw5XwjumWSyZXk7fBVqgYV-Md2en-0MY01hZ2U79uUYjKS_CZhuu12l9G7CyDITpV9JKIlrCIguTuCU-PiVgyRWK5TX5ekAVgofRlgnIS9Qa7Rtkk9sMNr9_IhnZe2E5kBc1w-rAqsQXzjPSy76ovNPcxC0gS2OuxT0DLAcY48eaYiaRtiC5lx1ekFb32T9BOXAhkePYeprhOmLaA-BasgdugFfxNcRY6SWtMNZEy-xIh7igIGNrt0Ka5jjTpb9Uk6CeWEtl",
+      "/images/fixtures/cart/pleated-trousers-cart.webp",
     quantity: 1,
     variantId: 1002,
   },
@@ -350,7 +350,7 @@ export const CHECKOUT_DEFAULT_ITEMS = [
     color: "Desert Beige",
     size: "L",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDzEpbUN-shaEnhKgeaimhkIAE6cjKG7iXJTHIQapFSiaKBexvvIM11dgtI9eXyXCsnw_quIiCDjPp0T41DuGK2cZIP3wSTOO5NFi46mgfnCOUGkbiGqrnOn2Ij0L4dQxz7gg6sU0LLvDZFRUGLo4mt6amvE5mxaNWzsanoJFw7Y7o68lv4JA5Phlk7-V2RIv8LfHpXKN6hX2ooko8cq7ElUFUYKjY-Chgfnr_O5QpSPJ-wSE0LbgBHRKOtUQjD08l1ZJReQBxW7xWf",
+      "/images/fixtures/checkout/linen-overcoat.webp",
   },
   {
     id: "organic-poplin-shirt2",
@@ -359,28 +359,28 @@ export const CHECKOUT_DEFAULT_ITEMS = [
     color: "Optical White",
     size: "M",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCMqphu9VlvWLNugHFT1iTILFBP6K-WM8Cb3e5pFFB8QsiCJxpEsmiFFZFM3_WpJFs1hqUHXizp3Vv7aVzzAWSGlsS8BMZW29JVxwngVK2x9YdAYK_0tRfAc4Uok-sNR0KhkzLWz6sFj2DTB89Pv6SqchyKZRotZHY8AXZoAJQYunICcwCvG1pju54IBP_DT6En5c9Ed1hXr_6rYqi2OzXe2XchKWdiLiZ-_kARufnSJw_DT-ddQf3HnEPoY0puM-r3IJSltpA72FV7",
+      "/images/fixtures/checkout/organic-poplin-shirt2.webp",
   },
 ];
 
 export const DETAIL_IMAGES = [
   {
-    src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDoA9Uo5k6BL6IdbvTFMUiJ7KIG8iRgQsc3QMmoqn-cKK9OqER3RQyvwyXaykaGSpkOH4ZdG_CNz4psJHcZ6zD4bPKbvH_On26upOPjqiQttw7TWlbT2z97VzL8Mah4tJPmmMnkHT1sgT0r5cwS7rrmPDXoGzYhcgO47hXj8vEWGweCKnkHIBbnVYB9oeDhwiXbCPzUG-5m78TGYs6AS7vrU57PNlDFz-jhigoBIE_QgWPc9qZ7jaT98VTYMz_yHcI0j2oTdnGRMdae",
+    src: "/images/fixtures/products/linen-blazer/gallery-main.webp",
     label: "Main Hangar",
   },
   {
-    src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDyD9m_xNqXFbT6dBkv-7PJErt_qbq8vpPQoDeWXzvGzka4p2u--toM85OmO0_uUkXnT-IpiV67PCYtSv0j-fiozJ88OuI38NEUWbJMBLhzRp6PkxLZsCjLUUF6sFsQAZI3WuTw7l9OfP-yaLSm9ekTok4xrmDA2Br5eMHXejZ9MaHWS2RMFgEEccxnqZqdcqBSwjvySlNud-mSbirh270Z17_6QYt2RzKWsE_1o7dejKIgmiRYnlIfAdo-ouFxXQFKwtqRuKoLBzcU",
+    src: "/images/fixtures/products/linen-blazer/gallery-drape.webp",
     label: "Drape Close Up",
   },
   {
-    src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAOKv0ijqxTbiYyYhAzBM411mGiAYjggpoXShLmWMZI_Vwj8oOyszpU355u3rrQ0U70bKeM5XajUyrym_ZMF8J-xzu8UpeGd8Kjw6VtZdBZkQMfkeJPN6SohMd-mlT7tVNWLySj6dJAVidu_wWtBkM1xyWhGSvqQuoG1xx4vfGMbdzq5CEMj7HIQpxZuECgT0ynfdhoOwnjVgdnY40gclr2NNfwA55x6CRZYAxMlZSG1dDIkLeNR-7V7WI7rBi1Pau-CxxoCRd_vb0Z",
+    src: "/images/fixtures/products/linen-blazer/gallery-seam.webp",
     label: "Horn Seam Detail",
   },
 ];
 
 // Map backend product data to client-side Product model to preserve high-res images and styling.
 export function resolveImageUrl(url: string | null | undefined): string {
-  if (!url) return "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80";
+  if (!url) return "/images/products/product-placeholder.webp";
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
     return url;
   }
@@ -462,7 +462,7 @@ export function mapBackendProduct(
     ? bp.images 
     : (match && match.id === "linen-blazer" 
         ? DETAIL_IMAGES.map((img) => img.src) 
-        : [mainImg || "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80"]);
+        : [mainImg || "/images/products/product-placeholder.webp"]);
 
   return {
     id: bp.slug,

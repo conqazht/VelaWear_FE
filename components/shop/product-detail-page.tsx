@@ -260,7 +260,7 @@ function ProductDetailContent({ product }: { product: Product }) {
 
         <div className="relative aspect-[16/10] overflow-hidden rounded-sm border border-[#1c1a18]/5 bg-[#efebe4]">
           <FashionImage
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC__H_4LMn9OWi2bzyNpIzC4gWHb9Br_Vet75TFD7uxaguWkP7KSCSFBLXNsS2sP9erYbXRbGKE-izIYXYHiCo87L58iNU80wrzteP0YK5eZku6Lz5B-IOD3xArSTTCzfPAA-ZRZG79PT-WF8sCzihhElmNZoDXZ5TId8uv0DiWfTf6mSGt7kD4f9droH6eKaw_bVH_JBVY_po65000LIfGEqogroLcKbqgTs6UpJpKEmzanAdDuAzI44Si0MQ5dp-RPTuzCoD8ICi6"
+            src="/images/product-detail/craftsmanship.webp"
             alt={t("storefront.product.craftImageAlt")}
           />
         </div>
