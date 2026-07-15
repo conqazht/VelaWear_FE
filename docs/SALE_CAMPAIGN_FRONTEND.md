@@ -106,12 +106,14 @@ Catalog công khai không bảo đảm có `customerRemaining`. Vì vậy produc
 ### Danh sách campaign
 
 ```http
-GET /api/v1/sales?type=STANDARD
-GET /api/v1/sales?type=FLASH
-GET /api/v1/sales?type=FLASH&phase=LIVE&phase=UPCOMING
+GET /api/v1/sales?type=STANDARD&locale=vi
+GET /api/v1/sales?type=FLASH&locale=en
+GET /api/v1/sales?type=FLASH&phase=LIVE&phase=UPCOMING&locale=vi
 ```
 
 Khi lọc nhiều phase, FE serialize thành nhiều query parameter cùng tên như ví dụ trên để Spring bind đúng vào `List<SaleCampaignPhase>`; không dùng `phase[]=...`.
+
+`locale` lấy từ i18n provider và là một phần của React Query key. Vì vậy VI và EN có cache tách biệt, không dùng dữ liệu placeholder của locale trước khi người dùng đổi ngôn ngữ. Nếu campaign chưa có EN, backend trả nội dung VI fallback. Trang Standard/Flash đồng thời cập nhật title và meta description ở client theo locale hiện tại mà không cần URL prefix.
 
 Payload:
 
@@ -127,7 +129,7 @@ Frontend lọc `LIVE` cho Standard, và `LIVE + UPCOMING` cho Flash. Query Flash
 ### Chi tiết campaign
 
 ```http
-GET /api/v1/sales/{code}
+GET /api/v1/sales/{code}?locale=en
 ```
 
 ## 6. API và quyền chỉnh sửa ở admin
@@ -142,6 +144,18 @@ Các action chính:
 - kết thúc và clone campaign mới.
 
 Mọi lệnh sửa mang theo `version` để optimistic locking. Khi hai admin cùng mở một campaign, người gửi dữ liệu cũ sẽ nhận conflict thay vì âm thầm ghi đè.
+
+Nội dung campaign có tab `Tiếng Việt | English` độc lập với ngôn ngữ giao diện admin. `code`, banner, type, schedule, items, price và quota là dữ liệu dùng chung; chỉ `name` và `description` được dịch. VI bắt buộc, EN tùy chọn và việc thiếu EN không chặn publish.
+
+Raw translation dùng các endpoint sau:
+
+```http
+GET    /api/v1/sale-campaigns/{id}/translations
+PUT    /api/v1/sale-campaigns/{id}/translations
+DELETE /api/v1/sale-campaigns/{id}/translations/{locale}?version={version}
+```
+
+Batch PUT gửi `{ "version": n, "translations": [...] }` và nhận lại `version` mới. Nếu admin xóa toàn bộ nội dung English, FE dùng version mới nhất để DELETE locale `en`. Lifecycle campaign không thay đổi bởi tính năng i18n.
 
 Quy tắc UI:
 
@@ -226,6 +240,8 @@ Sale là dữ liệu nhạy cảm với thời gian nên không dùng stale time
 
 Polling chỉ giúp UI bớt cũ, không thay thế transaction/conditional update ở backend.
 
+Mutation bản dịch admin invalidate cả danh sách/chi tiết admin và public Sale. Public query key chứa locale; metadata client cũng được tính lại khi locale hoặc loại Sale thay đổi.
+
 ## 10. Chạy kiểm thử
 
 ```bash
@@ -242,6 +258,10 @@ Test hiện có bao phủ:
 - cách tính phase/countdown và bù đồng hồ server;
 - gộp variant/quota/`availableQuantity` thành card sản phẩm và phân biệt hết stock với hết suất;
 - serialize nhiều `phase` thành query parameter lặp;
+- serialize `locale` vào public Sale API và tách query key theo locale;
+- serialization VI/EN, EN tùy chọn và translation endpoint có optimistic `version`;
+- tab nội dung VI/EN và metadata Sale theo locale;
+- status toggle mapping và rollback cache khi PATCH lỗi;
 - mapping stable checkout error codes;
 - nội dung nghiệp vụ của trang Standard/Flash bằng React Testing Library;
 - smoke test hai route Sale bằng Playwright.

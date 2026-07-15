@@ -153,6 +153,7 @@ export type SaleCampaign = {
   startsAt: string;
   endsAt: string;
   version?: number;
+  translationLocales?: Array<"en" | "vi">;
   items: SaleCampaignItem[];
 };
 

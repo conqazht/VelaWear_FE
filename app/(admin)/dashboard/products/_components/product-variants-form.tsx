@@ -1,5 +1,6 @@
 "use client";
 
+import type { Dispatch, SetStateAction } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -8,6 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import {
+  getVariantStatusToggleState,
+  getVariantStatusToggleTarget,
+} from "@/lib/admin-status-toggle";
 import type { AdminCatalogOption, ProductVariantStatus } from "@/lib/api/admin-commerce";
 
 export type ProductVariantFormValue = {
@@ -35,11 +41,13 @@ export function createEmptyProductVariant(key: string): ProductVariantFormValue 
 
 type ProductVariantsFormProps = {
   variants: ProductVariantFormValue[];
-  onChange: (variants: ProductVariantFormValue[]) => void;
+  onChange: Dispatch<SetStateAction<ProductVariantFormValue[]>>;
   colors: AdminCatalogOption[];
   sizes: AdminCatalogOption[];
   isCatalogLoading?: boolean;
   catalogError?: string | null;
+  pendingStatusVariantId?: number | null;
+  onPersistedStatusToggle?: (variantId: number, status: "ACTIVE" | "INACTIVE") => Promise<void>;
 };
 
 const NONE = "NONE";
@@ -65,6 +73,8 @@ export function ProductVariantsForm({
   sizes,
   isCatalogLoading = false,
   catalogError,
+  pendingStatusVariantId,
+  onPersistedStatusToggle,
 }: ProductVariantsFormProps) {
   const { t } = useI18n();
 
@@ -82,6 +92,30 @@ export function ProductVariantsForm({
 
   function removeVariant(index: number) {
     onChange(variants.filter((_, itemIndex) => itemIndex !== index));
+  }
+
+  async function togglePersistedStatus(index: number, checked: boolean) {
+    const variant = variants[index];
+    if (!variant.id || !onPersistedStatusToggle) return;
+    const previousStatus = variant.status;
+    const status = getVariantStatusToggleTarget(variant.status, checked);
+    if (!status) return;
+    onChange((current) =>
+      current.map((item) =>
+        item.id === variant.id ? { ...item, status } : item,
+      ),
+    );
+    try {
+      await onPersistedStatusToggle(variant.id, status);
+    } catch {
+      onChange((current) =>
+        current.map((item) =>
+          item.id === variant.id && item.status === status
+            ? { ...item, status: previousStatus }
+            : item,
+        ),
+      );
+    }
   }
 
   function updateStock(index: number, value: string) {
@@ -250,6 +284,22 @@ export function ProductVariantsForm({
                 <FieldLabel htmlFor={`variant-${variant.key}-status`}>
                   {t("admin.commerce.products.variants.status")}
                 </FieldLabel>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    size="sm"
+                    checked={getVariantStatusToggleState(variant.status).checked}
+                    disabled={
+                      !variant.id ||
+                      getVariantStatusToggleState(variant.status).disabled ||
+                      pendingStatusVariantId !== null && pendingStatusVariantId !== undefined
+                    }
+                    aria-label={t("admin.commerce.translation.toggleAria", { name: variant.sku })}
+                    onCheckedChange={(checked) => void togglePersistedStatus(index, checked)}
+                  />
+                  <span className="text-muted-foreground text-xs">
+                    {t(VARIANT_STATUS_MESSAGE_KEYS[variant.status])}
+                  </span>
+                </div>
                 <Select
                   value={variant.status}
                   onValueChange={(value) => updateVariant(index, "status", value as ProductVariantStatus)}

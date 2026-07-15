@@ -7,6 +7,7 @@ import {
   unwrapApiResponse,
 } from "@/lib/api/client";
 import type { ApiResponse } from "@/lib/api/types";
+import type { Locale } from "@/lib/i18n";
 
 export type SaleCampaignType = "STANDARD" | "FLASH";
 export type SaleCampaignStatus = "DRAFT" | "PUBLISHED" | "CANCELLED";
@@ -62,6 +63,23 @@ export type AdminSaleCampaign = {
   items: AdminSaleCampaignItem[];
   createdAt: string;
   updatedAt: string;
+  translationLocales?: Locale[];
+};
+
+export type SaleCampaignTranslation = {
+  localeCode: Locale;
+  name: string;
+  description: string | null;
+};
+
+export type SaleCampaignTranslationBatchRequest = {
+  version: number;
+  translations: SaleCampaignTranslation[];
+};
+
+export type SaleCampaignTranslationBatchResponse = {
+  version: number;
+  translations: SaleCampaignTranslation[];
 };
 
 export type AdminSaleCampaignListParams = {
@@ -72,6 +90,7 @@ export type AdminSaleCampaignListParams = {
   type?: SaleCampaignType;
   status?: SaleCampaignStatus;
   phase?: SaleCampaignPhase;
+  locale?: Locale;
 };
 
 export type AdminSaleCampaignItemRequest = {
@@ -160,6 +179,33 @@ export function updateAdminSaleCampaign(
   return apiPut<AdminSaleCampaign, UpdateAdminSaleCampaignRequest>(
     `/sale-campaigns/${id}`,
     request,
+  );
+}
+
+export function getAdminSaleCampaignTranslations(id: number) {
+  return apiGet<SaleCampaignTranslationBatchResponse>(
+    `/sale-campaigns/${id}/translations`,
+  );
+}
+
+export function updateAdminSaleCampaignTranslations(
+  id: number,
+  request: SaleCampaignTranslationBatchRequest,
+) {
+  return apiPut<SaleCampaignTranslationBatchResponse, SaleCampaignTranslationBatchRequest>(
+    `/sale-campaigns/${id}/translations`,
+    request,
+  );
+}
+
+export function deleteAdminSaleCampaignTranslation(
+  id: number,
+  locale: Locale,
+  version: number,
+) {
+  const searchParams = new URLSearchParams({ version: String(version) });
+  return apiDelete<SaleCampaignTranslationBatchResponse>(
+    `/sale-campaigns/${id}/translations/${encodeURIComponent(locale)}?${searchParams.toString()}`,
   );
 }
 

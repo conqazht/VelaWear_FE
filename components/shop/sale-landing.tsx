@@ -22,10 +22,11 @@ import { money, resolveImageUrl } from "@/lib/vela-data";
 
 export function SaleLanding({ type }: { type: SaleCampaignType }) {
   const isFlash = type === "FLASH";
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const queryClient = useQueryClient();
   const salesQuery = usePublicSalesQuery({
     type,
+    locale,
   });
   const [clientNow, setClientNow] = useState(() => Date.now());
   const serverOffset = useMemo(
@@ -38,6 +39,21 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
     const intervalId = window.setInterval(() => setClientNow(Date.now()), 1_000);
     return () => window.clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    document.title = isFlash
+      ? t("storefront.sale.flash.metaTitle")
+      : t("storefront.sale.standard.metaTitle");
+    let description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!description) {
+      description = document.createElement("meta");
+      description.name = "description";
+      document.head.append(description);
+    }
+    description.content = isFlash
+      ? t("storefront.sale.flash.metaDescription")
+      : t("storefront.sale.standard.metaDescription");
+  }, [isFlash, locale, t]);
 
   const campaigns = useMemo(() => {
     return [...(salesQuery.data?.campaigns ?? [])]
@@ -128,6 +144,7 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
             </p>
             <Button
               render={<Link href="/collection" />}
+              nativeButton={false}
               className="mt-7 bg-[#1c1a18] text-white hover:bg-[#b5573a]"
             >
               {t("storefront.sale.continueShopping")}
@@ -292,6 +309,7 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
                   {!soldOut && !isUpcoming ? (
                     <Button
                       render={<Link href={`/products/${encodeURIComponent(product.productSlug)}`} />}
+                      nativeButton={false}
                       className="mt-6 w-full bg-[#1c1a18] text-white hover:bg-[#b5573a]"
                     >
                       {t("storefront.sale.selectVariant")}

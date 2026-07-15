@@ -9,6 +9,7 @@ vi.mock("@/lib/api/client", () => ({
 }));
 
 import { getPublicSales } from "@/lib/api/sales";
+import { saleQueryKeys } from "@/lib/queries/sales";
 
 describe("public sales API", () => {
   beforeEach(() => {
@@ -27,6 +28,20 @@ describe("public sales API", () => {
 
     expect(apiGetMock).toHaveBeenCalledWith(
       "/sales?type=FLASH&phase=LIVE&phase=UPCOMING",
+    );
+  });
+
+  it("gửi locale trong API và tách cache key Sale theo locale", async () => {
+    await getPublicSales({ type: "FLASH", locale: "en" });
+
+    expect(apiGetMock).toHaveBeenCalledWith("/sales?type=FLASH&locale=en");
+    expect(saleQueryKeys.list({ type: "FLASH", locale: "en" })).toEqual([
+      "sales",
+      "list",
+      { type: "FLASH", locale: "en" },
+    ]);
+    expect(saleQueryKeys.list({ type: "FLASH", locale: "vi" })).not.toEqual(
+      saleQueryKeys.list({ type: "FLASH", locale: "en" }),
     );
   });
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -11,21 +10,26 @@ import {
   cancelAdminSaleCampaign,
   createAdminSaleCampaign,
   deleteAdminSaleCampaign,
+  deleteAdminSaleCampaignTranslation,
   endAdminSaleCampaign,
   endAndCloneAdminSaleCampaign,
   getAdminSaleCampaign,
   getAdminSaleCampaigns,
+  getAdminSaleCampaignTranslations,
   increaseAdminSaleQuota,
   publishAdminSaleCampaign,
   updateAdminSaleCampaign,
+  updateAdminSaleCampaignTranslations,
   updateAdminSaleDisplay,
   type AdminSaleCampaignListParams,
   type CreateAdminSaleCampaignRequest,
   type EndAndCloneSaleCampaignRequest,
   type IncreaseSaleQuotaRequest,
+  type SaleCampaignTranslationBatchRequest,
   type UpdateAdminSaleCampaignRequest,
   type UpdateAdminSaleDisplayRequest,
 } from "@/lib/api/admin-sales";
+import { invalidatePublicQueries } from "@/lib/queries/public-cache";
 
 export const adminSalesQueryKeys = {
   root: ["admin-sales"] as const,
@@ -34,6 +38,7 @@ export const adminSalesQueryKeys = {
     ["admin-sales", "list", params] as const,
   details: ["admin-sales", "detail"] as const,
   detail: (id: number) => ["admin-sales", "detail", id] as const,
+  translations: (id: number) => ["admin-sales", "detail", id, "translations"] as const,
 };
 
 export function useAdminSaleCampaignsQuery(
@@ -42,7 +47,11 @@ export function useAdminSaleCampaignsQuery(
   return useQuery({
     queryKey: adminSalesQueryKeys.list(params),
     queryFn: () => getAdminSaleCampaigns(params),
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) =>
+      (previousQuery?.queryKey[2] as AdminSaleCampaignListParams | undefined)?.locale ===
+      params.locale
+        ? previousData
+        : undefined,
   });
 }
 
@@ -54,12 +63,21 @@ export function useAdminSaleCampaignQuery(id?: number) {
   });
 }
 
+export function useAdminSaleCampaignTranslationsQuery(id?: number) {
+  return useQuery({
+    queryKey: adminSalesQueryKeys.translations(id ?? 0),
+    queryFn: () => getAdminSaleCampaignTranslations(id as number),
+    enabled: typeof id === "number" && Number.isInteger(id) && id > 0,
+  });
+}
+
 function useInvalidateAdminSales() {
   const queryClient = useQueryClient();
 
   return async (campaignId?: number) => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: adminSalesQueryKeys.lists }),
+      invalidatePublicQueries(queryClient, ["sales", "productLists", "productDetails"]),
       campaignId
         ? queryClient.invalidateQueries({
             queryKey: adminSalesQueryKeys.detail(campaignId),
@@ -67,6 +85,40 @@ function useInvalidateAdminSales() {
         : Promise.resolve(),
     ]);
   };
+}
+
+export function useUpdateAdminSaleCampaignTranslationsMutation() {
+  const invalidate = useInvalidateAdminSales();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, request }: { id: number; request: SaleCampaignTranslationBatchRequest }) =>
+      updateAdminSaleCampaignTranslations(id, request),
+    onSuccess: async (_response, variables) => {
+      await Promise.all([
+        invalidate(variables.id),
+        queryClient.invalidateQueries({
+          queryKey: adminSalesQueryKeys.translations(variables.id),
+        }),
+      ]);
+    },
+  });
+}
+
+export function useDeleteAdminSaleCampaignTranslationMutation() {
+  const invalidate = useInvalidateAdminSales();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, locale, version }: { id: number; locale: "en" | "vi"; version: number }) =>
+      deleteAdminSaleCampaignTranslation(id, locale, version),
+    onSuccess: async (_response, variables) => {
+      await Promise.all([
+        invalidate(variables.id),
+        queryClient.invalidateQueries({
+          queryKey: adminSalesQueryKeys.translations(variables.id),
+        }),
+      ]);
+    },
+  });
 }
 
 export function useCreateAdminSaleCampaignMutation() {

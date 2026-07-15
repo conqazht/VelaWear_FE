@@ -114,6 +114,7 @@ export function SalesManagement() {
     page,
     size: pageSize,
     sort: "createdAt,desc",
+    locale,
     search: deferredSearch || undefined,
     type:
       typeFilter === ALL_FILTER ? undefined : (typeFilter as SaleCampaignType),
@@ -176,6 +177,17 @@ export function SalesManagement() {
             <p className="truncate font-mono text-muted-foreground text-xs">
               {campaign.code}
             </p>
+            <div className="mt-1 flex gap-1">
+              {(["vi", "en"] as const).map((translationLocale) => (
+                <Badge
+                  key={translationLocale}
+                  variant={campaign.translationLocales?.includes(translationLocale) ? "secondary" : "outline"}
+                  className="px-1 py-0 text-[9px] uppercase"
+                >
+                  {translationLocale}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
       ),

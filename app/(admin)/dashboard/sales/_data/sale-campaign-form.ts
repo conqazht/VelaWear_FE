@@ -3,6 +3,7 @@ import type {
   AdminSaleCampaignItem,
   CreateAdminSaleCampaignRequest,
   SaleCampaignPhase,
+  SaleCampaignTranslation,
   SaleCampaignType,
   UpdateAdminSaleCampaignRequest,
 } from "@/lib/api/admin-sales";
@@ -36,6 +37,8 @@ export type SaleCampaignFormValues = {
   code: string;
   name: string;
   description: string;
+  englishName: string;
+  englishDescription: string;
   bannerUrl: string;
   type: SaleCampaignType;
   startsAt: string;
@@ -76,6 +79,8 @@ export function createEmptySaleCampaignForm(): SaleCampaignFormValues {
     code: "",
     name: "",
     description: "",
+    englishName: "",
+    englishDescription: "",
     bannerUrl: "",
     type: "STANDARD",
     startsAt: toLocalDateTimeInput(startsAt),
@@ -107,17 +112,46 @@ function campaignItemToFormItem(
 
 export function saleCampaignToFormValues(
   campaign: AdminSaleCampaign,
+  translations: SaleCampaignTranslation[] = [],
 ): SaleCampaignFormValues {
+  const byLocale = new Map(translations.map((translation) => [translation.localeCode, translation]));
+  const vi = byLocale.get("vi");
+  const en = byLocale.get("en");
   return {
     code: campaign.code,
-    name: campaign.name,
-    description: campaign.description ?? "",
+    name: vi?.name ?? campaign.name,
+    description: vi?.description ?? campaign.description ?? "",
+    englishName: en?.name ?? "",
+    englishDescription: en?.description ?? "",
     bannerUrl: campaign.bannerUrl ?? "",
     type: campaign.type,
     startsAt: toLocalDateTimeInput(campaign.startsAt),
     endsAt: toLocalDateTimeInput(campaign.endsAt),
     items: (campaign.items ?? []).map(campaignItemToFormItem),
   };
+}
+
+export function serializeSaleCampaignTranslations(
+  values: Pick<
+    SaleCampaignFormValues,
+    "name" | "description" | "englishName" | "englishDescription"
+  >,
+): SaleCampaignTranslation[] {
+  const translations: SaleCampaignTranslation[] = [
+    {
+      localeCode: "vi",
+      name: values.name.trim(),
+      description: values.description.trim() || null,
+    },
+  ];
+  if (values.englishName.trim()) {
+    translations.push({
+      localeCode: "en",
+      name: values.englishName.trim(),
+      description: values.englishDescription.trim() || null,
+    });
+  }
+  return translations;
 }
 
 export function productVariantToFormItem(
@@ -168,6 +202,13 @@ export function validateSaleCampaignForm(
       valid: false,
       step: 1,
       message: t("admin.sales.management.validation.nameRequired"),
+    };
+  }
+  if (values.englishDescription.trim() && !values.englishName.trim()) {
+    return {
+      valid: false,
+      step: 1,
+      message: t("admin.sales.management.validation.englishPartial"),
     };
   }
   if (values.bannerUrl.trim()) {
@@ -321,4 +362,40 @@ export function toUpdateSaleCampaignRequest(
     ...toCreateSaleCampaignRequest(values),
     version,
   };
+}
+
+type SaveSaleCampaignWithTranslationsOptions = {
+  campaign?: AdminSaleCampaign;
+  values: SaleCampaignFormValues;
+  createCampaign: (
+    request: CreateAdminSaleCampaignRequest,
+  ) => Promise<AdminSaleCampaign>;
+  updateCampaign: (input: {
+    id: number;
+    request: UpdateAdminSaleCampaignRequest;
+  }) => Promise<AdminSaleCampaign>;
+  saveTranslations: (campaign: AdminSaleCampaign) => Promise<AdminSaleCampaign>;
+  onBasePersisted: (campaign: AdminSaleCampaign) => void;
+};
+
+export async function saveSaleCampaignWithTranslations({
+  campaign,
+  values,
+  createCampaign,
+  updateCampaign,
+  saveTranslations,
+  onBasePersisted,
+}: SaveSaleCampaignWithTranslationsOptions) {
+  const baseCampaign = campaign
+    ? await updateCampaign({
+        id: campaign.id,
+        request: toUpdateSaleCampaignRequest(values, campaign.version),
+      })
+    : await createCampaign(toCreateSaleCampaignRequest(values));
+
+  // Persist this checkpoint before translation I/O so a retry updates the same campaign.
+  onBasePersisted(baseCampaign);
+  const savedCampaign = await saveTranslations(baseCampaign);
+  onBasePersisted(savedCampaign);
+  return savedCampaign;
 }

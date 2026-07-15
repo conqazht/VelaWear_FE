@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useDeferredValue, useState } from "react";
+import { type FormEvent, useDeferredValue, useRef, useState } from "react";
 import { Archive, Loader2, Package, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,14 +22,18 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   createAdminProduct,
   createAdminProductVariant,
+  deleteAdminProductTranslation,
   deleteAdminProductVariant,
   getAdminProductVariant,
   getAdminProductVariants,
+  getAdminProductTranslations,
   updateAdminProduct,
+  updateAdminProductTranslations,
   updateAdminProductVariant,
 } from "@/lib/api/admin-commerce";
 import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
@@ -37,6 +41,7 @@ import type {
   AdminCatalogOption,
   AdminProduct,
   AdminProductVariant,
+  ProductTranslation,
   CreateAdminProductRequest,
   CreateAdminProductVariantRequest,
   ProductStatus,
@@ -51,14 +56,37 @@ import {
   useAdminSizesQuery,
   adminCommerceQueryKeys,
   useDeleteAdminProductMutation,
+  useUpdateAdminProductStatusMutation,
+  useUpdateAdminProductVariantStatusMutation,
 } from "@/lib/queries/admin-commerce";
+import type { Locale } from "@/lib/i18n";
+import { invalidatePublicQueries } from "@/lib/queries/public-cache";
+import {
+  getProductStatusToggleState,
+  getProductStatusToggleTarget,
+} from "@/lib/admin-status-toggle";
 
-import { EMPTY_PRODUCT_FORM, ProductForm, type ProductFormValues } from "./product-form";
+import {
+  EMPTY_PRODUCT_FORM,
+  EMPTY_PRODUCT_TRANSLATION,
+  isProductTranslationComplete,
+  isProductTranslationEmpty,
+  ProductForm,
+  serializeProductTranslation,
+  type ProductFormValues,
+  type ProductTranslationFormValue,
+} from "./product-form";
 import {
   createEmptyProductVariant,
   ProductVariantsForm,
   type ProductVariantFormValue,
 } from "./product-variants-form";
+import {
+  createProductVariantWorkflowCheckpoint,
+  recordDeletedVariant,
+  recordPersistedVariant,
+  type ProductVariantWorkflowCheckpoint,
+} from "../_data/product-variant-workflow";
 
 const ALL_FILTER = "ALL";
 
@@ -78,14 +106,47 @@ function getStatusVariant(status: ProductStatus) {
   return "outline" as const;
 }
 
-function toFormValues(product: AdminProduct): ProductFormValues {
+function toTranslationFormValue(
+  translation?: ProductTranslation,
+): ProductTranslationFormValue {
+  return translation
+    ? {
+        name: translation.name,
+        slug: translation.slug,
+        shortDescription: translation.shortDescription ?? "",
+        description: translation.description ?? "",
+        material: translation.material ?? "",
+        careInstruction: translation.careInstruction ?? "",
+        seoTitle: translation.seoTitle ?? "",
+        seoDescription: translation.seoDescription ?? "",
+      }
+    : { ...EMPTY_PRODUCT_TRANSLATION };
+}
+
+function toFormValues(
+  product: AdminProduct,
+  translations: ProductTranslation[],
+): ProductFormValues {
+  const byLocale = new Map(translations.map((translation) => [translation.localeCode, translation]));
+  const vi = toTranslationFormValue(byLocale.get("vi"));
+  if (!byLocale.has("vi")) {
+    vi.name = product.name;
+    vi.slug = product.originalSlug || product.slug;
+    vi.description = product.description ?? "";
+    vi.shortDescription = product.shortDescription ?? "";
+    vi.material = product.material ?? "";
+    vi.careInstruction = product.careInstruction ?? "";
+    vi.seoTitle = product.seoTitle ?? "";
+    vi.seoDescription = product.seoDescription ?? "";
+  }
   return {
     categoryId: String(product.categoryId),
     brandId: String(product.brandId),
-    name: product.name,
-    slug: product.originalSlug || product.slug,
-    description: product.description ?? "",
     status: product.status,
+    translations: {
+      vi,
+      en: toTranslationFormValue(byLocale.get("en")),
+    },
   };
 }
 
@@ -232,11 +293,13 @@ export function ProductsManagement() {
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
   const [archiveProduct, setArchiveProduct] = useState<AdminProduct | null>(null);
   const [formValues, setFormValues] = useState<ProductFormValues>({ ...EMPTY_PRODUCT_FORM });
+  const [contentLocale, setContentLocale] = useState<Locale>("vi");
   const [variantValues, setVariantValues] = useState<ProductVariantFormValue[]>([
     createEmptyProductVariant("new-0"),
   ]);
   const [knownVariantIds, setKnownVariantIds] = useState<number[]>([]);
   const [baselineVariantValues, setBaselineVariantValues] = useState<ProductVariantFormValue[]>([]);
+  const variantWorkflowCheckpointRef = useRef<ProductVariantWorkflowCheckpoint | null>(null);
   const [loadingVariantProductId, setLoadingVariantProductId] = useState<number | null>(null);
   const [isWorkflowSaving, setIsWorkflowSaving] = useState(false);
   const [isArchiveWorkflowPending, setIsArchiveWorkflowPending] = useState(false);
@@ -259,6 +322,8 @@ export function ProductsManagement() {
   const colorsQuery = useAdminColorsQuery({ page: 1, size: 2000, sort: "sortOrder,asc" });
   const sizesQuery = useAdminSizesQuery({ page: 1, size: 2000, sort: "sortOrder,asc" });
   const deleteMutation = useDeleteAdminProductMutation();
+  const statusMutation = useUpdateAdminProductStatusMutation();
+  const variantStatusMutation = useUpdateAdminProductVariantStatusMutation();
 
   const rows = productsQuery.data?.result ?? [];
   const meta = productsQuery.data?.meta;
@@ -292,8 +357,16 @@ export function ProductsManagement() {
   const isSaving = isWorkflowSaving;
 
   function openCreateForm() {
+    variantWorkflowCheckpointRef.current = null;
     setEditingProduct(null);
-    setFormValues({ ...EMPTY_PRODUCT_FORM });
+    setFormValues({
+      ...EMPTY_PRODUCT_FORM,
+      translations: {
+        vi: { ...EMPTY_PRODUCT_TRANSLATION },
+        en: { ...EMPTY_PRODUCT_TRANSLATION },
+      },
+    });
+    setContentLocale("vi");
     setVariantValues([createEmptyProductVariant(`new-${Date.now()}`)]);
     setKnownVariantIds([]);
     setBaselineVariantValues([]);
@@ -302,18 +375,24 @@ export function ProductsManagement() {
   }
 
   async function openEditForm(product: AdminProduct) {
+    variantWorkflowCheckpointRef.current = null;
     setLoadingVariantProductId(product.id);
     try {
-      const variantsPage = await getAdminProductVariants({
-        productId: product.id,
-        page: 1,
-        size: 2000,
-        sort: "id,asc",
-      });
+      const [variantsPage, translationsResponse] = await Promise.all([
+        getAdminProductVariants({
+          productId: product.id,
+          page: 1,
+          size: 2000,
+          sort: "id,asc",
+        }),
+        getAdminProductTranslations(product.id),
+      ]);
       const loadedVariants = variantsPage.result.map(toVariantFormValue);
+      const translations = translationsResponse.translations;
 
       setEditingProduct(product);
-      setFormValues(toFormValues(product));
+      setFormValues(toFormValues(product, translations));
+      setContentLocale("vi");
       setVariantValues(
         loadedVariants.length > 0
           ? loadedVariants
@@ -325,7 +404,7 @@ export function ProductsManagement() {
       setFormOpen(true);
     } catch (error) {
       toast.error(
-        `${t("admin.commerce.products.loadVariantsFailed")} ${getApiErrorMessage(error)}`
+        `${t("admin.commerce.translation.loadFailed")} ${getApiErrorMessage(error)}`
       );
     } finally {
       setLoadingVariantProductId(null);
@@ -334,21 +413,19 @@ export function ProductsManagement() {
 
   async function persistVariants(
     productId: number,
-    variantsToPersist: ProductVariantFormValue[] = variantValues
+    initialCheckpoint: ProductVariantWorkflowCheckpoint,
   ) {
-    let workingVariants = [...variantsToPersist];
-    let persistedIds = [...knownVariantIds];
-    let persistedBaselines = [...baselineVariantValues];
-    const desiredIds = new Set(
-      workingVariants.flatMap((variant) => (variant.id === undefined ? [] : [variant.id]))
-    );
+    let checkpoint = initialCheckpoint;
 
-    for (const [index, variant] of workingVariants.entries()) {
+    for (let index = 0; index < checkpoint.workingVariants.length; index += 1) {
+      const variant = checkpoint.workingVariants[index];
       const request = toVariantRequest(productId, variant);
       let savedVariant: AdminProductVariant;
 
       if (variant.id !== undefined) {
-        const baseline = persistedBaselines.find((item) => item.id === variant.id);
+        const baseline = checkpoint.persistedBaselines.find(
+          (item) => item.id === variant.id,
+        );
         if (
           baseline &&
           variantRequestsEqual(request, toVariantRequest(productId, baseline))
@@ -363,43 +440,34 @@ export function ProductsManagement() {
         savedVariant = await updateAdminProductVariant(variant.id, updateRequest);
       } else {
         savedVariant = await createAdminProductVariant(request);
-        persistedIds = [...persistedIds, savedVariant.id];
-        setKnownVariantIds(persistedIds);
       }
 
-      workingVariants = workingVariants.map((item, itemIndex) =>
-        itemIndex === index ? toVariantFormValue(savedVariant) : item
-      );
-      persistedBaselines = [
-        ...persistedBaselines.filter((item) => item.id !== savedVariant.id),
+      checkpoint = recordPersistedVariant(
+        checkpoint,
+        index,
         toVariantFormValue(savedVariant),
-      ];
-      setVariantValues(workingVariants);
-      setBaselineVariantValues(persistedBaselines);
+      );
+      variantWorkflowCheckpointRef.current = checkpoint;
     }
 
-    for (const variantId of persistedIds.filter((id) => !desiredIds.has(id))) {
+    for (const variantId of [...checkpoint.staleVariantIds]) {
       await deleteAdminProductVariant(variantId);
-      persistedIds = persistedIds.filter((id) => id !== variantId);
-      persistedBaselines = persistedBaselines.filter((variant) => variant.id !== variantId);
-      setKnownVariantIds(persistedIds);
-      setBaselineVariantValues(persistedBaselines);
+      checkpoint = recordDeletedVariant(checkpoint, variantId);
+      variantWorkflowCheckpointRef.current = checkpoint;
     }
 
-    setKnownVariantIds(workingVariants.flatMap((variant) => (variant.id === undefined ? [] : [variant.id])));
-    setBaselineVariantValues(persistedBaselines);
-    return workingVariants;
+    return checkpoint;
   }
 
   async function applyDesiredVariantStatuses(
     productId: number,
-    persistedVariants: ProductVariantFormValue[],
-    desiredVariants: ProductVariantFormValue[]
+    initialCheckpoint: ProductVariantWorkflowCheckpoint,
   ) {
-    let workingVariants = [...persistedVariants];
+    let checkpoint = initialCheckpoint;
 
-    for (const [index, persistedVariant] of workingVariants.entries()) {
-      const desiredStatus = desiredVariants[index]?.status;
+    for (let index = 0; index < checkpoint.workingVariants.length; index += 1) {
+      const persistedVariant = checkpoint.workingVariants[index];
+      const desiredStatus = checkpoint.desiredVariants[index]?.status;
       if (
         persistedVariant.id === undefined ||
         desiredStatus === undefined ||
@@ -414,22 +482,25 @@ export function ProductsManagement() {
         ...currentRequest,
         status: desiredStatus,
       });
-      workingVariants = workingVariants.map((variant, itemIndex) =>
-        itemIndex === index ? toVariantFormValue(savedVariant) : variant
+      checkpoint = recordPersistedVariant(
+        checkpoint,
+        index,
+        toVariantFormValue(savedVariant),
       );
-      setVariantValues(workingVariants);
-      setBaselineVariantValues(workingVariants);
+      variantWorkflowCheckpointRef.current = checkpoint;
     }
 
-    return workingVariants;
+    return checkpoint;
   }
 
   async function saveProduct() {
 
     const categoryId = Number(formValues.categoryId);
     const brandId = Number(formValues.brandId);
-    const name = formValues.name.trim();
-    const slug = formValues.slug.trim();
+    const viTranslation = formValues.translations.vi;
+    const enTranslation = formValues.translations.en;
+    const name = viTranslation.name.trim();
+    const slug = viTranslation.slug.trim();
 
     if (
       !formValues.categoryId ||
@@ -438,17 +509,31 @@ export function ProductsManagement() {
       categoryId <= 0 ||
       !Number.isInteger(brandId) ||
       brandId <= 0 ||
-      !name ||
-      (!editingProduct && !slug)
+      !isProductTranslationComplete(viTranslation)
     ) {
       setFormTab("details");
+      setContentLocale("vi");
       toast.error(t("admin.commerce.products.validation.complete"));
       return;
     }
-    if (!editingProduct && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
       setFormTab("details");
       toast.error(t("admin.commerce.products.validation.slug"));
       return;
+    }
+    if (!isProductTranslationEmpty(enTranslation)) {
+      if (!isProductTranslationComplete(enTranslation)) {
+        setFormTab("details");
+        setContentLocale("en");
+        toast.error(t("admin.commerce.translation.enPartial"));
+        return;
+      }
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(enTranslation.slug.trim())) {
+        setFormTab("details");
+        setContentLocale("en");
+        toast.error(t("admin.commerce.products.validation.slug"));
+        return;
+      }
     }
 
     const variantValidationError = getVariantValidationError(variantValues, t);
@@ -470,7 +555,7 @@ export function ProductsManagement() {
       categoryId,
       brandId,
       name,
-      description: formValues.description.trim() || null,
+      description: viTranslation.description.trim() || null,
       status: formValues.status,
     };
     const changesBaseProduct =
@@ -503,23 +588,49 @@ export function ProductsManagement() {
         setEditingProduct(product);
       }
 
-      const desiredVariants = [...variantValues];
+      const translations: ProductTranslation[] = [
+        serializeProductTranslation("vi", viTranslation),
+      ];
+      if (!isProductTranslationEmpty(enTranslation)) {
+        translations.push(serializeProductTranslation("en", enTranslation));
+      }
+      const translationResponse = await updateAdminProductTranslations(product.id, { translations });
+      const savedTranslations = translationResponse.translations;
+      if (
+        isProductTranslationEmpty(enTranslation) &&
+        savedTranslations.some((translation) => translation.localeCode === "en")
+      ) {
+        await deleteAdminProductTranslation(product.id, "en");
+      }
       const needsActivationStage =
         formValues.status === "ACTIVE" && product.status !== "ACTIVE";
-      const stagedVariants = needsActivationStage
-        ? desiredVariants.map((variant) => ({
-            ...variant,
-            status: variant.status === "ACTIVE" ? ("INACTIVE" as const) : variant.status,
-          }))
-        : desiredVariants;
-      const persistedVariants = await persistVariants(product.id, stagedVariants);
+      let workflowCheckpoint = variantWorkflowCheckpointRef.current;
+      if (!workflowCheckpoint || workflowCheckpoint.productId !== product.id) {
+        workflowCheckpoint = createProductVariantWorkflowCheckpoint({
+          productId: product.id,
+          desiredVariants: variantValues,
+          knownVariantIds,
+          baselineVariants: baselineVariantValues,
+          needsActivationStage,
+        });
+        variantWorkflowCheckpointRef.current = workflowCheckpoint;
+      }
+      workflowCheckpoint = await persistVariants(product.id, workflowCheckpoint);
       if (createdDuringSave || productRequestChanged(product, commonRequest)) {
         await updateAdminProduct(product.id, commonRequest);
       }
       productStatusSaved = true;
-      if (needsActivationStage) {
-        await applyDesiredVariantStatuses(product.id, persistedVariants, desiredVariants);
+      if (workflowCheckpoint.needsActivationStage) {
+        workflowCheckpoint = await applyDesiredVariantStatuses(
+          product.id,
+          workflowCheckpoint,
+        );
       }
+
+      setVariantValues(workflowCheckpoint.workingVariants);
+      setKnownVariantIds(workflowCheckpoint.persistedIds);
+      setBaselineVariantValues(workflowCheckpoint.persistedBaselines);
+      variantWorkflowCheckpointRef.current = null;
 
       toast.success(
         createdDuringSave
@@ -549,6 +660,12 @@ export function ProductsManagement() {
       await Promise.allSettled([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.productVariants.root }),
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
+        invalidatePublicQueries(queryClient, ["productLists", "productDetails", "sales"]),
+        product
+          ? queryClient.invalidateQueries({
+              queryKey: adminCommerceQueryKeys.products.translations(product.id),
+            })
+          : Promise.resolve(),
       ]);
       setIsWorkflowSaving(false);
     }
@@ -588,6 +705,10 @@ export function ProductsManagement() {
       await Promise.allSettled([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.productVariants.root }),
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
+        invalidatePublicQueries(queryClient, ["productLists", "productDetails", "sales"]),
+        queryClient.invalidateQueries({
+          queryKey: adminCommerceQueryKeys.products.translations(id),
+        }),
       ]);
       setIsArchiveWorkflowPending(false);
     }
@@ -595,6 +716,37 @@ export function ProductsManagement() {
 
   function handleArchive() {
     void archiveProductAndVariants();
+  }
+
+  function toggleProductStatus(product: AdminProduct, checked: boolean) {
+    const status = getProductStatusToggleTarget(product.status, checked);
+    if (!status) return;
+    statusMutation.mutate(
+      { id: product.id, status },
+      {
+        onSuccess: () =>
+          toast.success(t("admin.commerce.translation.statusUpdated", { name: product.name })),
+        onError: () =>
+          toast.error(t("admin.commerce.translation.statusFailed", { name: product.name })),
+      },
+    );
+  }
+
+  async function toggleVariantStatus(
+    variantId: number,
+    status: "ACTIVE" | "INACTIVE",
+  ) {
+    try {
+      await variantStatusMutation.mutateAsync({ id: variantId, status });
+      toast.success(
+        t("admin.commerce.translation.statusUpdated", { name: `SKU #${variantId}` }),
+      );
+    } catch (error) {
+      toast.error(
+        `${t("admin.commerce.translation.statusFailed", { name: `SKU #${variantId}` })} ${getApiErrorMessage(error)}`,
+      );
+      throw error;
+    }
   }
 
   const columns: ManagementColumn<AdminProduct>[] = [
@@ -613,6 +765,17 @@ export function ProductsManagement() {
           <div className="min-w-0">
             <p className="truncate font-medium">{product.name}</p>
             <p className="max-w-64 truncate text-muted-foreground text-xs">/{product.slug}</p>
+            <div className="mt-1 flex gap-1">
+              {(["vi", "en"] as const).map((translationLocale) => (
+                <Badge
+                  key={translationLocale}
+                  variant={product.translationLocales?.includes(translationLocale) ? "secondary" : "outline"}
+                  className="px-1 py-0 text-[9px] uppercase"
+                >
+                  {translationLocale}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
       ),
@@ -646,11 +809,24 @@ export function ProductsManagement() {
     {
       key: "status",
       header: t("admin.commerce.common.status"),
-      cell: (product) => (
-        <Badge variant={getStatusVariant(product.status)}>
-          {t(PRODUCT_STATUS_MESSAGE_KEYS[product.status])}
-        </Badge>
-      ),
+      cell: (product) => {
+        const toggle = getProductStatusToggleState(product.status);
+        const disabled = toggle.disabled || statusMutation.isPending;
+        return (
+          <div className="flex items-center gap-2">
+            <Switch
+              size="sm"
+              checked={toggle.checked}
+              disabled={disabled}
+              aria-label={t("admin.commerce.translation.toggleAria", { name: product.name })}
+              onCheckedChange={(checked) => toggleProductStatus(product, checked)}
+            />
+            <Badge variant={getStatusVariant(product.status)}>
+              {t(PRODUCT_STATUS_MESSAGE_KEYS[product.status])}
+            </Badge>
+          </div>
+        );
+      },
     },
     {
       key: "updatedAt",
@@ -820,9 +996,10 @@ export function ProductsManagement() {
             <ProductForm
               values={formValues}
               onChange={setFormValues}
+              contentLocale={contentLocale}
+              onContentLocaleChange={setContentLocale}
               categories={productCategoryOptions}
               brands={productBrandOptions}
-              isEditing={Boolean(editingProduct)}
               isCatalogLoading={categoriesQuery.isPending || brandsQuery.isPending}
               catalogError={
                 categoriesQuery.isError
@@ -847,6 +1024,10 @@ export function ProductsManagement() {
                     ? getApiErrorMessage(sizesQuery.error)
                     : null
               }
+              pendingStatusVariantId={
+                variantStatusMutation.isPending ? variantStatusMutation.variables?.id : null
+              }
+              onPersistedStatusToggle={toggleVariantStatus}
             />
           </TabsContent>
         </Tabs>

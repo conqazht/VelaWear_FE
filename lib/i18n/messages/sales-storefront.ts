@@ -54,6 +54,12 @@ export const salesStorefrontMessages = defineMessages(
       "An eligible coupon can be applied when its conditions are met.",
     "storefront.sale.upcoming": "Coming soon",
     "storefront.sale.loadingAria": "Loading sale campaigns",
+    "storefront.sale.standard.metaTitle": "Sale | VELA WEAR",
+    "storefront.sale.standard.metaDescription":
+      "Explore current Standard Sale campaigns at VELA WEAR.",
+    "storefront.sale.flash.metaTitle": "Flash Sale | VELA WEAR",
+    "storefront.sale.flash.metaDescription":
+      "Discover limited-time, limited-quantity Flash Sale offers at VELA WEAR.",
   },
   {
     "storefront.sale.flashSoldOut": "Đã hết suất Flash",
@@ -108,5 +114,11 @@ export const salesStorefrontMessages = defineMessages(
       "Có thể áp dụng coupon khi mã đáp ứng điều kiện.",
     "storefront.sale.upcoming": "Sắp mở bán",
     "storefront.sale.loadingAria": "Đang tải chương trình giảm giá",
+    "storefront.sale.standard.metaTitle": "Sale | VELA WEAR",
+    "storefront.sale.standard.metaDescription":
+      "Khám phá các chương trình Standard Sale đang diễn ra tại VELA WEAR.",
+    "storefront.sale.flash.metaTitle": "Flash Sale | VELA WEAR",
+    "storefront.sale.flash.metaDescription":
+      "Khám phá Flash Sale giới hạn thời gian và số lượng tại VELA WEAR.",
   },
 );
