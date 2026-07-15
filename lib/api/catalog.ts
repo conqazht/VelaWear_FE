@@ -57,13 +57,13 @@ export function getProductVariants(params: ProductVariantFilters = {}) {
 export function getProductsForRender(filters: ProductFilters = {}) {
   return serverApiGet<ResultPaginationDTO<Product>>("/products", {
     query: filters,
-    next: { revalidate: 300 },
+    next: { revalidate: 15 },
   });
 }
 
 export function getProductForRender(id: number | string) {
   return serverApiGet<Product>(`/products/${id}`, {
-    next: { revalidate: 300 },
+    next: { revalidate: 5 },
   });
 }
 

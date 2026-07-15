@@ -287,14 +287,12 @@ export function SiteHeader() {
   const navigationItems = [
     {
       label: "Sale",
-      href: "/collection",
-      featuredTitle: "Ưu Đãi Lên Đến 50%",
-      featuredDesc: "Áp dụng cho toàn bộ sản phẩm thuộc bộ sưu tập cũ và sản phẩm chọn lọc.",
+      href: "/sale",
+      featuredTitle: "Chương Trình Giảm Giá",
+      featuredDesc: "Giá ưu đãi được cập nhật trực tiếp từ campaign đang hoạt động.",
       subItems: [
-        { label: "Sale Áo", href: "/collection" },
-        { label: "Sale Quần", href: "/collection" },
-        { label: "Sale Phụ Kiện", href: "/collection" },
-        { label: "Flash Sale", href: "/collection" },
+        { label: "Standard Sale", href: "/sale" },
+        { label: "Flash Sale", href: "/flash-sale" },
       ],
     },
     {

@@ -1,3 +1,5 @@
+> **Kiến trúc hiện tại (2026-07-15):** `salePrice` trực tiếp đã bị loại bỏ. Các mục cũ nhắc tới `salePrice` chỉ là lịch sử trước khi Sale Campaign được triển khai; xem mục mới và `SALE_CAMPAIGN_FRONTEND.md`.
+
 ### Fix Product Price Mismatch between Catalog and Detail Page
 
 - **Date/Time**: 2026-07-08T19:49:00+07:00
@@ -28,6 +30,15 @@
 # Project Status
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
+
+## 2026-07-15
+
+### Triển khai Sale Campaign cho storefront và Management
+- **Date/Time**: 2026-07-15 (Asia/Saigon)
+- **Implementation**: Loại bỏ toàn bộ `salePrice` khỏi contract và màn quản lý Product/Variant; mọi giá giảm giờ đi qua campaign `STANDARD` hoặc `FLASH`. Thêm Management workspace `/dashboard/sales` với danh sách, filter, CSV, editor ba bước chọn nhiều variant, publish/cancel, optimistic version, chỉnh display/tăng quota/kết thúc/end-and-clone theo lifecycle. Thêm storefront `/sale` và `/flash-sale`, banner, countdown theo `serverTime`, quota/giới hạn khách, giá canonical ở product/cart/order snapshot và giải thích coupon. Checkout dùng server preview + `pricingFingerprint`, `Idempotency-Key`, retry lost-response, stable conflict codes, cart refresh, SePay deadline 15 phút + 30 giây grace và command hủy đơn riêng. Cart không giữ stock/quota; sản phẩm Sale bắt buộc chọn đúng variant trước khi thêm.
+- **Documentation**: Thêm `docs/SALE_CAMPAIGN_FRONTEND.md` bằng tiếng Việt, bao gồm nghiệp vụ, cấu trúc code, API, race-condition flow, cache, testing và checklist mở rộng.
+- **Verification**: `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn ngoài feature); TypeScript pass; Vitest 17/17; Playwright Chromium 2/2; `pnpm build` pass và sinh đủ 68 routes gồm ba route admin Sale cùng hai route storefront Sale.
+- **Known Follow-ups**: Không có follow-up FE bắt buộc; các invariant oversell/quota/cancel–IPN–timeout được chứng minh ở test PostgreSQL/Testcontainers phía backend, không phải bằng unit test trình duyệt.
 
 ## 2026-07-14
 

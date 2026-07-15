@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import {
+  BadgePercent,
+  Clock3,
   Heart,
   ChevronUp,
   ChevronDown,
@@ -22,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getActiveLocale } from "@/lib/i18n";
 import { useProductReviewsQuery, useProductVariantsQuery } from "@/lib/queries/catalog";
+import type { ProductVariant as ApiProductVariant } from "@/lib/api/types";
 
 const colorSwatches: Record<string, string> = {
   Black: "bg-[#000000]",
@@ -31,27 +34,6 @@ const colorSwatches: Record<string, string> = {
   Purple: "bg-[#7b2cbf]",
   Orange: "bg-[#f97316]",
 };
-
-interface VariantColorInfo {
-  id: number;
-  name: string;
-}
-
-interface VariantSizeInfo {
-  id: number;
-  name: string;
-}
-
-interface ProductVariant {
-  id: number;
-  sku: string;
-  price: number;
-  salePrice: number | null;
-  stockQuantity: number;
-  color: VariantColorInfo | null;
-  size: VariantSizeInfo | null;
-  status: string;
-}
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -80,8 +62,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
     size: 100,
     locale: activeLocale,
   });
-  const variants = useMemo(
-    () => (variantsQuery.data?.result ?? []) as ProductVariant[],
+  const variants: ApiProductVariant[] = useMemo(
+    () => variantsQuery.data?.result ?? [],
     [variantsQuery.data?.result]
   );
   const reviewsQuery = useProductReviewsQuery({
@@ -197,13 +179,34 @@ export function ProductDetailClient({ product }: { product: Product }) {
     ? activeImage
     : gallery[0]?.src || product.image;
 
-  // Pricing hierarchy: active variant sale price > variant price > static product catalog price
-  const displayPrice = activeVariant ? Number(activeVariant.price) : product.price;
-  const displayOriginalPrice = activeVariant && activeVariant.salePrice 
-    ? Number(activeVariant.price) 
-    : product.originalPrice;
-  const mainPrice = activeVariant && activeVariant.salePrice ? Number(activeVariant.salePrice) : displayPrice;
-  const originalPrice = activeVariant && activeVariant.salePrice ? Number(activeVariant.price) : displayOriginalPrice;
+  // Khi đã chọn được variant, chỉ dùng pricing của chính variant đó. `null`
+  // nghĩa là variant đang ở giá gốc, không được fallback sang campaign rẻ nhất
+  // ở cấp product (campaign đó có thể thuộc một màu/size khác).
+  const activePricing = activeVariant ? activeVariant.pricing : product.pricing;
+  const mainPrice = activePricing?.effectivePrice ?? (activeVariant ? Number(activeVariant.price) : product.price);
+  const originalPrice =
+    activePricing && activePricing.listPrice > activePricing.effectivePrice
+      ? activePricing.listPrice
+      : activeVariant
+        ? undefined
+        : product.originalPrice;
+  const flashSoldOut =
+    activePricing?.priceSource === "FLASH_SALE" &&
+    activePricing.remainingQuota !== null &&
+    activePricing.remainingQuota !== undefined &&
+    activePricing.remainingQuota <= 0;
+  const customerLimitReached =
+    activePricing?.priceSource === "FLASH_SALE" && activePricing.customerRemaining === 0;
+  const noCanonicalAvailability =
+    activePricing?.availableQuantity !== null &&
+    activePricing?.availableQuantity !== undefined &&
+    activePricing.availableQuantity <= 0;
+  const unavailable =
+    !activeVariant ||
+    activeVariant.stockQuantity <= 0 ||
+    noCanonicalAvailability ||
+    flashSoldOut ||
+    customerLimitReached;
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -266,6 +269,39 @@ export function ProductDetailClient({ product }: { product: Product }) {
             </span>
           )}
         </div>
+
+        {activePricing && activePricing.priceSource !== "BASE" ? (
+          <div className="mb-6 rounded-lg border border-[#b5573a]/20 bg-[#fff8f3] p-4 text-xs text-[#1c1a18]/70">
+            <div className="flex items-center gap-2 font-semibold uppercase tracking-[0.14em] text-[#8f2f20]">
+              <BadgePercent className="size-4" />
+              {activePricing?.priceSource === "FLASH_SALE" ? "Flash Sale" : "Standard Sale"}
+              {activePricing?.campaignName ? ` · ${activePricing.campaignName}` : ""}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+              {activePricing?.endsAt ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 className="size-3.5" /> Kết thúc {new Date(activePricing.endsAt).toLocaleString("vi-VN")}
+                </span>
+              ) : null}
+              {activePricing?.priceSource === "FLASH_SALE" && activePricing.remainingQuota != null ? (
+                <span>Còn {Math.max(0, activePricing.remainingQuota)} suất</span>
+              ) : null}
+              {activePricing?.maxPerCustomer ? (
+                <span>
+                  Tối đa {activePricing.maxPerCustomer} sản phẩm/khách
+                  {activePricing.customerRemaining != null
+                    ? ` · Bạn còn ${activePricing.customerRemaining}`
+                    : " · Lượt còn lại xác nhận tại giỏ/checkout"}
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-2 text-[11px] text-[#1c1a18]/50">
+              {activePricing?.priceSource === "FLASH_SALE"
+                ? "Không áp dụng coupon. Thêm vào giỏ chưa giữ quota; giới hạn theo tài khoản được backend xác nhận lại ở giỏ và checkout."
+                : "Có thể áp dụng coupon khi mã đáp ứng điều kiện."}
+            </p>
+          </div>
+        ) : null}
 
         <Separator className="mb-8 bg-[#1c1a18]/10" />
 
@@ -331,15 +367,27 @@ export function ProductDetailClient({ product }: { product: Product }) {
         <div className="flex flex-col gap-3">
           <Button
             type="button"
+            disabled={unavailable}
             onClick={() => {
-              // Construct product with active variant pricing
-              const cartProduct = { ...product, price: mainPrice, variantId: activeVariant?.id };
+              const cartProduct = {
+                ...product,
+                price: mainPrice,
+                originalPrice,
+                pricing: activePricing ?? undefined,
+                variantId: activeVariant?.id,
+              };
               addToCart(cartProduct, resolvedSelectedColor, resolvedSelectedSize);
               showAddedToBag(cartProduct, resolvedSelectedSize, resolvedSelectedColor);
             }}
             className="w-full h-14 bg-black hover:bg-neutral-800 text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-colors cursor-pointer border-none shadow-sm flex items-center justify-center"
           >
-            Thêm vào giỏ
+            {flashSoldOut
+              ? "Đã hết suất Flash"
+              : customerLimitReached
+                ? "Bạn đã đạt giới hạn mua"
+                : activeVariant?.stockQuantity === 0
+                  ? "Hết hàng"
+                  : "Thêm vào giỏ"}
           </Button>
 
           <button

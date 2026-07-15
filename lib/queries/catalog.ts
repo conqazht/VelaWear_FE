@@ -22,6 +22,8 @@ export function useProductsQuery(filters: ProductFilters = {}) {
     queryKey: queryKeys.products.list(filters),
     queryFn: () => getProducts(filters),
     placeholderData: keepPreviousData,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -30,6 +32,9 @@ export function useProductQuery(id: number | string) {
     queryKey: queryKeys.products.detail(id),
     queryFn: () => getProduct(id),
     enabled: Boolean(id),
+    staleTime: 5_000,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -66,6 +71,9 @@ export function useProductVariantsQuery(params: ProductVariantFilters = {}) {
     queryKey: queryKeys.catalog.variants(params),
     queryFn: () => getProductVariants(params),
     enabled: params.productId === undefined || Boolean(params.productId),
+    staleTime: 5_000,
+    refetchInterval: params.productId ? 15_000 : false,
+    refetchOnWindowFocus: true,
   });
 }
 

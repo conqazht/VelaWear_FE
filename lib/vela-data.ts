@@ -1,9 +1,22 @@
+import type { PriceSource, Pricing } from "@/lib/api/types";
+
 export interface CartItem {
   id: string;
   productId?: number;
   productSlug?: string;
   name: string;
   price: number;
+  listPrice?: number;
+  priceSource?: PriceSource;
+  campaignId?: number;
+  campaignItemId?: number;
+  campaignCode?: string;
+  campaignName?: string;
+  campaignEndsAt?: string;
+  remainingQuota?: number;
+  maxPerCustomer?: number;
+  customerRemaining?: number;
+  availableQuantity?: number;
   color: string;
   size: string;
   image: string;
@@ -33,6 +46,7 @@ export interface Product {
   name: string;
   price: number;
   originalPrice?: number;
+  pricing?: Pricing;
   image: string;
   category: string;
   badge?: string;
@@ -359,7 +373,7 @@ export function mapBackendProduct(
     description: string;
     categoryId: number;
     price?: number | null;
-    salePrice?: number | null;
+    pricing?: Pricing | null;
     image?: string | null;
     thumbnail?: string | null;
     status?: string;
@@ -422,10 +436,19 @@ export function mapBackendProduct(
     realId: bp.id,
     name: bp.name,
     description: bp.description || (match ? match.description : ""),
-    price: bp.salePrice ?? bp.price ?? 0,
-    originalPrice: bp.salePrice != null ? bp.price ?? undefined : undefined,
+    price: bp.pricing?.effectivePrice ?? bp.price ?? 0,
+    originalPrice:
+      bp.pricing && bp.pricing.listPrice > bp.pricing.effectivePrice
+        ? bp.pricing.listPrice
+        : undefined,
     image: resolvedMainImg,
-    badge: match ? match.badge : undefined,
+    badge:
+      bp.pricing?.priceSource === "FLASH_SALE"
+        ? "Flash Sale"
+        : bp.pricing?.priceSource === "STANDARD_SALE"
+          ? "Sale"
+          : match?.badge,
+    pricing: bp.pricing ?? undefined,
     color: colorImages[0]?.colorName || (match ? match.color : "Black"),
     size: match ? match.size : "M",
     category: bp.categoryName || (match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN")),

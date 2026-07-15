@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import type { ComponentProps } from "react";
-import { useState, useEffect } from "react";
+import type { FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle2,
   LockKeyhole,
@@ -10,6 +11,8 @@ import {
   AlertTriangle,
   Truck,
   ShoppingBag,
+  AlarmClock,
+  RefreshCw,
 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,9 +30,13 @@ import { money } from "@/lib/vela-data";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   submitCheckout,
+  previewCheckout,
   extractCheckoutError,
   type CheckoutRequest,
+  type CheckoutPreviewRequest,
+  type CheckoutPreviewResponse,
   type CheckoutResponse,
+  type PaymentInitiationResponse,
 } from "@/lib/checkout-api";
 import { checkoutSchema } from "@/lib/validations";
 import {
@@ -43,6 +50,17 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 const CHECKOUT_DETAILS_STORAGE_PREFIX = "vela-checkout-details";
 
+let fallbackIdempotencySequence = 0;
+
+function createCheckoutIdempotencyKey() {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+
+  fallbackIdempotencySequence += 1;
+  return `checkout-fallback-${fallbackIdempotencySequence}`;
+}
+
 function checkoutDetailsStorageKey(userId: number) {
   return `${CHECKOUT_DETAILS_STORAGE_PREFIX}:${userId}`;
 }
@@ -53,7 +71,7 @@ function checkoutDetailsStorageKey(userId: number) {
 
 const PAYMENT_METHODS = [
   { value: "COD" as const, label: "Thanh toán khi nhận hàng (COD)", disabled: false },
-  { value: "BANK_TRANSFER" as const, label: "Chuyển khoản ngân hàng", disabled: false },
+  { value: "SEPAY" as const, label: "Chuyển khoản ngân hàng qua SePay", disabled: false },
 ] as const;
 
 type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
@@ -63,19 +81,30 @@ type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
 // ---------------------------------------------------------------------------
 
 export function CheckoutPageClient() {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, refreshCart } = useCart();
   const { user, isAuthenticated } = useAuth();
 
   const [couponCode, setCouponCode] = useState("");
+  const [appliedCouponCode, setAppliedCouponCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodValue>("COD");
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<CheckoutResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<CheckoutPreviewResponse | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [provinces, setProvinces] = useState<VietnamProvince[]>([]);
   const [wards, setWards] = useState<VietnamWard[]>([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   const [addressApiError, setAddressApiError] = useState<string | null>(null);
+  const previewRequestIdRef = useRef(0);
+  const idempotencyRef = useRef<{
+    key: string;
+    baseSignature: string;
+    request: CheckoutRequest;
+    serverTime: string;
+  } | null>(null);
 
   const {
     register,
@@ -182,13 +211,78 @@ export function CheckoutPageClient() {
 
   const activeItemsList = cart;
 
+  const cartSnapshotKey = useMemo(
+    () =>
+      cart
+        .map((item) => `${item.variantId ?? item.id}:${item.quantity}`)
+        .sort()
+        .join("|"),
+    [cart],
+  );
+
+  const buildPreviewRequest = useCallback(
+    (coupon: string): CheckoutPreviewRequest => {
+      return {
+        paymentMethod,
+        couponCode: coupon || undefined,
+      };
+    },
+    [paymentMethod],
+  );
+
+  const loadPreview = useCallback(
+    async (coupon = appliedCouponCode) => {
+      if (!isAuthenticated || cart.length === 0) return null;
+
+      const requestId = ++previewRequestIdRef.current;
+      setIsPreviewLoading(true);
+      setPreviewError(null);
+      try {
+        const nextPreview = await previewCheckout(buildPreviewRequest(coupon));
+        if (requestId === previewRequestIdRef.current) {
+          setPreview(nextPreview);
+          setCouponError(null);
+        }
+        return nextPreview;
+      } catch (error: unknown) {
+        const checkoutError = extractCheckoutError(error);
+        if (requestId === previewRequestIdRef.current) {
+          if (checkoutError.kind === "invalid_coupon") {
+            setCouponError(checkoutError.message);
+          } else {
+            setPreviewError(checkoutError.message);
+          }
+        }
+        throw error;
+      } finally {
+        if (requestId === previewRequestIdRef.current) setIsPreviewLoading(false);
+      }
+    },
+    [appliedCouponCode, buildPreviewRequest, cart.length, isAuthenticated],
+  );
+
+  useEffect(() => {
+    if (!isAuthenticated || !cartSnapshotKey) return;
+
+    const timeoutId = window.setTimeout(() => {
+      void loadPreview().catch(() => {
+        // Lỗi được hiển thị ngay trong phần tổng tiền.
+      });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [cartSnapshotKey, isAuthenticated, loadPreview, paymentMethod]);
+
   // Client-side estimates for display only — server is authoritative
   const subtotal = activeItemsList.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shippingFee = subtotal >= 500000 ? 0 : 30000;
-  const estimatedTotal = subtotal + shippingFee;
+  const localShippingEstimate = subtotal === 0 ? 0 : 30000;
+  const displayedSubtotal = preview?.subtotal ?? subtotal;
+  const displayedShippingFee = preview?.shippingFee ?? localShippingEstimate;
+  const displayedDiscount = preview?.discountAmount ?? 0;
+  const displayedTotal = preview?.finalAmount ?? subtotal + localShippingEstimate;
 
   const onCompletePurchase = async (data: CheckoutFormValues) => {
     setApiError(null);
@@ -206,17 +300,41 @@ export function CheckoutPageClient() {
     }
 
     try {
-      const request: CheckoutRequest = {
+      const baseRequest: CheckoutRequest = {
         receiverName: `${data.firstName} ${data.lastName}`.trim(),
         receiverPhone: data.phone,
         receiverAddress: [data.address, selectedWard.name, selectedProvince.name].join(", "),
         paymentMethod,
-        shippingFee,
-        couponCode: couponCode.trim() || undefined,
+        couponCode: appliedCouponCode || undefined,
       };
 
-      const response = await submitCheckout(request);
-      setCompletedOrder(response);
+      const baseSignature = JSON.stringify(baseRequest);
+      let attempt = idempotencyRef.current;
+
+      if (!attempt || attempt.baseSignature !== baseSignature) {
+        // Preview ngay trước lần ghi đầu tiên để tổng tiền luôn là dữ liệu mới
+        // nhất từ DB. Nếu phản hồi checkout bị thất lạc, lần thử lại phải gửi
+        // nguyên request + Idempotency-Key cũ (không preview lại trên cart đã
+        // được server xóa sau khi tạo đơn thành công).
+        const latestPreview = await previewCheckout(
+          buildPreviewRequest(appliedCouponCode),
+        );
+        setPreview(latestPreview);
+        attempt = {
+          key: createCheckoutIdempotencyKey(),
+          baseSignature,
+          request: {
+            ...baseRequest,
+            pricingFingerprint: latestPreview.pricingFingerprint,
+          },
+          serverTime: latestPreview.serverTime,
+        };
+        idempotencyRef.current = attempt;
+      }
+
+      const response = await submitCheckout(attempt.request, attempt.key);
+      idempotencyRef.current = null;
+      setCompletedOrder({ ...response, serverTime: attempt.serverTime });
       setOrderCompleted(true);
       if (user) {
         try {
@@ -237,7 +355,24 @@ export function CheckoutPageClient() {
       } else {
         setApiError(checkoutErr.message);
       }
+
+      if (
+        checkoutErr.status === 409 ||
+        checkoutErr.kind === "price_changed" ||
+        checkoutErr.kind === "flash_sold_out" ||
+        checkoutErr.kind === "flash_ended" ||
+        checkoutErr.kind === "customer_limit" ||
+        checkoutErr.kind === "insufficient_stock"
+      ) {
+        idempotencyRef.current = null;
+        await refreshCart().catch(() => undefined);
+        await loadPreview().catch(() => undefined);
+      }
     }
+  };
+
+  const onCheckoutFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    void handleSubmit(onCompletePurchase)(event);
   };
 
   if (!isAuthenticated) {
@@ -302,6 +437,18 @@ export function CheckoutPageClient() {
               </strong>
             </span>
           </div>
+          {completedOrder.paymentDueAt ? (
+            <PaymentDeadline
+              paymentDueAt={completedOrder.paymentDueAt}
+              reservationExpiresAt={completedOrder.reservationExpiresAt}
+              serverTime={completedOrder.serverTime}
+              paymentInitiation={completedOrder.paymentInitiation}
+            />
+          ) : (
+            <PaymentContinuationForm
+              paymentInitiation={completedOrder.paymentInitiation}
+            />
+          )}
           <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
           <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
             Thông tin giao nhận sẽ được cập nhật qua email{" "}
@@ -355,11 +502,27 @@ export function CheckoutPageClient() {
       </div>
 
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-        <form onSubmit={handleSubmit(onCompletePurchase)} className="space-y-10 lg:col-span-7">
+        <form onSubmit={onCheckoutFormSubmit} className="space-y-10 lg:col-span-7">
           {apiError && (
             <div className="flex items-start gap-3 rounded border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
               <span>{apiError}</span>
+            </div>
+          )}
+
+          {previewError && (
+            <div className="flex items-start justify-between gap-3 rounded border border-amber-500/25 bg-amber-50 p-3 text-sm text-amber-800">
+              <span className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                {previewError}
+              </span>
+              <button
+                type="button"
+                onClick={() => void loadPreview().catch(() => undefined)}
+                className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold underline"
+              >
+                <RefreshCw className="size-3" /> Thử lại
+              </button>
             </div>
           )}
 
@@ -516,7 +679,7 @@ export function CheckoutPageClient() {
 
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isPreviewLoading}
             className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c] disabled:opacity-50"
           >
             {isSubmitting ? (
@@ -550,10 +713,22 @@ export function CheckoutPageClient() {
                   <p className="mt-1 truncate text-[9px] uppercase tracking-widest text-[#1c1a18]/50">
                     Qty {item.quantity} / {item.size || "M"} / {item.color || "Oat"}
                   </p>
+                  {item.priceSource && item.priceSource !== "BASE" ? (
+                    <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#8f2f20]">
+                      {item.priceSource === "FLASH_SALE" ? "Flash Sale" : "Standard Sale"}
+                    </p>
+                  ) : null}
                 </div>
-                <span className="font-serif text-xs font-semibold text-[#1c1a18] font-numeric">
-                  {money(item.price * item.quantity)}
-                </span>
+                <div className="text-right">
+                  {item.listPrice && item.listPrice > item.price ? (
+                    <span className="block text-[9px] text-[#1c1a18]/35 line-through">
+                      {money(item.listPrice * item.quantity)}
+                    </span>
+                  ) : null}
+                  <span className="font-serif text-xs font-semibold text-[#1c1a18] font-numeric">
+                    {money(item.price * item.quantity)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -572,48 +747,70 @@ export function CheckoutPageClient() {
               />
               <Button
                 type="button"
+                disabled={isPreviewLoading}
                 onClick={() => {
-                  if (couponCode.trim()) {
-                    setCouponError(null);
+                  const normalizedCoupon = couponCode.trim().toUpperCase();
+                  setCouponError(null);
+                  if (normalizedCoupon === appliedCouponCode) {
+                    void loadPreview(normalizedCoupon).catch(() => undefined);
+                  } else {
+                    // Thay đổi state sẽ kích hoạt đúng một lần preview qua effect.
+                    setAppliedCouponCode(normalizedCoupon);
                   }
                 }}
                 className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c]"
               >
-                Apply
+                {isPreviewLoading ? "Đang kiểm tra" : appliedCouponCode ? "Cập nhật" : "Áp dụng"}
               </Button>
             </div>
             {couponError && (
               <p className="mt-2 text-xs text-red-600">{couponError}</p>
             )}
-            {couponCode.trim() && !couponError && (
+            {appliedCouponCode && !couponError && (
               <p className="mt-2 text-xs text-[#1c1a18]/50">
-                Mã &ldquo;{couponCode.trim().toUpperCase()}&rdquo; sẽ được áp dụng khi đặt hàng.
+                Mã &ldquo;{appliedCouponCode}&rdquo; đã được server kiểm tra trong bản tạm tính.
               </p>
             )}
+            {activeItemsList.some((item) => item.priceSource === "FLASH_SALE") ? (
+              <p className="mt-2 text-xs leading-5 text-amber-700">
+                Coupon không áp dụng lên sản phẩm Flash Sale. Các sản phẩm BASE/Standard
+                đủ điều kiện vẫn được tính riêng.
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-4 border-t border-[#1c1a18]/5 pt-6 text-xs tracking-wide">
-            <LedgerRow label="Subtotal" value={money(subtotal)} />
+            <LedgerRow label="Tạm tính" value={money(displayedSubtotal)} />
             <LedgerRow
-              label="Shipping"
-              value={shippingFee === 0 ? "Complimentary" : money(shippingFee)}
+              label="Phí vận chuyển"
+              value={displayedShippingFee === 0 ? "Miễn phí" : money(displayedShippingFee)}
             />
-            {couponCode.trim() && (
+            {appliedCouponCode && (
               <LedgerRow
-                label="Coupon"
-                value={couponCode.trim().toUpperCase()}
+                label={`Coupon (${appliedCouponCode})`}
+                value={`-${money(displayedDiscount)}`}
                 highlight
               />
             )}
+            {preview && appliedCouponCode ? (
+              <LedgerRow
+                label="Phần giá trị đủ điều kiện coupon"
+                value={money(preview.couponEligibleSubtotal)}
+              />
+            ) : null}
             <Separator className="my-4 bg-[#1c1a18]/10" />
             <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
-              <span>Estimated Total</span>
+              <span>{preview ? "Tổng tiền từ hệ thống" : "Tổng tiền tạm tính"}</span>
               <span className="font-serif text-lg tracking-wider text-[#b85a3c] font-numeric">
-                {money(estimatedTotal)}
+                {money(displayedTotal)}
               </span>
             </div>
             <p className="text-[10px] leading-relaxed text-[#1c1a18]/40">
-              Giảm giá (nếu có) sẽ được áp dụng sau khi xác nhận mã coupon bởi hệ thống.
+              {isPreviewLoading
+                ? "Đang đối chiếu giá, tồn kho và quota mới nhất..."
+                : preview
+                  ? "Giá cuối cùng vẫn được kiểm tra nguyên tử khi tạo đơn; thêm vào giỏ không giữ suất Flash Sale."
+                  : "Đây chỉ là ước tính trên trình duyệt. Hệ thống sẽ kiểm tra lại trước khi tạo đơn."}
             </p>
           </div>
         </Card>
@@ -688,4 +885,112 @@ function AddressSelectLoadingFixture({ label }: { label: string }) {
       {label}
     </div>
   );
+}
+
+function PaymentDeadline({
+  paymentDueAt,
+  reservationExpiresAt,
+  serverTime,
+  paymentInitiation,
+}: {
+  paymentDueAt: string;
+  reservationExpiresAt?: string | null;
+  serverTime?: string | null;
+  paymentInitiation?: PaymentInitiationResponse | null;
+}) {
+  const [clockOrigin] = useState(() => {
+    const clientTime = Date.now();
+    const parsedServerTime = serverTime ? Date.parse(serverTime) : Number.NaN;
+    const serverOffset = Number.isFinite(parsedServerTime)
+      ? parsedServerTime - clientTime
+      : 0;
+
+    return {
+      serverOffset,
+      initialNow: clientTime + serverOffset,
+    };
+  });
+  const [now, setNow] = useState(clockOrigin.initialNow);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(
+      () => setNow(Date.now() + clockOrigin.serverOffset),
+      1_000,
+    );
+    return () => window.clearInterval(intervalId);
+  }, [clockOrigin.serverOffset]);
+
+  const dueTimestamp = Date.parse(paymentDueAt);
+  const releaseTimestamp = reservationExpiresAt
+    ? Date.parse(reservationExpiresAt)
+    : dueTimestamp;
+  const remainingPaymentMs = Math.max(0, dueTimestamp - now);
+  const remainingGraceMs = Math.max(0, releaseTimestamp - now);
+  const isPastPaymentDue = now >= dueTimestamp;
+  const isReleased = now >= releaseTimestamp;
+
+  return (
+    <>
+      <div
+        className={`mb-6 w-full rounded border p-4 text-left ${
+          isReleased
+            ? "border-red-200 bg-red-50 text-red-800"
+            : "border-amber-200 bg-amber-50 text-amber-900"
+        }`}
+      >
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+          <AlarmClock className="size-4" />
+          {isReleased
+            ? "Đã hết thời gian giữ hàng"
+            : isPastPaymentDue
+              ? "Đang trong thời gian gia hạn xác nhận"
+              : "Thời gian thanh toán còn lại"}
+        </div>
+        <p className="mt-2 font-mono text-2xl font-semibold tabular-nums">
+          {formatRemainingTime(isPastPaymentDue ? remainingGraceMs : remainingPaymentMs)}
+        </p>
+        <p className="mt-2 text-[11px] leading-5 opacity-75">
+          {isReleased
+            ? "Tồn kho, quota và lượt mua đã được nhả. Giao dịch đến muộn sẽ không tự khôi phục đơn."
+            : `Thanh toán trước ${new Date(dueTimestamp).toLocaleTimeString("vi-VN")}. Hệ thống có thêm 30 giây để nhận thông báo thanh toán trước khi nhả tài nguyên.`}
+        </p>
+      </div>
+      {!isReleased ? (
+        <PaymentContinuationForm paymentInitiation={paymentInitiation} />
+      ) : null}
+    </>
+  );
+}
+
+function PaymentContinuationForm({
+  paymentInitiation,
+}: {
+  paymentInitiation?: PaymentInitiationResponse | null;
+}) {
+  if (!paymentInitiation?.actionUrl) return null;
+
+  return (
+    <form
+      action={paymentInitiation.actionUrl}
+      method={paymentInitiation.method.toLowerCase()}
+      className="mb-6 w-full"
+    >
+      {Object.entries(paymentInitiation.fields ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+      <Button
+        type="submit"
+        className="w-full rounded-sm bg-[#8f2f20] py-3 text-xs font-bold uppercase tracking-[0.15em] text-white hover:bg-[#6f2318]"
+      >
+        Tiếp tục thanh toán
+      </Button>
+    </form>
+  );
+}
+
+function formatRemainingTime(milliseconds: number) {
+  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1_000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }

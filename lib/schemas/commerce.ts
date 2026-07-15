@@ -4,9 +4,10 @@ export const checkoutSchema = z.object({
   receiverName: z.string().min(2, "Vui lòng nhập tên người nhận."),
   receiverPhone: z.string().min(8, "Số điện thoại không hợp lệ."),
   receiverAddress: z.string().min(8, "Vui lòng nhập địa chỉ giao hàng."),
-  paymentMethod: z.enum(["COD", "VNPAY", "MOMO", "BANK_TRANSFER"]),
-  shippingFee: z.number().nonnegative(),
+  paymentMethod: z.enum(["COD", "SEPAY"]),
+  shippingFee: z.number().nonnegative().optional(),
   couponCode: z.string().optional(),
+  pricingFingerprint: z.string().optional(),
 });
 
 export const userAddressSchema = z.object({

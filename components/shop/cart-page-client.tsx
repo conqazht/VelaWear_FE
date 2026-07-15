@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Skeleton } from "boneyard-js/react";
-import { ArrowRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,9 +17,9 @@ import { useCartStore } from "@/store/cart-store";
 export function CartPageClient() {
   const { cart, subtotal, updateQuantity, removeItem } = useCart();
   const hasHydrated = useCartHydration();
-  const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
-  const taxes = subtotal * 0.08;
-  const total = subtotal + shipping + taxes;
+  const shipping = subtotal === 0 ? 0 : 30000;
+  const total = subtotal + shipping;
+  const hasFlashItem = cart.some((item) => item.priceSource === "FLASH_SALE");
 
   return (
     <Skeleton
@@ -74,6 +74,17 @@ export function CartPageClient() {
       ) : (
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 min-h-[80vh]">
           <div className="space-y-6 lg:col-span-8">
+            {hasFlashItem ? (
+              <div className="flex gap-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                <AlertTriangle className="mt-0.5 size-5 shrink-0" />
+                <div>
+                  <p className="font-semibold">Sản phẩm Flash trong giỏ chưa được giữ chỗ</p>
+                  <p className="mt-1 text-xs leading-5 text-amber-900/75">
+                    Stock, quota và giới hạn khách sẽ được kiểm tra lại khi bạn đặt hàng.
+                  </p>
+                </div>
+              </div>
+            ) : null}
             {cart.map((item) => (
               <Card
                 key={`${item.id}-${item.color}-${item.size}`}
@@ -96,9 +107,16 @@ export function CartPageClient() {
                       >
                         {item.name}
                       </Link>
-                      <span className="whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
-                        {money(item.price * item.quantity)}
-                      </span>
+                      <div className="text-right">
+                        <span className="block whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
+                          {money(item.price * item.quantity)}
+                        </span>
+                        {item.listPrice && item.listPrice > item.price ? (
+                          <span className="text-xs text-[#1c1a18]/35 line-through">
+                            {money(item.listPrice * item.quantity)}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                     <p className="mt-2 flex gap-4 text-[11px] uppercase tracking-wider text-[#1c1a18]/60">
                       <span>
@@ -110,6 +128,22 @@ export function CartPageClient() {
                         <strong className="text-[#1c1a18]">{item.size}</strong>
                       </span>
                     </p>
+                    {item.priceSource && item.priceSource !== "BASE" ? (
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                        <span className={item.priceSource === "FLASH_SALE" ? "rounded bg-[#8f2f20] px-2 py-1 text-white" : "rounded bg-[#1c1a18] px-2 py-1 text-white"}>
+                          {item.priceSource === "FLASH_SALE" ? "Flash Sale" : "Standard Sale"}
+                        </span>
+                        {item.campaignName ? <span className="text-[#1c1a18]/50">{item.campaignName}</span> : null}
+                        {item.priceSource === "FLASH_SALE" && item.remainingQuota != null ? (
+                          <span className="text-[#8f2f20]">Còn {item.remainingQuota} suất</span>
+                        ) : null}
+                        {item.priceSource === "FLASH_SALE" && item.customerRemaining != null ? (
+                          <span className="text-[#8f2f20]">
+                            Bạn còn được mua {item.customerRemaining}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="mt-6 flex items-center justify-between border-t border-[#1c1a18]/5 pt-4">
@@ -133,6 +167,7 @@ export function CartPageClient() {
                         variant="ghost"
                         size="icon"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        disabled={getCartItemMaximum(item) !== null && item.quantity >= (getCartItemMaximum(item) as number)}
                         aria-label="Increase quantity"
                         className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
                       >
@@ -172,12 +207,6 @@ export function CartPageClient() {
                   {shipping === 0 ? "Complimentary" : money(shipping)}
                 </span>
               </div>
-              <div className="flex justify-between text-[#1c1a18]/65">
-                <span>Estimated Taxes (8%)</span>
-                <span className="font-semibold text-[#1c1a18] font-numeric">
-                  {money(taxes)}
-                </span>
-              </div>
               <Separator className="my-6 bg-[#1c1a18]/10" />
               <div className="flex justify-between text-sm font-semibold text-[#1c1a18] md:text-base">
                 <span>Total Amount</span>
@@ -204,7 +233,7 @@ export function CartPageClient() {
             </Link>
 
             <p className="mt-4 text-center text-[10px] uppercase leading-relaxed tracking-widest text-[#1c1a18]/50">
-              Miễn phí giao hàng cho đơn từ 500,000đ
+              Tổng tiền tại đây là tạm tính; checkout sẽ xác nhận lại giá, coupon và tồn kho.
             </p>
           </Card>
         </div>
@@ -220,6 +249,13 @@ export function CartPageClient() {
       </div>
     </Skeleton>
   );
+}
+
+function getCartItemMaximum(item: (ReturnType<typeof useCart>["cart"])[number]) {
+  const limits = [item.availableQuantity, item.remainingQuota, item.customerRemaining].filter(
+    (value): value is number => typeof value === "number" && value >= 0,
+  );
+  return limits.length > 0 ? Math.min(...limits) : null;
 }
 
 function useCartHydration() {

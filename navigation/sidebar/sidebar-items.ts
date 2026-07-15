@@ -1,5 +1,6 @@
 import {
   Banknote,
+  BadgePercent,
   Calendar,
   ChartBar,
   CheckSquare,
@@ -114,6 +115,12 @@ export const sidebarItems: NavGroup[] = [
         title: "Orders",
         url: "/dashboard/orders",
         icon: ClipboardList,
+      },
+      {
+        id: "sales",
+        title: "Sale Campaigns",
+        url: "/dashboard/sales",
+        icon: BadgePercent,
       },
       {
         id: "coupons",

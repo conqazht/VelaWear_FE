@@ -6,6 +6,7 @@ import { CartItem, Product, resolveImageUrl } from "@/lib/vela-data";
 import { useAuth } from "@/components/auth/auth-provider";
 import { getMyCart, replaceMyCartItems } from "@/lib/api/commerce";
 import { getProductVariants } from "@/lib/api/catalog";
+import type { CartApiItem } from "@/lib/api/types";
 import { useCartStore } from "@/store/cart-store";
 
 interface CartContextValue {
@@ -16,9 +17,63 @@ interface CartContextValue {
   updateQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
+  refreshCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
+
+function mapServerCartItems(items: CartApiItem[] = []): CartItem[] {
+  return items.map((item) => {
+    const pricing = item.pricing;
+
+    return {
+      id: `variant-${item.variantId}`,
+      productId: item.productId ?? undefined,
+      productSlug: item.productSlug ?? undefined,
+      name: item.productName,
+      price: Number(item.price ?? pricing?.effectivePrice ?? 0),
+      listPrice:
+        item.listPrice == null && pricing?.listPrice == null
+          ? undefined
+          : Number(item.listPrice ?? pricing?.listPrice),
+      priceSource: pricing?.priceSource ?? item.priceSource,
+      campaignId: pricing?.campaignId ?? item.campaignId ?? undefined,
+      campaignItemId:
+        pricing?.campaignItemId ?? item.campaignItemId ?? undefined,
+      campaignCode: pricing?.campaignCode ?? item.campaignCode ?? undefined,
+      campaignName: pricing?.campaignName ?? item.campaignName ?? undefined,
+      campaignEndsAt: pricing?.endsAt ?? item.campaignEndsAt ?? undefined,
+      remainingQuota:
+        pricing?.remainingQuota ?? item.remainingQuota ?? undefined,
+      maxPerCustomer:
+        pricing?.maxPerCustomer ?? item.maxPerCustomer ?? undefined,
+      customerRemaining:
+        pricing?.customerRemaining ?? item.customerRemaining ?? undefined,
+      availableQuantity:
+        pricing?.availableQuantity ?? item.availableQuantity ?? undefined,
+      color: item.color ?? "Default",
+      size: item.size ?? "Default",
+      image: resolveImageUrl(item.image),
+      quantity: item.quantity,
+      variantId: item.variantId,
+    };
+  });
+}
+
+function cartSignature(items: CartItem[]) {
+  return items
+    .map((item) => [
+      item.variantId ?? item.id,
+      item.quantity,
+      item.price,
+      item.priceSource ?? "BASE",
+      item.campaignItemId ?? "",
+      item.remainingQuota ?? "",
+      item.customerRemaining ?? "",
+    ].join(":"))
+    .sort()
+    .join("|");
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
@@ -30,6 +85,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
   const syncedUserIdRef = useRef<number | null>(null);
+
+  const refreshCart = useCallback(async () => {
+    if (!isAuthenticated || !user) return;
+
+    const serverCart = await getMyCart();
+    const unresolvedItems = useCartStore
+      .getState()
+      .cart.filter((item) => item.variantId === undefined);
+    setCart([...mapServerCartItems(serverCart.items), ...unresolvedItems]);
+  }, [isAuthenticated, setCart, user]);
 
   const addToCart = useCallback((product: Product, color = product.color, size = product.size) => {
     addToLocalCart(product, color, size);
@@ -59,18 +124,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     void getMyCart()
       .then(async (serverCart) => {
-        const serverItems: CartItem[] = (serverCart.items ?? []).map((item) => ({
-          id: `variant-${item.variantId}`,
-          productId: item.productId ?? undefined,
-          productSlug: item.productSlug ?? undefined,
-          name: item.productName,
-          price: Number(item.price ?? 0),
-          color: item.color ?? "Default",
-          size: item.size ?? "Default",
-          image: resolveImageUrl(item.image),
-          quantity: item.quantity,
-          variantId: item.variantId,
-        }));
+        const serverItems = mapServerCartItems(serverCart.items);
         const serverVariantIds = new Set(serverItems.map((item) => item.variantId));
         const mergedCart = [
           ...serverItems,
@@ -79,15 +133,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ),
         ];
 
-        await replaceMyCartItems({
+        const canonicalCart = await replaceMyCartItems({
           items: mergedCart
             .filter((item): item is CartItem & { variantId: number } => item.variantId !== undefined)
             .map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
         });
 
         if (!cancelled) {
+          const unresolvedItems = mergedCart.filter((item) => item.variantId === undefined);
           syncedUserIdRef.current = user.id;
-          setCart(mergedCart);
+          setCart([...mapServerCartItems(canonicalCart.items), ...unresolvedItems]);
         }
       })
       .catch(() => {
@@ -107,11 +162,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         items: cart
           .filter((item): item is CartItem & { variantId: number } => item.variantId !== undefined)
           .map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
+      }).then((canonicalCart) => {
+        const canonicalItems = mapServerCartItems(canonicalCart.items);
+        const unresolvedItems = useCartStore
+          .getState()
+          .cart.filter((item) => item.variantId === undefined);
+        const nextCart = [...canonicalItems, ...unresolvedItems];
+
+        if (cartSignature(nextCart) !== cartSignature(useCartStore.getState().cart)) {
+          setCart(nextCart);
+        }
+      }).catch(() => {
+        // Checkout remains authoritative; transient cart sync failures are surfaced there.
       });
     }, 250);
 
     return () => window.clearTimeout(timeoutId);
-  }, [cart, user]);
+  }, [cart, setCart, user]);
 
   const value = useMemo<CartContextValue>(() => {
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -128,8 +195,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateQuantity,
       removeItem,
       clearCart,
+      refreshCart,
     };
-  }, [addToCart, cart, clearCart, removeItem, updateQuantity]);
+  }, [addToCart, cart, clearCart, refreshCart, removeItem, updateQuantity]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

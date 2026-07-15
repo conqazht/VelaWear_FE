@@ -14,7 +14,6 @@ export type ProductVariantFormValue = {
   id?: number;
   sku: string;
   price: string;
-  salePrice: string;
   stockQuantity: string;
   colorId: string;
   sizeId: string;
@@ -26,7 +25,6 @@ export function createEmptyProductVariant(key: string): ProductVariantFormValue 
     key,
     sku: "",
     price: "",
-    salePrice: "",
     stockQuantity: "0",
     colorId: "",
     sizeId: "",
@@ -199,20 +197,6 @@ export function ProductVariantsForm({
                   onChange={(event) => updateVariant(index, "price", event.target.value)}
                   placeholder="0"
                   required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-sale-price`}>Sale price</FieldLabel>
-                <Input
-                  id={`variant-${variant.key}-sale-price`}
-                  type="number"
-                  min="0"
-                  step="1000"
-                  inputMode="decimal"
-                  value={variant.salePrice}
-                  onChange={(event) => updateVariant(index, "salePrice", event.target.value)}
-                  placeholder="Optional"
                 />
               </Field>
 
