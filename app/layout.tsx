@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import React from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
-import { BoneyardRegistry } from "@/components/providers/boneyard-registry";
 import { I18nProvider } from "@/components/providers/i18n-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { CartProvider } from "@/components/shop/cart-provider";
@@ -34,7 +33,6 @@ export default function RootLayout({
     >
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOTSTRAP_SCRIPT }} />
-        <BoneyardRegistry />
         <React.Suspense fallback={null}>
           <LocalizedAppProviders>{children}</LocalizedAppProviders>
         </React.Suspense>

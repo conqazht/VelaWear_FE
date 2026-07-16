@@ -2,8 +2,8 @@
 
 import { motion } from "motion/react";
 
-import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function AuthLoader({
   message,
@@ -18,7 +18,7 @@ export function AuthLoader({
 
   return (
     <main className="relative grid min-h-[100dvh] place-items-center bg-white px-6">
-      <LanguageSwitcher className="absolute right-5 top-5 z-10" />
+      <Skeleton className="absolute right-5 top-5 z-10 size-8 rounded-full bg-[#1c1a18]/10" aria-hidden="true" />
       <div className="flex flex-col items-center gap-10">
         <div className="flex flex-col items-center">
           <motion.div

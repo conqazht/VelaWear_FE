@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
-import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
@@ -34,7 +33,7 @@ function AdminSessionLoadingFrame() {
         <header className="flex h-12 items-center justify-between border-b px-4 lg:px-6">
           <Skeleton className="h-7 w-40" />
           <div className="flex items-center gap-2">
-            <LanguageSwitcher presentation="popover" />
+            <Skeleton className="size-8 rounded-full" />
             <Skeleton className="size-8" />
             <Skeleton className="size-8" />
           </div>
@@ -68,22 +67,12 @@ function AdminSessionLoadingFrame() {
   );
 }
 
-function AdminSessionSkeleton() {
-  const frame = <AdminSessionLoadingFrame />;
-
-  return (
-    <BoneyardSkeleton name="admin-session" loading fallback={frame} fixture={frame}>
-      {frame}
-    </BoneyardSkeleton>
-  );
-}
-
 export function AdminAuthGate({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { t } = useI18n();
 
   if (isLoading) {
-    return <AdminSessionSkeleton />;
+    return <AdminSessionLoadingFrame />;
   }
 
   if (!isAuthenticated) {

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
 import type { LucideIcon } from "lucide-react";
 import { Download, Plus, RefreshCw, Search } from "lucide-react";
 
@@ -327,13 +326,5 @@ export function ResourcePage<T extends { id: number }>({
     </Card>
   );
 
-  return (
-    <BoneyardSkeleton
-      name="management-resource-page"
-      loading={isLoading}
-      fixture={content}
-    >
-      {content}
-    </BoneyardSkeleton>
-  );
+  return content;
 }

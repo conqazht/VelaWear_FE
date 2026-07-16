@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton } from "boneyard-js/react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { setClientCookie } from "@/lib/cookie.client";
 
 import { type Mail, mailsByLocale } from "./data";
@@ -40,17 +40,7 @@ export function MailComponent({ defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: Mail
   );
 
   if (!isMounted) {
-    return (
-      <Skeleton
-        name="mail-layout"
-        loading
-        className="size-full"
-        fallback={<MailLoadingFallback />}
-        fixture={<MailLoadingFixture />}
-      >
-        <MailLoadingFixture />
-      </Skeleton>
-    );
+    return <MailLoadingSkeleton />;
   }
 
   return isMobile ? (
@@ -60,28 +50,44 @@ export function MailComponent({ defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: Mail
   );
 }
 
-function MailLoadingFallback() {
-  return <div className="size-full rounded-lg bg-muted" aria-hidden="true" />;
-}
-
-function MailLoadingFixture() {
-  const { t } = useI18n();
-
+function MailLoadingSkeleton() {
   return (
-    <div className="grid size-full grid-cols-[18rem_1fr] overflow-hidden rounded-lg border">
+    <div
+      className="grid size-full min-h-0 overflow-hidden rounded-lg border md:grid-cols-[18rem_1fr]"
+      aria-hidden="true"
+    >
       <aside className="space-y-4 border-r p-4">
-        <h2 className="text-xl font-semibold">
-          {t("admin.communications.mail.loading.inbox")}
-        </h2>
-        <div className="h-16 rounded border" />
-        <div className="h-16 rounded border" />
+        <Skeleton className="h-7 w-24" />
+        <Skeleton className="h-9 w-full rounded-md" />
+        <div className="space-y-2">
+          {Array.from({ length: 5 }, (_, index) => (
+            <div key={index} className="flex gap-3 rounded-md border p-3">
+              <Skeleton className="size-9 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className={index % 2 === 0 ? "h-3 w-3/5" : "h-3 w-2/5"} />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
+              </div>
+            </div>
+          ))}
+        </div>
       </aside>
-      <main className="space-y-6 p-8">
-        <h2 className="text-2xl font-semibold">
-          {t("admin.communications.mail.loading.subject")}
-        </h2>
+      <main className="hidden min-w-0 space-y-6 p-8 md:block">
+        <div className="flex items-start justify-between gap-6">
+          <div className="space-y-3">
+            <Skeleton className="h-7 w-64 max-w-full" />
+            <Skeleton className="h-3 w-40" />
+          </div>
+          <Skeleton className="size-8 rounded-full" />
+        </div>
         <div className="h-px bg-border" />
-        <p>{t("admin.communications.mail.loading.preview")}</p>
+        <div className="space-y-3">
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-11/12" />
+          <Skeleton className="h-3 w-4/5" />
+          <Skeleton className="mt-6 h-3 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+        </div>
       </main>
     </div>
   );

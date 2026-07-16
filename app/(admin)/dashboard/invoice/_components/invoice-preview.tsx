@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton } from "boneyard-js/react";
 
 import { Download, Printer } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { INVOICE_PAPER_HEIGHT, INVOICE_PAPER_SCALE, INVOICE_PAPER_WIDTH, type InvoiceFormValues } from "./data";
 import { InvoicePaper } from "./invoice-paper";
@@ -50,15 +50,9 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
           className="@container/preview relative min-h-[calc(100svh-15rem)] flex-1 rounded-b-xl bg-stone-200 p-4 dark:bg-stone-800"
         >
           {paperLayout === null ? (
-            <Skeleton
-              name="invoice-preview"
-              loading
-              className="absolute inset-4"
-              fallback={<InvoicePreviewLoadingFallback />}
-              fixture={<InvoicePreviewLoadingFixture />}
-            >
-              <InvoicePreviewLoadingFixture />
-            </Skeleton>
+            <div className="absolute inset-4">
+              <InvoicePreviewLoading />
+            </div>
           ) : null}
           <div
             style={{
@@ -85,22 +79,60 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
   );
 }
 
-function InvoicePreviewLoadingFallback() {
-  return <div className="mx-auto h-full max-w-[min(100%,48rem)] rounded-sm bg-white" aria-hidden="true" />;
-}
-
-function InvoicePreviewLoadingFixture() {
-  const { t } = useI18n();
-
+function InvoicePreviewLoading() {
   return (
-    <article className="mx-auto min-h-full max-w-[min(100%,48rem)] space-y-8 rounded-sm bg-white p-10">
-      <h2 className="text-3xl font-semibold">{t("admin.workflows.invoice.invoice")}</h2>
-      <div className="h-px bg-border" />
+    <article
+      className="mx-auto flex h-full max-w-[min(100%,48rem)] flex-col overflow-hidden rounded-sm bg-white p-6 sm:p-10"
+      aria-hidden="true"
+    >
+      <div className="flex items-start justify-between gap-8">
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-36 bg-stone-200" />
+          <Skeleton className="h-3 w-24 bg-stone-200" />
+        </div>
+        <div className="space-y-2 text-right">
+          <Skeleton className="ml-auto h-3 w-28 bg-stone-200" />
+          <Skeleton className="ml-auto h-3 w-20 bg-stone-200" />
+        </div>
+      </div>
+
+      <div className="my-7 h-px bg-stone-200" />
+
       <section className="grid grid-cols-2 gap-8">
-        <p>{t("admin.workflows.invoice.billTo")}</p>
-        <p>{t("admin.workflows.invoice.invoiceDetails")}</p>
+        {Array.from({ length: 2 }, (_, index) => (
+          <div key={index} className="space-y-3">
+            <Skeleton className="h-3 w-20 bg-stone-200" />
+            <Skeleton className="h-4 w-36 max-w-full bg-stone-200" />
+            <Skeleton className="h-3 w-44 max-w-full bg-stone-200" />
+          </div>
+        ))}
       </section>
-      <div className="h-64 rounded border" />
+
+      <div className="mt-8 overflow-hidden rounded-sm border border-stone-200">
+        <div className="grid grid-cols-[1fr_5rem_6rem] gap-4 bg-stone-100 p-3">
+          <Skeleton className="h-3 w-24 bg-stone-200" />
+          <Skeleton className="h-3 w-10 bg-stone-200" />
+          <Skeleton className="h-3 w-14 bg-stone-200" />
+        </div>
+        {Array.from({ length: 5 }, (_, index) => (
+          <div key={index} className="grid grid-cols-[1fr_5rem_6rem] gap-4 border-t border-stone-100 p-3">
+            <Skeleton className="h-3 w-3/4 bg-stone-200" />
+            <Skeleton className="h-3 w-8 bg-stone-200" />
+            <Skeleton className="h-3 w-16 bg-stone-200" />
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-7 ml-auto w-52 max-w-full space-y-3">
+        <div className="flex justify-between gap-4">
+          <Skeleton className="h-3 w-20 bg-stone-200" />
+          <Skeleton className="h-3 w-16 bg-stone-200" />
+        </div>
+        <div className="flex justify-between gap-4 border-t border-stone-200 pt-3">
+          <Skeleton className="h-4 w-16 bg-stone-200" />
+          <Skeleton className="h-4 w-20 bg-stone-200" />
+        </div>
+      </div>
     </article>
   );
 }

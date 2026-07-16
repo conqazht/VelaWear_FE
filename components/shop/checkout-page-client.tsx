@@ -16,12 +16,12 @@ import {
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Skeleton } from "boneyard-js/react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { FieldLabel } from "@/components/shop/field-label";
 import { useCart } from "@/components/shop/cart-provider";
@@ -643,31 +643,27 @@ export function CheckoutPageClient() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <FieldLabel>{t("checkout.province")}</FieldLabel>
-                  <Skeleton
-                    name="checkout-province-select"
-                    loading={isLoadingProvinces}
-                    fallback={<AddressSelectLoadingFallback />}
-                    fixture={<AddressSelectLoadingFixture label={t("checkout.selectProvince")} />}
-                  >
-                  <select
-                    autoComplete="address-level1"
-                    disabled={isLoadingProvinces}
-                    {...register("provinceCode", {
-                      onChange: () => {
-                        setValue("wardCode", "");
-                        setWards([]);
-                      },
-                    })}
-                    className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <option value="">{t("checkout.selectProvince")}</option>
-                    {provinces.map((province) => (
-                      <option key={province.code} value={province.code}>
-                        {province.name}
-                      </option>
-                    ))}
-                  </select>
-                  </Skeleton>
+                  {isLoadingProvinces ? (
+                    <AddressSelectLoading />
+                  ) : (
+                    <select
+                      autoComplete="address-level1"
+                      {...register("provinceCode", {
+                        onChange: () => {
+                          setValue("wardCode", "");
+                          setWards([]);
+                        },
+                      })}
+                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <option value="">{t("checkout.selectProvince")}</option>
+                      {provinces.map((province) => (
+                        <option key={province.code} value={province.code}>
+                          {province.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   {errors.provinceCode?.message && (
                     <p className="text-xs text-red-600">{errors.provinceCode.message}</p>
                   )}
@@ -675,26 +671,23 @@ export function CheckoutPageClient() {
 
                 <div className="space-y-2">
                   <FieldLabel>{t("checkout.ward")}</FieldLabel>
-                  <Skeleton
-                    name="checkout-ward-select"
-                    loading={isLoadingWards}
-                    fallback={<AddressSelectLoadingFallback />}
-                    fixture={<AddressSelectLoadingFixture label={t("checkout.selectWard")} />}
-                  >
-                  <select
-                    autoComplete="address-level2"
-                    disabled={!selectedProvinceCode || isLoadingWards}
-                    {...register("wardCode")}
-                    className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <option value="">{t("checkout.selectWard")}</option>
-                    {wards.map((ward) => (
-                      <option key={ward.code} value={ward.code}>
-                        {ward.name}
-                      </option>
-                    ))}
-                  </select>
-                  </Skeleton>
+                  {isLoadingWards ? (
+                    <AddressSelectLoading />
+                  ) : (
+                    <select
+                      autoComplete="address-level2"
+                      disabled={!selectedProvinceCode}
+                      {...register("wardCode")}
+                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <option value="">{t("checkout.selectWard")}</option>
+                      {wards.map((ward) => (
+                        <option key={ward.code} value={ward.code}>
+                          {ward.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   {errors.wardCode?.message && (
                     <p className="text-xs text-red-600">{errors.wardCode.message}</p>
                   )}
@@ -950,16 +943,8 @@ function LedgerRow({
   );
 }
 
-function AddressSelectLoadingFallback() {
-  return <div className="h-11 w-full rounded-sm bg-[#f7f4ef]" aria-hidden="true" />;
-}
-
-function AddressSelectLoadingFixture({ label }: { label: string }) {
-  return (
-    <div className="flex h-11 w-full items-center rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18]">
-      {label}
-    </div>
-  );
+function AddressSelectLoading() {
+  return <Skeleton className="h-11 w-full rounded-sm bg-[#f7f4ef]" aria-hidden="true" />;
 }
 
 function PaymentDeadline({

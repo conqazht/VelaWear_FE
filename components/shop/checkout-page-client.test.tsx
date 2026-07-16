@@ -58,10 +58,6 @@ vi.mock("@/lib/checkout-api", async (importOriginal) => {
   };
 });
 
-vi.mock("boneyard-js/react", () => ({
-  Skeleton: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 import { CheckoutPageClient } from "@/components/shop/checkout-page-client";
 
 type Deferred<T> = {
@@ -120,15 +116,17 @@ async function prepareCheckoutForm(container: HTMLElement) {
   fireEvent.change(input("phone"), { target: { value: "0900000000" } });
   fireEvent.change(input("address"), { target: { value: "123 Le Loi" } });
 
-  const province = container.querySelector<HTMLSelectElement>(
-    'select[name="provinceCode"]',
+  await waitFor(() =>
+    expect(container.querySelector('select[name="provinceCode"]')).not.toBeNull(),
   );
-  if (!province) throw new Error("Missing province select");
+  const province = container.querySelector<HTMLSelectElement>('select[name="provinceCode"]')!;
   fireEvent.change(province, { target: { value: "79" } });
 
   await waitFor(() => expect(getVietnamWardsMock).toHaveBeenCalledWith(79, expect.anything()));
-  const ward = container.querySelector<HTMLSelectElement>('select[name="wardCode"]');
-  if (!ward) throw new Error("Missing ward select");
+  await waitFor(() =>
+    expect(container.querySelector('select[name="wardCode"]')).not.toBeNull(),
+  );
+  const ward = container.querySelector<HTMLSelectElement>('select[name="wardCode"]')!;
   fireEvent.change(ward, { target: { value: "760" } });
 
   const form = container.querySelector("form");

@@ -33,6 +33,12 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-16
 
+### Loại bỏ Boneyard, khóa OAuth exchange và đồng bộ System theme
+- **Date/Time**: 2026-07-16T00:47:29+07:00
+- **Implementation**: Gỡ hoàn toàn 7 wrapper Boneyard, registry, generated bones, config và dependency `boneyard-js`; Admin session, Management table, Profile addresses, Checkout province/ward, Invoice preview và Mail loading nay dùng skeleton normal-flow/responsive. Nút đổi ngôn ngữ trong Admin/OAuth loading được thay bằng bone đúng kích thước, còn trạng thái đã tải vẫn giữ nút tương tác. OAuth callback cache một terminal promise cho toàn bộ `exchange → getMe` theo authorization code, nên StrictMode/remount không thể gửi lại code đã dùng một lần. Admin theme đọc đúng cookie `theme_mode`, missing/invalid mặc định `system`, bootstrap class/attribute/color-scheme trước paint, giữ lựa chọn Light/Dark hợp lệ và dọn theme khi quay lại storefront; Toaster dùng trực tiếp resolved theme của preference store và dependency `next-themes` dư thừa được gỡ.
+- **Verification**: Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); TypeScript pass; Vitest 20 file/66 test pass, gồm OAuth StrictMode/remount và theme bootstrap/persistence; production build pass 68 route. Browser QA production tại 1152x800 bắt được Admin cold-load với 46 UI bones, 0 Boneyard node và 0 language button; sau load có đúng 1 language button. System theme resolve dark đúng OS (`data-theme-mode=system`, `.dark`, `colorScheme=dark`) và toàn bộ attribute/class được dọn khi về storefront. OAuth loader có 1 language bone và 0 language button.
+- **Known Follow-ups**: Chưa chạy đăng nhập Google thật vì cần phiên tương tác; regression test đã tái hiện đúng cửa sổ exchange thành công rồi remount trong lúc `getMe` còn pending và xác nhận chỉ có 1 exchange/1 profile request.
+
 ### Chuyển ảnh tĩnh storefront từ HTTPS sang asset local
 - **Date/Time**: 2026-07-16T00:19:04+07:00
 - **Implementation**: Tải 31 ảnh tĩnh duy nhất từ Unsplash và Google `aida-public`, chuyển thật sang WebP rồi lưu theo ngữ cảnh trong `public/images`. Thay 35 tham chiếu ở Home editorial/story/newsletter, Collection lookbook, Product Detail craftsmanship và toàn bộ fixture product/cart/checkout/detail; ảnh trùng nguồn dùng chung một file. Gỡ hai `remotePatterns` Unsplash/Google khỏi Next Image, đồng thời giữ pattern upload của backend và logic ảnh động từ API.

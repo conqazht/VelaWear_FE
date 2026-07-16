@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Skeleton as BoneyardSkeleton } from "boneyard-js/react";
 import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/product-card";
@@ -602,14 +601,7 @@ export default function MemberProfile() {
                   <div>
                     <h2 className="text-2xl font-serif text-ink font-light tracking-tight mb-8">{t("account.addresses.title")}</h2>
                     {addressesQuery.isLoading ? (
-                      <BoneyardSkeleton
-                        name="profile-addresses"
-                        loading
-                        fallback={<ProfileAddressesLoadingFallback />}
-                        fixture={<ProfileAddressesLoadingFixture />}
-                      >
-                        <ProfileAddressesLoadingFixture />
-                      </BoneyardSkeleton>
+                      <ProfileAddressesLoadingFallback />
                     ) : addressesQuery.isError ? (
                       <StorefrontApiStatus
                         error={addressesQuery.error}
@@ -1257,21 +1249,6 @@ function ProfileOverviewLoading() {
           <Skeleton className="h-10 w-28 rounded-full" />
         </div>
       </div>
-    </div>
-  );
-}
-
-function ProfileAddressesLoadingFixture() {
-  const { t } = useI18n();
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {Array.from({ length: 2 }).map((_, index) => (
-        <article key={index} className="min-h-36 rounded-md border border-[#1c1a18]/10 bg-white p-5">
-          <h3 className="font-medium">{t("account.fixture.addressName")}</h3>
-          <p className="mt-3 text-sm">{t("account.fixture.address")}</p>
-        </article>
-      ))}
     </div>
   );
 }
