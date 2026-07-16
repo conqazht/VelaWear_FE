@@ -43,8 +43,11 @@ import {
   useUpdateAdminCategoryStatusMutation,
 } from "@/lib/queries/admin-commerce";
 import type { Locale } from "@/lib/i18n";
+import type { GeminiContentModel } from "@/lib/api/admin-translation-suggestions";
 import { getCatalogStatusToggleTarget } from "@/lib/admin-status-toggle";
 import { invalidatePublicQueries } from "@/lib/queries/public-cache";
+import { useCategoryEnglishSuggestionMutation } from "@/lib/queries/admin-translation-suggestions";
+import { toAsciiUrlSlug } from "@/lib/url-slug";
 
 import {
   CategoryForm,
@@ -155,12 +158,17 @@ export function CategoriesManagement() {
   const updateMutation = useUpdateAdminCategoryMutation();
   const deleteMutation = useDeleteAdminCategoryMutation();
   const statusMutation = useUpdateAdminCategoryStatusMutation();
+  const englishSuggestionMutation = useCategoryEnglishSuggestionMutation();
 
   const rows = categoriesQuery.data?.result ?? [];
   const meta = categoriesQuery.data?.meta;
   const parentCategories = parentCategoriesQuery.data?.result ?? [];
   const parentNames = new Map(parentCategories.map((category) => [category.id, category.name]));
-  const isSaving = createMutation.isPending || updateMutation.isPending || isContentSaving;
+  const isSaving =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    isContentSaving ||
+    englishSuggestionMutation.isPending;
 
   function openCreateForm() {
     setEditingCategory(null);
@@ -187,6 +195,47 @@ export function CategoriesManagement() {
       toast.error(`${t("admin.commerce.translation.loadFailed")} ${getApiErrorMessage(error)}`);
     } finally {
       setLoadingCategoryId(null);
+    }
+  }
+
+  async function generateEnglishContent(model: GeminiContentModel) {
+    const source = formValues.translations.vi;
+    const nullable = (value: string) => value.trim() || null;
+
+    try {
+      const suggestion = await englishSuggestionMutation.mutateAsync({
+        model,
+        name: source.name.trim(),
+        description: nullable(source.description),
+        seoTitle: nullable(source.seoTitle),
+        seoDescription: nullable(source.seoDescription),
+      });
+      const name = suggestion.name.trim();
+      const slug = toAsciiUrlSlug(name);
+      if (suggestion.localeCode !== "en" || !name || !slug) {
+        toast.error(t("admin.contentGeneration.invalidResponse"));
+        return;
+      }
+
+      setFormValues((current) => ({
+        ...current,
+        translations: {
+          ...current.translations,
+          en: {
+            name,
+            slug,
+            description: suggestion.description ?? "",
+            seoTitle: suggestion.seoTitle ?? "",
+            seoDescription: suggestion.seoDescription ?? "",
+          },
+        },
+      }));
+      setContentLocale("en");
+      toast.success(t("admin.contentGeneration.success"));
+    } catch (error) {
+      toast.error(
+        `${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`,
+      );
     }
   }
 
@@ -525,6 +574,8 @@ export function CategoriesManagement() {
               ? getApiErrorMessage(parentCategoriesQuery.error)
               : null
           }
+          isGeneratingEnglish={englishSuggestionMutation.isPending}
+          onGenerateEnglish={generateEnglishContent}
         />
       </ResourceFormSheet>
 
