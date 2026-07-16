@@ -94,6 +94,7 @@ export const authErrorMessages = defineMessages(
     "auth.otp.attemptsError": "Too many incorrect attempts. Request a new verification code.",
     "auth.otp.validationError": "The verification code is invalid. Check the code and try again.",
     "auth.otp.serviceError": "The verification email service is unavailable. Please try again later.",
+    "auth.otp.sessionRevokedError": "Your session is no longer valid. Please sign in again.",
     "auth.otp.genericError": "Something went wrong. Please try again.",
 
     "auth.google.continue": "Continue with Google",
@@ -239,6 +240,7 @@ export const authErrorMessages = defineMessages(
     "auth.otp.attemptsError": "Bạn đã nhập sai quá nhiều lần. Hãy yêu cầu mã xác minh mới.",
     "auth.otp.validationError": "Mã xác minh không hợp lệ. Hãy kiểm tra mã và thử lại.",
     "auth.otp.serviceError": "Dịch vụ email xác minh đang tạm ngưng. Vui lòng thử lại sau.",
+    "auth.otp.sessionRevokedError": "Phiên đăng nhập không còn hiệu lực. Vui lòng đăng nhập lại.",
     "auth.otp.genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
 
     "auth.google.continue": "Tiếp tục với Google",

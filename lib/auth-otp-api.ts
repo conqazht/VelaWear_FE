@@ -4,10 +4,23 @@ export type OtpPurpose =
   | "REGISTER"
   | "FORGOT_PASSWORD"
   | "CHANGE_EMAIL";
+
+export type OtpErrorCode =
+  | "OTP_INVALID_OR_EXPIRED"
+  | "OTP_ATTEMPTS_EXHAUSTED"
+  | "OTP_RATE_LIMITED"
+  | "OTP_PROOF_INVALID_OR_EXPIRED"
+  | "AUTH_RATE_LIMITED"
+  | "SESSION_REVOKED"
+  | "OTP_SERVICE_UNAVAILABLE"
+  | "OTP_DELIVERY_UNAVAILABLE";
+
 export type OtpErrorKind =
-  | "cooldown"
-  | "expired"
+  | "rate_limited"
+  | "invalid_or_expired"
   | "attempts_exhausted"
+  | "proof_invalid_or_expired"
+  | "session_revoked"
   | "validation"
   | "service"
   | "unknown";
@@ -18,18 +31,19 @@ export interface OtpRequestPayload {
 }
 
 export interface OtpVerifyPayload {
-  email: string;
-  purpose: OtpPurpose;
+  challengeId: string;
   code: string;
 }
 
 export interface ForgotPasswordResetPayload {
   email: string;
   newPassword: string;
+  otpProofToken: string;
 }
 
 export interface ChangeEmailPayload {
   newEmail: string;
+  otpProofToken: string;
 }
 
 export interface ChangePasswordPayload {
@@ -38,29 +52,62 @@ export interface ChangePasswordPayload {
 }
 
 export interface OtpRequestResult {
-  message?: string;
-  cooldownSeconds?: number;
+  challengeId: string;
+  expiresInSeconds: number;
+  cooldownSeconds: number;
+}
+
+export interface OtpVerifyResult {
+  proofToken: string;
+  expiresInSeconds: number;
+}
+
+export interface SensitiveActionResult {
+  allSessionsRevoked: boolean;
+  reauthenticationRequired: boolean;
 }
 
 export interface NormalizedOtpError {
+  code?: OtpErrorCode;
   kind: OtpErrorKind;
   message: string;
-  cooldownSeconds?: number;
+  retryAfterSeconds?: number;
 }
 
 interface ApiEnvelope<T = unknown> {
   code?: string;
+  error?: string;
   errorCode?: string;
   message?: string;
   data?: T;
 }
 
+interface RetryDetails {
+  retryAfterSeconds?: unknown;
+}
+
 interface OtpResponseData {
-  cooldownSeconds?: number;
-  cooldown?: number;
-  retryAfterSeconds?: number;
-  resendAfterSeconds?: number;
-  retryAfter?: number;
+  challengeId?: unknown;
+  proofToken?: unknown;
+  expiresInSeconds?: unknown;
+  cooldownSeconds?: unknown;
+  retryAfterSeconds?: unknown;
+  details?: RetryDetails | null;
+}
+
+const ERROR_KIND_BY_CODE: Readonly<Record<OtpErrorCode, OtpErrorKind>> = {
+  OTP_INVALID_OR_EXPIRED: "invalid_or_expired",
+  OTP_ATTEMPTS_EXHAUSTED: "attempts_exhausted",
+  OTP_RATE_LIMITED: "rate_limited",
+  OTP_PROOF_INVALID_OR_EXPIRED: "proof_invalid_or_expired",
+  AUTH_RATE_LIMITED: "rate_limited",
+  SESSION_REVOKED: "session_revoked",
+  OTP_SERVICE_UNAVAILABLE: "service",
+  OTP_DELIVERY_UNAVAILABLE: "service",
+};
+
+function isOtpErrorCode(value: unknown): value is OtpErrorCode {
+  return typeof value === "string" && value in ERROR_KIND_BY_CODE;
 }
 
 function toPositiveSeconds(value: unknown): number | undefined {
@@ -78,28 +125,46 @@ function toPositiveSeconds(value: unknown): number | undefined {
   return undefined;
 }
 
-function extractCooldownSeconds(data?: OtpResponseData | null, retryAfterHeader?: unknown): number | undefined {
+function parseRetryAfter(value: unknown): number | undefined {
+  const seconds = toPositiveSeconds(value);
+  if (seconds) return seconds;
+
+  if (typeof value !== "string") return undefined;
+  const retryAt = Date.parse(value);
+  if (!Number.isFinite(retryAt)) return undefined;
+
+  return Math.max(1, Math.ceil((retryAt - Date.now()) / 1000));
+}
+
+function getRetryAfterHeader(headers: unknown): unknown {
+  if (!headers || typeof headers !== "object") return undefined;
+
+  const axiosHeaders = headers as {
+    get?: (name: string) => unknown;
+    [key: string]: unknown;
+  };
+  return axiosHeaders.get?.("retry-after") ?? axiosHeaders["retry-after"] ?? axiosHeaders["Retry-After"];
+}
+
+function extractRetryAfterSeconds(data?: OtpResponseData | null, headers?: unknown): number | undefined {
   return (
-    toPositiveSeconds(data?.cooldownSeconds) ??
-    toPositiveSeconds(data?.cooldown) ??
     toPositiveSeconds(data?.retryAfterSeconds) ??
-    toPositiveSeconds(data?.resendAfterSeconds) ??
-    toPositiveSeconds(data?.retryAfter) ??
-    toPositiveSeconds(retryAfterHeader)
+    toPositiveSeconds(data?.details?.retryAfterSeconds) ??
+    parseRetryAfter(getRetryAfterHeader(headers))
   );
 }
 
-function getErrorKind(code?: string, message?: string): OtpErrorKind {
-  const normalized = `${code ?? ""} ${message ?? ""}`.toLowerCase();
+function getFallbackErrorKind(message?: string): OtpErrorKind {
+  const normalized = (message ?? "").toLowerCase();
 
-  if (normalized.includes("cooldown") || normalized.includes("rate") || normalized.includes("retry")) {
-    return "cooldown";
-  }
-  if (normalized.includes("expired")) {
-    return "expired";
+  if (normalized.includes("rate") || normalized.includes("retry") || normalized.includes("cooldown")) {
+    return "rate_limited";
   }
   if (normalized.includes("attempt") || normalized.includes("exhaust")) {
     return "attempts_exhausted";
+  }
+  if (normalized.includes("expired")) {
+    return "invalid_or_expired";
   }
   if (normalized.includes("invalid") || normalized.includes("validation") || normalized.includes("otp")) {
     return "validation";
@@ -113,67 +178,137 @@ function getErrorKind(code?: string, message?: string): OtpErrorKind {
 
 function getDefaultOtpMessage(kind: OtpErrorKind): string {
   switch (kind) {
-    case "cooldown":
-      return "Please wait before requesting another verification code.";
-    case "expired":
-      return "Your verification code has expired. Request a new code and try again.";
+    case "rate_limited":
+      return "Please wait before trying again.";
+    case "invalid_or_expired":
+      return "The verification code is invalid or has expired.";
     case "attempts_exhausted":
       return "Too many incorrect attempts. Request a new verification code.";
+    case "proof_invalid_or_expired":
+      return "Your verification has expired. Request a new verification code.";
+    case "session_revoked":
+      return "Your session is no longer valid. Please sign in again.";
     case "validation":
-      return "Invalid verification code. Check the code and try again.";
+      return "Invalid verification request. Check the entered information and try again.";
     case "service":
-      return "Verification email service is currently unavailable. Please try again later.";
+      return "Verification service is currently unavailable. Please try again later.";
     default:
       return "Something went wrong. Please try again.";
   }
 }
 
-export function normalizeOtpError(error: unknown, fallbackMessage = "Something went wrong. Please try again."): NormalizedOtpError {
+function requireNonEmptyString(value: unknown, field: string): string {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`Invalid OTP response: missing ${field}`);
+  }
+  return value;
+}
+
+function requirePositiveSeconds(value: unknown, field: string): number {
+  const seconds = toPositiveSeconds(value);
+  if (!seconds) {
+    throw new Error(`Invalid OTP response: missing ${field}`);
+  }
+  return seconds;
+}
+
+function requireSensitiveActionResult(value: unknown): SensitiveActionResult {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    typeof (value as SensitiveActionResult).allSessionsRevoked !== "boolean" ||
+    typeof (value as SensitiveActionResult).reauthenticationRequired !== "boolean"
+  ) {
+    throw new Error("Invalid sensitive action response");
+  }
+
+  return value as SensitiveActionResult;
+}
+
+export function normalizeOtpError(
+  error: unknown,
+  fallbackMessage = "Something went wrong. Please try again.",
+): NormalizedOtpError {
   const apiError = error as {
     response?: {
-      headers?: Record<string, unknown>;
+      headers?: unknown;
       data?: ApiEnvelope<OtpResponseData>;
-      status?: number;
     };
     message?: string;
   };
 
   const responseData = apiError.response?.data;
-  const errorData = responseData?.data;
-  const retryAfterHeader = apiError.response?.headers?.["retry-after"];
-  const cooldownSeconds = extractCooldownSeconds(errorData, retryAfterHeader);
-  const kind = getErrorKind(responseData?.code ?? responseData?.errorCode, responseData?.message ?? apiError.message);
-  const message = responseData?.message ?? (kind === "unknown" ? fallbackMessage : getDefaultOtpMessage(kind));
+  const rawCode = responseData?.code ?? responseData?.errorCode ?? responseData?.error;
+  const code = isOtpErrorCode(rawCode) ? rawCode : undefined;
+  const kind = code
+    ? ERROR_KIND_BY_CODE[code]
+    : getFallbackErrorKind(responseData?.message ?? apiError.message);
+  const retryAfterSeconds = extractRetryAfterSeconds(
+    responseData?.data,
+    apiError.response?.headers,
+  );
 
   return {
+    code,
     kind,
-    message,
-    cooldownSeconds,
+    message:
+      responseData?.message ??
+      (kind === "unknown" ? fallbackMessage : getDefaultOtpMessage(kind)),
+    retryAfterSeconds,
   };
 }
 
 export async function requestOtp(payload: OtpRequestPayload): Promise<OtpRequestResult> {
-  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>("/auth/otp/request", payload);
-  const responseData = response.data;
+  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>(
+    "/auth/otp/request",
+    payload,
+  );
+  const data = response.data?.data;
 
   return {
-    message: responseData?.message,
-    cooldownSeconds: extractCooldownSeconds(responseData?.data),
+    challengeId: requireNonEmptyString(data?.challengeId, "challengeId"),
+    expiresInSeconds: requirePositiveSeconds(data?.expiresInSeconds, "expiresInSeconds"),
+    cooldownSeconds: requirePositiveSeconds(data?.cooldownSeconds, "cooldownSeconds"),
   };
 }
 
-export async function verifyOtp(payload: OtpVerifyPayload): Promise<void> {
-  await apiClient.post("/auth/otp/verify", payload);
+export async function verifyOtp(payload: OtpVerifyPayload): Promise<OtpVerifyResult> {
+  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>(
+    "/auth/otp/verify",
+    payload,
+  );
+  const data = response.data?.data;
+
+  return {
+    proofToken: requireNonEmptyString(data?.proofToken, "proofToken"),
+    expiresInSeconds: requirePositiveSeconds(data?.expiresInSeconds, "expiresInSeconds"),
+  };
 }
 
-export async function resetPassword(payload: ForgotPasswordResetPayload): Promise<void> {
-  await apiClient.post("/auth/forgot-password/reset", payload);
+export async function resetPassword(
+  payload: ForgotPasswordResetPayload,
+): Promise<SensitiveActionResult> {
+  const response = await apiClient.post<ApiEnvelope<SensitiveActionResult>>(
+    "/auth/forgot-password/reset",
+    payload,
+  );
+  return requireSensitiveActionResult(response.data.data);
 }
 
-export async function changeEmail(payload: ChangeEmailPayload): Promise<void> {
-  await apiClient.put("/auth/me/email", payload);
+export async function changeEmail(payload: ChangeEmailPayload): Promise<SensitiveActionResult> {
+  const response = await apiClient.put<ApiEnvelope<SensitiveActionResult>>(
+    "/auth/me/email",
+    payload,
+  );
+  return requireSensitiveActionResult(response.data.data);
 }
 
-export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
-  await apiClient.put("/auth/me/password", payload);
+export async function changePassword(
+  payload: ChangePasswordPayload,
+): Promise<SensitiveActionResult> {
+  const response = await apiClient.put<ApiEnvelope<SensitiveActionResult>>(
+    "/auth/me/password",
+    payload,
+  );
+  return requireSensitiveActionResult(response.data.data);
 }

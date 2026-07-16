@@ -18,6 +18,7 @@ export type RegisterRequest = {
   fullName: string;
   birthDate?: string | null;
   gender?: "MALE" | "FEMALE" | "OTHER" | null;
+  otpProofToken: string;
 };
 
 export type TokenResponse = {

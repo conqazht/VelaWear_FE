@@ -44,6 +44,9 @@ async function loadApiClient() {
     apiClient: apiClientModule.default as AxiosInstance,
     refresh,
     refreshPost,
+    clearLocalAuthSession: apiClientModule.clearLocalAuthSession,
+    getAccessToken: apiClientModule.getAccessToken,
+    refreshAccessTokenOnce: apiClientModule.refreshAccessTokenOnce,
     setAccessToken: apiClientModule.setAccessToken,
   };
 }
@@ -198,5 +201,33 @@ describe("apiClient concurrent 401 refresh", () => {
       {},
       { timeout: 15_000, withCredentials: true },
     );
+  });
+
+  it("xóa local session và chặn refresh đang bay ghi token trở lại", async () => {
+    const {
+      refresh,
+      refreshAccessTokenOnce,
+      clearLocalAuthSession,
+      getAccessToken,
+      setAccessToken,
+    } = await loadApiClient();
+    setAccessToken("old-token");
+
+    const pendingRefresh = refreshAccessTokenOnce();
+    clearLocalAuthSession();
+    expect(getAccessToken()).toBeNull();
+
+    refresh.resolve({
+      config: {} as InternalAxiosRequestConfig,
+      data: { data: { accessToken: "stale-refreshed-token" } },
+      headers: {},
+      status: 200,
+      statusText: "OK",
+    });
+
+    await expect(pendingRefresh).rejects.toThrow(
+      "Auth session changed while refresh was in flight",
+    );
+    expect(getAccessToken()).toBeNull();
   });
 });
