@@ -3,6 +3,7 @@ import { apiDelete, apiGet, apiPost, apiPut, unwrapApiResponse } from "./client"
 import type {
   Cart,
   Coupon,
+  Gender,
   MyCoupons,
   Order,
   OrderStatusHistory,
@@ -44,17 +45,27 @@ export type ReplaceCartItemsRequest = {
 export type CreatePaymentRequest = Record<string, unknown>;
 export type UpdatePaymentRequest = Record<string, unknown>;
 
-export type CreateUserAddressRequest = {
-  userId: number;
+type MyAddressFields = {
   receiverName: string;
   phone: string;
   province: string;
   ward: string;
   addressDetail: string;
+};
+
+export type CreateMyAddressRequest = MyAddressFields & {
   isDefault?: boolean;
 };
 
-export type UpdateUserAddressRequest = Partial<CreateUserAddressRequest>;
+export type UpdateMyAddressRequest = MyAddressFields & {
+  isDefault: boolean;
+};
+
+export type UpdateMyProfileRequest = {
+  fullName: string;
+  birthDate: string;
+  gender: Gender;
+};
 
 export type CreateReviewRequest = {
   orderItemId: number;
@@ -102,10 +113,6 @@ export type OrderStatusHistoryFilters = PageParams & {
   createdFrom?: string;
   createdTo?: string;
 };
-
-export function getCartByUser(userId: number) {
-  return apiGet<Cart>(`/carts/user/${userId}`);
-}
 
 export function createCart(request: CreateCartRequest) {
   return apiPost<Cart, CreateCartRequest>("/carts", request);
@@ -163,24 +170,24 @@ export function getOrders(params: OrderFilters = {}) {
   return apiGet<ResultPaginationDTO<Order>>("/orders", params);
 }
 
-export function getOrdersByUser(userId: number, params: PageParams = {}) {
-  return apiGet<ResultPaginationDTO<Order>>(`/orders/user/${userId}`, params);
+export function getMyOrders(params: PageParams = {}) {
+  return apiGet<ResultPaginationDTO<Order>>("/orders/me", params);
 }
 
-export function getOrderByCode(orderCode: string) {
-  return apiGet<Order>(`/orders/code/${orderCode}`);
+export function getMyOrderByCode(orderCode: string) {
+  return apiGet<Order>(`/orders/me/code/${encodeURIComponent(orderCode)}`);
 }
 
-export function getOrderById(id: number) {
-  return apiGet<Order>(`/orders/${id}`);
+export function getMyOrderById(id: number) {
+  return apiGet<Order>(`/orders/me/${id}`);
 }
 
-export function getOrderStatusHistories(
+export function getMyOrderStatusHistories(
   id: number,
   params: OrderStatusHistoryFilters = {}
 ) {
   return apiGet<ResultPaginationDTO<OrderStatusHistory>>(
-    `/orders/${id}/status-histories`,
+    `/orders/me/${id}/status-histories`,
     params
   );
 }
@@ -205,39 +212,53 @@ export function getUsers(params: PageParams = {}) {
   return apiGet<ResultPaginationDTO<User>>("/users", params);
 }
 
-export function getUser(id: number) {
-  return apiGet<User>(`/users/${id}`);
+export function updateMyProfile(request: UpdateMyProfileRequest) {
+  return apiPut<User, UpdateMyProfileRequest>("/users/me", {
+    fullName: request.fullName,
+    birthDate: request.birthDate,
+    gender: request.gender,
+  });
 }
 
-export function updateUser(id: number, request: Partial<User>) {
-  return apiPut<User, Partial<User>>(`/users/${id}`, request);
+export function getMyAddresses(params: PageParams = {}) {
+  return apiGet<ResultPaginationDTO<UserAddress>>("/user-addresses/me", params);
 }
 
-export function getUserAddresses(params: PageParams & { userId?: number } = {}) {
-  return apiGet<ResultPaginationDTO<UserAddress>>("/user-addresses", params);
+export function getMyAddressById(id: number) {
+  return apiGet<UserAddress>(`/user-addresses/me/${id}`);
 }
 
-export function createUserAddress(request: CreateUserAddressRequest) {
-  return apiPost<UserAddress, CreateUserAddressRequest>("/user-addresses", request);
+function toMyAddressBody(request: CreateMyAddressRequest | UpdateMyAddressRequest) {
+  return {
+    receiverName: request.receiverName,
+    phone: request.phone,
+    province: request.province,
+    ward: request.ward,
+    addressDetail: request.addressDetail,
+    isDefault: request.isDefault ?? false,
+  };
 }
 
-export function updateUserAddress(id: number, request: UpdateUserAddressRequest) {
-  return apiPut<UserAddress, UpdateUserAddressRequest>(
-    `/user-addresses/${id}`,
-    request
+export function createMyAddress(request: CreateMyAddressRequest) {
+  return apiPost<UserAddress, CreateMyAddressRequest>(
+    "/user-addresses/me",
+    toMyAddressBody(request),
   );
 }
 
-export function deleteUserAddress(id: number) {
-  return apiDelete<void>(`/user-addresses/${id}`);
+export function updateMyAddress(id: number, request: UpdateMyAddressRequest) {
+  return apiPut<UserAddress, UpdateMyAddressRequest>(
+    `/user-addresses/me/${id}`,
+    toMyAddressBody(request),
+  );
+}
+
+export function deleteMyAddress(id: number) {
+  return apiDelete<void>(`/user-addresses/me/${id}`);
 }
 
 export function getCommerceReviews(params: CommerceReviewFilters = {}) {
   return apiGet<ResultPaginationDTO<Review>>("/reviews", params);
-}
-
-export function getReviewsByUser(userId: number, params: PageParams = {}) {
-  return apiGet<ResultPaginationDTO<Review>>(`/reviews/user/${userId}`, params);
 }
 
 export function getMyReviews(params: PageParams & { orderId?: number } = {}) {

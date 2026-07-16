@@ -8,6 +8,8 @@ import {
 export const fullstackApiUrl = process.env.PLAYWRIGHT_API_URL ?? "http://localhost:8080/api/v1";
 export const fullstackUserEmail = process.env.E2E_USER_EMAIL ?? "user@velawear.local";
 export const fullstackUserPassword = process.env.E2E_USER_PASSWORD ?? "Password123!";
+const fullstackSecondUserEmail = process.env.E2E_SECOND_USER_EMAIL ?? "linh@velawear.local";
+const fullstackSecondUserPassword = process.env.E2E_SECOND_USER_PASSWORD ?? "Password123!";
 const variantSku = process.env.E2E_VARIANT_SKU ?? "VW-TEE-BLK-M";
 
 type ApiEnvelope<T> = {
@@ -16,6 +18,11 @@ type ApiEnvelope<T> = {
 
 type LoginResponse = {
   accessToken: string;
+};
+
+type FullstackCredentials = {
+  email: string;
+  password: string;
 };
 
 type ProductVariant = {
@@ -42,9 +49,20 @@ type AuthenticatedSession = {
   setCleanupAccessToken: (accessToken: string) => void;
 };
 
+type AuthenticatedApiAccount = {
+  accessToken: string;
+  api: APIRequestContext;
+};
+
+type OwnershipAccounts = {
+  primary: AuthenticatedApiAccount;
+  secondary: AuthenticatedApiAccount;
+};
+
 type FullstackFixtures = {
   authenticatedSession: AuthenticatedSession;
   fullstackSession: FullstackSession;
+  ownershipAccounts: OwnershipAccounts;
 };
 
 function isCheckoutResponse(response: Response) {
@@ -54,14 +72,32 @@ function isCheckoutResponse(response: Response) {
     response.status() === 201;
 }
 
-export async function loginFullstackUser(api: APIRequestContext) {
+async function loginFullstackAccount(
+  api: APIRequestContext,
+  credentials: FullstackCredentials,
+  accountLabel: string,
+) {
   const loginResponse = await api.post(`${fullstackApiUrl}/auth/login`, {
-    data: { email: fullstackUserEmail, password: fullstackUserPassword },
+    data: credentials,
   });
-  expect(loginResponse.ok(), await loginResponse.text()).toBeTruthy();
+
+  expect(
+    loginResponse.ok(),
+    `${accountLabel} E2E account login failed with HTTP ${loginResponse.status()}`,
+  ).toBeTruthy();
   const loginBody = await loginResponse.json() as ApiEnvelope<LoginResponse>;
-  expect(loginBody.data.accessToken).toBeTruthy();
+  if (!loginBody.data?.accessToken) {
+    throw new Error(`${accountLabel} E2E account login returned no access token`);
+  }
   return loginBody.data.accessToken;
+}
+
+export async function loginFullstackUser(api: APIRequestContext) {
+  return loginFullstackAccount(
+    api,
+    { email: fullstackUserEmail, password: fullstackUserPassword },
+    "Primary",
+  );
 }
 
 async function cleanupAuthenticatedSession(api: APIRequestContext, accessToken: string) {
@@ -90,6 +126,49 @@ export const test = base.extend<FullstackFixtures>({
     });
 
     await cleanupAuthenticatedSession(context.request, cleanupAccessToken);
+  },
+
+  ownershipAccounts: async ({ playwright }, provide) => {
+    if (fullstackUserEmail.trim().toLowerCase() === fullstackSecondUserEmail.trim().toLowerCase()) {
+      throw new Error("E2E ownership smoke requires two different configured accounts");
+    }
+
+    const primaryApi = await playwright.request.newContext();
+    let secondaryApi: APIRequestContext | undefined;
+    let primaryAccessToken: string | undefined;
+    let secondaryAccessToken: string | undefined;
+
+    try {
+      secondaryApi = await playwright.request.newContext();
+      primaryAccessToken = await loginFullstackAccount(
+        primaryApi,
+        { email: fullstackUserEmail, password: fullstackUserPassword },
+        "Primary",
+      );
+      secondaryAccessToken = await loginFullstackAccount(
+        secondaryApi,
+        { email: fullstackSecondUserEmail, password: fullstackSecondUserPassword },
+        "Secondary",
+      );
+
+      await provide({
+        primary: { accessToken: primaryAccessToken, api: primaryApi },
+        secondary: { accessToken: secondaryAccessToken, api: secondaryApi },
+      });
+    } finally {
+      await Promise.all([
+        primaryAccessToken
+          ? cleanupAuthenticatedSession(primaryApi, primaryAccessToken)
+          : Promise.resolve(),
+        secondaryApi && secondaryAccessToken
+          ? cleanupAuthenticatedSession(secondaryApi, secondaryAccessToken)
+          : Promise.resolve(),
+      ]);
+      await Promise.allSettled([
+        primaryApi.dispose(),
+        secondaryApi?.dispose() ?? Promise.resolve(),
+      ]);
+    }
   },
 
   fullstackSession: async ({ authenticatedSession, context, page }, provide) => {
