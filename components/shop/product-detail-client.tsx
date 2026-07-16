@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   BadgePercent,
   Clock3,
@@ -12,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
-import { RatingStars } from "@/components/shop/rating-stars";
+import { ProductReviewsSection } from "@/components/shop/product-reviews-section";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -23,10 +24,10 @@ import {
   Product,
 } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
-import { getIntlLocale } from "@/lib/i18n";
 import { formatDateTime } from "@/lib/i18n/format";
-import { useProductReviewsQuery, useProductVariantsQuery } from "@/lib/queries/catalog";
+import { useProductVariantsQuery } from "@/lib/queries/catalog";
 import type { ProductVariant as ApiProductVariant } from "@/lib/api/types";
+import { createSizeGuideHref } from "@/app/(shop)/size-guide/_data/size-guide-data";
 
 const colorSwatches: Record<string, string> = {
   Black: "bg-[#000000]",
@@ -56,7 +57,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
     sizeAndFit: false,
     materialAndCare: false,
     delivery: false,
-    reviews: false,
   });
 
   const variantsQuery = useProductVariantsQuery({
@@ -68,48 +68,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
     () => variantsQuery.data?.result ?? [],
     [variantsQuery.data?.result]
   );
-  const reviewsQuery = useProductReviewsQuery({
-    productId: product.realId,
-    size: 100,
-    sort: "createdAt,desc",
-  });
-  const productReviews = useMemo(
-    () => reviewsQuery.data?.result ?? [],
-    [reviewsQuery.data?.result]
-  );
-  const averageRating = useMemo(() => {
-    if (productReviews.length === 0) return 0;
-
-    const ratingTotal = productReviews.reduce((total, review) => {
-      const rating = Number(review.rating);
-      return total + (Number.isFinite(rating) ? Math.min(5, Math.max(0, rating)) : 0);
-    }, 0);
-    return ratingTotal / productReviews.length;
-  }, [productReviews]);
-  const reviewCount = reviewsQuery.data?.meta.total ?? productReviews.length;
-
-  useEffect(() => {
-    if (window.location.hash !== "#reviews") return;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOpenSections((current) => current.reviews ? current : { ...current, reviews: true });
-  }, []);
-
-  useEffect(() => {
-    if (!openSections.reviews || productReviews.length === 0) return;
-
-    const linkedReviewId = new URLSearchParams(window.location.search).get("review");
-    if (!linkedReviewId) return;
-
-    const frameId = window.requestAnimationFrame(() => {
-      document.getElementById(`review-${linkedReviewId}`)?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [openSections.reviews, productReviews.length]);
-
   // Compute available colors and keep the backend gallery order when possible.
   const colorsList = useMemo(() => {
     const unique = new Set<string>();
@@ -147,6 +105,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
     sizesList.find((size) => size.toLowerCase() === selectedSize?.toLowerCase()) ||
     sizesList[0] ||
     product.size;
+  const sizeGuideHref = createSizeGuideHref({
+    categorySlug: product.categorySlug,
+    selectedSize: resolvedSelectedSize,
+    productSlug: product.id,
+    availableSizes: sizesList,
+  });
 
   // Find currently active variant matching selection
   const activeVariant = useMemo(() => {
@@ -358,9 +322,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
         <div className="mb-10">
           <div className="flex justify-between items-center mb-4">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60">{t("storefront.product.size")}</span>
-            <a className="text-[10px] font-semibold uppercase tracking-widest underline hover:text-[#b85a3c] transition-colors" href="#">
+            <Link className="text-[10px] font-semibold uppercase tracking-widest underline hover:text-[#b85a3c] transition-colors" href={sizeGuideHref}>
               {t("storefront.product.sizeGuide")}
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-4 gap-3">
             {sizesList.map((size) => (
@@ -452,9 +416,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   <li>{t("storefront.product.modelSize")}</li>
                   <li>{t("storefront.product.looseFit")}</li>
                   <li>
-                    <a className="underline hover:text-[#b85a3c] transition-colors" href="#">
+                    <Link className="underline hover:text-[#b85a3c] transition-colors" href={sizeGuideHref}>
                       {t("storefront.product.sizeGuide")}
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -536,98 +500,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
             )}
           </div>
 
-          {/* Product reviews */}
-          <div id="reviews" className="scroll-mt-32 border-b border-hairline/40 py-5">
-            <button
-              type="button"
-              onClick={() => toggleSection("reviews")}
-              className="flex justify-between items-center w-full group text-left cursor-pointer"
-            >
-              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
-                {t("storefront.product.reviews", { count: reviewCount })}
-              </h3>
-              <div className="flex items-center gap-4">
-                <RatingStars
-                  rating={averageRating}
-                  sizeClassName="size-3"
-                  className="gap-0.5"
-                  activeClassName="text-[#b85a3c]"
-                  inactiveClassName="text-[#55423d]/20"
-                />
-                {openSections.reviews ? (
-                  <ChevronUp className="size-4 text-ink/70" />
-                ) : (
-                  <ChevronDown className="size-4 text-ink/70" />
-                )}
-              </div>
-            </button>
-            {openSections.reviews && (
-              <div className="mt-4 pb-2 animate-in fade-in slide-in-from-top-2 duration-300 text-left">
-                {reviewsQuery.isLoading ? (
-                  <div className="space-y-3" aria-hidden="true">
-                    <div className="h-16 animate-pulse rounded-sm bg-[#efe7dc]" />
-                    <div className="h-16 animate-pulse rounded-sm bg-[#efe7dc]" />
-                  </div>
-                ) : reviewsQuery.isError ? (
-                  <p className="text-xs font-light leading-relaxed text-on-surface-variant/80">
-                    {t("storefront.product.reviewError")}
-                  </p>
-                ) : productReviews.length === 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold text-ink">{t("storefront.product.noReviews")}</p>
-                    <p className="text-xs font-light tracking-wide text-on-surface-variant/80 max-w-sm leading-relaxed">
-                      {t("storefront.product.noReviewsDescription", { product: product.name })}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 border-b border-hairline/40 pb-4">
-                      <span className="font-serif text-2xl text-ink">{averageRating.toFixed(1)}</span>
-                      <div>
-                        <RatingStars
-                          rating={averageRating}
-                          sizeClassName="size-4"
-                          activeClassName="text-[#b85a3c]"
-                        />
-                        <p className="mt-1 text-[10px] uppercase tracking-wider text-on-surface-variant/65">
-                          {t(
-                            reviewCount === 1
-                              ? "storefront.product.oneReview"
-                              : "storefront.product.manyReviews",
-                            { count: reviewCount },
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="max-h-80 space-y-4 overflow-y-auto pr-1">
-                      {productReviews.map((review) => (
-                        <article
-                          key={review.id}
-                          id={`review-${review.id}`}
-                          className="scroll-mt-40 border-b border-hairline/30 pb-4 last:border-0"
-                        >
-                          <div className="mb-2 flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-xs font-semibold text-ink">{review.userName}</p>
-                              {review.createdAt && (
-                                <time className="text-[10px] text-on-surface-variant/55">
-                                  {new Date(review.createdAt).toLocaleDateString(getIntlLocale(activeLocale))}
-                                </time>
-                              )}
-                            </div>
-                            <RatingStars rating={review.rating} sizeClassName="size-3" className="gap-0.5" />
-                          </div>
-                          <p className="text-xs font-light leading-relaxed text-on-surface-variant/85">
-                            {review.comment || t("storefront.product.noComment")}
-                          </p>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          <ProductReviewsSection productId={product.realId} productName={product.name} />
         </div>
 
       </div>

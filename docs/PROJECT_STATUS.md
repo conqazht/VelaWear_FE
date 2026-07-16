@@ -33,6 +33,19 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-16
 
+### Đồng bộ OTP/Auth hardening vào Storefront Catalog UX
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Implementation**: Merge `origin/main` sau khi PR OTP/Auth được phát hành; resolve conflict duy nhất tại tài liệu trạng thái bằng cách giữ đầy đủ cả hai mục OTP/Auth và Storefront. Toàn bộ source/config cho `challengeId`, `otpProofToken`, reauthentication và stale-refresh guard được giữ cùng Storefront Catalog UX, Size Guide và review.
+- **Verification**: Vitest pass `35` file/`116` test; ESLint pass với `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; Playwright smoke pass `13/13`; `git diff --check` pass.
+- **Known Follow-ups**: Chờ GitHub Actions chạy lại trên PR #16 sau khi push merge commit.
+
+### Hoàn thiện Storefront Catalog UX, Size Guide, review và trạng thái lỗi
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Implementation**: Collection và Search chuyển sang một storefront catalog controller lấy URL làm nguồn trạng thái, hỗ trợ multi-select category/color/size, effective-price range, bốn sort, facets, chip, server pagination, mobile draft và rollback về URL hợp lệ gần nhất. Header dùng mega-menu Vela có parent link/chevron riêng và leaf URL thật. Thêm Size Guide riêng với cm/in, bảng XXS–XXL, 0X–4X, quy đổi quốc tế, giày/phụ kiện và highlight availability. PDP hiển thị ba review text cùng modal summary/filter/sort/pagination/lightbox; chi tiết đơn `COMPLETED` có form multipart viết review. Chuẩn hóa retry/error/stale-data để initial error dùng route artwork còn background error giữ nội dung.
+- **Documentation**: Thêm `docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md`, đồng bộ `README.md` và `DESIGN.md`; tài liệu ghi contract thật, URL state, accessibility, troubleshooting, test và checklist bảo trì.
+- **Verification**: Full ESLint pass với 0 error và 4 warning TanStack Table có sẵn; TypeScript pass; Vitest `31` file/`96` test pass; production build pass `69` route. Focused storefront Playwright pass `7/7`, toàn bộ smoke pass `13/13`, full-stack với Spring Boot/PostgreSQL/Redis disposable pass `6/6`. Catalog full-stack dùng API thật, kiểm tra `sort=price-asc` không còn `400`, chạy cả `1440×900` và `390×844`, reload và không overflow. Strict OpenSpec, `git diff --check`, link Markdown và UTF-8 đều đạt.
+- **Known Follow-ups**: In-app Browser không có browser runtime (`agent.browsers.list()` trả `[]`), nên không có một lượt visual QA thủ công riêng; Chromium Playwright vẫn kiểm tra keyboard focus, hai viewport, overflow, page error, application console error và network allowlist. Review submit thành công được kiểm tra ở component/API multipart và Backend controller/service/storage; chưa thêm case Playwright full-stack vì toàn bộ `104/104` item `COMPLETED` của seed đã có review và không có setup/cleanup API an toàn. Không tạo reset endpoint production chỉ để phục vụ test.
+
 ### Chuyển OTP sang challenge/proof token và đăng xuất sau thay đổi nhạy cảm
 - **Date/Time**: 2026-07-16T13:21:35+07:00
 - **Implementation**: Thay contract OTP cũ bằng `request → challengeId`, `verify(challengeId, code) → proofToken`; proof chỉ đi qua biến cục bộ của callback, không nằm trong React state, storage hoặc URL. Register, reset password và đổi email gửi `otpProofToken`; resend thay challenge đang giữ trong memory. Reset/đổi mật khẩu và đổi email dọn access token, auth query cache, cart rồi `replace` về `/sign-in`; session generation guard ngăn refresh request cũ ghi token trở lại sau khi phiên bị thu hồi. Chuẩn hóa mapping tám security error code cùng `Retry-After`/`retryAfterSeconds`.

@@ -1,4 +1,5 @@
-import { apiDelete, apiGet, apiPost, apiPut } from "./client";
+import apiClient from "@/lib/api-client";
+import { apiDelete, apiGet, apiPost, apiPut, unwrapApiResponse } from "./client";
 import type {
   Cart,
   Coupon,
@@ -9,6 +10,7 @@ import type {
   Payment,
   ResultPaginationDTO,
   Review,
+  ApiResponse,
   User,
   UserAddress,
   Wishlist,
@@ -55,10 +57,10 @@ export type CreateUserAddressRequest = {
 export type UpdateUserAddressRequest = Partial<CreateUserAddressRequest>;
 
 export type CreateReviewRequest = {
-  userId: number;
   orderItemId: number;
   rating: number;
-  content?: string;
+  comment?: string;
+  images?: File[];
 };
 
 export type CouponFilters = PageParams & {
@@ -238,6 +240,28 @@ export function getReviewsByUser(userId: number, params: PageParams = {}) {
   return apiGet<ResultPaginationDTO<Review>>(`/reviews/user/${userId}`, params);
 }
 
+export function getMyReviews(params: PageParams & { orderId?: number } = {}) {
+  return apiGet<ResultPaginationDTO<Review>>("/reviews/me", params);
+}
+
 export function createReview(request: CreateReviewRequest) {
-  return apiPost<Review, CreateReviewRequest>("/reviews", request);
+  const formData = new FormData();
+  formData.append(
+    "review",
+    new Blob(
+      [JSON.stringify({
+        orderItemId: request.orderItemId,
+        rating: request.rating,
+        comment: request.comment?.trim() || null,
+      })],
+      { type: "application/json" },
+    ),
+  );
+  request.images?.forEach((image) => formData.append("images", image));
+
+  return apiClient
+    // Axios/the browser must set the multipart boundary; forcing Content-Type here
+    // can produce a request Spring cannot parse.
+    .post<ApiResponse<Review>>("/reviews", formData)
+    .then(unwrapApiResponse);
 }

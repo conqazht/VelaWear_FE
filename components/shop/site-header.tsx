@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,6 +23,8 @@ import {
 import { NavigationMenu as BaseNavigationMenu } from "@base-ui/react/navigation-menu";
 import { money } from "@/lib/vela-data";
 import { useSearchSuggestions } from "@/components/shop/use-search-suggestions";
+import { getStorefrontNavigation } from "@/lib/storefront-navigation";
+import { cn } from "@/lib/utils";
 
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
@@ -63,6 +65,7 @@ export function SiteHeader() {
   const { locale: activeLocale, t } = useI18n();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileExpandedItem, setMobileExpandedItem] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const searchSuggestions = useSearchSuggestions(searchQuery, activeLocale);
   const [searchHistory, setSearchHistory] = useState<string[]>(readSearchHistory);
@@ -237,70 +240,7 @@ export function SiteHeader() {
     runSearch(searchQuery);
   };
 
-  const navigationItems = [
-    {
-      label: t("storefront.nav.sale"),
-      href: "/sale",
-      featuredTitle: t("storefront.nav.saleTitle"),
-      featuredDesc: t("storefront.nav.saleDescription"),
-      subItems: [
-        { label: t("storefront.nav.sale"), href: "/sale" },
-        { label: t("storefront.nav.flashSale"), href: "/flash-sale" },
-      ],
-    },
-    {
-      label: t("storefront.nav.collection"),
-      href: "/collection",
-      featuredTitle: t("storefront.nav.collectionTitle"),
-      featuredDesc: t("storefront.nav.collectionDescription"),
-      subItems: [
-        { label: t("storefront.nav.newArrivals"), href: "/collection" },
-        { label: t("storefront.nav.artisanLinen"), href: "/collection" },
-        { label: t("storefront.nav.minimalistTailoring"), href: "/collection" },
-        { label: t("storefront.nav.heritageWool"), href: "/collection" },
-      ],
-    },
-    {
-      label: t("storefront.nav.trousers"),
-      href: "/collection",
-      featuredTitle: t("storefront.nav.trousersTitle"),
-      featuredDesc: t("storefront.nav.trousersDescription"),
-      subItems: [
-        { label: t("storefront.nav.pleatedTrousers"), href: "/collection" },
-        { label: t("storefront.nav.slimTrousers"), href: "/collection" },
-        { label: t("storefront.nav.relaxedTrousers"), href: "/collection" },
-        { label: t("storefront.nav.linenShorts"), href: "/collection" },
-      ],
-    },
-    {
-      label: t("storefront.nav.tops"),
-      href: "/collection",
-      featuredTitle: t("storefront.nav.topsTitle"),
-      featuredDesc: t("storefront.nav.topsDescription"),
-      subItems: [
-        { label: t("storefront.nav.signatureTee"), href: "/collection" },
-        { label: t("storefront.nav.linenShirt"), href: "/collection" },
-        { label: t("storefront.nav.tailoredBlazer"), href: "/collection" },
-        { label: t("storefront.nav.lightJacket"), href: "/collection" },
-      ],
-    },
-    {
-      label: t("storefront.nav.accessories"),
-      href: "/collection",
-      featuredTitle: t("storefront.nav.accessoriesTitle"),
-      featuredDesc: t("storefront.nav.accessoriesDescription"),
-      subItems: [
-        { label: t("storefront.nav.canvasTote"), href: "/collection" },
-        { label: t("storefront.nav.leatherBelt"), href: "/collection" },
-        { label: t("storefront.nav.clutch"), href: "/collection" },
-        { label: t("storefront.nav.minimalCap"), href: "/collection" },
-      ],
-    },
-    {
-      label: t("storefront.nav.help"),
-      href: "/help",
-    },
-  ];
+  const navigationItems = getStorefrontNavigation(activeLocale);
 
   return (
     <>
@@ -323,7 +263,7 @@ export function SiteHeader() {
           }
         >
           {/* Hamburger button for mobile */}
-          <div className="flex md:hidden items-center">
+          <div className="flex items-center lg:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`${burgerClass} transition-colors p-1`}
@@ -382,29 +322,35 @@ export function SiteHeader() {
           </div>
 
           {/* Desktop Navigation Menu */}
-          <NavigationMenu className="hidden md:flex max-w-none flex-1 justify-start">
+          <NavigationMenu className="hidden max-w-none flex-1 justify-start lg:flex">
             <NavigationMenuList className="gap-3 pl-3">
               {navigationItems.map((item) => (
-                <NavigationMenuItem key={item.label}>
-                  {item.subItems ? (
+                <NavigationMenuItem key={item.label} className="flex items-center">
+                  {item.groups ? (
                     <>
-                      <NavigationMenuTrigger
-                        className={`group/link relative bg-transparent px-2.5 text-sm font-medium tracking-[0.5px] ${textClass} transition-colors border-none cursor-pointer flex items-center gap-1`}
-                      >
-                        <span className="relative inline-flex items-center gap-1">
-                          <span className="relative pb-0.5">
+                      <div className="flex items-center">
+                        <NavigationMenuLink
+                          render={<Link href={item.href} />}
+                          className="rounded-none bg-transparent px-2 py-2"
+                        >
+                          <span className={`group/link relative text-sm font-medium tracking-[0.5px] ${textClass}`}>
                             {item.label}
                             <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100" />
                           </span>
-                        </span>
-                      </NavigationMenuTrigger>
+                        </NavigationMenuLink>
+                        <NavigationMenuTrigger
+                          aria-label={`${item.label} menu`}
+                          className={`h-9 w-6 rounded-none border-none bg-transparent p-0 ${textClass}`}
+                        >
+                          <span className="sr-only">{item.label}</span>
+                        </NavigationMenuTrigger>
+                      </div>
                       <NavigationMenuContent>
-                        <div className="flex w-[800px] gap-10 p-8">
-                          <div className="flex w-1/3 flex-col justify-between p-2">
+                        <div className="flex w-[min(1120px,calc(100vw-48px))] gap-10 p-8">
+                          <div className="flex w-56 shrink-0 flex-col justify-between border-l-2 border-[#b5573a] py-2 pl-6">
                             <div>
-                              <p className="text-[10px] uppercase tracking-[0.22em] text-[#1c1a18]/50 font-semibold">Vela Wear</p>
-                              <p className="mt-4 text-2xl font-medium text-[#1c1a18] leading-tight">{item.featuredTitle}</p>
-                              <p className="mt-3 text-sm leading-6 text-[#1c1a18]/70">{item.featuredDesc}</p>
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#1c1a18]/45">Vela Wear</p>
+                              <p className="mt-4 font-serif text-3xl font-light leading-tight text-[#1c1a18]">{item.label}</p>
                             </div>
                             <BaseNavigationMenu.Link
                               render={<Link href={item.href} onClick={() => {
@@ -414,24 +360,32 @@ export function SiteHeader() {
                               }} />}
                               className="mt-6 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1 group/btn"
                             >
-                              {t("storefront.nav.discoverAll")} <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
+                              {item.ctaLabel} <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
                             </BaseNavigationMenu.Link>
                           </div>
-                          <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-2">
-                            {item.subItems.map((sub) => (
-                              <NavigationMenuLink
-                                key={sub.label}
-                                render={<Link href={sub.href} onClick={() => {
-                                  setIsMobileMenuOpen(false);
-                                  if (document.activeElement instanceof HTMLElement) {
-                                    document.activeElement.blur();
-                                  }
-                                }} />}
-                                className="group/item flex flex-col justify-center rounded-xl p-4 transition-all duration-300 hover:bg-white/60 hover:shadow-[0_4px_12px_rgba(28,26,24,0.03)]"
-                              >
-                                <p className="text-sm font-medium text-[#1c1a18] transition-colors group-hover/item:text-[#b5573a]">{sub.label}</p>
-                                <p className="mt-1.5 text-xs leading-5 text-[#1c1a18]/55">{t("storefront.nav.exploreCollection")}</p>
-                              </NavigationMenuLink>
+                          <div className={cn(
+                            "grid flex-1 gap-x-8 gap-y-6",
+                            item.groups.length >= 3 ? "grid-cols-3" : item.groups.length === 2 ? "grid-cols-2" : "grid-cols-1",
+                          )}>
+                            {item.groups.map((group) => (
+                              <section key={group.title}>
+                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#1c1a18]">{group.title}</h3>
+                                <div className="space-y-1">
+                                  {group.items.map((sub) => (
+                                    <NavigationMenuLink
+                                      key={`${sub.label}-${sub.href}`}
+                                      render={<Link href={sub.href} onClick={() => {
+                                        if (document.activeElement instanceof HTMLElement) {
+                                          document.activeElement.blur();
+                                        }
+                                      }} />}
+                                      className="group/item rounded-none px-0 py-2 text-sm text-[#1c1a18]/65 hover:text-[#b5573a]"
+                                    >
+                                      {sub.label}
+                                    </NavigationMenuLink>
+                                  ))}
+                                </div>
+                              </section>
                             ))}
                           </div>
                         </div>
@@ -719,21 +673,68 @@ export function SiteHeader() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={`md:hidden bg-[#f7f4ef] overflow-hidden z-40 fixed left-4 right-4 w-[calc(100%-32px)] rounded-[24px] border border-[#e3dccf] shadow-2xl ${
+            className={`fixed left-4 right-4 z-40 w-[calc(100%-32px)] overflow-hidden rounded-[24px] border border-[#e3dccf] bg-[#f7f4ef] shadow-2xl lg:hidden ${
               isHome && !isScrolled ? "top-[88px]" : "top-[78px]"
             }`}
           >
-            <div className="px-6 py-8 flex flex-col gap-6">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="font-serif text-2xl text-[#1c1a18] hover:text-[#b5573a] transition-colors"
-                >
-                  {item.label}
-                </Link>
-              ))}
+            <div className="flex max-h-[calc(100dvh-96px)] flex-col gap-4 overflow-y-auto px-6 py-8">
+              {navigationItems.map((item) => {
+                const expanded = mobileExpandedItem === item.label;
+                return (
+                  <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <Link
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="font-serif text-2xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
+                      >
+                        {item.label}
+                      </Link>
+                      {item.groups && (
+                        <button
+                          type="button"
+                          aria-label={`${item.label} menu`}
+                          aria-expanded={expanded}
+                          onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
+                          className="grid size-9 place-items-center text-[#1c1a18]"
+                        >
+                          <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+                        </button>
+                      )}
+                    </div>
+                    {item.groups && expanded && (
+                      <div className="mt-4 border-l-2 border-[#b5573a] pl-4">
+                        <div className="space-y-5">
+                          {item.groups.map((group) => (
+                            <section key={group.title}>
+                              <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
+                              <div className="flex flex-col gap-2.5">
+                                {group.items.map((sub) => (
+                                  <Link
+                                    key={`${sub.label}-${sub.href}`}
+                                    href={sub.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="text-sm text-[#1c1a18]/70 hover:text-[#b5573a]"
+                                  >
+                                    {sub.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </section>
+                          ))}
+                        </div>
+                        <Link
+                          href={item.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="mt-5 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                        >
+                          {item.ctaLabel} &rarr;
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <div className="h-[1px] bg-[#e3dccf] my-2" />
 
               <div className="flex justify-center">

@@ -52,6 +52,7 @@ export interface Product {
   pricing?: Pricing;
   image: string;
   category: string;
+  categorySlug?: string;
   badge?: string;
   color: string;
   size: string;
@@ -485,6 +486,7 @@ export function mapBackendProduct(
     color: colorImages[0]?.colorName || localizedMatch?.color || (locale === "vi" ? "Đen" : "Black"),
     size: match ? match.size : "M",
     category: bp.categoryName || (match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN")),
+    categorySlug: bp.categorySlug ?? undefined,
     seoTitle: bp.seoTitle,
     seoDescription: bp.seoDescription,
     seoKeywords: bp.seoKeywords,

@@ -95,6 +95,59 @@ export type Product = {
   categorySlug?: string | null;
 };
 
+export type StorefrontCatalogSort =
+  | "featured"
+  | "newest"
+  | "price-asc"
+  | "price-desc";
+
+export type StorefrontCatalogFilters = {
+  q?: string;
+  categorySlugs?: string[];
+  colorIds?: number[];
+  sizeIds?: number[];
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: StorefrontCatalogSort;
+  page?: number;
+  size?: number;
+  locale?: string;
+};
+
+export type StorefrontCategoryFacet = {
+  id: number;
+  name: string;
+  slug: string;
+  count: number;
+};
+
+export type StorefrontColorFacet = {
+  id: number;
+  name: string;
+  hexCode?: string | null;
+  sortOrder?: number | null;
+  count: number;
+};
+
+export type StorefrontSizeFacet = {
+  id: number;
+  name: string;
+  sortOrder?: number | null;
+  count: number;
+};
+
+export type StorefrontCatalogResult = ResultPaginationDTO<Product> & {
+  facets: {
+    categories: StorefrontCategoryFacet[];
+    colors: StorefrontColorFacet[];
+    sizes: StorefrontSizeFacet[];
+    priceRange: {
+      min: number | null;
+      max: number | null;
+    };
+  };
+};
+
 export type CatalogEntity = {
   id: number;
   name: string;
@@ -232,6 +285,7 @@ export type OrderItem = {
   id: number;
   variantId?: number | null;
   productName: string;
+  productSlug?: string | null;
   variantName?: string | null;
   sku: string;
   image?: string | null;
@@ -306,15 +360,24 @@ export type MyCoupons = {
 
 export type Review = {
   id: number;
-  userId: number;
+  userId?: number;
   userName: string;
-  orderId: number;
-  orderCode: string;
-  orderItemId: number;
+  orderId?: number;
+  orderCode?: string;
+  orderItemId?: number;
   productName: string;
   productId?: number | null;
   productSlug?: string | null;
+  variantName?: string | null;
   rating: number;
   comment?: string | null;
+  images?: string[];
+  verifiedPurchase?: boolean;
   createdAt?: string;
+};
+
+export type ReviewSummary = {
+  total: number;
+  averageRating: number;
+  ratingCounts: Record<"1" | "2" | "3" | "4" | "5", number>;
 };

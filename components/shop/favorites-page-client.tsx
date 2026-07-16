@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Heart, LockKeyhole, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -39,22 +40,27 @@ export function FavoritesPageClient() {
     <>
       {!isAuthenticated ? (
         <FavoritesSignInState />
-      ) : error ? (
-        <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
-          <StorefrontApiStatus
-            error={error}
-            onRetry={retry}
-            resourceLabel={t("favorites.resource")}
-            returnHref="/collection"
-            variant="panel"
-          />
-        </div>
-      ) : (
-        <FavoritesContent
-          favorites={favorites}
-          removeFromFavorites={removeFromFavorites}
-          handleAddToBag={handleAddToBag}
+      ) : error && favorites.length === 0 ? (
+        <StorefrontApiStatus
+          error={error}
+          onRetry={retry}
+          resourceLabel={t("favorites.resource")}
+          returnHref="/collection"
+          variant="route"
         />
+      ) : (
+        <>
+          {error ? (
+            <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] md:px-16 md:pt-[120px]">
+              <StorefrontStaleWarning resourceLabel={t("favorites.resource")} onRetry={retry} />
+            </div>
+          ) : null}
+          <FavoritesContent
+            favorites={favorites}
+            removeFromFavorites={removeFromFavorites}
+            handleAddToBag={handleAddToBag}
+          />
+        </>
       )}
     </>
   );

@@ -43,7 +43,7 @@ type StorefrontStatusProps = {
   eyebrow?: string;
   secondaryAction?: StorefrontStatusAction;
   reference?: string;
-  variant?: "page" | "panel";
+  variant?: "page" | "route" | "panel";
   className?: string;
   headerAccessory?: ReactNode;
   standaloneCopy?: StorefrontStatusCopy;
@@ -151,6 +151,7 @@ function StorefrontStatusView({
   copy,
 }: StorefrontStatusViewProps) {
   const compact = variant === "panel";
+  const route = variant === "route";
   const code = String(status);
   const titleId = `storefront-status-${status}-title`;
 
@@ -160,7 +161,9 @@ function StorefrontStatusView({
         "relative isolate flex w-full flex-col overflow-hidden bg-[#f7f4ef] text-[#1c1a18]",
         compact
           ? "min-h-[430px] rounded-sm border border-[#e3dccf] px-5 py-10 sm:px-8"
-          : "min-h-dvh px-5 py-8 sm:px-8 sm:py-10 lg:px-12",
+          : route
+            ? "mt-[72px] min-h-[calc(100dvh-72px)] px-5 py-10 sm:px-8 lg:px-12"
+            : "min-h-dvh px-5 py-8 sm:px-8 sm:py-10 lg:px-12",
         className,
       )}
       aria-labelledby={titleId}
@@ -177,7 +180,7 @@ function StorefrontStatusView({
         hintTone="dark"
       />
 
-      {!compact ? (
+      {!compact && !route ? (
         <div className="relative z-10 flex items-center justify-between border-b border-[#e3dccf] pb-5">
           <Link
             href="/"
@@ -259,7 +262,7 @@ function StorefrontStatusView({
         </div>
       </div>
 
-      {!compact ? (
+      {!compact && !route ? (
         <div className="relative z-10 flex items-center justify-between border-t border-[#e3dccf] pt-5 text-[10px] uppercase tracking-[0.2em] text-[#55423d]/55">
           <span>{copy.editorial}</span>
           <span aria-hidden="true">{copy.statusNumberText ?? `# ${code}`}</span>

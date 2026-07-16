@@ -1,279 +1,366 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { X, Check, ChevronDown, ChevronUp } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { FashionImage } from "@/components/shop/fashion-image";
+import {
+  ProductGrid,
+  ProductLayoutMain,
+  ProductToolbar,
+  type SortOption,
+} from "@/components/shop/product-layout-components";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
-import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import type {
+  StorefrontCatalogResult,
+  StorefrontCatalogSort,
+} from "@/lib/api/types";
+import { formatCurrency } from "@/lib/i18n/format";
+import { useStorefrontProductsQuery } from "@/lib/queries/catalog";
+import {
+  catalogStateToApiFilters,
+  EMPTY_CATALOG_URL_STATE,
+  getCatalogRollbackQuery,
+  isValidCatalogPriceRange,
+  parseCatalogUrlState,
+  serializeCatalogUrlState,
+  toggleCatalogValue,
+  type CatalogUrlState,
+} from "@/lib/storefront-catalog";
 import { cn } from "@/lib/utils";
 import { mapBackendProduct } from "@/lib/vela-data";
-import { ProductToolbar, ProductGrid, ProductLayoutMain, useCommonSortOptions } from "@/components/shop/product-layout-components";
-import {
-  useCategoriesQuery,
-  useProductsQuery,
-  useColorsQuery,
-  useSizesQuery,
-} from "@/lib/queries/catalog";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-interface FilterGroupsProps {
-  selectedCategoryId: number | "ALL";
-  selectedColorId: number | null;
-  selectedSizeId: number | null;
-  minPrice: string;
-  maxPrice: string;
-  categoryTabsList: { id: number | "ALL"; name: string }[];
-  colors: { id: number; name: string; hexCode: string }[];
-  sizes: { id: number; name: string }[];
-  expandedSections: { category: boolean; size: boolean; color: boolean; price: boolean };
-  setSelectedCategoryId: (id: number | "ALL") => void;
-  setSelectedColorId: (id: number | null) => void;
-  setSelectedSizeId: (id: number | null) => void;
-  setMinPrice: (price: string) => void;
-  setMaxPrice: (price: string) => void;
-  setPage: (page: number) => void;
-  toggleSection: (section: "category" | "size" | "color" | "price") => void;
-  clearAllFilters: () => void;
-  hasActiveFilters: boolean;
-  isMobile?: boolean;
+
+type CatalogMode = "collection" | "search";
+
+type CatalogCopy = {
+  selected: string;
+  noOptions: string;
+  priceError: string;
+  staleWarning: string;
+  retry: string;
+  previous: string;
+  next: string;
+  page: string;
+  viewProducts: (count: number) => string;
+};
+
+function getCatalogCopy(locale: "vi" | "en"): CatalogCopy {
+  return locale === "vi"
+    ? {
+        selected: "Đang lọc",
+        noOptions: "Chưa có tùy chọn phù hợp.",
+        priceError: "Giá tối thiểu không được lớn hơn giá tối đa.",
+        staleWarning: "Dữ liệu mới chưa tải được. Bạn vẫn đang xem kết quả gần nhất.",
+        retry: "Thử lại",
+        previous: "Trang trước",
+        next: "Trang sau",
+        page: "Trang",
+        viewProducts: (count) => `Xem ${count} sản phẩm`,
+      }
+    : {
+        selected: "Active filters",
+        noOptions: "No matching options yet.",
+        priceError: "Minimum price cannot exceed maximum price.",
+        staleWarning: "Fresh data could not be loaded. The latest available results remain visible.",
+        retry: "Retry",
+        previous: "Previous page",
+        next: "Next page",
+        page: "Page",
+        viewProducts: (count) => `View ${count} products`,
+      };
 }
 
-function FilterGroups({
-  selectedCategoryId,
-  selectedColorId,
-  selectedSizeId,
-  minPrice,
-  maxPrice,
-  categoryTabsList,
-  colors,
-  sizes,
-  expandedSections,
-  setSelectedCategoryId,
-  setSelectedColorId,
-  setSelectedSizeId,
-  setMinPrice,
-  setMaxPrice,
-  setPage,
-  toggleSection,
-  clearAllFilters,
-  hasActiveFilters,
-  isMobile = false,
-}: FilterGroupsProps) {
-  const { t } = useI18n();
+type FilterProps = {
+  state: CatalogUrlState;
+  facets: StorefrontCatalogResult["facets"];
+  onChange: (next: CatalogUrlState) => void;
+  onClear: () => void;
+  priceError: string | null;
+  setPriceError: (message: string | null) => void;
+  isMobile?: boolean;
+};
+
+function PriceRangeInputs({
+  state,
+  priceRange,
+  onChange,
+  priceError,
+  setPriceError,
+}: {
+  state: CatalogUrlState;
+  priceRange: StorefrontCatalogResult["facets"]["priceRange"];
+  onChange: (next: CatalogUrlState) => void;
+  priceError: string | null;
+  setPriceError: (message: string | null) => void;
+}) {
+  const { locale, t } = useI18n();
+  const copy = getCatalogCopy(locale);
+  const [minimum, setMinimum] = useState(state.minPrice?.toString() ?? "");
+  const [maximum, setMaximum] = useState(state.maxPrice?.toString() ?? "");
+
+  const commit = () => {
+    const minPrice = minimum.trim() === "" ? undefined : Number(minimum);
+    const maxPrice = maximum.trim() === "" ? undefined : Number(maximum);
+    if (
+      (minPrice !== undefined && (!Number.isFinite(minPrice) || minPrice < 0)) ||
+      (maxPrice !== undefined && (!Number.isFinite(maxPrice) || maxPrice < 0))
+    ) return;
+
+    const next = { ...state, minPrice, maxPrice, page: 1 };
+    if (!isValidCatalogPriceRange(next)) {
+      setPriceError(copy.priceError);
+      return;
+    }
+
+    setPriceError(null);
+    onChange(next);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Category Section */}
-      <div className="border-b border-[#1c1a18]/10 pb-6">
-        <button
-          type="button"
-          onClick={() => toggleSection("category")}
-          className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
-        >
-          <span>{t("storefront.catalog.category")}</span>
-          {expandedSections.category ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-        </button>
-        <AnimatePresence initial={false}>
-          {expandedSections.category && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 space-y-3 text-sm text-[#1c1a18]/70">
-                {categoryTabsList.map((cat) => {
-                  const isChecked = selectedCategoryId === cat.id;
-                  return (
-                    <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
-                      <div className="relative flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {
-                            setSelectedCategoryId(isChecked ? "ALL" : cat.id);
-                            setPage(1);
-                          }}
-                          className="peer appearance-none h-4 w-4 border border-[#1c1a18]/25 rounded-none bg-canvas checked:bg-[#1c1a18] checked:border-[#1c1a18] cursor-pointer transition-colors"
-                        />
-                        <Check className="absolute size-3 text-[#f7f4ef] opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" />
-                      </div>
-                      <span className="group-hover:text-[#1c1a18] transition-colors">
-                        {cat.name}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <div>
+      <div className="flex items-center gap-2">
+        <Input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={minimum}
+          placeholder={t("storefront.catalog.minimum")}
+          onChange={(event) => setMinimum(event.currentTarget.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+          }}
+          className="h-10 rounded-none border-[#1c1a18]/15 bg-transparent px-2 text-xs"
+        />
+        <span aria-hidden className="text-[#1c1a18]/35">—</span>
+        <Input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={maximum}
+          placeholder={t("storefront.catalog.maximum")}
+          onChange={(event) => setMaximum(event.currentTarget.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+          }}
+          className="h-10 rounded-none border-[#1c1a18]/15 bg-transparent px-2 text-xs"
+        />
       </div>
+      {priceRange.min !== null && priceRange.max !== null && (
+        <p className="mt-2 text-[10px] text-[#1c1a18]/45">
+          {formatCurrency(priceRange.min, locale)} – {formatCurrency(priceRange.max, locale)}
+        </p>
+      )}
+      {priceError && <p className="mt-2 text-xs text-red-700">{priceError}</p>}
+    </div>
+  );
+}
 
-      {/* Size Section */}
-      <div className="border-b border-[#1c1a18]/10 pb-6">
-        <button
-          type="button"
-          onClick={() => toggleSection("size")}
-          className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
-        >
-          <span>{t("storefront.catalog.size")}</span>
-          {expandedSections.size ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-        </button>
-        <AnimatePresence initial={false}>
-          {expandedSections.size && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 grid grid-cols-3 gap-2">
-                {sizes.map((size) => {
-                  const isSelected = selectedSizeId === size.id;
-                  return (
-                    <button
-                      key={size.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedSizeId(isSelected ? null : size.id);
-                        setPage(1);
-                      }}
+function CatalogFilters({
+  state,
+  facets,
+  onChange,
+  onClear,
+  priceError,
+  setPriceError,
+  isMobile = false,
+}: FilterProps) {
+  const { locale, t } = useI18n();
+  const copy = getCatalogCopy(locale);
+  const [expanded, setExpanded] = useState({
+    category: true,
+    size: true,
+    color: true,
+    price: true,
+  });
+
+  const toggleSection = (section: keyof typeof expanded) => {
+    setExpanded((current) => ({ ...current, [section]: !current[section] }));
+  };
+
+  const hasActiveFilters =
+    state.categories.length > 0 ||
+    state.colors.length > 0 ||
+    state.sizes.length > 0 ||
+    state.minPrice !== undefined ||
+    state.maxPrice !== undefined;
+
+  const sectionButton = (
+    section: keyof typeof expanded,
+    label: string,
+  ) => (
+    <button
+      type="button"
+      onClick={() => toggleSection(section)}
+      aria-expanded={expanded[section]}
+      className="flex w-full cursor-pointer items-center justify-between text-left text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18]"
+    >
+      <span>{label}</span>
+      {expanded[section] ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+    </button>
+  );
+
+  return (
+    <div className="space-y-7">
+      <section className="border-b border-[#1c1a18]/10 pb-6">
+        {sectionButton("category", t("storefront.catalog.category"))}
+        {expanded.category && (
+          <div className="mt-4 space-y-3">
+            {facets.categories.length === 0 ? (
+              <p className="text-xs text-[#1c1a18]/50">{copy.noOptions}</p>
+            ) : (
+              facets.categories.map((category) => {
+                const selected = state.categories.includes(category.slug);
+                const disabled = category.count === 0 && !selected;
+                return (
+                  <label
+                    key={category.id}
+                    className={cn(
+                      "flex items-center gap-3 text-sm text-[#1c1a18]/70",
+                      disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer hover:text-[#1c1a18]",
+                    )}
+                  >
+                    <span className="relative grid size-4 place-items-center">
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        disabled={disabled}
+                        onChange={() =>
+                          onChange({
+                            ...state,
+                            categories: toggleCatalogValue(state.categories, category.slug),
+                            page: 1,
+                          })
+                        }
+                        className="peer size-4 cursor-pointer appearance-none rounded-none border border-[#1c1a18]/25 checked:border-[#1c1a18] checked:bg-[#1c1a18] disabled:cursor-not-allowed"
+                      />
+                      <Check className="pointer-events-none absolute size-3 text-white opacity-0 peer-checked:opacity-100" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{category.name}</span>
+                    <span className="text-[11px] tabular-nums text-[#1c1a18]/40">{category.count}</span>
+                  </label>
+                );
+              })
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="border-b border-[#1c1a18]/10 pb-6">
+        {sectionButton("size", t("storefront.catalog.size"))}
+        {expanded.size && (
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {facets.sizes.length === 0 ? (
+              <p className="col-span-3 text-xs text-[#1c1a18]/50">{copy.noOptions}</p>
+            ) : (
+              facets.sizes.map((size) => {
+                const selected = state.sizes.includes(size.id);
+                const disabled = size.count === 0 && !selected;
+                return (
+                  <button
+                    key={size.id}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() =>
+                      onChange({
+                        ...state,
+                        sizes: toggleCatalogValue(state.sizes, size.id),
+                        page: 1,
+                      })
+                    }
+                    className={cn(
+                      "min-h-10 border px-2 text-xs font-medium transition-colors",
+                      selected
+                        ? "border-[#1c1a18] bg-[#efe7dc] text-[#1c1a18]"
+                        : "border-[#1c1a18]/10 text-[#1c1a18]/70 hover:border-[#1c1a18]",
+                      disabled && "cursor-not-allowed opacity-35",
+                    )}
+                    aria-label={`${size.name}, ${size.count}`}
+                  >
+                    {size.name}
+                    <span className="ml-1 text-[9px] text-[#1c1a18]/40">({size.count})</span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="border-b border-[#1c1a18]/10 pb-6">
+        {sectionButton("color", t("storefront.catalog.color"))}
+        {expanded.color && (
+          <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3">
+            {facets.colors.length === 0 ? (
+              <p className="col-span-2 text-xs text-[#1c1a18]/50">{copy.noOptions}</p>
+            ) : (
+              facets.colors.map((color) => {
+                const selected = state.colors.includes(color.id);
+                const disabled = color.count === 0 && !selected;
+                return (
+                  <button
+                    key={color.id}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() =>
+                      onChange({
+                        ...state,
+                        colors: toggleCatalogValue(state.colors, color.id),
+                        page: 1,
+                      })
+                    }
+                    className={cn(
+                      "flex min-w-0 items-center gap-2 text-left text-xs text-[#1c1a18]/70 hover:text-[#1c1a18]",
+                      disabled && "cursor-not-allowed opacity-35",
+                    )}
+                  >
+                    <span
                       className={cn(
-                        "py-2 text-center text-xs font-medium border rounded-none transition-colors cursor-pointer",
-                        isSelected
-                          ? "border-[#1c1a18] bg-[#efe7dc] text-[#1c1a18]"
-                          : "border-[#1c1a18]/10 hover:border-[#1c1a18] text-[#1c1a18]/70 bg-transparent"
+                        "size-6 shrink-0 border border-[#1c1a18]/15",
+                        selected && "ring-2 ring-[#1c1a18] ring-offset-2 ring-offset-[#f7f4ef]",
                       )}
-                    >
-                      {size.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                      style={{ backgroundColor: color.hexCode || "#e7e0d6" }}
+                    />
+                    <span className="truncate">{color.name}</span>
+                    <span className="ml-auto text-[10px] tabular-nums text-[#1c1a18]/40">{color.count}</span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        )}
+      </section>
 
-      {/* Color Section */}
-      <div className="border-b border-[#1c1a18]/10 pb-6">
-        <button
-          type="button"
-          onClick={() => toggleSection("color")}
-          className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
-        >
-          <span>{t("storefront.catalog.color")}</span>
-          {expandedSections.color ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-        </button>
-        <AnimatePresence initial={false}>
-          {expandedSections.color && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 flex flex-wrap gap-3">
-                {colors.map((color) => {
-                  const isSelected = selectedColorId === color.id;
-                  return (
-                    <button
-                      key={color.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedColorId(isSelected ? null : color.id);
-                        setPage(1);
-                      }}
-                      title={color.name}
-                      style={{ backgroundColor: color.hexCode || "#efebe4" }}
-                      className={cn(
-                        "w-8 h-8 rounded-none border border-[#1c1a18]/10 shadow-sm transition-transform duration-150 ease-out cursor-pointer relative",
-                        isSelected
-                          ? "ring-2 ring-offset-2 ring-[#1c1a18] ring-offset-[#f7f4ef]"
-                          : "hover:scale-105"
-                      )}
-                    >
-                      {color.name.toLowerCase() === "white" && (
-                        <div className="absolute inset-0 border border-[#1c1a18]/5 rounded-none pointer-events-none" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      <section className="border-b border-[#1c1a18]/10 pb-6">
+        {sectionButton("price", t("storefront.catalog.priceRange"))}
+        {expanded.price && (
+          <div className="mt-4">
+            <PriceRangeInputs
+              key={`${state.minPrice ?? ""}-${state.maxPrice ?? ""}`}
+              state={state}
+              priceRange={facets.priceRange}
+              onChange={onChange}
+              priceError={priceError}
+              setPriceError={setPriceError}
+            />
+          </div>
+        )}
+      </section>
 
-      {/* Price Range Section */}
-      <div className="border-b border-[#1c1a18]/10 pb-6">
-        <button
-          type="button"
-          onClick={() => toggleSection("price")}
-          className="w-full text-left font-sans text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18] flex justify-between items-center select-none cursor-pointer"
-        >
-          <span>{t("storefront.catalog.priceRange")}</span>
-          {expandedSections.price ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-        </button>
-        <AnimatePresence initial={false}>
-          {expandedSections.price && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 flex items-center gap-3">
-                <Input
-                  type="number"
-                  placeholder={t("storefront.catalog.minimum")}
-                  value={minPrice}
-                  onChange={(e) => {
-                    setMinPrice(e.target.value);
-                    setPage(1);
-                  }}
-                  className="h-9 rounded-none border-[#1c1a18]/15 bg-transparent px-3 text-xs focus-visible:ring-[#b85a3c]/30"
-                />
-                <span className="text-xs text-[#1c1a18]/40">—</span>
-                <Input
-                  type="number"
-                  placeholder={t("storefront.catalog.maximum")}
-                  value={maxPrice}
-                  onChange={(e) => {
-                    setMaxPrice(e.target.value);
-                    setPage(1);
-                  }}
-                  className="h-9 rounded-none border-[#1c1a18]/15 bg-transparent px-3 text-xs focus-visible:ring-[#b85a3c]/30"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Clear Filters Button (Desktop Sidebar only) */}
       {!isMobile && hasActiveFilters && (
         <button
           type="button"
-          onClick={clearAllFilters}
-          className="w-full py-2.5 border border-[#b5573a] text-[#b5573a] hover:bg-[#b5573a] hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider rounded-none cursor-pointer"
+          onClick={onClear}
+          className="w-full border border-[#b5573a] py-2.5 text-xs font-semibold uppercase tracking-wider text-[#b5573a] transition-colors hover:bg-[#b5573a] hover:text-white"
         >
           {t("storefront.common.clearAllFilters")}
         </button>
@@ -282,422 +369,459 @@ function FilterGroups({
   );
 }
 
-export function CollectionClient() {
-  const { locale: activeLocale, t } = useI18n();
-  const sortOptions = useCommonSortOptions();
-  const collectionScrollAnchorRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
-  const filterMotionIntent: "show" | "hide" = "show";
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | "ALL">("ALL");
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
-  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
-  const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
-  
-  // Filter visibility default to hidden
-  const [showFilters, setShowFilters] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+type ActiveFiltersProps = {
+  state: CatalogUrlState;
+  facets: StorefrontCatalogResult["facets"];
+  onChange: (next: CatalogUrlState) => void;
+};
 
-  // Expanded Sidebar sections
-  const [expandedSections, setExpandedSections] = useState({
-    category: true,
-    size: true,
-    color: true,
-    price: true,
+function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
+  const { locale } = useI18n();
+  const copy = getCatalogCopy(locale);
+  const categoryNames = new Map(facets.categories.map((item) => [item.slug, item.name]));
+  const colorNames = new Map(facets.colors.map((item) => [item.id, item.name]));
+  const sizeNames = new Map(facets.sizes.map((item) => [item.id, item.name]));
+  const chips: Array<{ key: string; label: string; remove: () => void }> = [];
+
+  state.categories.forEach((slug) => chips.push({
+    key: `category-${slug}`,
+    label: categoryNames.get(slug) ?? slug,
+    remove: () => onChange({ ...state, categories: state.categories.filter((item) => item !== slug), page: 1 }),
+  }));
+  state.colors.forEach((id) => chips.push({
+    key: `color-${id}`,
+    label: colorNames.get(id) ?? String(id),
+    remove: () => onChange({ ...state, colors: state.colors.filter((item) => item !== id), page: 1 }),
+  }));
+  state.sizes.forEach((id) => chips.push({
+    key: `size-${id}`,
+    label: sizeNames.get(id) ?? String(id),
+    remove: () => onChange({ ...state, sizes: state.sizes.filter((item) => item !== id), page: 1 }),
+  }));
+  if (state.minPrice !== undefined) chips.push({
+    key: "min-price",
+    label: `≥ ${formatCurrency(state.minPrice, locale)}`,
+    remove: () => onChange({ ...state, minPrice: undefined, page: 1 }),
+  });
+  if (state.maxPrice !== undefined) chips.push({
+    key: "max-price",
+    label: `≤ ${formatCurrency(state.maxPrice, locale)}`,
+    remove: () => onChange({ ...state, maxPrice: undefined, page: 1 }),
   });
 
-  const [sortBy, setSortBy] = useState<string>("featured");
-
-  const backendSortMap: Record<string, string> = {
-    featured: "", // default sort
-    newest: "createdAt,desc",
-    price_asc: "price,asc",
-    price_desc: "price,desc",
-  };
-
-  const [page, setPage] = useState(1);
-  const size = 12;
-
-  const categoriesQuery = useCategoriesQuery({ size: 100, locale: activeLocale });
-  const colorsQuery = useColorsQuery({ size: 100, locale: activeLocale });
-  const sizesQuery = useSizesQuery({ size: 100, locale: activeLocale });
-  const allProductsQuery = useProductsQuery({
-    size: 1000,
-    sort: "createdAt,desc",
-    locale: activeLocale,
-  });
-  
-  const productsQuery = useProductsQuery({ 
-    page,
-    size,
-    sort: backendSortMap[sortBy] || undefined,
-    categoryId: selectedCategoryId === "ALL" ? undefined : selectedCategoryId,
-    colorId: selectedColorId ?? undefined,
-    sizeId: selectedSizeId ?? undefined,
-    minPrice: minPrice ? Number(minPrice) : undefined,
-    maxPrice: maxPrice ? Number(maxPrice) : undefined,
-    locale: activeLocale 
-  });
-
-  const categories = useMemo(
-    () => categoriesQuery.data?.result ?? [],
-    [categoriesQuery.data]
-  );
-
-  const colors = useMemo(
-    () => colorsQuery.data?.result ?? [],
-    [colorsQuery.data]
-  );
-
-  const sizes = useMemo(
-    () => sizesQuery.data?.result ?? [],
-    [sizesQuery.data]
-  );
-  
-  const products = useMemo(
-    () =>
-      productsQuery.data?.result?.map((product) =>
-        mapBackendProduct(product, activeLocale)
-      ) ?? [],
-    [activeLocale, productsQuery.data]
-  );
-
-  const meta = productsQuery.data?.meta;
-
-  const isInitialLoading = productsQuery.isPending && productsQuery.data === undefined;
-
-  const categoryIdsWithProducts = useMemo(() => {
-    const ids = new Set<number>();
-    allProductsQuery.data?.result?.forEach((product) => {
-      if (typeof product.categoryId === "number") {
-        ids.add(product.categoryId);
-      }
-    });
-    return ids;
-  }, [allProductsQuery.data]);
-
-  // Compute category list dynamically from backend categories containing products
-  const categoryTabsList = useMemo(() => {
-    const list: { id: number | "ALL"; name: string }[] = [];
-    categories.forEach((cat) => {
-      if (categoryIdsWithProducts.has(cat.id)) {
-        list.push({ id: cat.id, name: cat.name });
-      }
-    });
-    return list;
-  }, [categories, categoryIdsWithProducts]);
-
-  const toggleSection = (section: "category" | "size" | "color" | "price") => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const hasActiveFilters = 
-    selectedColorId !== null || 
-    selectedSizeId !== null || 
-    minPrice !== "" || 
-    maxPrice !== "" || 
-    selectedCategoryId !== "ALL";
-
-  const clearAllFilters = () => {
-    setSelectedColorId(null);
-    setSelectedSizeId(null);
-    setMinPrice("");
-    setMaxPrice("");
-    setSelectedCategoryId("ALL");
-    setPage(1);
-  };
-
-  const filterProps = {
-    selectedCategoryId,
-    selectedColorId,
-    selectedSizeId,
-    minPrice,
-    maxPrice,
-    categoryTabsList,
-    colors: colors as { id: number; name: string; hexCode: string }[],
-    sizes: sizes as { id: number; name: string }[],
-    expandedSections,
-    setSelectedCategoryId,
-    setSelectedColorId,
-    setSelectedSizeId,
-    setMinPrice,
-    setMaxPrice,
-    setPage,
-    toggleSection,
-    clearAllFilters,
-    hasActiveFilters,
-  };
-
-  const scrollToCollectionTop = () => {
-    const headerOffset = Number.parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--header-visible-height")
-    ) || 0;
-    const anchorTop =
-      (collectionScrollAnchorRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY;
-    const targetTop = anchorTop - headerOffset - 28;
-
-    window.scrollTo({
-      top: Math.max(targetTop, 0),
-      behavior: "auto",
-    });
-  };
-
-  const goToPage = (targetPage: number) => {
-    if (!meta || targetPage === page || targetPage < 1 || targetPage > meta.pages) return;
-    scrollToCollectionTop();
-    setPage(targetPage);
-  };
-
-  // Render shadcn page numbers dynamically with ellipses
-  const renderPageNumbers = () => {
-    const totalPages = meta?.pages || 1;
-    const items: (number | "...")[] = [];
-    const siblingCount = 1;
-
-    const totalPageNumbers = siblingCount * 2 + 5;
-
-    if (totalPages <= totalPageNumbers) {
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(i);
-      }
-    } else {
-      const leftSiblingIndex = Math.max(page - siblingCount, 1);
-      const rightSiblingIndex = Math.min(page + siblingCount, totalPages);
-
-      const shouldShowLeftDots = leftSiblingIndex > 2;
-      const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
-
-      const firstPageIndex = 1;
-      const lastPageIndex = totalPages;
-
-      if (!shouldShowLeftDots && shouldShowRightDots) {
-        const leftItemCount = 3 + 2 * siblingCount;
-        for (let i = 1; i <= leftItemCount; i++) {
-          items.push(i);
-        }
-        items.push("...");
-        items.push(lastPageIndex);
-      } else if (shouldShowLeftDots && !shouldShowRightDots) {
-        const rightItemCount = 3 + 2 * siblingCount;
-        items.push(firstPageIndex);
-        items.push("...");
-        for (let i = totalPages - rightItemCount + 1; i <= totalPages; i++) {
-          items.push(i);
-        }
-      } else if (shouldShowLeftDots && shouldShowRightDots) {
-        items.push(firstPageIndex);
-        items.push("...");
-        for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
-          items.push(i);
-        }
-        items.push("...");
-        items.push(lastPageIndex);
-      }
-    }
-
-    return items.map((item, index) => {
-      if (item === "...") {
-        return (
-          <PaginationItem key={`dots-${index}`}>
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-      return (
-        <PaginationItem key={item}>
-          <PaginationLink
-            href="#"
-            isActive={item === page}
-            onClick={(e) => {
-              e.preventDefault();
-              goToPage(Number(item));
-            }}
-          >
-            {item}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    });
-  };
+  if (chips.length === 0) return null;
 
   return (
-    <>
-      {isInitialLoading ? (
-        <CollectionCatalogLoading />
-      ) : productsQuery.isError ? (
-          <StorefrontApiStatus
-            error={productsQuery.error}
-            onRetry={() => void productsQuery.refetch()}
-            resourceLabel={t("storefront.catalog.resource")}
-            returnHref="/"
-            variant="panel"
-          />
-        ) : (
-        <div className="w-full">
-          <div ref={collectionScrollAnchorRef} className="h-px w-full" aria-hidden="true" />
+    <div className="mb-5 flex flex-wrap items-center gap-2" aria-label={copy.selected}>
+      <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#1c1a18]/50">
+        {copy.selected}
+      </span>
+      {chips.map((chip) => (
+        <button
+          key={chip.key}
+          type="button"
+          onClick={chip.remove}
+          className="inline-flex items-center gap-1.5 border border-[#1c1a18]/12 bg-white/50 px-3 py-1.5 text-xs text-[#1c1a18] hover:border-[#1c1a18]/35"
+        >
+          {chip.label}
+          <X className="size-3" aria-hidden />
+        </button>
+      ))}
+    </div>
+  );
+}
 
-          <ProductToolbar
-            totalProducts={meta?.total || products.length}
-            showFilters={showFilters}
-            setShowFilters={setShowFilters}
-            setMobileFiltersOpen={setMobileFiltersOpen}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            sortOptions={sortOptions}
-          />
+function CatalogPagination({
+  state,
+  pages,
+  onPage,
+}: {
+  state: CatalogUrlState;
+  pages: number;
+  onPage: (page: number) => void;
+}) {
+  const { locale } = useI18n();
+  const copy = getCatalogCopy(locale);
+  if (pages <= 1) return null;
 
-          {/* Main Content Area */}
-          <ProductLayoutMain
-            showFilters={showFilters}
-            sidebarContent={<FilterGroups {...filterProps} />}
-            id="collection-layout"
-            shouldReduceMotion={Boolean(shouldReduceMotion)}
-            filterMotionIntent={filterMotionIntent}
-          >
-            {products.length === 0 ? (
-              <div className="py-20 text-center select-none min-h-[580px] flex items-center justify-center">
-                <p className="text-sm text-[#1c1a18]/50">
-                  {t("storefront.catalog.noProducts")}
-                </p>
-              </div>
-            ) : (
-              <div className="flex-grow w-full">
-                <ProductGrid>
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} imageAspect="collection" />
-                  ))}
-                </ProductGrid>
+  const candidates = Array.from(new Set([
+    1,
+    Math.max(1, state.page - 1),
+    state.page,
+    Math.min(pages, state.page + 1),
+    pages,
+  ])).sort((a, b) => a - b);
 
-                {/* Pagination Controls */}
-                {meta && meta.pages > 1 && (
-                  <div className="border-b border-[#1c1a18]/10 pb-4 pt-4">
-                    <Pagination aria-label={t("storefront.pagination.label")} className="select-none">
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            href="#"
-                            text={t("storefront.pagination.previous")}
-                            aria-label={t("storefront.pagination.previousAria")}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              goToPage(page - 1);
-                            }}
-                            aria-disabled={page === 1}
-                            className={cn(page === 1 && "pointer-events-none opacity-50")}
-                          />
-                        </PaginationItem>
-                        
-                        {renderPageNumbers()}
-
-                        <PaginationItem>
-                          <PaginationNext
-                            href="#"
-                            text={t("storefront.pagination.next")}
-                            aria-label={t("storefront.pagination.nextAria")}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              goToPage(page + 1);
-                            }}
-                            aria-disabled={page === meta.pages}
-                            className={cn(page === meta.pages && "pointer-events-none opacity-50")}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </div>
+  return (
+    <nav className="mt-12 flex items-center justify-center gap-2" aria-label={copy.page}>
+      <button
+        type="button"
+        disabled={state.page <= 1}
+        onClick={() => onPage(state.page - 1)}
+        className="border border-[#1c1a18]/15 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        {copy.previous}
+      </button>
+      {candidates.map((page, index) => (
+        <span key={page} className="contents">
+          {index > 0 && candidates[index - 1] !== page - 1 && (
+            <span className="px-1 text-[#1c1a18]/40">…</span>
+          )}
+          <button
+            type="button"
+            onClick={() => onPage(page)}
+            aria-current={page === state.page ? "page" : undefined}
+            aria-label={`${copy.page} ${page}`}
+            className={cn(
+              "size-9 border text-xs",
+              page === state.page
+                ? "border-[#1c1a18] bg-[#1c1a18] text-white"
+                : "border-[#1c1a18]/15 hover:border-[#1c1a18]",
             )}
-          </ProductLayoutMain>
+          >
+            {page}
+          </button>
+        </span>
+      ))}
+      <button
+        type="button"
+        disabled={state.page >= pages}
+        onClick={() => onPage(state.page + 1)}
+        className="border border-[#1c1a18]/15 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        {copy.next}
+      </button>
+    </nav>
+  );
+}
+
+export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }) {
+  const { locale, t } = useI18n();
+  const copy = getCatalogCopy(locale);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const shouldReduceMotion = useReducedMotion();
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+  const lastSuccessfulQueryRef = useRef<string | null>(null);
+  const [rolledBackQuery, setRolledBackQuery] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [mobileDraft, setMobileDraft] = useState<CatalogUrlState>(EMPTY_CATALOG_URL_STATE);
+  const [priceError, setPriceError] = useState<string | null>(null);
+
+  const state = useMemo(
+    () => parseCatalogUrlState(searchParams),
+    [searchParams],
+  );
+  const serializedState = serializeCatalogUrlState(state);
+  const productsQuery = useStorefrontProductsQuery(
+    catalogStateToApiFilters(state, locale),
+  );
+  const mobilePreviewQuery = useStorefrontProductsQuery(
+    catalogStateToApiFilters({ ...mobileDraft, page: 1 }, locale, 1),
+    { enabled: mobileFiltersOpen && isValidCatalogPriceRange(mobileDraft) },
+  );
+
+  const facets = productsQuery.data?.facets ?? {
+    categories: [],
+    colors: [],
+    sizes: [],
+    priceRange: { min: null, max: null },
+  };
+  const products = useMemo(
+    () => (productsQuery.data?.result ?? []).map((product) => mapBackendProduct(product, locale)),
+    [locale, productsQuery.data?.result],
+  );
+  const meta = productsQuery.data?.meta;
+  const isInitialLoading = productsQuery.isPending && productsQuery.data === undefined;
+  const sortOptions: SortOption[] = [
+    { value: "featured", label: t("storefront.catalog.sortFeatured") },
+    { value: "newest", label: t("storefront.catalog.sortNewest") },
+    { value: "price-asc", label: t("storefront.catalog.sortPriceLow") },
+    { value: "price-desc", label: t("storefront.catalog.sortPriceHigh") },
+  ];
+
+  useEffect(() => {
+    if (
+      productsQuery.isSuccess &&
+      !productsQuery.isPlaceholderData &&
+      productsQuery.data !== undefined
+    ) {
+      lastSuccessfulQueryRef.current = serializedState;
+      if (rolledBackQuery === serializedState) {
+        // The retry reached a terminal success, so the rollback warning can close.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setRolledBackQuery(null);
+      }
+    }
+  }, [productsQuery.data, productsQuery.isPlaceholderData, productsQuery.isSuccess, rolledBackQuery, serializedState]);
+
+  useEffect(() => {
+    const rollbackQuery = getCatalogRollbackQuery({
+      currentQuery: serializedState,
+      lastSuccessfulQuery: lastSuccessfulQueryRef.current,
+      isError: productsQuery.isError,
+      hasCachedData: productsQuery.data !== undefined,
+    });
+    if (rollbackQuery === null) return;
+
+    // Router state is external to React; remember the failed URL before replacing it.
+    setRolledBackQuery(serializedState);
+    router.replace(rollbackQuery ? `${pathname}?${rollbackQuery}` : pathname, { scroll: false });
+  }, [pathname, productsQuery.data, productsQuery.isError, router, serializedState]);
+
+  const navigate = (next: CatalogUrlState, scroll = false) => {
+    setRolledBackQuery(null);
+    const query = serializeCatalogUrlState(next);
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll });
+  };
+
+  const clearFilters = (target = state) => {
+    setPriceError(null);
+    navigate({
+      ...target,
+      categories: [],
+      colors: [],
+      sizes: [],
+      minPrice: undefined,
+      maxPrice: undefined,
+      page: 1,
+    });
+  };
+
+  const openMobileFilters = () => {
+    setMobileDraft(state);
+    setPriceError(null);
+    setMobileFiltersOpen(true);
+  };
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileFiltersOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileFiltersOpen]);
+
+  const goToPage = (page: number) => {
+    navigate({ ...state, page });
+    const headerOffset = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--header-visible-height"),
+    ) || 0;
+    const top = (scrollAnchorRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY;
+    window.scrollTo({ top: Math.max(0, top - headerOffset - 24), behavior: "auto" });
+  };
+
+  if (productsQuery.isError && productsQuery.data === undefined) {
+    return (
+      <StorefrontApiStatus
+        error={productsQuery.error}
+        onRetry={() => productsQuery.refetch()}
+        resourceLabel={mode === "search" ? t("storefront.search.resource") : t("storefront.catalog.pageTitle")}
+        returnHref="/"
+        variant="route"
+      />
+    );
+  }
+
+  if (isInitialLoading) return <CollectionCatalogLoading />;
+
+  const title = mode === "search"
+    ? t("storefront.search.resultsFor", { query: state.q })
+    : t("storefront.catalog.pageTitle");
+  const previewCount = mobilePreviewQuery.data?.meta.total ?? meta?.total ?? 0;
+
+  return (
+    <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
+      <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+        <Link href="/" className="hover:text-[#1c1a18]">{t("storefront.common.home")}</Link>
+        <span>/</span>
+        <span className="font-medium text-[#1c1a18]">
+          {mode === "search" ? t("storefront.search.title") : t("storefront.common.collections")}
+        </span>
+      </div>
+
+      <header className="mb-4">
+        <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">{title}</h1>
+      </header>
+
+      {(productsQuery.isError && productsQuery.data !== undefined) ||
+      (rolledBackQuery !== null &&
+        !(productsQuery.isSuccess &&
+          !productsQuery.isPlaceholderData &&
+          serializedState === rolledBackQuery)) ? (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-l-2 border-[#b5573a] bg-[#efe7dc]/65 px-4 py-3 text-xs text-[#1c1a18]/70" role="status">
+          <span>{copy.staleWarning}</span>
+          <button
+            type="button"
+            onClick={() => {
+              if (rolledBackQuery !== null) {
+                router.replace(rolledBackQuery ? `${pathname}?${rolledBackQuery}` : pathname, { scroll: false });
+                return;
+              }
+              productsQuery.refetch();
+            }}
+            className="font-semibold uppercase tracking-wider text-[#b5573a]"
+          >
+            {copy.retry}
+          </button>
         </div>
+      ) : null}
+
+      <div ref={scrollAnchorRef} />
+      <ProductToolbar
+        totalProducts={meta?.total ?? 0}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        setMobileFiltersOpen={openMobileFilters}
+        sortBy={state.sort}
+        setSortBy={(sort) => navigate({ ...state, sort: sort as StorefrontCatalogSort, page: 1 })}
+        sortOptions={sortOptions}
+      />
+
+      <ActiveFilters state={state} facets={facets} onChange={navigate} />
+
+      <ProductLayoutMain
+        showFilters={showFilters}
+        sidebarContent={
+          <CatalogFilters
+            state={state}
+            facets={facets}
+            onChange={navigate}
+            onClear={() => clearFilters()}
+            priceError={priceError}
+            setPriceError={setPriceError}
+          />
+        }
+        id={`${mode}-catalog-layout`}
+        shouldReduceMotion={Boolean(shouldReduceMotion)}
+        filterMotionIntent={showFilters ? "show" : "hide"}
+      >
+        {products.length === 0 ? (
+          <div className="py-24 text-center">
+            <p className="mb-6 text-sm text-[#1c1a18]/50">{t("storefront.search.noResults")}</p>
+            <button
+              type="button"
+              onClick={() => clearFilters({ ...state, q: "" })}
+              className="bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#b5573a]"
+            >
+              {t("storefront.common.clearAllFilters")}
+            </button>
+          </div>
+        ) : (
+          <>
+            <ProductGrid>
+              {products.map((product) => <ProductCard key={product.id} product={product} />)}
+            </ProductGrid>
+            <CatalogPagination state={state} pages={meta?.pages ?? 1} onPage={goToPage} />
+          </>
+        )}
+      </ProductLayoutMain>
+
+      {mode === "collection" && (
+        <section className="relative mb-4 mt-4 h-[300px] w-full overflow-hidden rounded-lg bg-black">
+          <FashionImage src="/images/collection/lookbook-banner.webp" alt={t("storefront.catalog.lookbookAlt")} className="opacity-65" />
+          <div className="absolute inset-0 bg-[#1c1a18]/40" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            <span className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/80">{t("storefront.catalog.lookbookLabel")}</span>
+            <h2 className="mb-4 font-serif text-3xl font-light uppercase tracking-[0.1em] text-white">{t("storefront.catalog.comingSoon")}</h2>
+            <div className="mb-6 h-px w-10 bg-white/40" />
+            <Link href="/collection" className="rounded-sm bg-white px-6 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-black hover:bg-[#efebe4]">
+              {t("storefront.catalog.exploreNow")}
+            </Link>
+          </div>
+        </section>
       )}
 
-      {/* Mobile Filters Drawer */}
       <AnimatePresence>
         {mobileFiltersOpen && (
           <>
-            {/* Backdrop */}
-            <motion.div
+            <motion.button
+              type="button"
+              aria-label={t("common.close")}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileFiltersOpen(false)}
-              className="fixed inset-0 bg-black/45 z-50 md:hidden"
+              className="fixed inset-0 z-50 bg-black/45 md:hidden"
             />
-            {/* Drawer Panel */}
-            <motion.div
+            <motion.aside
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("storefront.common.filters")}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="fixed right-0 top-0 h-full w-[85vw] max-w-sm bg-[#f7f4ef] z-50 p-6 overflow-y-auto flex flex-col shadow-2xl md:hidden"
+              transition={{ type: "tween", duration: shouldReduceMotion ? 0.01 : 0.25 }}
+              className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-sm flex-col bg-[#f7f4ef] p-6 shadow-2xl md:hidden"
             >
-              <div className="flex items-center justify-between border-b border-[#1c1a18]/10 pb-4 mb-6">
-                <h2 className="font-serif text-2xl font-light text-[#1c1a18]">{t("storefront.common.filters")}</h2>
-                <button
-                  type="button"
-                  onClick={() => setMobileFiltersOpen(false)}
-                  className="p-1 hover:text-[#b5573a] transition-colors cursor-pointer"
-                >
+              <div className="mb-6 flex items-center justify-between border-b border-[#1c1a18]/10 pb-4">
+                <h2 className="font-serif text-2xl font-light">{t("storefront.common.filters")}</h2>
+                <button type="button" onClick={() => setMobileFiltersOpen(false)} aria-label={t("common.close")} className="p-1">
                   <X className="size-6" />
                 </button>
               </div>
-
-              <div className="flex-grow overflow-y-auto pr-1">
-                <FilterGroups {...filterProps} isMobile={true} />
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                <CatalogFilters
+                  state={mobileDraft}
+                  facets={facets}
+                  onChange={setMobileDraft}
+                  onClear={() => {
+                    setPriceError(null);
+                    setMobileDraft({
+                      ...mobileDraft,
+                      categories: [], colors: [], sizes: [],
+                      minPrice: undefined, maxPrice: undefined, page: 1,
+                    });
+                  }}
+                  priceError={priceError}
+                  setPriceError={setPriceError}
+                  isMobile
+                />
               </div>
-
-              <div className="border-t border-[#1c1a18]/10 pt-4 mt-6 flex gap-4">
+              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#1c1a18]/10 pt-4">
                 <button
                   type="button"
-                  onClick={clearAllFilters}
-                  className="flex-1 py-3 border border-[#1c1a18] text-[#1c1a18] text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#1c1a18]/5 rounded-none cursor-pointer"
+                  onClick={() => setMobileDraft({
+                    ...mobileDraft,
+                    categories: [], colors: [], sizes: [],
+                    minPrice: undefined, maxPrice: undefined, page: 1,
+                  })}
+                  className="border border-[#1c1a18] py-3 text-xs font-semibold uppercase tracking-wider"
                 >
                   {t("storefront.common.clearAll")}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setMobileFiltersOpen(false)}
-                  className="flex-1 py-3 bg-[#1c1a18] text-white text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[#b5573a] rounded-none cursor-pointer"
+                  disabled={!isValidCatalogPriceRange(mobileDraft) || mobilePreviewQuery.isFetching}
+                  onClick={() => {
+                    if (!isValidCatalogPriceRange(mobileDraft)) return;
+                    navigate({ ...mobileDraft, page: 1 });
+                    setMobileFiltersOpen(false);
+                  }}
+                  className="bg-[#1c1a18] px-2 py-3 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-45"
                 >
-                  {t("storefront.common.apply")}
+                  {copy.viewProducts(previewCount)}
                 </button>
               </div>
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
 
 export function CollectionCatalogLoading() {
   return (
-    <div className="w-full" aria-busy="true">
-      <div aria-hidden="true">
-        <div className="sticky top-[var(--header-visible-height)] z-30 mb-6 flex items-center justify-between py-3">
-          <Skeleton className="hidden h-3 w-24 bg-[#efe7dc] md:block" />
-          <Skeleton className="h-8 w-24 rounded-none bg-[#efe7dc] md:hidden" />
-          <div className="flex items-center gap-4 md:gap-6">
-            <Skeleton className="hidden h-3 w-24 bg-[#efe7dc] md:block" />
-            <Skeleton className="h-3 w-32 bg-[#efe7dc]" />
-          </div>
-        </div>
-
-        <ProductLayoutMain
-          showFilters={false}
-          sidebarContent={null}
-          id="collection-loading-layout"
-        >
-          <ProductCardSkeletonGrid
-            count={6}
-            imageAspect="square"
-            gridClassName="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
-          />
-        </ProductLayoutMain>
+    <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]" aria-busy="true">
+      <div aria-hidden>
+        <div className="mb-4 flex gap-2"><Skeleton className="h-2.5 w-12" /><Skeleton className="h-2.5 w-24" /></div>
+        <Skeleton className="mb-7 h-12 w-full max-w-md" />
+        <div className="mb-6 flex justify-between py-3"><Skeleton className="h-4 w-24" /><Skeleton className="h-4 w-44" /></div>
+        <ProductCardSkeletonGrid count={6} gridClassName="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" />
       </div>
     </div>
   );

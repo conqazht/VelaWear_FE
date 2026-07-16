@@ -8,6 +8,11 @@ export const queryKeys = {
     list: (filters: unknown, locale?: string) => ["products", filters, locale] as const,
     detail: (id: number | string, locale?: string) => ["product", id, locale] as const,
   },
+  storefrontCatalog: {
+    root: ["storefront-catalog"] as const,
+    list: (filters: unknown, locale?: string) =>
+      ["storefront-catalog", filters, locale] as const,
+  },
   catalog: {
     categories: (params?: unknown, locale?: string) => ["categories", params, locale] as const,
     brands: (params?: unknown) => ["brands", params] as const,
@@ -45,5 +50,8 @@ export const queryKeys = {
   reviews: {
     root: ["reviews"] as const,
     list: (params?: unknown) => ["reviews", params] as const,
+    product: (productId: number, params?: unknown) => ["reviews", "product", productId, params] as const,
+    summary: (productId: number) => ["reviews", "product", productId, "summary"] as const,
+    me: (params?: unknown) => ["reviews", "me", params] as const,
   },
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStatus } from "@/components/errors/storefront-status";
@@ -25,6 +27,9 @@ import {
 import { cancelOrder } from "@/lib/checkout-api";
 import { formatDateTime } from "@/lib/i18n/format";
 import { money } from "@/lib/vela-data";
+import type { OrderItem } from "@/lib/api/types";
+import { useMyReviewsQuery } from "@/lib/queries/commerce";
+import { OrderReviewDialog } from "./order-review-dialog";
 
 const statusLabelKeys = {
   PENDING: "account.orders.status.pending",
@@ -76,6 +81,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { locale, t } = useI18n();
   const queryClient = useQueryClient();
+  const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const orderQuery = useQuery({
     queryKey: ["orders", "code", code],
     queryFn: () => getOrderByCode(code),
@@ -83,6 +89,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   });
   const order = orderQuery.data;
   const hasAccess = Boolean(order && order.userId === user?.id);
+  const reviewsQuery = useMyReviewsQuery(hasAccess, {
+    orderId: order?.id,
+    page: 1,
+    size: 100,
+    sort: "createdAt,desc",
+  });
   const historiesQuery = useQuery({
     queryKey: ["orders", order?.id, "status-histories"],
     queryFn: () =>
@@ -99,6 +111,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     },
   });
   const histories = historiesQuery.data?.result ?? [];
+  const completedOrder = order?.status === "COMPLETED";
+  const reviewedOrderItemIds = new Set(
+    (reviewsQuery.data?.result ?? [])
+      .map((review) => review.orderItemId)
+      .filter((orderItemId): orderItemId is number => typeof orderItemId === "number"),
+  );
   const error = cancelMutation.error
     ? getErrorMessage(cancelMutation.error, t("account.order.cancelError"))
     : null;
@@ -163,65 +181,57 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     );
   }
 
-  if (orderQuery.isError) {
+  if (orderQuery.isError && !order) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <StorefrontApiStatus
-          error={orderQuery.error}
-          onRetry={() => void orderQuery.refetch()}
-          resourceLabel={t("account.order.title")}
-          returnHref="/profile?tab=orders"
-          returnLabel={t("account.order.historyAction")}
-          variant="panel"
-        />
-      </div>
+      <StorefrontApiStatus
+        error={orderQuery.error}
+        onRetry={() => void orderQuery.refetch()}
+        resourceLabel={t("account.order.title")}
+        returnHref="/profile?tab=orders"
+        returnLabel={t("account.order.historyAction")}
+        variant="route"
+      />
     );
   }
 
   if (!order) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <StorefrontStatus
-          status={404}
-          eyebrow={t("account.order.notFoundEyebrow")}
-          title={t("account.order.notFoundTitle")}
-          description={t("account.order.notFoundDescription")}
-          primaryAction={{ label: t("account.order.historyAction"), href: "/profile?tab=orders" }}
-          secondaryAction={{ label: t("account.order.shopAction"), href: "/collection" }}
-          variant="panel"
-        />
-      </div>
+      <StorefrontStatus
+        status={404}
+        eyebrow={t("account.order.notFoundEyebrow")}
+        title={t("account.order.notFoundTitle")}
+        description={t("account.order.notFoundDescription")}
+        primaryAction={{ label: t("account.order.historyAction"), href: "/profile?tab=orders" }}
+        secondaryAction={{ label: t("account.order.shopAction"), href: "/collection" }}
+        variant="route"
+      />
     );
   }
 
   if (!hasAccess) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <StorefrontStatus
-          status={403}
-          eyebrow={t("account.order.forbiddenEyebrow")}
-          title={t("account.order.forbiddenTitle")}
-          description={t("account.order.forbiddenDescription")}
-          primaryAction={{ label: t("account.order.myOrdersAction"), href: "/profile?tab=orders" }}
-          secondaryAction={{ label: t("account.order.homeAction"), href: "/" }}
-          variant="panel"
-        />
-      </div>
+      <StorefrontStatus
+        status={403}
+        eyebrow={t("account.order.forbiddenEyebrow")}
+        title={t("account.order.forbiddenTitle")}
+        description={t("account.order.forbiddenDescription")}
+        primaryAction={{ label: t("account.order.myOrdersAction"), href: "/profile?tab=orders" }}
+        secondaryAction={{ label: t("account.order.homeAction"), href: "/" }}
+        variant="route"
+      />
     );
   }
 
-  if (historiesQuery.isError) {
+  if (historiesQuery.isError && histories.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <StorefrontApiStatus
-          error={historiesQuery.error}
-          onRetry={() => void historiesQuery.refetch()}
-          resourceLabel={t("account.order.historyResource")}
-          returnHref="/profile?tab=orders"
-          returnLabel={t("account.order.historyAction")}
-          variant="panel"
-        />
-      </div>
+      <StorefrontApiStatus
+        error={historiesQuery.error}
+        onRetry={() => void historiesQuery.refetch()}
+        resourceLabel={t("account.order.historyResource")}
+        returnHref="/profile?tab=orders"
+        returnLabel={t("account.order.historyAction")}
+        variant="route"
+      />
     );
   }
 
@@ -234,6 +244,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     <div className="min-h-screen bg-canvas text-ink">
       <main className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
         <Link href="/profile?tab=orders" className="mb-8 inline-flex text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/55 hover:text-[#1c1a18]">← {t("account.order.back")}</Link>
+
+        {orderQuery.isError ? (
+          <StorefrontStaleWarning
+            onRetry={() => void orderQuery.refetch()}
+            resourceLabel={t("account.order.title")}
+            className="mb-6"
+          />
+        ) : null}
 
         <header className="mb-10 flex flex-col justify-between gap-6 border-b border-[#1c1a18]/10 pb-8 md:flex-row md:items-end">
           <div>
@@ -255,6 +273,13 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           <div className="flex flex-col gap-8 lg:col-span-8">
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
               <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">{t("account.order.items", { count: order.items?.length ?? 0 })}</h2>
+              {completedOrder && reviewsQuery.isError ? (
+                <StorefrontStaleWarning
+                  onRetry={() => void reviewsQuery.refetch()}
+                  resourceLabel={t("reviews.write.statusResource")}
+                  className="mb-5"
+                />
+              ) : null}
               {order.items?.length ? (
                 <div className="divide-y divide-[#1c1a18]/8">
                   {order.items.map((item) => (
@@ -296,6 +321,36 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                             ) : null}
                           </div>
                         ) : null}
+                        {completedOrder ? (
+                          <div className="mt-4">
+                            {reviewsQuery.isLoading && !reviewsQuery.data ? (
+                              <span className="text-xs text-[#1c1a18]/45">
+                                {t("reviews.write.checking")}
+                              </span>
+                            ) : reviewedOrderItemIds.has(item.id) ? (
+                              item.productSlug ? (
+                                <Link
+                                  href={`/products/${encodeURIComponent(item.productSlug)}?reviews=1#reviews`}
+                                  className="inline-flex min-h-9 items-center border border-emerald-200 bg-emerald-50 px-4 text-xs font-bold uppercase tracking-[0.12em] text-emerald-700"
+                                >
+                                  {t("reviews.write.done")}
+                                </Link>
+                              ) : (
+                                <span className="inline-flex min-h-9 items-center border border-emerald-200 bg-emerald-50 px-4 text-xs font-bold uppercase tracking-[0.12em] text-emerald-700">
+                                  {t("reviews.write.done")}
+                                </span>
+                              )
+                            ) : !reviewsQuery.isError ? (
+                              <button
+                                type="button"
+                                onClick={() => setReviewItem(item)}
+                                className="min-h-9 border border-[#1c1a18] px-4 text-xs font-bold uppercase tracking-[0.12em] text-[#1c1a18] transition-colors hover:bg-[#1c1a18] hover:text-white"
+                              >
+                                {t("reviews.write.cta")}
+                              </button>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ))}
@@ -312,6 +367,13 @@ export default function OrderDetailsClient({ code }: { code: string }) {
 
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
               <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">{t("account.order.statusHistory")}</h2>
+              {historiesQuery.isError ? (
+                <StorefrontStaleWarning
+                  onRetry={() => void historiesQuery.refetch()}
+                  resourceLabel={t("account.order.historyResource")}
+                  className="mb-5"
+                />
+              ) : null}
               <div className="space-y-5">
                 <div className="flex gap-4">
                   <CheckCircle2 className="mt-0.5 size-5 text-emerald-600" />
@@ -398,6 +460,15 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           </div>
         </div>
       </main>
+      {reviewItem ? (
+        <OrderReviewDialog
+          item={reviewItem}
+          open
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setReviewItem(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

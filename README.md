@@ -28,6 +28,13 @@ Xem [hướng dẫn Playwright và CI full-stack bằng tiếng Việt](./docs/P
 để biết test nào chạy ở frontend/backend, cách chạy đồng thời hai repository và cách
 cấu hình GitHub Actions.
 
+## Tài liệu storefront
+
+- [Storefront Catalog UX — frontend (tiếng Việt)](./docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md):
+  Collection/Search, mega-menu, Size Guide, review, xử lý lỗi, kiểm thử và hướng dẫn
+  mở rộng.
+- [Sale Campaign frontend](./docs/SALE_CAMPAIGN_FRONTEND.md).
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

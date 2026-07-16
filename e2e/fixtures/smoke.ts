@@ -14,6 +14,16 @@ const emptyPage = {
   result: [],
 };
 
+const emptyStorefrontCatalog = {
+  ...emptyPage,
+  facets: {
+    categories: [],
+    colors: [],
+    sizes: [],
+    priceRange: { min: null, max: null },
+  },
+};
+
 function corsHeaders(request: Request) {
   return {
     "access-control-allow-credentials": "true",
@@ -64,6 +74,15 @@ async function fulfillGuestApi(route: Route, unexpectedApiRequests: string[]) {
     return;
   }
 
+  if (pathname === "/api/v1/storefront/products") {
+    await route.fulfill({
+      status: 200,
+      headers,
+      json: { statusCode: 200, message: "OK", data: emptyStorefrontCatalog },
+    });
+    return;
+  }
+
   if (pathname === "/api/v1/sales") {
     await route.fulfill({
       status: 200,
@@ -96,8 +115,14 @@ async function fulfillGuestApi(route: Route, unexpectedApiRequests: string[]) {
 export const test = base.extend<SmokeFixtures>({
   guestApi: [
     async ({ page }, use) => {
+      const consoleErrors: string[] = [];
       const pageErrors: string[] = [];
       const unexpectedApiRequests: string[] = [];
+      page.on("console", (message) => {
+        if (message.type() === "error" && !message.text().startsWith("Failed to load resource:")) {
+          consoleErrors.push(message.text());
+        }
+      });
       page.on("pageerror", (error) => pageErrors.push(error.message));
       await page.route("**/api/v1/**", (route) =>
         fulfillGuestApi(route, unexpectedApiRequests)
@@ -105,6 +130,7 @@ export const test = base.extend<SmokeFixtures>({
 
       await use();
 
+      expect(consoleErrors, "Smoke page emitted a console error").toEqual([]);
       expect(pageErrors, "Smoke page emitted an uncaught JavaScript error").toEqual([]);
       expect(
         unexpectedApiRequests,
