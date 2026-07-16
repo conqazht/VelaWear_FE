@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Skeleton } from "boneyard-js/react";
 import { Heart, LockKeyhole, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -10,8 +9,7 @@ import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductGrid } from "@/components/shop/product-layout-components";
-import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
-import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Product } from "@/lib/vela-data";
 import { useI18n } from "@/components/providers/i18n-provider";
 
@@ -33,13 +31,12 @@ export function FavoritesPageClient() {
     showAddedToBag(product, product.size || "M", product.color || "Sand");
   };
 
+  if (isAuthLoading || isFavoritesLoading) {
+    return <FavoritesPageLoadingFallback loadingLabel={t("common.loading")} />;
+  }
+
   return (
-    <Skeleton
-      name="favorites-page"
-      loading={isAuthLoading || isFavoritesLoading}
-      fallback={<FavoritesPageLoadingFallback />}
-      fixture={<FavoritesPageFixture />}
-    >
+    <>
       {!isAuthenticated ? (
         <FavoritesSignInState />
       ) : error ? (
@@ -59,15 +56,55 @@ export function FavoritesPageClient() {
           handleAddToBag={handleAddToBag}
         />
       )}
-    </Skeleton>
+    </>
   );
 }
-
-function FavoritesPageLoadingFallback() {
+function FavoritesPageLoadingFallback({ loadingLabel }: { loadingLabel: string }) {
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
-      <div className="h-8 w-56 animate-pulse bg-[#efe7dc]" />
-      <ProductCardSkeletonGrid count={6} imageAspect="portrait" gridClassName="mt-10" />
+    <div
+      className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]"
+      aria-busy="true"
+    >
+      <span role="status" className="sr-only">
+        {loadingLabel}
+      </span>
+
+      <div aria-hidden="true">
+        <div className="mb-6 flex items-center gap-2">
+          <Skeleton className="h-2.5 w-12 rounded-none bg-[#efe7dc]" />
+          <Skeleton className="h-2.5 w-2 rounded-none bg-[#efe7dc]" />
+          <Skeleton className="h-2.5 w-20 rounded-none bg-[#efe7dc]" />
+        </div>
+
+        <div className="mb-4 space-y-2">
+          <Skeleton className="h-12 w-52 rounded-none bg-[#efe7dc] md:h-14 md:w-64" />
+          <Skeleton className="h-2.5 w-28 rounded-none bg-[#efe7dc]" />
+        </div>
+
+        <ProductGrid>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex h-full flex-col overflow-hidden rounded-md border border-transparent bg-white"
+            >
+              <div className="relative aspect-square">
+                <Skeleton className="size-full rounded-none bg-[#efe7dc]" />
+                <Skeleton className="absolute right-4 top-4 size-10 rounded-full bg-white/85" />
+              </div>
+
+              <div className="flex flex-grow flex-col items-start px-4 pb-6 pt-5">
+                <Skeleton className="mb-2 h-3 w-2/5 rounded-none bg-[#efe7dc]" />
+                <Skeleton className="mb-3 h-5 w-4/5 rounded-none bg-[#efe7dc]" />
+                <div className="mt-1 flex items-center gap-2.5">
+                  <Skeleton className="h-4 w-20 rounded-none bg-[#efe7dc]" />
+                  <Skeleton className="h-3 w-16 rounded-none bg-[#efe7dc]" />
+                </div>
+                <Skeleton className="mt-5 h-11 w-full rounded-full bg-[#efe7dc]" />
+              </div>
+            </div>
+          ))}
+        </ProductGrid>
+      </div>
     </div>
   );
 }
@@ -193,17 +230,5 @@ function FavoritesGrid({
         />
       ))}
     </ProductGrid>
-  );
-}
-
-function FavoritesPageFixture() {
-  const { locale } = useI18n();
-
-  return (
-    <FavoritesContent
-      favorites={getLocalizedFixtureProducts(locale).slice(0, 4)}
-      removeFromFavorites={() => undefined}
-      handleAddToBag={() => undefined}
-    />
   );
 }

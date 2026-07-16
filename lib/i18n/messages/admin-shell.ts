@@ -5,6 +5,7 @@ export const adminShellMessages = defineMessages(
     "admin.shell.brand": "Vela Wear Admin",
 
     "admin.shell.navigation.management": "Management",
+    "admin.shell.navigation.storefront": "Return to storefront",
     "admin.shell.navigation.dashboards": "Dashboards",
     "admin.shell.navigation.pages": "Pages",
     "admin.shell.navigation.users": "Users",
@@ -143,6 +144,7 @@ export const adminShellMessages = defineMessages(
     "admin.shell.brand": "Quản trị Vela Wear",
 
     "admin.shell.navigation.management": "Quản lý",
+    "admin.shell.navigation.storefront": "Quay lại cửa hàng",
     "admin.shell.navigation.dashboards": "Bảng điều khiển",
     "admin.shell.navigation.pages": "Trang",
     "admin.shell.navigation.users": "Người dùng",

@@ -10,14 +10,6 @@ const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowLocalIP: process.env.NODE_ENV === "development" && isLoopbackApi,
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
       productUploadsPattern,
     ],
   },

@@ -17,7 +17,7 @@ export default function AdminError({
     <div className="relative">
       <LanguageSwitcher
         inverted
-        showIcon={false}
+        presentation="popover"
         className="absolute right-4 top-4 z-30"
       />
       <AnimatedStatus

@@ -2,10 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Skeleton } from "boneyard-js/react";
 import { CalendarClock, History, PiggyBank, Ticket } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMyCouponsQuery } from "@/lib/queries/commerce";
 import type { Coupon } from "@/lib/api/types";
 import { money } from "@/lib/vela-data";
@@ -40,13 +40,15 @@ export function CouponsClient() {
     return remaining >= 0 && remaining <= 7 * 24 * 60 * 60 * 1000;
   }).length;
 
+  if (isAuthLoading) {
+    return <CouponsPageLoading />;
+  }
+
   if (!isAuthenticated || !user) {
     return (
-      <Skeleton name="coupons-page" loading={isAuthLoading} fallback={<CouponsLoadingFallback />} fixture={<CouponsLoadingFixture />}>
       <div className="bg-canvas text-ink min-h-[100dvh] pt-[120px] px-6 flex items-center justify-center">
         <p className="text-sm font-medium uppercase tracking-wider text-[#1c1a18]/60">{t("coupons.signIn")}</p>
       </div>
-      </Skeleton>
     );
   }
 
@@ -63,7 +65,9 @@ export function CouponsClient() {
             </span>
           </div>
 
-          {!couponsQuery.isLoading && !couponsQuery.isError && (
+          {couponsQuery.isLoading ? (
+            <CouponStatsLoadingSkeleton />
+          ) : !couponsQuery.isError && (
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <CouponStat label={t("coupons.stat.available")} value={coupons.length.toString()} icon={<Ticket className="size-4" />} />
               <CouponStat label={t("coupons.stat.used")} value={usageHistory.length.toString()} icon={<History className="size-4" />} />
@@ -81,14 +85,7 @@ export function CouponsClient() {
             variant="panel"
           />
         ) : couponsQuery.isLoading ? (
-          <Skeleton
-            name="coupons-page"
-            loading
-            fallback={<CouponsLoadingFallback />}
-            fixture={<CouponsLoadingFixture />}
-          >
-            <CouponsLoadingFixture />
-          </Skeleton>
+          <CouponsLoadingSkeleton />
         ) : coupons.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center bg-white border border-[#1c1a18]/5 rounded-md shadow-sm">
             <Ticket className="w-12 h-12 text-[#1c1a18]/20 mb-6" strokeWidth={1} />
@@ -242,27 +239,65 @@ function CouponStat({ label, value, icon }: { label: string; value: string; icon
   );
 }
 
-function CouponsLoadingFallback() {
+function CouponsPageLoading() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="h-72 rounded-md bg-white" />
+    <div className="bg-canvas text-ink flex min-h-screen flex-col" aria-busy="true">
+      <main className="flex w-full flex-grow flex-col gap-10 px-6 py-10 md:px-16 md:py-16">
+        <section className="flex flex-col gap-6 text-left" aria-hidden="true">
+          <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
+            <Skeleton className="h-8 w-40 bg-[#efe7dc] md:h-9 md:w-52" />
+            <Skeleton className="h-3 w-16 bg-[#efe7dc]" />
+          </div>
+          <CouponStatsLoadingSkeleton />
+          <CouponsLoadingSkeleton />
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function CouponStatsLoadingSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-hidden="true">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="rounded-md border border-[#1c1a18]/8 bg-white p-4 md:p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <Skeleton className="h-2.5 w-16 bg-[#efe7dc]" />
+            <Skeleton className="size-4 rounded-full bg-[#efe7dc]" />
+          </div>
+          <Skeleton className="h-7 w-20 bg-[#efe7dc]" />
+        </div>
       ))}
     </div>
   );
 }
 
-function CouponsLoadingFixture() {
-  const { locale, t } = useI18n();
-
+function CouponsLoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
       {Array.from({ length: 6 }).map((_, index) => (
-        <article key={index} className="min-h-72 rounded-md border border-[#1c1a18]/10 bg-white p-8">
-          <p className="text-xs uppercase tracking-widest">{t("coupons.type.percentage")}</p>
-          <h3 className="mt-4 font-serif text-2xl">VELA20</h3>
-          <p className="mt-16 text-3xl font-semibold">20%</p>
-          <p className="mt-3 text-xs">{t("coupons.minimum", { amount: money(500000, locale) })}</p>
+        <article
+          key={index}
+          className="relative min-h-72 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white p-8"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <Skeleton className="h-2.5 w-20 bg-[#efe7dc]" />
+            <Skeleton className="h-5 w-16 bg-[#efe7dc]" />
+          </div>
+          <Skeleton className="mt-4 h-7 w-32 bg-[#efe7dc]" />
+
+          <div className="my-8 border-t border-dashed border-[#1c1a18]/15" />
+
+          <Skeleton className="h-9 w-24 bg-[#efe7dc]" />
+          <div className="mt-4 space-y-2">
+            <Skeleton className="h-3 w-4/5 bg-[#efe7dc]" />
+            <Skeleton className="h-3 w-3/5 bg-[#efe7dc]" />
+          </div>
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <Skeleton className="h-2.5 w-24 bg-[#efe7dc]" />
+            <Skeleton className="h-2.5 w-16 bg-[#efe7dc]" />
+          </div>
+          <Skeleton className="mt-2 h-1.5 w-full rounded-full bg-[#efe7dc]" />
         </article>
       ))}
     </div>

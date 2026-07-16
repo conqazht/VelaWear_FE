@@ -4,6 +4,7 @@ import { Sparkles, Leaf, ShieldCheck, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
 import { mapBackendProduct } from "@/lib/vela-data";
 import { useProductsQuery, useCategoriesQuery } from "@/lib/queries/catalog";
@@ -71,16 +72,28 @@ export function HomePage() {
   const categoriesQuery = useCategoriesQuery({ size: 10, sort: "sortOrder,asc", locale: activeLocale });
 
   const trendingProducts = useMemo(() => {
-    if (productsQuery.data?.result && productsQuery.data.result.length > 0) {
-      return productsQuery.data.result.map((product) => mapBackendProduct(product, activeLocale));
+    if (productsQuery.isPending) {
+      return [];
     }
-    // Fallback to static if backend fails or empty
-    const trendingProductIds = ["classic-linen-shirt", "pleated-wool-trousers", "the-heritage-tote", "merino-wool-coat"];
+
+    if (productsQuery.data?.result && productsQuery.data.result.length > 0) {
+      return productsQuery.data.result.map((product) =>
+        mapBackendProduct(product, activeLocale)
+      );
+    }
+
+    const trendingProductIds = [
+      "classic-linen-shirt",
+      "pleated-wool-trousers",
+      "the-heritage-tote",
+      "merino-wool-coat",
+    ];
     const fixtureProducts = getLocalizedFixtureProducts(activeLocale);
+
     return trendingProductIds
-      .map(id => fixtureProducts.find(p => p.id === id))
-      .filter((p): p is (typeof fixtureProducts)[number] => !!p);
-  }, [productsQuery.data, activeLocale]);
+      .map((id) => fixtureProducts.find((product) => product.id === id))
+      .filter((product): product is (typeof fixtureProducts)[number] => Boolean(product));
+  }, [productsQuery.data, productsQuery.isPending, activeLocale]);
 
   const featuredCategories = useMemo(() => {
     if (categoriesQuery.data?.result && categoriesQuery.data.result.length > 0) {
@@ -148,9 +161,13 @@ export function HomePage() {
           </div>
 
           <div className="max-w-[1800px] mx-auto px-6 md:px-16 overflow-visible">
-            <ScrollReveal direction="up" delay={0.1}>
-              <HorizontalSlider products={trendingProducts} />
-            </ScrollReveal>
+            {productsQuery.isPending ? (
+              <TrendingProductsSkeleton loadingLabel={t("common.loading")} />
+            ) : (
+              <ScrollReveal direction="up" delay={0.1}>
+                <HorizontalSlider products={trendingProducts} />
+              </ScrollReveal>
+            )}
           </div>
         </section>
 
@@ -228,6 +245,43 @@ export function HomePage() {
         {/* 8. Newsletter Subscription */}
         <Newsletter />
       </main>
+    </div>
+  );
+}
+
+function TrendingProductsSkeleton({ loadingLabel }: { loadingLabel: string }) {
+  return (
+    <div aria-busy="true">
+      <span role="status" className="sr-only">
+        {loadingLabel}
+      </span>
+
+      <div
+        className="flex gap-6 overflow-hidden px-1 pb-4"
+        aria-hidden="true"
+      >
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="min-w-[280px] max-w-[400px] flex-none pb-4 sm:min-w-[340px] md:min-w-[380px]"
+          >
+            <div className="relative aspect-[3/4] w-full overflow-hidden">
+              <Skeleton className="size-full rounded-none bg-[#efe7dc]" />
+              <Skeleton className="absolute left-4 top-4 h-6 w-16 rounded-full bg-[#e5dccf]" />
+              <Skeleton className="absolute right-4 top-4 size-10 rounded-full bg-[#f7f4ef]/90" />
+            </div>
+
+            <div className="flex flex-col gap-1.5 px-1 pt-4">
+              <Skeleton className="h-3 w-24 rounded-none bg-[#e5dccf]" />
+              <Skeleton className="h-5 w-3/4 rounded-none bg-[#e5dccf]" />
+              <div className="mt-0.5 flex items-center gap-2.5">
+                <Skeleton className="h-4 w-24 rounded-none bg-[#e5dccf]" />
+                <Skeleton className="h-3 w-16 rounded-none bg-[#e5dccf]" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { Suspense, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Skeleton } from "boneyard-js/react";
 import { ChevronDown, ChevronUp, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
@@ -11,6 +10,7 @@ import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getProducts } from "@/lib/api/catalog";
 import { matchesSearchText, normalizeSearchText } from "@/lib/search";
 import { cn } from "@/lib/utils";
@@ -603,14 +603,12 @@ function SearchResultsContent() {
     );
   }
 
+  if (isCatalogLoading) {
+    return <SearchResultsLoading />;
+  }
+
   return (
-    <Skeleton
-      name="search-results"
-      loading={isCatalogLoading}
-      className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]"
-      fallback={<SearchResultsLoadingFallback />}
-      fixture={<SearchResultsFixture products={visibleCatalogProducts.slice(0, 6)} query={query} />}
-    >
+    <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
       {/* Breadcrumbs */}
       <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
@@ -719,87 +717,54 @@ function SearchResultsContent() {
           </>
         )}
       </AnimatePresence>
-    </Skeleton>
-  );
-}
-
-function SearchResultsLoadingFallback() {
-  return (
-    <div className="space-y-8 py-6">
-      <div className="space-y-3">
-        <div className="h-3 w-28 animate-pulse bg-[#efe7dc]" />
-        <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
-      </div>
-      <ProductCardSkeletonGrid />
     </div>
   );
 }
 
-function SearchResultsFixture({ products, query }: { products: Product[]; query: string }) {
-  const fixtureProducts = products.slice(0, 6);
-  const { t } = useI18n();
-  const sortOptions = useCommonSortOptions();
-
+function SearchResultsLoading() {
   return (
-    <>
-      <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
-        <span>{t("storefront.common.home")}</span>
-        <span>/</span>
-        <span className="font-medium text-[#1c1a18]">{t("storefront.search.title")}</span>
-      </div>
+    <div
+      className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]"
+      aria-busy="true"
+    >
+      <div aria-hidden="true">
+        <div className="mb-4 flex items-center gap-2">
+          <Skeleton className="h-2.5 w-12 bg-[#efe7dc]" />
+          <Skeleton className="size-1.5 rounded-full bg-[#efe7dc]" />
+          <Skeleton className="h-2.5 w-20 bg-[#efe7dc]" />
+        </div>
 
-      <header className="mb-4">
-        <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
-          {t("storefront.search.resultsFor", {
-            query: query || t("storefront.search.fixtureQuery"),
-          })}
-        </h1>
-      </header>
+        <header className="mb-4">
+          <Skeleton className="h-9 w-full max-w-sm bg-[#efe7dc] md:h-12 md:max-w-xl" />
+        </header>
 
-      <ProductToolbar
-        totalProducts={fixtureProducts.length || 12}
-        showFilters={false}
-        setShowFilters={() => undefined}
-        setMobileFiltersOpen={() => undefined}
-        sortBy="featured"
-        setSortBy={() => undefined}
-        sortOptions={sortOptions}
-      />
-
-      <ProductLayoutMain
-        showFilters={false}
-        sidebarContent={<div className="min-h-[520px] border-r border-[#1c1a18]/10" />}
-        id="search-layout-fixture"
-      >
-        {fixtureProducts.length > 0 ? (
-          <ProductGrid>
-            {fixtureProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </ProductGrid>
-        ) : (
-          <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="space-y-3">
-                <div className="aspect-[3/4] bg-[#efe7dc]" />
-                <div className="h-4 w-3/4 bg-[#efe7dc]" />
-                <div className="h-4 w-1/3 bg-[#efe7dc]" />
-              </div>
-            ))}
+        <div className="sticky top-[var(--header-visible-height)] z-30 mb-6 flex items-center justify-between py-3">
+          <Skeleton className="hidden h-3 w-24 bg-[#efe7dc] md:block" />
+          <Skeleton className="h-8 w-24 rounded-none bg-[#efe7dc] md:hidden" />
+          <div className="flex items-center gap-4 md:gap-6">
+            <Skeleton className="hidden h-3 w-24 bg-[#efe7dc] md:block" />
+            <Skeleton className="h-3 w-32 bg-[#efe7dc]" />
           </div>
-        )}
-      </ProductLayoutMain>
-    </>
+        </div>
+
+        <ProductLayoutMain
+          showFilters={false}
+          sidebarContent={null}
+          id="search-loading-layout"
+        >
+          <ProductCardSkeletonGrid
+            count={6}
+            gridClassName="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
+          />
+        </ProductLayoutMain>
+      </div>
+    </div>
   );
 }
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
-        <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
-      </div>
-    }>
+    <Suspense fallback={<SearchResultsLoading />}>
       <SearchResultsContent />
     </Suspense>
   );

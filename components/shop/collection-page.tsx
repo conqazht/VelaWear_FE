@@ -3,10 +3,12 @@
 import { Suspense } from "react";
 import Link from "next/link";
 
-import { CollectionClient } from "@/components/shop/collection-client";
+import {
+  CollectionCatalogLoading,
+  CollectionClient,
+} from "@/components/shop/collection-client";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { PRODUCTS } from "@/lib/vela-data";
 
 export function CollectionPage() {
   const { t } = useI18n();
@@ -29,13 +31,13 @@ export function CollectionPage() {
         </h1>
       </div>
 
-      <Suspense fallback={<CollectionClientFallback />}>
-        <CollectionClient products={PRODUCTS} />
+      <Suspense fallback={<CollectionCatalogLoading />}>
+        <CollectionClient />
       </Suspense>
 
       <section className="relative mt-4 mb-4 h-[300px] w-full overflow-hidden rounded-lg bg-black">
         <FashionImage
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80"
+          src="/images/collection/lookbook-banner.webp"
           alt={t("storefront.catalog.lookbookAlt")}
           className="opacity-65"
         />
@@ -56,23 +58,6 @@ export function CollectionPage() {
           </Link>
         </div>
       </section>
-    </div>
-  );
-}
-
-function CollectionClientFallback() {
-  return (
-    <div className="space-y-8">
-      <div className="h-10 w-full max-w-xl animate-pulse bg-[#efe7dc]" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="space-y-3">
-            <div className="aspect-square animate-pulse bg-[#efe7dc]" />
-            <div className="h-4 w-3/4 animate-pulse bg-[#efe7dc]" />
-            <div className="h-4 w-1/3 animate-pulse bg-[#efe7dc]" />
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

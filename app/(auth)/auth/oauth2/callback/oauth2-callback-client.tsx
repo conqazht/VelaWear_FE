@@ -16,20 +16,16 @@ import { queryKeys } from "@/lib/queries/keys";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { getAuthRoleMessageKey } from "@/lib/i18n/messages/auth-errors";
 
-let activeOAuthExchange: {
+let oauthCompletion: {
   code: string;
-  promise: ReturnType<typeof exchangeOAuth2Code>;
+  promise: ReturnType<typeof getMe>;
 } | null = null;
 
-function exchangeOAuth2CodeOnce(code: string) {
-  if (activeOAuthExchange?.code === code) return activeOAuthExchange.promise;
+function completeOAuth2LoginOnce(code: string) {
+  if (oauthCompletion?.code === code) return oauthCompletion.promise;
 
-  const promise = exchangeOAuth2Code({ code });
-  activeOAuthExchange = { code, promise };
-  const clearActiveExchange = () => {
-    if (activeOAuthExchange?.promise === promise) activeOAuthExchange = null;
-  };
-  void promise.then(clearActiveExchange, clearActiveExchange);
+  const promise = exchangeOAuth2Code({ code }).then(() => getMe());
+  oauthCompletion = { code, promise };
   return promise;
 }
 
@@ -39,9 +35,9 @@ export function OAuth2CallbackClient() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [sessionRoleLabel, setSessionRoleLabel] = useState<string | null>(null);
+  const code = searchParams.get("code");
 
   useEffect(() => {
-    const code = searchParams.get("code");
     const redirectTo = getStoredPostAuthRedirect();
     if (!code) {
       const signInHref = createSignInHref(redirectTo);
@@ -54,10 +50,7 @@ export function OAuth2CallbackClient() {
 
     async function completeLogin() {
       try {
-        await exchangeOAuth2CodeOnce(loginCode);
-        if (cancelled) return;
-
-        const profile = await getMe();
+        const profile = await completeOAuth2LoginOnce(loginCode);
         if (cancelled) return;
 
         queryClient.setQueryData(queryKeys.auth.session, profile);
@@ -78,7 +71,7 @@ export function OAuth2CallbackClient() {
     return () => {
       cancelled = true;
     };
-  }, [queryClient, router, searchParams]);
+  }, [code, queryClient, router]);
 
   return (
     <AuthLoader

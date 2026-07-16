@@ -31,7 +31,61 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-07-16
+
+### Sửa Playwright smoke theo Language Switcher dạng popover
+- **Date/Time**: 2026-07-16T11:28:14+07:00
+- **Implementation**: Đồng bộ nhánh PR với commit merge `main` mới nhất, sau đó cập nhật test Flash Sale locale để mở Language Switcher popover, chọn English trong nhóm ngôn ngữ và xác nhận lựa chọn vẫn có `aria-pressed=true` sau reload. Bỏ locator cũ dành cho segmented switcher vì trigger popover không mang trạng thái pressed.
+- **Verification**: Case Flash Sale locale pass 1/1; toàn bộ `pnpm test:e2e:smoke` pass 6/6; scoped ESLint, TypeScript và `git diff --check` pass.
+- **Known Follow-ups**: Chờ GitHub Actions chạy lại trên PR #14.
+
+### Loại bỏ Boneyard, khóa OAuth exchange và đồng bộ System theme
+- **Date/Time**: 2026-07-16T00:47:29+07:00
+- **Implementation**: Gỡ hoàn toàn 7 wrapper Boneyard, registry, generated bones, config và dependency `boneyard-js`; Admin session, Management table, Profile addresses, Checkout province/ward, Invoice preview và Mail loading nay dùng skeleton normal-flow/responsive. Nút đổi ngôn ngữ trong Admin/OAuth loading được thay bằng bone đúng kích thước, còn trạng thái đã tải vẫn giữ nút tương tác. OAuth callback cache một terminal promise cho toàn bộ `exchange → getMe` theo authorization code, nên StrictMode/remount không thể gửi lại code đã dùng một lần. Admin theme đọc đúng cookie `theme_mode`, missing/invalid mặc định `system`, bootstrap class/attribute/color-scheme trước paint, giữ lựa chọn Light/Dark hợp lệ và dọn theme khi quay lại storefront; Toaster dùng trực tiếp resolved theme của preference store và dependency `next-themes` dư thừa được gỡ.
+- **Verification**: Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); TypeScript pass; Vitest 20 file/66 test pass, gồm OAuth StrictMode/remount và theme bootstrap/persistence; production build pass 68 route. Browser QA production tại 1152x800 bắt được Admin cold-load với 46 UI bones, 0 Boneyard node và 0 language button; sau load có đúng 1 language button. System theme resolve dark đúng OS (`data-theme-mode=system`, `.dark`, `colorScheme=dark`) và toàn bộ attribute/class được dọn khi về storefront. OAuth loader có 1 language bone và 0 language button.
+- **Known Follow-ups**: Chưa chạy đăng nhập Google thật vì cần phiên tương tác; regression test đã tái hiện đúng cửa sổ exchange thành công rồi remount trong lúc `getMe` còn pending và xác nhận chỉ có 1 exchange/1 profile request.
+
+### Chuyển ảnh tĩnh storefront từ HTTPS sang asset local
+- **Date/Time**: 2026-07-16T00:19:04+07:00
+- **Implementation**: Tải 31 ảnh tĩnh duy nhất từ Unsplash và Google `aida-public`, chuyển thật sang WebP rồi lưu theo ngữ cảnh trong `public/images`. Thay 35 tham chiếu ở Home editorial/story/newsletter, Collection lookbook, Product Detail craftsmanship và toàn bộ fixture product/cart/checkout/detail; ảnh trùng nguồn dùng chung một file. Gỡ hai `remotePatterns` Unsplash/Google khỏi Next Image, đồng thời giữ pattern upload của backend và logic ảnh động từ API.
+- **Verification**: Không còn tham chiếu `images.unsplash.com` hoặc `lh3.googleusercontent.com` trong `app`, `components`, `lib`, `styles` và `next.config.ts`; 35 tham chiếu WebP map đủ 31 file, 31/31 file decode thành công, tổng dung lượng 1.11 MB. Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54; production build pass 68 route; Playwright storefront smoke 3/3. Browser QA production xác nhận Home tải 15/15 ảnh không lỗi và không có remote URL trong DOM; Collection dùng background local; asset craftsmanship Product Detail được phục vụ trực tiếp ở 512x512.
+- **Known Follow-ups**: Collection và Product Detail trả trạng thái dữ liệu 500 trong lần browser QA production dù backend products endpoint trực tiếp trả 200; đây không phải lỗi tải asset và cần audit data request riêng nếu vẫn tái hiện. Google Fonts và ảnh động do backend trả về không thuộc phạm vi local hóa ảnh tĩnh.
+
 ## 2026-07-15
+
+### Loại bỏ product fixture flash khi React Query còn pending
+- **Date/Time**: 2026-07-15T23:46:04+07:00
+- **Implementation**: Home Trending và Collection không còn render sản phẩm mẫu trước response API; cold query dùng skeleton chi tiết đúng carousel/grid rồi mới chuyển sang dữ liệu thật. Collection bỏ hẳn dependency `PRODUCTS` khỏi component tree và dùng chung một fallback grid cho cả Suspense lẫn React Query. Related Products được sửa cùng nguyên nhân: pending dùng carousel skeleton, fixture chỉ còn là fallback sau khi request đã kết thúc nhưng lỗi/rỗng; Home giữ chính sách fallback này để không phá demo/offline flow. Background refetch vẫn giữ API data hiện có nhờ React Query `placeholderData`.
+- **Hydration Audit**: Hero Slider tiếp tục truyền trực tiếp hai URL root-relative `/images/home/hero-autumn-2026.avif` và `/images/home/hero-lookbook-2026.jpg`; cả hai asset tồn tại trong `public/images/home`, không có source mismatch cần sửa.
+- **Verification**: Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54; TypeScript và production build 68 route pass; storefront Playwright smoke 3/3 pass trên production server sạch. Browser QA cold-load xác nhận Home có 0 fixture/0 product card khi 28 bone đang hiện, Collection có 0 fixture/0 product card khi 40 bone đang hiện; viewport 1440x900 và 390x844 không overflow.
+- **Known Follow-ups**: Full smoke hiện còn một test Sale locale cũ tìm aria-label `Chuyển ngôn ngữ sang Tiếng Anh` trước redesign popover; năm case còn lại pass trên server sạch. Cần cập nhật test đó theo thao tác mở language popover ở một thay đổi riêng.
+
+### Thay skeleton Boneyard động bằng skeleton theo layout thật
+- **Date/Time**: 2026-07-15T23:24:00+07:00
+- **Implementation**: Thay Boneyard ở Product Detail, Search, Collection, Cart, Favorites, Reviews, Coupons, Profile Orders/Favourites và Order Details bằng skeleton normal-flow theo đúng grid thật. Mỗi card/row vẫn có bone riêng cho ảnh, nút, nhãn, tên, giá và CTA; breakpoint của product grid được đồng bộ 1/2/3 cột. Giữ Boneyard cho dashboard/admin và Profile Addresses vì các layout này có geometry ổn định. Thu gọn registry từ 13 xuống 3 fixture và xóa 10 file bones không còn dùng.
+- **Verification**: `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54 pass; production build pass 68 route. Browser QA ở 1440x900 và 390x844 xác nhận skeleton Product Detail/Search cùng các màn Cart, Favorites, Reviews và Profile Orders bám đúng layout, không bị co chiều cao hoặc overflow ngang.
+- **Known Follow-ups**: Các wrapper Boneyard fallback-only ở checkout province/ward, invoice preview và mail layout chưa có generated bones; hiện không gây lỗi geometry và có thể được giản lược riêng khi chỉnh các màn đó.
+
+### Đồng bộ trang Sale với grid và card của Collection
+- **Date/Time**: 2026-07-15T22:36:16+07:00
+- **Implementation**: Redesign có mục tiêu cho `/sale` và `/flash-sale`: dùng cùng container `max-w-[1800px]`, breadcrumb/heading, `ProductGrid` 1/2/3 cột, ảnh vuông, khoảng cách và card shell của Collection. Tách `ProductCardShell` dùng chung cho catalog và `SaleProductCard` chuyên giữ giá khuyến mãi, quota, giới hạn mỗi khách, sold-out/upcoming cùng CTA chọn biến thể. Campaign chuyển từ card bo lớn có shadow sang section phẳng có border; banner, type/phase/code, coupon advisory, server-clock countdown, query cadence và boundary invalidation được giữ nguyên. Loading dùng square grid skeleton cùng breakpoint; error dùng `StorefrontApiStatus`; empty state bỏ nested card.
+- **Artifacts**: Không thêm artifact vào repository; ảnh QA tạm được lưu ngoài worktree Codex.
+- **Verification**: Scoped ESLint, TypeScript và 10/10 test Sale/API pass; full `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); production build pass 68 route. Playwright QA mock trên `/sale` desktop 1440px và `/flash-sale` mobile 390px xác nhận lần lượt 3/1 cột, 6 card, không overflow và không có console warning/error.
+- **Known Follow-ups**: Kiểm tra lại crop của banner campaign thật nếu nội dung ảnh quan trọng nằm sát mép; layout hiện dùng `background-position: center` như trước.
+
+### Gỡ thử nghiệm chuyển động khỏi nhãn Sale
+- **Date/Time**: 2026-07-15T22:09:51+07:00
+- **Implementation**: Gỡ toàn bộ prototype editorial/misregistration/crossfade, component phụ, CSS animation và hai public Sale query chỉ phục vụ phần trăm trên header. Nhãn `Giảm giá`/`Sale` trở lại text điều hướng thông thường, dùng cùng hover underline có sẵn như các mục desktop khác và không tự chuyển động trên mobile.
+- **Artifacts**: Xóa toàn bộ ảnh QA của các prototype Sale đã bị loại bỏ.
+- **Verification**: Xác nhận không còn selector, component, data attribute, helper hay API query dành riêng cho motion Sale; nhãn desktop/mobile trở lại markup ban đầu. Scoped ESLint, TypeScript và unit test `sale-utils` 4/4 đều pass.
+- **Known Follow-ups**: Không có.
+
+### Thu gọn bộ đổi ngôn ngữ toàn ứng dụng và thêm lối về storefront trong Management
+- **Date/Time**: 2026-07-15T21:05:53+07:00
+- **Implementation**: Bổ sung chế độ popover cho `LanguageSwitcher`: nút trigger tròn 32px mở nhóm toggle VI/EN, hiển thị ngôn ngữ đang chọn bằng dấu check, đặt focus đúng lựa chọn hiện tại và tự đóng sau khi đổi. Popover trở thành mặc định trên storefront header desktop/mobile, auth, trạng thái lỗi dùng chung, dashboard, khung loading/auth, trang lỗi, Chat và Mail thuộc Management; segmented switcher vẫn còn như một presentation tùy chọn. Thêm liên kết `Quay lại cửa hàng` vào màn Management chưa đăng nhập và footer sidebar; liên kết vẫn còn tooltip khi sidebar thu gọn và hiển thị đầy đủ trong off-canvas mobile.
+- **Artifacts**: Các ảnh QA tạm đã được xóa theo yêu cầu; không lưu artifact cho thay đổi này.
+- **Verification**: Browser QA trên storefront desktop/mobile, trang đăng nhập, trạng thái Management guest và phiên ADMIN mock xác nhận trigger 32px, popover nằm trọn viewport, có semantics dialog cùng nhóm toggle button, VI ↔ EN cập nhật nội dung rồi tự đóng và console không có lỗi mới. Liên kết storefront hoạt động ở sidebar mở/thu gọn và mobile. Scoped ESLint, TypeScript và `git diff --check` pass; Vitest 54/54; full `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); production build pass với 68 routes.
+- **Known Follow-ups**: Inline `<script>` có sẵn trong `app/(admin)/layout.tsx` vẫn tạo một cảnh báo React ở Next dev khi render client; thay đổi này không thêm script và production build không bị ảnh hưởng.
 
 ### Chuẩn hóa cấu trúc Playwright bằng AAA và POM có chọn lọc
 - **Date/Time**: 2026-07-15 (Asia/Saigon)

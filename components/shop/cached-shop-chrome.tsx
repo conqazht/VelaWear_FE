@@ -41,8 +41,8 @@ export async function CachedProfileNavigation() {
 
 /**
  * Keep personalized account content out of the prerendered shell. The route's
- * own Boneyard boundary takes over as soon as the request-time Client
- * Component tree is streamed, while the cached shop chrome can be sent first.
+ * own route-specific loading skeleton takes over as soon as the request-time
+ * Client Component tree is streamed, while cached shop chrome can be sent first.
  */
 export function PersonalizedRouteBoundary({ children }: { children: ReactNode }) {
   return (

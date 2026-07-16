@@ -25,7 +25,7 @@ export function Newsletter() {
       {/* Background Soft Image Vignette */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.08] pointer-events-none select-none"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200&auto=format&fit=crop')" }}
+        style={{ backgroundImage: "url('/images/home/editorial/materials-and-draping.webp')" }}
       />
       
       {/* Radial soft lighting vignette */}

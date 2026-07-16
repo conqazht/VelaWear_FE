@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Skeleton } from "boneyard-js/react";
 import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { RatingStars } from "@/components/shop/rating-stars";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useReviewsByUserQuery } from "@/lib/queries/commerce";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatDate } from "@/lib/i18n/format";
@@ -20,13 +20,15 @@ export function ReviewsClient() {
   });
   const reviews = reviewsQuery.data?.result ?? [];
 
+  if (isAuthLoading) {
+    return <ReviewsPageLoading />;
+  }
+
   if (!isAuthenticated || !user) {
     return (
-      <Skeleton name="reviews-page" loading={isAuthLoading} fallback={<ReviewsLoadingFallback />} fixture={<ReviewsLoadingFixture />}>
       <div className="bg-canvas text-ink min-h-[100dvh] pt-[120px] px-6 flex items-center justify-center">
         <p className="text-sm font-medium uppercase tracking-wider text-[#1c1a18]/60">{t("reviews.signIn")}</p>
       </div>
-      </Skeleton>
     );
   }
 
@@ -52,14 +54,7 @@ export function ReviewsClient() {
             variant="panel"
           />
         ) : reviewsQuery.isLoading ? (
-          <Skeleton
-            name="reviews-page"
-            loading
-            fallback={<ReviewsLoadingFallback />}
-            fixture={<ReviewsLoadingFixture />}
-          >
-            <ReviewsLoadingFixture />
-          </Skeleton>
+          <ReviewsLoadingSkeleton />
         ) : reviews.length === 0 ? (
           <div className="py-24 flex flex-col items-center justify-center text-center bg-white border border-[#1c1a18]/5 rounded-md shadow-sm">
             <MessageSquare className="w-12 h-12 text-[#1c1a18]/20 mb-6" strokeWidth={1} />
@@ -114,28 +109,45 @@ export function ReviewsClient() {
   );
 }
 
-function ReviewsLoadingFallback() {
+function ReviewsPageLoading() {
   return (
-    <div className="flex flex-col gap-8" aria-hidden="true">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="h-44 rounded-md bg-white" />
-      ))}
+    <div className="bg-canvas text-ink flex min-h-screen flex-col" aria-busy="true">
+      <main className="flex w-full flex-grow flex-col gap-10 px-6 py-10 md:px-16 md:py-16">
+        <section className="flex flex-col gap-6 text-left" aria-hidden="true">
+          <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
+            <Skeleton className="h-8 w-40 bg-[#efe7dc] md:h-9 md:w-52" />
+            <Skeleton className="h-3 w-16 bg-[#efe7dc]" />
+          </div>
+          <ReviewsLoadingSkeleton />
+        </section>
+      </main>
     </div>
   );
 }
 
-function ReviewsLoadingFixture() {
-  const { t } = useI18n();
-
+function ReviewsLoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8" aria-hidden="true">
       {Array.from({ length: 3 }).map((_, index) => (
-        <article key={index} className="grid min-h-44 grid-cols-1 gap-8 rounded-md border border-[#1c1a18]/10 bg-white p-8 md:grid-cols-3">
+        <article
+          key={index}
+          className="grid min-h-44 grid-cols-1 gap-8 rounded-md border border-[#1c1a18]/10 bg-white p-8 md:grid-cols-3"
+        >
           <div className="space-y-4">
-            <h3 className="font-serif text-xl">{t("reviews.fixtureProduct")}</h3>
-            <p className="text-xs uppercase tracking-widest">{t("reviews.order")} VW-0000</p>
+            <Skeleton className="h-6 w-4/5 bg-[#efe7dc]" />
+            <Skeleton className="h-3 w-32 bg-[#efe7dc]" />
+            <div className="flex gap-1.5">
+              {Array.from({ length: 5 }).map((_, starIndex) => (
+                <Skeleton key={starIndex} className="size-5 rounded-full bg-[#efe7dc]" />
+              ))}
+            </div>
+            <Skeleton className="h-2.5 w-20 bg-[#efe7dc]" />
           </div>
-          <p className="md:col-span-2">{t("reviews.fixtureContent")}</p>
+          <div className="space-y-3 md:col-span-2 md:border-l md:border-[#1c1a18]/10 md:pl-8">
+            <Skeleton className="h-3.5 w-full bg-[#efe7dc]" />
+            <Skeleton className="h-3.5 w-11/12 bg-[#efe7dc]" />
+            <Skeleton className="h-3.5 w-3/5 bg-[#efe7dc]" />
+          </div>
         </article>
       ))}
     </div>
