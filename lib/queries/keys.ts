@@ -22,7 +22,8 @@ export const queryKeys = {
   },
   cart: {
     root: ["cart"] as const,
-    byUser: (userId: number) => ["cart", "user", userId] as const,
+    me: (accountId: number | undefined) =>
+      ["cart", "me", accountId ?? "anonymous"] as const,
   },
   wishlists: {
     root: ["wishlists"] as const,
@@ -36,16 +37,41 @@ export const queryKeys = {
   },
   orders: {
     root: ["orders"] as const,
-    byUser: (userId: number, params?: unknown) =>
-      ["orders", "user", userId, params] as const,
-    byCode: (orderCode: string) => ["orders", "code", orderCode] as const,
+    meList: (accountId: number | undefined, params?: unknown) =>
+      ["orders", "me", accountId ?? "anonymous", "list", params] as const,
+    meByCode: (accountId: number | undefined, orderCode: string) =>
+      ["orders", "me", accountId ?? "anonymous", "code", orderCode] as const,
+    meById: (accountId: number | undefined, orderId: number | undefined) =>
+      ["orders", "me", accountId ?? "anonymous", "id", orderId ?? "pending"] as const,
+    meStatusHistories: (
+      accountId: number | undefined,
+      orderId: number | undefined,
+      params?: unknown,
+    ) => [
+      "orders",
+      "me",
+      accountId ?? "anonymous",
+      "id",
+      orderId ?? "pending",
+      "status-histories",
+      params,
+    ] as const,
   },
   payments: {
     root: ["payments"] as const,
   },
   addresses: {
     root: ["user-addresses"] as const,
-    list: (params?: unknown) => ["user-addresses", params] as const,
+    meList: (accountId: number | undefined, params?: unknown) =>
+      ["user-addresses", "me", accountId ?? "anonymous", "list", params] as const,
+    meById: (accountId: number | undefined, addressId: number | undefined) =>
+      [
+        "user-addresses",
+        "me",
+        accountId ?? "anonymous",
+        "id",
+        addressId ?? "pending",
+      ] as const,
   },
   reviews: {
     root: ["reviews"] as const,

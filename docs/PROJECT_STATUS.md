@@ -33,6 +33,14 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-16
 
+### FE-001 — Chuyển customer flows sang self-scoped API
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Branch**: `fix/self-scoped-customer-apis`
+- **Implementation**: Chuyển profile update sang `PUT /users/me`, order list/detail/status history sang `/orders/me/**`, và address CRUD sang `/user-addresses/me/**`. Customer request không còn gửi `userId` để chọn ownership; profile/address helpers whitelist field ở runtime nên không thể chuyển tiếp `avatar`, `id` hoặc `userId`. React Query key vẫn chứa authenticated account ID để cache không đi từ account A sang B. Order detail bỏ client-side ownership decision và dùng `404` từ backend self-service làm authorization outcome.
+- **Tests**: Thêm request-level API contract tests, hook/cache transition tests, order-detail component tests và Playwright ownership smoke với hai API contexts độc lập. Primary own reads thành công; secondary dùng order ID/code/status-history và address ID của primary đều nhận `404`, không match error message và không tạo dữ liệu persistent.
+- **Verification**: Focused Vitest `3` file/`14` test pass; full TypeScript pass; full Vitest `38` file/`130` test pass; ESLint pass `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; targeted ownership smoke `1/1` pass; toàn bộ `@fullstack` pass `7/7`; negative search không còn storefront legacy ownership contract.
+- **Known Follow-ups**: Chỉ triển khai BE-002 để thu hồi legacy `ROLE_USER` grants sau khi PR FE-001 này đã merge. Avatar customer vẫn thuộc BE-004; PR này không thay đổi upload/UI.
+
 ### Đồng bộ OTP/Auth hardening vào Storefront Catalog UX
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Merge `origin/main` sau khi PR OTP/Auth được phát hành; resolve conflict duy nhất tại tài liệu trạng thái bằng cách giữ đầy đủ cả hai mục OTP/Auth và Storefront. Toàn bộ source/config cho `challengeId`, `otpProofToken`, reauthentication và stale-refresh guard được giữ cùng Storefront Catalog UX, Size Guide và review.

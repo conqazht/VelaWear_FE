@@ -23,9 +23,9 @@ import { formatDate } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n";
 import { createEmailSchema, createStrongPasswordSchema } from "@/lib/validations";
 import {
-  useOrdersByUserQuery,
+  useMyAddressesQuery,
+  useMyOrdersQuery,
   useUpdateProfileMutation,
-  useUserAddressesQuery,
 } from "@/lib/queries/commerce";
 import type { Gender, UserAddress } from "@/lib/api/types";
 
@@ -117,11 +117,11 @@ export default function MemberProfile() {
   const { showAddedToBag } = useNotification();
   const updateProfileMutation = useUpdateProfileMutation();
   const userId = user?.id;
-  const ordersQuery = useOrdersByUserQuery(userId, {
+  const ordersQuery = useMyOrdersQuery(userId, {
     size: 100,
     sort: "createdAt,desc",
   });
-  const addressesQuery = useUserAddressesQuery({ userId, size: 100 });
+  const addressesQuery = useMyAddressesQuery(userId, { size: 100 });
   const orders = ordersQuery.data?.result ?? [];
   const orderStats = orderStatusOrder.map((status) => ({
     status,
@@ -213,13 +213,9 @@ export default function MemberProfile() {
 
     try {
       await updateProfileMutation.mutateAsync({
-        id: user.id,
-        request: {
-          fullName: editForm.fullName.trim(),
-          birthDate: editForm.dob,
-          avatar: user.avatar,
-          gender: editForm.gender as Gender,
-        },
+        fullName: editForm.fullName.trim(),
+        birthDate: editForm.dob,
+        gender: editForm.gender as Gender,
       });
       await checkSession();
       setEditForm({ fullName: "", email: "", gender: "", dob: "" });
