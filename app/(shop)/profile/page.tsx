@@ -854,6 +854,7 @@ export default function MemberProfile() {
               <StorefrontStaleWarning
                 onRetry={() => void ordersQuery.refetch()}
                 resourceLabel={t("account.orders.resource")}
+                error={ordersQuery.error}
               />
             ) : null}
 

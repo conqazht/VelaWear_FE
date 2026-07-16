@@ -23,6 +23,7 @@ import type {
   StorefrontCatalogResult,
   StorefrontCatalogSort,
 } from "@/lib/api/types";
+import { classifyApiError, type ApiErrorClassification } from "@/lib/api/errors";
 import { formatCurrency } from "@/lib/i18n/format";
 import { useStorefrontProductsQuery } from "@/lib/queries/catalog";
 import {
@@ -40,11 +41,17 @@ import { mapBackendProduct } from "@/lib/vela-data";
 
 type CatalogMode = "collection" | "search";
 
+type CatalogRollback = {
+  query: string;
+  error: ApiErrorClassification;
+};
+
 type CatalogCopy = {
   selected: string;
   noOptions: string;
   priceError: string;
   staleWarning: string;
+  invalidRequestWarning: string;
   retry: string;
   previous: string;
   next: string;
@@ -59,6 +66,7 @@ function getCatalogCopy(locale: "vi" | "en"): CatalogCopy {
         noOptions: "Chưa có tùy chọn phù hợp.",
         priceError: "Giá tối thiểu không được lớn hơn giá tối đa.",
         staleWarning: "Dữ liệu mới chưa tải được. Bạn vẫn đang xem kết quả gần nhất.",
+        invalidRequestWarning: "Bộ lọc vừa chọn không hợp lệ. Kết quả gần nhất vẫn được giữ lại.",
         retry: "Thử lại",
         previous: "Trang trước",
         next: "Trang sau",
@@ -70,6 +78,7 @@ function getCatalogCopy(locale: "vi" | "en"): CatalogCopy {
         noOptions: "No matching options yet.",
         priceError: "Minimum price cannot exceed maximum price.",
         staleWarning: "Fresh data could not be loaded. The latest available results remain visible.",
+        invalidRequestWarning: "That filter request is invalid. The latest available results remain visible.",
         retry: "Retry",
         previous: "Previous page",
         next: "Next page",
@@ -504,7 +513,11 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
   const shouldReduceMotion = useReducedMotion();
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
   const lastSuccessfulQueryRef = useRef<string | null>(null);
-  const [rolledBackQuery, setRolledBackQuery] = useState<string | null>(null);
+  const [lastSuccessfulCatalog, setLastSuccessfulCatalog] = useState<{
+    data: StorefrontCatalogResult;
+    locale: "vi" | "en";
+  } | null>(null);
+  const [rollback, setRollback] = useState<CatalogRollback | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [mobileDraft, setMobileDraft] = useState<CatalogUrlState>(EMPTY_CATALOG_URL_STATE);
@@ -523,18 +536,23 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
     { enabled: mobileFiltersOpen && isValidCatalogPriceRange(mobileDraft) },
   );
 
-  const facets = productsQuery.data?.facets ?? {
+  const catalogData = productsQuery.data ?? (
+    productsQuery.isError && lastSuccessfulCatalog?.locale === locale
+      ? lastSuccessfulCatalog.data
+      : undefined
+  );
+  const facets = catalogData?.facets ?? {
     categories: [],
     colors: [],
     sizes: [],
     priceRange: { min: null, max: null },
   };
   const products = useMemo(
-    () => (productsQuery.data?.result ?? []).map((product) => mapBackendProduct(product, locale)),
-    [locale, productsQuery.data?.result],
+    () => (catalogData?.result ?? []).map((product) => mapBackendProduct(product, locale)),
+    [catalogData?.result, locale],
   );
-  const meta = productsQuery.data?.meta;
-  const isInitialLoading = productsQuery.isPending && productsQuery.data === undefined;
+  const meta = catalogData?.meta;
+  const isInitialLoading = productsQuery.isPending && catalogData === undefined;
   const sortOptions: SortOption[] = [
     { value: "featured", label: t("storefront.catalog.sortFeatured") },
     { value: "newest", label: t("storefront.catalog.sortNewest") },
@@ -549,30 +567,38 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
       productsQuery.data !== undefined
     ) {
       lastSuccessfulQueryRef.current = serializedState;
-      if (rolledBackQuery === serializedState) {
+      if (rollback?.query === serializedState) {
         // The retry reached a terminal success, so the rollback warning can close.
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setRolledBackQuery(null);
+        setRollback(null);
       }
     }
-  }, [productsQuery.data, productsQuery.isPlaceholderData, productsQuery.isSuccess, rolledBackQuery, serializedState]);
+  }, [locale, productsQuery.data, productsQuery.isPlaceholderData, productsQuery.isSuccess, rollback?.query, serializedState]);
 
   useEffect(() => {
     const rollbackQuery = getCatalogRollbackQuery({
       currentQuery: serializedState,
       lastSuccessfulQuery: lastSuccessfulQueryRef.current,
       isError: productsQuery.isError,
-      hasCachedData: productsQuery.data !== undefined,
+      hasCachedData: catalogData !== undefined,
     });
     if (rollbackQuery === null) return;
 
     // Router state is external to React; remember the failed URL before replacing it.
-    setRolledBackQuery(serializedState);
+    setRollback({
+      query: serializedState,
+      error: classifyApiError(productsQuery.error),
+    });
     router.replace(rollbackQuery ? `${pathname}?${rollbackQuery}` : pathname, { scroll: false });
-  }, [pathname, productsQuery.data, productsQuery.isError, router, serializedState]);
+  }, [catalogData, pathname, productsQuery.error, productsQuery.isError, router, serializedState]);
 
   const navigate = (next: CatalogUrlState, scroll = false) => {
-    setRolledBackQuery(null);
+    if (productsQuery.data !== undefined) {
+      // Placeholder data disappears when a different query reaches an error state.
+      // Capture it at the user action boundary so the page can retain the last grid.
+      setLastSuccessfulCatalog({ data: productsQuery.data, locale });
+    }
+    setRollback(null);
     const query = serializeCatalogUrlState(next);
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll });
   };
@@ -614,13 +640,14 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
     window.scrollTo({ top: Math.max(0, top - headerOffset - 24), behavior: "auto" });
   };
 
-  if (productsQuery.isError && productsQuery.data === undefined) {
+  if (productsQuery.isError && catalogData === undefined) {
     return (
       <StorefrontApiStatus
         error={productsQuery.error}
         onRetry={() => productsQuery.refetch()}
-        resourceLabel={mode === "search" ? t("storefront.search.resource") : t("storefront.catalog.pageTitle")}
+        resourceLabel={mode === "search" ? t("storefront.search.resource") : t("storefront.catalog.resource")}
         returnHref="/"
+        recoveryAction={{ label: t("storefront.search.viewAll"), href: pathname }}
         variant="route"
       />
     );
@@ -632,6 +659,16 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
     ? t("storefront.search.resultsFor", { query: state.q })
     : t("storefront.catalog.pageTitle");
   const previewCount = mobilePreviewQuery.data?.meta.total ?? meta?.total ?? 0;
+  const catalogWarningError = rollback?.error ?? (
+    productsQuery.isError ? classifyApiError(productsQuery.error) : null
+  );
+  const showCatalogWarning = catalogWarningError !== null && (
+    (productsQuery.isError && catalogData !== undefined) ||
+    (rollback !== null &&
+      !(productsQuery.isSuccess &&
+        !productsQuery.isPlaceholderData &&
+        serializedState === rollback.query))
+  );
 
   return (
     <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
@@ -647,26 +684,29 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
         <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">{title}</h1>
       </header>
 
-      {(productsQuery.isError && productsQuery.data !== undefined) ||
-      (rolledBackQuery !== null &&
-        !(productsQuery.isSuccess &&
-          !productsQuery.isPlaceholderData &&
-          serializedState === rolledBackQuery)) ? (
+      {showCatalogWarning ? (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-l-2 border-[#b5573a] bg-[#efe7dc]/65 px-4 py-3 text-xs text-[#1c1a18]/70" role="status">
-          <span>{copy.staleWarning}</span>
-          <button
-            type="button"
-            onClick={() => {
-              if (rolledBackQuery !== null) {
-                router.replace(rolledBackQuery ? `${pathname}?${rolledBackQuery}` : pathname, { scroll: false });
-                return;
-              }
-              productsQuery.refetch();
-            }}
-            className="font-semibold uppercase tracking-wider text-[#b5573a]"
-          >
-            {copy.retry}
-          </button>
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{catalogWarningError.status === 400 ? copy.invalidRequestWarning : copy.staleWarning}</span>
+            {catalogWarningError.status !== null ? (
+              <span className="font-mono text-[10px] opacity-65">HTTP {catalogWarningError.status}</span>
+            ) : null}
+          </span>
+          {catalogWarningError.retryable ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (rollback !== null) {
+                  router.replace(rollback.query ? `${pathname}?${rollback.query}` : pathname, { scroll: false });
+                  return;
+                }
+                productsQuery.refetch();
+              }}
+              className="font-semibold uppercase tracking-wider text-[#b5573a]"
+            >
+              {copy.retry}
+            </button>
+          ) : null}
         </div>
       ) : null}
 

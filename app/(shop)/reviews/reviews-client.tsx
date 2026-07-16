@@ -74,6 +74,7 @@ export function ReviewsClient() {
               <StorefrontStaleWarning
                 onRetry={() => void reviewsQuery.refetch()}
                 resourceLabel={t("reviews.resource")}
+                error={reviewsQuery.error}
               />
             ) : null}
             {reviews.map((review) => (

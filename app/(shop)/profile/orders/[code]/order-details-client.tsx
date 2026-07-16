@@ -222,19 +222,6 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     );
   }
 
-  if (historiesQuery.isError && histories.length === 0) {
-    return (
-      <StorefrontApiStatus
-        error={historiesQuery.error}
-        onRetry={() => void historiesQuery.refetch()}
-        resourceLabel={t("account.order.historyResource")}
-        returnHref="/profile?tab=orders"
-        returnLabel={t("account.order.historyAction")}
-        variant="route"
-      />
-    );
-  }
-
   const canCancel =
     order.status === "PENDING" &&
     order.paymentStatus !== "PAID" &&
@@ -249,6 +236,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           <StorefrontStaleWarning
             onRetry={() => void orderQuery.refetch()}
             resourceLabel={t("account.order.title")}
+            error={orderQuery.error}
             className="mb-6"
           />
         ) : null}
@@ -277,6 +265,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 <StorefrontStaleWarning
                   onRetry={() => void reviewsQuery.refetch()}
                   resourceLabel={t("reviews.write.statusResource")}
+                  error={reviewsQuery.error}
                   className="mb-5"
                 />
               ) : null}
@@ -371,6 +360,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 <StorefrontStaleWarning
                   onRetry={() => void historiesQuery.refetch()}
                   resourceLabel={t("account.order.historyResource")}
+                  error={historiesQuery.error}
                   className="mb-5"
                 />
               ) : null}

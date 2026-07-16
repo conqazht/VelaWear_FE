@@ -108,6 +108,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
           className="mb-6"
           resourceLabel={t("storefront.product.resource")}
           onRetry={() => setRetryKey((value) => value + 1)}
+          error={loadError}
         />
       ) : null}
       <ProductDetailContent product={product} />

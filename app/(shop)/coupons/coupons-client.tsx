@@ -93,6 +93,7 @@ export function CouponsClient() {
           <StorefrontStaleWarning
             resourceLabel={t("coupons.resource")}
             onRetry={() => void couponsQuery.refetch()}
+            error={couponsQuery.error}
           />
         ) : couponsQuery.isLoading ? (
           <CouponsLoadingSkeleton />

@@ -33,6 +33,13 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-16
 
+### Thu hẹp HTTP 400/5xx theo phạm vi dữ liệu còn sử dụng được
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Implementation**: HTTP 400 storefront chuyển từ artwork mã lỗi toàn màn hình sang notice gọn, giữ `HTTP 400` như metadata phụ, dùng hành động đặt lại ngữ cảnh và không retry lại request xác định là không hợp lệ. Collection lưu lần tải catalog thành công cuối tại ranh giới thao tác, nên filter 400 rollback về URL hợp lệ vẫn giữ grid và chỉ hiện cảnh báo cục bộ; 5xx vẫn cho Retry. Banner stale dùng mã HTTP thật và chỉ hiện Retry cho lỗi retryable. Lỗi API lịch sử trạng thái đơn hàng không còn che toàn bộ chi tiết đơn. `ResourcePage` admin giữ cached rows cùng banner `HTTP 5xx`; chỉ dùng artwork đúng mã `500/502/503/504` khi không còn row sử dụng được, còn 403 tiếp tục blocking để không lộ dữ liệu cache sau khi mất quyền. Các runtime error boundary hiện có được giữ nguyên.
+- **Tests**: Thêm test component cho notice 400/artwork 5xx, stale warning, order history và ba trạng thái ResourcePage; thêm Playwright cho initial/filter 400 và khóa lại hành vi initial/filter 500.
+- **Verification**: TypeScript pass; Vitest `39` file/`124` test pass; full ESLint pass với `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; toàn bộ Playwright smoke pass `15/15`; `git diff --check` pass.
+- **Known Follow-ups**: Không có trong phạm vi thay đổi này.
+
 ### Đồng bộ OTP/Auth hardening vào Storefront Catalog UX
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Merge `origin/main` sau khi PR OTP/Auth được phát hành; resolve conflict duy nhất tại tài liệu trạng thái bằng cách giữ đầy đủ cả hai mục OTP/Auth và Storefront. Toàn bộ source/config cho `challengeId`, `otpProofToken`, reauthentication và stale-refresh guard được giữ cùng Storefront Catalog UX, Size Guide và review.

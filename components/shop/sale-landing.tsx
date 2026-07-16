@@ -176,6 +176,7 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
             <StorefrontStaleWarning
               resourceLabel={isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
               onRetry={() => void salesQuery.refetch()}
+              error={salesQuery.error}
             />
           ) : null}
 
