@@ -30,16 +30,20 @@ test("trang Flash Sale nói rõ giỏ hàng không giữ suất", { tag: "@smoke
 test("Flash Sale giữ nội dung và metadata English sau reload", { tag: "@smoke" }, async ({ page }) => {
   await page.goto("/flash-sale");
 
-  await page.getByRole("button", { name: "Chuyển ngôn ngữ sang Tiếng Anh" }).click();
+  await page.getByRole("button", { name: "Ngôn ngữ: Tiếng Việt" }).click();
+  await page
+    .getByRole("group", { name: "Ngôn ngữ" })
+    .getByRole("button", { name: /Tiếng Anh$/ })
+    .click();
 
   await expectEnglishFlashSale(page);
 
   await page.reload();
 
   await expectEnglishFlashSale(page);
-  await expect(page.getByRole("button", { name: "Switch language to English" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await page.getByRole("button", { name: "Language: English" }).click();
+  await expect(
+    page.getByRole("group", { name: "Language" }).getByRole("button", { name: /English$/ }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem("vela-locale"))).toBe("en");
 });

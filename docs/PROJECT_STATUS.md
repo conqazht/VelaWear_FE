@@ -33,6 +33,12 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-16
 
+### Sửa Playwright smoke theo Language Switcher dạng popover
+- **Date/Time**: 2026-07-16T11:28:14+07:00
+- **Implementation**: Đồng bộ nhánh PR với commit merge `main` mới nhất, sau đó cập nhật test Flash Sale locale để mở Language Switcher popover, chọn English trong nhóm ngôn ngữ và xác nhận lựa chọn vẫn có `aria-pressed=true` sau reload. Bỏ locator cũ dành cho segmented switcher vì trigger popover không mang trạng thái pressed.
+- **Verification**: Case Flash Sale locale pass 1/1; toàn bộ `pnpm test:e2e:smoke` pass 6/6; scoped ESLint, TypeScript và `git diff --check` pass.
+- **Known Follow-ups**: Chờ GitHub Actions chạy lại trên PR #14.
+
 ### Loại bỏ Boneyard, khóa OAuth exchange và đồng bộ System theme
 - **Date/Time**: 2026-07-16T00:47:29+07:00
 - **Implementation**: Gỡ hoàn toàn 7 wrapper Boneyard, registry, generated bones, config và dependency `boneyard-js`; Admin session, Management table, Profile addresses, Checkout province/ward, Invoice preview và Mail loading nay dùng skeleton normal-flow/responsive. Nút đổi ngôn ngữ trong Admin/OAuth loading được thay bằng bone đúng kích thước, còn trạng thái đã tải vẫn giữ nút tương tác. OAuth callback cache một terminal promise cho toàn bộ `exchange → getMe` theo authorization code, nên StrictMode/remount không thể gửi lại code đã dùng một lần. Admin theme đọc đúng cookie `theme_mode`, missing/invalid mặc định `system`, bootstrap class/attribute/color-scheme trước paint, giữ lựa chọn Light/Dark hợp lệ và dọn theme khi quay lại storefront; Toaster dùng trực tiếp resolved theme của preference store và dependency `next-themes` dư thừa được gỡ.
