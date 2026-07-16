@@ -5,6 +5,7 @@ import { createSignInHref } from "./auth/post-auth-redirect";
 let accessToken: string | null = null;
 let refreshPromise: Promise<string> | null = null;
 let sessionExpiryRedirectStarted = false;
+let authSessionGeneration = 0;
 const authSessionLockName = "vela-auth-session";
 
 export function getAccessToken(): string | null {
@@ -14,6 +15,11 @@ export function getAccessToken(): string | null {
 export function setAccessToken(token: string | null) {
   accessToken = token;
   if (token) sessionExpiryRedirectStarted = false;
+}
+
+export function clearLocalAuthSession() {
+  authSessionGeneration += 1;
+  accessToken = null;
 }
 
 function redirectExpiredSessionToSignIn() {
@@ -34,6 +40,7 @@ const apiClient = axios.create({
 });
 
 async function requestFreshAccessToken() {
+  const generationAtRequest = authSessionGeneration;
   const response = await axios.post(
     `${apiClient.defaults.baseURL}/auth/refresh`,
     {},
@@ -42,6 +49,9 @@ async function requestFreshAccessToken() {
   const newAccessToken = response.data?.data?.accessToken;
   if (!newAccessToken) {
     throw new Error("Invalid refresh response format");
+  }
+  if (generationAtRequest !== authSessionGeneration) {
+    throw new Error("Auth session changed while refresh was in flight");
   }
   setAccessToken(newAccessToken);
   return newAccessToken as string;
@@ -91,7 +101,7 @@ export async function logoutAuthSession(): Promise<void> {
         );
       }
     } finally {
-      setAccessToken(null);
+      clearLocalAuthSession();
     }
   });
 }
@@ -136,6 +146,15 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (error.response?.status === 401 && error.response?.data?.code === "SESSION_REVOKED") {
+      const requestHadAccessToken = Boolean(
+        accessToken || originalRequest.headers?.Authorization,
+      );
+      clearLocalAuthSession();
+      if (requestHadAccessToken) redirectExpiredSessionToSignIn();
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const requestHadAccessToken = Boolean(
@@ -151,7 +170,7 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh token is expired or invalid, clear token
-        setAccessToken(null);
+        clearLocalAuthSession();
         if (requestHadAccessToken) redirectExpiredSessionToSignIn();
         return Promise.reject(refreshError);
       }

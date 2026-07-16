@@ -13,6 +13,7 @@ import { resetPassword } from "@/lib/auth-otp-api";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { OtpEntry } from "@/components/auth/otp-entry";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { useReauthenticationRedirect } from "@/components/auth/use-reauthentication-redirect";
 import type {
   AuthSceneFocus,
   AuthSceneStatus,
@@ -27,6 +28,7 @@ type ResetFormValues = { newPassword: string };
 
 export function ForgotPasswordPage() {
   const { locale, t } = useI18n();
+  const redirectAfterRevocation = useReauthenticationRedirect();
   const requestSchema = useMemo(
     () => createForgotPasswordRequestSchema(locale),
     [locale],
@@ -71,12 +73,16 @@ export function ForgotPasswordPage() {
   } = useOtpFlow({
     email: emailValue,
     purpose: "FORGOT_PASSWORD",
-    onVerifySuccess: async () => {
+    onVerifySuccess: async (proofToken) => {
       try {
-        await resetPassword({ email: emailValue, newPassword: resetForm.getValues("newPassword") });
+        await resetPassword({
+          email: emailValue,
+          newPassword: resetForm.getValues("newPassword"),
+          otpProofToken: proofToken,
+        });
         setSceneStatus("success");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
         setStep("SUCCESS");
+        await redirectAfterRevocation();
       } catch (err: unknown) {
         setSceneStatus("error");
         setTimeout(() => setSceneStatus("idle"), 850);

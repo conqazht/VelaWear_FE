@@ -28,6 +28,7 @@ import { changeEmail, changePassword } from "@/lib/auth-otp-api";
 import { formatDate } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n";
 import { createEmailSchema, createStrongPasswordSchema } from "@/lib/validations";
+import { useReauthenticationRedirect } from "@/components/auth/use-reauthentication-redirect";
 
 const createChangeEmailSchema = (locale: Locale) =>
   z.object({ email: createEmailSchema(locale) });
@@ -53,7 +54,8 @@ type ChangePasswordFormValues = z.infer<ReturnType<typeof createChangePasswordSc
 type SuccessMessage = "email" | "password" | "passwordCreated";
 
 export default function MemberSettings() {
-  const { user, isAuthenticated, checkSession } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const redirectAfterRevocation = useReauthenticationRedirect();
   const { locale, t } = useI18n();
   const changeEmailSchema = useMemo(() => createChangeEmailSchema(locale), [locale]);
   const changePasswordSchema = useMemo(
@@ -114,16 +116,12 @@ export default function MemberSettings() {
   } = useOtpFlow({
     email: otpEmail,
     purpose: "CHANGE_EMAIL",
-    onVerifySuccess: async () => {
-      // Step 2: Change email using verified marker
-      await changeEmail({ newEmail: otpEmail });
-
-      // Refresh session/profile
-      await checkSession();
-
-      setRequestedEmail(null);
-      resetFlow();
-      setSuccessMessage("email");
+    onVerifySuccess: async (proofToken) => {
+      await changeEmail({
+        newEmail: otpEmail,
+        otpProofToken: proofToken,
+      });
+      await redirectAfterRevocation();
     },
   });
 
@@ -162,10 +160,7 @@ export default function MemberSettings() {
         currentPassword: hasPassword ? data.currentPassword : undefined,
         newPassword: data.newPassword,
       });
-      await checkSession();
-      resetPasswordForm();
-      setIsPasswordEditing(false);
-      setSuccessMessage(hasPassword ? "password" : "passwordCreated");
+      await redirectAfterRevocation();
     } catch (error) {
       setPasswordSubmitError(getApiErrorMessage(error));
     } finally {

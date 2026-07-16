@@ -33,6 +33,12 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-16
 
+### Chuyển OTP sang challenge/proof token và đăng xuất sau thay đổi nhạy cảm
+- **Date/Time**: 2026-07-16T13:21:35+07:00
+- **Implementation**: Thay contract OTP cũ bằng `request → challengeId`, `verify(challengeId, code) → proofToken`; proof chỉ đi qua biến cục bộ của callback, không nằm trong React state, storage hoặc URL. Register, reset password và đổi email gửi `otpProofToken`; resend thay challenge đang giữ trong memory. Reset/đổi mật khẩu và đổi email dọn access token, auth query cache, cart rồi `replace` về `/sign-in`; session generation guard ngăn refresh request cũ ghi token trở lại sau khi phiên bị thu hồi. Chuẩn hóa mapping tám security error code cùng `Retry-After`/`retryAfterSeconds`.
+- **Verification**: TypeScript pass; full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 28 file/98 test pass, gồm contract/payload OTP, resend, proof callback, limiter retry, redirect reauthentication và stale-refresh guard; production build pass 68 route; `git diff --check` pass.
+- **Known Follow-ups**: Backend và frontend phải phát hành đồng thời vì contract cũ không còn tương thích. CAPTCHA, Cloudflare và monitoring bên ngoài không thuộc thay đổi frontend này.
+
 ### Sửa Playwright smoke theo Language Switcher dạng popover
 - **Date/Time**: 2026-07-16T11:28:14+07:00
 - **Implementation**: Đồng bộ nhánh PR với commit merge `main` mới nhất, sau đó cập nhật test Flash Sale locale để mở Language Switcher popover, chọn English trong nhóm ngôn ngữ và xác nhận lựa chọn vẫn có `aria-pressed=true` sau reload. Bỏ locator cũ dành cho segmented switcher vì trigger popover không mang trạng thái pressed.
