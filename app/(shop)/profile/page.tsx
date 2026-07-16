@@ -7,6 +7,7 @@ import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLi
 
 import { ProductCard } from "@/components/shop/product-card";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useCart } from "@/components/shop/cart-provider";
 import { useNotification } from "@/components/shop/notification-provider";
@@ -265,6 +266,18 @@ export default function MemberProfile() {
           </Link>
         </Card>
       </div>
+    );
+  }
+
+  if (activeSubTab === "orders" && ordersQuery.isError && !ordersQuery.data) {
+    return (
+      <StorefrontApiStatus
+        error={ordersQuery.error}
+        onRetry={() => void ordersQuery.refetch()}
+        resourceLabel={t("account.orders.resource")}
+        returnHref="/collection"
+        variant="route"
+      />
     );
   }
 
@@ -837,7 +850,14 @@ export default function MemberProfile() {
               </span>
             </div>
 
-            {!ordersQuery.isLoading && !ordersQuery.isError && orders.length > 0 && (
+            {ordersQuery.isError ? (
+              <StorefrontStaleWarning
+                onRetry={() => void ordersQuery.refetch()}
+                resourceLabel={t("account.orders.resource")}
+              />
+            ) : null}
+
+            {!ordersQuery.isLoading && orders.length > 0 && (
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                 {orderStats.map((stat) => {
                   const percentage = Math.round((stat.count / orders.length) * 100);
@@ -864,14 +884,6 @@ export default function MemberProfile() {
 
             {ordersQuery.isLoading ? (
               <ProfileOrdersLoading />
-            ) : ordersQuery.isError ? (
-              <StorefrontApiStatus
-                error={ordersQuery.error}
-                onRetry={() => void ordersQuery.refetch()}
-                resourceLabel={t("account.orders.resource")}
-                returnHref="/collection"
-                variant="panel"
-              />
             ) : orders.length === 0 ? (
               <div className="py-12 text-center select-none bg-surface-card/10 border border-hairline/20 rounded-sm">
                 <p className="text-sm text-[#1c1a18]/50 mb-6">{t("account.orders.empty")}</p>

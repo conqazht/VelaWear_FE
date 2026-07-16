@@ -8,14 +8,16 @@ import {
   getColors,
   getProduct,
   getProductReviews,
+  getProductReviewSummary,
   getProducts,
+  getStorefrontProducts,
   getProductVariants,
   getSizes,
   type ProductFilters,
   type ProductVariantFilters,
   type ReviewFilters,
 } from "@/lib/api/catalog";
-import type { PageParams } from "@/lib/api/types";
+import type { PageParams, StorefrontCatalogFilters } from "@/lib/api/types";
 import { queryKeys } from "./keys";
 
 export function useProductsQuery(filters: ProductFilters = {}) {
@@ -28,6 +30,24 @@ export function useProductsQuery(filters: ProductFilters = {}) {
       previousQuery?.queryKey[2] === locale ? previousData : undefined,
     staleTime: 30_000,
     refetchOnWindowFocus: true,
+  });
+}
+
+export function useStorefrontProductsQuery(
+  filters: StorefrontCatalogFilters = {},
+  options: { enabled?: boolean } = {},
+) {
+  const { locale } = useI18n();
+  const localizedFilters = { ...filters, locale: filters.locale ?? locale };
+
+  return useQuery({
+    queryKey: queryKeys.storefrontCatalog.list(localizedFilters, locale),
+    queryFn: () => getStorefrontProducts(localizedFilters),
+    enabled: options.enabled ?? true,
+    placeholderData: (previousData, previousQuery) =>
+      previousQuery?.queryKey[2] === locale ? previousData : undefined,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -86,10 +106,24 @@ export function useProductVariantsQuery(params: ProductVariantFilters = {}) {
   });
 }
 
-export function useProductReviewsQuery(params: ReviewFilters = {}) {
+export function useProductReviewsQuery(
+  params: ReviewFilters = {},
+  options: { enabled?: boolean } = {},
+) {
   return useQuery({
-    queryKey: queryKeys.reviews.list(params),
+    queryKey: queryKeys.reviews.product(params.productId as number, params),
     queryFn: () => getProductReviews(params.productId as number, params),
-    enabled: Boolean(params.productId),
+    enabled: Boolean(params.productId) && (options.enabled ?? true),
+  });
+}
+
+export function useProductReviewSummaryQuery(
+  productId?: number,
+  options: { enabled?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: queryKeys.reviews.summary(productId as number),
+    queryFn: () => getProductReviewSummary(productId as number),
+    enabled: Boolean(productId) && (options.enabled ?? true),
   });
 }

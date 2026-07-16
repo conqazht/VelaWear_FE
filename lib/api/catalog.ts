@@ -7,6 +7,9 @@ import type {
   ProductVariant,
   ResultPaginationDTO,
   Review,
+  ReviewSummary,
+  StorefrontCatalogFilters,
+  StorefrontCatalogResult,
 } from "./types";
 
 export type ProductFilters = PageParams & {
@@ -28,6 +31,21 @@ export type ProductVariantFilters = PageParams & {
 
 export function getProducts(filters: ProductFilters = {}) {
   return apiGet<ResultPaginationDTO<Product>>("/products", filters);
+}
+
+export function getStorefrontProducts(filters: StorefrontCatalogFilters = {}) {
+  return apiGet<StorefrontCatalogResult>("/storefront/products", {
+    q: filters.q?.trim() || undefined,
+    categorySlugs: filters.categorySlugs?.join(",") || undefined,
+    colorIds: filters.colorIds?.join(",") || undefined,
+    sizeIds: filters.sizeIds?.join(",") || undefined,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    sort: filters.sort ?? "featured",
+    page: filters.page ?? 1,
+    size: filters.size ?? 12,
+    locale: filters.locale,
+  });
 }
 
 export function getProduct(id: number | string, locale?: string) {
@@ -73,6 +91,8 @@ export type ReviewFilters = PageParams & {
   userId?: number;
   orderId?: number;
   orderItemId?: number;
+  rating?: number;
+  sort?: "newest" | "oldest" | "rating-high" | "rating-low" | string;
 };
 
 export function getReviews(filters: ReviewFilters = {}) {
@@ -84,4 +104,8 @@ export function getProductReviews(productId: number, filters: ReviewFilters = {}
     ...filters,
     productId: undefined,
   });
+}
+
+export function getProductReviewSummary(productId: number) {
+  return apiGet<ReviewSummary>(`/reviews/product/${productId}/summary`);
 }

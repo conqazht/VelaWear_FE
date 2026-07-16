@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarClock, History, PiggyBank, Ticket } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyCouponsQuery } from "@/lib/queries/commerce";
 import type { Coupon } from "@/lib/api/types";
@@ -52,6 +53,18 @@ export function CouponsClient() {
     );
   }
 
+  if (couponsQuery.isError && !couponsQuery.data) {
+    return (
+      <StorefrontApiStatus
+        error={couponsQuery.error}
+        onRetry={() => void couponsQuery.refetch()}
+        resourceLabel={t("coupons.resource")}
+        returnHref="/collection"
+        variant="route"
+      />
+    );
+  }
+
   return (
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
       <main className="flex-grow w-full px-6 md:px-16 py-10 md:py-16 flex flex-col gap-10">
@@ -77,12 +90,9 @@ export function CouponsClient() {
           )}
 
         {couponsQuery.isError ? (
-          <StorefrontApiStatus
-            error={couponsQuery.error}
-            onRetry={() => void couponsQuery.refetch()}
+          <StorefrontStaleWarning
             resourceLabel={t("coupons.resource")}
-            returnHref="/collection"
-            variant="panel"
+            onRetry={() => void couponsQuery.refetch()}
           />
         ) : couponsQuery.isLoading ? (
           <CouponsLoadingSkeleton />

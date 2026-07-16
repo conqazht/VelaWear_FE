@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { getApiErrorStatus } from "@/lib/api/errors";
+import { classifyApiError } from "@/lib/api/errors";
 import { createSignInHref } from "@/lib/auth/post-auth-redirect";
 import type { TranslationKey } from "@/lib/i18n/messages";
 
@@ -18,7 +18,7 @@ type StorefrontApiStatusProps = {
   resourceLabel?: string;
   returnHref?: string;
   returnLabel?: string;
-  variant?: "page" | "panel";
+  variant?: "page" | "route" | "panel";
   className?: string;
 };
 
@@ -57,7 +57,8 @@ export function StorefrontApiStatus({
   className,
 }: StorefrontApiStatusProps) {
   const { t } = useI18n();
-  const status = getApiErrorStatus(error) ?? 500;
+  const classification = classifyApiError(error);
+  const status = classification.status ?? 500;
   const localizedResource = resourceLabel
     ? RESOURCE_KEYS[resourceLabel]
       ? t(RESOURCE_KEYS[resourceLabel])
@@ -75,6 +76,8 @@ export function StorefrontApiStatus({
     const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     window.location.replace(createSignInHref(currentPath));
   }, [status]);
+
+  if (classification.kind === "cancelled") return null;
 
   // 401 is a navigation state, not a dedicated artwork. The effect above hands it
   // to sign-in while preserving a validated internal return path.

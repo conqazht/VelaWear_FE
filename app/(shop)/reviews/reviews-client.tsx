@@ -4,21 +4,23 @@ import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { RatingStars } from "@/components/shop/rating-stars";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useReviewsByUserQuery } from "@/lib/queries/commerce";
+import { useMyReviewsQuery } from "@/lib/queries/commerce";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatDate } from "@/lib/i18n/format";
 
 export function ReviewsClient() {
   const { locale, t } = useI18n();
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const userId = user?.id;
-  const reviewsQuery = useReviewsByUserQuery(userId, {
+  const reviewsQuery = useMyReviewsQuery(isAuthenticated && Boolean(user), {
+    page: 1,
     size: 100,
     sort: "createdAt,desc",
   });
   const reviews = reviewsQuery.data?.result ?? [];
+  const reviewCount = reviewsQuery.data?.meta.total ?? reviews.length;
 
   if (isAuthLoading) {
     return <ReviewsPageLoading />;
@@ -41,17 +43,17 @@ export function ReviewsClient() {
               {t("reviews.title")}
             </h2>
             <span className="text-xs text-[#55423d]/65">
-              {t("reviews.count", { count: reviews.length })}
+              {t("reviews.count", { count: reviewCount })}
             </span>
           </div>
 
-        {reviewsQuery.isError ? (
+        {reviewsQuery.isError && reviews.length === 0 ? (
           <StorefrontApiStatus
             error={reviewsQuery.error}
             onRetry={() => void reviewsQuery.refetch()}
             resourceLabel={t("reviews.resource")}
             returnHref="/collection"
-            variant="panel"
+            variant="route"
           />
         ) : reviewsQuery.isLoading ? (
           <ReviewsLoadingSkeleton />
@@ -68,11 +70,17 @@ export function ReviewsClient() {
           </div>
         ) : (
           <div className="flex flex-col gap-8">
+            {reviewsQuery.isError ? (
+              <StorefrontStaleWarning
+                onRetry={() => void reviewsQuery.refetch()}
+                resourceLabel={t("reviews.resource")}
+              />
+            ) : null}
             {reviews.map((review) => (
               <Link
                 key={review.id}
                 href={review.productSlug
-                  ? `/products/${encodeURIComponent(review.productSlug)}?review=${review.id}#reviews`
+                  ? `/products/${encodeURIComponent(review.productSlug)}?reviews=1#reviews`
                   : "/collection"}
                 aria-label={t("reviews.viewProduct", { product: review.productName })}
                 className="bg-white border border-[#1c1a18]/10 rounded-md p-8 shadow-sm flex flex-col md:flex-row md:items-start gap-8 transition-all hover:-translate-y-0.5 hover:border-[#b85a3c]/35 hover:shadow-md"

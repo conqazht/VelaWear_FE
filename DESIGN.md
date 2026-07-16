@@ -215,6 +215,16 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 
 **`filter-chip`** — Chip filter có thể xóa (ví dụ "Size: M ×", "Màu: Đen ×"). Nền `{colors.surface-card}`, rounded `{rounded.pill}`, padding 6px × 12px, icon × để xóa filter.
 
+### Storefront Catalog UX (2026-07-16)
+
+- **Catalog controller:** Collection và Search dùng cùng layout. Desktop filter áp dụng ngay; mobile dùng right-side dialog, giữ draft và chỉ áp dụng khi bấm CTA **Xem N sản phẩm**. URL là nguồn trạng thái cho query, chip, sort và pagination.
+- **Mega-menu:** rail trái dùng border terracotta 2px, một heading serif và đúng một CTA cam `Xem tất cả … →`; không đặt dòng mô tả lặp bên dưới từng leaf. Parent label và chevron là hai vùng tương tác riêng.
+- **Size Guide:** route riêng dưới shop shell, bảng rộng cuộn ngang, cột label sticky, selected size dùng nền terracotta nhạt và unavailable size giảm tương phản nhưng không bị ẩn.
+- **Review:** PDP hiển thị ba review text; modal gần toàn màn hình dùng surface kem/trắng, summary rail và list phân trang. Lightbox ảnh dùng nền đen để giữ tương phản.
+- **Status route:** 403/404/5xx phủ toàn vùng còn lại dưới storefront header, không bọc trong card nhỏ và không lặp một header Vela Wear thứ hai. Khi có cached content, giữ content và dùng warning terracotta nhỏ.
+
+Contract, state và checklist QA chi tiết nằm trong [`docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md`](./docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md).
+
 ### CTA / Footer
 
 **`cta-band-terracotta`** — Băng CTA trước footer (ví dụ "Đăng ký nhận ưu đãi 10% cho đơn đầu tiên"). Nền terracotta full-width, text trắng, rounded `{rounded.lg}` **(16px)**, padding 64px. H2 dùng `{typography.display-sm}` (vẫn serif), sub-line, và `{component.newsletter-band-dark}` biến thể nền sáng hoặc nút kem.
@@ -252,7 +262,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 
 | Name | Width | Key Changes |
 |---|---|---|
-| Mobile | < 768px | Hamburger nav; hero h1 56→28px; hero full-bleed giữ nguyên tỉ lệ nhưng text co lại; product grid 2-up; category tile 2-up; filter chuyển thành bottom-sheet; footer 4 cột → 1 |
+| Mobile | < 768px | Hamburger nav; hero h1 56→28px; hero full-bleed giữ nguyên tỉ lệ nhưng text co lại; product grid 2-up; category tile 2-up; filter chuyển thành right-side dialog có draft; footer 4 cột → 1 |
 | Tablet | 768–1024px | Top nav giữ ngang nhưng thu gọn; product grid 3-up; category tile 3-up |
 | Desktop | 1024–1440px | Top nav đầy đủ menu; product grid 4-up; category tile 6-up |
 | Wide | > 1440px | Giống desktop với khoảng thở ngoài lớn hơn; max content width giữ ở 1280px |
@@ -268,7 +278,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 - Top nav thu về hamburger ở < 768px; menu mở dưới dạng sheet kem toàn màn hình.
 - Hero full-bleed giữ nguyên trên mobile, nhưng headline giảm cỡ và overlay gradient đậm hơn để đảm bảo độ đọc.
 - Product grid giảm cột (4→3→2) thay vì thu nhỏ card — ảnh sản phẩm luôn đủ lớn để thấy chi tiết vải.
-- Filter chuyển từ tab ngang sang bottom-sheet trên mobile, vẫn dùng `{component.filter-chip}` để hiển thị filter đang áp dụng.
+- Filter chuyển từ sidebar sang right-side dialog trên mobile, giữ lựa chọn nháp tới khi bấm **Xem N sản phẩm**; `{component.filter-chip}` chỉ phản ánh filter đã áp dụng.
 - Banner sale/collection giữ tỉ lệ ảnh, chỉ co text overlay.
 
 ### Image Behavior
@@ -294,5 +304,5 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 - Logo Vela Wear chưa được thiết kế trong tài liệu này — cần một wordmark/dấu hiệu đơn giản (gợi ý: chữ "V" cách điệu hoặc một đường nét tối giản gợi hình áo/voan) để dùng nhất quán trong top-nav và footer.
 - Animation/transition (page-load, scroll-reveal cho ảnh lookbook, hiệu ứng hover product card) chưa được định nghĩa chi tiết — cần xác nhận thêm khi build trong Google Stitch.
 - Trạng thái form validation (lỗi nhập email, lỗi thanh toán) ngoài `{component.text-input-focused}` chưa được đặc tả — cần bổ sung khi xây flow checkout.
-- Trang chi tiết sản phẩm (gallery ảnh nhiều góc, tab mô tả/chất liệu/đánh giá, size guide modal) là các component đặc thù chưa nằm trong phạm vi tài liệu này và cần thiết kế bổ sung.
+- PDP đã có Size Guide route riêng và review preview/modal theo Storefront Catalog UX. Gallery nâng cao, tab mô tả/chất liệu và fit-specific measurement cho từng SKU vẫn cần đặc tả riêng nếu mở rộng.
 - Trang giỏ hàng/checkout (cart drawer, order summary, payment method selector) chưa được đặc tả — sẽ kế thừa token màu/typography ở trên nhưng cần layout riêng.

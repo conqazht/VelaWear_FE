@@ -45,7 +45,7 @@ export function ProductToolbar({
   const currentSortLabel = sortOptions.find((o) => o.value === sortBy)?.label ?? sortOptions[0]?.label;
 
   return (
-    <div className="sticky top-[var(--header-visible-height)] z-30 isolate mb-6 flex select-none flex-row items-center justify-between py-3 transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:inset-y-0 before:-left-[100vw] before:-right-[100vw] before:-z-10 before:bg-[#f7f4ef]">
+    <div className="sticky top-[var(--header-visible-height)] z-30 isolate mb-6 flex select-none flex-row items-center justify-between py-3 transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:inset-0 before:-z-10 before:bg-[#f7f4ef]">
       <div className="relative z-10 flex items-center gap-4">
         <p className="hidden text-xs uppercase tracking-widest text-[#1c1a18]/60 md:block">
           {t(

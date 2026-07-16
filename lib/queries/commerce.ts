@@ -15,6 +15,7 @@ import {
   getOrderByCode,
   getOrdersByUser,
   getReviewsByUser,
+  getMyReviews,
   getUserAddresses,
   getMyWishlists,
   updateUser,
@@ -143,6 +144,17 @@ export function useReviewsByUserQuery(userId?: number, params: PageParams = {}) 
   });
 }
 
+export function useMyReviewsQuery(
+  enabled: boolean,
+  params: PageParams & { orderId?: number } = {},
+) {
+  return useQuery({
+    queryKey: queryKeys.reviews.me(params),
+    queryFn: () => getMyReviews(params),
+    enabled,
+  });
+}
+
 export function useUserAddressesQuery(
   params: PageParams & { userId?: number } = {}
 ) {
@@ -211,7 +223,11 @@ export function useCreateReviewMutation() {
   return useMutation({
     mutationFn: (request: CreateReviewRequest) => createReview(request),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.reviews.root });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.reviews.root }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.orders.root }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.products.root }),
+      ]);
     },
   });
 }

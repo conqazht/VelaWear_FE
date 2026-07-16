@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductDetailClient } from "@/components/shop/product-detail-client";
 import { RelatedProducts } from "@/components/shop/related-products";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStatus } from "@/components/errors/storefront-status";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Product, mapBackendProduct } from "@/lib/vela-data";
 import apiClient from "@/lib/api-client";
+import { classifyApiError } from "@/lib/api/errors";
 
 export function ProductDetailPage({ slug }: { slug: string }) {
   const { locale: activeLocale, t } = useI18n();
@@ -19,27 +21,28 @@ export function ProductDetailPage({ slug }: { slug: string }) {
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isMissing, setIsMissing] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const productRef = useRef<Product | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadProduct() {
-      setIsLoading(true);
-      setLoadError(null);
-      setIsMissing(false);
-      setProduct(null);
-
       try {
         const response = await apiClient.get(`/products/slug/${slug}?locale=${activeLocale}`);
         if (!isMounted) return;
 
         if (response.data?.data) {
-          setProduct(mapBackendProduct(response.data.data, activeLocale));
-        } else {
+          const nextProduct = mapBackendProduct(response.data.data, activeLocale);
+          productRef.current = nextProduct;
+          setProduct(nextProduct);
+          setLoadError(null);
+          setIsMissing(false);
+        } else if (!productRef.current) {
           setIsMissing(true);
+          setLoadError(null);
         }
       } catch (err) {
-        if (isMounted) {
+        if (isMounted && classifyApiError(err).kind !== "cancelled") {
           setLoadError(err);
         }
       } finally {
@@ -56,7 +59,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     };
   }, [slug, activeLocale, retryKey]);
 
-  if (isLoading) {
+  if (isLoading && !product) {
     return (
       <div
         className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]"
@@ -70,31 +73,44 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     );
   }
 
+  if (!product && loadError) {
+    return (
+      <StorefrontApiStatus
+        error={loadError}
+        onRetry={() => setRetryKey((value) => value + 1)}
+        resourceLabel={t("storefront.product.resource")}
+        returnHref="/collection"
+        variant="route"
+      />
+    );
+  }
+
+  if (!product) {
+    return (
+      <StorefrontStatus
+        status={404}
+        eyebrow={t("storefront.product.missingEyebrow")}
+        title={t("storefront.product.missingTitle")}
+        description={isMissing
+          ? t("storefront.product.missingDescription")
+          : t("storefront.product.missingGeneric")}
+        primaryAction={{ label: t("storefront.product.viewCollection"), href: "/collection" }}
+        secondaryAction={{ label: t("storefront.product.backHome"), href: "/" }}
+        variant="route"
+      />
+    );
+  }
+
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
-      {product ? (
-        <ProductDetailContent product={product} />
-      ) : loadError ? (
-        <StorefrontApiStatus
-          error={loadError}
-          onRetry={() => setRetryKey((value) => value + 1)}
+    <div className="mx-auto w-full max-w-[1800px] px-6 pb-12 pt-[104px] md:px-16 md:pt-[120px]">
+      {loadError ? (
+        <StorefrontStaleWarning
+          className="mb-6"
           resourceLabel={t("storefront.product.resource")}
-          returnHref="/collection"
-          variant="panel"
+          onRetry={() => setRetryKey((value) => value + 1)}
         />
-      ) : (
-        <StorefrontStatus
-          status={404}
-          eyebrow={t("storefront.product.missingEyebrow")}
-          title={t("storefront.product.missingTitle")}
-          description={isMissing
-            ? t("storefront.product.missingDescription")
-            : t("storefront.product.missingGeneric")}
-          primaryAction={{ label: t("storefront.product.viewCollection"), href: "/collection" }}
-          secondaryAction={{ label: t("storefront.product.backHome"), href: "/" }}
-          variant="panel"
-        />
-      )}
+      ) : null}
+      <ProductDetailContent product={product} />
     </div>
   );
 }

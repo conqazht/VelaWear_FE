@@ -33,7 +33,7 @@ Smoke test có tag `@smoke`, tự khởi động Next.js và không yêu cầu S
 Mục tiêu là phát hiện route không render, lỗi JavaScript nghiêm trọng và nội dung
 cốt lõi biến mất. Bộ này chạy trên mọi pull request FE.
 
-Sáu case hiện tại kiểm tra:
+Mười ba case hiện tại kiểm tra:
 
 1. trang chủ, header và điều hướng tìm kiếm;
 2. validation đăng nhập chặn form rỗng trước khi gọi API;
@@ -41,11 +41,22 @@ Sáu case hiện tại kiểm tra:
 4. nội dung nghiệp vụ của trang Standard Sale;
 5. cảnh báo giỏ hàng không giữ suất của Flash Sale;
 6. chuyển VI sang EN bằng switcher thật, giữ locale và metadata sau reload.
+7. parent/chevron/leaf của mega-menu ở desktop và accordion mobile;
+8. URL multi-filter và sort giá được khôi phục sau reload;
+9. mobile giữ filter draft cho tới khi bấm **Xem N sản phẩm**;
+10. initial `500` giữ artwork rồi Retry về `200` không chèn lại skeleton;
+11. filter lỗi quay lại URL hợp lệ gần nhất và không làm mất grid;
+12. Size Guide đổi cm/in và mở bảng plus-size;
+13. PDP chỉ preview ba review, còn modal dùng lightbox và phân trang server-side
+    10 review.
 
 Fixture smoke chặn API VelaWear ở tầng browser: refresh của khách trả `401`, catalog
 và Sale trả dữ liệu rỗng để UI dùng fixture deterministic. Vì vậy job không phụ
 thuộc backend hoặc dữ liệu mạng, nhưng vẫn thất bại nếu trang phát sinh JavaScript
 exception không được xử lý hoặc gọi một endpoint VelaWear chưa được allowlist rõ ràng.
+Spec `e2e/storefront-catalog-ux.spec.ts` đăng ký response chi tiết sau fixture chung
+cho đúng endpoint cần kiểm tra; route hẹp hơn xử lý request trước, các request còn
+lại vẫn đi qua allowlist và bộ phát hiện endpoint ngoài dự kiến.
 
 ### Cách tổ chức code test
 
@@ -86,8 +97,9 @@ pnpm test:e2e:fullstack
 ```
 
 Full-stack test có tag `@fullstack`, chạy Chromium với một worker và dùng backend
-thật tại `http://localhost:8080`. Năm case hiện tại gồm session reload, bootstrap
-hai tab, refresh-vs-logout, logout/replay và checkout race.
+thật tại `http://localhost:8080`. Sáu case hiện tại gồm session reload, bootstrap
+hai tab, refresh-vs-logout, logout/replay, checkout race và Collection gọi
+storefront catalog thật với `sort=price-asc`.
 
 Bốn test auth:
 
@@ -121,6 +133,27 @@ Test checkout:
 4. gọi `requestSubmit()` hai lần trong cùng một browser tick;
 5. xác nhận chỉ có một `POST /api/v1/checkout` và UI nhận một đơn hàng;
 6. hủy đơn trong teardown để trả lại tài nguyên.
+
+Test storefront catalog:
+
+1. mở `/collection?sort=price-asc&page=1` bằng UI thật ở `1440×900`;
+2. bắt đúng `GET /api/v1/storefront/products` do trang phát ra, không mock API Vela;
+3. xác nhận HTTP `200` (regression cho lỗi sort giá từng trả `400`), `meta.page=1`
+   và dữ liệu seed có sản phẩm `ACTIVE`;
+4. xác nhận `effectivePrice` trong response tăng dần, URL/sort label được giữ đúng
+   và sản phẩm đầu tiên thật sự xuất hiện trong grid;
+5. chuyển sang `390×844`, reload với API thật và xác nhận trang không tràn ngang.
+
+Smoke fixture bắt uncaught page error, application `console.error` và request API
+không có mock/allowlist. Log `Failed to load resource` do Chromium tự sinh cho các
+HTTP `401`/`500` có chủ đích không được tính là application console error; status và
+retry của chúng được assertion trực tiếp ở network/UI.
+
+Chưa có review-submit full-stack vì `104/104` item `COMPLETED` của user seed đã có
+review và contract không cung cấp review delete/reset. FE component test cùng BE
+controller/service/storage test vẫn bao phủ multipart, quyền và rollback; chỉ thêm
+browser case khi profile test có fixture setup/cleanup an toàn, không thêm reset
+endpoint vào production.
 
 Không tạo endpoint reset dữ liệu trong production. PostgreSQL/Redis của CI là
 disposable, còn fixture dùng các API nghiệp vụ hiện có.

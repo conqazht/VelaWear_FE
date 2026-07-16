@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlarmClock, BadgePercent, ShoppingBag } from "lucide-react";
 
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
+import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { ProductGrid } from "@/components/shop/product-layout-components";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
@@ -81,6 +82,19 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
     }, Math.min(nextBoundary - now + 500, 2_147_000_000));
     return () => window.clearTimeout(timeoutId);
   }, [campaigns, now, queryClient]);
+
+  if (salesQuery.isError && !salesQuery.data) {
+    return (
+      <StorefrontApiStatus
+        error={salesQuery.error}
+        onRetry={() => void salesQuery.refetch()}
+        resourceLabel={isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
+        returnHref="/collection"
+        returnLabel={t("storefront.sale.continueShopping")}
+        variant="route"
+      />
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f7f4ef] pb-24 pt-[104px] text-[#1c1a18] md:pt-[120px]">
@@ -159,17 +173,9 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
           {salesQuery.isLoading ? <SaleLoading /> : null}
 
           {salesQuery.isError ? (
-            <StorefrontApiStatus
-              error={salesQuery.error}
+            <StorefrontStaleWarning
+              resourceLabel={isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
               onRetry={() => void salesQuery.refetch()}
-              resourceLabel={
-                isFlash
-                  ? t("storefront.sale.flash.title")
-                  : t("storefront.sale.standard.title")
-              }
-              returnHref="/collection"
-              returnLabel={t("storefront.sale.continueShopping")}
-              variant="panel"
             />
           ) : null}
 

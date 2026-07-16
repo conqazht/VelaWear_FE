@@ -4,13 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Locale } from "@/lib/i18n";
 import type { Product } from "@/lib/vela-data";
 
-const { getProductsMock, mapBackendProductMock } = vi.hoisted(() => ({
-  getProductsMock: vi.fn(),
+const { getStorefrontProductsMock, mapBackendProductMock } = vi.hoisted(() => ({
+  getStorefrontProductsMock: vi.fn(),
   mapBackendProductMock: vi.fn((product: Product) => product),
 }));
 
 vi.mock("@/lib/api/catalog", () => ({
-  getProducts: getProductsMock,
+  getStorefrontProducts: getStorefrontProductsMock,
 }));
 
 vi.mock("@/lib/vela-data", () => ({
@@ -55,7 +55,7 @@ async function advanceDebounce() {
 describe("useSearchSuggestions", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    getProductsMock.mockReset();
+    getStorefrontProductsMock.mockReset();
     mapBackendProductMock.mockClear();
   });
 
@@ -66,7 +66,7 @@ describe("useSearchSuggestions", () => {
   it("không cho response cũ ghi đè response của query mới", async () => {
     const oldRequest = deferred<{ result: Product[] }>();
     const newRequest = deferred<{ result: Product[] }>();
-    getProductsMock
+    getStorefrontProductsMock
       .mockReturnValueOnce(oldRequest.promise)
       .mockReturnValueOnce(newRequest.promise);
 
@@ -77,11 +77,11 @@ describe("useSearchSuggestions", () => {
     );
 
     await advanceDebounce();
-    expect(getProductsMock).toHaveBeenCalledTimes(1);
+    expect(getStorefrontProductsMock).toHaveBeenCalledTimes(1);
 
     rerender({ query: "new", locale: "vi" });
     await advanceDebounce();
-    expect(getProductsMock).toHaveBeenCalledTimes(2);
+    expect(getStorefrontProductsMock).toHaveBeenCalledTimes(2);
 
     await act(async () => {
       newRequest.resolve({ result: [product("new", "New shirt")] });
@@ -98,7 +98,7 @@ describe("useSearchSuggestions", () => {
 
   it("clear query vô hiệu hóa request đang chạy và xóa suggestions", async () => {
     const slowRequest = deferred<{ result: Product[] }>();
-    getProductsMock
+    getStorefrontProductsMock
       .mockResolvedValueOnce({ result: [product("ready", "Ready shirt")] })
       .mockReturnValueOnce(slowRequest.promise);
 
@@ -113,7 +113,7 @@ describe("useSearchSuggestions", () => {
 
     rerender({ query: "slow", locale: "vi" });
     await advanceDebounce();
-    expect(getProductsMock).toHaveBeenCalledTimes(2);
+    expect(getStorefrontProductsMock).toHaveBeenCalledTimes(2);
 
     rerender({ query: "", locale: "vi" });
     expect(result.current).toEqual([]);
@@ -131,6 +131,6 @@ describe("useSearchSuggestions", () => {
     unmount();
     await advanceDebounce();
 
-    expect(getProductsMock).not.toHaveBeenCalled();
+    expect(getStorefrontProductsMock).not.toHaveBeenCalled();
   });
 });
