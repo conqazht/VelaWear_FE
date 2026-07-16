@@ -84,7 +84,39 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   await page.goto("/collection");
 
   await expectNoHorizontalOverflow(page);
-  const collectionMenu = page.getByRole("button", { name: "Bộ sưu tập menu" });
+  const desktopNavigation = page.locator('[data-slot="navigation-menu"]');
+  const desktopMenus = [
+    { parent: "Giảm giá", leaf: "Flash Sale" },
+    { parent: "Bộ sưu tập", leaf: "May đo" },
+    { parent: "Áo", leaf: "Cardigan" },
+    { parent: "Quần", leaf: "Cargo" },
+    { parent: "Váy & Đầm", leaf: "Jumpsuit" },
+    { parent: "Phụ kiện & Giày", leaf: "Móc khóa" },
+  ];
+
+  for (const menu of desktopMenus) {
+    const parentLink = desktopNavigation.getByRole("link", { name: menu.parent, exact: true });
+    const trigger = desktopNavigation.getByRole("button", { name: `${menu.parent} menu` });
+    await parentLink.hover();
+    await expect(page.getByRole("link", { name: menu.leaf, exact: true })).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  }
+
+  const topsLink = desktopNavigation.getByRole("link", { name: "Áo", exact: true });
+  const topsTrigger = desktopNavigation.getByRole("button", { name: "Áo menu" });
+  await topsLink.hover();
+  const labelBox = await topsLink.locator('[data-slot="storefront-nav-label"]').boundingBox();
+  const chevronBox = await topsTrigger.locator("svg").boundingBox();
+  expect(labelBox).not.toBeNull();
+  expect(chevronBox).not.toBeNull();
+  const labelChevronGap = chevronBox!.x - (labelBox!.x + labelBox!.width);
+  expect(labelChevronGap).toBeGreaterThanOrEqual(2);
+  expect(labelChevronGap).toBeLessThanOrEqual(8);
+  await expect(topsLink).toHaveAttribute("href", /categories=ao%2Cao-khoac/);
+  await expectNoHorizontalOverflow(page);
+
+  await page.keyboard.press("Escape");
+  const collectionMenu = desktopNavigation.getByRole("button", { name: "Bộ sưu tập menu" });
   await collectionMenu.focus();
   await page.keyboard.press("Enter");
   const newArrivals = page.getByRole("link", { name: "Mới về", exact: true });

@@ -15,6 +15,7 @@ export type StorefrontNavigationItem = {
   label: string;
   href: string;
   ctaLabel?: string;
+  description?: string;
   groups?: StorefrontNavigationGroup[];
 };
 
@@ -86,6 +87,24 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
         all: "View all",
       };
 
+  const descriptions = locale === "vi"
+    ? {
+        sale: "Ưu đãi theo mùa và những thiết kế chọn lọc đang chờ bạn.",
+        collection: "Khám phá thiết kế mới, chất liệu đặc trưng và những phom dáng tinh tuyển.",
+        tops: "Những lớp áo linh hoạt, từ thiết yếu hằng ngày đến may đo chỉn chu.",
+        trousers: "Phom quần cân bằng giữa chuyển động tự nhiên và đường nét thanh lịch.",
+        dresses: "Váy và đầm được chọn theo độ rủ, tỷ lệ và nhịp chuyển động.",
+        accessories: "Hoàn thiện trang phục bằng giày và phụ kiện có chủ đích.",
+      }
+    : {
+        sale: "Seasonal offers and selected designs, considered for the moment.",
+        collection: "Discover new designs, signature materials, and considered silhouettes.",
+        tops: "Versatile layers, from everyday essentials to refined tailoring.",
+        trousers: "Trouser shapes balancing natural movement with polished lines.",
+        dresses: "Skirts and dresses selected for drape, proportion, and movement.",
+        accessories: "Complete each look with purposeful shoes and accessories.",
+      };
+
   const makeGroup = (
     title: string,
     items: LocalizedLeaf[],
@@ -99,6 +118,7 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
       label: labels.sale,
       href: "/sale",
       ctaLabel: `${labels.all} ${labels.sale.toLocaleLowerCase()}`,
+      description: descriptions.sale,
       groups: [
         makeGroup(labels.offer, [
           { vi: "Tất cả ưu đãi", en: "All offers", href: "/sale" },
@@ -110,6 +130,7 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
       label: labels.collection,
       href: "/collection",
       ctaLabel: `${labels.all} ${labels.collection.toLocaleLowerCase()}`,
+      description: descriptions.collection,
       groups: [
         makeGroup(labels.explore, [
           { vi: "Tất cả sản phẩm", en: "All products" },
@@ -127,6 +148,7 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
       label: labels.tops,
       href: createCatalogHref({ categories: ["ao", "ao-khoac"] }),
       ctaLabel: `${labels.all} ${labels.tops.toLocaleLowerCase()}`,
+      description: descriptions.tops,
       groups: [
         makeGroup(labels.essentials, [
           { vi: "Áo thun", en: "T-shirts", categories: ["ao"], qVi: "áo thun", qEn: "tee" },
@@ -151,6 +173,7 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
       label: labels.trousers,
       href: createCatalogHref({ categories: ["quan"] }),
       ctaLabel: `${labels.all} ${labels.trousers.toLocaleLowerCase()}`,
+      description: descriptions.trousers,
       groups: [
         makeGroup(labels.trousersGroup, [
           { vi: "Tất cả quần", en: "All trousers", categories: ["quan"] },
@@ -166,6 +189,7 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
       label: labels.dresses,
       href: createCatalogHref({ categories: ["vay", "dam"] }),
       ctaLabel: `${labels.all} ${labels.dresses.toLocaleLowerCase()}`,
+      description: descriptions.dresses,
       groups: [
         makeGroup(labels.skirts, [
           { vi: "Tất cả váy", en: "All skirts", categories: ["vay"] },
@@ -186,6 +210,7 @@ export function getStorefrontNavigation(locale: Locale): StorefrontNavigationIte
       label: labels.accessories,
       href: createCatalogHref({ categories: ["giay", "phu-kien"] }),
       ctaLabel: `${labels.all} ${labels.accessories.toLocaleLowerCase()}`,
+      description: descriptions.accessories,
       groups: [
         makeGroup(labels.shoes, [
           { vi: "Tất cả giày", en: "All shoes", categories: ["giay"] },

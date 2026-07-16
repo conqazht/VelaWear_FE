@@ -17,6 +17,7 @@ describe("storefront mega-menu configuration", () => {
       "Trợ giúp",
     ]);
     expect(leaves.length).toBeGreaterThan(30);
+    expect(navigation.filter((item) => item.groups).every((item) => item.description)).toBe(true);
     expect(leaves.every((item) => item.href.startsWith("/"))).toBe(true);
     expect(leaves.find((item) => item.label === "Cargo")?.href).toContain("categories=quan");
     expect(leaves.find((item) => item.label === "Cargo")?.href).toContain("q=cargo");

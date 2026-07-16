@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -66,6 +66,7 @@ export function SiteHeader() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileExpandedItem, setMobileExpandedItem] = useState<string | null>(null);
+  const [desktopMenuValue, setDesktopMenuValue] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const searchSuggestions = useSearchSuggestions(searchQuery, activeLocale);
   const [searchHistory, setSearchHistory] = useState<string[]>(readSearchHistory);
@@ -78,6 +79,7 @@ export function SiteHeader() {
   const lastScrollY = useRef(0);
   const headerToggleAnchorY = useRef(0);
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
+  const desktopMenuCloseTimerRef = useRef<number | null>(null);
 
   if (searchPathname !== pathname) {
     setSearchPathname(pathname);
@@ -164,6 +166,12 @@ export function SiteHeader() {
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
+  useEffect(() => () => {
+    if (desktopMenuCloseTimerRef.current !== null) {
+      window.clearTimeout(desktopMenuCloseTimerRef.current);
+    }
+  }, []);
+
   const shouldBeTransparent = isHome && !isScrolled;
   const safeFavoritesCount = hasMounted ? favorites.length : 0;
   const safeItemCount = hasMounted ? itemCount : 0;
@@ -240,7 +248,27 @@ export function SiteHeader() {
     runSearch(searchQuery);
   };
 
+  const cancelDesktopMenuClose = () => {
+    if (desktopMenuCloseTimerRef.current === null) return;
+    window.clearTimeout(desktopMenuCloseTimerRef.current);
+    desktopMenuCloseTimerRef.current = null;
+  };
+
+  const openDesktopMenu = (value: string) => {
+    cancelDesktopMenuClose();
+    setDesktopMenuValue(value);
+  };
+
+  const scheduleDesktopMenuClose = () => {
+    cancelDesktopMenuClose();
+    desktopMenuCloseTimerRef.current = window.setTimeout(() => {
+      setDesktopMenuValue(null);
+      desktopMenuCloseTimerRef.current = null;
+    }, 160);
+  };
+
   const navigationItems = getStorefrontNavigation(activeLocale);
+  const megaMenuItemCount = navigationItems.filter((item) => item.groups).length;
 
   return (
     <>
@@ -322,66 +350,144 @@ export function SiteHeader() {
           </div>
 
           {/* Desktop Navigation Menu */}
-          <NavigationMenu className="hidden max-w-none flex-1 justify-start lg:flex">
-            <NavigationMenuList className="gap-3 pl-3">
-              {navigationItems.map((item) => (
-                <NavigationMenuItem key={item.label} className="flex items-center">
+          <NavigationMenu
+            value={desktopMenuValue}
+            onValueChange={(value) => {
+              cancelDesktopMenuClose();
+              setDesktopMenuValue(value);
+            }}
+            delay={40}
+            closeDelay={120}
+            className="hidden max-w-none flex-1 justify-start lg:flex"
+          >
+            <NavigationMenuList className="gap-1 pl-3">
+              {navigationItems.map((item, itemIndex) => (
+                <NavigationMenuItem
+                  key={item.label}
+                  value={item.label}
+                  className="flex items-center"
+                  onPointerEnter={(event) => {
+                    if (event.pointerType !== "touch" && item.groups) openDesktopMenu(item.label);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType !== "touch" && item.groups) scheduleDesktopMenuClose();
+                  }}
+                >
                   {item.groups ? (
                     <>
-                      <div className="flex items-center">
+                      <div
+                        className={cn(
+                          "group/nav flex h-10 items-center rounded-full px-0.5 transition-colors duration-200",
+                          shouldBeTransparent
+                            ? "hover:bg-white/10"
+                            : "hover:bg-[#1c1a18]/[0.05]",
+                          desktopMenuValue === item.label && (
+                            shouldBeTransparent ? "bg-white/10" : "bg-[#1c1a18]/[0.05]"
+                          ),
+                        )}
+                      >
                         <NavigationMenuLink
-                          render={<Link href={item.href} />}
-                          className="rounded-none bg-transparent px-2 py-2"
+                          render={<Link href={item.href} onClick={() => setDesktopMenuValue(null)} />}
+                          className="h-9 rounded-l-full rounded-r-none bg-transparent py-0 pl-2.5 pr-0.5"
                         >
-                          <span className={`group/link relative text-sm font-medium tracking-[0.5px] ${textClass}`}>
+                          <span
+                            data-slot="storefront-nav-label"
+                            className={`group/link relative text-sm font-medium tracking-[0.5px] ${textClass}`}
+                          >
                             {item.label}
-                            <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100" />
+                            <span
+                              className={cn(
+                                "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100",
+                                desktopMenuValue === item.label && "scale-x-100",
+                              )}
+                            />
                           </span>
                         </NavigationMenuLink>
                         <NavigationMenuTrigger
                           aria-label={`${item.label} menu`}
-                          className={`h-9 w-6 rounded-none border-none bg-transparent p-0 ${textClass}`}
+                          className={`h-9 w-8 rounded-l-none rounded-r-full border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-popup-open:bg-transparent [&_svg]:-translate-x-1.5 [&_svg]:ml-0 [&_svg]:size-3 ${textClass}`}
                         >
                           <span className="sr-only">{item.label}</span>
                         </NavigationMenuTrigger>
                       </div>
-                      <NavigationMenuContent>
-                        <div className="flex w-[min(1120px,calc(100vw-48px))] gap-10 p-8">
-                          <div className="flex w-56 shrink-0 flex-col justify-between border-l-2 border-[#b5573a] py-2 pl-6">
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#1c1a18]/45">Vela Wear</p>
-                              <p className="mt-4 font-serif text-3xl font-light leading-tight text-[#1c1a18]">{item.label}</p>
+                      <NavigationMenuContent
+                        className="p-0"
+                        onPointerEnter={(event) => {
+                          if (event.pointerType !== "touch") cancelDesktopMenuClose();
+                        }}
+                        onPointerLeave={(event) => {
+                          if (event.pointerType !== "touch") scheduleDesktopMenuClose();
+                        }}
+                      >
+                        <div
+                          className={cn(
+                            "flex max-w-[calc(var(--available-width)-24px)] gap-3 rounded-[22px] bg-white p-3",
+                            item.groups.length >= 3
+                              ? "w-[min(1080px,calc(100vw-64px))]"
+                              : item.groups.length === 2
+                                ? "w-[min(920px,calc(100vw-48px))]"
+                                : "w-[min(680px,calc(100vw-48px))]",
+                          )}
+                        >
+                          <div className="relative flex min-h-[280px] w-64 shrink-0 flex-col justify-between overflow-hidden rounded-[18px] bg-[#f2ebe1] p-6 ring-1 ring-[#b5573a]/10">
+                            <div className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full border border-[#b5573a]/15" />
+                            <div className="pointer-events-none absolute -bottom-16 -left-10 size-36 rounded-full bg-white/35" />
+                            <div className="relative z-10">
+                              <div className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6f554c]/80">
+                                <span className="flex items-center gap-2">
+                                  <span className="size-1.5 rounded-full bg-[#b5573a]" />
+                                  Vela Wear
+                                </span>
+                                <span className="font-mono tracking-[0.12em]">
+                                  {String(itemIndex + 1).padStart(2, "0")} / {String(megaMenuItemCount).padStart(2, "0")}
+                                </span>
+                              </div>
+                              <p className="mt-8 font-serif text-4xl font-light leading-none tracking-[-0.035em] text-[#1c1a18]">
+                                {item.label}
+                              </p>
+                              <p className="mt-4 max-w-[13rem] text-[13px] leading-5 text-[#55423d]/85">
+                                {item.description}
+                              </p>
                             </div>
                             <BaseNavigationMenu.Link
                               render={<Link href={item.href} onClick={() => {
+                                setDesktopMenuValue(null);
                                 if (document.activeElement instanceof HTMLElement) {
                                   document.activeElement.blur();
                                 }
                               }} />}
-                              className="mt-6 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1 group/btn"
+                              className="group/cta relative z-10 mt-8 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-5 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#964025] transition-colors hover:text-[#6f2e1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
                             >
-                              {item.ctaLabel} <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
+                              <span className="max-w-[10rem] leading-4">{item.ctaLabel}</span>
+                              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1c1a18] text-[#f7f4ef] transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-0.5">
+                                <ArrowUpRight className="size-4" aria-hidden="true" />
+                              </span>
                             </BaseNavigationMenu.Link>
                           </div>
                           <div className={cn(
-                            "grid flex-1 gap-x-8 gap-y-6",
+                            "grid min-w-0 flex-1 content-start gap-x-6 gap-y-8 px-5 py-6",
                             item.groups.length >= 3 ? "grid-cols-3" : item.groups.length === 2 ? "grid-cols-2" : "grid-cols-1",
                           )}>
                             {item.groups.map((group) => (
                               <section key={group.title}>
-                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#1c1a18]">{group.title}</h3>
-                                <div className="space-y-1">
+                                <div className="mb-3 flex items-center gap-2.5">
+                                  <span className="h-px w-5 bg-[#b5573a]/60" aria-hidden="true" />
+                                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]">{group.title}</h3>
+                                </div>
+                                <div className="space-y-0.5">
                                   {group.items.map((sub) => (
                                     <NavigationMenuLink
                                       key={`${sub.label}-${sub.href}`}
                                       render={<Link href={sub.href} onClick={() => {
+                                        setDesktopMenuValue(null);
                                         if (document.activeElement instanceof HTMLElement) {
                                           document.activeElement.blur();
                                         }
                                       }} />}
-                                      className="group/item rounded-none px-0 py-2 text-sm text-[#1c1a18]/65 hover:text-[#b5573a]"
+                                      className="group/item flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#964025] focus-visible:bg-[#f4eee6] focus-visible:text-[#964025] focus-visible:outline-none"
                                     >
-                                      {sub.label}
+                                      <span>{sub.label}</span>
+                                      <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:opacity-100 group-focus-visible/item:translate-x-0 group-focus-visible/item:opacity-100" aria-hidden="true" />
                                     </NavigationMenuLink>
                                   ))}
                                 </div>
