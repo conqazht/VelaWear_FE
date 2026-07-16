@@ -70,7 +70,7 @@ export function RegisterPage() {
   } = useOtpFlow({
     email,
     purpose: "REGISTER",
-    onVerifySuccess: async () => {
+    onVerifySuccess: async (proofToken) => {
       // Format birthdate as YYYY-MM-DD
       const formattedDay = dobDay.padStart(2, "0");
       const formattedMonth = dobMonth.padStart(2, "0");
@@ -90,7 +90,7 @@ export function RegisterPage() {
         fullName: `${firstName} ${lastName}`.trim(),
         birthDate,
         gender,
-        avatar: null,
+        otpProofToken: proofToken,
       });
 
       router.push("/sign-in");

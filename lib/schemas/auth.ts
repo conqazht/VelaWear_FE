@@ -11,6 +11,7 @@ export const registerSchema = z.object({
   fullName: z.string().min(2, "Vui lòng nhập họ tên."),
   birthDate: z.string().optional().nullable(),
   gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional().nullable(),
+  otpProofToken: z.string().min(1, "Thiếu proof token xác minh email."),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
