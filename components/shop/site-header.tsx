@@ -29,6 +29,14 @@ import { cn } from "@/lib/utils";
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
 
+function preventNavigationTriggerHover(event: React.MouseEvent<HTMLButtonElement>) {
+  (
+    event as React.MouseEvent<HTMLButtonElement> & {
+      preventBaseUIHandler?: () => void;
+    }
+  ).preventBaseUIHandler?.();
+}
+
 function readSearchHistory(): string[] {
   if (typeof window === "undefined") return [];
 
@@ -264,7 +272,7 @@ export function SiteHeader() {
     desktopMenuCloseTimerRef.current = window.setTimeout(() => {
       setDesktopMenuValue(null);
       desktopMenuCloseTimerRef.current = null;
-    }, 160);
+    }, 100);
   };
 
   const navigationItems = getStorefrontNavigation(activeLocale);
@@ -352,12 +360,18 @@ export function SiteHeader() {
           {/* Desktop Navigation Menu */}
           <NavigationMenu
             value={desktopMenuValue}
-            onValueChange={(value) => {
+            onValueChange={(value, eventDetails) => {
+              if (
+                value === null
+                && eventDetails.reason === "trigger-hover"
+              ) {
+                return;
+              }
               cancelDesktopMenuClose();
               setDesktopMenuValue(value);
             }}
             delay={40}
-            closeDelay={120}
+            closeDelay={80}
             className="hidden max-w-none flex-1 justify-start lg:flex"
           >
             <NavigationMenuList className="gap-1 pl-3">
@@ -367,28 +381,25 @@ export function SiteHeader() {
                   value={item.label}
                   className="flex items-center"
                   onPointerEnter={(event) => {
-                    if (event.pointerType !== "touch" && item.groups) openDesktopMenu(item.label);
+                    if (event.pointerType !== "touch" && item.groups) {
+                      openDesktopMenu(item.label);
+                    }
                   }}
                   onPointerLeave={(event) => {
-                    if (event.pointerType !== "touch" && item.groups) scheduleDesktopMenuClose();
+                    if (event.pointerType !== "touch" && item.groups) {
+                      scheduleDesktopMenuClose();
+                    }
                   }}
                 >
                   {item.groups ? (
                     <>
                       <div
-                        className={cn(
-                          "group/nav flex h-10 items-center rounded-full px-0.5 transition-colors duration-200",
-                          shouldBeTransparent
-                            ? "hover:bg-white/10"
-                            : "hover:bg-[#1c1a18]/[0.05]",
-                          desktopMenuValue === item.label && (
-                            shouldBeTransparent ? "bg-white/10" : "bg-[#1c1a18]/[0.05]"
-                          ),
-                        )}
+                        data-slot="storefront-nav-control"
+                        className="group/nav flex h-10 items-center bg-transparent px-0.5"
                       >
                         <NavigationMenuLink
                           render={<Link href={item.href} onClick={() => setDesktopMenuValue(null)} />}
-                          className="h-9 rounded-l-full rounded-r-none bg-transparent py-0 pl-2.5 pr-0.5"
+                          className="h-9 bg-transparent py-0 pl-2.5 pr-0.5 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         >
                           <span
                             data-slot="storefront-nav-label"
@@ -397,7 +408,7 @@ export function SiteHeader() {
                             {item.label}
                             <span
                               className={cn(
-                                "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100",
+                                "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100 group-has-[:focus-visible]/nav:scale-x-100",
                                 desktopMenuValue === item.label && "scale-x-100",
                               )}
                             />
@@ -405,7 +416,8 @@ export function SiteHeader() {
                         </NavigationMenuLink>
                         <NavigationMenuTrigger
                           aria-label={`${item.label} menu`}
-                          className={`h-9 w-8 rounded-l-none rounded-r-full border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-popup-open:bg-transparent [&_svg]:-translate-x-1.5 [&_svg]:ml-0 [&_svg]:size-3 ${textClass}`}
+                          onMouseEnter={preventNavigationTriggerHover}
+                          className={`h-9 w-8 rounded-none border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-popup-open:bg-transparent [&_svg]:-translate-x-1.5 [&_svg]:ml-0 [&_svg]:size-3 ${textClass} focus-visible:text-[#b5573a] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0`}
                         >
                           <span className="sr-only">{item.label}</span>
                         </NavigationMenuTrigger>
@@ -413,23 +425,28 @@ export function SiteHeader() {
                       <NavigationMenuContent
                         className="p-0"
                         onPointerEnter={(event) => {
-                          if (event.pointerType !== "touch") cancelDesktopMenuClose();
+                          if (event.pointerType !== "touch") {
+                            cancelDesktopMenuClose();
+                          }
                         }}
                         onPointerLeave={(event) => {
-                          if (event.pointerType !== "touch") scheduleDesktopMenuClose();
+                          if (event.pointerType !== "touch") {
+                            scheduleDesktopMenuClose();
+                          }
                         }}
                       >
                         <div
+                          data-slot="storefront-mega-menu-panel"
                           className={cn(
-                            "flex max-w-[calc(var(--available-width)-24px)] gap-3 rounded-[22px] bg-white p-3",
+                            "flex max-w-[calc(var(--available-width)-24px)] gap-2.5 rounded-[20px] bg-white p-2.5",
                             item.groups.length >= 3
-                              ? "w-[min(1080px,calc(100vw-64px))]"
+                              ? "w-[min(1000px,calc(100vw-64px))]"
                               : item.groups.length === 2
-                                ? "w-[min(920px,calc(100vw-48px))]"
-                                : "w-[min(680px,calc(100vw-48px))]",
+                                ? "w-[min(800px,calc(100vw-48px))]"
+                                : "w-[min(600px,calc(100vw-48px))]",
                           )}
                         >
-                          <div className="relative flex min-h-[280px] w-64 shrink-0 flex-col justify-between overflow-hidden rounded-[18px] bg-[#f2ebe1] p-6 ring-1 ring-[#b5573a]/10">
+                          <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-[16px] bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
                             <div className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full border border-[#b5573a]/15" />
                             <div className="pointer-events-none absolute -bottom-16 -left-10 size-36 rounded-full bg-white/35" />
                             <div className="relative z-10">
@@ -442,10 +459,10 @@ export function SiteHeader() {
                                   {String(itemIndex + 1).padStart(2, "0")} / {String(megaMenuItemCount).padStart(2, "0")}
                                 </span>
                               </div>
-                              <p className="mt-8 font-serif text-4xl font-light leading-none tracking-[-0.035em] text-[#1c1a18]">
+                              <p className="mt-6 font-serif text-[34px] font-light leading-none tracking-[-0.035em] text-[#1c1a18]">
                                 {item.label}
                               </p>
-                              <p className="mt-4 max-w-[13rem] text-[13px] leading-5 text-[#55423d]/85">
+                              <p className="mt-3 max-w-[12rem] text-[13px] leading-5 text-[#55423d]/85">
                                 {item.description}
                               </p>
                             </div>
@@ -456,7 +473,7 @@ export function SiteHeader() {
                                   document.activeElement.blur();
                                 }
                               }} />}
-                              className="group/cta relative z-10 mt-8 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-5 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#964025] transition-colors hover:text-[#6f2e1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
+                              className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#964025] transition-colors hover:text-[#6f2e1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
                             >
                               <span className="max-w-[10rem] leading-4">{item.ctaLabel}</span>
                               <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1c1a18] text-[#f7f4ef] transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-0.5">
@@ -465,12 +482,12 @@ export function SiteHeader() {
                             </BaseNavigationMenu.Link>
                           </div>
                           <div className={cn(
-                            "grid min-w-0 flex-1 content-start gap-x-6 gap-y-8 px-5 py-6",
+                            "grid min-w-0 flex-1 content-start gap-x-4 gap-y-5 px-4 py-5",
                             item.groups.length >= 3 ? "grid-cols-3" : item.groups.length === 2 ? "grid-cols-2" : "grid-cols-1",
                           )}>
                             {item.groups.map((group) => (
                               <section key={group.title}>
-                                <div className="mb-3 flex items-center gap-2.5">
+                                <div className="mb-2 flex items-center gap-2.5">
                                   <span className="h-px w-5 bg-[#b5573a]/60" aria-hidden="true" />
                                   <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]">{group.title}</h3>
                                 </div>
@@ -484,7 +501,7 @@ export function SiteHeader() {
                                           document.activeElement.blur();
                                         }
                                       }} />}
-                                      className="group/item flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#964025] focus-visible:bg-[#f4eee6] focus-visible:text-[#964025] focus-visible:outline-none"
+                                      className="group/item flex min-h-9 items-center justify-between rounded-lg px-2.5 py-1.5 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#964025] focus-visible:bg-[#f4eee6] focus-visible:text-[#964025] focus-visible:outline-none"
                                     >
                                       <span>{sub.label}</span>
                                       <ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:opacity-100 group-focus-visible/item:translate-x-0 group-focus-visible/item:opacity-100" aria-hidden="true" />

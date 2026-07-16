@@ -105,6 +105,32 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   const topsLink = desktopNavigation.getByRole("link", { name: "Áo", exact: true });
   const topsTrigger = desktopNavigation.getByRole("button", { name: "Áo menu" });
   await topsLink.hover();
+  const topsControlStyles = await topsLink.evaluate((element) => {
+    const control = element.closest('[data-slot="storefront-nav-control"]');
+    if (!(control instanceof HTMLElement)) throw new Error("Không tìm thấy nav control");
+    const styles = window.getComputedStyle(control);
+    return {
+      backgroundColor: styles.backgroundColor,
+      boxShadow: styles.boxShadow,
+    };
+  });
+  expect(topsControlStyles.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+  expect(topsControlStyles.boxShadow).toBe("none");
+
+  const cardiganLink = page.getByRole("link", { name: "Cardigan", exact: true });
+  for (let transition = 0; transition < 4; transition += 1) {
+    await topsTrigger.hover();
+    expect(await cardiganLink.isVisible()).toBe(true);
+    await topsLink.hover();
+    await page.waitForTimeout(140);
+    expect(await cardiganLink.isVisible()).toBe(true);
+    await expect(topsTrigger).toHaveAttribute("aria-expanded", "true");
+  }
+
+  await page.getByRole("heading", { name: "Tất cả sản phẩm" }).hover();
+  await expect(topsTrigger).toHaveAttribute("aria-expanded", "false");
+  await topsLink.hover();
+
   const labelBox = await topsLink.locator('[data-slot="storefront-nav-label"]').boundingBox();
   const chevronBox = await topsTrigger.locator("svg").boundingBox();
   expect(labelBox).not.toBeNull();
@@ -113,6 +139,18 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   expect(labelChevronGap).toBeGreaterThanOrEqual(2);
   expect(labelChevronGap).toBeLessThanOrEqual(8);
   await expect(topsLink).toHaveAttribute("href", /categories=ao%2Cao-khoac/);
+  await expectNoHorizontalOverflow(page);
+
+  const dressesLink = desktopNavigation.getByRole("link", { name: "Váy & Đầm", exact: true });
+  await dressesLink.hover();
+  const compactPanel = page
+    .locator('[data-slot="storefront-mega-menu-panel"]')
+    .filter({ hasText: "05 / 06" });
+  await expect(compactPanel).toBeVisible();
+  const compactPanelBox = await compactPanel.boundingBox();
+  expect(compactPanelBox).not.toBeNull();
+  expect(compactPanelBox!.width).toBeLessThanOrEqual(801);
+  expect(compactPanelBox!.height).toBeLessThanOrEqual(310);
   await expectNoHorizontalOverflow(page);
 
   await page.keyboard.press("Escape");
