@@ -100,6 +100,14 @@ export async function loginFullstackUser(api: APIRequestContext) {
   );
 }
 
+export async function loginFullstackSecondUser(api: APIRequestContext) {
+  return loginFullstackAccount(
+    api,
+    { email: fullstackSecondUserEmail, password: fullstackSecondUserPassword },
+    "Secondary",
+  );
+}
+
 async function cleanupAuthenticatedSession(api: APIRequestContext, accessToken: string) {
   try {
     const logoutResponse = await api.post(`${fullstackApiUrl}/auth/logout`, {

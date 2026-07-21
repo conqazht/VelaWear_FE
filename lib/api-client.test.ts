@@ -174,7 +174,7 @@ describe("apiClient concurrent 401 refresh", () => {
     await expect(secondRequest).resolves.toMatchObject({ status: 200 });
   });
 
-  it("logout retry không Bearer khi access token hết hạn", async () => {
+  it("logout retry không Bearer khi access token hết hạn (initial 401 -> cookie 200)", async () => {
     const axiosModule = await import("axios");
     const logoutPost = vi.spyOn(axiosModule.default, "post")
       .mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } })
@@ -183,6 +183,7 @@ describe("apiClient concurrent 401 refresh", () => {
     apiClientModule.setAccessToken("expired-access-token");
 
     await expect(apiClientModule.logoutAuthSession()).resolves.toBeUndefined();
+    expect(apiClientModule.getAccessToken()).toBeNull();
 
     expect(logoutPost).toHaveBeenCalledTimes(2);
     expect(logoutPost).toHaveBeenNthCalledWith(
@@ -201,6 +202,47 @@ describe("apiClient concurrent 401 refresh", () => {
       {},
       { timeout: 15_000, withCredentials: true },
     );
+  });
+
+  it("logout retry thất bại với final 401 (stable unauthenticated) -> clear token", async () => {
+    const axiosModule = await import("axios");
+    vi.spyOn(axiosModule.default, "post")
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } })
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } });
+    const apiClientModule = await import("@/lib/api-client");
+    apiClientModule.setAccessToken("expired-access-token");
+
+    // Resolves successfully because session is already gone on server
+    await expect(apiClientModule.logoutAuthSession()).resolves.toBeUndefined();
+    expect(apiClientModule.getAccessToken()).toBeNull();
+  });
+
+  it("logout initial 500/network error -> throw & keep token", async () => {
+    const axiosModule = await import("axios");
+    const networkError = new Error("Network error");
+    (networkError as unknown as { isAxiosError: boolean }).isAxiosError = true;
+    vi.spyOn(axiosModule.default, "post").mockRejectedValueOnce(networkError);
+    const apiClientModule = await import("@/lib/api-client");
+    apiClientModule.setAccessToken("valid-access-token");
+
+    await expect(apiClientModule.logoutAuthSession()).rejects.toThrow("Network error");
+    expect(apiClientModule.getAccessToken()).toBe("valid-access-token");
+  });
+
+  it("logout retry 500 error -> throw & keep token", async () => {
+    const axiosModule = await import("axios");
+    vi.spyOn(axiosModule.default, "post")
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } })
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 500 } });
+    const apiClientModule = await import("@/lib/api-client");
+    apiClientModule.setAccessToken("valid-access-token");
+
+    await expect(apiClientModule.logoutAuthSession()).rejects.toMatchObject({
+      isAxiosError: true,
+      response: { status: 500 }
+    });
+    // Local auth is kept so the user can retry
+    expect(apiClientModule.getAccessToken()).toBe("valid-access-token");
   });
 
   it("xóa local session và chặn refresh đang bay ghi token trở lại", async () => {

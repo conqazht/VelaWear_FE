@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
   const queryClient = useQueryClient();
-  const clearCart = useCartStore((state) => state.clearCart);
+  const releaseToAnonymous = useCartStore((state) => state.releaseToAnonymous);
 
   const user = (sessionQuery.data ?? null) as User | null;
   const isLoading = sessionQuery.isPending;
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         registerMutation.mutateAsync(data),
       signOut: async () => {
         await logoutMutation.mutateAsync();
-        clearCart();
+        releaseToAnonymous();
       },
       checkSession: async () => {
         await sessionQuery.refetch();
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
           queryClient.setQueryData(queryKeys.auth.session, null);
           queryClient.removeQueries({ queryKey: queryKeys.auth.root });
-          clearCart();
+          releaseToAnonymous();
         }
       },
     }),
@@ -80,11 +80,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isLoading,
       isAuthenticated,
-      clearCart,
       loginMutation,
       logoutMutation,
       queryClient,
       registerMutation,
+      releaseToAnonymous,
       sessionQuery,
     ]
   );

@@ -82,6 +82,8 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.logIn": "Log in",
     "storefront.nav.viewProfileName": "View profile ({name})",
     "storefront.nav.signOut": "Sign out",
+    "storefront.nav.loggingOut": "Logging out...",
+    "storefront.nav.logoutError": "Failed to log out. Please try again.",
 
     "storefront.footer.tagline": "The Art of Slow Living",
     "storefront.footer.description": "An independent design and tailoring studio devoted to minimalist fashion. We select natural materials, craft with care, and accompany a quieter, more sustainable way of living.",
@@ -333,6 +335,8 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.logIn": "Đăng nhập",
     "storefront.nav.viewProfileName": "Xem hồ sơ ({name})",
     "storefront.nav.signOut": "Đăng xuất",
+    "storefront.nav.loggingOut": "Đang đăng xuất...",
+    "storefront.nav.logoutError": "Đăng xuất thất bại. Vui lòng thử lại.",
 
     "storefront.footer.tagline": "Nghệ Thuật Sống Chậm",
     "storefront.footer.description": "Một studio thiết kế và may đo thời trang tối giản độc lập. Chúng tôi chọn lọc chất liệu tự nhiên, chế tác tỉ mỉ và đồng hành cùng phong cách sống tĩnh lặng, bền vững.",

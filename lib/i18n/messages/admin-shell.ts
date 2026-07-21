@@ -46,6 +46,8 @@ export const adminShellMessages = defineMessages(
     "admin.shell.account.billing": "Billing",
     "admin.shell.account.notifications": "Notifications",
     "admin.shell.account.logout": "Log out",
+    "admin.shell.account.logoutError": "Failed to log out. Please try again.",
+    "admin.shell.account.loggingOut": "Logging out...",
 
     "admin.shell.search.label": "Search",
     "admin.shell.search.placeholder": "Search dashboards, users, and more…",
@@ -185,6 +187,8 @@ export const adminShellMessages = defineMessages(
     "admin.shell.account.billing": "Thanh toán",
     "admin.shell.account.notifications": "Thông báo",
     "admin.shell.account.logout": "Đăng xuất",
+    "admin.shell.account.logoutError": "Đăng xuất thất bại. Vui lòng thử lại.",
+    "admin.shell.account.loggingOut": "Đang đăng xuất...",
 
     "admin.shell.search.label": "Tìm kiếm",
     "admin.shell.search.placeholder": "Tìm bảng điều khiển, người dùng và nội dung khác…",
