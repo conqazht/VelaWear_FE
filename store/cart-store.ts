@@ -140,7 +140,7 @@ export const useCartStore = create<CartStore>()(
       }),
       migrate: (persisted, version) => {
         if (version < 2) {
-          return migrateV1ToV2(persisted as Record<string, unknown>);
+          return migrateV1ToV2();
         }
         return persisted as PersistedCartState;
       },
