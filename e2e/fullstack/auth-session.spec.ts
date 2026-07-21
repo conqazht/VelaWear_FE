@@ -3,6 +3,8 @@ import type { BrowserContext, Page, Request, Response, Route } from "@playwright
 import {
   expect,
   fullstackApiUrl,
+  loginFullstackUser,
+  loginFullstackSecondUser,
   test,
 } from "../fixtures/fullstack";
 import { ProfilePage } from "../pages/profile.page";
@@ -399,4 +401,55 @@ test(
     });
     expect(replayAccessToken.status()).toBe(401);
   },
+);
+
+test(
+  "cart ownership survives account transitions",
+  { tag: "@fullstack" },
+  async ({ context, page, request }) => {
+    // 1. Fetch real variant ID
+    const variantsResponse = await request.get(`${fullstackApiUrl}/product-variants?sku=VW-TEE-BLK-M&size=100`);
+    const variantsBody = await variantsResponse.json() as { data: { result: Array<{ sku: string, id: number }> } };
+    const variantId = variantsBody.data.result.find((i) => i.sku === "VW-TEE-BLK-M")!.id;
+
+    // 2. Guest cart
+    await page.goto("/");
+    await page.evaluate((vid) => {
+      localStorage.setItem("vela-cart-v1", JSON.stringify({
+        state: {
+          cart: [{ id: `variant-${vid}`, variantId: vid, quantity: 1, price: 100, name: "Test" }],
+          owner: "anonymous"
+        },
+        version: 0
+      }));
+    }, variantId);
+
+    // 3. Login A and sync
+    await loginFullstackUser(context.request);
+    await page.reload();
+    
+    // Wait for the sync request
+    const syncReqA = await page.waitForResponse(res => 
+      res.request().method() === "PUT" && new URL(res.url()).pathname === "/api/v1/carts/me/items"
+    );
+    expect(syncReqA.status()).toBe(200);
+
+    // 4. Logout A via UI
+    const profilePage = new ProfilePage(page);
+    await profilePage.gotoAndWaitForBootstrap();
+    await profilePage.authHeader.profileLink.hover();
+    await profilePage.authHeader.logoutButton.click();
+    await expect(profilePage.authHeader.loginLink).toBeVisible();
+
+    // 5. Login B and check
+    await loginFullstackSecondUser(context.request);
+    await page.reload();
+    
+    const cartRes = await context.request.get(`${fullstackApiUrl}/carts/me`);
+    const cartBody = await cartRes.json() as { data: { items: Array<{ variantId: number }> } };
+    
+    // B's cart shouldn't sync A's item.
+    const hasVariantId = cartBody.data.items?.some((i) => i.variantId === variantId);
+    expect(hasVariantId).toBeFalsy();
+  }
 );

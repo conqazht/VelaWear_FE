@@ -33,6 +33,13 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ## 2026-07-21
 
+### FE-003 — Cart isolation and hardened logout
+- **Date/Time**: 2026-07-21T17:55:00+07:00
+- **Branch**: `fix/cart-session-isolation`
+- **Implementation**: Bổ sung discriminator owner vào cart state (`"anonymous"` hoặc `"user:<id>"`). Cart provider sync sẽ abort nếu owner bị mismatch sau khi authentication resolve. Logout flow trong `api-client` đã phân biệt clear session với retryable network error/5xx. Ui caller (site-header, app-sidebar) được update xử lý toast success/error theo đúng trạng thái thay vì clear local session vội vàng. Migrate version cart state để dọn rác của v1 (ownerless).
+- **Verification**: `pnpm lint`, `pnpm build` pass. Unit tests components auth, api-client, cart-store (9 tests) đều pass the settlement matrix.
+- **Known Follow-ups**: Tích hợp BE-004.
+
 ### FE-002 — Bảo toàn multipart review uploads qua Axios
 - **Date/Time**: 2026-07-21T17:08:00+07:00
 - **Branch**: `fix/review-multipart-transport`

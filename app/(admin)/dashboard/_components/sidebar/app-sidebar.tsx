@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Command, Store } from "lucide-react";
+import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 
 import { resolveAdminAssetUrl } from "@/app/(admin)/dashboard/_components/management/resource-utils";
@@ -45,8 +46,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   async function handleLogout() {
-    await signOut();
-    router.push("/sign-in");
+    const toastId = toast.loading(t("admin.shell.account.loggingOut"));
+    try {
+      await signOut();
+      toast.dismiss(toastId);
+      router.push("/sign-in");
+    } catch {
+      toast.error(t("admin.shell.account.logoutError"), { id: toastId });
+    }
   }
 
   return (
