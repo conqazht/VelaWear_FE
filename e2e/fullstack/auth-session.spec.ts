@@ -442,10 +442,12 @@ test(
     await expect(profilePage.authHeader.loginLink).toBeVisible();
 
     // 5. Login B and check
-    await loginFullstackSecondUser(context.request);
+    const accessTokenB = await loginFullstackSecondUser(context.request);
     await page.reload();
     
-    const cartRes = await context.request.get(`${fullstackApiUrl}/carts/me`);
+    const cartRes = await context.request.get(`${fullstackApiUrl}/carts/me`, {
+      headers: { Authorization: `Bearer ${accessTokenB}` },
+    });
     const cartBody = await cartRes.json() as { data: { items: Array<{ variantId: number }> } };
     
     // B's cart shouldn't sync A's item.
