@@ -31,6 +31,16 @@
 
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-07-21
+
+### FE-002 — Bảo toàn multipart review uploads qua Axios
+- **Date/Time**: 2026-07-21T17:08:00+07:00
+- **Branch**: `fix/review-multipart-transport`
+- **Implementation**: Xóa header `Content-Type: application/json` cố định trong `axios.create()` tại `lib/api-client.ts`. Axios mặc định tự suy luận đúng content-type: `application/json` cho plain objects, `multipart/form-data` cho FormData. Trước thay đổi này, header cố định có thể khiến Axios serialize `FormData` thành JSON trước khi browser tạo multipart boundary, dẫn đến request Spring không parse được.
+- **Tests**: Thêm ba test transport-level trong `lib/api/commerce-review.test.ts` dùng custom Axios adapter (không mock `.post`) để kiểm tra: (1) multipart review với ảnh đến adapter dưới dạng FormData, review JSON Blob và images parts còn nguyên, Content-Type không bị ép `application/json`; (2) multipart review không có ảnh vẫn gửi FormData; (3) plain JSON object request vẫn serialize thành JSON với content-type `application/json`.
+- **Verification**: Targeted `2` file/`7` test pass; ESLint `0` error, `4` warning TanStack Table có sẵn; TypeScript pass; full Vitest `38` file/`132` test pass; production build pass `69` route.
+- **Known Follow-ups**: Không có. Mọi endpoint binary trong tương lai cần dùng cùng test pattern transport-level.
+
 ## 2026-07-16
 
 ### FE-001 — Chuyển customer flows sang self-scoped API
