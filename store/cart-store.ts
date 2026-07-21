@@ -38,9 +38,7 @@ type CartStore = {
   releaseToAnonymous: () => void;
 };
 
-function migrateV1ToV2(
-  _persisted: Record<string, unknown>,
-): PersistedCartState {
+function migrateV1ToV2(): PersistedCartState {
   // v1 had no owner — discard ownerless data to prevent cross-account leaks
   return { cart: [], owner: "anonymous", version: 2 };
 }
