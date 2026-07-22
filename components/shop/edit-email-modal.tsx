@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
-import { changeEmail } from "@/lib/api/auth";
+import { changeEmail } from "@/lib/auth-otp-api";
 import { OtpEntry } from "@/components/auth/otp-entry";
 import { createEmailSchema } from "@/lib/validations";
 
@@ -16,7 +16,7 @@ export function EditEmailModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { redirectAfterRevocation } = useAuth();
+  const { clearRevokedSession } = useAuth();
   const { t, locale } = useI18n();
 
   const [newEmail, setNewEmail] = useState("");
@@ -48,7 +48,7 @@ export function EditEmailModal({
           newEmail,
           otpProofToken: proofToken,
         });
-        await redirectAfterRevocation();
+        await clearRevokedSession();
         onClose();
       } catch (error) {
         setSubmitError(getApiErrorMessage(error));

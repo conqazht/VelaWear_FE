@@ -14,7 +14,7 @@ export function EditPasswordModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { user, redirectAfterRevocation } = useAuth();
+  const { user, clearRevokedSession } = useAuth();
   const { t, locale } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function EditPasswordModal({
         newPassword: passwordForm.newPassword,
       });
       // Logout after password change
-      await redirectAfterRevocation();
+      await clearRevokedSession();
       onClose();
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));

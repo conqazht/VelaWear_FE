@@ -600,10 +600,10 @@ export default function MemberProfile() {
                           <AlertDialogContent className="bg-canvas border-[#1c1a18]/10 max-w-md">
                             <AlertDialogHeader>
                               <AlertDialogTitle className="font-serif font-light text-xl text-ink">
-                                {t("account.settings.deleteAccountTitle")}
+                                {t("account.profile.deleteAccountTitle")}
                               </AlertDialogTitle>
                               <AlertDialogDescription className="text-ink/70">
-                                {t("account.settings.deleteAccountConfirm")}
+                                {t("account.profile.deleteAccountConfirm")}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-6">
@@ -615,7 +615,7 @@ export default function MemberProfile() {
                                 disabled={isDeleting}
                                 className="bg-red-600 text-white hover:bg-red-700 border-0"
                               >
-                                {isDeleting ? t("account.settings.deleting") : t("account.profile.deleteAccount")}
+                                {isDeleting ? t("account.profile.deleting") : t("account.profile.deleteAccount")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
