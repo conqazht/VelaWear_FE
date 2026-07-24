@@ -74,6 +74,96 @@ export function classifyApiError(error: unknown): ApiErrorClassification {
   return { kind: "unexpected", status: 500, retryable: true };
 }
 
-export function shouldRetryApiError(failureCount: number, error: unknown): boolean {
-  return failureCount < 1 && classifyApiError(error).retryable;
+function toPositiveSeconds(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.ceil(value);
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return Math.ceil(parsed);
+    }
+  }
+
+  return undefined;
+}
+
+function parseRetryAfter(value: unknown, nowMs: number): number | undefined {
+  const seconds = toPositiveSeconds(value);
+  if (seconds) return seconds;
+
+  if (typeof value !== "string") return undefined;
+  const retryAt = Date.parse(value);
+  if (!Number.isFinite(retryAt)) return undefined;
+
+  const diffSeconds = Math.ceil((retryAt - nowMs) / 1000);
+  if (diffSeconds <= 0) return undefined;
+  return diffSeconds;
+}
+
+function getRetryAfterHeader(headers: unknown): unknown {
+  if (!headers || typeof headers !== "object") return undefined;
+
+  const axiosHeaders = headers as {
+    get?: (name: string) => unknown;
+    [key: string]: unknown;
+  };
+  return axiosHeaders.get?.("retry-after") ?? axiosHeaders["retry-after"] ?? axiosHeaders["Retry-After"];
+}
+
+export function extractRetryAfterSeconds(error: unknown, nowMs = Date.now()): number | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+
+  const maybeApiError = error as {
+    response?: {
+      headers?: unknown;
+      data?: {
+        retryAfterSeconds?: unknown;
+        details?: {
+          retryAfterSeconds?: unknown;
+        };
+      };
+    };
+  };
+
+  const responseData = maybeApiError.response?.data as {
+    data?: { retryAfterSeconds?: unknown; details?: { retryAfterSeconds?: unknown } };
+    retryAfterSeconds?: unknown;
+    details?: { retryAfterSeconds?: unknown };
+  } | undefined;
+  const innerData = responseData?.data;
+  const headers = maybeApiError.response?.headers;
+
+  return (
+    toPositiveSeconds(innerData?.retryAfterSeconds) ??
+    toPositiveSeconds(responseData?.retryAfterSeconds) ??
+    toPositiveSeconds(innerData?.details?.retryAfterSeconds) ??
+    toPositiveSeconds(responseData?.details?.retryAfterSeconds) ??
+    parseRetryAfter(getRetryAfterHeader(headers), nowMs)
+  );
+}
+
+export function getQueryRetryDelayMs(attemptIndex: number, error: unknown, nowMs = Date.now()): number {
+  const seconds = extractRetryAfterSeconds(error, nowMs);
+  if (seconds !== undefined) {
+    return seconds * 1000;
+  }
+  return Math.min(1000 * 2 ** attemptIndex, 30000);
+}
+
+export function shouldRetryApiError(failureCount: number, error: unknown, nowMs = Date.now()): boolean {
+  if (failureCount >= 1) return false;
+  
+  const classification = classifyApiError(error);
+  if (!classification.retryable) return false;
+
+  if (classification.status === 429) {
+    const delaySeconds = extractRetryAfterSeconds(error, nowMs);
+    if (delaySeconds !== undefined && delaySeconds > 300) {
+      return false;
+    }
+  }
+
+  return true;
 }
