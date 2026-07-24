@@ -29,6 +29,16 @@
 
 # Project Status
 
+## 2026-07-24
+
+### Honor Rate Limit Retry-After UI (FE-005) Completed
+
+- Centralized `Retry-After` parsing logic into `lib/api/errors.ts` (`extractRetryAfterSeconds` and `getQueryRetryDelayMs`) to decode delays from response bodies or headers.
+- Wired React Query `retryDelay` in `components/providers/query-provider.tsx` to automatically wait the prescribed number of seconds before retrying 429 requests, while preventing retries entirely if the wait time exceeds 5 minutes (300 seconds).
+- Refactored `lib/auth-otp-api.ts` to rely on the centralized generic errors module and eliminated substring checks for error mapping.
+- Added comprehensive unit tests in `lib/api/errors.test.ts` and adversarial cases in `lib/auth-otp-api.test.ts`.
+- Verification: Ran `pnpm exec vitest`, `tsc`, and `eslint` successfully with no regressions.
+
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
 ## 2026-07-21
