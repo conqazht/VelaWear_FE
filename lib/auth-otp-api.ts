@@ -1,4 +1,5 @@
 import apiClient from "./api-client";
+import { getApiErrorStatus, extractRetryAfterSeconds } from "./api/errors";
 
 export type OtpPurpose =
   | "REGISTER"
@@ -110,69 +111,10 @@ function isOtpErrorCode(value: unknown): value is OtpErrorCode {
   return typeof value === "string" && value in ERROR_KIND_BY_CODE;
 }
 
-function toPositiveSeconds(value: unknown): number | undefined {
-  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-    return Math.ceil(value);
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return Math.ceil(parsed);
-    }
-  }
-
-  return undefined;
-}
-
-function parseRetryAfter(value: unknown): number | undefined {
-  const seconds = toPositiveSeconds(value);
-  if (seconds) return seconds;
-
-  if (typeof value !== "string") return undefined;
-  const retryAt = Date.parse(value);
-  if (!Number.isFinite(retryAt)) return undefined;
-
-  return Math.max(1, Math.ceil((retryAt - Date.now()) / 1000));
-}
-
-function getRetryAfterHeader(headers: unknown): unknown {
-  if (!headers || typeof headers !== "object") return undefined;
-
-  const axiosHeaders = headers as {
-    get?: (name: string) => unknown;
-    [key: string]: unknown;
-  };
-  return axiosHeaders.get?.("retry-after") ?? axiosHeaders["retry-after"] ?? axiosHeaders["Retry-After"];
-}
-
-function extractRetryAfterSeconds(data?: OtpResponseData | null, headers?: unknown): number | undefined {
-  return (
-    toPositiveSeconds(data?.retryAfterSeconds) ??
-    toPositiveSeconds(data?.details?.retryAfterSeconds) ??
-    parseRetryAfter(getRetryAfterHeader(headers))
-  );
-}
-
-function getFallbackErrorKind(message?: string): OtpErrorKind {
-  const normalized = (message ?? "").toLowerCase();
-
-  if (normalized.includes("rate") || normalized.includes("retry") || normalized.includes("cooldown")) {
-    return "rate_limited";
-  }
-  if (normalized.includes("attempt") || normalized.includes("exhaust")) {
-    return "attempts_exhausted";
-  }
-  if (normalized.includes("expired")) {
-    return "invalid_or_expired";
-  }
-  if (normalized.includes("invalid") || normalized.includes("validation") || normalized.includes("otp")) {
-    return "validation";
-  }
-  if (normalized.includes("unavailable") || normalized.includes("service")) {
-    return "service";
-  }
-
+function getFallbackErrorKind(status: number | null): OtpErrorKind {
+  if (status === 429) return "rate_limited";
+  if (status === 401) return "session_revoked";
+  if (status !== null && status >= 500) return "service";
   return "unknown";
 }
 
@@ -205,11 +147,18 @@ function requireNonEmptyString(value: unknown, field: string): string {
 }
 
 function requirePositiveSeconds(value: unknown, field: string): number {
-  const seconds = toPositiveSeconds(value);
-  if (!seconds) {
-    throw new Error(`Invalid OTP response: missing ${field}`);
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.ceil(value);
   }
-  return seconds;
+
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return Math.ceil(parsed);
+    }
+  }
+
+  throw new Error(`Invalid OTP response: missing ${field}`);
 }
 
 function requireSensitiveActionResult(value: unknown): SensitiveActionResult {
@@ -240,13 +189,14 @@ export function normalizeOtpError(
   const responseData = apiError.response?.data;
   const rawCode = responseData?.code ?? responseData?.errorCode ?? responseData?.error;
   const code = isOtpErrorCode(rawCode) ? rawCode : undefined;
+  
+  const status = getApiErrorStatus(error);
+  
   const kind = code
     ? ERROR_KIND_BY_CODE[code]
-    : getFallbackErrorKind(responseData?.message ?? apiError.message);
-  const retryAfterSeconds = extractRetryAfterSeconds(
-    responseData?.data,
-    apiError.response?.headers,
-  );
+    : getFallbackErrorKind(status);
+    
+  const retryAfterSeconds = extractRetryAfterSeconds(error);
 
   return {
     code,
