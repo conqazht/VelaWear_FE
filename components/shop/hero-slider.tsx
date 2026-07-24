@@ -87,7 +87,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             alt={slides[current].title}
             fill
             sizes="100vw"
-            preload={current === 0}
+            priority={current === 0}
             className="object-cover select-none"
           />
 

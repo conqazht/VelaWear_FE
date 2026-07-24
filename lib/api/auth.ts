@@ -4,7 +4,7 @@ import {
   setAccessToken,
   withAuthSessionLock,
 } from "@/lib/api-client";
-import { apiGet, apiPost } from "./client";
+import { apiGet, apiPost, apiDelete } from "./client";
 import type { User } from "./types";
 
 export type LoginRequest = {
@@ -76,4 +76,11 @@ export async function getMe(): Promise<User> {
 export async function getSessionUser(): Promise<User> {
   await refreshSession();
   return getMe();
+}
+
+export async function deleteAccount(): Promise<void> {
+  await withAuthSessionLock(async () => {
+    await apiDelete<void>("/auth/me");
+    setAccessToken(null);
+  });
 }

@@ -59,8 +59,9 @@ Source of truth: `package.json` and `components.json`.
 
 ### Type Safety
 
-- Avoid `any`. Define explicit interfaces/types for props, data models, callback payloads, and server responses.
-- If `any` is unavoidable because of an external library or truly dynamic data, add a short comment directly above it explaining why and what would remove the need later.
+- STRICTLY FORBIDDEN: Do NOT use `any` under any circumstances, including in test files or mock setups (e.g. `as any`). 
+- Instead of `any`, define explicit interfaces/types for props, data models, callback payloads, and server responses.
+- For mocking and tests, use exact type casting (e.g. `as unknown as ReturnType<typeof ...>`), `Parameters<...>`, `vi.mocked(...)`, or `unknown` when truly dynamic.
 - Reuse existing `Product`, `CartItem`, `Screen`, and `TransitionType` types from `lib/vela-data.ts` when working in the current prototype.
 
 ### Next.js 16 and React 19

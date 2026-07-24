@@ -315,6 +315,7 @@ export function SiteHeader() {
                 <Image
                   src="/images/brand/vela-wear-logo.png"
                   alt={t("brand.logoAlt")}
+                  priority
                   width={512}
                   height={512}
                   style={logoStyle}

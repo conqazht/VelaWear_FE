@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { LockKeyhole, User, MapPin, X, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
+import { LockKeyhole, User, MapPin, Check, Heart, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/product-card";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -21,7 +21,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { formatDate } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n";
-import { createEmailSchema, createStrongPasswordSchema } from "@/lib/validations";
+import { createEmailSchema } from "@/lib/validations";
+import { deleteAccount } from "@/lib/api/auth";
+import { EditPasswordModal } from "@/components/shop/edit-password-modal";
+import { EditEmailModal } from "@/components/shop/edit-email-modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   useMyAddressesQuery,
   useMyOrdersQuery,
@@ -136,23 +150,8 @@ export default function MemberProfile() {
   const [activeProfileSidebarTab, setActiveProfileSidebarTab] = useState("account");
 
   const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-  });
-  const [passwordTouched, setPasswordTouched] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
-  const [passwordModified, setPasswordModified] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
-
-  const [editFormDraft, setEditForm] = useState({
+  const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();  const [editFormDraft, setEditForm] = useState({
     fullName: "",
     email: "",
     gender: "",
@@ -177,11 +176,7 @@ export default function MemberProfile() {
     { value: "OTHER", label: t("account.profile.gender.other") },
   ];
   const emailValidation = createEmailSchema(locale).safeParse(editForm.email);
-  const passwordValidation = createStrongPasswordSchema(locale).safeParse(passwordForm.newPassword);
-  const isStrongPassword = passwordValidation.success;
-  const passwordValidationMessage = passwordValidation.success
-    ? null
-    : passwordValidation.error.issues[0]?.message;
+
 
   const isFormDirty = user ? (
     editForm.fullName.trim() !== (user.fullName || "") ||
@@ -236,6 +231,18 @@ export default function MemberProfile() {
     profileAds: true,
     workoutData: true
   });
+
+  const handleDeleteAccount = () => {
+    startDeleteTransition(async () => {
+      try {
+        await deleteAccount();
+        // Since we deleted the account, we should be logged out and redirected
+        window.location.href = "/";
+      } catch (error) {
+        console.error("Failed to delete account:", error);
+      }
+    });
+  };
 
 
 
@@ -379,7 +386,7 @@ export default function MemberProfile() {
                             }}
                             onBlur={() => setFormTouched(prev => ({...prev, fullName: true}))}
                             className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                              formTouched.fullName && formModified.fullName && editForm.fullName.trim() === ""
+                              formTouched.fullName && editForm.fullName.trim() === ""
                                 ? "border-red-600 focus:border-red-600"
                                 : "border-[#1c1a18]/20 focus:border-ink/60"
                             }`}
@@ -387,7 +394,7 @@ export default function MemberProfile() {
                           <label 
                             htmlFor="fullName"
                             className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                              formTouched.fullName && formModified.fullName && editForm.fullName.trim() === ""
+                              formTouched.fullName && editForm.fullName.trim() === ""
                                 ? "text-red-600 peer-focus:text-red-600"
                                 : "text-ink/70 peer-focus:text-ink/70"
                             }`}
@@ -395,7 +402,7 @@ export default function MemberProfile() {
                             {t("account.profile.fullName")}
                           </label>
                         </div>
-                        {formTouched.fullName && formModified.fullName && editForm.fullName.trim() === "" && (
+                        {formTouched.fullName && editForm.fullName.trim() === "" && (
                           <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.fullNameRequired")}</p>
                         )}
                       </div>
@@ -438,9 +445,18 @@ export default function MemberProfile() {
                         {formTouched.email && formModified.email && editForm.email.trim() !== "" && !emailValidation.success && (
                           <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailInvalid")}</p>
                         )}
-                        <p className="text-xs text-ink/45 mt-1.5">
-                          {t("account.profile.emailSettingsNote")}
-                        </p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-xs text-ink/45">
+                            {t("account.profile.emailSettingsNote")}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditEmailOpen(true)}
+                            className="text-sm font-medium text-ink underline underline-offset-4 hover:text-primary transition-colors cursor-pointer"
+                          >
+                            {t("account.profile.edit")}
+                          </button>
+                        </div>
                       </div>
                       
                       {/* Password block (Readonly) */}
@@ -449,6 +465,7 @@ export default function MemberProfile() {
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-2xl tracking-widest text-ink">................</p>
                           <button 
+                            type="button"
                             onClick={() => setIsEditPasswordOpen(true)}
                             className="text-sm font-medium text-ink underline underline-offset-4 hover:text-primary transition-colors cursor-pointer"
                           >
@@ -477,7 +494,7 @@ export default function MemberProfile() {
                             <SelectTrigger
                               id="gender"
                               className={`!w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink focus:ring-0 focus:outline-none transition-colors duration-500 ease-out flex items-center justify-between ${
-                                formTouched.gender && formModified.gender && editForm.gender === ""
+                                formTouched.gender && editForm.gender === ""
                                   ? "border-red-600 focus:border-red-600"
                                   : (isGenderOpen ? "border-ink/60" : "border-[#1c1a18]/20")
                               }`}
@@ -499,7 +516,7 @@ export default function MemberProfile() {
                                 ? "top-[15px] text-sm" 
                                 : "-top-2 text-xs"
                             } ${
-                              formTouched.gender && formModified.gender && editForm.gender === ""
+                              formTouched.gender && editForm.gender === ""
                                 ? "text-red-600"
                                 : "text-ink/70"
                             }`}
@@ -507,7 +524,7 @@ export default function MemberProfile() {
                             {t("account.profile.gender")}
                           </label>
                         </div>
-                        {formTouched.gender && formModified.gender && editForm.gender === "" && (
+                        {formTouched.gender && editForm.gender === "" && (
                           <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.genderRequired")}</p>
                         )}
                       </div>
@@ -523,7 +540,7 @@ export default function MemberProfile() {
                             readOnly
                             onBlur={() => setFormTouched(prev => ({...prev, dob: true}))}
                             className={`peer !w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out cursor-default ${
-                              formTouched.dob && formModified.dob && editForm.dob.trim() === ""
+                              formTouched.dob && editForm.dob.trim() === ""
                                 ? "border-red-600 focus:border-red-600"
                                 : (isDobOpen ? "border-ink/60" : "border-[#1c1a18]/20 focus:border-ink/60")
                             }`}
@@ -560,7 +577,7 @@ export default function MemberProfile() {
                                 ? "top-[15px] text-sm" 
                                 : "-top-2 text-xs"
                             } ${
-                              formTouched.dob && formModified.dob && editForm.dob.trim() === ""
+                              formTouched.dob && editForm.dob.trim() === ""
                                 ? "text-red-600"
                                 : "text-ink/70"
                             }`}
@@ -568,7 +585,7 @@ export default function MemberProfile() {
                             {t("account.profile.birthDate")}
                           </label>
                         </div>
-                        {formTouched.dob && formModified.dob && editForm.dob.trim() === "" && (
+                        {formTouched.dob && editForm.dob.trim() === "" && (
                           <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.birthDateRequired")}</p>
                         )}
                       </div>
@@ -576,9 +593,33 @@ export default function MemberProfile() {
                       {/* Delete Account */}
                       <div className="flex justify-between items-center border-t border-[#1c1a18]/10 pt-8">
                         <p className="text-sm font-medium text-ink">{t("account.profile.deleteAccount")}</p>
-                        <button className="px-6 py-2 rounded-full border border-[#1c1a18]/30 text-sm font-medium text-ink hover:border-[#1c1a18] transition-colors cursor-pointer">
-                          {t("account.profile.delete")}
-                        </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger className="px-6 py-2 rounded-full border border-red-600/30 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+                            {t("account.profile.deleteAccount")}
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-canvas border-[#1c1a18]/10 max-w-md">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="font-serif font-light text-xl text-ink">
+                                {t("account.profile.deleteAccountTitle")}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-ink/70">
+                                {t("account.profile.deleteAccountConfirm")}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-6">
+                              <AlertDialogCancel className="border-[#1c1a18]/20 text-ink hover:bg-[#1c1a18]/5">
+                                {t("account.settings.cancel")}
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleDeleteAccount}
+                                disabled={isDeleting}
+                                className="bg-red-600 text-white hover:bg-red-700 border-0"
+                              >
+                                {isDeleting ? t("account.profile.deleting") : t("account.profile.deleteAccount")}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
 
                       {profileSaveError && (
@@ -592,9 +633,9 @@ export default function MemberProfile() {
                       <div className="flex justify-end border-t border-[#1c1a18]/10 pt-8">
                         <button 
                           onClick={handleSaveProfile}
-                          disabled={!isFormDirty || !isProfileFormValid || updateProfileMutation.isPending}
+                          disabled={!isFormDirty || updateProfileMutation.isPending}
                           className={`px-6 py-2 rounded-full border text-sm font-medium transition-colors ${
-                            isFormDirty && isProfileFormValid && !updateProfileMutation.isPending
+                            isFormDirty && !updateProfileMutation.isPending
                               ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 cursor-pointer"
                               : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed"
                           }`}
@@ -736,8 +777,11 @@ export default function MemberProfile() {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                      <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
-                        {t("account.profile.save")}
+                      <button 
+                        aria-disabled="true"
+                        className="px-8 py-2.5 rounded-full bg-ink/50 text-sm font-medium text-white cursor-not-allowed pointer-events-none transition-colors"
+                      >
+                        {t("storefront.catalog.comingSoon")}
                       </button>
                     </div>
                   </div>
@@ -763,8 +807,11 @@ export default function MemberProfile() {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                      <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
-                        {t("account.profile.save")}
+                      <button 
+                        aria-disabled="true"
+                        className="px-8 py-2.5 rounded-full bg-ink/50 text-sm font-medium text-white cursor-not-allowed pointer-events-none transition-colors"
+                      >
+                        {t("storefront.catalog.comingSoon")}
                       </button>
                     </div>
                   </div>
@@ -823,8 +870,11 @@ export default function MemberProfile() {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                      <button className="px-8 py-2.5 rounded-full bg-ink text-sm font-medium text-white hover:bg-[#b85a3c] transition-colors">
-                        {t("account.profile.save")}
+                      <button 
+                        aria-disabled="true"
+                        className="px-8 py-2.5 rounded-full bg-ink/50 text-sm font-medium text-white cursor-not-allowed pointer-events-none transition-colors"
+                      >
+                        {t("storefront.catalog.comingSoon")}
                       </button>
                     </div>
                   </div>
@@ -1010,176 +1060,14 @@ export default function MemberProfile() {
           </section>
         )}
 
-        {/* Edit Password Modal */}
-        {isEditPasswordOpen && (
-          <div 
-            className="fixed inset-0 bg-[#1c1a18]/40 z-50 flex items-center justify-center p-4"
-            onClick={() => setIsEditPasswordOpen(false)}
-          >
-            <div 
-              className="bg-canvas rounded-2xl w-full max-w-[500px] p-6 md:p-8 relative shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="password-dialog-title"
-            >
-              {/* Close Button */}
-              <button 
-                onClick={() => setIsEditPasswordOpen(false)}
-                aria-label={t("account.password.close")}
-                className="absolute top-6 right-6 p-2 bg-[#1c1a18]/5 rounded-full hover:bg-[#1c1a18]/10 transition-colors cursor-pointer"
-              >
-                <X className="size-5 text-ink" />
-              </button>
-
-              <h2 id="password-dialog-title" className="text-2xl font-serif font-light text-ink tracking-tight mb-8">
-                {user?.hasPassword !== false ? t("account.password.editTitle") : t("account.password.createTitle")}
-              </h2>
-
-              <div className="flex flex-col gap-6">
-                {/* Current Password */}
-                {user?.hasPassword !== false && (
-                <div>
-                  <div className="relative">
-                    <input 
-                      type="password"
-                      id="currentPassword"
-                      placeholder={t("account.password.current")}
-                      value={passwordForm.currentPassword}
-                      onChange={(e) => {
-                        setPasswordForm(prev => ({...prev, currentPassword: e.target.value}));
-                        setPasswordModified(prev => ({...prev, current: true}));
-                        setPasswordTouched(prev => ({...prev, current: false}));
-                      }}
-                      onBlur={() => setPasswordTouched(prev => ({...prev, current: true}))}
-                      className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                        passwordTouched.current && passwordModified.current && passwordForm.currentPassword.length === 0
-                          ? "border-red-600 focus:border-red-600"
-                          : "border-[#1c1a18]/20 focus:border-ink/60"
-                      }`}
-                    />
-                    <label 
-                      htmlFor="currentPassword"
-                      className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                        passwordTouched.current && passwordModified.current && passwordForm.currentPassword.length === 0
-                          ? "text-red-600 peer-focus:text-red-600"
-                          : "text-ink/70 peer-focus:text-ink/70"
-                      }`}
-                    >
-                      {t("account.password.current")}
-                    </label>
-                  </div>
-                  {passwordTouched.current && passwordModified.current && passwordForm.currentPassword.length === 0 && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.password.currentRequired")}</p>
-                  )}
-                </div>
-                )}
-                
-                {/* New Password */}
-                <div>
-                  <div className="relative">
-                    <input 
-                      type="password"
-                      id="newPassword"
-                      placeholder={t("account.password.new")}
-                      value={passwordForm.newPassword}
-                      onChange={(e) => {
-                        setPasswordForm(prev => ({...prev, newPassword: e.target.value}));
-                        setPasswordModified(prev => ({...prev, new: true}));
-                        setPasswordTouched(prev => ({...prev, new: false}));
-                      }}
-                      onBlur={() => setPasswordTouched(prev => ({...prev, new: true}))}
-                      className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                        passwordTouched.new && passwordModified.new && !isStrongPassword
-                          ? "border-red-600 focus:border-red-600"
-                          : "border-[#1c1a18]/20 focus:border-ink/60"
-                      }`}
-                    />
-                    <label 
-                      htmlFor="newPassword"
-                      className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                        passwordTouched.new && passwordModified.new && !isStrongPassword
-                          ? "text-red-600 peer-focus:text-red-600"
-                          : "text-ink/70 peer-focus:text-ink/70"
-                      }`}
-                    >
-                      {t("account.password.new")}
-                    </label>
-                  </div>
-                  {passwordTouched.new && passwordModified.new && !isStrongPassword && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{passwordValidationMessage ?? t("account.password.newRequired")}</p>
-                  )}
-                </div>
-
-                {/* Confirm New Password */}
-                <div>
-                  <div className="relative">
-                    <input 
-                      type="password"
-                      id="confirmPassword"
-                      placeholder={t("account.password.confirm")}
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) => {
-                        setPasswordForm(prev => ({...prev, confirmPassword: e.target.value}));
-                        setPasswordModified(prev => ({...prev, confirm: true}));
-                        setPasswordTouched(prev => ({...prev, confirm: false}));
-                      }}
-                      onBlur={() => setPasswordTouched(prev => ({...prev, confirm: true}))}
-                      className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                        passwordTouched.confirm && passwordModified.confirm && (passwordForm.confirmPassword.length === 0 || passwordForm.confirmPassword !== passwordForm.newPassword)
-                          ? "border-red-600 focus:border-red-600"
-                          : "border-[#1c1a18]/20 focus:border-ink/60"
-                      }`}
-                    />
-                    <label 
-                      htmlFor="confirmPassword"
-                      className={`absolute left-3 -top-2.5 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                        passwordTouched.confirm && passwordModified.confirm && (passwordForm.confirmPassword.length === 0 || passwordForm.confirmPassword !== passwordForm.newPassword)
-                          ? "text-red-600 peer-focus:text-red-600"
-                          : "text-ink/70 peer-focus:text-ink/70"
-                      }`}
-                    >
-                      {t("account.password.confirm")}
-                    </label>
-                  </div>
-                  {passwordTouched.confirm && passwordModified.confirm && passwordForm.confirmPassword.length > 0 && passwordForm.confirmPassword !== passwordForm.newPassword && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-300">{t("account.password.mismatch")}</p>
-                  )}
-                  {passwordTouched.confirm && passwordModified.confirm && passwordForm.confirmPassword.length === 0 && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-300">{t("account.password.confirmRequired")}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-8 mb-12 pl-2">
-                <p className="text-ink/70 text-sm mb-2">{t("account.password.requirements")}</p>
-                <div className={`flex items-center gap-2 text-sm ${isStrongPassword ? "text-green-700" : "text-ink/70"}`}>
-                  {isStrongPassword ? <Check className="size-4" /> : <X className="size-4" />}
-                  <span>{t("account.password.strongRequirement")}</span>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <button 
-                  disabled={
-                    user?.hasPassword !== false 
-                      ? passwordForm.currentPassword.length === 0 || !isStrongPassword || passwordForm.newPassword !== passwordForm.confirmPassword
-                      : !isStrongPassword || passwordForm.newPassword !== passwordForm.confirmPassword
-                  }
-                  className={`px-8 py-2.5 rounded-full border text-sm font-medium transition-colors cursor-pointer ${
-                    (user?.hasPassword !== false 
-                      ? passwordForm.currentPassword.length > 0 && isStrongPassword && passwordForm.newPassword === passwordForm.confirmPassword
-                      : isStrongPassword && passwordForm.newPassword === passwordForm.confirmPassword)
-                      ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90"
-                      : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed pointer-events-none"
-                  }`}
-                >
-                  {user?.hasPassword !== false ? t("account.profile.save") : t("account.password.create")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      <EditPasswordModal 
+        isOpen={isEditPasswordOpen} 
+        onClose={() => setIsEditPasswordOpen(false)} 
+      />
+      <EditEmailModal
+        isOpen={isEditEmailOpen}
+        onClose={() => setIsEditEmailOpen(false)}
+      />
 
       </main>
     </div>
