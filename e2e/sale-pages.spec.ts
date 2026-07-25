@@ -28,6 +28,12 @@ test("trang Flash Sale nói rõ giỏ hàng không giữ suất", { tag: "@smoke
 });
 
 test("Flash Sale giữ nội dung và metadata English sau reload", { tag: "@smoke" }, async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (err) => errors.push(err.message));
+  page.on("console", (msg) => {
+    if (msg.type() === "error") errors.push(msg.text());
+  });
+
   await page.goto("/flash-sale");
 
   await page.getByRole("button", { name: "Ngôn ngữ: Tiếng Việt" }).click();

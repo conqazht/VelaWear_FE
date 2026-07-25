@@ -1,3 +1,16 @@
+## 2026-07-25
+
+### FE-006 Scope Shop Providers Completed
+
+- Reconciled FE-006 plan drift and implemented the scoping of storefront context providers.
+- Removed CartProvider, NotificationProvider, and FavoritesProvider from the global pp/layout.tsx where they unnecessarily wrapped the admin dashboard.
+- Created a boundary component components/shop/shop-providers.tsx and injected it into pp/(shop)/layout.tsx.
+- Created pp/provider-boundaries.test.ts structural tests to enforce that shop context providers remain outside the root layout.
+- Created 2e/provider-boundaries.spec.ts smoke test to verify an authenticated admin user can render the dashboard without triggering any frontend shop-related API requests (/carts/me, /favorites/me, etc.).
+- Fixed test flakes by updating the mock admin roles and ensuring valid server responses.
+- Verification: ran pnpm test:e2e:smoke successfully with 14 passing tests, verifying the decoupling did not break shop features and properly isolates admin.
+- Follow-ups: none.
+
 > **Kiến trúc hiện tại (2026-07-15):** `salePrice` trực tiếp đã bị loại bỏ. Các mục cũ nhắc tới `salePrice` chỉ là lịch sử trước khi Sale Campaign được triển khai; xem mục mới và `SALE_CAMPAIGN_FRONTEND.md`.
 
 ### Fix Product Price Mismatch between Catalog and Detail Page
