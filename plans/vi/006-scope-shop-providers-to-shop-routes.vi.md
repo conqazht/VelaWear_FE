@@ -4,7 +4,7 @@
 >
 > **Hướng dẫn executor**: Đo/verify route boundary, giữ provider order và không di chuyển global auth/query/i18n providers. STOP nếu non-shop route dùng shop context.
 >
-> **Drift check (chạy đầu tiên)**: `git diff --stat ff217af..HEAD -- app/layout.tsx 'app/(shop)/layout.tsx' app/provider-boundaries.test.ts components/shop/shop-providers.tsx components/shop/cart-provider.tsx components/shop/notification-provider.tsx components/shop/favorites-provider.tsx e2e/provider-boundaries.spec.ts`
+> **Drift check (chạy đầu tiên)**: `git diff --stat 3d556e0..HEAD -- app/layout.tsx 'app/(shop)/layout.tsx' app/provider-boundaries.test.ts components/shop/shop-providers.tsx components/shop/cart-provider.tsx components/shop/notification-provider.tsx components/shop/favorites-provider.tsx e2e/provider-boundaries.spec.ts`
 
 ## Trạng thái
 
@@ -14,7 +14,7 @@
 - **Risk**: MED — thiếu/sai thứ tự context có thể làm hỏng cả route group.
 - **Depends on**: FE-003
 - **Category**: perf
-- **Planned at**: commit `ff217af`, 2026-07-16
+- **Planned at**: commit `3d556e0`, 2026-07-25
 
 ## Vì sao quan trọng
 

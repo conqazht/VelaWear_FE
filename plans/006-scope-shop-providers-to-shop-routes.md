@@ -4,7 +4,7 @@
 >
 > **Executor instructions**: Measure/verify route boundaries, preserve provider order, and do not move global auth/query/i18n providers. STOP if any non-shop route consumes a shop context.
 >
-> **Drift check (run first)**: `git diff --stat ff217af..HEAD -- app/layout.tsx 'app/(shop)/layout.tsx' app/provider-boundaries.test.ts components/shop/shop-providers.tsx components/shop/cart-provider.tsx components/shop/notification-provider.tsx components/shop/favorites-provider.tsx e2e/provider-boundaries.spec.ts`
+> **Drift check (run first)**: `git diff --stat 3d556e0..HEAD -- app/layout.tsx 'app/(shop)/layout.tsx' app/provider-boundaries.test.ts components/shop/shop-providers.tsx components/shop/cart-provider.tsx components/shop/notification-provider.tsx components/shop/favorites-provider.tsx e2e/provider-boundaries.spec.ts`
 
 ## Status
 
@@ -14,7 +14,7 @@
 - **Risk**: MED — a missing or misordered context breaks whole route groups at runtime.
 - **Depends on**: FE-003
 - **Category**: perf
-- **Planned at**: commit `ff217af`, 2026-07-16
+- **Planned at**: commit `3d556e0`, 2026-07-25
 
 ## Why this matters
 
