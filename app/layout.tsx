@@ -4,9 +4,7 @@ import React from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { I18nProvider } from "@/components/providers/i18n-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { CartProvider } from "@/components/shop/cart-provider";
-import { NotificationProvider } from "@/components/shop/notification-provider";
-import { FavoritesProvider } from "@/components/shop/favorites-provider";
+
 import {
   LOCALE_BOOTSTRAP_SCRIPT,
   LOCALE_COOKIE_KEY,
@@ -49,11 +47,7 @@ async function LocalizedAppProviders({ children }: { children: React.ReactNode }
     <QueryProvider>
       <I18nProvider initialLocale={initialLocale}>
         <AuthProvider>
-          <CartProvider>
-            <NotificationProvider>
-              <FavoritesProvider>{children}</FavoritesProvider>
-            </NotificationProvider>
-          </CartProvider>
+          {children}
         </AuthProvider>
       </I18nProvider>
     </QueryProvider>
