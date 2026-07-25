@@ -1,4 +1,4 @@
-import { test, expect, type Request, type Route } from "@playwright/test";
+import { test, expect, type Request } from "@playwright/test";
 
 function corsHeaders(request: Request) {
   return {
