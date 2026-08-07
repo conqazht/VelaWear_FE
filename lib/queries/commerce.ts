@@ -40,10 +40,11 @@ export function useMyCartQuery(accountId?: number) {
 export function useWishlistsQuery(
   userId: number | undefined,
   params: PageParams = {},
-  enabled = true
+  enabled = true,
+  locale?: string
 ) {
   return useQuery({
-    queryKey: queryKeys.wishlists.list(userId, params),
+    queryKey: queryKeys.wishlists.list(userId, params, locale),
     queryFn: () => getMyWishlists(params),
     enabled: enabled && typeof userId === "number",
   });

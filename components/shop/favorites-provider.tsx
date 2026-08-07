@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useQueries } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import {
@@ -10,9 +9,6 @@ import {
   useDeleteWishlistMutation,
   useWishlistsQuery,
 } from "@/lib/queries/commerce";
-import { getProduct } from "@/lib/api/catalog";
-import { getApiErrorStatus } from "@/lib/api/errors";
-import { queryKeys } from "@/lib/queries/keys";
 import { mapBackendProduct, Product } from "@/lib/vela-data";
 import { useNotification } from "./notification-provider";
 
@@ -51,7 +47,8 @@ function AccountFavoritesProvider({ children }: { children: React.ReactNode }) {
   const wishlistsQuery = useWishlistsQuery(
     wishlistUserId,
     { size: 100 },
-    isAuthenticated
+    isAuthenticated,
+    activeLocale
   );
   const createWishlistMutation = useCreateWishlistMutation();
   const deleteWishlistMutation = useDeleteWishlistMutation();
@@ -61,52 +58,22 @@ function AccountFavoritesProvider({ children }: { children: React.ReactNode }) {
     [wishlistsQuery.data?.result]
   );
 
-  const wishlistProductIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          serverWishlists
-            .map((item) => item.productId)
-            .filter((productId) => !optimisticRemovedProductIds.has(productId))
-        )
-      ),
-    [optimisticRemovedProductIds, serverWishlists]
-  );
-
-  const wishlistProductQueries = useQueries({
-    queries: wishlistProductIds.map((productId) => ({
-      queryKey: queryKeys.products.detail(productId, activeLocale),
-      queryFn: () => getProduct(productId, activeLocale),
-      enabled: typeof user?.id === "number",
-    })),
-  });
-
   const isLoading =
-    isAuthLoading ||
-    (isAuthenticated &&
-      (wishlistsQuery.isLoading ||
-        wishlistProductQueries.some((query) => query.isLoading)));
+    isAuthLoading || (isAuthenticated && wishlistsQuery.isLoading);
 
-  const productQueryError = wishlistProductQueries.find(
-    (query) => query.error && getApiErrorStatus(query.error) !== 404
-  )?.error ?? null;
-  const error = wishlistsQuery.error ?? productQueryError;
+  const error = wishlistsQuery.error ?? null;
 
   const retry = useCallback(() => {
     void wishlistsQuery.refetch();
-    wishlistProductQueries.forEach((query) => {
-      if (query.isError) void query.refetch();
-    });
-  }, [wishlistsQuery, wishlistProductQueries]);
+  }, [wishlistsQuery]);
 
   const serverFavorites = useMemo(
     () => {
-      return wishlistProductIds
-        .map((_, index) => wishlistProductQueries[index]?.data)
-        .filter(Boolean)
-        .map((product) => mapBackendProduct(product!, activeLocale));
+      return serverWishlists
+        .filter((item) => item.product && !optimisticRemovedProductIds.has(item.productId))
+        .map((item) => mapBackendProduct(item.product, activeLocale));
     },
-    [activeLocale, wishlistProductIds, wishlistProductQueries]
+    [activeLocale, optimisticRemovedProductIds, serverWishlists]
   );
 
   const favorites = useMemo(() => {

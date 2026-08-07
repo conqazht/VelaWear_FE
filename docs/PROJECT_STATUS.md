@@ -1,3 +1,15 @@
+## 2026-08-07
+
+### FE-007 Consume Wishlist Product Summaries Completed
+
+- Refactored wishlist loading in `FavoritesProvider` from N+1 per-product queries (`useQueries` fan-out calling `getProduct`) to consuming `WishlistProductSummary` directly from `GET /api/v1/wishlists/me` in a single request.
+- Defined `WishlistProductSummary` transport DTO in `lib/api/types.ts` matching backend `WishlistProductSummaryResponse` and made `product` field required on `Wishlist`.
+- Updated wishlist cache keys in `lib/queries/keys.ts` and `useWishlistsQuery` hook in `lib/queries/commerce.ts` to include `locale` in query identity.
+- Refactored `components/shop/favorites-provider.tsx` to map backend `WishlistProductSummary` directly via `mapBackendProduct` while preserving account-scoped caching, optimistic add/remove, and rollback behavior.
+- Added comprehensive unit tests in `components/shop/favorites-provider.test.tsx` proving zero `getProduct` calls, correct active-only item handling, locale propagation, and optimistic updates.
+- Verification: `pnpm exec eslint . --max-warnings 25` (0 errors, 4 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (45 files, 168 tests passed), `pnpm build` (68 static routes prerendered).
+- Follow-ups: none.
+
 ## 2026-07-25
 
 ### FE-006 Scope Shop Providers Completed
