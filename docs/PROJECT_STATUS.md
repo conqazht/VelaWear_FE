@@ -1,5 +1,15 @@
 ## 2026-08-07
 
+### FE-008 Load Profile Data On Demand Completed
+
+- Refactored profile data loading in `app/(shop)/profile/page.tsx` (`MemberProfile`) to request orders and addresses data only when their respective panels are active.
+- Extended `useMyOrdersQuery` and `useMyAddressesQuery` in `lib/queries/commerce.ts` to accept an explicit `enabled` boolean parameter while preserving default `true` behavior for other callers.
+- Reordered state derivation in `MemberProfile` so `isOrdersEnabled` and `isAddressesEnabled` are derived before invoking the data hooks.
+- Created `lib/queries/commerce-profile.test.tsx` (6 tests) proving zero requests when `enabled: false` and single request when `enabled: true`.
+- Created `app/(shop)/profile/page.test.tsx` (4 tests) proving default account panel enables neither resource, orders panel enables only orders, and delivery panel enables only addresses.
+- Verification: `pnpm exec eslint . --max-warnings 25` (0 errors, 4 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (47 files, 178 tests passed), `pnpm build` (68 static routes prerendered).
+- Follow-ups: none.
+
 ### FE-007 Consume Wishlist Product Summaries Completed
 
 - Refactored wishlist loading in `FavoritesProvider` from N+1 per-product queries (`useQueries` fan-out calling `getProduct`) to consuming `WishlistProductSummary` directly from `GET /api/v1/wishlists/me` in a single request.

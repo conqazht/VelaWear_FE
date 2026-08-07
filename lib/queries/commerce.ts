@@ -114,11 +114,15 @@ export function useCreatePaymentMutation() {
   });
 }
 
-export function useMyOrdersQuery(accountId?: number, params: PageParams = {}) {
+export function useMyOrdersQuery(
+  accountId?: number,
+  params: PageParams = {},
+  enabled = true
+) {
   return useQuery({
     queryKey: queryKeys.orders.meList(accountId, params),
     queryFn: () => getMyOrders(params),
-    enabled: typeof accountId === "number",
+    enabled: enabled && typeof accountId === "number",
   });
 }
 
@@ -133,11 +137,15 @@ export function useMyReviewsQuery(
   });
 }
 
-export function useMyAddressesQuery(accountId?: number, params: PageParams = {}) {
+export function useMyAddressesQuery(
+  accountId?: number,
+  params: PageParams = {},
+  enabled = true
+) {
   return useQuery({
     queryKey: queryKeys.addresses.meList(accountId, params),
     queryFn: () => getMyAddresses(params),
-    enabled: typeof accountId === "number",
+    enabled: enabled && typeof accountId === "number",
   });
 }
 
