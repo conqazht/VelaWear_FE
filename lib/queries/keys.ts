@@ -27,8 +27,8 @@ export const queryKeys = {
   },
   wishlists: {
     root: ["wishlists"] as const,
-    list: (userId: number | undefined, params?: unknown) =>
-      ["wishlists", "user", userId ?? "anonymous", params] as const,
+    list: (userId: number | undefined, params?: unknown, locale?: string) =>
+      ["wishlists", "user", userId ?? "anonymous", params, locale] as const,
   },
   coupons: {
     root: ["coupons"] as const,

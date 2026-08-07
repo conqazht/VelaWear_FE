@@ -249,11 +249,28 @@ export type Cart = {
   updatedAt?: string;
 };
 
+export type WishlistProductSummary = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  categoryId: number;
+  originalSlug?: string;
+  shortDescription?: string;
+  status: string;
+  image?: string | null;
+  thumbnail?: string | null;
+  categoryName?: string | null;
+  categorySlug?: string | null;
+  price: number;
+  pricing?: Pricing | null;
+};
+
 export type Wishlist = {
   id: number;
   userId: number;
   productId: number;
-  product?: Product;
+  product: WishlistProductSummary;
   createdAt?: string;
 };
 

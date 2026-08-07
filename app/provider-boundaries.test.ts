@@ -26,6 +26,7 @@ test('shop providers should not be consumed outside shop routes', () => {
     path.join('components', 'shop', 'cart-provider.test.tsx'),
     path.join('components', 'shop', 'cart-page-client.tsx'),
     path.join('components', 'shop', 'favorites-provider.tsx'),
+    path.join('components', 'shop', 'favorites-provider.test.tsx'),
     path.join('components', 'shop', 'favorites-page-client.tsx'),
     path.join('components', 'shop', 'home-product-card.tsx'),
     path.join('components', 'shop', 'notification-provider.tsx'),
