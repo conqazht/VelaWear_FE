@@ -130,12 +130,29 @@ export default function MemberProfile() {
   const { addToCart } = useCart();
   const { showAddedToBag } = useNotification();
   const updateProfileMutation = useUpdateProfileMutation();
+
+  const searchParams = useSearchParams();
+  const activeSubTab = getProfileTabId(searchParams.get("tab"));
+  const [activeProfileSidebarTab, setActiveProfileSidebarTab] = useState("account");
+
   const userId = user?.id;
-  const ordersQuery = useMyOrdersQuery(userId, {
-    size: 100,
-    sort: "createdAt,desc",
-  });
-  const addressesQuery = useMyAddressesQuery(userId, { size: 100 });
+  const isOrdersEnabled = isAuthenticated && activeSubTab === "orders";
+  const isAddressesEnabled =
+    isAuthenticated && activeSubTab === "profile" && activeProfileSidebarTab === "delivery";
+
+  const ordersQuery = useMyOrdersQuery(
+    userId,
+    {
+      size: 100,
+      sort: "createdAt,desc",
+    },
+    isOrdersEnabled
+  );
+  const addressesQuery = useMyAddressesQuery(
+    userId,
+    { size: 100 },
+    isAddressesEnabled
+  );
   const orders = ordersQuery.data?.result ?? [];
   const orderStats = orderStatusOrder.map((status) => ({
     status,
@@ -144,10 +161,6 @@ export default function MemberProfile() {
     count: orders.filter((order) => order.status === status).length,
   }));
   const addresses = addressesQuery.data?.result ?? [];
-
-  const searchParams = useSearchParams();
-  const activeSubTab = getProfileTabId(searchParams.get("tab"));
-  const [activeProfileSidebarTab, setActiveProfileSidebarTab] = useState("account");
 
   const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
   const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
