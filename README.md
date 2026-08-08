@@ -222,9 +222,11 @@ Các tài liệu quan trọng của dự án:
 - [Storefront catalog UX](docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md)
 - [Quản trị nội dung i18n](docs/I18N_ADMIN_GUIDE_VI.md)
 
-## Implementation Plans
+## Lộ Trình Cải Tiến & Refactoring (Improvement Plans)
 
-Lộ trình phát triển được chia thành 12 kế hoạch (plans) trải dài qua 5 giai đoạn (waves): security → correctness → performance → refactoring → maintenance.
+Các kế hoạch trong thư mục `plans/` được tạo ra từ đợt audit nâng cao chất lượng codebase, dùng để quản lý các đợt refactoring, tối ưu hiệu năng, thắt chặt bảo mật và dọn dẹp mã nguồn qua 5 đợt (waves):
 
-- [Lộ trình triển khai Frontend (tiếng Việt)](plans/README.vi.md)
-- [Implementation Plans (English)](plans/README.md)
+- [Lộ trình cải tiến Frontend (tiếng Việt)](plans/README.vi.md)
+- [Improvement Plans Index (English)](plans/README.md)
+
+*Lưu ý: Thư mục `plans/` tập trung vào lộ trình refactoring và tối ưu hóa giao diện/state management, các tài liệu đặc tả nghiệp vụ chính nằm trong thư mục `docs/`.*
