@@ -224,7 +224,7 @@ Các tài liệu quan trọng của dự án:
 
 ## Lộ Trình Cải Tiến & Refactoring (Improvement Plans)
 
-Các kế hoạch trong thư mục `plans/` được tạo ra từ đợt audit nâng cao chất lượng codebase (shadcn/improve audit), dùng để quản lý các đợt refactoring, tối ưu hiệu năng, thắt chặt bảo mật và dọn dẹp mã nguồn qua 5 đợt (waves):
+Các kế hoạch trong thư mục `plans/` được tạo ra từ đợt audit nâng cao chất lượng codebase, dùng để quản lý các đợt refactoring, tối ưu hiệu năng, thắt chặt bảo mật và dọn dẹp mã nguồn qua 5 đợt (waves):
 
 - [Lộ trình cải tiến Frontend (tiếng Việt)](plans/README.vi.md)
 - [Improvement Plans Index (English)](plans/README.md)
