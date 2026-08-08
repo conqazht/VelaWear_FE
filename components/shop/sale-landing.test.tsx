@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SaleLanding } from "@/components/shop/sale-landing";
-import { I18nProvider } from "@/components/providers/i18n-provider";
+import { I18nProvider, I18nCatalogProvider } from "@/components/providers/i18n-provider";
+import { shopMessages } from "@/lib/i18n/messages/catalog-shop";
 import {
   LOCALE_STORAGE_KEY,
   setActiveLocale,
@@ -32,7 +33,9 @@ function renderSaleLanding(type: "STANDARD" | "FLASH", locale: Locale = "vi") {
 
   return render(
     <I18nProvider initialLocale={locale}>
-      <SaleLanding type={type} />
+      <I18nCatalogProvider messages={shopMessages}>
+        <SaleLanding type={type} />
+      </I18nCatalogProvider>
     </I18nProvider>,
   );
 }

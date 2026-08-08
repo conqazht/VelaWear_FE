@@ -1,5 +1,15 @@
 ## 2026-08-08
 
+### FE-011 Split Runtime i18n Catalogs by Route Namespace Completed
+
+- Split runtime i18n message catalogs into core, shop, and admin modules (`catalog-core.ts`, `catalog-shop.ts`, `catalog-admin.ts`, `types.ts`).
+- Created `catalog-audit.test.ts` to enforce EN/VI key parity, placeholder match, zero duplicate keys, and layout static imports.
+- Updated `I18nProvider` to load `coreMessages` at root (`app/layout.tsx`) and exported `I18nCatalogProvider` to overlay route-scoped catalogs at nested layouts (`app/(shop)/layout.tsx` and `app/(admin)/layout.tsx`).
+- Created `components/providers/i18n-provider.test.tsx` (4 tests) verifying catalog overlays, core fallbacks, and locale persistence across route boundaries.
+- Updated 6 catalog-using component tests with explicit `I18nCatalogProvider` wrappers (`review-comment.test.tsx`, `sale-landing.test.tsx`, `order-review-dialog.test.tsx`, `campaign-interaction-lock.test.tsx`, `content-locale-tabs.test.tsx`, `english-content-generator.test.tsx`).
+- Verification: `pnpm exec vitest run catalog-audit.test.ts`, `pnpm exec vitest run i18n-provider.test.tsx`, `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (50 files, 196 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+- Follow-ups: Ready for FE-012 maintenance.
+
 ### HOTFIX Profile Page E2E Alignment Completed
 
 - Created hotfix branch `hotfix/profile-fullstack-e2e` from FE-010 merge commit `ba42994`.

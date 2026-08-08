@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { I18nProvider } from "@/components/providers/i18n-provider";
+import { I18nProvider, I18nCatalogProvider } from "@/components/providers/i18n-provider";
+import { adminMessages } from "@/lib/i18n/messages/catalog-admin";
 import { createEmptySaleCampaignForm } from "@/app/(admin)/dashboard/sales/_data/sale-campaign-form";
 import { CampaignDetailsStep } from "@/app/(admin)/dashboard/sales/_components/campaign-details-step";
 import { CampaignStepper } from "@/app/(admin)/dashboard/sales/_components/campaign-stepper";
@@ -13,7 +14,9 @@ describe("Sale English generation interaction lock", () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="vi">
-        <CampaignStepper currentStep={1} onStepChange={onStepChange} disabled />
+        <I18nCatalogProvider messages={adminMessages}>
+          <CampaignStepper currentStep={1} onStepChange={onStepChange} disabled />
+        </I18nCatalogProvider>
       </I18nProvider>,
     );
 
@@ -34,18 +37,20 @@ describe("Sale English generation interaction lock", () => {
     };
     const details = (contentLocale: "vi" | "en") => (
       <I18nProvider initialLocale="vi">
-        <CampaignDetailsStep
-          values={values}
-          onChange={vi.fn()}
-          codeDisabled={false}
-          displayDisabled={false}
-          typeAndScheduleDisabled={false}
-          contentLocale={contentLocale}
-          onContentLocaleChange={vi.fn()}
-          isGeneratingEnglish
-          interactionDisabled
-          onGenerateEnglish={vi.fn()}
-        />
+        <I18nCatalogProvider messages={adminMessages}>
+          <CampaignDetailsStep
+            values={values}
+            onChange={vi.fn()}
+            codeDisabled={false}
+            displayDisabled={false}
+            typeAndScheduleDisabled={false}
+            contentLocale={contentLocale}
+            onContentLocaleChange={vi.fn()}
+            isGeneratingEnglish
+            interactionDisabled
+            onGenerateEnglish={vi.fn()}
+          />
+        </I18nCatalogProvider>
       </I18nProvider>
     );
     const { container, rerender } = render(details("vi"));

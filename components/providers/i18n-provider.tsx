@@ -23,12 +23,19 @@ import {
   interpolateMessage,
   type MessageVariables,
 } from "@/lib/i18n/define-messages";
-import { messages, type TranslationKey } from "@/lib/i18n/messages";
+import { coreMessages } from "@/lib/i18n/messages/catalog-core";
+import type { TranslationKey } from "@/lib/i18n/messages/types";
+
+export type MessageCatalog = {
+  en: Record<string, string>;
+  vi: Record<string, string>;
+};
 
 type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: TranslationKey, variables?: MessageVariables) => string;
+  catalog: MessageCatalog;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -107,15 +114,63 @@ export function I18nProvider({
     [applyLocale],
   );
 
+  const catalog = coreMessages;
+
   const t = useCallback(
     (key: TranslationKey, variables?: MessageVariables) => {
-      const message = messages[locale][key] ?? messages.en[key] ?? key;
+      const message =
+        catalog[locale][key as keyof typeof catalog[typeof locale]] ??
+        catalog.en[key as keyof typeof catalog.en] ??
+        key;
       return interpolateMessage(message, variables);
     },
-    [locale],
+    [locale, catalog],
   );
 
-  const value = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
+  const value = useMemo(
+    () => ({ locale, setLocale, t, catalog }),
+    [locale, setLocale, t, catalog],
+  );
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+export function I18nCatalogProvider({
+  messages,
+  children,
+}: {
+  messages: MessageCatalog;
+  children: React.ReactNode;
+}) {
+  const { locale, setLocale, catalog: parentCatalog } = useI18n();
+
+  const mergedCatalog = useMemo<MessageCatalog>(() => {
+    return {
+      en: { ...parentCatalog.en, ...messages.en },
+      vi: { ...parentCatalog.vi, ...messages.vi },
+    };
+  }, [parentCatalog, messages]);
+
+  const t = useCallback(
+    (key: TranslationKey, variables?: MessageVariables) => {
+      const message =
+        mergedCatalog[locale][key as keyof typeof mergedCatalog[typeof locale]] ??
+        mergedCatalog.en[key as keyof typeof mergedCatalog.en] ??
+        key;
+      return interpolateMessage(message, variables);
+    },
+    [locale, mergedCatalog],
+  );
+
+  const value = useMemo(
+    () => ({
+      locale,
+      setLocale,
+      t,
+      catalog: mergedCatalog,
+    }),
+    [locale, setLocale, t, mergedCatalog],
+  );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
