@@ -1,88 +1,230 @@
 # Vela Wear Frontend
 
-Giao diện thương mại điện tử thời trang cao cấp — xây dựng trên **Next.js 16 App Router**, **React 19**, **TypeScript**, **TanStack Query**, **Zustand**, **Tailwind CSS 4**, **Vitest** và **Playwright**.
+**GitHub**: [conqazht/VelaWear_FE](https://github.com/conqazht/VelaWear_FE)
 
-## Yêu cầu hệ thống (Prerequisites)
+Storefront và admin dashboard cho ứng dụng thương mại điện tử thời trang cao cấp Vela Wear.
 
-| Công cụ | Phiên bản | Ghi chú |
+## Tech Stack
+
+Dự án sử dụng các công nghệ hiện đại nhất:
+- **Framework**: Next.js 16.2.9 (App Router, Partial Prerender)
+- **UI Library**: React 19.2.4 (React Server Components)
+- **Language**: TypeScript ^5
+- **Styling**: Tailwind CSS ^4 (sử dụng `@tailwindcss/postcss`)
+- **Components**: shadcn CLI ^4.11.0 / `@shadcn/react` 0.2.1 với style `base-nova`
+- **Headless UI**: Base UI (`@base-ui/react` ^1.5.0)
+- **Icons**: lucide-react ^1.18.0
+- **Animation**: motion ^12.40.0 (animation qua `motion/react`)
+- **State Management**:
+  - Server state: TanStack Query 5.101.2
+  - Client state: Zustand 5.0.14 (cart, auth, theme, locale)
+- **HTTP Client**: Axios ^1.18.1 (tích hợp interceptors)
+- **Forms**: React Hook Form ^7 + `@hookform/resolvers` ^5.4.0
+- **Utilities**: `@dnd-kit` (kéo thả), `@fullcalendar/react` ^7.0.0 (lịch), recharts ^3 (biểu đồ)
+- **Testing**:
+  - Unit test: Vitest ^4.1.10
+  - E2E test: Playwright ^1.61.1 (smoke và fullstack)
+- **Môi trường**: Package manager: pnpm 11.5.2, Node.js: 24
+
+## Application Routes
+
+Dự án được chia thành 3 phần chính:
+
+- `app/(shop)/` — **Storefront**: Bao gồm trang chủ, danh sách sản phẩm, chi tiết sản phẩm, giỏ hàng, thanh toán, sale, flash-sale, tìm kiếm, yêu thích, mã giảm giá, đánh giá, hồ sơ người dùng, hướng dẫn chọn size, hỗ trợ.
+- `app/(admin)/dashboard/` — **Admin Dashboard**: Các chức năng quản trị bao gồm ecommerce, analytics, finance, infrastructure, CRM, products, categories, brands, orders, users, roles, permissions, coupons, sales, tasks, kanban, calendar, chat, mail, productivity, invoice, coming-soon.
+- `app/(auth)/` — **Authentication**: Đăng nhập, đăng ký, quên mật khẩu, OAuth2 callback.
+- `app/unauthorized/` — Trang lỗi 403.
+
+## Repository Structure
+
+```text
+app/
+├── (shop)/           # Storefront routes
+│   └── page.tsx      # Homepage
+├── (admin)/dashboard/ # Admin dashboard routes
+│   └── <screen>/
+│       ├── page.tsx
+│       └── _components/
+├── (auth)/           # Auth routes
+├── globals.css       # Tailwind theme
+└── layout.tsx        # Root layout
+components/
+├── shop/             # Storefront components
+├── ui/               # shadcn primitives
+├── providers/        # Query, i18n, notification, cart, favourites
+└── auth/             # Auth components & hooks
+lib/
+├── api-client.ts     # Axios instance, token mgmt, Web Lock, refresh
+├── api/              # Types, helpers, transport layer
+│   ├── client.ts     # apiGet, apiPost, apiPut, apiDelete, unwrap
+│   ├── types.ts      # ApiResponse<T>, ResultPaginationDTO<T>, DTOs
+│   ├── errors.ts     # Retry-After extraction
+│   └── server.ts     # RSC server-side fetch
+├── queries/          # TanStack Query hooks and cache keys
+├── i18n/             # EN/VI locale system
+│   └── messages/     # Route-scoped catalogs (core, shop, admin)
+├── auth/             # Post-auth redirect, OTP flow
+└── utils.ts          # cn() and shared utilities
+hooks/                # Shared React hooks
+styles/presets/       # Theme presets
+scripts/              # Dev tooling (link checker)
+docs/                 # Project documentation
+plans/                # Implementation roadmap (12 plans, 5 waves)
+```
+
+## Auth Architecture
+
+Hệ thống bảo mật và authentication được thiết kế chặt chẽ:
+- **Access token**: Lưu trữ in-memory (biến module JavaScript), tuyệt đối KHÔNG lưu trong `localStorage`.
+- **Refresh token**: Lưu dưới dạng HttpOnly cookie (trình duyệt không thể đọc qua JavaScript).
+- **Single-flight token refresh**: Đảm bảo chỉ có một request refresh token diễn ra tại một thời điểm, các request khác sẽ đợi.
+- **Web Lock API** (`navigator.locks.request('vela-auth-session')`): Đồng bộ hóa quá trình đăng nhập/refresh/đăng xuất giữa các tab.
+- **Session generation guard**: Ngăn chặn tình trạng refresh token cũ ghi đè lên token mới sau khi đăng xuất.
+- **OAuth2**: Hỗ trợ đăng nhập qua mạng xã hội (Google) với callback tại `/auth/oauth2/callback`.
+- **Xác thực 2 bước**: Luồng OTP challenge/proof cho việc xác thực email.
+
+## i18n
+
+Hệ thống đa ngôn ngữ được tối ưu:
+- Hỗ trợ song ngữ Tiếng Anh (EN) và Tiếng Việt (VI).
+- Tối ưu hóa tải trang với **Route-scoped catalog splitting**: `catalog-core.ts`, `catalog-shop.ts`, `catalog-admin.ts`.
+- Cấu trúc: `I18nProvider` ở root, `I18nCatalogProvider` ở các layout route group.
+- **Admin content translation**: Cung cấp giao diện dịch thuật nội dung (VI/EN tabs) tích hợp công cụ tự động dịch bằng Gemini AI.
+
+## Backend Integration
+
+Dự án giao tiếp với Backend (`conqazht/VelaWear_BE`) thông qua các quy chuẩn nghiêm ngặt:
+- **Base URL**: Cấu hình qua biến môi trường `NEXT_PUBLIC_API_URL` (bao gồm prefix `/api/v1`).
+- **Response Format**: Tất cả phản hồi từ API đều được bọc trong `ApiResponse<T>` với các trường `statusCode`, `data`, `message`, `code`, `timestamp`.
+- **Pagination**: Đánh chỉ mục từ 1 (`page=1`), bao gồm `size`, `sort=field,direction`.
+- **Xử lý lỗi Validation (400)**: Field-level error map được trả về trong payload `data`.
+- **Xử lý lỗi Authorization (401)**: Interceptor tự động bắt lỗi 401 → thực hiện single-flight refresh → retry request bị lỗi hoặc chuyển hướng người dùng về trang `/sign-in`.
+- **Rate Limit (429)**: React Query tự động xử lý thời gian đợi retry thông qua header/body `Retry-After` (đơn vị: giây).
+- **Self-scoped APIs**: Các API dành cho khách hàng sử dụng path nội bộ như `/users/me`, `/orders/me`, v.v.
+- Để xem hướng dẫn chi tiết về tích hợp API, tham khảo [Quy ước tích hợp FE-BE](convention.md).
+
+## Luồng Tích Hợp End-to-End (FE ↔ BE Flow)
+
+Kiến trúc tương tác giữa Frontend client và Spring Boot backend đảm bảo an toàn session và toàn vẹn dữ liệu:
+
+### 1. Quản Lý Session & Web Lock Serialization
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Tab1 as Browser Tab 1
+    actor Tab2 as Browser Tab 2
+    participant BE as Backend (Spring Boot 4)
+
+    Note over Tab1: Access Token hết hạn (401)
+    Tab1->>Tab1: Đăng ký Web Lock "vela-auth-session"
+    Note over Tab1: Lấy thành công Web Lock
+    Tab2->>Tab2: Yêu cầu Web Lock "vela-auth-session"
+    Note over Tab2: Đang chờ Tab 1 giải phóng Lock
+
+    Tab1->>BE: POST /api/v1/auth/refresh (Cookie HttpOnly)
+    BE-->>Tab1: 200 OK (AccessToken mới)
+    Note over Tab1: Gọi setAccessToken() & giải phóng Lock
+
+    Note over Tab2: Lấy được Web Lock
+    Note over Tab2: Kiểm tra Token mới đã cập nhật -> Bỏ qua request refresh thừa
+```
+
+### 2. Luồng Checkout an toàn dữ liệu (Pricing Fingerprint & Idempotency)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor FE as Storefront Client
+    participant BE as Backend Server
+
+    FE->>BE: POST /api/v1/orders/preview (items, promoCode, shippingAddress)
+    Note over BE: Tính giá chuẩn (Effective Price) & Tạo hash pricingFingerprint
+    BE-->>FE: 200 OK (pricingFingerprint, finalAmount)
+
+    FE->>BE: POST /api/v1/orders/checkout (Header: Idempotency-Key, Body: pricingFingerprint)
+    Note over BE: Kiểm tra chống trùng request (Idempotency)
+    Note over BE: So sánh pricingFingerprint (Tránh lệch giá)
+    Note over BE: Tạo đơn hàng (PENDING) & Khóa tồn kho
+    BE-->>FE: 201 Created (orderCode, paymentUrl)
+```
+
+## Setup Instructions
+
+Các bước cài đặt để chạy dự án ở môi trường phát triển:
+
+1. **Yêu cầu hệ thống**: Đảm bảo bạn đã cài đặt Node.js 24 và pnpm 11.5.2.
+2. Clone repository về máy.
+3. Cài đặt các dependencies:
+   ```bash
+   pnpm install --frozen-lockfile
+   ```
+4. Copy file cấu hình môi trường:
+   Sao chép `.env.example` thành `.env.local` và điều chỉnh các biến số nếu cần thiết.
+   ```text
+   NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+   NEXT_PUBLIC_BACKEND_ORIGIN=http://localhost:8080
+   ```
+5. Chạy development server:
+   ```bash
+   pnpm dev
+   ```
+   (Server sẽ khởi chạy tại cổng 3000).
+6. Build cho môi trường production:
+   ```bash
+   pnpm build
+   ```
+
+## Available Scripts
+
+Dưới đây là các lệnh (scripts) khả dụng trong `package.json`:
+
+| Script | Lệnh thực thi | Mục đích |
 |---|---|---|
-| Node.js | **24** | Đồng bộ CI |
-| pnpm | **11.5.2** | Đồng bộ CI |
+| `pnpm dev` | `next dev` | Chạy dev server với Turbopack |
+| `pnpm build` | `next build` | Build dự án cho production |
+| `pnpm start` | `next start` | Khởi chạy server production |
+| `pnpm lint` | `eslint` | Kiểm tra lỗi cú pháp (Lint) toàn bộ codebase |
+| `pnpm test` | `pnpm test:unit` | Chạy bộ unit tests |
+| `pnpm test:unit` | `vitest run` | Chạy unit tests một lần |
+| `pnpm test:unit:watch` | `vitest` | Chạy unit tests ở chế độ watch |
+| `pnpm test:coverage` | `vitest run --coverage` | Chạy tests và xuất báo cáo coverage |
+| `pnpm test:e2e` | `playwright test --grep @smoke` | Chạy E2E smoke tests |
+| `pnpm test:e2e:smoke` | `playwright test --grep @smoke` | Chạy smoke tests (không yêu cầu backend) |
+| `pnpm test:e2e:fullstack` | `playwright test --grep @fullstack --workers=1` | Chạy Full-stack E2E tests (yêu cầu backend, DB và Redis) |
 
-## Cài đặt và khởi chạy
+## CI Pipeline (GitHub Actions)
 
-```bash
-pnpm install --frozen-lockfile
-cp .env.example .env.local
-```
+Dự án thiết lập CI workflow tự động chạy trên mọi Pull Request và khi push vào nhánh `main`:
+- Môi trường: pnpm 11.5.2, Node 24
+- Cài đặt dependency: `pnpm install --frozen-lockfile`
+- Linter: `pnpm exec eslint . --max-warnings 25`
+- Type checking: `pnpm exec tsc --noEmit`
+- Unit Test: `pnpm test:unit` (Chạy 50 files, 196 tests)
+- Build: `pnpm build` (Build 68 static routes)
+- E2E Smoke Test: Playwright smoke suite (Chạy 13 cases, Next.js được tự động start)
 
-File `.env.local` cần khai báo hai biến public:
+## Testing Stats
 
-- `NEXT_PUBLIC_API_URL` — URL gốc của Backend API (bao gồm `/api/v1`)
-- `NEXT_PUBLIC_BACKEND_ORIGIN` — Origin của Backend (dùng cho CORS/cookie)
+Hệ thống test đảm bảo chất lượng codebase:
+- **Unit Testing**: 50 unit test files, 196 tests sử dụng Vitest và Testing Library.
+- **Smoke Testing**: 13 Playwright smoke cases có thể chạy độc lập mà không cần backend.
+- **Full-stack Testing**: Yêu cầu môi trường hoàn chỉnh bao gồm backend, PostgreSQL và Redis.
+- Chi tiết xem tại: [Hướng dẫn Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
 
-> **Lưu ý:** Không commit giá trị thật vào repository. Xem `.env.example` để biết tên biến.
+## Documentation References
 
-Khởi chạy development server:
+Các tài liệu quan trọng của dự án:
+- [Tiến độ dự án](docs/PROJECT_STATUS.md)
+- [Quy ước tích hợp FE-BE](convention.md)
+- [Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
+- [Sale campaign frontend](docs/SALE_CAMPAIGN_FRONTEND.md)
+- [Storefront catalog UX](docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md)
+- [Quản trị nội dung i18n](docs/I18N_ADMIN_GUIDE_VI.md)
 
-```bash
-pnpm dev
-```
+## Implementation Plans
 
-Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
+Lộ trình phát triển được chia thành 12 kế hoạch (plans) trải dài qua 5 giai đoạn (waves): security → correctness → performance → refactoring → maintenance.
 
-## Cấu trúc route chính (Entrypoints)
-
-| Route group | Entrypoint | Mô tả |
-|---|---|---|
-| Storefront (shop) | `app/(shop)/page.tsx` | Trang chủ cửa hàng |
-| Admin dashboard | `app/(admin)/dashboard/` | Bảng điều khiển quản lý |
-| Authentication | `app/(auth)/` | Đăng nhập, đăng ký, OAuth |
-
-## Kiểm tra chất lượng (CI-equivalent)
-
-Các lệnh dưới đây tương đương pipeline CI trên GitHub Actions:
-
-```bash
-# Lint (ESLint)
-pnpm exec eslint . --max-warnings 25
-
-# Kiểm tra kiểu TypeScript
-pnpm exec tsc --noEmit
-
-# Unit test (Vitest)
-pnpm test:unit
-
-# Production build
-pnpm build
-```
-
-## Kiểm thử Playwright
-
-### Smoke test (không cần backend)
-
-```bash
-pnpm test:e2e:smoke
-```
-
-### Full-stack test (cần backend)
-
-Full-stack test yêu cầu Backend Spring Boot, PostgreSQL và Redis đang chạy:
-
-```bash
-pnpm test:e2e:fullstack
-```
-
-Xem [hướng dẫn Playwright và CI full-stack bằng tiếng Việt](./docs/PLAYWRIGHT_CI_VI.md) để biết cách cấu hình hai repository chạy đồng thời và thiết lập GitHub Actions.
-
-## Tài liệu dự án
-
-| Tài liệu | Mô tả |
-|---|---|
-| [Quy ước tích hợp Frontend & Backend](./convention.md) | API contract, auth flow, chuẩn request/response |
-| [Trạng thái dự án](./docs/PROJECT_STATUS.md) | Lịch sử thay đổi và trạng thái hiện tại |
-| [Playwright và CI](./docs/PLAYWRIGHT_CI_VI.md) | Hướng dẫn test E2E và CI hai repository |
-| [Hướng dẫn i18n Admin](./docs/I18N_ADMIN_GUIDE_VI.md) | Quản lý nội dung đa ngôn ngữ phía Admin |
-| [Sale Campaign Frontend](./docs/SALE_CAMPAIGN_FRONTEND.md) | Nghiệp vụ và cấu trúc code Sale/Flash Sale |
-| [Storefront Catalog UX](./docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md) | Collection, Search, Size Guide, review, lỗi |
-| [Lộ trình shadcn/improve](./plans/README.vi.md) | Roadmap cải tiến theo đợt (wave) |
+- [Lộ trình triển khai Frontend (tiếng Việt)](plans/README.vi.md)
+- [Implementation Plans (English)](plans/README.md)
