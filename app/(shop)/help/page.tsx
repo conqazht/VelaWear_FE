@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -84,10 +84,9 @@ export default function HelpCenter() {
     },
   ];
 
-  // Scrollspy via IntersectionObserver
+  // Scrollspy via scroll listener
   useEffect(() => {
     const handleScroll = () => {
-      if (Date.now() - lastClickTime < 800) return;
       const sectionIds = ["overview", "shipping", "returns", "size", "care", "contact", "faq"];
       const scrollPosition = window.scrollY + 160;
 
@@ -102,11 +101,10 @@ export default function HelpCenter() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastClickTime]);
+  }, []);
 
   const scrollToSection = (id: string) => {
     setActiveTopic(id);
-    setLastClickTime(Date.now());
     const el = document.getElementById(id);
     if (el) {
       const topOffset = el.getBoundingClientRect().top + window.pageYOffset - 110;
