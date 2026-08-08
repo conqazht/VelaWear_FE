@@ -413,9 +413,6 @@ export function SiteHeader() {
                                   <span className="size-1.5 rounded-full bg-[#b5573a]" />
                                   Vela Wear
                                 </span>
-                                <span className="font-mono tracking-[0.12em]">
-                                  {String(itemIndex + 1).padStart(2, "0")} / {String(megaMenuItemCount).padStart(2, "0")}
-                                </span>
                               </div>
                               <p className="mt-6 font-serif text-[34px] font-light leading-none tracking-[-0.035em] text-[#1c1a18]">
                                 {item.label}

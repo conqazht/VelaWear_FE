@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 export default function HelpCenter() {
   const { t, locale } = useI18n();
   const [activeTopic, setActiveTopic] = useState("overview");
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
