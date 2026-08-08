@@ -148,6 +148,38 @@ describe("auth OTP API contract", () => {
     ).toBe(90);
   });
 
+  it("không đoán mã lỗi từ text của message nữa", () => {
+    expect(
+      normalizeOtpError({
+        response: { status: 400, data: { message: "rate limit exceeded" } },
+      }).kind,
+    ).toBe("unknown");
+
+    expect(
+      normalizeOtpError({
+        response: { status: 400, data: { code: "SOME_UNKNOWN_CODE", message: "expired OTP" } },
+      }).kind,
+    ).toBe("unknown");
+    
+    expect(
+      normalizeOtpError({
+        response: { status: 429, data: { message: "random text" } },
+      }).kind,
+    ).toBe("rate_limited");
+    
+    expect(
+      normalizeOtpError({
+        response: { status: 401, data: { message: "random text" } },
+      }).kind,
+    ).toBe("session_revoked");
+    
+    expect(
+      normalizeOtpError({
+        response: { status: 503, data: { message: "random text" } },
+      }).kind,
+    ).toBe("service");
+  });
+
   it("fail closed khi response mới thiếu challenge/proof", async () => {
     apiClientMocks.post
       .mockResolvedValueOnce({ data: { data: { expiresInSeconds: 300, cooldownSeconds: 60 } } })

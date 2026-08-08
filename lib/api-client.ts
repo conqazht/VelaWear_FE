@@ -34,9 +34,6 @@ function redirectExpiredSessionToSignIn() {
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1",
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 async function requestFreshAccessToken() {
@@ -68,39 +65,52 @@ export async function withAuthSessionLock<T>(operation: () => Promise<T>): Promi
 }
 
 export async function logoutAuthSession(): Promise<void> {
+  sessionExpiryRedirectStarted = true;
   await withAuthSessionLock(async () => {
     const currentAccessToken = accessToken;
-    try {
-      try {
-        await axios.post(
-          `${apiClient.defaults.baseURL}/auth/logout`,
-          {},
-          {
-            headers: currentAccessToken
-              ? { Authorization: `Bearer ${currentAccessToken}` }
-              : undefined,
-            timeout: 15_000,
-            withCredentials: true,
-          },
-        );
-      } catch (error) {
-        if (
-          !currentAccessToken ||
-          !axios.isAxiosError(error) ||
-          error.response?.status !== 401
-        ) {
-          throw error;
-        }
+    let isSettled = false;
 
-        // Token hết hạn có thể bị Spring Security chặn trước controller. Retry không
-        // Bearer để controller vẫn thu hồi refresh cookie/session HttpOnly.
+    try {
+      await axios.post(
+        `${apiClient.defaults.baseURL}/auth/logout`,
+        {},
+        {
+          headers: currentAccessToken
+            ? { Authorization: `Bearer ${currentAccessToken}` }
+            : undefined,
+          timeout: 15_000,
+          withCredentials: true,
+        },
+      );
+      isSettled = true;
+    } catch (error) {
+      if (
+        !currentAccessToken ||
+        !axios.isAxiosError(error) ||
+        error.response?.status !== 401
+      ) {
+        throw error; // Network, 5xx, or non-401 errors are rejected immediately
+      }
+
+      // Token hết hạn có thể bị Spring Security chặn trước controller. Retry không
+      // Bearer để controller vẫn thu hồi refresh cookie/session HttpOnly.
+      try {
         await axios.post(
           `${apiClient.defaults.baseURL}/auth/logout`,
           {},
           { timeout: 15_000, withCredentials: true },
         );
+        isSettled = true;
+      } catch (retryError) {
+        if (axios.isAxiosError(retryError) && retryError.response?.status === 401) {
+          isSettled = true; // Final 401 is stable revoked/unauthenticated
+        } else {
+          throw retryError;
+        }
       }
-    } finally {
+    }
+
+    if (isSettled) {
       clearLocalAuthSession();
     }
   });

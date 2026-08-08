@@ -46,18 +46,18 @@ treat dependency drift as automatically safe.
 
 | ID | Plan | Branch | Priority | Effort | Depends on | Wave | Status |
 |---|---|---|---:|---:|---|---:|---|
-| FE-001 | [Migrate to self-scoped customer APIs](001-migrate-to-self-scoped-customer-apis.md) | `fix/self-scoped-customer-apis` | P1 | L | external BE-001 | 1 | TODO |
-| FE-002 | [Preserve review multipart requests](002-preserve-review-multipart-requests.md) | `fix/review-multipart-transport` | P1 | M | FE-001 | 2 | TODO |
-| FE-003 | [Isolate cart state by account and harden logout](003-isolate-cart-by-account-and-harden-logout.md) | `fix/cart-session-isolation` | P1 | L | FE-002 | 2 | TODO |
-| FE-004 | [Consolidate account settings and hydration](004-consolidate-account-settings-and-hydration.md) | `fix/account-settings-integrity` | P1 | L | FE-001 | 2 | TODO |
-| FE-005 | [Honor rate-limit Retry-After](005-honor-rate-limit-retry-after.md) | `fix/rate-limit-retry-after` | P2 | M | FE-003 and external BE-005 | 2 | TODO |
-| FE-006 | [Scope shop providers to shop routes](006-scope-shop-providers-to-shop-routes.md) | `perf/shop-provider-scope` | P2 | M | FE-003 | 3 | TODO |
-| FE-007 | [Consume wishlist product summaries](007-consume-wishlist-product-summaries.md) | `perf/wishlist-summary-client` | P2 | M | FE-006 and external BE-009 | 3 | TODO |
-| FE-008 | [Load profile data on demand](008-load-profile-data-on-demand.md) | `perf/profile-demand-loading` | P2 | M | FE-001, FE-004 | 3 | TODO |
-| FE-009 | [Characterize profile-page behavior](009-characterize-profile-page-behavior.md) | `test/profile-characterization` | P2 | M | FE-004, FE-008 | 4 | TODO |
-| FE-010 | [Decompose the profile page](010-decompose-profile-page.md) | `refactor/profile-page` | P3 | L | FE-009 | 4 | TODO |
-| FE-011 | [Split i18n message namespaces](011-split-i18n-message-namespaces.md) | `perf/i18n-message-splitting` | P3 | L | FE-001–FE-010 | 5 | TODO |
-| FE-012 | [Clean frontend dependencies and documentation](012-clean-frontend-dependencies-and-docs.md) | `chore/frontend-maintenance-docs` | P3 | M | FE-001–FE-011 and external BE-015 | 5 | TODO |
+| FE-001 | [Migrate to self-scoped customer APIs](001-migrate-to-self-scoped-customer-apis.md) | `fix/self-scoped-customer-apis` | P1 | L | external BE-001 | 1 | DONE |
+| FE-002 | [Preserve review multipart requests](002-preserve-review-multipart-requests.md) | `fix/review-multipart-transport` | P1 | M | FE-001 | 2 | DONE |
+| FE-003 | [Isolate cart state by account and harden logout](003-isolate-cart-by-account-and-harden-logout.md) | `fix/cart-session-isolation` | P1 | L | FE-002 | 2 | DONE |
+| FE-004 | [Consolidate account settings and hydration](004-consolidate-account-settings-and-hydration.md) | `fix/account-settings-integrity` | P1 | L | FE-001 | 2 | DONE |
+| FE-005 | [Honor rate-limit Retry-After](005-honor-rate-limit-retry-after.md) | `fix/rate-limit-retry-after` | P2 | M | FE-003 and external BE-005 | 2 | DONE |
+| FE-006 | [Scope shop providers to shop routes](006-scope-shop-providers-to-shop-routes.md) | `perf/shop-provider-scope` | P2 | M | FE-003 | 3 | DONE |
+| FE-007 | [Consume wishlist product summaries](007-consume-wishlist-product-summaries.md) | `perf/wishlist-summary-client` | P2 | M | FE-006 and external BE-009 | 3 | DONE |
+| FE-008 | [Load profile data on demand](008-load-profile-data-on-demand.md) | `perf/profile-demand-loading` | P2 | M | FE-001, FE-004 | 3 | DONE |
+| FE-009 | [Characterize profile-page behavior](009-characterize-profile-page-behavior.md) | `test/profile-characterization` | P2 | M | FE-004, FE-008 | 4 | DONE |
+| FE-010 | [Decompose the profile page](010-decompose-profile-page.md) | `refactor/profile-page` | P3 | L | FE-009 | 4 | DONE |
+| FE-011 | [Split i18n message namespaces](011-split-i18n-message-namespaces.md) | `perf/i18n-message-splitting` | P3 | L | FE-001–FE-010 | 5 | DONE |
+| FE-012 | [Clean frontend dependencies and documentation](012-clean-frontend-dependencies-and-docs.md) | `chore/frontend-maintenance-docs` | P3 | M | FE-001–FE-011 and external BE-015 | 5 | DONE |
 
 Status values: `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED (<reason>)`, or
 `REJECTED (<reason>)`.

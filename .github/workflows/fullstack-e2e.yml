@@ -123,7 +123,7 @@ jobs:
       - name: Check out backend
         uses: actions/checkout@v7
         with:
-          repository: coqanklazy/VelaWear_BE
+          repository: conqazht/VelaWear_BE
           path: backend
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_ref || 'main' }}
           token: ${{ secrets.CROSS_REPO_READ_TOKEN }}

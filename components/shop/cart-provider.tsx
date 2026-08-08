@@ -176,6 +176,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { locale } = useI18n();
   const storedCart = useCartStore((state) => state.cart);
+  const storedOwner = useCartStore((state) => state.owner);
   const addToLocalCart = useCartStore((state) => state.addToCart);
   const attachVariant = useCartStore((state) => state.attachVariant);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
@@ -192,6 +193,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   const cart = useMemo(() => {
+    // Prevent showing a mismatched account's cart while auth is still loading/resolving
+    if (
+      storedOwner !== "anonymous" &&
+      (!isAuthenticated || storedOwner !== `user:${userId}`)
+    ) {
+      return [];
+    }
+
     if (
       !isAuthenticated ||
       userId === undefined ||
@@ -202,10 +211,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     return applyLocalizedCartCopy(storedCart, localizedCartCopy.items);
-  }, [isAuthenticated, locale, localizedCartCopy, storedCart, userId]);
+  }, [
+    isAuthenticated,
+    locale,
+    localizedCartCopy,
+    storedCart,
+    storedOwner,
+    userId,
+  ]);
 
   const refreshCart = useCallback(async () => {
     if (!isAuthenticated || userId === undefined) return;
+    useCartStore.getState().claimForUser(userId);
 
     while (true) {
       const requestedLocale = getActiveLocale();
@@ -312,6 +329,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const mergeAuthenticatedCart = async () => {
       try {
+        useCartStore.getState().claimForUser(userId);
+        
         while (!cancelled) {
           const requestedLocale = getActiveLocale();
           const serverCart = await getMyCart();

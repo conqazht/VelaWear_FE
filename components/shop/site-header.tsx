@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useAuth } from "@/components/auth/auth-provider";
+import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useI18n } from "@/components/providers/i18n-provider";
 import {
@@ -86,6 +87,18 @@ export function SiteHeader() {
     setSearchPathname(pathname);
     setSearchQuery("");
     setIsSearchSuggestionsOpen(false);
+  }
+
+  async function handleLogout() {
+    const toastId = toast.loading(t("storefront.nav.loggingOut"));
+    try {
+      await signOut();
+      toast.dismiss(toastId);
+      setIsMobileMenuOpen(false);
+      router.push("/");
+    } catch {
+      toast.error(t("storefront.nav.logoutError"), { id: toastId });
+    }
   }
 
   useEffect(() => {
@@ -312,6 +325,7 @@ export function SiteHeader() {
                 <Image
                   src="/images/brand/vela-wear-logo.png"
                   alt={t("brand.logoAlt")}
+                  priority
                   width={512}
                   height={512}
                   style={logoStyle}
@@ -715,7 +729,7 @@ export function SiteHeader() {
                         <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.favourites")}</Link>
                         <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.coupons")}</Link>
                         <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.reviews")}</Link>
-                        <button onClick={() => { signOut(); router.push("/"); }} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
+                        <button onClick={handleLogout} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
                       </div>
                     </div>
                   </div>
@@ -832,11 +846,7 @@ export function SiteHeader() {
                     {t("storefront.nav.viewProfileName", { name: safeUser.fullName })}
                   </Link>
                   <button
-                    onClick={() => {
-                      signOut();
-                      setIsMobileMenuOpen(false);
-                      router.push("/");
-                    }}
+                    onClick={handleLogout}
                     className="text-sm font-semibold uppercase tracking-[1px] text-[#b5573a] text-center border border-[#b5573a]/40 py-4 rounded-[6px] hover:bg-[#b5573a]/10 transition-colors duration-300"
                   >
                     {t("storefront.nav.signOut")}

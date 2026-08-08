@@ -1,10 +1,108 @@
+## Current State (as of FE-012)
+
+**Architecture:** Next.js 16 App Router with React 19, TypeScript, TanStack Query, Zustand, Tailwind CSS 4, Vitest, and Playwright. The storefront runs at `app/(shop)/`, admin dashboard at `app/(admin)/dashboard/`, and authentication at `app/(auth)/`. API integration uses Axios with in-memory access tokens, HttpOnly refresh cookies, Web Lock session serialization, and single-flight token refresh. EN/VI i18n uses route-scoped catalog splitting.
+
+**Latest wave (Wave 5):** FE-011 (i18n catalog splitting) and FE-012 (dependency cleanup and documentation) completed.
+
+**Build:** 68 static routes, 50+ test files, 196+ unit tests.
+
+---
+
+## 2026-08-08
+
+### FE-012 Clean Frontend Dependencies and Documentation
+
+- **Branch:** `chore/frontend-maintenance-docs`
+- Moved `shadcn` CLI package from `dependencies` to `devDependencies`; `@shadcn/react` remains in `dependencies` as a runtime dependency.
+- Created `scripts/check-markdown-links.mjs` and `scripts/check-markdown-links.test.mjs` — reusable Markdown link checker with 9 tests covering same/cross-file anchors, duplicate headings, encoded paths, external URL ignoring, and deterministic error output.
+- Rewrote `README.md` in Vietnamese with actual entrypoints, Node 24/pnpm 11.5.2 prerequisites, CI-equivalent commands, Playwright prerequisites, and documentation links.
+- Updated `AGENTS.md` to reflect live App Router architecture, real route groups, API layer, auth flow, and dependency classification. Removed stale references to `app/page.tsx`, `components/vela-wear-app.tsx`, prototype terminology, and mock-only guidance.
+- Updated `convention.md` to match live implementation: `NEXT_PUBLIC_API_URL` includes `/api/v1`, `ApiResponse.code` field documented, in-memory access token (not localStorage), HttpOnly refresh cookie, Web Lock session serialization, single-flight refresh, `Retry-After` in seconds, self-scoped customer APIs.
+- Fixed invalid control characters in `docs/PROJECT_STATUS.md` and added current state summary.
+- Verification: `pnpm install --frozen-lockfile` (exit 0), `pnpm exec eslint . --max-warnings 25` (0 errors, 4 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (50 files, 196 tests passed), `pnpm build` (68 static routes prerendered), `node --test scripts/check-markdown-links.test.mjs` (9 tests passed), `node scripts/check-markdown-links.mjs README.md AGENTS.md docs/PROJECT_STATUS.md convention.md` (4 files, 11 links, 0 errors), `git diff --check` (clean), `git diff --name-only` (8 files, all in scope).
+- Follow-ups: none.
+
+### FE-011 Split Runtime i18n Catalogs by Route Namespace Completed
+
+- Split runtime i18n message catalogs into core, shop, and admin modules (`catalog-core.ts`, `catalog-shop.ts`, `catalog-admin.ts`, `types.ts`).
+- Created `catalog-audit.test.ts` to enforce EN/VI key parity, placeholder match, zero duplicate keys, and layout static imports.
+- Updated `I18nProvider` to load `coreMessages` at root (`app/layout.tsx`) and exported `I18nCatalogProvider` to overlay route-scoped catalogs at nested layouts (`app/(shop)/layout.tsx` and `app/(admin)/layout.tsx`).
+- Created `components/providers/i18n-provider.test.tsx` (4 tests) verifying catalog overlays, core fallbacks, and locale persistence across route boundaries.
+- Updated 6 catalog-using component tests with explicit `I18nCatalogProvider` wrappers (`review-comment.test.tsx`, `sale-landing.test.tsx`, `order-review-dialog.test.tsx`, `campaign-interaction-lock.test.tsx`, `content-locale-tabs.test.tsx`, `english-content-generator.test.tsx`).
+- Verification: `pnpm exec vitest run catalog-audit.test.ts`, `pnpm exec vitest run i18n-provider.test.tsx`, `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (50 files, 196 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+- Follow-ups: Ready for FE-012 maintenance.
+
+### HOTFIX Profile Page E2E Alignment Completed
+
+- Created hotfix branch `hotfix/profile-fullstack-e2e` from FE-010 merge commit `ba42994`.
+- Re-verified all 13 FE-010 safety net tests, 187 unit tests, ESLint, TypeScript, Next.js build, and Playwright E2E smoke suite.
+- Confirmed fullstack auth session and profile bootstrap locator compatibility with `AuthHeaderComponent`.
+- Verification: `pnpm exec vitest run "app/(shop)/profile/page.test.tsx"`, `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (187 tests pass), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+
+### FE-010 Decompose Profile Page into Typed Presentation Panels Completed
+
+- Decomposed monolithic `MemberProfile` in `app/(shop)/profile/page.tsx` into 5 typed presentation panel modules in `components/shop/profile/`:
+  - `profile-shell.tsx`: Profile page frame & top-level tab navigation (`profile`, `orders`, `favourites`, `coupons`, `reviews`).
+  - `profile-account-panel.tsx`: Account details form, gender select, birth date picker, edit password/email modals, account deletion.
+  - `profile-addresses-panel.tsx`: Delivery addresses list, empty state, loading & error states.
+  - `profile-orders-tab.tsx`: Order history list, status badges/analytics, order item details, empty & error states.
+  - `profile-favorites-tab.tsx`: Wishlist grid (`ProductCard`), add to bag, favorite toggle, empty & error states.
+- Reduced `app/(shop)/profile/page.tsx` from 1,035 lines to 129 lines (well below the 350-line target).
+- Retained 100% of route orchestration, auth gates, demand-gated query enabling (FE-008), and characterization safety net (FE-009).
+- Verification: `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (48 files, 187 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+- Follow-ups: none.
+
+### FE-009 Characterize Profile Page Behavior Completed
+
+- Extracted pure formatting and metadata utilities from `app/(shop)/profile/page.tsx` into `components/shop/profile/profile-formatters.ts` (`getProfileTabId`, `formatDisplayDate`, `formatMemberSince`, `formatAddress`, `orderStatusMeta`, `orderStatusLabelKeys`).
+- Extracted 5 loading fallback components into `components/shop/profile/profile-loading.tsx` (`ProfileAddressesLoadingFallback`, `ProfileTabLoading`, `ProfileOverviewLoading`, `ProfileOrdersLoading`, `ProfileFavouritesLoading`).
+- Created `components/shop/profile/profile-formatters.test.ts` (9 tests) verifying all pure formatting and tab normalization edge cases.
+- Reduced `app/(shop)/profile/page.tsx` from 1,211 lines to 1,035 lines (well below the 1,150 target).
+- Verification: `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (48 files, 187 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+- Follow-ups: Ready for FE-010 (Decompose profile page into focused sub-components).
+
+## 2026-08-07
+
+### FE-008 Load Profile Data On Demand Completed
+
+- Refactored profile data loading in `app/(shop)/profile/page.tsx` (`MemberProfile`) to request orders and addresses data only when their respective panels are active.
+- Extended `useMyOrdersQuery` and `useMyAddressesQuery` in `lib/queries/commerce.ts` to accept an explicit `enabled` boolean parameter while preserving default `true` behavior for other callers.
+- Reordered state derivation in `MemberProfile` so `isOrdersEnabled` and `isAddressesEnabled` are derived before invoking the data hooks.
+- Created `lib/queries/commerce-profile.test.tsx` (6 tests) proving zero requests when `enabled: false` and single request when `enabled: true`.
+- Created `app/(shop)/profile/page.test.tsx` (4 tests) proving default account panel enables neither resource, orders panel enables only orders, and delivery panel enables only addresses.
+- Verification: `pnpm exec eslint . --max-warnings 25` (0 errors, 4 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (47 files, 178 tests passed), `pnpm build` (68 static routes prerendered).
+- Follow-ups: none.
+
+### FE-007 Consume Wishlist Product Summaries Completed
+
+- Refactored wishlist loading in `FavoritesProvider` from N+1 per-product queries (`useQueries` fan-out calling `getProduct`) to consuming `WishlistProductSummary` directly from `GET /api/v1/wishlists/me` in a single request.
+- Defined `WishlistProductSummary` transport DTO in `lib/api/types.ts` matching backend `WishlistProductSummaryResponse` and made `product` field required on `Wishlist`.
+- Updated wishlist cache keys in `lib/queries/keys.ts` and `useWishlistsQuery` hook in `lib/queries/commerce.ts` to include `locale` in query identity.
+- Refactored `components/shop/favorites-provider.tsx` to map backend `WishlistProductSummary` directly via `mapBackendProduct` while preserving account-scoped caching, optimistic add/remove, and rollback behavior.
+- Added comprehensive unit tests in `components/shop/favorites-provider.test.tsx` proving zero `getProduct` calls, correct active-only item handling, locale propagation, and optimistic updates.
+- Verification: `pnpm exec eslint . --max-warnings 25` (0 errors, 4 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (45 files, 168 tests passed), `pnpm build` (68 static routes prerendered).
+- Follow-ups: none.
+
+## 2026-07-25
+
+### FE-006 Scope Shop Providers Completed
+
+- Reconciled FE-006 plan drift and implemented the scoping of storefront context providers.
+- Removed CartProvider, NotificationProvider, and FavoritesProvider from the global app/layout.tsx where they unnecessarily wrapped the admin dashboard.
+- Created a boundary component components/shop/shop-providers.tsx and injected it into app/(shop)/layout.tsx.
+- Created app/provider-boundaries.test.ts structural tests to enforce that shop context providers remain outside the root layout.
+- Created e2e/provider-boundaries.spec.ts smoke test to verify an authenticated admin user can render the dashboard without triggering any frontend shop-related API requests (/carts/me, /favorites/me, etc.).
+- Fixed test flakes by updating the mock admin roles and ensuring valid server responses.
+- Verification: ran pnpm test:e2e:smoke successfully with 14 passing tests, verifying the decoupling did not break shop features and properly isolates admin.
+- Follow-ups: none.
+
 > **Kiến trúc hiện tại (2026-07-15):** `salePrice` trực tiếp đã bị loại bỏ. Các mục cũ nhắc tới `salePrice` chỉ là lịch sử trước khi Sale Campaign được triển khai; xem mục mới và `SALE_CAMPAIGN_FRONTEND.md`.
 
 ### Fix Product Price Mismatch between Catalog and Detail Page
 
 - **Date/Time**: 2026-07-08T19:49:00+07:00
 - **Backend**: Updated ProductServiceImpl to query variants and identify the minimum salePrice or price for each product. Added price and salePrice to ProductResponse to expose it correctly to the frontend.
-- **Frontend**: Updated Product and mapBackendProduct in ela-data.ts to consume the real prices instead of falling back to mock static products.
+- **Frontend**: Updated Product and mapBackendProduct in vela-data.ts to consume the real prices instead of falling back to mock static products.
 - **Verification**: mvnw clean compile (Backend) and pnpm build (Frontend) passed.
 - **Known Follow-ups**: None.
 
@@ -29,9 +127,44 @@
 
 # Project Status
 
+## 2026-07-24
+
+### Honor Rate Limit Retry-After UI (FE-005) Completed
+
+- Centralized `Retry-After` parsing logic into `lib/api/errors.ts` (`extractRetryAfterSeconds` and `getQueryRetryDelayMs`) to decode delays from response bodies or headers.
+- Wired React Query `retryDelay` in `components/providers/query-provider.tsx` to automatically wait the prescribed number of seconds before retrying 429 requests, while preventing retries entirely if the wait time exceeds 5 minutes (300 seconds).
+- Refactored `lib/auth-otp-api.ts` to rely on the centralized generic errors module and eliminated substring checks for error mapping.
+- Added comprehensive unit tests in `lib/api/errors.test.ts` and adversarial cases in `lib/auth-otp-api.test.ts`.
+- Verification: Ran `pnpm exec vitest`, `tsc`, and `eslint` successfully with no regressions.
+
 Newest entries first. Every agent must read this file before starting work and update it after completing a meaningful task.
 
+## 2026-07-21
+
+### FE-003 — Cart isolation and hardened logout
+- **Date/Time**: 2026-07-21T17:55:00+07:00
+- **Branch**: `fix/cart-session-isolation`
+- **Implementation**: Bổ sung discriminator owner vào cart state (`"anonymous"` hoặc `"user:<id>"`). Cart provider sync sẽ abort nếu owner bị mismatch sau khi authentication resolve. Logout flow trong `api-client` đã phân biệt clear session với retryable network error/5xx. Ui caller (site-header, app-sidebar) được update xử lý toast success/error theo đúng trạng thái thay vì clear local session vội vàng. Migrate version cart state để dọn rác của v1 (ownerless).
+- **Verification**: `pnpm lint`, `pnpm build` pass. Unit tests components auth, api-client, cart-store (9 tests) đều pass the settlement matrix.
+- **Known Follow-ups**: Tích hợp BE-004.
+
+### FE-002 — Bảo toàn multipart review uploads qua Axios
+- **Date/Time**: 2026-07-21T17:08:00+07:00
+- **Branch**: `fix/review-multipart-transport`
+- **Implementation**: Xóa header `Content-Type: application/json` cố định trong `axios.create()` tại `lib/api-client.ts`. Axios mặc định tự suy luận đúng content-type: `application/json` cho plain objects, `multipart/form-data` cho FormData. Trước thay đổi này, header cố định có thể khiến Axios serialize `FormData` thành JSON trước khi browser tạo multipart boundary, dẫn đến request Spring không parse được.
+- **Tests**: Thêm ba test transport-level trong `lib/api/commerce-review.test.ts` dùng custom Axios adapter (không mock `.post`) để kiểm tra: (1) multipart review với ảnh đến adapter dưới dạng FormData, review JSON Blob và images parts còn nguyên, Content-Type không bị ép `application/json`; (2) multipart review không có ảnh vẫn gửi FormData; (3) plain JSON object request vẫn serialize thành JSON với content-type `application/json`.
+- **Verification**: Targeted `2` file/`7` test pass; ESLint `0` error, `4` warning TanStack Table có sẵn; TypeScript pass; full Vitest `38` file/`132` test pass; production build pass `69` route.
+- **Known Follow-ups**: Không có. Mọi endpoint binary trong tương lai cần dùng cùng test pattern transport-level.
+
 ## 2026-07-16
+
+### FE-001 — Chuyển customer flows sang self-scoped API
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Branch**: `fix/self-scoped-customer-apis`
+- **Implementation**: Chuyển profile update sang `PUT /users/me`, order list/detail/status history sang `/orders/me/**`, và address CRUD sang `/user-addresses/me/**`. Customer request không còn gửi `userId` để chọn ownership; profile/address helpers whitelist field ở runtime nên không thể chuyển tiếp `avatar`, `id` hoặc `userId`. React Query key vẫn chứa authenticated account ID để cache không đi từ account A sang B. Order detail bỏ client-side ownership decision và dùng `404` từ backend self-service làm authorization outcome.
+- **Tests**: Thêm request-level API contract tests, hook/cache transition tests, order-detail component tests và Playwright ownership smoke với hai API contexts độc lập. Primary own reads thành công; secondary dùng order ID/code/status-history và address ID của primary đều nhận `404`, không match error message và không tạo dữ liệu persistent.
+- **Verification**: Focused Vitest `3` file/`14` test pass; full TypeScript pass; full Vitest `38` file/`130` test pass; ESLint pass `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; targeted ownership smoke `1/1` pass; toàn bộ `@fullstack` pass `7/7`; negative search không còn storefront legacy ownership contract.
+- **Known Follow-ups**: Chỉ triển khai BE-002 để thu hồi legacy `ROLE_USER` grants sau khi PR FE-001 này đã merge. Avatar customer vẫn thuộc BE-004; PR này không thay đổi upload/UI.
 
 ### Ổn định một hover lifecycle và thu gọn mega-menu storefront
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
@@ -348,7 +481,7 @@ Newest entries first. Every agent must read this file before starting work and u
 
 - **Reference Review**: Read the external `animated-login/prompt.md` brief and extracted its core strengths: shared reactive scene, cursor tracking, state-based focus reactions, password visibility choreography, and success/fail animation sequencing.
 - **Source-Aware Rewrite**: Reviewed the reference source files (`js/state.js`, `js/eye-tracking.js`, `js/form-interactions.js`, and `css/characters.css`) to preserve the useful implementation ideas: compact state machine, single `requestAnimationFrame` pointer loop, CSS custom property transforms, and staged success/error transitions.
-- **Vela Wear Rewrite**: Added [form-prompt.md](D:\CANH\Java\side project\commercial-fe\form-prompt.md) at the repo root as a rewritten implementation brief for a future sign-in / register redesign. The new prompt keeps the interaction architecture of the reference project but translates it into Vela Wear's current premium fashion language: warm beige surfaces, serif editorial typography, terracotta CTA accents, abstract sculptural left-panel motion, and compatibility with the existing auth field set and OTP registration flow.
+- **Vela Wear Rewrite**: Added [form-prompt.md](prompts/form-prompt.md) at `docs/prompts/` as a rewritten implementation brief for a future sign-in / register redesign. The new prompt keeps the interaction architecture of the reference project but translates it into Vela Wear's current premium fashion language: warm beige surfaces, serif editorial typography, terracotta CTA accents, abstract sculptural left-panel motion, and compatibility with the existing auth field set and OTP registration flow.
 - **Tech Alignment**: Updated the prompt so the target build is explicitly based on the current app stack: Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4, and `motion/react`, with a React component + hook architecture instead of static `index.html` / `css` / `js` modules.
 - **Asset Direction Update**: Updated the prompt to preserve the provided `bg-login.webp` reference image as a reusable supporting auth asset, while replacing the other playful reference-image direction with a premium fashion/editorial image direction suitable for Vela Wear.
 - **Scope Guardrails**: The new brief explicitly rejects cartoon/mascot styling, generic SaaS auth UI, third-party login drift, and any redesign that breaks current Vela Wear auth structure or form behavior.

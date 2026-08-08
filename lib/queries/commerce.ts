@@ -5,46 +5,46 @@ import {
   createOrder,
   createPayment,
   createReview,
-  createUserAddress,
+  createMyAddress,
   createMyWishlist,
-  deleteUserAddress,
+  deleteMyAddress,
   deleteMyWishlist,
-  getCartByUser,
   getCoupons,
+  getMyAddresses,
+  getMyCart,
   getMyCoupons,
-  getOrderByCode,
-  getOrdersByUser,
-  getReviewsByUser,
+  getMyOrders,
   getMyReviews,
-  getUserAddresses,
   getMyWishlists,
-  updateUser,
-  updateUserAddress,
+  updateMyAddress,
+  updateMyProfile,
   type CouponFilters,
+  type CreateMyAddressRequest,
   type CreateOrderRequest,
   type CreatePaymentRequest,
   type CreateReviewRequest,
-  type CreateUserAddressRequest,
-  type UpdateUserAddressRequest,
+  type UpdateMyAddressRequest,
+  type UpdateMyProfileRequest,
 } from "@/lib/api/commerce";
-import type { PageParams, User } from "@/lib/api/types";
+import type { PageParams } from "@/lib/api/types";
 import { queryKeys } from "./keys";
 
-export function useUserCartQuery(userId?: number) {
+export function useMyCartQuery(accountId?: number) {
   return useQuery({
-    queryKey: userId ? queryKeys.cart.byUser(userId) : queryKeys.cart.root,
-    queryFn: () => getCartByUser(userId as number),
-    enabled: typeof userId === "number",
+    queryKey: queryKeys.cart.me(accountId),
+    queryFn: getMyCart,
+    enabled: typeof accountId === "number",
   });
 }
 
 export function useWishlistsQuery(
   userId: number | undefined,
   params: PageParams = {},
-  enabled = true
+  enabled = true,
+  locale?: string
 ) {
   return useQuery({
-    queryKey: queryKeys.wishlists.list(userId, params),
+    queryKey: queryKeys.wishlists.list(userId, params, locale),
     queryFn: () => getMyWishlists(params),
     enabled: enabled && typeof userId === "number",
   });
@@ -114,33 +114,15 @@ export function useCreatePaymentMutation() {
   });
 }
 
-export function useOrdersByUserQuery(userId?: number, params: PageParams = {}) {
+export function useMyOrdersQuery(
+  accountId?: number,
+  params: PageParams = {},
+  enabled = true
+) {
   return useQuery({
-    queryKey:
-      typeof userId === "number"
-        ? queryKeys.orders.byUser(userId, params)
-        : queryKeys.orders.root,
-    queryFn: () => getOrdersByUser(userId as number, params),
-    enabled: typeof userId === "number",
-  });
-}
-
-export function useOrderByCodeQuery(orderCode?: string) {
-  return useQuery({
-    queryKey: queryKeys.orders.byCode(orderCode ?? ""),
-    queryFn: () => getOrderByCode(orderCode as string),
-    enabled: Boolean(orderCode),
-  });
-}
-
-export function useReviewsByUserQuery(userId?: number, params: PageParams = {}) {
-  return useQuery({
-    queryKey:
-      typeof userId === "number"
-        ? queryKeys.reviews.list({ userId, ...params })
-        : queryKeys.reviews.root,
-    queryFn: () => getReviewsByUser(userId as number, params),
-    enabled: typeof userId === "number",
+    queryKey: queryKeys.orders.meList(accountId, params),
+    queryFn: () => getMyOrders(params),
+    enabled: enabled && typeof accountId === "number",
   });
 }
 
@@ -155,29 +137,30 @@ export function useMyReviewsQuery(
   });
 }
 
-export function useUserAddressesQuery(
-  params: PageParams & { userId?: number } = {}
+export function useMyAddressesQuery(
+  accountId?: number,
+  params: PageParams = {},
+  enabled = true
 ) {
   return useQuery({
-    queryKey: queryKeys.addresses.list(params),
-    queryFn: () => getUserAddresses(params),
-    enabled: typeof params.userId === "number",
+    queryKey: queryKeys.addresses.meList(accountId, params),
+    queryFn: () => getMyAddresses(params),
+    enabled: enabled && typeof accountId === "number",
   });
 }
 
-export function useCreateUserAddressMutation() {
+export function useCreateMyAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateUserAddressRequest) =>
-      createUserAddress(request),
+    mutationFn: (request: CreateMyAddressRequest) => createMyAddress(request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.addresses.root });
     },
   });
 }
 
-export function useUpdateUserAddressMutation() {
+export function useUpdateMyAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -186,19 +169,19 @@ export function useUpdateUserAddressMutation() {
       request,
     }: {
       id: number;
-      request: UpdateUserAddressRequest;
-    }) => updateUserAddress(id, request),
+      request: UpdateMyAddressRequest;
+    }) => updateMyAddress(id, request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.addresses.root });
     },
   });
 }
 
-export function useDeleteUserAddressMutation() {
+export function useDeleteMyAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => deleteUserAddress(id),
+    mutationFn: (id: number) => deleteMyAddress(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.addresses.root });
     },
@@ -209,8 +192,7 @@ export function useUpdateProfileMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, request }: { id: number; request: Partial<User> }) =>
-      updateUser(id, request),
+    mutationFn: (request: UpdateMyProfileRequest) => updateMyProfile(request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.auth.root });
     },

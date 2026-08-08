@@ -21,15 +21,18 @@ import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  getOrderByCode,
-  getOrderStatusHistories,
+  getMyOrderByCode,
+  getMyOrderStatusHistories,
 } from "@/lib/api/commerce";
 import { cancelOrder } from "@/lib/checkout-api";
 import { formatDateTime } from "@/lib/i18n/format";
 import { money } from "@/lib/vela-data";
 import type { OrderItem } from "@/lib/api/types";
 import { useMyReviewsQuery } from "@/lib/queries/commerce";
+import { queryKeys } from "@/lib/queries/keys";
 import { OrderReviewDialog } from "./order-review-dialog";
+
+const orderHistoryParams = { size: 100, sort: "createdAt,asc" } as const;
 
 const statusLabelKeys = {
   PENDING: "account.orders.status.pending",
@@ -83,26 +86,26 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const queryClient = useQueryClient();
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const orderQuery = useQuery({
-    queryKey: ["orders", "code", code],
-    queryFn: () => getOrderByCode(code),
+    queryKey: queryKeys.orders.meByCode(user?.id, code),
+    queryFn: () => getMyOrderByCode(code),
     enabled: isAuthenticated && Boolean(user),
   });
   const order = orderQuery.data;
-  const hasAccess = Boolean(order && order.userId === user?.id);
-  const reviewsQuery = useMyReviewsQuery(hasAccess, {
+  const hasOrder = Boolean(order);
+  const reviewsQuery = useMyReviewsQuery(hasOrder, {
     orderId: order?.id,
     page: 1,
     size: 100,
     sort: "createdAt,desc",
   });
   const historiesQuery = useQuery({
-    queryKey: ["orders", order?.id, "status-histories"],
-    queryFn: () =>
-      getOrderStatusHistories(order!.id, {
-        size: 100,
-        sort: "createdAt,asc",
-      }),
-    enabled: hasAccess,
+    queryKey: queryKeys.orders.meStatusHistories(
+      user?.id,
+      order?.id,
+      orderHistoryParams,
+    ),
+    queryFn: () => getMyOrderStatusHistories(order!.id, orderHistoryParams),
+    enabled: hasOrder,
   });
   const cancelMutation = useMutation({
     mutationFn: (orderId: number) => cancelOrder(orderId),
@@ -208,15 +211,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     );
   }
 
-  if (!hasAccess) {
+  if (historiesQuery.isError && histories.length === 0) {
     return (
-      <StorefrontStatus
-        status={403}
-        eyebrow={t("account.order.forbiddenEyebrow")}
-        title={t("account.order.forbiddenTitle")}
-        description={t("account.order.forbiddenDescription")}
-        primaryAction={{ label: t("account.order.myOrdersAction"), href: "/profile?tab=orders" }}
-        secondaryAction={{ label: t("account.order.homeAction"), href: "/" }}
+      <StorefrontApiStatus
+        error={historiesQuery.error}
+        onRetry={() => void historiesQuery.refetch()}
+        resourceLabel={t("account.order.historyResource")}
+        returnHref="/profile?tab=orders"
+        returnLabel={t("account.order.historyAction")}
         variant="route"
       />
     );
@@ -236,7 +238,6 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           <StorefrontStaleWarning
             onRetry={() => void orderQuery.refetch()}
             resourceLabel={t("account.order.title")}
-            error={orderQuery.error}
             className="mb-6"
           />
         ) : null}
@@ -265,7 +266,6 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 <StorefrontStaleWarning
                   onRetry={() => void reviewsQuery.refetch()}
                   resourceLabel={t("reviews.write.statusResource")}
-                  error={reviewsQuery.error}
                   className="mb-5"
                 />
               ) : null}
@@ -360,7 +360,6 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 <StorefrontStaleWarning
                   onRetry={() => void historiesQuery.refetch()}
                   resourceLabel={t("account.order.historyResource")}
-                  error={historiesQuery.error}
                   className="mb-5"
                 />
               ) : null}
