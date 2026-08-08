@@ -1,5 +1,18 @@
 ## 2026-08-08
 
+### FE-010 Decompose Profile Page into Typed Presentation Panels Completed
+
+- Decomposed monolithic `MemberProfile` in `app/(shop)/profile/page.tsx` into 5 typed presentation panel modules in `components/shop/profile/`:
+  - `profile-shell.tsx`: Profile page frame & top-level tab navigation (`profile`, `orders`, `favourites`, `coupons`, `reviews`).
+  - `profile-account-panel.tsx`: Account details form, gender select, birth date picker, edit password/email modals, account deletion.
+  - `profile-addresses-panel.tsx`: Delivery addresses list, empty state, loading & error states.
+  - `profile-orders-tab.tsx`: Order history list, status badges/analytics, order item details, empty & error states.
+  - `profile-favorites-tab.tsx`: Wishlist grid (`ProductCard`), add to bag, favorite toggle, empty & error states.
+- Reduced `app/(shop)/profile/page.tsx` from 1,035 lines to 129 lines (well below the 350-line target).
+- Retained 100% of route orchestration, auth gates, demand-gated query enabling (FE-008), and characterization safety net (FE-009).
+- Verification: `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (48 files, 187 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+- Follow-ups: none.
+
 ### FE-009 Characterize Profile Page Behavior Completed
 
 - Extracted pure formatting and metadata utilities from `app/(shop)/profile/page.tsx` into `components/shop/profile/profile-formatters.ts` (`getProfileTabId`, `formatDisplayDate`, `formatMemberSince`, `formatAddress`, `orderStatusMeta`, `orderStatusLabelKeys`).
