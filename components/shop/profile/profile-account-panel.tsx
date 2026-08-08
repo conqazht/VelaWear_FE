@@ -656,7 +656,7 @@ export function ProfileAccountPanel({
                     onChange={(e) => setLocationSharing(e.target.value)}
                     className="text-xs bg-transparent border border-[#1c1a18]/20 rounded-md px-3 py-2 text-ink focus:outline-none"
                   >
-                    <option value="dont_share">Don't Share</option>
+                    <option value="dont_share">Don&apos;t Share</option>
                     <option value="approximate">Approximate Location</option>
                     <option value="precise">Precise Location</option>
                   </select>
