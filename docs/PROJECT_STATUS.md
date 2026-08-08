@@ -1,3 +1,14 @@
+## 2026-08-08
+
+### FE-009 Characterize Profile Page Behavior Completed
+
+- Extracted pure formatting and metadata utilities from `app/(shop)/profile/page.tsx` into `components/shop/profile/profile-formatters.ts` (`getProfileTabId`, `formatDisplayDate`, `formatMemberSince`, `formatAddress`, `orderStatusMeta`, `orderStatusLabelKeys`).
+- Extracted 5 loading fallback components into `components/shop/profile/profile-loading.tsx` (`ProfileAddressesLoadingFallback`, `ProfileTabLoading`, `ProfileOverviewLoading`, `ProfileOrdersLoading`, `ProfileFavouritesLoading`).
+- Created `components/shop/profile/profile-formatters.test.ts` (9 tests) verifying all pure formatting and tab normalization edge cases.
+- Reduced `app/(shop)/profile/page.tsx` from 1,211 lines to 1,035 lines (well below the 1,150 target).
+- Verification: `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (48 files, 187 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+- Follow-ups: Ready for FE-010 (Decompose profile page into focused sub-components).
+
 ## 2026-08-07
 
 ### FE-008 Load Profile Data On Demand Completed
