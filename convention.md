@@ -6,11 +6,8 @@ Tài liệu này định nghĩa các quy ước và tiêu chuẩn tích hợp gi
 
 ## 1. Địa Chỉ API (Base URL) & Định Dạng Đường Dẫn
 
-- **Địa chỉ gọi API (Base URL):**
-  - Môi trường Phát triển (Development): `http://localhost:8080/api`
-  - Môi trường Production: `https://api.example.com/api` (hoặc tên miền cấu hình thực tế)
-- **Phiên bản API (Versioning):** Phiên bản hiện tại là `v1`. Do đó, tất cả các route gọi từ Frontend phải bắt đầu bằng `/api/v1/`.
-  - Ví dụ: `http://localhost:8080/api/v1/products`
+- **Biến môi trường:** Frontend đọc base URL từ `NEXT_PUBLIC_API_URL`, mặc định `http://localhost:8080/api/v1`. Giá trị này **đã bao gồm** tiền tố `/api/v1`.
+- **Cấu hình Axios client:** `lib/api-client.ts` dùng `baseURL` từ biến trên; mọi path tương đối (ví dụ `/products`, `/auth/login`) được nối vào base URL đã có `/api/v1`.
 - **Quy ước đặt tên URL (URL Path Naming):**
   - Sử dụng **danh từ số nhiều** cho các tài nguyên (resources).
   - Sử dụng định dạng **kebab-case** (chữ thường, phân tách bằng dấu gạch ngang) cho các path gồm nhiều từ.
@@ -19,29 +16,39 @@ Tài liệu này định nghĩa các quy ước và tiêu chuẩn tích hợp gi
     - Biến thể sản phẩm: `/api/v1/product-variants`
     - Địa chỉ người dùng: `/api/v1/user-addresses`
     - Lịch sử trạng thái đơn hàng: `/api/v1/orders/{id}/status-histories`
+- **Customer self-scoped API:** Các endpoint customer không truyền `userId`; backend xác định ownership từ access token. Ví dụ:
+  - Profile: `PUT /users/me`
+  - Đơn hàng: `GET /orders/me`, `GET /orders/me/{code}`
+  - Địa chỉ: `GET /user-addresses/me`, `POST /user-addresses/me`, `PUT /user-addresses/me/{id}`
 
 ---
 
 ## 2. Định Dạng Phản Hồi Chuẩn Của API (API Response Format)
 
-Tất cả các API từ Backend đều trả về một cấu trúc bọc chung (`ApiResponse<T>`) ở dạng JSON. Frontend cần khai báo kiểu dữ liệu và xử lý đồng bộ theo cấu trúc này.
+Tất cả các API từ Backend đều trả về một cấu trúc bọc chung (`ApiResponse<T>`) ở dạng JSON. Frontend khai báo type tại `lib/api/types.ts`.
 
 ### 2.1. Cấu Trúc Khai Báo TypeScript (API Response Interface)
+
 ```typescript
-interface ApiResponse<T> {
+type ApiResponse<T> = {
   statusCode: number;      // Mã trạng thái HTTP (200, 201, 400, 401, 403, 404, 500, v.v.)
-  data: T | null;          // Dữ liệu payload thực tế, bằng null nếu có lỗi xảy ra
-  message: string;         // Thông điệp phản hồi (ví dụ: "Success", "Created", hoặc thông báo lỗi)
-  timestamp: string;       // Thời gian phản hồi theo định dạng ISO-8601 (LocalDateTime)
-}
+  data: T;                 // Dữ liệu payload thực tế
+  message: string;         // Thông điệp hiển thị (display-only, không dùng để điều khiển logic)
+  code?: string;           // Mã lỗi ổn định (stable error code) để điều khiển logic phía client
+  error?: string;          // Chi tiết lỗi bổ sung (nếu có)
+  timestamp?: string;      // Thời gian phản hồi theo định dạng ISO-8601
+};
 ```
 
+> **Lưu ý:** Trường `message` chỉ dùng để hiển thị cho người dùng. Luồng logic phía frontend (ví dụ: retry, redirect, hiển thị lỗi cụ thể) phải dựa vào `statusCode` và `code` (khi có) thay vì substring match trên `message`.
+
 ### 2.2. Phản Hồi Thành Công (Success Response)
+
 - **Phương thức GET/PUT/PATCH/DELETE thành công (HTTP 200):**
   ```json
   {
     "statusCode": 200,
-    "data": { ... }, // Payload dữ liệu tài nguyên
+    "data": { "..." },
     "message": "Success",
     "timestamp": "2026-06-27T16:13:00.000"
   }
@@ -50,11 +57,15 @@ interface ApiResponse<T> {
   ```json
   {
     "statusCode": 201,
-    "data": { ... }, // Tài nguyên vừa được tạo
+    "data": { "..." },
     "message": "Created",
     "timestamp": "2026-06-27T16:13:00.000"
   }
   ```
+
+### 2.3. Unwrap helper
+
+Frontend dùng `unwrapApiResponse()` từ `lib/api/client.ts` để trích xuất `data` từ `ApiResponse`. Mọi API helper (`apiGet`, `apiPost`, `apiPut`, `apiDelete`) đều tự động unwrap.
 
 ---
 
@@ -63,6 +74,7 @@ interface ApiResponse<T> {
 Khi gọi các API lấy danh sách dạng trang (paginated list như `/api/v1/products`), Backend sử dụng cơ chế phân trang của Spring Data.
 
 ### 3.1. Tham Số Truy Vấn Phân Trang (Query Parameters)
+
 Frontend gửi các query parameters sau lên Backend:
 
 | Tham số | Kiểu dữ liệu | Giá trị mặc định | Mô tả |
@@ -72,10 +84,11 @@ Frontend gửi các query parameters sau lên Backend:
 | `sort` | `string` | Không có | Cú pháp sắp xếp của Spring: `tênThuộcTính,hướngSắpXếp` (Ví dụ: `createdAt,desc` hoặc `price,asc`). Thuộc tính viết theo kiểu camelCase của Java. |
 
 ### 3.2. Cấu Trúc Phản Hồi Phân Trang (Paginated Response)
+
 Khi dữ liệu được phân trang, thuộc tính `data` trong `ApiResponse` sẽ có cấu trúc `ResultPaginationDTO` như sau:
 
 ```typescript
-interface PaginatedData<T> {
+type ResultPaginationDTO<T> = {
   meta: {
     page: number;        // Trang hiện tại (1-indexed)
     pageSize: number;    // Số lượng phần tử mỗi trang
@@ -83,10 +96,11 @@ interface PaginatedData<T> {
     total: number;       // Tổng số bản ghi trên hệ thống
   };
   result: T[];           // Danh sách dữ liệu của trang hiện tại
-}
+};
 ```
 
 **Ví dụ thực tế phản hồi phân trang:**
+
 ```json
 {
   "statusCode": 200,
@@ -118,6 +132,7 @@ interface PaginatedData<T> {
 ## 4. Xử Lý Lỗi & Xác Thực Dữ Liệu (Error & Validation Handling)
 
 ### 4.1. Lỗi Xác Thực Form (Validation Error - HTTP 400)
+
 Khi Frontend gửi dữ liệu không hợp lệ (ví dụ: thiếu email, sai định dạng mật khẩu), Backend sẽ trả về mã `400 Bad Request` kèm theo chi tiết lỗi của từng trường trong trường `data`:
 
 ```json
@@ -131,6 +146,7 @@ Khi Frontend gửi dữ liệu không hợp lệ (ví dụ: thiếu email, sai �
   "timestamp": "2026-06-27T16:13:00.000"
 }
 ```
+
 **Quy tắc xử lý phía FE:** Đọc thuộc tính `data` khi nhận lỗi `400` để hiển thị thông báo lỗi tương ứng bên dưới từng ô nhập liệu của form.
 
 ### 4.2. Các Mã Lỗi Hệ Thống Phổ Biến
@@ -138,11 +154,23 @@ Khi Frontend gửi dữ liệu không hợp lệ (ví dụ: thiếu email, sai �
 | HTTP Status | statusCode | Ý nghĩa | Cách xử lý phía Frontend |
 | :--- | :--- | :--- | :--- |
 | **400 Bad Request** | `400` | Sai cú pháp request hoặc Lỗi Validation dữ liệu | Hiển thị lỗi form hoặc thông báo lỗi chung từ trường `message`. |
-| **401 Unauthorized** | `401` | Token hết hạn, không hợp lệ hoặc thiếu Token xác thực | Chuyển hướng người dùng sang trang Đăng nhập hoặc thực hiện tự động Refresh Token. |
+| **401 Unauthorized** | `401` | Token hết hạn, không hợp lệ hoặc thiếu Token xác thực | Tự động thử refresh token (single-flight). Nếu refresh thất bại, chuyển hướng tới `/sign-in`. |
 | **403 Forbidden** | `403` | Người dùng không có quyền truy cập endpoint này | Hiển thị thông báo hoặc trang báo lỗi không có quyền truy cập. |
 | **404 Not Found** | `404` | Tài nguyên không tồn tại hoặc đã bị xóa mềm | Hiển thị trang 404 hoặc thông báo không tìm thấy bản ghi. |
 | **409 Conflict** | `409` | Trùng lặp dữ liệu (ví dụ trùng Email đăng ký) | Thông báo cho người dùng giá trị nhập vào đã tồn tại. |
+| **429 Too Many Requests** | `429` | Rate limit đã đạt | Đọc `Retry-After` từ response body hoặc header (đơn vị: **giây**). React Query tự động retry sau thời gian chỉ định; bỏ qua retry nếu chờ > 300 giây. |
 | **500 Internal Error**| `500` | Lỗi máy chủ không mong muốn | Hiển thị thông báo "Đã có lỗi xảy ra từ máy chủ, vui lòng thử lại sau". |
+
+### 4.3. Stable Error Codes (`code` field)
+
+Một số response bao gồm trường `code` (stable error code) để frontend xử lý logic mà không phụ thuộc vào nội dung `message`. Ví dụ:
+
+| `code` | Ngữ cảnh | Frontend action |
+|---|---|---|
+| `OTP_EXPIRED` | OTP verify | Hiển thị "Mã đã hết hạn, vui lòng yêu cầu mã mới" |
+| `OTP_MAX_ATTEMPTS` | OTP verify | Disable form, hiển thị thông báo vượt giới hạn |
+| `PRICING_CHANGED` | Checkout | Hiển thị giá mới, yêu cầu xác nhận lại |
+| `ITEM_OUT_OF_STOCK` | Checkout | Refresh cart, hiển thị sản phẩm hết hàng |
 
 ---
 
@@ -151,28 +179,39 @@ Khi Frontend gửi dữ liệu không hợp lệ (ví dụ: thiếu email, sai �
 Hệ thống xác thực của Vela Wear sử dụng hai loại token: **Access Token** (ngắn hạn - 15 phút) và **Refresh Token** (dài hạn - 3 ngày).
 
 ### 5.1. Luồng Đăng Nhập & Lưu Trữ Token
-1. **Đăng nhập:** FE gửi yêu cầu đăng nhập qua `POST /api/v1/auth/login`.
+
+1. **Đăng nhập:** FE gửi yêu cầu đăng nhập qua `POST /auth/login`.
 2. **Nhận Token:** Backend phản hồi thành công và trả về thông tin token trong body đồng thời thiết lập Cookie:
-   - **Access Token:** Nằm trong JSON body (`data.accessToken`). FE lưu trữ token này vào bộ nhớ (State/Context) hoặc trong Local Storage/Client-side Session để gửi kèm ở header các request tiếp theo.
+   - **Access Token:** Nằm trong JSON body (`data.accessToken`). FE lưu trữ token này **trong bộ nhớ JavaScript** (biến module-scope trong `lib/api-client.ts`). **Không dùng** localStorage, sessionStorage hay cookie phía client.
    - **Refresh Token:**
      - Backend tự động thiết lập Cookie có tên là `refresh_token` trong tiêu đề phản hồi HTTP:
        `Set-Cookie: refresh_token=<token>; HttpOnly; Path=/api/v1/auth; SameSite=Lax; Max-Age=259200`
-     - **Quan trọng:** Do cookie này có cấu hình `HttpOnly` và bị giới hạn đường dẫn truy cập (`Path=/api/v1/auth`), mã javascript phía Frontend **không thể đọc hoặc sửa** cookie này. Browser sẽ tự động đính kèm cookie này khi gửi các request tới các endpoint thuộc `/api/v1/auth/*` (như `/refresh` và `/logout`).
+     - **Quan trọng:** Do cookie này có cấu hình `HttpOnly` và bị giới hạn đường dẫn truy cập (`Path=/api/v1/auth`), mã JavaScript phía Frontend **không thể đọc hoặc sửa** cookie này. Browser sẽ tự động đính kèm cookie này khi gửi các request tới các endpoint thuộc `/auth/*` (như `/auth/refresh` và `/auth/logout`).
 3. **Gọi API được bảo vệ:** Các API yêu cầu xác thực bắt buộc phải đính kèm Access Token vào header dưới định dạng:
    ```text
    Authorization: Bearer <accessToken>
    ```
+4. **Axios client:** `lib/api-client.ts` cấu hình `withCredentials: true` để tự động gửi/nhận cookie chứa refresh token.
 
-### 5.2. Luồng Tự Động Làm Mới Token (Token Rotation)
-Khi Access Token hết hạn (hoặc khi gọi API nhận lỗi `401 Unauthorized`), Frontend cần thực hiện luồng refresh token tự động trước khi thử lại request ban đầu:
-1. Gửi request `POST /api/v1/auth/refresh` (Không cần đính kèm body nếu chạy trên browser vì trình duyệt sẽ tự động gửi cookie `refresh_token`).
-2. Nếu thành công, Backend sẽ trả về cặp Access Token và Refresh Token mới trong JSON body và cập nhật lại HttpOnly cookie.
-3. Frontend cập nhật Access Token mới vào State/Context và tiếp tục thực hiện request ban đầu đã bị gián đoạn.
-4. Nếu refresh thất bại (lỗi `401` do Refresh Token đã hết hạn hoặc bị thu hồi), tiến hành đăng xuất người dùng và chuyển hướng về trang `/sign-in`.
+### 5.2. Luồng Tự Động Làm Mới Token (Single-flight Refresh)
 
-### 5.3. Luồng Đăng Xuất (Logout)
-- Gọi API `POST /api/v1/auth/logout`. Backend sẽ thu hồi token trong DB và thiết lập xóa Cookie `refresh_token` (`Max-Age=0`).
-- Frontend xóa Access Token trong State/Context và chuyển hướng về trang chủ hoặc trang đăng nhập.
+Khi Access Token hết hạn (hoặc khi gọi API nhận lỗi `401 Unauthorized`):
+
+1. Interceptor Axios bắt lỗi 401 và kiểm tra nếu đã có `refreshPromise` đang chạy thì tái sử dụng (single-flight) thay vì gửi nhiều request refresh đồng thời.
+2. Gửi `POST /auth/refresh` (browser tự động gửi cookie `refresh_token`).
+3. **Session generation guard:** Nếu auth session thay đổi trong khi refresh đang chạy (ví dụ: user đã logout ở tab khác), refresh bị reject để không ghi đè token mới.
+4. Nếu thành công, Backend trả về Access Token mới; FE cập nhật biến in-memory và retry request ban đầu.
+5. Nếu thất bại (401), chuyển hướng tới `/sign-in` với return path.
+
+### 5.3. Web Lock Session Serialization
+
+`lib/api-client.ts` sử dụng `navigator.locks.request("vela-auth-session", ...)` (Web Lock API) để tuần tự hóa login, refresh, và logout giữa các tab cùng origin. Điều này ngăn race condition khi nhiều tab đồng thời cố gắng refresh hoặc logout, tránh ghi đè refresh cookie của nhau.
+
+### 5.4. Luồng Đăng Xuất (Logout)
+
+- Gọi `POST /auth/logout` qua `logoutAuthSession()` trong `lib/api-client.ts`.
+- Logout gửi Bearer hiện tại để backend blacklist access token. Nếu token đã hết hạn và bị chặn 401, retry đúng một lần không Bearer để vẫn thu hồi cookie/session.
+- Frontend xóa Access Token in-memory, clear auth query cache, clear cart state, và chuyển hướng về `/sign-in`.
 
 ---
 
@@ -183,7 +222,7 @@ Khi Access Token hết hạn (hoặc khi gọi API nhận lỗi `401 Unauthorize
   - Ngày tháng không kèm giờ (Ví dụ: sinh nhật): Định dạng chuỗi `YYYY-MM-DD` (Ví dụ: `"2000-01-01"`).
   - Ngày giờ hệ thống (Ví dụ: ngày tạo, cập nhật): Định dạng chuỗi ISO-8601 UTC (Ví dụ: `"2026-06-27T16:13:00.000Z"`).
 - **ID của thực thể:** Tất cả các ID của bản ghi dữ liệu (sản phẩm, người dùng, đơn hàng...) đều là kiểu **số nguyên dài (Long/number)**, không phải chuỗi ký tự (slug/string).
-  - Ví dụ: `id: 12` thay vị `id: "linen-blazer"`. Slug chỉ dùng để tạo URL thân thiện người dùng và truy vấn động.
+  - Ví dụ: `id: 12` thay vì `id: "linen-blazer"`. Slug chỉ dùng để tạo URL thân thiện người dùng và truy vấn động.
 
 ### 6.1. Một Số Kiểu Dữ Liệu TypeScript Tham Khảo (DTOs Mapping)
 
@@ -242,79 +281,29 @@ interface UserAddressResponse {
 
 ---
 
-## 7. Khuyến Nghị Hiện Thực Mã Phía Frontend (Next.js Client Setup)
+## 7. Kiến Trúc Client HTTP (API Client Architecture)
 
-Để xử lý tối ưu, Frontend nên sử dụng **Axios** hoặc **Fetch API** được cấu hình interceptor để tự động hóa việc đính kèm Token và làm mới Token khi hết hạn.
+Mã nguồn chính xác nằm tại `lib/api-client.ts` và `lib/api/client.ts`. Tài liệu này chỉ mô tả contract và flow; **không** chứa implementation thứ hai để tránh drift.
 
-### 7.1. Cấu hình Axios Client Tham Khảo (`lib/api-client.ts`)
-```typescript
-import axios from "axios";
+### 7.1. Cấu trúc module
 
-let accessToken: string | null = null;
+| File | Vai trò |
+|---|---|
+| `lib/api-client.ts` | Axios instance, interceptor, in-memory token, Web Lock, refresh, logout |
+| `lib/api/client.ts` | Helper `unwrapApiResponse`, `apiGet`, `apiPost`, `apiPut`, `apiDelete` |
+| `lib/api/types.ts` | `ApiResponse<T>`, `ResultPaginationDTO<T>`, domain DTO types |
+| `lib/api/errors.ts` | `extractRetryAfterSeconds`, `getQueryRetryDelayMs` |
+| `lib/api/server.ts` | Server-side fetch wrapper (RSC data fetching) |
 
-export const setAccessToken = (token: string | null) => {
-  accessToken = token;
-};
+### 7.2. Nguyên tắc chính
 
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1",
-  withCredentials: true, // Bắt buộc để tự động gửi/nhận cookie chứa refresh_token
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Interceptor đính kèm Access Token vào mỗi request
-apiClient.interceptors.request.use(
-  (config) => {
-    if (accessToken && config.headers) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Interceptor xử lý lỗi và Refresh Token tự động
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    
-    // Nếu gặp lỗi 401 (Unauthorized) và chưa từng thử refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        // Thực hiện gọi API refresh token
-        const refreshResponse = await axios.post(
-          `${apiClient.defaults.baseURL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        
-        const newAccessToken = refreshResponse.data.data.accessToken;
-        setAccessToken(newAccessToken);
-        
-        // Thử lại request ban đầu với token mới
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        // Refresh token thất bại hoặc hết hạn -> Đăng xuất người dùng
-        setAccessToken(null);
-        if (typeof window !== "undefined") {
-          window.location.href = "/sign-in";
-        }
-        return Promise.reject(refreshError);
-      }
-    }
-    
-    return Promise.reject(error);
-  }
-);
-
-export default apiClient;
-```
+- Access token **chỉ** lưu in-memory (biến module-scope), không localStorage/sessionStorage.
+- Refresh token là HttpOnly cookie, JavaScript không đọc được.
+- Single-flight refresh: chỉ một request refresh tại một thời điểm, các interceptor khác chờ cùng promise.
+- Web Lock `vela-auth-session` tuần tự hóa login/refresh/logout giữa các tab.
+- Session generation guard ngăn stale refresh response ghi đè token sau logout.
+- `Retry-After` (đơn vị giây) từ response body hoặc header được React Query tự động xử lý trong `retryDelay`.
 
 ---
 
-*Tài liệu quy ước này là cơ sở duy nhất cho việc phát triển và tích hợp giao diện. Vui lòng thảo luận và cập nhật tài liệu này nếu có bất kỳ sự thay đổi nào từ phía API Backend.*
+*Tài liệu quy ước này là cơ sở cho việc phát triển và tích hợp giao diện. Vui lòng thảo luận và cập nhật tài liệu này nếu có bất kỳ sự thay đổi nào từ phía API Backend.*

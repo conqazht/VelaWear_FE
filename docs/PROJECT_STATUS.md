@@ -1,4 +1,26 @@
+## Current State (as of FE-012)
+
+**Architecture:** Next.js 16 App Router with React 19, TypeScript, TanStack Query, Zustand, Tailwind CSS 4, Vitest, and Playwright. The storefront runs at `app/(shop)/`, admin dashboard at `app/(admin)/dashboard/`, and authentication at `app/(auth)/`. API integration uses Axios with in-memory access tokens, HttpOnly refresh cookies, Web Lock session serialization, and single-flight token refresh. EN/VI i18n uses route-scoped catalog splitting.
+
+**Latest wave (Wave 5):** FE-011 (i18n catalog splitting) and FE-012 (dependency cleanup and documentation) completed.
+
+**Build:** 68 static routes, 50+ test files, 196+ unit tests.
+
+---
+
 ## 2026-08-08
+
+### FE-012 Clean Frontend Dependencies and Documentation
+
+- **Branch:** `chore/frontend-maintenance-docs`
+- Moved `shadcn` CLI package from `dependencies` to `devDependencies`; `@shadcn/react` remains in `dependencies` as a runtime dependency.
+- Created `scripts/check-markdown-links.mjs` and `scripts/check-markdown-links.test.mjs` — reusable Markdown link checker with 9 tests covering same/cross-file anchors, duplicate headings, encoded paths, external URL ignoring, and deterministic error output.
+- Rewrote `README.md` in Vietnamese with actual entrypoints, Node 24/pnpm 11.5.2 prerequisites, CI-equivalent commands, Playwright prerequisites, and documentation links.
+- Updated `AGENTS.md` to reflect live App Router architecture, real route groups, API layer, auth flow, and dependency classification. Removed stale references to `app/page.tsx`, `components/vela-wear-app.tsx`, prototype terminology, and mock-only guidance.
+- Updated `convention.md` to match live implementation: `NEXT_PUBLIC_API_URL` includes `/api/v1`, `ApiResponse.code` field documented, in-memory access token (not localStorage), HttpOnly refresh cookie, Web Lock session serialization, single-flight refresh, `Retry-After` in seconds, self-scoped customer APIs.
+- Fixed invalid control characters in `docs/PROJECT_STATUS.md` and added current state summary.
+- Verification: `pnpm install --frozen-lockfile` (exit 0), `pnpm exec eslint . --max-warnings 25` (0 errors, 4 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (50 files, 196 tests passed), `pnpm build` (68 static routes prerendered), `node --test scripts/check-markdown-links.test.mjs` (9 tests passed), `node scripts/check-markdown-links.mjs README.md AGENTS.md docs/PROJECT_STATUS.md convention.md` (4 files, 11 links, 0 errors), `git diff --check` (clean), `git diff --name-only` (8 files, all in scope).
+- Follow-ups: none.
 
 ### FE-011 Split Runtime i18n Catalogs by Route Namespace Completed
 
@@ -66,10 +88,10 @@
 ### FE-006 Scope Shop Providers Completed
 
 - Reconciled FE-006 plan drift and implemented the scoping of storefront context providers.
-- Removed CartProvider, NotificationProvider, and FavoritesProvider from the global pp/layout.tsx where they unnecessarily wrapped the admin dashboard.
-- Created a boundary component components/shop/shop-providers.tsx and injected it into pp/(shop)/layout.tsx.
-- Created pp/provider-boundaries.test.ts structural tests to enforce that shop context providers remain outside the root layout.
-- Created 2e/provider-boundaries.spec.ts smoke test to verify an authenticated admin user can render the dashboard without triggering any frontend shop-related API requests (/carts/me, /favorites/me, etc.).
+- Removed CartProvider, NotificationProvider, and FavoritesProvider from the global app/layout.tsx where they unnecessarily wrapped the admin dashboard.
+- Created a boundary component components/shop/shop-providers.tsx and injected it into app/(shop)/layout.tsx.
+- Created app/provider-boundaries.test.ts structural tests to enforce that shop context providers remain outside the root layout.
+- Created e2e/provider-boundaries.spec.ts smoke test to verify an authenticated admin user can render the dashboard without triggering any frontend shop-related API requests (/carts/me, /favorites/me, etc.).
 - Fixed test flakes by updating the mock admin roles and ensuring valid server responses.
 - Verification: ran pnpm test:e2e:smoke successfully with 14 passing tests, verifying the decoupling did not break shop features and properly isolates admin.
 - Follow-ups: none.
@@ -80,7 +102,7 @@
 
 - **Date/Time**: 2026-07-08T19:49:00+07:00
 - **Backend**: Updated ProductServiceImpl to query variants and identify the minimum salePrice or price for each product. Added price and salePrice to ProductResponse to expose it correctly to the frontend.
-- **Frontend**: Updated Product and mapBackendProduct in ela-data.ts to consume the real prices instead of falling back to mock static products.
+- **Frontend**: Updated Product and mapBackendProduct in vela-data.ts to consume the real prices instead of falling back to mock static products.
 - **Verification**: mvnw clean compile (Backend) and pnpm build (Frontend) passed.
 - **Known Follow-ups**: None.
 
