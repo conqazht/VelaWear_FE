@@ -99,7 +99,7 @@ Dự án giao tiếp với Backend (`conqazht/VelaWear_BE`) thông qua các quy 
 - **Xử lý lỗi Authorization (401)**: Interceptor tự động bắt lỗi 401 → thực hiện single-flight refresh → retry request bị lỗi hoặc chuyển hướng người dùng về trang `/sign-in`.
 - **Rate Limit (429)**: React Query tự động xử lý thời gian đợi retry thông qua header/body `Retry-After` (đơn vị: giây).
 - **Self-scoped APIs**: Các API dành cho khách hàng sử dụng path nội bộ như `/users/me`, `/orders/me`, v.v.
-- Để xem hướng dẫn chi tiết về tích hợp API, tham khảo [Quy ước tích hợp FE-BE](convention.md).
+- Để xem hướng dẫn chi tiết về tích hợp API, tham khảo [Quy ước tích hợp FE-BE](docs/convention.md).
 
 ## Luồng Tích Hợp End-to-End (FE ↔ BE Flow)
 
@@ -213,9 +213,9 @@ Hệ thống test đảm bảo chất lượng codebase:
 ## Documentation References
 
 Các tài liệu quan trọng của dự án:
-- [Hệ thống thiết kế UI/UX (Design System)](DESIGN.md): Bảng màu thương hiệu (Cream/Terracotta), typography (Slab-serif/Sans-serif), spacing, radius và quy chuẩn phong cách editorial.
+- [Hệ thống thiết kế UI/UX (Design System)](docs/DESIGN.md): Bảng màu thương hiệu (Cream/Terracotta), typography (Slab-serif/Sans-serif), spacing, radius và quy chuẩn phong cách editorial.
 - [Tiến độ dự án](docs/PROJECT_STATUS.md)
-- [Quy ước tích hợp FE-BE](convention.md)
+- [Quy ước tích hợp FE-BE](docs/convention.md)
 - [Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
 - [Sale campaign frontend](docs/SALE_CAMPAIGN_FRONTEND.md)
 - [Storefront catalog UX](docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md)

@@ -112,7 +112,7 @@ Source of truth: `package.json` and `components.json`.
 
 ### Before Starting
 
-- Read `convention.md` first before starting any task to ensure full compliance with the integration guidelines, API standards, and coding conventions.
+- Read `docs/convention.md` first before starting any task to ensure full compliance with the integration guidelines, API standards, and coding conventions.
 - Check the working tree with `git status --short` and avoid overwriting user changes.
 - Read `docs/PROJECT_STATUS.md` before making changes so the current project state, recent work, and known follow-ups are understood before editing.
 - Inspect the existing implementation before editing. Prefer `rg`/`rg --files` for search.
