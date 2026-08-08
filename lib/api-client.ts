@@ -65,6 +65,7 @@ export async function withAuthSessionLock<T>(operation: () => Promise<T>): Promi
 }
 
 export async function logoutAuthSession(): Promise<void> {
+  sessionExpiryRedirectStarted = true;
   await withAuthSessionLock(async () => {
     const currentAccessToken = accessToken;
     let isSettled = false;
