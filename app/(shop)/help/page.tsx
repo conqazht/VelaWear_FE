@@ -87,7 +87,7 @@ export default function HelpCenter() {
   // Scrollspy via IntersectionObserver
   useEffect(() => {
     const handleScroll = () => {
-      if (isClickingRef.current) return;
+      if (Date.now() - lastClickTime < 800) return;
       const sectionIds = ["overview", "shipping", "returns", "size", "care", "contact", "faq"];
       const scrollPosition = window.scrollY + 160;
 
@@ -102,20 +102,17 @@ export default function HelpCenter() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastClickTime]);
 
-  const scrollToSection = useCallback((id: string) => {
+  const scrollToSection = (id: string) => {
     setActiveTopic(id);
-    isClickingRef.current = true;
+    setLastClickTime(Date.now());
     const el = document.getElementById(id);
     if (el) {
       const topOffset = el.getBoundingClientRect().top + window.pageYOffset - 110;
       window.scrollTo({ top: topOffset, behavior: "smooth" });
     }
-    setTimeout(() => {
-      isClickingRef.current = false;
-    }, 800);
-  }, []);
+  };
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
