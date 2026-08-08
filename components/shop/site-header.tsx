@@ -29,13 +29,6 @@ import { cn } from "@/lib/utils";
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
 
-function preventNavigationTriggerHover(event: React.MouseEvent<HTMLButtonElement>) {
-  (
-    event as React.MouseEvent<HTMLButtonElement> & {
-      preventBaseUIHandler?: () => void;
-    }
-  ).preventBaseUIHandler?.();
-}
 
 function readSearchHistory(): string[] {
   if (typeof window === "undefined") return [];
@@ -256,25 +249,6 @@ export function SiteHeader() {
     runSearch(searchQuery);
   };
 
-  const cancelDesktopMenuClose = () => {
-    if (desktopMenuCloseTimerRef.current === null) return;
-    window.clearTimeout(desktopMenuCloseTimerRef.current);
-    desktopMenuCloseTimerRef.current = null;
-  };
-
-  const openDesktopMenu = (value: string) => {
-    cancelDesktopMenuClose();
-    setDesktopMenuValue(value);
-  };
-
-  const scheduleDesktopMenuClose = () => {
-    cancelDesktopMenuClose();
-    desktopMenuCloseTimerRef.current = window.setTimeout(() => {
-      setDesktopMenuValue(null);
-      desktopMenuCloseTimerRef.current = null;
-    }, 100);
-  };
-
   const navigationItems = getStorefrontNavigation(activeLocale);
   const megaMenuItemCount = navigationItems.filter((item) => item.groups).length;
 
@@ -357,21 +331,10 @@ export function SiteHeader() {
             </Link>
           </div>
 
-          {/* Desktop Navigation Menu */}
           <NavigationMenu
-            value={desktopMenuValue}
-            onValueChange={(value, eventDetails) => {
-              if (
-                value === null
-                && eventDetails.reason === "trigger-hover"
-              ) {
-                return;
-              }
-              cancelDesktopMenuClose();
-              setDesktopMenuValue(value);
-            }}
-            delay={40}
-            closeDelay={80}
+            onValueChange={(value) => setDesktopMenuValue(value)}
+            delay={30}
+            closeDelay={50}
             className="hidden max-w-none flex-1 justify-start lg:flex"
           >
             <NavigationMenuList className="gap-1 pl-3">
@@ -380,73 +343,54 @@ export function SiteHeader() {
                   key={item.label}
                   value={item.label}
                   className="flex items-center"
-                  onPointerEnter={(event) => {
-                    if (event.pointerType !== "touch" && item.groups) {
-                      openDesktopMenu(item.label);
-                    }
-                  }}
-                  onPointerLeave={(event) => {
-                    if (event.pointerType !== "touch" && item.groups) {
-                      scheduleDesktopMenuClose();
-                    }
-                  }}
                 >
                   {item.groups ? (
                     <>
-                      <div
-                        data-slot="storefront-nav-control"
-                        className="group/nav flex h-10 items-center bg-transparent px-0.5"
+                      <NavigationMenuTrigger
+                        nativeButton={false}
+                        render={
+                          <Link
+                            href={item.href}
+                            onClick={() => {
+                              setDesktopMenuValue(null);
+                              if (document.activeElement instanceof HTMLElement) {
+                                document.activeElement.blur();
+                              }
+                            }}
+                          />
+                        }
+                        className={cn(
+                          navigationMenuTriggerStyle(),
+                          "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2.5 py-0 hover:bg-transparent focus:bg-transparent data-open:bg-transparent data-popup-open:bg-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                          textClass
+                        )}
                       >
-                        <NavigationMenuLink
-                          render={<Link href={item.href} onClick={() => setDesktopMenuValue(null)} />}
-                          className="h-9 bg-transparent py-0 pl-2.5 pr-0.5 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        <span
+                          data-slot="storefront-nav-label"
+                          className="group/link relative text-sm font-medium tracking-[0.5px]"
                         >
+                          {item.label}
                           <span
-                            data-slot="storefront-nav-label"
-                            className={`group/link relative text-sm font-medium tracking-[0.5px] ${textClass}`}
-                          >
-                            {item.label}
-                            <span
-                              className={cn(
-                                "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100 group-has-[:focus-visible]/nav:scale-x-100",
-                                desktopMenuValue === item.label && "scale-x-100",
-                              )}
-                            />
-                          </span>
-                        </NavigationMenuLink>
-                        <NavigationMenuTrigger
-                          aria-label={`${item.label} menu`}
-                          onMouseEnter={preventNavigationTriggerHover}
-                          className={`h-9 w-8 rounded-none border-none bg-transparent p-0 hover:bg-transparent focus:bg-transparent data-popup-open:bg-transparent [&_svg]:-translate-x-1.5 [&_svg]:ml-0 [&_svg]:size-3 ${textClass} focus-visible:text-[#b5573a] focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0`}
-                        >
-                          <span className="sr-only">{item.label}</span>
-                        </NavigationMenuTrigger>
-                      </div>
-                      <NavigationMenuContent
-                        className="p-0"
-                        onPointerEnter={(event) => {
-                          if (event.pointerType !== "touch") {
-                            cancelDesktopMenuClose();
-                          }
-                        }}
-                        onPointerLeave={(event) => {
-                          if (event.pointerType !== "touch") {
-                            scheduleDesktopMenuClose();
-                          }
-                        }}
-                      >
+                            className={cn(
+                              "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100 group-data-open/navigation-menu-trigger:scale-x-100",
+                              desktopMenuValue === item.label && "scale-x-100"
+                            )}
+                          />
+                        </span>
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="p-0 w-max">
                         <div
                           data-slot="storefront-mega-menu-panel"
                           className={cn(
-                            "flex max-w-[calc(var(--available-width)-24px)] gap-2.5 rounded-[20px] bg-white p-2.5",
+                            "flex gap-2.5 rounded-lg bg-white p-2.5",
                             item.groups.length >= 3
                               ? "w-[min(1000px,calc(100vw-64px))]"
                               : item.groups.length === 2
                                 ? "w-[min(800px,calc(100vw-48px))]"
-                                : "w-[min(600px,calc(100vw-48px))]",
+                                : "w-[min(600px,calc(100vw-48px))]"
                           )}
                         >
-                          <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-[16px] bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
+                          <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-md bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
                             <div className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full border border-[#b5573a]/15" />
                             <div className="pointer-events-none absolute -bottom-16 -left-10 size-36 rounded-full bg-white/35" />
                             <div className="relative z-10">
@@ -483,7 +427,7 @@ export function SiteHeader() {
                           </div>
                           <div className={cn(
                             "grid min-w-0 flex-1 content-start gap-x-4 gap-y-5 px-4 py-5",
-                            item.groups.length >= 3 ? "grid-cols-3" : item.groups.length === 2 ? "grid-cols-2" : "grid-cols-1",
+                            item.groups.length >= 3 ? "grid-cols-3" : item.groups.length === 2 ? "grid-cols-2" : "grid-cols-1"
                           )}>
                             {item.groups.map((group) => (
                               <section key={group.title}>
@@ -517,6 +461,7 @@ export function SiteHeader() {
                   ) : (
                     <NavigationMenuLink
                       render={<Link href={item.href} onClick={() => {
+                        setDesktopMenuValue(null);
                         if (document.activeElement instanceof HTMLElement) {
                           document.activeElement.blur();
                         }
@@ -571,7 +516,7 @@ export function SiteHeader() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-[20px] border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_6px_18px_rgba(28,26,24,0.06)] z-50"
+                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-md z-50"
                   >
                     {searchQuery.trim() ? (
                       <>
@@ -760,7 +705,7 @@ export function SiteHeader() {
                     <div className="absolute right-0 top-8 h-4 w-32 bg-transparent" />
                     
                     {/* Dropdown Menu */}
-                    <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-[#f7f4ef] rounded-[16px] border border-[#1c1a18]/10 shadow-[0_4px_16px_rgba(28,26,24,0.06)] overflow-hidden">
+                    <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-md overflow-hidden">
                       <div className="px-4 py-2.5 border-b border-[#1c1a18]/10">
                         <span className="font-sans text-sm font-semibold text-[#1c1a18]">{t("storefront.nav.account")}</span>
                       </div>
