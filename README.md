@@ -1,7 +1,5 @@
 # Vela Wear Frontend
 
-**GitHub**: [conqazht/VelaWear_FE](https://github.com/conqazht/VelaWear_FE)
-
 Storefront và admin dashboard cho ứng dụng thương mại điện tử thời trang cao cấp Vela Wear.
 
 ## Tech Stack
@@ -215,6 +213,7 @@ Hệ thống test đảm bảo chất lượng codebase:
 ## Documentation References
 
 Các tài liệu quan trọng của dự án:
+- [Hệ thống thiết kế UI/UX (Design System)](DESIGN.md): Bảng màu thương hiệu (Cream/Terracotta), typography (Slab-serif/Sans-serif), spacing, radius và quy chuẩn phong cách editorial.
 - [Tiến độ dự án](docs/PROJECT_STATUS.md)
 - [Quy ước tích hợp FE-BE](convention.md)
 - [Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
