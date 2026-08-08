@@ -10,6 +10,13 @@
 - Verification: `pnpm exec vitest run catalog-audit.test.ts`, `pnpm exec vitest run i18n-provider.test.tsx`, `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (50 files, 196 tests passed), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
 - Follow-ups: Ready for FE-012 maintenance.
 
+### HOTFIX Profile Page E2E Alignment Completed
+
+- Created hotfix branch `hotfix/profile-fullstack-e2e` from FE-010 merge commit `ba42994`.
+- Re-verified all 13 FE-010 safety net tests, 187 unit tests, ESLint, TypeScript, Next.js build, and Playwright E2E smoke suite.
+- Confirmed fullstack auth session and profile bootstrap locator compatibility with `AuthHeaderComponent`.
+- Verification: `pnpm exec vitest run "app/(shop)/profile/page.test.tsx"`, `pnpm exec eslint` (0 errors, 0 warnings), `pnpm exec tsc --noEmit` (0 errors), `pnpm test:unit` (187 tests pass), `pnpm build` (68 static routes prerendered), `git diff --check` (clean).
+
 ### FE-010 Decompose Profile Page into Typed Presentation Panels Completed
 
 - Decomposed monolithic `MemberProfile` in `app/(shop)/profile/page.tsx` into 5 typed presentation panel modules in `components/shop/profile/`:
