@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { I18nProvider } from "@/components/providers/i18n-provider";
+import { I18nProvider, I18nCatalogProvider } from "@/components/providers/i18n-provider";
+import { shopMessages } from "@/lib/i18n/messages/catalog-shop";
 import { ReviewComment } from "@/components/shop/review-comment";
 
 const longComment = "Một đánh giá đủ dài để vượt quá ngưỡng ba dòng. ".repeat(8);
@@ -12,7 +13,9 @@ describe("ReviewComment", () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="vi">
-        <ReviewComment comment={longComment} clamp />
+        <I18nCatalogProvider messages={shopMessages}>
+          <ReviewComment comment={longComment} clamp />
+        </I18nCatalogProvider>
       </I18nProvider>,
     );
 
@@ -30,7 +33,9 @@ describe("ReviewComment", () => {
   it("không hiển thị nút mở rộng cho bình luận ngắn", () => {
     render(
       <I18nProvider initialLocale="vi">
-        <ReviewComment comment="Chất liệu đẹp." clamp />
+        <I18nCatalogProvider messages={shopMessages}>
+          <ReviewComment comment="Chất liệu đẹp." clamp />
+        </I18nCatalogProvider>
       </I18nProvider>,
     );
 

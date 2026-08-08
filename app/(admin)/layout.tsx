@@ -5,6 +5,8 @@ import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { createThemeBootstrapScript } from "@/lib/preferences/theme-bootstrap";
 import { getPreference } from "@/server/server-actions";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
+import { I18nCatalogProvider } from "@/components/providers/i18n-provider";
+import { adminMessages } from "@/lib/i18n/messages/catalog-admin";
 
 import { AdminThemeEnforcer } from "./_components/admin-theme-enforcer";
 import { AdminAuthGate } from "./_components/admin-auth-gate";
@@ -19,17 +21,19 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   };
 
   return (
-    <TooltipProvider>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `document.documentElement.setAttribute("data-admin-theme","true");if(!document.documentElement.hasAttribute("data-theme-preset")){document.documentElement.setAttribute("data-theme-preset","default")}${createThemeBootstrapScript(themeMode)}`,
-        }}
-      />
-      <AdminThemeEnforcer themeMode={themeMode} />
-      <PreferencesStoreProvider initialValues={initialPreferences}>
-        <AdminAuthGate>{children}</AdminAuthGate>
-        <AdminToaster />
-      </PreferencesStoreProvider>
-    </TooltipProvider>
+    <I18nCatalogProvider messages={adminMessages}>
+      <TooltipProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.setAttribute("data-admin-theme","true");if(!document.documentElement.hasAttribute("data-theme-preset")){document.documentElement.setAttribute("data-theme-preset","default")}${createThemeBootstrapScript(themeMode)}`,
+          }}
+        />
+        <AdminThemeEnforcer themeMode={themeMode} />
+        <PreferencesStoreProvider initialValues={initialPreferences}>
+          <AdminAuthGate>{children}</AdminAuthGate>
+          <AdminToaster />
+        </PreferencesStoreProvider>
+      </TooltipProvider>
+    </I18nCatalogProvider>
   );
 }

@@ -3,7 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { EnglishContentGenerator } from "@/app/(admin)/dashboard/_components/management/english-content-generator";
-import { I18nProvider } from "@/components/providers/i18n-provider";
+import { I18nProvider, I18nCatalogProvider } from "@/components/providers/i18n-provider";
+import { adminMessages } from "@/lib/i18n/messages/catalog-admin";
 
 function renderGenerator(
   props: Partial<React.ComponentProps<typeof EnglishContentGenerator>> = {},
@@ -11,13 +12,15 @@ function renderGenerator(
   const onGenerate = props.onGenerate ?? vi.fn();
   render(
     <I18nProvider initialLocale="vi">
-      <EnglishContentGenerator
-        hasEnglishContent={false}
-        sourceReady
-        isPending={false}
-        onGenerate={onGenerate}
-        {...props}
-      />
+      <I18nCatalogProvider messages={adminMessages}>
+        <EnglishContentGenerator
+          hasEnglishContent={false}
+          sourceReady
+          isPending={false}
+          onGenerate={onGenerate}
+          {...props}
+        />
+      </I18nCatalogProvider>
     </I18nProvider>,
   );
   return { onGenerate };
@@ -30,14 +33,16 @@ describe("EnglishContentGenerator", () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="vi">
-        <form onSubmit={onSubmit}>
-          <EnglishContentGenerator
-            hasEnglishContent={false}
-            sourceReady
-            isPending={false}
-            onGenerate={onGenerate}
-          />
-        </form>
+        <I18nCatalogProvider messages={adminMessages}>
+          <form onSubmit={onSubmit}>
+            <EnglishContentGenerator
+              hasEnglishContent={false}
+              sourceReady
+              isPending={false}
+              onGenerate={onGenerate}
+            />
+          </form>
+        </I18nCatalogProvider>
       </I18nProvider>,
     );
 

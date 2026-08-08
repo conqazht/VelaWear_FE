@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { I18nProvider } from "@/components/providers/i18n-provider";
+import { I18nProvider, I18nCatalogProvider } from "@/components/providers/i18n-provider";
+import { shopMessages } from "@/lib/i18n/messages/catalog-shop";
 import { OrderReviewDialog } from "./order-review-dialog";
 
 const { mutateAsyncMock, resetMock } = vi.hoisted(() => ({
@@ -43,19 +44,21 @@ describe("OrderReviewDialog", () => {
     const onOpenChange = vi.fn();
     render(
       <I18nProvider initialLocale="vi">
-        <OrderReviewDialog
-          open
-          item={{
-            id: 41,
-            productName: "Áo linen",
-            sku: "VELA-41",
-            price: 950_000,
-            quantity: 1,
-            subtotal: 950_000,
-            status: "COMPLETED",
-          }}
-          onOpenChange={onOpenChange}
-        />
+        <I18nCatalogProvider messages={shopMessages}>
+          <OrderReviewDialog
+            open
+            item={{
+              id: 41,
+              productName: "Áo linen",
+              sku: "VELA-41",
+              price: 950_000,
+              quantity: 1,
+              subtotal: 950_000,
+              status: "COMPLETED",
+            }}
+            onOpenChange={onOpenChange}
+          />
+        </I18nCatalogProvider>
       </I18nProvider>,
     );
     const file = new File(["image"], "review.webp", { type: "image/webp" });
