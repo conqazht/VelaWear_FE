@@ -1,56 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vela Wear Frontend
 
-## Getting Started
+Giao diện thương mại điện tử thời trang cao cấp — xây dựng trên **Next.js 16 App Router**, **React 19**, **TypeScript**, **TanStack Query**, **Zustand**, **Tailwind CSS 4**, **Vitest** và **Playwright**.
 
-First, run the development server:
+## Yêu cầu hệ thống (Prerequisites)
+
+| Công cụ | Phiên bản | Ghi chú |
+|---|---|---|
+| Node.js | **24** | Đồng bộ CI |
+| pnpm | **11.5.2** | Đồng bộ CI |
+
+## Cài đặt và khởi chạy
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install --frozen-lockfile
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+File `.env.local` cần khai báo hai biến public:
 
-## Kiểm thử và CI
+- `NEXT_PUBLIC_API_URL` — URL gốc của Backend API (bao gồm `/api/v1`)
+- `NEXT_PUBLIC_BACKEND_ORIGIN` — Origin của Backend (dùng cho CORS/cookie)
+
+> **Lưu ý:** Không commit giá trị thật vào repository. Xem `.env.example` để biết tên biến.
+
+Khởi chạy development server:
 
 ```bash
+pnpm dev
+```
+
+Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
+
+## Cấu trúc route chính (Entrypoints)
+
+| Route group | Entrypoint | Mô tả |
+|---|---|---|
+| Storefront (shop) | `app/(shop)/page.tsx` | Trang chủ cửa hàng |
+| Admin dashboard | `app/(admin)/dashboard/` | Bảng điều khiển quản lý |
+| Authentication | `app/(auth)/` | Đăng nhập, đăng ký, OAuth |
+
+## Kiểm tra chất lượng (CI-equivalent)
+
+Các lệnh dưới đây tương đương pipeline CI trên GitHub Actions:
+
+```bash
+# Lint (ESLint)
+pnpm exec eslint . --max-warnings 25
+
+# Kiểm tra kiểu TypeScript
+pnpm exec tsc --noEmit
+
+# Unit test (Vitest)
 pnpm test:unit
+
+# Production build
+pnpm build
+```
+
+## Kiểm thử Playwright
+
+### Smoke test (không cần backend)
+
+```bash
 pnpm test:e2e:smoke
+```
+
+### Full-stack test (cần backend)
+
+Full-stack test yêu cầu Backend Spring Boot, PostgreSQL và Redis đang chạy:
+
+```bash
 pnpm test:e2e:fullstack
 ```
 
-Xem [hướng dẫn Playwright và CI full-stack bằng tiếng Việt](./docs/PLAYWRIGHT_CI_VI.md)
-để biết test nào chạy ở frontend/backend, cách chạy đồng thời hai repository và cách
-cấu hình GitHub Actions.
+Xem [hướng dẫn Playwright và CI full-stack bằng tiếng Việt](./docs/PLAYWRIGHT_CI_VI.md) để biết cách cấu hình hai repository chạy đồng thời và thiết lập GitHub Actions.
 
-## Tài liệu storefront
+## Tài liệu dự án
 
-- [Storefront Catalog UX — frontend (tiếng Việt)](./docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md):
-  Collection/Search, mega-menu, Size Guide, review, xử lý lỗi, kiểm thử và hướng dẫn
-  mở rộng.
-- [Sale Campaign frontend](./docs/SALE_CAMPAIGN_FRONTEND.md).
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# VelaWear_FE
+| Tài liệu | Mô tả |
+|---|---|
+| [Quy ước tích hợp Frontend & Backend](./convention.md) | API contract, auth flow, chuẩn request/response |
+| [Trạng thái dự án](./docs/PROJECT_STATUS.md) | Lịch sử thay đổi và trạng thái hiện tại |
+| [Playwright và CI](./docs/PLAYWRIGHT_CI_VI.md) | Hướng dẫn test E2E và CI hai repository |
+| [Hướng dẫn i18n Admin](./docs/I18N_ADMIN_GUIDE_VI.md) | Quản lý nội dung đa ngôn ngữ phía Admin |
+| [Sale Campaign Frontend](./docs/SALE_CAMPAIGN_FRONTEND.md) | Nghiệp vụ và cấu trúc code Sale/Flash Sale |
+| [Storefront Catalog UX](./docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md) | Collection, Search, Size Guide, review, lỗi |
+| [Lộ trình shadcn/improve](./plans/README.vi.md) | Roadmap cải tiến theo đợt (wave) |
