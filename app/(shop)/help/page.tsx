@@ -31,7 +31,6 @@ export default function HelpCenter() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const isClickingRef = useRef(false);
 
   const isVi = locale === "vi";
 
