@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -104,7 +104,7 @@ export default function HelpCenter() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = useCallback((id: string) => {
     setActiveTopic(id);
     isClickingRef.current = true;
     const el = document.getElementById(id);
@@ -115,7 +115,7 @@ export default function HelpCenter() {
     setTimeout(() => {
       isClickingRef.current = false;
     }, 800);
-  };
+  }, []);
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
@@ -351,7 +351,7 @@ export default function HelpCenter() {
               </div>
 
               {/* 3 Core Commitments Banner */}
-              <div className="bg-[#f2ebe1]/80 rounded-sm p-8 border border-hairline/40 grid grid-cols-1 md:grid-cols-3 gap-6 shadow-[0_2px_12px_rgba(28,26,24,0.02)]">
+              <div className="bg-white rounded-sm p-8 border border-hairline/40 grid grid-cols-1 md:grid-cols-3 gap-6 shadow-[0_2px_12px_rgba(28,26,24,0.03)]">
                 <div className="flex items-start gap-4">
                   <PackageCheck className="size-6 text-[#b5573a] shrink-0 mt-0.5" />
                   <div>
@@ -467,7 +467,7 @@ export default function HelpCenter() {
                 </div>
               </div>
 
-              <div className="bg-[#f2ebe1]/60 p-6 rounded-sm border border-hairline/30 text-xs text-[#55423d]/85 leading-relaxed">
+              <div className="bg-[#f9f7f4] p-6 rounded-sm border border-hairline/30 text-xs text-[#55423d]/85 leading-relaxed">
                 <p className="font-medium text-[#1c1a18] mb-2">{isVi ? "Cách kiểm tra vị trí đơn hàng:" : "How to track your order:"}</p>
                 <ol className="list-decimal pl-4 space-y-1">
                   <li>{isVi ? "Đăng nhập tài khoản Vela Wear và vào trang Đơn hàng cá nhân." : "Log in to your account and open My Orders page."}</li>
@@ -601,7 +601,7 @@ export default function HelpCenter() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#f2ebe1]/70 p-6 rounded-sm border border-hairline/30">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#f9f7f4] p-6 rounded-sm border border-hairline/30">
                 <div>
                   <h4 className="font-serif text-lg font-medium text-[#1c1a18] mb-1">
                     {isVi ? "Xem bảng số đo chi tiết từng dòng sản phẩm" : "View complete garment size chart"}
@@ -735,12 +735,12 @@ export default function HelpCenter() {
                   <span>{isVi ? "Hệ thống Cửa Hàng Flagship Store" : "Flagship Stores"}</span>
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-5 rounded-sm bg-[#f2ebe1]/50 border border-hairline/30 text-xs">
+                  <div className="p-5 rounded-sm bg-[#f9f7f4] border border-hairline/30 text-xs">
                     <p className="font-semibold text-[#1c1a18] mb-1">Flagship Store Hà Nội</p>
                     <p className="text-[#55423d]/80 font-light">18 Tràng Tiền, Quận Hoàn Kiếm, Hà Nội</p>
                     <p className="text-[#55423d]/60 font-light mt-1">Giờ mở cửa: 9:00 – 21:30</p>
                   </div>
-                  <div className="p-5 rounded-sm bg-[#f2ebe1]/50 border border-hairline/30 text-xs">
+                  <div className="p-5 rounded-sm bg-[#f9f7f4] border border-hairline/30 text-xs">
                     <p className="font-semibold text-[#1c1a18] mb-1">Flagship Store TP. Hồ Chí Minh</p>
                     <p className="text-[#55423d]/80 font-light">122 Đồng Khởi, Quận 1, TP. Hồ Chí Minh</p>
                     <p className="text-[#55423d]/60 font-light mt-1">Giờ mở cửa: 9:00 – 21:30</p>
