@@ -95,12 +95,12 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   ];
 
   for (const menu of desktopMenus) {
-    const navLink = desktopNavigation.getByRole("link", { name: menu.parent, exact: true });
+    const navLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: menu.parent });
     await navLink.hover();
     await expect(page.getByRole("link", { name: menu.leaf, exact: true })).toBeVisible();
   }
 
-  const topsLink = desktopNavigation.getByRole("link", { name: "Áo", exact: true });
+  const topsLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Áo" });
   await topsLink.hover();
 
   const cardiganLink = page.getByRole("link", { name: "Cardigan", exact: true });
@@ -118,11 +118,11 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   await expect(topsLink).toHaveAttribute("href", /categories=ao%2Cao-khoac/);
   await expectNoHorizontalOverflow(page);
 
-  const dressesLink = desktopNavigation.getByRole("link", { name: "Váy & Đầm", exact: true });
+  const dressesLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Váy & Đầm" });
   await dressesLink.hover();
   const compactPanel = page
     .locator('[data-slot="storefront-mega-menu-panel"]')
-    .filter({ hasText: "05 / 06" });
+    .filter({ hasText: "Váy & Đầm" });
   await expect(compactPanel).toBeVisible();
   const compactPanelBox = await compactPanel.boundingBox();
   expect(compactPanelBox).not.toBeNull();
@@ -131,7 +131,7 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   await expectNoHorizontalOverflow(page);
 
   await page.keyboard.press("Escape");
-  const collectionMenu = desktopNavigation.getByRole("link", { name: "Bộ sưu tập", exact: true });
+  const collectionMenu = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Bộ sưu tập" });
   await collectionMenu.hover();
   const newArrivals = page.getByRole("link", { name: "Mới về", exact: true });
   await expect(newArrivals).toBeVisible();

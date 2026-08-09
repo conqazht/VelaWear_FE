@@ -263,7 +263,6 @@ export function SiteHeader() {
   };
 
   const navigationItems = getStorefrontNavigation(activeLocale);
-  const megaMenuItemCount = navigationItems.filter((item) => item.groups).length;
 
   return (
     <>
@@ -352,7 +351,7 @@ export function SiteHeader() {
             className="hidden max-w-none flex-1 justify-start lg:flex"
           >
             <NavigationMenuList className="gap-1 pl-3">
-              {navigationItems.map((item, itemIndex) => (
+              {navigationItems.map((item) => (
                 <NavigationMenuItem
                   key={item.label}
                   value={item.label}
