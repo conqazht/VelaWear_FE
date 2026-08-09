@@ -345,7 +345,9 @@ export function SiteHeader() {
           </div>
 
           <NavigationMenu
-            onValueChange={(value) => setDesktopMenuValue(value)}
+            value={desktopMenuValue}
+            onValueChange={(value) => setDesktopMenuValue(value ?? "")}
+            align="center"
             delay={30}
             closeDelay={50}
             className="hidden max-w-none flex-1 justify-start lg:flex"
@@ -405,7 +407,7 @@ export function SiteHeader() {
                         >
                           <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-md bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
                             <div className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full border border-[#b5573a]/15" />
-                            <div className="pointer-events-none absolute -bottom-16 -left-10 size-36 rounded-full bg-white/35" />
+                            <div className="pointer-events-none absolute -bottom-16 left-0 size-36 rounded-full bg-white/35" />
                             <div className="relative z-10">
                               <div className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6f554c]/80">
                                 <span className="flex items-center gap-2">

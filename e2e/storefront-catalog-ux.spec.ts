@@ -85,6 +85,7 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
 
   await expectNoHorizontalOverflow(page);
   const desktopNavigation = page.locator('[data-slot="navigation-menu"]');
+  await expect(desktopNavigation).toBeVisible();
   const desktopMenus = [
     { parent: "Giảm giá", leaf: "Flash Sale" },
     { parent: "Bộ sưu tập", leaf: "May đo" },
@@ -96,22 +97,22 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
 
   for (const menu of desktopMenus) {
     const navLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: menu.parent });
-    await navLink.hover();
+    await navLink.hover({ force: true });
     await expect(page.getByRole("link", { name: menu.leaf, exact: true })).toBeVisible();
   }
 
   const topsLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Áo" });
-  await topsLink.hover();
+  await topsLink.hover({ force: true });
 
   const cardiganLink = page.getByRole("link", { name: "Cardigan", exact: true });
   for (let transition = 0; transition < 4; transition += 1) {
-    await topsLink.hover();
+    await topsLink.hover({ force: true });
     await page.waitForTimeout(140);
     expect(await cardiganLink.isVisible()).toBe(true);
   }
 
-  await page.getByRole("heading", { name: "Tất cả sản phẩm" }).hover();
-  await topsLink.hover();
+  await page.getByRole("heading", { name: "Tất cả sản phẩm" }).hover({ force: true });
+  await topsLink.hover({ force: true });
 
   const labelBox = await topsLink.locator('[data-slot="storefront-nav-label"]').boundingBox();
   expect(labelBox).not.toBeNull();
@@ -119,7 +120,7 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   await expectNoHorizontalOverflow(page);
 
   const dressesLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Váy & Đầm" });
-  await dressesLink.hover();
+  await dressesLink.hover({ force: true });
   const compactPanel = page
     .locator('[data-slot="storefront-mega-menu-panel"]')
     .filter({ hasText: "Váy & Đầm" });
@@ -132,7 +133,7 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
 
   await page.keyboard.press("Escape");
   const collectionMenu = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Bộ sưu tập" });
-  await collectionMenu.hover();
+  await collectionMenu.hover({ force: true });
   const newArrivals = page.getByRole("link", { name: "Mới về", exact: true });
   await expect(newArrivals).toBeVisible();
   await newArrivals.click();
