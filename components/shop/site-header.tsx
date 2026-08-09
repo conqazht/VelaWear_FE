@@ -542,6 +542,12 @@ export function SiteHeader() {
                     setIsSearchSuggestionsOpen(true);
                   }}
                   onFocus={() => setIsSearchSuggestionsOpen(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearchSubmit(e);
+                    }
+                  }}
                   className={`bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full ${searchInputClass}`}
                 />
               </form>
