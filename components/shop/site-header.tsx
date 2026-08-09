@@ -289,7 +289,7 @@ export function SiteHeader() {
           </div>
 
           {/* Logo */}
-          <div className="flex-none">
+          <div className="flex-none lg:static absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:translate-x-0 lg:translate-y-0">
             <Link href="/" className="flex items-center gap-2 group relative">
               <motion.div
                 className="relative flex items-center overflow-hidden rounded-md"
