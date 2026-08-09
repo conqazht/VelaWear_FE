@@ -52,7 +52,7 @@ export function FavoritesPageClient() {
         <>
           {error ? (
             <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] md:px-16 md:pt-[120px]">
-              <StorefrontStaleWarning resourceLabel={t("favorites.resource")} onRetry={retry} />
+              <StorefrontStaleWarning resourceLabel={t("favorites.resource")} onRetry={retry} error={error} />
             </div>
           ) : null}
           <FavoritesContent

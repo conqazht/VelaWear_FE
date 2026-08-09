@@ -84,9 +84,56 @@ test("mega-menu tách parent link và leaf link thật trên desktop/mobile", { 
   await page.goto("/collection");
 
   await expectNoHorizontalOverflow(page);
-  const collectionMenu = page.getByRole("button", { name: "Bộ sưu tập menu" });
-  await collectionMenu.focus();
-  await page.keyboard.press("Enter");
+  const desktopNavigation = page.locator('[data-slot="navigation-menu"]');
+  await expect(desktopNavigation).toBeVisible();
+  const desktopMenus = [
+    { parent: "Giảm giá", leaf: "Flash Sale" },
+    { parent: "Bộ sưu tập", leaf: "May đo" },
+    { parent: "Áo", leaf: "Cardigan" },
+    { parent: "Quần", leaf: "Cargo" },
+    { parent: "Váy & Đầm", leaf: "Jumpsuit" },
+    { parent: "Phụ kiện & Giày", leaf: "Móc khóa" },
+  ];
+
+  for (const menu of desktopMenus) {
+    const navLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: menu.parent });
+    await navLink.hover({ force: true });
+    await expect(page.getByRole("link", { name: menu.leaf, exact: true })).toBeVisible();
+  }
+
+  const topsLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Áo" });
+  await topsLink.hover({ force: true });
+
+  const cardiganLink = page.getByRole("link", { name: "Cardigan", exact: true });
+  for (let transition = 0; transition < 4; transition += 1) {
+    await topsLink.hover({ force: true });
+    await page.waitForTimeout(140);
+    expect(await cardiganLink.isVisible()).toBe(true);
+  }
+
+  await page.getByRole("heading", { name: "Tất cả sản phẩm" }).hover({ force: true });
+  await topsLink.hover({ force: true });
+
+  const labelBox = await topsLink.locator('[data-slot="storefront-nav-label"]').boundingBox();
+  expect(labelBox).not.toBeNull();
+  await expect(topsLink).toHaveAttribute("href", /categories=ao%2Cao-khoac/);
+  await expectNoHorizontalOverflow(page);
+
+  const dressesLink = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Váy & Đầm" });
+  await dressesLink.hover({ force: true });
+  const compactPanel = page
+    .locator('[data-slot="storefront-mega-menu-panel"]')
+    .filter({ hasText: "Váy & Đầm" });
+  await expect(compactPanel).toBeVisible();
+  const compactPanelBox = await compactPanel.boundingBox();
+  expect(compactPanelBox).not.toBeNull();
+  expect(compactPanelBox!.width).toBeLessThanOrEqual(801);
+  expect(compactPanelBox!.height).toBeLessThanOrEqual(310);
+  await expectNoHorizontalOverflow(page);
+
+  await page.keyboard.press("Escape");
+  const collectionMenu = desktopNavigation.locator('[data-slot="navigation-menu-trigger"]').filter({ hasText: "Bộ sưu tập" });
+  await collectionMenu.hover({ force: true });
   const newArrivals = page.getByRole("link", { name: "Mới về", exact: true });
   await expect(newArrivals).toBeVisible();
   await newArrivals.click();
@@ -178,6 +225,34 @@ test("initial 500 giữ artwork đến khi Retry thành công", { tag: "@smoke" 
   expect(attempts).toBe(3);
 });
 
+test("initial 400 dùng notice gọn và đặt lại query thay vì Retry", { tag: "@smoke" }, async ({ page }) => {
+  let attempts = 0;
+  await page.route("**/api/v1/storefront/products**", async (route) => {
+    attempts += 1;
+    const url = new URL(route.request().url());
+    if (url.searchParams.has("minPrice")) {
+      await route.fulfill({
+        status: 400,
+        headers: apiHeaders(route),
+        json: { statusCode: 400, message: "Invalid catalog request", data: null },
+      });
+      return;
+    }
+    await fulfillCatalog(route);
+  });
+
+  await page.goto("/collection?minPrice=999999999");
+  await expect(page.getByRole("heading", { name: "Kiểm tra lại thông tin" })).toBeVisible();
+  await expect(page.getByText("Vela Wear / HTTP 400")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Thử lại" })).toHaveCount(0);
+  await expect.poll(() => attempts).toBe(1);
+
+  await page.getByRole("link", { name: "Xem tất cả sản phẩm" }).click();
+  await expect(page).toHaveURL((url) => url.pathname === "/collection" && url.search === "");
+  await expect(page.getByRole("heading", { name: "Tất cả sản phẩm" })).toBeVisible();
+  expect(attempts).toBe(2);
+});
+
 test("filter lỗi quay về URL hợp lệ và giữ grid đã có", { tag: "@smoke" }, async ({ page }) => {
   await page.route("**/api/v1/storefront/products**", async (route) => {
     const url = new URL(route.request().url());
@@ -199,6 +274,36 @@ test("filter lỗi quay về URL hợp lệ và giữ grid đã có", { tag: "@s
 
   await expect(page).toHaveURL((url) => !url.searchParams.has("categories"));
   await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
+});
+
+test("filter 400 giữ grid và không đề nghị Retry request sai", { tag: "@smoke" }, async ({ page }) => {
+  let invalidFilterAttempts = 0;
+  await page.route("**/api/v1/storefront/products**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.searchParams.has("categorySlugs")) {
+      invalidFilterAttempts += 1;
+      await route.fulfill({
+        status: 400,
+        headers: apiHeaders(route),
+        json: { statusCode: 400, message: "Invalid filter", data: null },
+      });
+      return;
+    }
+    await fulfillCatalog(route);
+  });
+
+  await page.goto("/collection");
+  await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
+  await openDesktopFilters(page);
+  await page.getByRole("checkbox", { name: /Áo/ }).click();
+
+  await expect.poll(() => invalidFilterAttempts).toBe(1);
+  await expect(page).toHaveURL((url) => !url.searchParams.has("categories"));
+  await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
+  const warning = page.getByRole("status");
+  await expect(warning).toContainText("Bộ lọc vừa chọn không hợp lệ");
+  await expect(warning).toContainText("HTTP 400");
+  await expect(warning.getByRole("button", { name: "Thử lại" })).toHaveCount(0);
 });
 
 test("size guide đổi cm/in và dùng accordion plus-size", { tag: "@smoke" }, async ({ page }) => {

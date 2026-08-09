@@ -177,7 +177,11 @@ export function ProductReviewsSection({
         <>
           {previewQuery.isError ? (
             <div className="mt-5">
-              <StorefrontStaleWarning onRetry={() => void previewQuery.refetch()} resourceLabel={t("reviews.resource")} />
+              <StorefrontStaleWarning
+                onRetry={() => void previewQuery.refetch()}
+                resourceLabel={t("reviews.resource")}
+                error={previewQuery.error}
+              />
             </div>
           ) : null}
           <div className="mt-6 divide-y divide-[#1c1a18]/10">

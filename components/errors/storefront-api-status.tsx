@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { classifyApiError } from "@/lib/api/errors";
 import { createSignInHref } from "@/lib/auth/post-auth-redirect";
 import type { TranslationKey } from "@/lib/i18n/messages";
+import { cn } from "@/lib/utils";
 
 import {
   StorefrontStatus,
@@ -18,9 +20,14 @@ type StorefrontApiStatusProps = {
   resourceLabel?: string;
   returnHref?: string;
   returnLabel?: string;
+  recoveryAction?: StorefrontApiRecoveryAction;
   variant?: "page" | "route" | "panel";
   className?: string;
 };
+
+type StorefrontApiRecoveryAction =
+  | { label: string; href: string; onClick?: never }
+  | { label: string; onClick: () => void; href?: never };
 
 type StatusContent = {
   title: string;
@@ -47,12 +54,74 @@ const RETURN_LABEL_KEYS: Record<string, TranslationKey> = {
   "Về lịch sử đơn hàng": "errors.common.orderHistory",
 };
 
+function BadRequestNotice({
+  title,
+  description,
+  action,
+  variant,
+  className,
+}: {
+  title: string;
+  description: string;
+  action: StorefrontApiRecoveryAction;
+  variant: "page" | "route" | "panel";
+  className?: string;
+}) {
+  const titleId = "storefront-status-400-title";
+  const actionClassName =
+    "inline-flex min-h-11 items-center justify-center rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#f7f4ef] transition-colors hover:border-[#b5573a] hover:bg-[#b5573a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f4ef]";
+
+  return (
+    <section
+      className={cn(
+        "relative isolate flex w-full items-center overflow-hidden bg-[#f7f4ef] px-5 py-10 text-[#1c1a18] sm:px-8",
+        variant === "panel"
+          ? "min-h-64 rounded-sm border border-[#e3dccf]"
+          : variant === "route"
+            ? "mt-[72px] min-h-[360px] lg:px-12"
+            : "min-h-[50dvh] lg:px-12",
+        className,
+      )}
+      aria-labelledby={titleId}
+      role="alert"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(181,87,58,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(181,87,58,0.045)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+      <div className="relative z-10 mx-auto w-full max-w-3xl border-l-2 border-[#b5573a]/55 pl-5 sm:pl-8">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#964025]">
+          Vela Wear / HTTP 400
+        </p>
+        <h1
+          id={titleId}
+          className="mt-4 font-serif text-3xl font-medium leading-tight tracking-[-0.025em] sm:text-4xl"
+        >
+          {title}
+        </h1>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-[#55423d]/80 sm:text-base sm:leading-7">
+          {description}
+        </p>
+        <div className="mt-7">
+          {action.href ? (
+            <Link href={action.href} className={actionClassName}>
+              {action.label}
+            </Link>
+          ) : (
+            <button type="button" onClick={action.onClick} className={actionClassName}>
+              {action.label}
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function StorefrontApiStatus({
   error,
   onRetry,
   resourceLabel,
   returnHref = "/",
   returnLabel,
+  recoveryAction,
   variant = "panel",
   className,
 }: StorefrontApiStatusProps) {
@@ -83,13 +152,25 @@ export function StorefrontApiStatus({
   // to sign-in while preserving a validated internal return path.
   if (status === 401) return null;
 
-  const returnAction: StorefrontStatusAction = {
+  const returnAction: StorefrontApiRecoveryAction = {
     label: localizedReturnLabel,
     href: returnHref,
   };
-  const retryAction: StorefrontStatusAction | undefined = onRetry
+  const retryAction: StorefrontStatusAction | undefined = classification.retryable && onRetry
     ? { label: t("errors.common.retry"), onClick: onRetry }
     : undefined;
+
+  if (status === 400) {
+    return (
+      <BadRequestNotice
+        title={t("errors.api.badRequestTitle")}
+        description={t("errors.api.badRequestDescription", { resource: localizedResource })}
+        action={recoveryAction ?? returnAction}
+        variant={variant}
+        className={className}
+      />
+    );
+  }
 
   let content: StatusContent;
 

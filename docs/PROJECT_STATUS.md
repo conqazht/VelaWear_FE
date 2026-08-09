@@ -166,6 +166,27 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Verification**: Focused Vitest `3` file/`14` test pass; full TypeScript pass; full Vitest `38` file/`130` test pass; ESLint pass `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; targeted ownership smoke `1/1` pass; toàn bộ `@fullstack` pass `7/7`; negative search không còn storefront legacy ownership contract.
 - **Known Follow-ups**: Chỉ triển khai BE-002 để thu hồi legacy `ROLE_USER` grants sau khi PR FE-001 này đã merge. Avatar customer vẫn thuộc BE-004; PR này không thay đổi upload/UI.
 
+### Ổn định một hover lifecycle và thu gọn mega-menu storefront
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Implementation**: Parent label và chevron desktop nay dùng chung lifecycle hover do `NavigationMenuItem`/content quản lý. Chặn `onMouseEnter` đo lại popup của Base UI và bỏ qua riêng close reason `trigger-hover`, nên rê liên tục `label → chevron → label` không còn restart animation hoặc làm mất content; click, touch, Escape, focus-out và keyboard trigger vẫn giữ nguyên. Bỏ hoàn toàn pill/background active cùng ring nửa vòng của link/chevron, thay bằng underline focus-visible. Popup được thu từ `1000/800/600px`, giảm intro card, padding, row height và khoảng cách cột nhưng vẫn co theo available width, không overflow.
+- **Tests**: Playwright đổi qua lại label/chevron bốn lần và chờ lâu hơn close delay ở mỗi lượt, xác nhận content cùng `aria-expanded` không rơi; kiểm tra rời toàn vùng vẫn đóng, nav control transparent/không shadow, panel hai cột không quá `801×310px`, parent link, keyboard, mobile và overflow.
+- **Verification**: TypeScript pass; Vitest `39` file/`124` test pass; full ESLint pass với `0` error và `4` warning TanStack Table có sẵn; focused mega-menu Playwright pass `1/1`; toàn bộ Playwright smoke pass `15/15`; visual QA homepage `1440×900` pass; `git diff --check` pass.
+- **Known Follow-ups**: Không có trong phạm vi thay đổi này.
+
+### Hoàn thiện tương tác và thiết kế mega-menu storefront
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Implementation**: Mega-menu tiếp tục dùng cấu hình frontend trong `lib/storefront-navigation.ts`, không phụ thuộc backend để hiển thị nhãn và leaf link. Toàn bộ vùng tên + chevron của sáu mục desktop nay mở menu khi hover nhưng parent label vẫn là link điều hướng thật; chevron có hitbox lớn hơn, icon nằm sát nhãn, touch không bị giả lập hover và keyboard tiếp tục mở bằng trigger có `aria-expanded`. Intro rail cũ được thay bằng editorial card có mô tả theo locale, chỉ số `01 / 06`, CTA rõ và focus-visible; các nhóm leaf có hierarchy, hover/focus nhất quán. Popup co theo `--available-width`, giữ lề viewport và không tràn ngang ở desktop hẹp.
+- **Tests**: Mở rộng navigation unit test cho description; Playwright hover trực tiếp parent link của cả sáu menu, xác nhận leaf/expanded, khoảng cách nhãn-chevron `2–8px`, parent `href`, keyboard trigger, mobile leaf và không overflow khi popup mở.
+- **Verification**: TypeScript pass; Vitest `39` file/`124` test pass; full ESLint pass với `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; toàn bộ Playwright smoke pass `15/15`; visual QA tại `1440×900` pass; `git diff --check` pass.
+- **Known Follow-ups**: Không có trong phạm vi thay đổi này.
+
+### Thu hẹp HTTP 400/5xx theo phạm vi dữ liệu còn sử dụng được
+- **Date/Time**: 2026-07-16 (Asia/Saigon)
+- **Implementation**: HTTP 400 storefront chuyển từ artwork mã lỗi toàn màn hình sang notice gọn, giữ `HTTP 400` như metadata phụ, dùng hành động đặt lại ngữ cảnh và không retry lại request xác định là không hợp lệ. Collection lưu lần tải catalog thành công cuối tại ranh giới thao tác, nên filter 400 rollback về URL hợp lệ vẫn giữ grid và chỉ hiện cảnh báo cục bộ; 5xx vẫn cho Retry. Banner stale dùng mã HTTP thật và chỉ hiện Retry cho lỗi retryable. Lỗi API lịch sử trạng thái đơn hàng không còn che toàn bộ chi tiết đơn. `ResourcePage` admin giữ cached rows cùng banner `HTTP 5xx`; chỉ dùng artwork đúng mã `500/502/503/504` khi không còn row sử dụng được, còn 403 tiếp tục blocking để không lộ dữ liệu cache sau khi mất quyền. Các runtime error boundary hiện có được giữ nguyên.
+- **Tests**: Thêm test component cho notice 400/artwork 5xx, stale warning, order history và ba trạng thái ResourcePage; thêm Playwright cho initial/filter 400 và khóa lại hành vi initial/filter 500.
+- **Verification**: TypeScript pass; Vitest `39` file/`124` test pass; full ESLint pass với `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; toàn bộ Playwright smoke pass `15/15`; `git diff --check` pass.
+- **Known Follow-ups**: Không có trong phạm vi thay đổi này.
+
 ### Đồng bộ OTP/Auth hardening vào Storefront Catalog UX
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Merge `origin/main` sau khi PR OTP/Auth được phát hành; resolve conflict duy nhất tại tài liệu trạng thái bằng cách giữ đầy đủ cả hai mục OTP/Auth và Storefront. Toàn bộ source/config cho `challengeId`, `otpProofToken`, reauthentication và stale-refresh guard được giữ cùng Storefront Catalog UX, Size Guide và review.

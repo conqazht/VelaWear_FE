@@ -71,7 +71,7 @@ describe("EnglishContentGenerator", () => {
     renderGenerator({ onGenerate });
 
     await user.click(screen.getByRole("combobox", { name: "Mô hình Gemini" }));
-    await user.click(screen.getByRole("option", { name: /Cân bằng/ }));
+    await user.click(screen.getByText(/Gemini 3.5 Flash/i));
     await user.click(screen.getByRole("button", { name: "Tạo nội dung English" }));
 
     expect(onGenerate).toHaveBeenCalledWith("gemini-3.5-flash");

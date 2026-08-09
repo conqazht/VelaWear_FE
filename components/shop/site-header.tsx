@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
+
 
 function readSearchHistory(): string[] {
   if (typeof window === "undefined") return [];
@@ -335,95 +336,169 @@ export function SiteHeader() {
             </Link>
           </div>
 
-          {/* Desktop Navigation Menu */}
-          <NavigationMenu className="hidden max-w-none flex-1 justify-start lg:flex">
-            <NavigationMenuList className="gap-3 pl-3">
-              {navigationItems.map((item) => (
-                <NavigationMenuItem key={item.label} className="flex items-center">
-                  {item.groups ? (
-                    <>
-                      <div className="flex items-center">
-                        <NavigationMenuLink
-                          render={<Link href={item.href} />}
-                          className="rounded-none bg-transparent px-2 py-2"
-                        >
-                          <span className={`group/link relative text-sm font-medium tracking-[0.5px] ${textClass}`}>
-                            {item.label}
-                            <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100" />
-                          </span>
-                        </NavigationMenuLink>
-                        <NavigationMenuTrigger
-                          aria-label={`${item.label} menu`}
-                          className={`h-9 w-6 rounded-none border-none bg-transparent p-0 ${textClass}`}
-                        >
-                          <span className="sr-only">{item.label}</span>
-                        </NavigationMenuTrigger>
-                      </div>
-                      <NavigationMenuContent>
-                        <div className="flex w-[min(1120px,calc(100vw-48px))] gap-10 p-8">
-                          <div className="flex w-56 shrink-0 flex-col justify-between border-l-2 border-[#b5573a] py-2 pl-6">
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#1c1a18]/45">Vela Wear</p>
-                              <p className="mt-4 font-serif text-3xl font-light leading-tight text-[#1c1a18]">{item.label}</p>
-                            </div>
-                            <BaseNavigationMenu.Link
-                              render={<Link href={item.href} onClick={() => {
-                                if (document.activeElement instanceof HTMLElement) {
-                                  document.activeElement.blur();
-                                }
-                              }} />}
-                              className="mt-6 text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:text-[#964025] transition-colors inline-flex items-center gap-1 group/btn"
-                            >
-                              {item.ctaLabel} <span className="transition-transform duration-300 ease-out group-hover/btn:translate-x-1">&rarr;</span>
-                            </BaseNavigationMenu.Link>
-                          </div>
-                          <div className={cn(
-                            "grid flex-1 gap-x-8 gap-y-6",
-                            item.groups.length >= 3 ? "grid-cols-3" : item.groups.length === 2 ? "grid-cols-2" : "grid-cols-1",
-                          )}>
-                            {item.groups.map((group) => (
-                              <section key={group.title}>
-                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#1c1a18]">{group.title}</h3>
-                                <div className="space-y-1">
-                                  {group.items.map((sub) => (
-                                    <NavigationMenuLink
-                                      key={`${sub.label}-${sub.href}`}
-                                      render={<Link href={sub.href} onClick={() => {
-                                        if (document.activeElement instanceof HTMLElement) {
-                                          document.activeElement.blur();
-                                        }
-                                      }} />}
-                                      className="group/item rounded-none px-0 py-2 text-sm text-[#1c1a18]/65 hover:text-[#b5573a]"
-                                    >
-                                      {sub.label}
-                                    </NavigationMenuLink>
-                                  ))}
-                                </div>
-                              </section>
-                            ))}
-                          </div>
-                        </div>
-                      </NavigationMenuContent>
-                    </>
-                  ) : (
-                    <NavigationMenuLink
-                      render={<Link href={item.href} onClick={() => {
-                        if (document.activeElement instanceof HTMLElement) {
-                          document.activeElement.blur();
-                        }
-                      }} />}
-                      className={navigationMenuTriggerStyle()}
+          <NavigationMenu
+            align="center"
+            delay={30}
+            closeDelay={50}
+            className="hidden max-w-none flex-1 justify-start lg:flex"
+          >
+            <NavigationMenuList className="gap-1 pl-3">
+              {navigationItems.map((item) =>
+                item.groups ? (
+                  <NavigationMenuItem
+                    key={item.label}
+                    className="flex items-center"
+                  >
+                    <NavigationMenuTrigger
+                      nativeButton={false}
+                      render={
+                        <Link
+                          href={item.href}
+                          onClick={() => {
+                            if (document.activeElement instanceof HTMLElement) {
+                              document.activeElement.blur();
+                            }
+                          }}
+                        />
+                      }
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2.5 py-0 hover:bg-transparent focus:bg-transparent data-open:bg-transparent data-popup-open:bg-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                        textClass
+                      )}
                     >
-                      <span className={`relative inline-flex items-center ${textClass} group/link`}>
-                        <span className="relative pb-0.5">
-                          {item.label}
-                          <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/link:scale-x-100" />
-                        </span>
+                      <span
+                        data-slot="storefront-nav-label"
+                        className="group/link relative text-sm font-medium tracking-[0.5px]"
+                      >
+                        {item.label}
+                        <span
+                          className={cn(
+                            "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/nav:scale-x-100 group-data-open/navigation-menu-trigger:scale-x-100"
+                          )}
+                        />
                       </span>
-                    </NavigationMenuLink>
-                  )}
-                </NavigationMenuItem>
-              ))}
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="p-0 w-max">
+                      <div
+                        data-slot="storefront-mega-menu-panel"
+                        className={cn(
+                          "flex gap-2.5 rounded-lg bg-white p-2.5",
+                          item.groups.length >= 3
+                            ? "w-[min(1000px,calc(100vw-64px))]"
+                            : item.groups.length === 2
+                              ? "w-[min(800px,calc(100vw-48px))]"
+                              : "w-[min(600px,calc(100vw-48px))]"
+                        )}
+                      >
+                        <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-md bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
+                          <div className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full border border-[#b5573a]/15" />
+                          <div className="pointer-events-none absolute -bottom-16 left-0 size-36 rounded-full bg-white/35" />
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6f554c]/80">
+                              <span className="flex items-center gap-2">
+                                <span className="size-1.5 rounded-full bg-[#b5573a]" />
+                                Vela Wear
+                              </span>
+                            </div>
+                            <p className="mt-6 font-serif text-[34px] font-light leading-none tracking-[-0.035em] text-[#1c1a18]">
+                              {item.label}
+                            </p>
+                            <p className="mt-3 max-w-[12rem] text-[13px] leading-5 text-[#55423d]/85">
+                              {item.description}
+                            </p>
+                          </div>
+                          <BaseNavigationMenu.Link
+                            render={
+                              <Link
+                                href={item.href}
+                                onClick={() => {
+                                  if (document.activeElement instanceof HTMLElement) {
+                                    document.activeElement.blur();
+                                  }
+                                }}
+                              />
+                            }
+                            className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#964025] transition-colors hover:text-[#6f2e1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
+                          >
+                            <span className="max-w-[10rem] leading-4">{item.ctaLabel}</span>
+                            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1c1a18] text-[#f7f4ef] transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-0.5">
+                              <ArrowUpRight className="size-4" aria-hidden="true" />
+                            </span>
+                          </BaseNavigationMenu.Link>
+                        </div>
+                        <div
+                          className={cn(
+                            "grid min-w-0 flex-1 content-start gap-x-4 gap-y-5 px-4 py-5",
+                            item.groups.length >= 3
+                              ? "grid-cols-3"
+                              : item.groups.length === 2
+                                ? "grid-cols-2"
+                                : "grid-cols-1"
+                          )}
+                        >
+                          {item.groups.map((group) => (
+                            <section key={group.title}>
+                              <div className="mb-2 flex items-center gap-2.5">
+                                <span className="h-px w-5 bg-[#b5573a]/60" aria-hidden="true" />
+                                <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]">
+                                  {group.title}
+                                </h3>
+                              </div>
+                              <div className="space-y-0.5">
+                                {group.items.map((sub) => (
+                                  <NavigationMenuLink
+                                    key={`${sub.label}-${sub.href}`}
+                                    render={
+                                      <Link
+                                        href={sub.href}
+                                        onClick={() => {
+                                          if (document.activeElement instanceof HTMLElement) {
+                                            document.activeElement.blur();
+                                          }
+                                        }}
+                                      />
+                                    }
+                                    className="group/item flex min-h-9 items-center justify-between rounded-lg px-2.5 py-1.5 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#964025] focus-visible:bg-[#f4eee6] focus-visible:text-[#964025] focus-visible:outline-none"
+                                  >
+                                    <span>{sub.label}</span>
+                                    <ArrowUpRight
+                                      className="size-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover/item:translate-x-0 group-hover/item:opacity-100 group-focus-visible/item:translate-x-0 group-focus-visible/item:opacity-100"
+                                      aria-hidden="true"
+                                    />
+                                  </NavigationMenuLink>
+                                ))}
+                              </div>
+                            </section>
+                          ))}
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                ) : (
+                  <NavigationMenuLink
+                    key={item.label}
+                    render={
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          if (document.activeElement instanceof HTMLElement) {
+                            document.activeElement.blur();
+                          }
+                        }}
+                      />
+                    }
+                    className={cn(navigationMenuTriggerStyle(), "group/nav")}
+                  >
+                    <span className={`relative inline-flex items-center ${textClass}`}>
+                      <span className="relative pb-0.5">
+                        {item.label}
+                        <span className="absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/nav:scale-x-100" />
+                      </span>
+                    </span>
+                  </NavigationMenuLink>
+                )
+              )}
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -462,7 +537,7 @@ export function SiteHeader() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-[20px] border border-[#1c1a18]/10 bg-[#f7f4ef] shadow-[0_6px_18px_rgba(28,26,24,0.06)] z-50"
+                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-md z-50"
                   >
                     {searchQuery.trim() ? (
                       <>
@@ -651,7 +726,7 @@ export function SiteHeader() {
                     <div className="absolute right-0 top-8 h-4 w-32 bg-transparent" />
                     
                     {/* Dropdown Menu */}
-                    <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-[#f7f4ef] rounded-[16px] border border-[#1c1a18]/10 shadow-[0_4px_16px_rgba(28,26,24,0.06)] overflow-hidden">
+                    <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-md overflow-hidden">
                       <div className="px-4 py-2.5 border-b border-[#1c1a18]/10">
                         <span className="font-sans text-sm font-semibold text-[#1c1a18]">{t("storefront.nav.account")}</span>
                       </div>

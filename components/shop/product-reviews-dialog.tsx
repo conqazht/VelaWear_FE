@@ -118,6 +118,7 @@ export function ProductReviewsDialog({
                       <StorefrontStaleWarning
                         onRetry={() => void summaryQuery.refetch()}
                         resourceLabel={t("reviews.summaryResource")}
+                        error={summaryQuery.error}
                       />
                     ) : null}
                     <div className="flex items-end gap-3">
@@ -234,6 +235,7 @@ export function ProductReviewsDialog({
                           <StorefrontStaleWarning
                             onRetry={() => void reviewsQuery.refetch()}
                             resourceLabel={t("reviews.resource")}
+                            error={reviewsQuery.error}
                           />
                         </div>
                       ) : null}

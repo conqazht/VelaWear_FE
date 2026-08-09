@@ -103,6 +103,7 @@ export function ResourcePage<T extends { id: number }>({
   const errorMessage = error
     ? getApiErrorMessage(error, t("admin.shell.resource.unexpectedError"))
     : null;
+  const hasUsableRows = rows.length > 0;
   const statusScene =
     errorStatus === 403
       ? {
@@ -118,7 +119,7 @@ export function ResourcePage<T extends { id: number }>({
             description: t("admin.shell.resource.notFoundDescription"),
             accent: "#f7f4ef",
           }
-        : errorStatus !== null && errorStatus >= 500
+        : errorStatus !== null && errorStatus >= 500 && !hasUsableRows
           ? {
               code: String(errorStatus),
               title: t("admin.shell.resource.serverErrorTitle"),
@@ -219,7 +220,12 @@ export function ResourcePage<T extends { id: number }>({
         {errorMessage ? (
           <div className="px-4">
             <Alert variant="destructive">
-              <AlertTitle>{t("admin.shell.resource.unableToLoad", { resource: title })}</AlertTitle>
+              <AlertTitle className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>{t("admin.shell.resource.unableToLoad", { resource: title })}</span>
+                {errorStatus !== null ? (
+                  <span className="font-mono text-[11px] font-normal opacity-70">HTTP {errorStatus}</span>
+                ) : null}
+              </AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           </div>

@@ -86,7 +86,7 @@ export function ProductToolbar({
               side="bottom"
               sideOffset={8}
               align="end"
-              className="min-w-[170px] rounded-[20px] border border-[#e3dccf] bg-[#fbf8f3] p-1.5 shadow-[0_6px_18px_rgba(28,26,24,0.06)]"
+              className="min-w-[170px] rounded-md border border-hairline bg-white p-1.5 shadow-md"
             >
               {sortOptions.map((opt) => (
                 <SelectItem
