@@ -31,6 +31,27 @@ import { cn } from "@/lib/utils";
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
 
+const POPULAR_SEARCH_TERMS = {
+  vi: [
+    "Áo sơ mi linen",
+    "Quần âu khoá gập",
+    "Áo thun Pima",
+    "Blazer dáng rộng",
+    "Váy midi xếp ly",
+    "Áo polo dệt kim",
+    "Quần short bermuda",
+  ],
+  en: [
+    "Linen shirt",
+    "Pleated trousers",
+    "Pima tee",
+    "Oversized blazer",
+    "Midi skirt",
+    "Knit polo",
+    "Bermuda shorts",
+  ],
+};
+
 
 function readSearchHistory(): string[] {
   if (typeof window === "undefined") return [];
@@ -946,121 +967,153 @@ export function SiteHeader() {
         )}
       </AnimatePresence>
 
-      {/* Dedicated Mobile Search Popup Overlay */}
+      {/* Dedicated Mobile Search Modal (Nike Style) */}
       <AnimatePresence>
         {isMobileSearchOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setIsMobileSearchOpen(false)}
-              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs lg:hidden"
-            />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-0 z-50 flex flex-col bg-[#f7f4ef] text-[#1c1a18] p-5 sm:p-6 lg:hidden"
+          >
+            {/* Header: Input Pill + Cancel Button */}
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
+              <div className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 flex-1 border border-transparent focus-within:border-[#b5573a]/30 transition-all">
+                <Search className="w-4 h-4 text-[#8a857c] flex-none" />
+                <input
+                  ref={mobileSearchInputRef}
+                  type="text"
+                  placeholder={t("storefront.nav.searchPlaceholder")}
+                  value={searchQuery}
+                  autoComplete="off"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-sm w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18] p-1 flex-none"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSearchOpen(false)}
+                className="text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a] px-1 py-1 cursor-pointer flex-none"
+              >
+                {activeLocale === "vi" ? "Hủy" : "Cancel"}
+              </button>
+            </form>
 
-            {/* Top Search Popup */}
-            <motion.div
-              initial={{ y: "-100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-100%" }}
-              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-              className="fixed inset-x-0 top-0 z-50 flex flex-col bg-[#f7f4ef] border-b border-[#e3dccf] shadow-2xl p-4 lg:hidden"
-            >
-              <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
-                <div className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 flex-1 border border-transparent focus-within:border-[#b5573a]/30 transition-all">
-                  <Search className="w-4 h-4 text-[#8a857c]" />
-                  <input
-                    ref={mobileSearchInputRef}
-                    type="text"
-                    placeholder={t("storefront.nav.searchPlaceholder")}
-                    value={searchQuery}
-                    autoComplete="off"
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18]"
-                    >
-                      ✕
-                    </button>
+            {/* Modal Body */}
+            <div className="mt-6 flex-1 overflow-y-auto space-y-6 pr-1">
+              {searchQuery.trim() ? (
+                /* Live Suggestions */
+                <div className="space-y-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[#707072]">
+                    {t("storefront.nav.searchSuggestions")}
+                  </div>
+                  {searchSuggestions.length > 0 ? (
+                    searchSuggestions.map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/products/${product.id}`}
+                        onClick={() => {
+                          persistSearchHistory(searchQuery);
+                          setIsMobileSearchOpen(false);
+                        }}
+                        className="flex items-center gap-3 py-2.5 border-b border-[#1c1a18]/8 text-sm text-[#1c1a18] hover:text-[#b5573a] transition-colors"
+                      >
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          width={44}
+                          height={44}
+                          className="h-11 w-11 rounded-sm object-cover bg-white flex-none"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-[#1c1a18]">{product.name}</p>
+                          <p className="text-xs text-[#b5573a] font-numeric font-medium">{money(product.price, activeLocale)}</p>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-sm text-[#1c1a18]/60 py-4">
+                      {t("storefront.nav.noMatchingProducts")}
+                    </p>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileSearchOpen(false)}
-                  className="text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:text-[#b5573a] px-2 py-1 cursor-pointer"
-                >
-                  Hủy
-                </button>
-              </form>
-
-              {/* Search Suggestions & History List */}
-              {(searchQuery.trim() || searchHistory.length > 0) && (
-                <div className="mt-4 max-h-[60vh] overflow-y-auto space-y-4 pt-2 border-t border-[#1c1a18]/10">
-                  {searchQuery.trim() ? (
-                    <>
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/50">
-                        {t("storefront.nav.searchSuggestions")}
-                      </div>
-                      {searchSuggestions.map((product) => (
-                        <Link
-                          key={product.id}
-                          href={`/products/${product.id}`}
-                          onClick={() => {
-                            persistSearchHistory(searchQuery);
-                            setIsMobileSearchOpen(false);
-                          }}
-                          className="flex items-center gap-3 py-2 border-b border-[#1c1a18]/5 text-sm text-[#1c1a18] hover:bg-[#efe7dc]/50 transition-colors"
+              ) : (
+                /* Popular Terms + Recent Searches */
+                <>
+                  {/* Popular Search Terms */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-[#707072] uppercase tracking-[0.08em] mb-3">
+                      {activeLocale === "vi" ? "Từ khóa tìm kiếm phổ biến" : "Popular Search Terms"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2.5">
+                      {POPULAR_SEARCH_TERMS[activeLocale === "vi" ? "vi" : "en"].map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => runSearch(term)}
+                          className="rounded-full bg-[#efe7dc] px-4 py-2 text-xs font-medium text-[#1c1a18] hover:bg-[#b5573a] hover:text-white transition-colors cursor-pointer"
                         >
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 rounded-sm object-cover bg-white"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-medium text-[#1c1a18]">{product.name}</p>
-                            <p className="text-[11px] text-[#b5573a] font-numeric">{money(product.price, activeLocale)}</p>
-                          </div>
-                        </Link>
+                          {term}
+                        </button>
                       ))}
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/50">
-                        <span>{t("storefront.nav.recentSearches")}</span>
+                    </div>
+                  </div>
+
+                  {/* Recent Searches */}
+                  {searchHistory.length > 0 && (
+                    <div className="pt-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xs font-semibold text-[#707072] uppercase tracking-[0.08em]">
+                          {activeLocale === "vi" ? "Tìm kiếm gần đây" : "Recent searches"}
+                        </h3>
                         <button
                           type="button"
                           onClick={() => setSearchHistory([])}
-                          className="hover:text-[#b5573a]"
+                          className="text-xs text-[#1c1a18]/50 hover:text-[#b5573a] font-medium"
                         >
-                          {activeLocale === "vi" ? "Xóa lịch sử" : "Clear history"}
+                          {activeLocale === "vi" ? "Xóa tất cả" : "Clear all"}
                         </button>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="divide-y divide-[#1c1a18]/8">
                         {searchHistory.map((term) => (
-                          <button
+                          <div
                             key={term}
-                            type="button"
-                            onClick={() => runSearch(term)}
-                            className="rounded-full bg-[#efe7dc] px-3.5 py-1.5 text-xs text-[#1c1a18] hover:bg-[#b5573a] hover:text-white transition-colors"
+                            className="flex items-center justify-between py-3 group"
                           >
-                            {term}
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => runSearch(term)}
+                              className="text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a] text-left flex-1 truncate transition-colors cursor-pointer"
+                            >
+                              {term}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeSearchHistoryItem(term)}
+                              className="p-1 text-[#1c1a18]/40 hover:text-[#1c1a18] transition-colors cursor-pointer flex-none"
+                              aria-label={`Remove ${term} from history`}
+                            >
+                              <X className="size-4" />
+                            </button>
+                          </div>
                         ))}
                       </div>
-                    </>
+                    </div>
                   )}
-                </div>
+                </>
               )}
-            </motion.div>
-          </>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>
