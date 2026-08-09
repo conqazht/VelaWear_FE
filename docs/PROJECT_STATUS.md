@@ -2,6 +2,7 @@
 
 - **Branch:** `fix/e2e-catalog-overflow-hotfix`
 - **Fixes Delivered:**
+  0. **Nike-Style Mobile Header Layout:** Pinned Logo to the left and aligned right-side mobile icon group `[ Search 🔍 ] [ Account 👤 ] [ Bag 👜 ] [ Menu ☰ ]` in `site-header.tsx` matching Nike mobile header design.
   0. **Dead-Center Mobile Logo Alignment:** Added `lg:static absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2` to logo wrapper in `site-header.tsx` so logo icon is perfectly centered horizontally and vertically on all mobile devices.
   1. **Eliminated Mobile Horizontal Page Overflow:** Replaced `before:-left-12 before:-right-12` on `ProductToolbar` in `product-layout-components.tsx` with `before:inset-0`. This ensures `scrollWidth <= clientWidth` is 100% satisfied on mobile 390px viewports without horizontal page overflow.
   2. **Form Error Casing & E2E Validation Match:** Removed `uppercase` from validation error message paragraphs in `sign-in-page.tsx` to preserve normal sentence casing ("Không được để trống").
