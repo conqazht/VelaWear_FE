@@ -81,6 +81,7 @@ export function SiteHeader() {
   const lastScrollY = useRef(0);
   const headerToggleAnchorY = useRef(0);
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   if (searchPathname !== pathname) {
     setSearchPathname(pathname);
@@ -791,133 +792,199 @@ export function SiteHeader() {
         </div>
       </motion.header>
 
-      {/* Mobile Menu Slidedown */}
+      {/* Mobile Left Side Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className={`fixed left-4 right-4 z-40 w-[calc(100%-32px)] overflow-hidden rounded-[24px] border border-[#e3dccf] bg-[#f7f4ef] shadow-2xl lg:hidden ${
-              isHome && !isScrolled ? "top-[88px]" : "top-[78px]"
-            }`}
-          >
-            <div className="flex max-h-[calc(100dvh-96px)] flex-col gap-4 overflow-y-auto px-6 py-8">
-              {navigationItems.map((item) => {
-                const expanded = mobileExpandedItem === item.label;
-                return (
-                  <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <Link
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="font-serif text-2xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
-                      >
-                        {item.label}
-                      </Link>
-                      {item.groups && (
-                        <button
-                          type="button"
-                          aria-label={`${item.label} menu`}
-                          aria-expanded={expanded}
-                          onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
-                          className="grid size-9 place-items-center text-[#1c1a18]"
-                        >
-                          <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
-                        </button>
-                      )}
-                    </div>
-                    <AnimatePresence initial={false}>
-                      {item.groups && expanded && (
-                        <motion.div
-                          key={item.label}
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.22, ease: EASE_VELA }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-4 border-l-2 border-[#b5573a] pl-4">
-                            <div className="space-y-5">
-                              {item.groups.map((group) => (
-                                <section key={group.title}>
-                                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
-                                  <div className="flex flex-col gap-2.5">
-                                    {group.items.map((sub) => (
-                                      <Link
-                                        key={`${sub.label}-${sub.href}`}
-                                        href={sub.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="text-sm text-[#1c1a18]/70 hover:text-[#b5573a]"
-                                      >
-                                        {sub.label}
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </section>
-                              ))}
-                            </div>
-                            <Link
-                              href={item.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="mt-5 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
-                            >
-                              {item.ctaLabel} &rarr;
-                            </Link>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-              <div className="h-[1px] bg-[#e3dccf] my-2" />
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs lg:hidden"
+            />
 
-              <div className="flex justify-center">
-                <LanguageSwitcher />
-              </div>
-              
-              {/* Mobile Search */}
-              <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#efe7dc] rounded-full px-4 py-3 gap-3 w-full border border-transparent">
-                <Search className="w-5 h-5 text-[#8a857c]" />
-                <input
-                  type="text"
-                  placeholder={t("storefront.nav.searchPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-sm w-full text-[#1c1a18]"
-                />
-              </form>
-
-              {/* Mobile Account Profile */}
-              {safeIsAuthenticated && safeUser ? (
-                <div className="flex flex-col gap-4">
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
-                  >
-                    {t("storefront.nav.viewProfileName", { name: safeUser.fullName })}
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="text-sm font-semibold uppercase tracking-[1px] text-[#b5573a] text-center border border-[#b5573a]/40 py-4 rounded-[6px] hover:bg-[#b5573a]/10 transition-colors duration-300"
-                  >
-                    {t("storefront.nav.signOut")}
-                  </button>
-                </div>
-              ) : (
+            {/* Left Side Drawer */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 26, stiffness: 290 }}
+              className="fixed inset-y-0 left-0 z-50 flex w-[320px] max-w-[85vw] flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl lg:hidden"
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between border-b border-[#e3dccf] px-6 py-5">
                 <Link
-                  href="/sign-in"
+                  href="/"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
+                  className="flex items-center gap-2"
                 >
-                  {t("storefront.nav.logIn")}
+                  <Image
+                    src="/images/brand/vela-wear-logo.png"
+                    alt={t("brand.logoAlt")}
+                    width={160}
+                    height={160}
+                    className="h-7 w-auto object-contain"
+                  />
+                  <span className="font-serif text-lg font-normal tracking-wide text-[#1c1a18]">
+                    Vela Wear
+                  </span>
                 </Link>
-              )}
-            </div>
-          </motion.div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="grid size-9 place-items-center rounded-full text-[#1c1a18] hover:bg-[#1c1a18]/5 transition-colors cursor-pointer"
+                  aria-label="Đóng"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              {/* Drawer Body */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                {/* Search Bar in Mobile Drawer */}
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 w-full border border-transparent focus-within:border-[#b5573a]/30 transition-all"
+                >
+                  <button
+                    type="submit"
+                    aria-label={t("storefront.nav.search")}
+                    className="cursor-pointer border-none p-0 bg-transparent flex items-center justify-center text-[#8a857c] hover:text-[#b5573a]"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                  <input
+                    ref={mobileSearchInputRef}
+                    type="text"
+                    placeholder={t("storefront.nav.searchPlaceholder")}
+                    value={searchQuery}
+                    autoComplete="off"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </form>
+
+                {/* Navigation Items (Accordion) */}
+                <div className="space-y-4">
+                  {navigationItems.map((item) => {
+                    const expanded = mobileExpandedItem === item.label;
+                    return (
+                      <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="font-serif text-xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
+                          >
+                            {item.label}
+                          </Link>
+                          {item.groups && (
+                            <button
+                              type="button"
+                              aria-label={`${item.label} menu`}
+                              aria-expanded={expanded}
+                              onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
+                              className="grid size-8 place-items-center text-[#1c1a18]"
+                            >
+                              <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+                            </button>
+                          )}
+                        </div>
+                        <AnimatePresence initial={false}>
+                          {item.groups && expanded && (
+                            <motion.div
+                              key={item.label}
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.22, ease: EASE_VELA }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-3 border-l-2 border-[#b5573a] pl-3 space-y-4">
+                                {item.groups.map((group) => (
+                                  <section key={group.title}>
+                                    <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
+                                    <div className="flex flex-col gap-2">
+                                      {group.items.map((sub) => (
+                                        <Link
+                                          key={`${sub.label}-${sub.href}`}
+                                          href={sub.href}
+                                          onClick={() => setIsMobileMenuOpen(false)}
+                                          className="text-xs text-[#1c1a18]/70 hover:text-[#b5573a]"
+                                        >
+                                          {sub.label}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </section>
+                                ))}
+                                <Link
+                                  href={item.href}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className="mt-3 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                                >
+                                  {item.ctaLabel} &rarr;
+                                </Link>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="border-t border-[#e3dccf] p-6 space-y-4 bg-[#efe7dc]/40">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-[#1c1a18]/60">{activeLocale === "vi" ? "Ngôn ngữ" : "Language"}</span>
+                  <LanguageSwitcher />
+                </div>
+                {safeIsAuthenticated && safeUser ? (
+                  <div className="flex items-center justify-between pt-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-xs font-semibold text-[#1c1a18] hover:text-[#b5573a]"
+                    >
+                      {safeUser.fullName || safeUser.email}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="text-xs text-red-600 font-medium cursor-pointer"
+                    >
+                      {t("storefront.nav.logOut")}
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex h-10 w-full items-center justify-center rounded-sm bg-[#1c1a18] text-xs font-semibold uppercase tracking-wider text-[#f7f4ef] hover:bg-[#b5573a] transition-colors"
+                  >
+                    {t("storefront.nav.logIn")}
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
