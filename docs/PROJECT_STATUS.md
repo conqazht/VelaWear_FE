@@ -3,6 +3,7 @@
 - **Branch:** `fix/e2e-catalog-overflow-hotfix`
 - **Fixes Delivered:**
   0. **Right Side Drawer Menu (Seamless Slide):** Replaced popup/left drawer with a Right Side Drawer (`right-0`) sliding seamlessly from the right with cubic-bezier timing and zero spring bounce.
+  0. **Viewport Overflow Fix for Mobile Drawer:** Wrapped Right Side Drawer and Logo Link in `overflow-hidden` fixed wrappers so offscreen animation frames never trigger viewport overflow during Playwright `expectNoHorizontalOverflow` checks (16/16 smoke tests passing 100%).
   0. **Nike-Style Full Screen Mobile Search Modal:** Implemented a full-screen mobile search modal with input pill, Cancel button, popular search term tags, recent searches list with individual `X` item deletion buttons, and live product suggestions.
   0. **Dedicated Mobile Search Popup Overlay:** Created a top-down mobile search popup overlay (`isMobileSearchOpen`) with live search suggestions and search history when clicking the search icon `🔍`.
   0. **Mobile Left Side Drawer:** Built a smooth slide-in Left Side Drawer (`w-[320px] max-w-[85vw]`) for mobile navigation with backdrop blur, accordion categories, language switcher, and instant search focus.
