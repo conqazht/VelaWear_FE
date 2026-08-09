@@ -564,7 +564,7 @@ export function SiteHeader() {
                                   alt={product.name}
                                   width={56}
                                   height={56}
-                                  className="h-14 w-14 rounded-lg object-cover bg-white"
+                                  className="h-14 w-14 rounded-sm object-cover bg-white"
                                 />
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-medium text-[#1c1a18]">

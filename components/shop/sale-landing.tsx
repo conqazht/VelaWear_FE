@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import { motion, useReducedMotion } from "motion/react";
 import { AlarmClock, BadgePercent, ShoppingBag } from "lucide-react";
 
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -212,6 +213,7 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
 
 function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: number }) {
   const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
   const isFlash = campaign.type === "FLASH";
   const isUpcoming = campaign.phase === "UPCOMING";
   const target = isUpcoming ? campaign.startsAt : campaign.endsAt;
@@ -231,7 +233,11 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
   return (
     <section className="border-b border-[#1c1a18]/10 pb-16 last:border-b-0 last:pb-0">
       {bannerUrl ? (
-        <div
+        <motion.div
+          initial={{ clipPath: reduceMotion ? "inset(0 0 0 0)" : "inset(0 100% 0 0)" }}
+          whileInView={{ clipPath: "inset(0 0 0 0)" }}
+          viewport={{ once: true }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.6, ease: [0.16, 1, 0.3, 1] }}
           role="img"
           aria-label={t("storefront.sale.bannerAria", { name: campaign.name })}
           className="mb-8 h-40 overflow-hidden rounded-lg bg-[#e8ded2] bg-cover bg-center md:h-64"
@@ -287,13 +293,23 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
         </p>
       ) : (
         <ProductGrid>
-          {products.map((product) => (
-            <SaleProductCard
+          {products.map((product, index) => (
+            <motion.div
               key={product.productId}
-              product={product}
-              isFlash={isFlash}
-              isUpcoming={isUpcoming}
-            />
+              initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: reduceMotion ? 0.15 : 0.35,
+                delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.4),
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
+              <SaleProductCard
+                product={product}
+                isFlash={isFlash}
+                isUpcoming={isUpcoming}
+              />
+            </motion.div>
           ))}
         </ProductGrid>
       )}
