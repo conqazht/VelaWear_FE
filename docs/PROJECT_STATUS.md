@@ -3,6 +3,7 @@
 - **Branch:** `fix/e2e-catalog-overflow-hotfix`
 - **Fixes Delivered:**
   0. **Right Side Drawer Menu (Seamless Slide):** Replaced popup/left drawer with a Right Side Drawer (`right-0`) sliding seamlessly from the right with cubic-bezier timing and zero spring bounce.
+  0. **Nike-Style Full Screen Mobile Search Modal:** Implemented a full-screen mobile search modal with input pill, Cancel button, popular search term tags, recent searches list with individual `X` item deletion buttons, and live product suggestions.
   0. **Dedicated Mobile Search Popup Overlay:** Created a top-down mobile search popup overlay (`isMobileSearchOpen`) with live search suggestions and search history when clicking the search icon `🔍`.
   0. **Mobile Left Side Drawer:** Built a smooth slide-in Left Side Drawer (`w-[320px] max-w-[85vw]`) for mobile navigation with backdrop blur, accordion categories, language switcher, and instant search focus.
   0. **Nike-Style Mobile Header Layout:** Pinned Logo to the left and aligned right-side mobile icon group `[ Search 🔍 ] [ Account 👤 ] [ Bag 👜 ] [ Menu ☰ ]` in `site-header.tsx` matching Nike mobile header design.
