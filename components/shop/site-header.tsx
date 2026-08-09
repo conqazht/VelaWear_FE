@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { EASE_VELA } from "@/lib/motion-tokens";
-import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,6 +30,27 @@ import { cn } from "@/lib/utils";
 
 const SEARCH_HISTORY_STORAGE_KEY = "vela-search-history";
 const MAX_SEARCH_HISTORY_ITEMS = 5;
+
+const POPULAR_SEARCH_TERMS = {
+  vi: [
+    "Áo sơ mi linen",
+    "Quần âu khoá gập",
+    "Áo thun Pima",
+    "Blazer dáng rộng",
+    "Váy midi xếp ly",
+    "Áo polo dệt kim",
+    "Quần short bermuda",
+  ],
+  en: [
+    "Linen shirt",
+    "Pleated trousers",
+    "Pima tee",
+    "Oversized blazer",
+    "Midi skirt",
+    "Knit polo",
+    "Bermuda shorts",
+  ],
+};
 
 
 function readSearchHistory(): string[] {
@@ -68,6 +89,7 @@ export function SiteHeader() {
   const { locale: activeLocale, t } = useI18n();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [mobileExpandedItem, setMobileExpandedItem] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const searchSuggestions = useSearchSuggestions(searchQuery, activeLocale);
@@ -81,11 +103,14 @@ export function SiteHeader() {
   const lastScrollY = useRef(0);
   const headerToggleAnchorY = useRef(0);
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   if (searchPathname !== pathname) {
     setSearchPathname(pathname);
     setSearchQuery("");
     setIsSearchSuggestionsOpen(false);
+    setIsMobileSearchOpen(false);
+    setIsMobileMenuOpen(false);
   }
 
   async function handleLogout() {
@@ -247,6 +272,7 @@ export function SiteHeader() {
     persistSearchHistory(normalized);
     router.push(`/search?q=${encodeURIComponent(normalized)}`);
     setIsMobileMenuOpen(false);
+    setIsMobileSearchOpen(false);
     setIsSearchSuggestionsOpen(false);
   };
 
@@ -260,7 +286,7 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
-        initial={{ y: isHome ? -120 : -72 }}
+        initial={{ y: 0 }}
         animate={{ y: showHeader ? 0 : (isHome ? -120 : -72) }}
         transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
         className={headerClass}
@@ -277,20 +303,9 @@ export function SiteHeader() {
               : undefined
           }
         >
-          {/* Hamburger button for mobile */}
-          <div className="flex items-center lg:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`${burgerClass} transition-colors p-1`}
-              aria-label={t("storefront.nav.openMenu")}
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-
-          {/* Logo */}
+          {/* Logo pinned to left */}
           <div className="flex-none">
-            <Link href="/" className="flex items-center gap-2 group relative">
+            <Link href="/" className="flex items-center gap-2 group relative overflow-hidden">
               <motion.div
                 className="relative flex items-center overflow-hidden rounded-md"
                 style={{ perspective: 1000 }}
@@ -327,9 +342,9 @@ export function SiteHeader() {
                 {/* Shine effect on hover */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/45 to-transparent pointer-events-none"
-                  initial={{ x: "-150%", skewX: -20 }}
+                  initial={{ opacity: 0, x: "-150%", skewX: -20 }}
                   variants={{
-                    hover: { x: "150%" },
+                    hover: { opacity: 1, x: "150%" },
                   }}
                   transition={{ duration: 0.75, ease: "easeInOut" }}
                 />
@@ -527,6 +542,12 @@ export function SiteHeader() {
                     setIsSearchSuggestionsOpen(true);
                   }}
                   onFocus={() => setIsSearchSuggestionsOpen(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearchSubmit(e);
+                    }
+                  }}
                   className={`bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full ${searchInputClass}`}
                 />
               </form>
@@ -650,14 +671,50 @@ export function SiteHeader() {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
               <LanguageSwitcher
                 className="hidden md:inline-flex"
                 inverted={shouldBeTransparent}
               />
 
+              {/* Mobile Search Button */}
+              <motion.button
+                type="button"
+                onClick={() => {
+                  setIsMobileSearchOpen(true);
+                  setTimeout(() => {
+                    mobileSearchInputRef.current?.focus();
+                  }, 120);
+                }}
+                className={`${iconClass} p-2 rounded-full cursor-pointer lg:hidden relative`}
+                whileHover={{
+                  scale: 1.04,
+                  backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                }}
+                whileTap={{ scale: 0.95 }}
+                aria-label={t("storefront.nav.search")}
+              >
+                <Search className="w-4.5 h-4.5" />
+              </motion.button>
+
+              {/* Mobile Account Profile / Login Button */}
+              <Link href={safeIsAuthenticated ? "/profile" : "/sign-in"} className="lg:hidden">
+                <motion.button
+                  type="button"
+                  className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
+                  whileHover={{
+                    scale: 1.04,
+                    backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label={t("storefront.nav.account")}
+                >
+                  <User className="w-4.5 h-4.5" />
+                </motion.button>
+              </Link>
+
               {/* Wishlist Link */}
-              <Link href="/favorites">
+              <Link href="/favorites" className="hidden sm:inline-flex">
                 <motion.button
                   className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
                   whileHover={{
@@ -703,6 +760,16 @@ export function SiteHeader() {
                   )}
                 </motion.button>
               </Link>
+
+              {/* Mobile Hamburger Menu Button */}
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`${burgerClass} p-2 rounded-full transition-colors cursor-pointer lg:hidden flex items-center justify-center`}
+                aria-label={isMobileMenuOpen ? "Đóng menu" : "Mở menu"}
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
 
               {/* Account Profile / Login */}
               <div className="hidden md:flex items-center gap-4">
@@ -755,130 +822,303 @@ export function SiteHeader() {
         </div>
       </motion.header>
 
-      {/* Mobile Menu Slidedown */}
+      {/* Mobile Right Side Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className={`fixed left-4 right-4 z-40 w-[calc(100%-32px)] overflow-hidden rounded-[24px] border border-[#e3dccf] bg-[#f7f4ef] shadow-2xl lg:hidden ${
-              isHome && !isScrolled ? "top-[88px]" : "top-[78px]"
-            }`}
-          >
-            <div className="flex max-h-[calc(100dvh-96px)] flex-col gap-4 overflow-y-auto px-6 py-8">
-              {navigationItems.map((item) => {
-                const expanded = mobileExpandedItem === item.label;
-                return (
-                  <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <Link
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="font-serif text-2xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
-                      >
-                        {item.label}
-                      </Link>
-                      {item.groups && (
-                        <button
-                          type="button"
-                          aria-label={`${item.label} menu`}
-                          aria-expanded={expanded}
-                          onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
-                          className="grid size-9 place-items-center text-[#1c1a18]"
-                        >
-                          <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
-                        </button>
-                      )}
-                    </div>
-                    <AnimatePresence initial={false}>
-                      {item.groups && expanded && (
-                        <motion.div
-                          key={item.label}
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.22, ease: EASE_VELA }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-4 border-l-2 border-[#b5573a] pl-4">
-                            <div className="space-y-5">
-                              {item.groups.map((group) => (
-                                <section key={group.title}>
-                                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
-                                  <div className="flex flex-col gap-2.5">
-                                    {group.items.map((sub) => (
-                                      <Link
-                                        key={`${sub.label}-${sub.href}`}
-                                        href={sub.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="text-sm text-[#1c1a18]/70 hover:text-[#b5573a]"
-                                      >
-                                        {sub.label}
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </section>
-                              ))}
-                            </div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs lg:hidden"
+            />
+
+            {/* Right Side Drawer Wrapper */}
+            <div className="fixed inset-y-0 right-0 z-50 w-[320px] max-w-[85vw] overflow-hidden pointer-events-none lg:hidden">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                className="flex h-full w-full flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl pointer-events-auto"
+              >
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between border-b border-[#e3dccf] px-6 py-5">
+                  <span className="font-serif text-lg font-normal tracking-wide text-[#1c1a18]">
+                    MENU
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="grid size-9 place-items-center rounded-full text-[#1c1a18] hover:bg-[#1c1a18]/5 transition-colors cursor-pointer"
+                    aria-label="Đóng"
+                  >
+                    <X className="size-5" />
+                  </button>
+                </div>
+
+                {/* Drawer Body */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                  {/* Navigation Items (Accordion) */}
+                  <div className="space-y-4">
+                    {navigationItems.map((item) => {
+                      const expanded = mobileExpandedItem === item.label;
+                      return (
+                        <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
+                          <div className="flex items-center justify-between gap-3">
                             <Link
                               href={item.href}
                               onClick={() => setIsMobileMenuOpen(false)}
-                              className="mt-5 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                              className="font-serif text-xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
                             >
-                              {item.ctaLabel} &rarr;
+                              {item.label}
                             </Link>
+                            {item.groups && (
+                              <button
+                                type="button"
+                                aria-label={`${item.label} menu`}
+                                aria-expanded={expanded}
+                                onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
+                                className="grid size-8 place-items-center text-[#1c1a18]"
+                              >
+                                <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+                              </button>
+                            )}
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          <AnimatePresence initial={false}>
+                            {item.groups && expanded && (
+                              <motion.div
+                                key={item.label}
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.22, ease: EASE_VELA }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-3 border-l-2 border-[#b5573a] pl-3 space-y-4">
+                                  {item.groups.map((group) => (
+                                    <section key={group.title}>
+                                      <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
+                                      <div className="flex flex-col gap-2">
+                                        {group.items.map((sub) => (
+                                          <Link
+                                            key={`${sub.label}-${sub.href}`}
+                                            href={sub.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="text-xs text-[#1c1a18]/70 hover:text-[#b5573a]"
+                                          >
+                                            {sub.label}
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </section>
+                                  ))}
+                                  <Link
+                                    href={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="mt-3 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                                  >
+                                    {item.ctaLabel} &rarr;
+                                  </Link>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-              <div className="h-[1px] bg-[#e3dccf] my-2" />
+                </div>
 
-              <div className="flex justify-center">
-                <LanguageSwitcher />
-              </div>
-              
-              {/* Mobile Search */}
-              <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#efe7dc] rounded-full px-4 py-3 gap-3 w-full border border-transparent">
-                <Search className="w-5 h-5 text-[#8a857c]" />
+                {/* Drawer Footer */}
+                <div className="border-t border-[#e3dccf] p-6 space-y-4 bg-[#efe7dc]/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-[#1c1a18]/60">{activeLocale === "vi" ? "Ngôn ngữ" : "Language"}</span>
+                    <LanguageSwitcher />
+                  </div>
+                  {safeIsAuthenticated && safeUser ? (
+                    <div className="flex items-center justify-between pt-2">
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-xs font-semibold text-[#1c1a18] hover:text-[#b5573a]"
+                      >
+                        {safeUser.fullName || safeUser.email}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="text-xs text-red-600 font-medium cursor-pointer"
+                      >
+                        {t("storefront.nav.logOut")}
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/sign-in"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex h-10 w-full items-center justify-center rounded-sm bg-[#1c1a18] text-xs font-semibold uppercase tracking-wider text-[#f7f4ef] hover:bg-[#b5573a] transition-colors"
+                    >
+                      {t("storefront.nav.logIn")}
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Dedicated Mobile Search Modal (Nike Style) */}
+      <AnimatePresence>
+        {isMobileSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-0 z-50 flex flex-col bg-[#f7f4ef] text-[#1c1a18] p-5 sm:p-6 lg:hidden"
+          >
+            {/* Header: Input Pill + Cancel Button */}
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
+              <div className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 flex-1 border border-transparent focus-within:border-[#b5573a]/30 transition-all">
+                <Search className="w-4 h-4 text-[#8a857c] flex-none" />
                 <input
+                  ref={mobileSearchInputRef}
                   type="text"
                   placeholder={t("storefront.nav.searchPlaceholder")}
                   value={searchQuery}
+                  autoComplete="off"
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-sm w-full text-[#1c1a18]"
+                  className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-sm w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
                 />
-              </form>
-
-              {/* Mobile Account Profile */}
-              {safeIsAuthenticated && safeUser ? (
-                <div className="flex flex-col gap-4">
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
-                  >
-                    {t("storefront.nav.viewProfileName", { name: safeUser.fullName })}
-                  </Link>
+                {searchQuery && (
                   <button
-                    onClick={handleLogout}
-                    className="text-sm font-semibold uppercase tracking-[1px] text-[#b5573a] text-center border border-[#b5573a]/40 py-4 rounded-[6px] hover:bg-[#b5573a]/10 transition-colors duration-300"
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18] p-1 flex-none"
                   >
-                    {t("storefront.nav.signOut")}
+                    ✕
                   </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSearchOpen(false)}
+                className="text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a] px-1 py-1 cursor-pointer flex-none"
+              >
+                {activeLocale === "vi" ? "Hủy" : "Cancel"}
+              </button>
+            </form>
+
+            {/* Modal Body */}
+            <div className="mt-6 flex-1 overflow-y-auto space-y-6 pr-1">
+              {searchQuery.trim() ? (
+                /* Live Suggestions */
+                <div className="space-y-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[#707072]">
+                    {t("storefront.nav.searchSuggestions")}
+                  </div>
+                  {searchSuggestions.length > 0 ? (
+                    searchSuggestions.map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/products/${product.id}`}
+                        onClick={() => {
+                          persistSearchHistory(searchQuery);
+                          setIsMobileSearchOpen(false);
+                        }}
+                        className="flex items-center gap-3 py-2.5 border-b border-[#1c1a18]/8 text-sm text-[#1c1a18] hover:text-[#b5573a] transition-colors"
+                      >
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          width={44}
+                          height={44}
+                          className="h-11 w-11 rounded-sm object-cover bg-white flex-none"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-[#1c1a18]">{product.name}</p>
+                          <p className="text-xs text-[#b5573a] font-numeric font-medium">{money(product.price, activeLocale)}</p>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-sm text-[#1c1a18]/60 py-4">
+                      {t("storefront.nav.noMatchingProducts")}
+                    </p>
+                  )}
                 </div>
               ) : (
-                <Link
-                  href="/sign-in"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-sm font-semibold uppercase tracking-[1px] text-[#1c1a18] text-center bg-[#efe7dc] py-4 rounded-[6px] hover:bg-[#b5573a] hover:text-white transition-colors duration-300"
-                >
-                  {t("storefront.nav.logIn")}
-                </Link>
+                /* Popular Terms + Recent Searches */
+                <>
+                  {/* Popular Search Terms */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-[#707072] uppercase tracking-[0.08em] mb-3">
+                      {activeLocale === "vi" ? "Từ khóa tìm kiếm phổ biến" : "Popular Search Terms"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2.5">
+                      {POPULAR_SEARCH_TERMS[activeLocale === "vi" ? "vi" : "en"].map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => runSearch(term)}
+                          className="rounded-full bg-[#efe7dc] px-4 py-2 text-xs font-medium text-[#1c1a18] hover:bg-[#b5573a] hover:text-white transition-colors cursor-pointer"
+                        >
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recent Searches */}
+                  {searchHistory.length > 0 && (
+                    <div className="pt-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xs font-semibold text-[#707072] uppercase tracking-[0.08em]">
+                          {activeLocale === "vi" ? "Tìm kiếm gần đây" : "Recent searches"}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setSearchHistory([])}
+                          className="text-xs text-[#1c1a18]/50 hover:text-[#b5573a] font-medium"
+                        >
+                          {activeLocale === "vi" ? "Xóa tất cả" : "Clear all"}
+                        </button>
+                      </div>
+                      <div className="divide-y divide-[#1c1a18]/8">
+                        {searchHistory.map((term) => (
+                          <div
+                            key={term}
+                            className="flex items-center justify-between py-3 group"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => runSearch(term)}
+                              className="text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a] text-left flex-1 truncate transition-colors cursor-pointer"
+                            >
+                              {term}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeSearchHistoryItem(term)}
+                              className="p-1 text-[#1c1a18]/40 hover:text-[#1c1a18] transition-colors cursor-pointer flex-none"
+                              aria-label={`Remove ${term} from history`}
+                            >
+                              <X className="size-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </motion.div>

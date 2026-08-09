@@ -101,7 +101,7 @@ export function SignInPage() {
         </p>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-6">
+      <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-6">
         {apiError && (
           <div className="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
             {apiError}
@@ -125,7 +125,7 @@ export function SignInPage() {
             }}
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+            <p className="mt-1 text-xs font-medium text-destructive">
               {errors.email.message}
             </p>
           )}
@@ -168,7 +168,7 @@ export function SignInPage() {
             }
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+            <p className="mt-1 text-xs font-medium text-destructive">
               {errors.password.message}
             </p>
           )}
