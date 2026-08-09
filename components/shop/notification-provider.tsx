@@ -84,12 +84,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       {/* Floating Notification Panel */}
       {notification && (
         <div
-          className={`fixed right-4 md:right-16 z-50 transition-all duration-300 ease-out max-w-sm md:max-w-md w-[calc(100vw-2rem)] ${
+          className={`fixed top-24 right-4 md:right-16 z-50 transition-[transform,opacity] duration-300 ease-out max-w-sm md:max-w-md w-[calc(100vw-2rem)] ${
             isVisible
-              ? "top-24 translate-y-0 opacity-100"
-              : "top-20 -translate-y-4 opacity-0 pointer-events-none"
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-4 opacity-0 pointer-events-none"
           }`}
-          style={{ transitionProperty: "transform, opacity, top" }}
+          style={{ transitionProperty: "transform, opacity" }}
         >
           {notification.type === "bag" ? (
             /* ADDED TO BAG NOTIFICATION (Nike Style) */

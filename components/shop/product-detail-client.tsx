@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { EASE_VELA } from "@/lib/motion-tokens";
 import {
   BadgePercent,
   Clock3,
   Heart,
-  ChevronUp,
   ChevronDown,
 } from "lucide-react";
 
@@ -40,12 +41,13 @@ const colorSwatches: Record<string, string> = {
 
 export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
-  const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
   const { locale: activeLocale, t } = useI18n();
+  const reduceMotion = useReducedMotion();
   const favorited =
     product.realId !== undefined
-      ? favorites.some((item) => item.realId === product.realId || item.id === product.id)
+      ? isFavorite(String(product.realId))
       : isFavorite(product.id);
   const [selectedColor, setSelectedColor] = useState(
     product.colorImages?.[0]?.colorName || product.color
@@ -383,7 +385,18 @@ export function ProductDetailClient({ product }: { product: Product }) {
             )}
           >
             <span>{favorited ? t("storefront.product.favourited") : t("storefront.product.favourite")}</span>
-            <Heart className={cn("size-4 transition-transform active:scale-95 duration-200", favorited && "fill-black stroke-black")} />
+            <motion.div
+              key={favorited ? "favorited" : "unfavorited"}
+              initial={{ scale: reduceMotion ? 1 : 0.8 }}
+              animate={{ scale: 1 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0.15 }
+                  : { type: "spring", stiffness: 400, damping: 18 }
+              }
+            >
+              <Heart className={cn("size-4", favorited && "fill-black stroke-black")} />
+            </motion.div>
           </button>
         </div>
 
@@ -404,25 +417,38 @@ export function ProductDetailClient({ product }: { product: Product }) {
               <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
                 {t("storefront.product.sizeAndFit")}
               </h3>
-              {openSections.sizeAndFit ? (
-                <ChevronUp className="size-4 text-ink/70" />
-              ) : (
-                <ChevronDown className="size-4 text-ink/70" />
-              )}
+              <motion.span
+                animate={{ rotate: openSections.sizeAndFit ? 180 : 0 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="text-ink/70 flex-shrink-0"
+              >
+                <ChevronDown className="size-4" />
+              </motion.span>
             </button>
-            {openSections.sizeAndFit && (
-              <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
-                  <li>{t("storefront.product.modelSize")}</li>
-                  <li>{t("storefront.product.looseFit")}</li>
-                  <li>
-                    <Link className="underline hover:text-[#b85a3c] transition-colors" href={sizeGuideHref}>
-                      {t("storefront.product.sizeGuide")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {openSections.sizeAndFit && (
+                <motion.div
+                  key="sizeAndFit"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.26, ease: EASE_VELA }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-4">
+                    <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
+                      <li>{t("storefront.product.modelSize")}</li>
+                      <li>{t("storefront.product.looseFit")}</li>
+                      <li>
+                        <Link className="underline hover:text-[#b85a3c] transition-colors" href={sizeGuideHref}>
+                          {t("storefront.product.sizeGuide")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Material & Care */}
@@ -436,28 +462,41 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
                   {t("storefront.product.materialCare")}
                 </h3>
-                {openSections.materialAndCare ? (
-                  <ChevronUp className="size-4 text-ink/70" />
-                ) : (
-                  <ChevronDown className="size-4 text-ink/70" />
-                )}
+                <motion.span
+                  animate={{ rotate: openSections.materialAndCare ? 180 : 0 }}
+                  transition={{ duration: 0.22, ease: "easeInOut" }}
+                  className="text-ink/70 flex-shrink-0"
+                >
+                  <ChevronDown className="size-4" />
+                </motion.span>
               </button>
-              {openSections.materialAndCare && (
-                <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
-                    {product.material && (
-                      <p>
-                        <span className="font-medium text-ink">{t("storefront.product.material")}</span> {product.material}
-                      </p>
-                    )}
-                    {product.care && (
-                      <p>
-                        <span className="font-medium text-ink">{t("storefront.product.care")}</span> {product.care}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
+              <AnimatePresence initial={false}>
+                {openSections.materialAndCare && (
+                  <motion.div
+                    key="materialAndCare"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.26, ease: EASE_VELA }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-4">
+                      <div className="space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                        {product.material && (
+                          <p>
+                            <span className="font-medium text-ink">{t("storefront.product.material")}</span> {product.material}
+                          </p>
+                        )}
+                        {product.care && (
+                          <p>
+                            <span className="font-medium text-ink">{t("storefront.product.care")}</span> {product.care}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -471,33 +510,46 @@ export function ProductDetailClient({ product }: { product: Product }) {
               <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
                 {t("storefront.product.deliveryTitle")}
               </h3>
-              {openSections.delivery ? (
-                <ChevronUp className="size-4 text-ink/70" />
-              ) : (
-                <ChevronDown className="size-4 text-ink/70" />
-              )}
+              <motion.span
+                animate={{ rotate: openSections.delivery ? 180 : 0 }}
+                transition={{ duration: 0.22, ease: "easeInOut" }}
+                className="text-ink/70 flex-shrink-0"
+              >
+                <ChevronDown className="size-4" />
+              </motion.span>
             </button>
-            {openSections.delivery && (
-              <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <p className="text-xs font-light tracking-wide text-on-surface-variant/80 mb-3 leading-relaxed">
-                  {t("storefront.product.deliveryThreshold")}
-                </p>
-                <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
-                  <li>{t("storefront.product.standardDelivery")}</li>
-                  <li>{t("storefront.product.expressDelivery")}</li>
-                </ul>
-                <p className="mt-3 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
-                  {t("storefront.product.deliverySchedule")}
-                </p>
-                <p className="mt-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
-                  {t("storefront.product.memberReturnsPrefix")}{" "}
-                  <a className="underline hover:text-[#b85a3c] transition-colors" href="#">
-                    {t("storefront.product.freeReturns")}
-                  </a>
-                  .
-                </p>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {openSections.delivery && (
+                <motion.div
+                  key="delivery"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.26, ease: EASE_VELA }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-4">
+                    <p className="text-xs font-light tracking-wide text-on-surface-variant/80 mb-3 leading-relaxed">
+                      {t("storefront.product.deliveryThreshold")}
+                    </p>
+                    <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
+                      <li>{t("storefront.product.standardDelivery")}</li>
+                      <li>{t("storefront.product.expressDelivery")}</li>
+                    </ul>
+                    <p className="mt-3 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                      {t("storefront.product.deliverySchedule")}
+                    </p>
+                    <p className="mt-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                      {t("storefront.product.memberReturnsPrefix")}{" "}
+                      <a className="underline hover:text-[#b85a3c] transition-colors" href="#">
+                        {t("storefront.product.freeReturns")}
+                      </a>
+                      .
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <ProductReviewsSection productId={product.realId} productName={product.name} />

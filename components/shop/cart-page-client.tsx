@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AlertTriangle, ArrowRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -94,113 +95,21 @@ export function CartPageClient() {
                 </div>
               </div>
             ) : null}
-            {cart.map((item) => (
-              <Card
-                key={`${item.id}-${item.color}-${item.size}`}
-                className="flex gap-6 rounded-md border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row"
-              >
-                <Link
-                  href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
-                  className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28"
-                  aria-label={t("cart.viewProduct", { product: item.name })}
-                >
-                  <FashionImage src={item.image} alt={item.name} />
-                </Link>
-
-                <div className="flex flex-grow flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-4">
-                      <Link
-                        href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
-                        className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b85a3c]"
-                      >
-                        {item.name}
-                      </Link>
-                      <div className="text-right">
-                        <span className="block whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
-                          {money(item.price * item.quantity, locale)}
-                        </span>
-                        {item.listPrice && item.listPrice > item.price ? (
-                          <span className="text-xs text-[#1c1a18]/35 line-through">
-                            {money(item.listPrice * item.quantity, locale)}
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <p className="mt-2 flex gap-4 text-[11px] uppercase tracking-wider text-[#1c1a18]/60">
-                      <span>
-                        {t("common.color")}:{" "}
-                        <strong className="text-[#1c1a18]">{item.color}</strong>
-                      </span>
-                      <span>
-                        {t("common.size")}:{" "}
-                        <strong className="text-[#1c1a18]">{item.size}</strong>
-                      </span>
-                    </p>
-                    {item.priceSource && item.priceSource !== "BASE" ? (
-                      <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
-                        <span className={item.priceSource === "FLASH_SALE" ? "rounded bg-[#8f2f20] px-2 py-1 text-white" : "rounded bg-[#1c1a18] px-2 py-1 text-white"}>
-                          {item.priceSource === "FLASH_SALE"
-                            ? t("storefront.sale.type.flash")
-                            : t("storefront.sale.type.standard")}
-                        </span>
-                        {item.campaignName ? <span className="text-[#1c1a18]/50">{item.campaignName}</span> : null}
-                        {item.priceSource === "FLASH_SALE" && item.remainingQuota != null ? (
-                          <span className="text-[#8f2f20]">
-                            {t("sale.cart.remainingQuota", { count: item.remainingQuota })}
-                          </span>
-                        ) : null}
-                        {item.priceSource === "FLASH_SALE" && item.customerRemaining != null ? (
-                          <span className="text-[#8f2f20]">
-                            {t("sale.cart.customerRemaining", { count: item.customerRemaining })}
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-6 flex items-center justify-between border-t border-[#1c1a18]/5 pt-4">
-                    <div className="flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/15 bg-[#efebe4]/30 px-2 py-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                        aria-label={t("cart.decreaseQuantity")}
-                        className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
-                      >
-                        <Minus className="size-3" />
-                      </Button>
-                      <span className="w-8 text-center text-xs font-bold text-[#1c1a18]">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={getCartItemMaximum(item) !== null && item.quantity >= (getCartItemMaximum(item) as number)}
-                        aria-label={t("cart.increaseQuantity")}
-                        className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
-                      >
-                        <Plus className="size-3" />
-                      </Button>
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => removeItem(item.id)}
-                      className="h-8 rounded-sm text-[10px] font-bold uppercase tracking-widest text-[#b85a3c] hover:bg-[#efebe4]"
-                    >
-                      <Trash2 className="size-3.5" />
-                      {t("cart.remove")}
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+            <AnimatePresence initial={false}>
+              {cart.map((item) => {
+                const key = `${item.id}-${item.color}-${item.size}`;
+                return (
+                  <CartItemRow
+                    key={key}
+                    item={item}
+                    locale={locale}
+                    t={t}
+                    updateQuantity={updateQuantity}
+                    removeItem={removeItem}
+                  />
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
@@ -393,5 +302,139 @@ function CartPageLoadingFallback() {
         </div>
       </section>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// CartItemRow — animated exit on removal (Preventing a jarring change · Occasional)
+// ---------------------------------------------------------------------------
+
+type CartItemRowProps = {
+  item: ReturnType<typeof useCart>["cart"][number];
+  locale: ReturnType<typeof useI18n>["locale"];
+  t: ReturnType<typeof useI18n>["t"];
+  updateQuantity: (id: string, qty: number) => void;
+  removeItem: (id: string) => void;
+};
+
+function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRowProps) {
+  const reduce = useReducedMotion();
+
+  return (
+    <motion.div
+      layout
+      exit={
+        reduce
+          ? { opacity: 0, transition: { duration: 0.15 } }
+          : {
+              opacity: 0,
+              transform: "translateX(-16px)",
+              transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] },
+            }
+      }
+    >
+      <Card className="flex gap-6 rounded-md border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row">
+        <Link
+          href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
+          className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28"
+          aria-label={t("cart.viewProduct", { product: item.name })}
+        >
+          <FashionImage src={item.image} alt={item.name} />
+        </Link>
+
+        <div className="flex flex-grow flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between gap-4">
+              <Link
+                href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
+                className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b85a3c]"
+              >
+                {item.name}
+              </Link>
+              <div className="text-right">
+                <span className="block whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
+                  {money(item.price * item.quantity, locale)}
+                </span>
+                {item.listPrice && item.listPrice > item.price ? (
+                  <span className="text-xs text-[#1c1a18]/35 line-through">
+                    {money(item.listPrice * item.quantity, locale)}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <p className="mt-2 flex gap-4 text-[11px] uppercase tracking-wider text-[#1c1a18]/60">
+              <span>
+                {t("common.color")}:{" "}
+                <strong className="text-[#1c1a18]">{item.color}</strong>
+              </span>
+              <span>
+                {t("common.size")}:{" "}
+                <strong className="text-[#1c1a18]">{item.size}</strong>
+              </span>
+            </p>
+            {item.priceSource && item.priceSource !== "BASE" ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                <span className={item.priceSource === "FLASH_SALE" ? "rounded bg-[#8f2f20] px-2 py-1 text-white" : "rounded bg-[#1c1a18] px-2 py-1 text-white"}>
+                  {item.priceSource === "FLASH_SALE"
+                    ? t("storefront.sale.type.flash")
+                    : t("storefront.sale.type.standard")}
+                </span>
+                {item.campaignName ? <span className="text-[#1c1a18]/50">{item.campaignName}</span> : null}
+                {item.priceSource === "FLASH_SALE" && item.remainingQuota != null ? (
+                  <span className="text-[#8f2f20]">
+                    {t("sale.cart.remainingQuota", { count: item.remainingQuota })}
+                  </span>
+                ) : null}
+                {item.priceSource === "FLASH_SALE" && item.customerRemaining != null ? (
+                  <span className="text-[#8f2f20]">
+                    {t("sale.cart.customerRemaining", { count: item.customerRemaining })}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-6 flex items-center justify-between border-t border-[#1c1a18]/5 pt-4">
+            <div className="flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/15 bg-[#efebe4]/30 px-2 py-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                disabled={item.quantity <= 1}
+                aria-label={t("cart.decreaseQuantity")}
+                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
+              >
+                <Minus className="size-3" />
+              </Button>
+              <span className="w-8 text-center text-xs font-bold text-[#1c1a18]">
+                {item.quantity}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                disabled={getCartItemMaximum(item) !== null && item.quantity >= (getCartItemMaximum(item) as number)}
+                aria-label={t("cart.increaseQuantity")}
+                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
+              >
+                <Plus className="size-3" />
+              </Button>
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => removeItem(item.id)}
+              className="h-8 rounded-sm text-[10px] font-bold uppercase tracking-widest text-[#b85a3c] hover:bg-[#efebe4]"
+            >
+              <Trash2 className="size-3.5" />
+              {t("cart.remove")}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
   );
 }

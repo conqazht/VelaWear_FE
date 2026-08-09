@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { motion } from "motion/react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { type ProfileTabId } from "./profile-formatters";
 
@@ -31,13 +32,20 @@ export function ProfileShell({ activeTab, children }: ProfileShellProps) {
                 <Link
                   key={tab.id}
                   href={`/profile?tab=${tab.id}`}
-                  className={`text-xs uppercase tracking-[0.15em] font-medium transition-colors py-4 border-b-2 ${
+                  className={`relative text-xs uppercase tracking-[0.15em] font-medium transition-colors py-4 ${
                     isActive
-                      ? "border-ink text-ink font-semibold"
-                      : "border-transparent text-ink/60 hover:text-ink hover:border-hairline"
+                      ? "text-ink font-semibold"
+                      : "text-ink/60 hover:text-ink"
                   }`}
                 >
                   {tab.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="profile-tab-indicator"
+                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-ink"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                 </Link>
               );
             })}

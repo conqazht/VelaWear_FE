@@ -102,19 +102,19 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             <div className="max-w-[1280px] w-full mx-auto flex flex-col items-center text-center">
               {/* Subtitle */}
               <motion.span
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-[11px] md:text-xs font-semibold uppercase tracking-[2.5px] text-[#ffb59f] mb-4"
+                initial={{ opacity: 0, transform: "translateY(15px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                transition={{ delay: 0.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[11px] md:text-xs font-semibold uppercase tracking-[2.5px] text-[#ffb59f] mb-4 block"
               >
                 {slides[current].subtitle}
               </motion.span>
 
               {/* Serif Title */}
               <motion.h1
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.7 }}
+                initial={{ opacity: 0, transform: "translateY(20px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                transition={{ delay: 0.3, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
                 className="font-serif text-4xl sm:text-5xl md:text-7xl text-[#f7f4ef] font-light leading-tight tracking-tight max-w-4xl mb-8"
               >
                 {slides[current].title}
@@ -122,12 +122,12 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 
               {/* Call-to-action button */}
               <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
+                initial={{ opacity: 0, transform: "translateY(15px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="bg-[#b5573a] hover:bg-[#8f4329] text-white font-medium text-sm tracking-[1.5px] uppercase px-10 py-4.5 rounded-[6px] transition-colors duration-300 shadow-lg cursor-pointer flex items-center gap-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => router.push("/collection")}
               >
                 {slides[current].ctaText}
@@ -142,8 +142,8 @@ export function HeroSlider({ slides }: HeroSliderProps) {
         <motion.button
           onClick={handlePrev}
           className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           aria-label={t("storefront.home.previousSlide")}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -152,8 +152,8 @@ export function HeroSlider({ slides }: HeroSliderProps) {
         <motion.button
           onClick={handleNext}
           className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           aria-label={t("storefront.home.nextSlide")}
         >
           <ChevronRight className="w-5 h-5" />
@@ -174,8 +174,10 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             aria-label={t("storefront.home.goToSlide", { number: i + 1 })}
           >
             <div
-              className={`h-1.5 rounded-full transition-all duration-500 ease-out ${
-                i === current ? "w-10 bg-white" : "w-2.5 bg-white/40 group-hover:bg-white/60"
+              className={`h-1.5 w-10 origin-left rounded-full transition-[transform,background-color] duration-300 ease-out ${
+                i === current
+                  ? "scale-x-100 bg-white"
+                  : "scale-x-[0.25] bg-white/40 group-hover:bg-white/60"
               }`}
             />
           </button>

@@ -72,9 +72,9 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
             toggleFavorite(product, product.size || "M");
           }}
           className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center bg-[#f7f4ef]/90 text-[#1c1a18] shadow-sm cursor-pointer z-10 backdrop-blur-sm"
-          whileHover={{ scale: 1.1, backgroundColor: "#efe7dc" }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ duration: 0.2 }}
+          whileHover={{ scale: 1.04, backgroundColor: "#efe7dc" }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.15 }}
           aria-label={favorited
             ? t("storefront.common.removeFromWishlist")
             : t("storefront.common.addToWishlist")}
@@ -87,7 +87,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
         </motion.button>
 
         {/* Add to Cart Overlay */}
-        <div className="absolute inset-x-0 bottom-0 overflow-hidden translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
+        <div className="absolute inset-x-0 bottom-0 overflow-hidden translate-y-full [@media(hover:hover)_and_(pointer:fine)]:group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
           <motion.button
             disabled={flashUnavailable}
             onClick={(e) => {

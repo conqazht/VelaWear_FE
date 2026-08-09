@@ -58,6 +58,10 @@ treat dependency drift as automatically safe.
 | FE-010 | [Decompose the profile page](010-decompose-profile-page.md) | `refactor/profile-page` | P3 | L | FE-009 | 4 | DONE |
 | FE-011 | [Split i18n message namespaces](011-split-i18n-message-namespaces.md) | `perf/i18n-message-splitting` | P3 | L | FE-001–FE-010 | 5 | DONE |
 | FE-012 | [Clean frontend dependencies and documentation](012-clean-frontend-dependencies-and-docs.md) | `chore/frontend-maintenance-docs` | P3 | M | FE-001–FE-011 and external BE-015 | 5 | DONE |
+| FE-013 | [Consolidate shared CSS animation tokens](013-consolidate-animation-tokens.md) | `feat/storefront-animations` | P2 | S | FE-012 | 6 | DONE |
+| FE-014 | [Add spring pop feedback to product detail wishlist heart](014-product-detail-favorite-spring.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | DONE |
+| FE-015 | [Add sliding layout indicator to profile page tab navigation](015-profile-tab-layout-indicator.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | DONE |
+| FE-016 | [Add reduced motion fallback to editorial craft scroll gallery](016-editorial-craft-reduced-motion.md) | `feat/storefront-animations` | P2 | S | FE-013 | 6 | DONE |
 
 Status values: `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED (<reason>)`, or
 `REJECTED (<reason>)`.
