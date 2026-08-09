@@ -230,7 +230,6 @@ function CatalogFilters({
   onClear,
   priceError,
   setPriceError,
-  isMobile = false,
 }: FilterProps) {
   const { locale, t } = useI18n();
   const copy = getCatalogCopy(locale);
@@ -733,7 +732,7 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
     window.scrollTo({ top: Math.max(0, top - headerOffset - 24), behavior: "auto" });
   };
 
-  if (productsQuery.isError && catalogData === undefined) {
+  if (productsQuery.isError && (catalogData === undefined || lastSuccessfulCatalog === null)) {
     return (
       <StorefrontApiStatus
         error={productsQuery.error}

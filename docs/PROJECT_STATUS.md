@@ -1,3 +1,12 @@
+## 2026-08-09 (E2E Fullstack & Mobile Overflow Hotfix)
+
+- **Branch:** `fix/e2e-catalog-overflow-hotfix`
+- **Fixes Delivered:**
+  1. **Eliminated Mobile Horizontal Page Overflow:** Replaced `before:-left-12 before:-right-12` on `ProductToolbar` in `product-layout-components.tsx` with `before:inset-0`. This ensures `scrollWidth <= clientWidth` is 100% satisfied on mobile 390px viewports without horizontal page overflow.
+  2. **Form Error Casing & E2E Validation Match:** Removed `uppercase` from validation error message paragraphs in `sign-in-page.tsx` to preserve normal sentence casing ("Không được để trống").
+  3. **Playwright Search URL Timeout:** Added `{ timeout: 15000 }` to `toHaveURL` assertion in `storefront-smoke.spec.ts` for cold route compilation in dev server.
+- **Verification:** `pnpm test:e2e:smoke` (16/16 passed 100%), `pnpm exec tsc --noEmit` (0 errors).
+
 ## 2026-08-09 (Eliminated Vertical Side Seams on ProductToolbar)
 
 - **Branch:** `feat/emil-design-eng-polish`

@@ -21,8 +21,9 @@ test("trang chủ render shell và tìm kiếm từ header", { tag: "@smoke" }, 
   await searchInput.fill("linen shirt");
   await searchInput.press("Enter");
 
-  await expect(page).toHaveURL((url) =>
-    url.pathname === "/search" && url.searchParams.get("q") === "linen shirt"
+  await expect(page).toHaveURL(
+    (url) => url.pathname === "/search" && url.searchParams.get("q") === "linen shirt",
+    { timeout: 15000 }
   );
 });
 

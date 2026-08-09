@@ -125,7 +125,7 @@ export function SignInPage() {
             }}
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+            <p className="mt-1 text-xs font-medium text-destructive">
               {errors.email.message}
             </p>
           )}
@@ -168,7 +168,7 @@ export function SignInPage() {
             }
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+            <p className="mt-1 text-xs font-medium text-destructive">
               {errors.password.message}
             </p>
           )}
