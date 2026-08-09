@@ -760,7 +760,7 @@ export function SiteHeader() {
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`${burgerClass} p-2 rounded-full transition-colors cursor-pointer lg:hidden flex items-center justify-center`}
-                aria-label={t("storefront.nav.openMenu")}
+                aria-label={isMobileMenuOpen ? "Đóng menu" : (activeLocale === "vi" ? "Mở menu" : "Open menu")}
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
