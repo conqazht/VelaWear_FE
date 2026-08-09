@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { EASE_VELA } from "@/lib/motion-tokens";
-import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -277,19 +277,8 @@ export function SiteHeader() {
               : undefined
           }
         >
-          {/* Hamburger button for mobile */}
-          <div className="flex items-center lg:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`${burgerClass} transition-colors p-1`}
-              aria-label={t("storefront.nav.openMenu")}
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-
-          {/* Logo */}
-          <div className="flex-none lg:static absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:translate-x-0 lg:translate-y-0">
+          {/* Logo pinned to left */}
+          <div className="flex-none">
             <Link href="/" className="flex items-center gap-2 group relative">
               <motion.div
                 className="relative flex items-center overflow-hidden rounded-md"
@@ -650,14 +639,51 @@ export function SiteHeader() {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
               <LanguageSwitcher
                 className="hidden md:inline-flex"
                 inverted={shouldBeTransparent}
               />
 
+              {/* Mobile Search Button */}
+              <motion.button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(true);
+                  setTimeout(() => {
+                    const input = document.querySelector<HTMLInputElement>('input[placeholder*="Tìm kiếm"]');
+                    input?.focus();
+                  }, 100);
+                }}
+                className={`${iconClass} p-2 rounded-full cursor-pointer lg:hidden relative`}
+                whileHover={{
+                  scale: 1.04,
+                  backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                }}
+                whileTap={{ scale: 0.95 }}
+                aria-label={t("storefront.nav.search")}
+              >
+                <Search className="w-4.5 h-4.5" />
+              </motion.button>
+
+              {/* Mobile Account Profile / Login Button */}
+              <Link href={safeIsAuthenticated ? "/profile" : "/sign-in"} className="lg:hidden">
+                <motion.button
+                  type="button"
+                  className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
+                  whileHover={{
+                    scale: 1.04,
+                    backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label={t("storefront.nav.account")}
+                >
+                  <User className="w-4.5 h-4.5" />
+                </motion.button>
+              </Link>
+
               {/* Wishlist Link */}
-              <Link href="/favorites">
+              <Link href="/favorites" className="hidden sm:inline-flex">
                 <motion.button
                   className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
                   whileHover={{
@@ -703,6 +729,16 @@ export function SiteHeader() {
                   )}
                 </motion.button>
               </Link>
+
+              {/* Mobile Hamburger Menu Button */}
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`${burgerClass} p-2 rounded-full transition-colors cursor-pointer lg:hidden flex items-center justify-center`}
+                aria-label={t("storefront.nav.openMenu")}
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
 
               {/* Account Profile / Login */}
               <div className="hidden md:flex items-center gap-4">
