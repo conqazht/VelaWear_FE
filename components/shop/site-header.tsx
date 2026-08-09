@@ -342,9 +342,9 @@ export function SiteHeader() {
                 {/* Shine effect on hover */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/45 to-transparent pointer-events-none"
-                  initial={{ x: "-150%", skewX: -20 }}
+                  initial={{ opacity: 0, x: "-150%", skewX: -20 }}
                   variants={{
-                    hover: { x: "150%" },
+                    hover: { opacity: 1, x: "150%" },
                   }}
                   transition={{ duration: 0.75, ease: "easeInOut" }}
                 />
@@ -833,9 +833,9 @@ export function SiteHeader() {
             {/* Right Side Drawer Wrapper */}
             <div className="fixed inset-y-0 right-0 z-50 w-[320px] max-w-[85vw] overflow-hidden pointer-events-none lg:hidden">
               <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
+                initial={{ opacity: 0, x: "100%" }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: "100%" }}
                 transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
                 className="flex h-full w-full flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl pointer-events-auto"
               >
