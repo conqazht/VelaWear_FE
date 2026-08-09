@@ -50,7 +50,7 @@ export function AnimatedAuthShell({
         />
 
         <section
-          className="relative flex h-full w-full max-w-[560px] mx-auto items-center justify-center overflow-y-auto rounded-[24px] border border-[#e4dacf] px-4 py-8 shadow-[0_24px_80px_rgba(69,43,28,0.08)] md:px-8"
+          className="relative flex h-full w-full max-w-[560px] mx-auto items-center justify-center overflow-hidden overflow-y-auto rounded-[24px] border border-[#e4dacf] px-4 py-8 shadow-[0_24px_80px_rgba(69,43,28,0.08)] md:px-8"
           style={{
             backgroundImage: "url('/auth/bg-login.webp')",
             backgroundPosition: "center",
@@ -58,7 +58,7 @@ export function AnimatedAuthShell({
           }}
         >
           {/* Glassmorphic overlay matching the original layout */}
-          <div className="absolute inset-0 bg-[#f7f4ef]/82 backdrop-blur-[2px] z-0" />
+          <div className="absolute inset-0 bg-[#f7f4ef]/82 backdrop-blur-[2px] z-0 rounded-[24px]" />
 
           <motion.div
             className={cn(
