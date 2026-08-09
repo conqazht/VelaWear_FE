@@ -35,7 +35,7 @@ export function HomeProductCard({ product }: HomeProductCardProps) {
   return (
     <motion.article
       aria-label={product.name}
-      className="group relative flex flex-col bg-transparent overflow-hidden transition-all duration-300 pb-4"
+      className="group relative flex flex-col bg-transparent overflow-hidden transition-all duration-300 pb-4 cursor-pointer"
       whileHover={{ y: -4 }}
     >
       {/* Product Image Wrapper */}

@@ -45,7 +45,7 @@ export function ProductToolbar({
   const currentSortLabel = sortOptions.find((o) => o.value === sortBy)?.label ?? sortOptions[0]?.label;
 
   return (
-    <div className="sticky top-[var(--header-visible-height)] z-30 isolate mb-6 flex select-none flex-row items-center justify-between py-3 transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:inset-0 before:-z-10 before:bg-[#f7f4ef]">
+    <div className="sticky top-[var(--header-visible-height)] z-30 isolate mb-6 flex select-none flex-row items-center justify-between py-3 transition-[top] duration-[220ms] ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:inset-y-0 before:-left-12 before:-right-12 before:-z-10 before:bg-[#f7f4ef]">
       <div className="relative z-10 flex items-center gap-4">
         <p className="hidden text-xs uppercase tracking-widest text-[#1c1a18]/60 md:block">
           {t(
@@ -92,7 +92,7 @@ export function ProductToolbar({
                 <SelectItem
                   key={opt.value}
                   value={opt.value}
-                  className="rounded-xl px-3 py-2.5 text-sm text-[#1c1a18] data-highlighted:bg-[#efe7dc] data-highlighted:text-[#1c1a18]"
+                  className="rounded-sm px-3 py-2.5 text-sm text-[#1c1a18] data-highlighted:bg-[#efe7dc] data-highlighted:text-[#1c1a18]"
                 >
                   {opt.label}
                 </SelectItem>
@@ -170,7 +170,7 @@ export function ProductLayoutMain({
               ease: [0.23, 1, 0.32, 1],
             }}
             className={cn(
-              "w-64 pr-8 will-change-transform",
+              "w-64 pl-1.5 pr-6.5 will-change-transform",
               !showFilters && "pointer-events-none"
             )}
           >

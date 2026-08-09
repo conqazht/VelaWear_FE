@@ -363,15 +363,33 @@ export function ProductDetailClient({ product }: { product: Product }) {
               addToCart(cartProduct, resolvedSelectedColor, resolvedSelectedSize);
               showAddedToBag(cartProduct, resolvedSelectedSize, resolvedSelectedColor);
             }}
-            className="w-full h-14 bg-black hover:bg-neutral-800 text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-colors cursor-pointer border-none shadow-sm flex items-center justify-center"
+            className="w-full h-14 bg-black hover:bg-neutral-800 active:scale-[0.97] text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-all cursor-pointer border-none shadow-sm flex items-center justify-center overflow-hidden"
           >
-            {flashSoldOut
-              ? t("storefront.sale.flashSoldOut")
-              : customerLimitReached
-                ? t("storefront.sale.customerLimitReached")
-                : activeVariant?.stockQuantity === 0
-                  ? t("storefront.sale.outOfStock")
-                  : t("storefront.common.addToBag")}
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={
+                  flashSoldOut
+                    ? "sold-out"
+                    : customerLimitReached
+                      ? "limit-reached"
+                      : activeVariant?.stockQuantity === 0
+                        ? "out-of-stock"
+                        : "add-to-bag"
+                }
+                initial={{ opacity: 0, filter: reduceMotion ? "none" : "blur(2px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, filter: reduceMotion ? "none" : "blur(2px)" }}
+                transition={{ duration: reduceMotion ? 0.08 : 0.15 }}
+              >
+                {flashSoldOut
+                  ? t("storefront.sale.flashSoldOut")
+                  : customerLimitReached
+                    ? t("storefront.sale.customerLimitReached")
+                    : activeVariant?.stockQuantity === 0
+                      ? t("storefront.sale.outOfStock")
+                      : t("storefront.common.addToBag")}
+              </motion.span>
+            </AnimatePresence>
           </Button>
 
           <button

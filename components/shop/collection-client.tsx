@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -18,6 +18,15 @@ import { ProductCard } from "@/components/shop/product-card";
 import { ProductCardSkeletonGrid } from "@/components/shop/product-skeletons";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import type {
   StorefrontCatalogResult,
@@ -133,9 +142,22 @@ function PriceRangeInputs({
     onChange(next);
   };
 
+  const applyPreset = (min?: number, max?: number) => {
+    setMinimum(min?.toString() ?? "");
+    setMaximum(max?.toString() ?? "");
+    setPriceError(null);
+    onChange({ ...state, minPrice: min, maxPrice: max, page: 1 });
+  };
+
+  const presets = [
+    { label: "< 300k", min: undefined, max: 300000 },
+    { label: "300k – 600k", min: 300000, max: 600000 },
+    { label: "> 600k", min: 600000, max: undefined },
+  ];
+
   return (
-    <div>
-      <div className="flex items-center gap-2">
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5 py-0.5">
         <Input
           type="number"
           inputMode="numeric"
@@ -143,13 +165,12 @@ function PriceRangeInputs({
           value={minimum}
           placeholder={t("storefront.catalog.minimum")}
           onChange={(event) => setMinimum(event.currentTarget.value)}
-          onBlur={commit}
           onKeyDown={(event) => {
-            if (event.key === "Enter") event.currentTarget.blur();
+            if (event.key === "Enter") commit();
           }}
-          className="h-10 rounded-none border-[#1c1a18]/15 bg-transparent px-2 text-xs"
+          className="h-9 flex-1 min-w-0 rounded-sm border-[#1c1a18]/20 bg-transparent px-2 text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:border-[#b5573a] focus-visible:ring-2 focus-visible:ring-[#b5573a]/20"
         />
-        <span aria-hidden className="text-[#1c1a18]/35">—</span>
+        <span aria-hidden className="text-[#1c1a18]/35 shrink-0">—</span>
         <Input
           type="number"
           inputMode="numeric"
@@ -157,19 +178,47 @@ function PriceRangeInputs({
           value={maximum}
           placeholder={t("storefront.catalog.maximum")}
           onChange={(event) => setMaximum(event.currentTarget.value)}
-          onBlur={commit}
           onKeyDown={(event) => {
-            if (event.key === "Enter") event.currentTarget.blur();
+            if (event.key === "Enter") commit();
           }}
-          className="h-10 rounded-none border-[#1c1a18]/15 bg-transparent px-2 text-xs"
+          className="h-9 flex-1 min-w-0 rounded-sm border-[#1c1a18]/20 bg-transparent px-2 text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:border-[#b5573a] focus-visible:ring-2 focus-visible:ring-[#b5573a]/20"
         />
+        <button
+          type="button"
+          onClick={commit}
+          className="h-9 rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#b5573a] hover:border-[#b5573a] shrink-0"
+        >
+          {locale === "vi" ? "Lọc" : "Apply"}
+        </button>
       </div>
+
+      <div className="flex flex-wrap gap-1.5 pt-0.5">
+        {presets.map((preset) => {
+          const isActive = state.minPrice === preset.min && state.maxPrice === preset.max;
+          return (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => applyPreset(preset.min, preset.max)}
+              className={cn(
+                "rounded-sm border px-2 py-1 text-[11px] transition-colors",
+                isActive
+                  ? "border-[#1c1a18] bg-[#efe7dc] font-semibold text-[#1c1a18]"
+                  : "border-[#1c1a18]/15 text-[#1c1a18]/60 hover:border-[#1c1a18]/40 hover:text-[#1c1a18]"
+              )}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
+      </div>
+
       {priceRange.min !== null && priceRange.max !== null && (
-        <p className="mt-2 text-[10px] text-[#1c1a18]/45">
+        <p className="text-[10px] text-[#1c1a18]/45">
           {formatCurrency(priceRange.min, locale)} – {formatCurrency(priceRange.max, locale)}
         </p>
       )}
-      {priceError && <p className="mt-2 text-xs text-red-700">{priceError}</p>}
+      {priceError && <p className="text-xs text-red-700">{priceError}</p>}
     </div>
   );
 }
@@ -250,7 +299,7 @@ function CatalogFilters({
                             page: 1,
                           })
                         }
-                        className="peer size-4 cursor-pointer appearance-none rounded-none border border-[#1c1a18]/25 checked:border-[#1c1a18] checked:bg-[#1c1a18] disabled:cursor-not-allowed"
+                        className="peer size-4 cursor-pointer appearance-none rounded-sm border border-[#1c1a18]/25 checked:border-[#1c1a18] checked:bg-[#1c1a18] disabled:cursor-not-allowed"
                       />
                       <Check className="pointer-events-none absolute size-3 text-white opacity-0 peer-checked:opacity-100" />
                     </span>
@@ -274,6 +323,7 @@ function CatalogFilters({
               facets.sizes.map((size) => {
                 const selected = state.sizes.includes(size.id);
                 const disabled = size.count === 0 && !selected;
+                const isLongName = size.name.length > 8;
                 return (
                   <button
                     key={size.id}
@@ -287,7 +337,8 @@ function CatalogFilters({
                       })
                     }
                     className={cn(
-                      "min-h-10 border px-2 text-xs font-medium transition-colors",
+                      "min-h-10 rounded-sm border px-1.5 py-1.5 transition-colors flex flex-col items-center justify-center text-center leading-none",
+                      isLongName ? "col-span-2" : "col-span-1",
                       selected
                         ? "border-[#1c1a18] bg-[#efe7dc] text-[#1c1a18]"
                         : "border-[#1c1a18]/10 text-[#1c1a18]/70 hover:border-[#1c1a18]",
@@ -295,8 +346,12 @@ function CatalogFilters({
                     )}
                     aria-label={`${size.name}, ${size.count}`}
                   >
-                    {size.name}
-                    <span className="ml-1 text-[9px] text-[#1c1a18]/40">({size.count})</span>
+                    <span className="text-[10px] font-medium uppercase tracking-tight leading-tight max-w-full truncate">
+                      {size.name}
+                    </span>
+                    <span className="text-[9px] text-[#1c1a18]/40 font-numeric leading-tight mt-0.5">
+                      ({size.count})
+                    </span>
                   </button>
                 );
               })
@@ -328,17 +383,21 @@ function CatalogFilters({
                       })
                     }
                     className={cn(
-                      "flex min-w-0 items-center gap-2 text-left text-xs text-[#1c1a18]/70 hover:text-[#1c1a18]",
+                      "group flex min-w-0 items-center gap-2 text-left text-xs text-[#1c1a18]/70 hover:text-[#1c1a18]",
                       disabled && "cursor-not-allowed opacity-35",
                     )}
                   >
                     <span
                       className={cn(
-                        "size-6 shrink-0 border border-[#1c1a18]/15",
-                        selected && "ring-2 ring-[#1c1a18] ring-offset-2 ring-offset-[#f7f4ef]",
+                        "grid size-7 shrink-0 place-items-center rounded-full transition-all",
+                        selected ? "border-2 border-[#1c1a18]" : "border border-transparent",
                       )}
-                      style={{ backgroundColor: color.hexCode || "#e7e0d6" }}
-                    />
+                    >
+                      <span
+                        className="size-5 rounded-full border border-[#1c1a18]/15"
+                        style={{ backgroundColor: color.hexCode || "#e7e0d6" }}
+                      />
+                    </span>
                     <span className="truncate">{color.name}</span>
                     <span className="ml-auto text-[10px] tabular-nums text-[#1c1a18]/40">{color.count}</span>
                   </button>
@@ -365,14 +424,16 @@ function CatalogFilters({
         )}
       </section>
 
-      {!isMobile && hasActiveFilters && (
-        <button
-          type="button"
-          onClick={onClear}
-          className="w-full border border-[#b5573a] py-2.5 text-xs font-semibold uppercase tracking-wider text-[#b5573a] transition-colors hover:bg-[#b5573a] hover:text-white"
-        >
-          {t("storefront.common.clearAllFilters")}
-        </button>
+      {hasActiveFilters && (
+        <div className="pb-8 pt-4">
+          <button
+            type="button"
+            onClick={onClear}
+            className="w-full rounded-sm border border-[#b5573a] py-2.5 text-xs font-semibold uppercase tracking-wider text-[#b5573a] transition-colors hover:bg-[#b5573a] hover:text-white"
+          >
+            {t("storefront.common.clearAllFilters")}
+          </button>
+        </div>
       )}
     </div>
   );
@@ -407,16 +468,25 @@ function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
     label: sizeNames.get(id) ?? String(id),
     remove: () => onChange({ ...state, sizes: state.sizes.filter((item) => item !== id), page: 1 }),
   }));
-  if (state.minPrice !== undefined) chips.push({
-    key: "min-price",
-    label: `≥ ${formatCurrency(state.minPrice, locale)}`,
-    remove: () => onChange({ ...state, minPrice: undefined, page: 1 }),
-  });
-  if (state.maxPrice !== undefined) chips.push({
-    key: "max-price",
-    label: `≤ ${formatCurrency(state.maxPrice, locale)}`,
-    remove: () => onChange({ ...state, maxPrice: undefined, page: 1 }),
-  });
+  if (state.minPrice !== undefined && state.maxPrice !== undefined) {
+    chips.push({
+      key: "price-range",
+      label: `${formatCurrency(state.minPrice, locale)} – ${formatCurrency(state.maxPrice, locale)}`,
+      remove: () => onChange({ ...state, minPrice: undefined, maxPrice: undefined, page: 1 }),
+    });
+  } else if (state.minPrice !== undefined) {
+    chips.push({
+      key: "min-price",
+      label: `≥ ${formatCurrency(state.minPrice, locale)}`,
+      remove: () => onChange({ ...state, minPrice: undefined, page: 1 }),
+    });
+  } else if (state.maxPrice !== undefined) {
+    chips.push({
+      key: "max-price",
+      label: `≤ ${formatCurrency(state.maxPrice, locale)}`,
+      remove: () => onChange({ ...state, maxPrice: undefined, page: 1 }),
+    });
+  }
 
   if (chips.length === 0) return null;
 
@@ -430,7 +500,7 @@ function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
           key={chip.key}
           type="button"
           onClick={chip.remove}
-          className="inline-flex items-center gap-1.5 border border-[#1c1a18]/12 bg-white/50 px-3 py-1.5 text-xs text-[#1c1a18] hover:border-[#1c1a18]/35"
+          className="inline-flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/12 bg-white/50 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:border-[#1c1a18]/35"
         >
           {chip.label}
           <X className="size-3" aria-hidden />
@@ -453,61 +523,84 @@ function CatalogPagination({
   const copy = getCatalogCopy(locale);
   if (pages <= 1) return null;
 
-  const candidates = Array.from(new Set([
-    1,
-    Math.max(1, state.page - 1),
-    state.page,
-    Math.min(pages, state.page + 1),
-    pages,
-  ])).sort((a, b) => a - b);
+  const candidates = Array.from(
+    new Set([
+      1,
+      Math.max(1, state.page - 1),
+      state.page,
+      Math.min(pages, state.page + 1),
+      pages,
+    ])
+  ).sort((a, b) => a - b);
 
   return (
-    <nav className="mt-12 flex items-center justify-center gap-2" aria-label={copy.page}>
-      <button
-        type="button"
-        disabled={state.page <= 1}
-        onClick={() => onPage(state.page - 1)}
-        className="border border-[#1c1a18]/15 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-35"
-      >
-        {copy.previous}
-      </button>
-      {candidates.map((page, index) => (
-        <span key={page} className="contents">
-          {index > 0 && candidates[index - 1] !== page - 1 && (
-            <span className="px-1 text-[#1c1a18]/40">…</span>
-          )}
-          <button
-            type="button"
-            onClick={() => onPage(page)}
-            aria-current={page === state.page ? "page" : undefined}
-            aria-label={`${copy.page} ${page}`}
-            className={cn(
-              "size-9 border text-xs",
-              page === state.page
-                ? "border-[#1c1a18] bg-[#1c1a18] text-white"
-                : "border-[#1c1a18]/15 hover:border-[#1c1a18]",
-            )}
-          >
-            {page}
-          </button>
-        </span>
-      ))}
-      <button
-        type="button"
-        disabled={state.page >= pages}
-        onClick={() => onPage(state.page + 1)}
-        className="border border-[#1c1a18]/15 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-35"
-      >
-        {copy.next}
-      </button>
-    </nav>
+    <div className="mt-12">
+      <Pagination aria-label={copy.page}>
+        <PaginationContent className="gap-1.5">
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={(e) => {
+                e.preventDefault();
+                if (state.page > 1) onPage(state.page - 1);
+              }}
+              className={cn(
+                "cursor-pointer rounded-sm border border-[#1c1a18]/15 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:bg-[#efe7dc]",
+                state.page <= 1 && "pointer-events-none opacity-40"
+              )}
+              text={copy.previous}
+            />
+          </PaginationItem>
+
+          {candidates.map((page, index) => (
+            <Fragment key={page}>
+              {index > 0 && candidates[index - 1] !== page - 1 && (
+                <PaginationItem>
+                  <PaginationEllipsis className="text-[#1c1a18]/40" />
+                </PaginationItem>
+              )}
+              <PaginationItem>
+                <PaginationLink
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPage(page);
+                  }}
+                  isActive={page === state.page}
+                  className={cn(
+                    "size-9 cursor-pointer rounded-sm border text-xs font-medium transition-colors",
+                    page === state.page
+                      ? "border-[#1c1a18] bg-[#1c1a18] text-white hover:bg-[#1c1a18] hover:text-white"
+                      : "border-[#1c1a18]/15 text-[#1c1a18] hover:border-[#1c1a18] hover:bg-[#efe7dc]"
+                  )}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            </Fragment>
+          ))}
+
+          <PaginationItem>
+            <PaginationNext
+              onClick={(e) => {
+                e.preventDefault();
+                if (state.page < pages) onPage(state.page + 1);
+              }}
+              className={cn(
+                "cursor-pointer rounded-sm border border-[#1c1a18]/15 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:bg-[#efe7dc]",
+                state.page >= pages && "pointer-events-none opacity-40"
+              )}
+              text={copy.next}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
   );
 }
 
 export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }) {
+  const router = useRouter();
   const { locale, t } = useI18n();
   const copy = getCatalogCopy(locale);
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
@@ -753,7 +846,20 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
         ) : (
           <>
             <ProductGrid>
-              {products.map((product) => <ProductCard key={product.id} product={product} />)}
+              {products.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0.15 : 0.35,
+                    delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.4),
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
             </ProductGrid>
             <CatalogPagination state={state} pages={meta?.pages ?? 1} onPage={goToPage} />
           </>

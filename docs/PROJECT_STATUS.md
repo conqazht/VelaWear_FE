@@ -1,3 +1,90 @@
+## 2026-08-09 (Eliminated Vertical Side Seams on ProductToolbar)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fix Delivered:**
+  - Extended the sticky background pseudo-element on `ProductToolbar` in `product-layout-components.tsx` from `before:inset-0` to `before:inset-y-0 before:-left-12 before:-right-12`.
+  - The sticky background now bleeds seamlessly past the container margins on left and right, completely eliminating the two vertical side edges/seams around "Hiển thị 100 sản phẩm" and "Sắp xếp".
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Replaced Raw Button Pagination with Shadcn UI Pagination)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fix Delivered:**
+  - Replaced the custom raw `<button>` pagination implementation in `collection-client.tsx` with Shadcn UI `Pagination` primitives (`Pagination`, `PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationPrevious`, `PaginationNext`, `PaginationEllipsis`).
+  - Added soft rounded corners (`rounded-sm`), subtle borders (`border-[#1c1a18]/15`), and soft hover backgrounds (`hover:bg-[#efe7dc]`) matching the `base-nova` theme tokens and high-end fashion design.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Upgraded Price Range Filter UX & Single Combined Active Chip)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **UX Upgrades Delivered:**
+  1. **Combined Active Price Chip:** In `ActiveFilters` (`collection-client.tsx`), when both min & max price are set, active filters now render a single combined chip (e.g. `111.111 đ – 23.123.213 đ ✕`) instead of 2 separate chips.
+  2. **Dedicated "Lọc" (Apply) Button & Enter Key Trigger:** Added a explicit "Lọc" button alongside price inputs with `Enter` key binding so users can trigger price filtering immediately without having to guess or rely on blur events.
+  3. **Quick Price Range Preset Chips:** Added 3 quick range preset buttons (`< 300k`, `300k – 600k`, `> 600k`) under price inputs for instant 1-click filtering.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Eliminated Left Focus Ring Clipping on Sidebar Inputs)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fix Delivered:**
+  - Added `pl-1.5` padding to the sticky sidebar container in `product-layout-components.tsx` and removed negative margin `-mx-1` from `PriceRangeInputs` in `collection-client.tsx`.
+  - The "Từ" input now sits 6px inside the sidebar boundary, giving the 2px red focus ring ample room on all 4 sides. When focused, the "Từ" input renders a 100% complete, unclipped, smooth rounded red focus ring identical to the "Đến" input.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Fixed "Từ" Input Left Focus Ring Clipping & Clear Filters Button)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fixes Delivered:**
+  1. **Fixed "Từ" Input Left Focus Ring Clipping:** Added `px-1 py-1.5 -mx-1` container padding to `PriceRangeInputs` in `collection-client.tsx` so the 2px focus ring on the "Từ" input has adequate left padding and renders 100% smoothly without being clipped by parent overflow bounds, matching the "Đến" input perfectly.
+  2. **Ensured Clear All Filters Button Visibility:** Removed `!isMobile` condition on `hasActiveFilters` in `collection-client.tsx` so the "XÓA TẤT CẢ BỘ LỌC" button renders reliably whenever filters are active with proper `pb-8 pt-4` bottom spacing.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Fixed Sort Dropdown Highlight Rounding & Long Size Label Overflow)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fixes Delivered:**
+  1. **Sort Dropdown Highlight Rounding:** Changed `SelectItem` highlight background in `product-layout-components.tsx` from heavy squircle `rounded-xl` to `rounded-sm` (4px/6px) so the highlight box matches the popup container corners cleanly.
+  2. **Size Filter Overflow Fix:** Updated size button layout in `collection-client.tsx` so size name and count stack vertically, and long labels like `ADJUSTABLE` automatically span 2 columns (`col-span-2`), preventing text overflow outside the button border box.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Fixed Popup Image Rounding & Bottom Clipping of Filters)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fixes Delivered:**
+  1. **Popup Menu Search Thumbnail Rounding:** Changed search dropdown product thumbnail images in `site-header.tsx` from heavy squircle `rounded-lg` to subtle fashion-editorial `rounded-sm` (4px/6px).
+  2. **Prevented Bottom Clipping on Price Inputs & Clear Filters Button:**
+     - Removed browser number input spin arrows with `[appearance:textfield]` and added `py-1` padding to wrapper so focus rings on "Từ" / "Đến" inputs never clip.
+     - Wrapped "XÓA TẤT CẢ BỘ LỌC" button in `pb-8 pt-2` container so the bottom red border outline is fully visible without being cut off by dark footer or parent overflow bounds.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Fixed Price Inputs & Color Swatch Ring Clipping)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Fixes Delivered:**
+  1. **Rounded Corners for Price Inputs & Clear Filters Button:** Added `rounded-sm` (6px) to "Từ" / "Đến" price range inputs and "XÓA TẤT CẢ BỘ LỌC" button in `collection-client.tsx`.
+  2. **Fixed Color Swatch Clipping:** Replaced `ring-offset-2` (which clipped on the left edge inside tight button margins) with a concentric double-ring structure (`grid size-7 place-items-center rounded-full border-2 border-[#1c1a18]`) around a 20px inner color circle. Active selected color swatches now render perfectly without edge clipping or text overlap.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Refined Design Polish per User Feedback)
+
+- **Branch:** `feat/emil-design-eng-polish`
+- **Refinements Made:**
+  1. **Removed Press Scale from Product Cards:** Removed `whileTap={{ scale: 0.98 }}` and `active:scale-[0.98]` from Product Cards (`home-product-card.tsx`, `product-card-shell.tsx`) so clicking on image areas remains flat without image distortion.
+  2. **Soft Rounded Corners for Filter Sidebar:** Updated `collection-client.tsx` so active filter chips ("Giày x", "Phụ kiện x"), category checkboxes, size filter tiles, and color swatches use soft rounded corners (`rounded-sm` / `rounded-full`) per `DESIGN.md` tier controls rule.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Design Engineering Polish on feat/emil-design-eng-polish)
+
+### Implemented 4 Core Design Engineering Optimizations
+
+- **Branch:** `feat/emil-design-eng-polish` (created clean from updated `main`).
+- **Scope & Changes:**
+  1. **Press Feedback (`active:scale-[0.97]` / `whileTap={{ scale: 0.98 }}`):** Added tactile scale-down feedback on click to shared Button (`components/ui/button.tsx`), Home Product Cards (`home-product-card.tsx`), and Product Card Shell (`product-card-shell.tsx`).
+  2. **Stagger Animation for Product Grids:** Added staggered entrance delays (`index * 0.04s`) to product card grids in Collection browsing (`collection-client.tsx`) and Sale landing (`sale-landing.tsx`) with `useReducedMotion` support.
+  3. **State Transition Blur Masking (`filter: blur(2px)`):** Added 150ms blur/opacity crossfade masking on state transitions in Add to Cart buttons (`product-detail-client.tsx`) eliminating visual label flicker.
+  4. **GPU `clip-path: inset()` Reveal for Sale Banners:** Replaced height/opacity transitions on campaign banners in Sale landing (`sale-landing.tsx`) with hardware-accelerated `clip-path: inset(0 100% 0 0) → inset(0 0 0 0)` reveal.
+- **Verification:** `pnpm lint` (0 errors), `pnpm exec tsc --noEmit` (0 errors).
+
 ## 2026-08-09 (Full Execution of Animation Plans 013 - 016)
 
 ### Storefront Animation Improvement Plans FE-013 - FE-016 Completed
