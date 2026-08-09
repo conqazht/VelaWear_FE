@@ -286,7 +286,7 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
-        initial={{ y: isHome ? -120 : -72 }}
+        initial={{ y: 0 }}
         animate={{ y: showHeader ? 0 : (isHome ? -120 : -72) }}
         transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
         className={headerClass}
