@@ -3,6 +3,8 @@
 import Link from "next/link";
 import type { ComponentProps, FormEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { EASE_VELA } from "@/lib/motion-tokens";
 import {
   CheckCircle2,
   LockKeyhole,
@@ -459,74 +461,7 @@ export function CheckoutPageClient() {
   if (orderCompleted && completedOrder) {
     return (
       <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px] min-h-[80vh] flex flex-col justify-center items-center">
-        <Card className="mx-auto mt-6 flex max-w-lg flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
-          <CheckCircle2 className="mb-6 size-14 text-[#b85a3c]" />
-          <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
-            {t("checkout.successTitle")}
-          </h1>
-          <p className="mb-2 text-sm leading-relaxed text-[#1c1a18]/65">
-            {t("checkout.successDescription", { brand: "VELA WEAR" })}
-          </p>
-          <p className="mb-2 text-xs font-semibold text-[#1c1a18]/50">
-            {t("checkout.orderCode")}:{" "}
-            <span className="font-serif text-sm tracking-wide text-black">
-              {completedOrder.orderCode}
-            </span>
-          </p>
-          <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] uppercase tracking-widest text-[#1c1a18]/45">
-            <span>
-              {t("checkout.total")}:{" "}
-              <strong className="text-[#1c1a18] font-numeric">
-                {money(completedOrder.finalAmount, locale)}
-              </strong>
-            </span>
-            <span>
-              {t("checkout.payment")}:{" "}
-              <strong className="text-[#1c1a18]">
-                {completedOrder.paymentMethod === "COD"
-                  ? t("checkout.cod")
-                  : completedOrder.paymentMethod === "SEPAY"
-                    ? t("sale.checkout.payment.sepay")
-                    : completedOrder.paymentMethod}
-              </strong>
-            </span>
-            <span>
-              {t("checkout.status")}:{" "}
-              <strong className="text-[#1c1a18]">
-                {{
-                  PENDING: t("order.status.pending"),
-                  CONFIRMED: t("order.status.confirmed"),
-                  PROCESSING: t("order.status.processing"),
-                  SHIPPING: t("order.status.shipping"),
-                  DELIVERED: t("order.status.delivered"),
-                  CANCELLED: t("order.status.cancelled"),
-                }[completedOrder.status.toUpperCase()] ?? completedOrder.status}
-              </strong>
-            </span>
-          </div>
-          {completedOrder.paymentDueAt ? (
-            <PaymentDeadline
-              paymentDueAt={completedOrder.paymentDueAt}
-              reservationExpiresAt={completedOrder.reservationExpiresAt}
-              serverTime={completedOrder.serverTime}
-              paymentInitiation={completedOrder.paymentInitiation}
-            />
-          ) : (
-            <PaymentContinuationForm
-              paymentInitiation={completedOrder.paymentInitiation}
-            />
-          )}
-          <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
-          <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
-            {t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}
-          </p>
-          <Link
-            href="/"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
-          >
-            {t("checkout.backHome")}
-          </Link>
-        </Card>
+        <OrderSuccessCard completedOrder={completedOrder} locale={locale} t={t} />
       </div>
     );
   }
@@ -1058,4 +993,123 @@ function formatRemainingTime(milliseconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+// ---------------------------------------------------------------------------
+// Order success card — animated entrance (Delight · Rare / first-time)
+// ---------------------------------------------------------------------------
+
+type OrderSuccessCardProps = {
+  completedOrder: CheckoutResponse;
+  locale: ReturnType<typeof useI18n>["locale"];
+  t: ReturnType<typeof useI18n>["t"];
+};
+
+function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) {
+  const reduce = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={{
+        opacity: 0,
+        transform: reduce ? "none" : "scale(0.96) translateY(8px)",
+      }}
+      animate={{
+        opacity: 1,
+        transform: "scale(1) translateY(0px)",
+      }}
+      transition={{
+        duration: reduce ? 0.25 : 0.4,
+        ease: EASE_VELA,
+      }}
+      className="mx-auto mt-6 w-full max-w-lg"
+    >
+      <Card className="flex flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
+        {/* Check icon — spring pop after card settles */}
+        <motion.div
+          initial={{ opacity: 0, transform: reduce ? "none" : "scale(0.3)" }}
+          animate={{ opacity: 1, transform: "scale(1)" }}
+          transition={
+            reduce
+              ? { duration: 0.2, ease: "easeOut" }
+              : {
+                  type: "spring",
+                  stiffness: 380,
+                  damping: 22,
+                  delay: 0.3,
+                }
+          }
+          className="mb-6"
+        >
+          <CheckCircle2 className="size-14 text-[#b85a3c]" />
+        </motion.div>
+
+        <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
+          {t("checkout.successTitle")}
+        </h1>
+        <p className="mb-2 text-sm leading-relaxed text-[#1c1a18]/65">
+          {t("checkout.successDescription", { brand: "VELA WEAR" })}
+        </p>
+        <p className="mb-2 text-xs font-semibold text-[#1c1a18]/50">
+          {t("checkout.orderCode")}:{" "}
+          <span className="font-serif text-sm tracking-wide text-black">
+            {completedOrder.orderCode}
+          </span>
+        </p>
+        <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] uppercase tracking-widest text-[#1c1a18]/45">
+          <span>
+            {t("checkout.total")}:{" "}
+            <strong className="text-[#1c1a18] font-numeric">
+              {money(completedOrder.finalAmount, locale)}
+            </strong>
+          </span>
+          <span>
+            {t("checkout.payment")}:{" "}
+            <strong className="text-[#1c1a18]">
+              {completedOrder.paymentMethod === "COD"
+                ? t("checkout.cod")
+                : completedOrder.paymentMethod === "SEPAY"
+                  ? t("sale.checkout.payment.sepay")
+                  : completedOrder.paymentMethod}
+            </strong>
+          </span>
+          <span>
+            {t("checkout.status")}:{" "}
+            <strong className="text-[#1c1a18]">
+              {{
+                PENDING: t("order.status.pending"),
+                CONFIRMED: t("order.status.confirmed"),
+                PROCESSING: t("order.status.processing"),
+                SHIPPING: t("order.status.shipping"),
+                DELIVERED: t("order.status.delivered"),
+                CANCELLED: t("order.status.cancelled"),
+              }[completedOrder.status.toUpperCase()] ?? completedOrder.status}
+            </strong>
+          </span>
+        </div>
+        {completedOrder.paymentDueAt ? (
+          <PaymentDeadline
+            paymentDueAt={completedOrder.paymentDueAt}
+            reservationExpiresAt={completedOrder.reservationExpiresAt}
+            serverTime={completedOrder.serverTime}
+            paymentInitiation={completedOrder.paymentInitiation}
+          />
+        ) : (
+          <PaymentContinuationForm
+            paymentInitiation={completedOrder.paymentInitiation}
+          />
+        )}
+        <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
+        <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
+          {t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}
+        </p>
+        <Link
+          href="/"
+          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
+        >
+          {t("checkout.backHome")}
+        </Link>
+      </Card>
+    </motion.div>
+  );
 }

@@ -49,7 +49,10 @@ export function ProductCardShell({
           <FashionImage
             src={imageSrc}
             alt={imageAlt}
-            className={cn("transition-none", imageClassName)}
+            className={cn(
+              "[@media(hover:hover)_and_(pointer:fine)]:transition-transform [@media(hover:hover)_and_(pointer:fine)]:duration-500 [@media(hover:hover)_and_(pointer:fine)]:ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03]",
+              imageClassName
+            )}
           />
           {imageOverlay ? (
             <span className="pointer-events-none absolute inset-0 z-10">

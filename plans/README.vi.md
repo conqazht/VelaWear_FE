@@ -56,6 +56,10 @@ dependency drift là an toàn.
 | FE-010 | [Tách nhỏ profile page](vi/010-decompose-profile-page.vi.md) | `refactor/profile-page` | P3 | L | FE-009 | 4 | [xem English index](README.md#execution-order-and-status) |
 | FE-011 | [Tách i18n message namespace](vi/011-split-i18n-message-namespaces.vi.md) | `perf/i18n-message-splitting` | P3 | L | FE-001–FE-010 | 5 | [xem English index](README.md#execution-order-and-status) |
 | FE-012 | [Dọn dependency và tài liệu Frontend](vi/012-clean-frontend-dependencies-and-docs.vi.md) | `chore/frontend-maintenance-docs` | P3 | M | FE-001–FE-011 và external BE-015 | 5 | [xem English index](README.md#execution-order-and-status) |
+| FE-013 | [Hợp nhất CSS animation token dùng chung](013-consolidate-animation-tokens.md) | `feat/storefront-animations` | P2 | S | FE-012 | 6 | [xem English index](README.md#execution-order-and-status) |
+| FE-014 | [Thêm hiệu ứng spring pop cho icon Yêu thích](014-product-detail-favorite-spring.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | [xem English index](README.md#execution-order-and-status) |
+| FE-015 | [Thêm thanh chuyển tab trượt trên trang Profile](015-profile-tab-layout-indicator.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | [xem English index](README.md#execution-order-and-status) |
+| FE-016 | [Thêm fallback tuân thủ reduced motion cho editorial craft](016-editorial-craft-reduced-motion.md) | `feat/storefront-animations` | P2 | S | FE-013 | 6 | [xem English index](README.md#execution-order-and-status) |
 
 Xem trạng thái `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED` hoặc `REJECTED` tại
 index tiếng Anh canonical.

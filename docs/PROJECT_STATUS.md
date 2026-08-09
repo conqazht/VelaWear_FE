@@ -1,3 +1,42 @@
+## 2026-08-09 (Full Execution of Animation Plans 013 - 016)
+
+### Storefront Animation Improvement Plans FE-013 - FE-016 Completed
+
+- **Scope:** Realized all 4 implementation plans (FE-013, FE-014, FE-015, FE-016) defined under `plans/`.
+- **Delivered Plans:**
+  1. **FE-013 (CSS & TS Motion Tokens):** Defined `--ease-vela` and `--ease-vela-out` in `app/globals.css` and exported `EASE_VELA` tuple constant in `lib/motion-tokens.ts`. Replaced inline cubic-bezier arrays across `site-header.tsx`, `product-detail-client.tsx`, `checkout-page-client.tsx`, and `scroll-reveal.tsx`.
+  2. **FE-014 (Product Detail Spring Pop):** Wrapped Wishlist heart button in `motion.div` with spring pop feedback (`stiffness: 400, damping: 18`) when favorited state toggles, with `useReducedMotion` fallback.
+  3. **FE-015 (Profile Tab Layout Indicator):** Added shared `motion.div layoutId="profile-tab-indicator"` under active tab in `components/shop/profile/profile-shell.tsx` for a sliding active tab line.
+  4. **FE-016 (Editorial Craft Reduced Motion Fallback):** Integrated `useReducedMotion()` in `components/shop/editorial-craft.tsx` to disable scroll-bound pinning and desktop autoplay when reduced motion is requested at OS level.
+- **Verification:** `pnpm lint` (0 errors), `pnpm exec tsc --noEmit` (0 errors).
+
+## 2026-08-09 (Hoan thien Animation Optimization Pass)
+
+### Storefront Animation Optimization Pass — Completed
+
+- **Scope:** khac phuc toan bo 8 vi tri animation duoc chi ra trong luot review.
+- **Chi tiet khac phuc:**
+  1. button.tsx — Thay transition-all thanh transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out de tranh tinh lai layout.
+  2. notification-provider.tsx — Bo animate thuoc tinh top trong Toast; dung top-24 co dinh va animate translateY() GPU-accelerated.
+  3. scroll-reveal.tsx — Giam khoang cach xuat hien xuong 20px, duration 0.45s, chuyen sang chuoi transform GPU va ho tro prefers-reduced-motion.
+  4. hero-slider.tsx — Chuyen title/subtitle/CTA sang transform GPU string; chuyen cham phan trang slider tu animate width sang scaleX() transform; giam hover scale mui ten xuong 1.05.
+  5. auth-motion-scene.tsx — Them nguong dirty check (> 0.0005) trong requestAnimationFrame loop de loai bo style recalculation storm khi con tro nhan roi.
+  6. home-product-card.tsx — Chan hover overlay Add-to-Bag bag voi [@media(hover:hover)_and_(pointer:fine)] de khong bi dinh hover tren thiet bi cam ung; giam wishlist hover scale xuong 1.04.
+  7. site-header.tsx — Giam wishlist & shopping bag icon hover scale xuong 1.04 phu hop voi nav icon xuat hien thuong xuyên.
+- **Kiem thu:** pnpm lint (0 errors), pnpm exec tsc --noEmit (0 errors).
+
+## 2026-08-09
+
+### Storefront Animation Pass — 5 Motion Improvements
+
+- **Scope:** animation opportunities from the previous audit, implemented via /animate skill.
+- checkout-page-client.tsx — OrderSuccessCard extracted with motion.div entrance (scale 0.96 to 1 + opacity, 400ms, ease [0.16,1,0.3,1]) and spring-popped CheckCircle2 icon (stiffness 380, damping 22, delay 300ms). useReducedMotion falls back to opacity-only at 250ms.
+- product-detail-client.tsx — All 3 accordion sections (Size & Fit, Material & Care, Delivery) animate open and closed via AnimatePresence + motion.div (height 0 to auto + opacity, 260ms). ChevronUp removed; single ChevronDown rotates via motion.span.
+- cart-page-client.tsx — Item removal exits via AnimatePresence + layout prop + slide-left + fade (220ms). Extracted CartItemRow component. useReducedMotion respected.
+- product-card-shell.tsx — Image hover scale 1.03 (500ms ease-out), gated behind pointer:fine via Tailwind v4 arbitrary media query variant.
+- site-header.tsx — Mobile nav sub-menus animate open and close via AnimatePresence (height 0 to auto, 220ms). initial=false prevents animation on first render.
+- **Verification:** pnpm lint (0 errors), pnpm exec tsc --noEmit (0 errors).
+- **Follow-ups:** Feel-check cart layout reflow on last-item removal; consider shared --ease-vela CSS token.
 ## Current State (as of FE-012)
 
 **Architecture:** Next.js 16 App Router with React 19, TypeScript, TanStack Query, Zustand, Tailwind CSS 4, Vitest, and Playwright. The storefront runs at `app/(shop)/`, admin dashboard at `app/(admin)/dashboard/`, and authentication at `app/(auth)/`. API integration uses Axios with in-memory access tokens, HttpOnly refresh cookies, Web Lock session serialization, and single-flight token refresh. EN/VI i18n uses route-scoped catalog splitting.

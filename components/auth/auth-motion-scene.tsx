@@ -74,11 +74,16 @@ export function AuthMotionScene({
       }
 
       // Smooth physical interpolation (lerping)
+      const prevX = current.current.x;
+      const prevY = current.current.y;
       current.current.x += (targetX - current.current.x) * 0.08;
       current.current.y += (targetY - current.current.y) * 0.08;
 
-      node.style.setProperty("--mx", current.current.x.toFixed(4));
-      node.style.setProperty("--my", current.current.y.toFixed(4));
+      // Only write to DOM if coordinates changed significantly to avoid style recalculations when stationary
+      if (Math.abs(current.current.x - prevX) > 0.0005 || Math.abs(current.current.y - prevY) > 0.0005) {
+        node.style.setProperty("--mx", current.current.x.toFixed(4));
+        node.style.setProperty("--my", current.current.y.toFixed(4));
+      }
 
       frame = requestAnimationFrame(animate);
     };

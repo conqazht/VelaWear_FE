@@ -189,6 +189,8 @@ html[data-admin-theme="true"].dark:not([data-theme-preset]) {
   --sidebar-ring: oklch(0.708 0 0);
   --header-visible-height: 72px;
   --header-y: 0px;
+  --ease-vela: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-vela-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .dark {

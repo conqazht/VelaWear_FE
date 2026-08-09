@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { EASE_VELA } from "@/lib/motion-tokens";
 import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -660,7 +661,7 @@ export function SiteHeader() {
                 <motion.button
                   className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
                   whileHover={{
-                    scale: 1.1,
+                    scale: 1.04,
                     backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
@@ -684,7 +685,7 @@ export function SiteHeader() {
                 <motion.button
                   className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
                   whileHover={{
-                    scale: 1.1,
+                    scale: 1.04,
                     backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
@@ -791,36 +792,47 @@ export function SiteHeader() {
                         </button>
                       )}
                     </div>
-                    {item.groups && expanded && (
-                      <div className="mt-4 border-l-2 border-[#b5573a] pl-4">
-                        <div className="space-y-5">
-                          {item.groups.map((group) => (
-                            <section key={group.title}>
-                              <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
-                              <div className="flex flex-col gap-2.5">
-                                {group.items.map((sub) => (
-                                  <Link
-                                    key={`${sub.label}-${sub.href}`}
-                                    href={sub.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="text-sm text-[#1c1a18]/70 hover:text-[#b5573a]"
-                                  >
-                                    {sub.label}
-                                  </Link>
-                                ))}
-                              </div>
-                            </section>
-                          ))}
-                        </div>
-                        <Link
-                          href={item.href}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="mt-5 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                    <AnimatePresence initial={false}>
+                      {item.groups && expanded && (
+                        <motion.div
+                          key={item.label}
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease: EASE_VELA }}
+                          className="overflow-hidden"
                         >
-                          {item.ctaLabel} &rarr;
-                        </Link>
-                      </div>
-                    )}
+                          <div className="mt-4 border-l-2 border-[#b5573a] pl-4">
+                            <div className="space-y-5">
+                              {item.groups.map((group) => (
+                                <section key={group.title}>
+                                  <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
+                                  <div className="flex flex-col gap-2.5">
+                                    {group.items.map((sub) => (
+                                      <Link
+                                        key={`${sub.label}-${sub.href}`}
+                                        href={sub.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="text-sm text-[#1c1a18]/70 hover:text-[#b5573a]"
+                                      >
+                                        {sub.label}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </section>
+                              ))}
+                            </div>
+                            <Link
+                              href={item.href}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="mt-5 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                            >
+                              {item.ctaLabel} &rarr;
+                            </Link>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}

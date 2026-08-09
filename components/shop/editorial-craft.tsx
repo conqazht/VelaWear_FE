@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Compass, Sparkles, Sliders, Flower2 } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -50,9 +50,12 @@ export function EditorialCraft() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
 
   // Monitor scrolling to pin the viewport and advance steps on desktop
   useEffect(() => {
+    if (reduceMotion) return;
+
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
       
@@ -76,18 +79,18 @@ export function EditorialCraft() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [reduceMotion]);
 
   // Autoplay step switching on mobile screens for fluid interaction
   useEffect(() => {
-    if (window.innerWidth >= 1024) return;
+    if (reduceMotion || window.innerWidth >= 1024) return;
     
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % STEPS.length);
     }, 5000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [reduceMotion]);
 
   const handleStepClick = (index: number) => {
     if (window.innerWidth < 1024) {
