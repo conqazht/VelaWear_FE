@@ -305,7 +305,7 @@ export function SiteHeader() {
         >
           {/* Logo pinned to left */}
           <div className="flex-none">
-            <Link href="/" className="flex items-center gap-2 group relative">
+            <Link href="/" className="flex items-center gap-2 group relative overflow-hidden">
               <motion.div
                 className="relative flex items-center overflow-hidden rounded-md"
                 style={{ perspective: 1000 }}
@@ -830,139 +830,141 @@ export function SiteHeader() {
               className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs lg:hidden"
             />
 
-            {/* Right Side Drawer */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-              className="fixed inset-y-0 right-0 z-50 flex w-[320px] max-w-[85vw] flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl lg:hidden"
-            >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between border-b border-[#e3dccf] px-6 py-5">
-                <span className="font-serif text-lg font-normal tracking-wide text-[#1c1a18]">
-                  MENU
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="grid size-9 place-items-center rounded-full text-[#1c1a18] hover:bg-[#1c1a18]/5 transition-colors cursor-pointer"
-                  aria-label="Đóng"
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
-
-              {/* Drawer Body */}
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-                {/* Navigation Items (Accordion) */}
-                <div className="space-y-4">
-                  {navigationItems.map((item) => {
-                    const expanded = mobileExpandedItem === item.label;
-                    return (
-                      <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
-                        <div className="flex items-center justify-between gap-3">
-                          <Link
-                            href={item.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="font-serif text-xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
-                          >
-                            {item.label}
-                          </Link>
-                          {item.groups && (
-                            <button
-                              type="button"
-                              aria-label={`${item.label} menu`}
-                              aria-expanded={expanded}
-                              onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
-                              className="grid size-8 place-items-center text-[#1c1a18]"
-                            >
-                              <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
-                            </button>
-                          )}
-                        </div>
-                        <AnimatePresence initial={false}>
-                          {item.groups && expanded && (
-                            <motion.div
-                              key={item.label}
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.22, ease: EASE_VELA }}
-                              className="overflow-hidden"
-                            >
-                              <div className="mt-3 border-l-2 border-[#b5573a] pl-3 space-y-4">
-                                {item.groups.map((group) => (
-                                  <section key={group.title}>
-                                    <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
-                                    <div className="flex flex-col gap-2">
-                                      {group.items.map((sub) => (
-                                        <Link
-                                          key={`${sub.label}-${sub.href}`}
-                                          href={sub.href}
-                                          onClick={() => setIsMobileMenuOpen(false)}
-                                          className="text-xs text-[#1c1a18]/70 hover:text-[#b5573a]"
-                                        >
-                                          {sub.label}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </section>
-                                ))}
-                                <Link
-                                  href={item.href}
-                                  onClick={() => setIsMobileMenuOpen(false)}
-                                  className="mt-3 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
-                                >
-                                  {item.ctaLabel} &rarr;
-                                </Link>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Drawer Footer */}
-              <div className="border-t border-[#e3dccf] p-6 space-y-4 bg-[#efe7dc]/40">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-[#1c1a18]/60">{activeLocale === "vi" ? "Ngôn ngữ" : "Language"}</span>
-                  <LanguageSwitcher />
-                </div>
-                {safeIsAuthenticated && safeUser ? (
-                  <div className="flex items-center justify-between pt-2">
-                    <Link
-                      href="/profile"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-xs font-semibold text-[#1c1a18] hover:text-[#b5573a]"
-                    >
-                      {safeUser.fullName || safeUser.email}
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="text-xs text-red-600 font-medium cursor-pointer"
-                    >
-                      {t("storefront.nav.logOut")}
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    href="/sign-in"
+            {/* Right Side Drawer Wrapper */}
+            <div className="fixed inset-y-0 right-0 z-50 w-[320px] max-w-[85vw] overflow-hidden pointer-events-none lg:hidden">
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                className="flex h-full w-full flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl pointer-events-auto"
+              >
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between border-b border-[#e3dccf] px-6 py-5">
+                  <span className="font-serif text-lg font-normal tracking-wide text-[#1c1a18]">
+                    MENU
+                  </span>
+                  <button
+                    type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex h-10 w-full items-center justify-center rounded-sm bg-[#1c1a18] text-xs font-semibold uppercase tracking-wider text-[#f7f4ef] hover:bg-[#b5573a] transition-colors"
+                    className="grid size-9 place-items-center rounded-full text-[#1c1a18] hover:bg-[#1c1a18]/5 transition-colors cursor-pointer"
+                    aria-label="Đóng"
                   >
-                    {t("storefront.nav.logIn")}
-                  </Link>
-                )}
-              </div>
-            </motion.div>
+                    <X className="size-5" />
+                  </button>
+                </div>
+
+                {/* Drawer Body */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                  {/* Navigation Items (Accordion) */}
+                  <div className="space-y-4">
+                    {navigationItems.map((item) => {
+                      const expanded = mobileExpandedItem === item.label;
+                      return (
+                        <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
+                          <div className="flex items-center justify-between gap-3">
+                            <Link
+                              href={item.href}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="font-serif text-xl text-[#1c1a18] transition-colors hover:text-[#b5573a]"
+                            >
+                              {item.label}
+                            </Link>
+                            {item.groups && (
+                              <button
+                                type="button"
+                                aria-label={`${item.label} menu`}
+                                aria-expanded={expanded}
+                                onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
+                                className="grid size-8 place-items-center text-[#1c1a18]"
+                              >
+                                <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+                              </button>
+                            )}
+                          </div>
+                          <AnimatePresence initial={false}>
+                            {item.groups && expanded && (
+                              <motion.div
+                                key={item.label}
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.22, ease: EASE_VELA }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-3 border-l-2 border-[#b5573a] pl-3 space-y-4">
+                                  {item.groups.map((group) => (
+                                    <section key={group.title}>
+                                      <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
+                                      <div className="flex flex-col gap-2">
+                                        {group.items.map((sub) => (
+                                          <Link
+                                            key={`${sub.label}-${sub.href}`}
+                                            href={sub.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="text-xs text-[#1c1a18]/70 hover:text-[#b5573a]"
+                                          >
+                                            {sub.label}
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </section>
+                                  ))}
+                                  <Link
+                                    href={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="mt-3 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                                  >
+                                    {item.ctaLabel} &rarr;
+                                  </Link>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Drawer Footer */}
+                <div className="border-t border-[#e3dccf] p-6 space-y-4 bg-[#efe7dc]/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-[#1c1a18]/60">{activeLocale === "vi" ? "Ngôn ngữ" : "Language"}</span>
+                    <LanguageSwitcher />
+                  </div>
+                  {safeIsAuthenticated && safeUser ? (
+                    <div className="flex items-center justify-between pt-2">
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-xs font-semibold text-[#1c1a18] hover:text-[#b5573a]"
+                      >
+                        {safeUser.fullName || safeUser.email}
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="text-xs text-red-600 font-medium cursor-pointer"
+                      >
+                        {t("storefront.nav.logOut")}
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/sign-in"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex h-10 w-full items-center justify-center rounded-sm bg-[#1c1a18] text-xs font-semibold uppercase tracking-wider text-[#f7f4ef] hover:bg-[#b5573a] transition-colors"
+                    >
+                      {t("storefront.nav.logIn")}
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
