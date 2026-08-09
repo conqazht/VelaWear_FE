@@ -68,6 +68,7 @@ export function SiteHeader() {
   const { locale: activeLocale, t } = useI18n();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [mobileExpandedItem, setMobileExpandedItem] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const searchSuggestions = useSearchSuggestions(searchQuery, activeLocale);
@@ -87,6 +88,8 @@ export function SiteHeader() {
     setSearchPathname(pathname);
     setSearchQuery("");
     setIsSearchSuggestionsOpen(false);
+    setIsMobileSearchOpen(false);
+    setIsMobileMenuOpen(false);
   }
 
   async function handleLogout() {
@@ -248,6 +251,7 @@ export function SiteHeader() {
     persistSearchHistory(normalized);
     router.push(`/search?q=${encodeURIComponent(normalized)}`);
     setIsMobileMenuOpen(false);
+    setIsMobileSearchOpen(false);
     setIsSearchSuggestionsOpen(false);
   };
 
@@ -650,11 +654,10 @@ export function SiteHeader() {
               <motion.button
                 type="button"
                 onClick={() => {
-                  setIsMobileMenuOpen(true);
+                  setIsMobileSearchOpen(true);
                   setTimeout(() => {
-                    const input = document.querySelector<HTMLInputElement>('input[placeholder*="Tìm kiếm"]');
-                    input?.focus();
-                  }, 100);
+                    mobileSearchInputRef.current?.focus();
+                  }, 120);
                 }}
                 className={`${iconClass} p-2 rounded-full cursor-pointer lg:hidden relative`}
                 whileHover={{
@@ -792,7 +795,7 @@ export function SiteHeader() {
         </div>
       </motion.header>
 
-      {/* Mobile Left Side Drawer */}
+      {/* Mobile Right Side Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -801,37 +804,24 @@ export function SiteHeader() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.18 }}
               onClick={() => setIsMobileMenuOpen(false)}
               className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs lg:hidden"
             />
 
-            {/* Left Side Drawer */}
+            {/* Right Side Drawer */}
             <motion.div
-              initial={{ x: "-100%" }}
+              initial={{ x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 26, stiffness: 290 }}
-              className="fixed inset-y-0 left-0 z-50 flex w-[320px] max-w-[85vw] flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl lg:hidden"
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+              className="fixed inset-y-0 right-0 z-50 flex w-[320px] max-w-[85vw] flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl lg:hidden"
             >
               {/* Drawer Header */}
               <div className="flex items-center justify-between border-b border-[#e3dccf] px-6 py-5">
-                <Link
-                  href="/"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2"
-                >
-                  <Image
-                    src="/images/brand/vela-wear-logo.png"
-                    alt={t("brand.logoAlt")}
-                    width={160}
-                    height={160}
-                    className="h-7 w-auto object-contain"
-                  />
-                  <span className="font-serif text-lg font-normal tracking-wide text-[#1c1a18]">
-                    Vela Wear
-                  </span>
-                </Link>
+                <span className="font-serif text-lg font-normal tracking-wide text-[#1c1a18]">
+                  MENU
+                </span>
                 <button
                   type="button"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -844,38 +834,6 @@ export function SiteHeader() {
 
               {/* Drawer Body */}
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-                {/* Search Bar in Mobile Drawer */}
-                <form
-                  onSubmit={handleSearchSubmit}
-                  className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 w-full border border-transparent focus-within:border-[#b5573a]/30 transition-all"
-                >
-                  <button
-                    type="submit"
-                    aria-label={t("storefront.nav.search")}
-                    className="cursor-pointer border-none p-0 bg-transparent flex items-center justify-center text-[#8a857c] hover:text-[#b5573a]"
-                  >
-                    <Search className="w-4 h-4" />
-                  </button>
-                  <input
-                    ref={mobileSearchInputRef}
-                    type="text"
-                    placeholder={t("storefront.nav.searchPlaceholder")}
-                    value={searchQuery}
-                    autoComplete="off"
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18]"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </form>
-
                 {/* Navigation Items (Accordion) */}
                 <div className="space-y-4">
                   {navigationItems.map((item) => {
@@ -983,6 +941,124 @@ export function SiteHeader() {
                   </Link>
                 )}
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Dedicated Mobile Search Popup Overlay */}
+      <AnimatePresence>
+        {isMobileSearchOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setIsMobileSearchOpen(false)}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs lg:hidden"
+            />
+
+            {/* Top Search Popup */}
+            <motion.div
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+              className="fixed inset-x-0 top-0 z-50 flex flex-col bg-[#f7f4ef] border-b border-[#e3dccf] shadow-2xl p-4 lg:hidden"
+            >
+              <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
+                <div className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 flex-1 border border-transparent focus-within:border-[#b5573a]/30 transition-all">
+                  <Search className="w-4 h-4 text-[#8a857c]" />
+                  <input
+                    ref={mobileSearchInputRef}
+                    type="text"
+                    placeholder={t("storefront.nav.searchPlaceholder")}
+                    value={searchQuery}
+                    autoComplete="off"
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSearchOpen(false)}
+                  className="text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:text-[#b5573a] px-2 py-1 cursor-pointer"
+                >
+                  Hủy
+                </button>
+              </form>
+
+              {/* Search Suggestions & History List */}
+              {(searchQuery.trim() || searchHistory.length > 0) && (
+                <div className="mt-4 max-h-[60vh] overflow-y-auto space-y-4 pt-2 border-t border-[#1c1a18]/10">
+                  {searchQuery.trim() ? (
+                    <>
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/50">
+                        {t("storefront.nav.searchSuggestions")}
+                      </div>
+                      {searchSuggestions.map((product) => (
+                        <Link
+                          key={product.id}
+                          href={`/products/${product.id}`}
+                          onClick={() => {
+                            persistSearchHistory(searchQuery);
+                            setIsMobileSearchOpen(false);
+                          }}
+                          className="flex items-center gap-3 py-2 border-b border-[#1c1a18]/5 text-sm text-[#1c1a18] hover:bg-[#efe7dc]/50 transition-colors"
+                        >
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-sm object-cover bg-white"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium text-[#1c1a18]">{product.name}</p>
+                            <p className="text-[11px] text-[#b5573a] font-numeric">{money(product.price, activeLocale)}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/50">
+                        <span>{t("storefront.nav.recentSearches")}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSearchHistory([])}
+                          className="hover:text-[#b5573a]"
+                        >
+                          {activeLocale === "vi" ? "Xóa lịch sử" : "Clear history"}
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {searchHistory.map((term) => (
+                          <button
+                            key={term}
+                            type="button"
+                            onClick={() => runSearch(term)}
+                            className="rounded-full bg-[#efe7dc] px-3.5 py-1.5 text-xs text-[#1c1a18] hover:bg-[#b5573a] hover:text-white transition-colors"
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </motion.div>
           </>
         )}
