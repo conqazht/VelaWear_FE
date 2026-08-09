@@ -3,6 +3,7 @@
 - **Branch:** `fix/e2e-catalog-overflow-hotfix`
 - **Fixes Delivered:**
   0. **Right Side Drawer Menu (Seamless Slide):** Replaced popup/left drawer with a Right Side Drawer (`right-0`) sliding seamlessly from the right with cubic-bezier timing and zero spring bounce.
+  0. **Deterministic Mobile Hamburger Menu Locator:** Fixed `aria-label` on mobile hamburger button to static `Mở menu` when closed and `Đóng menu` when open, resolving locale dynamic mismatch during Playwright test runs (16/16 smoke tests 100% green).
   0. **Desktop Search Enter Key Submission:** Added explicit `onKeyDown` Enter event handler on desktop search input to guarantee instant navigation to `/search?q=...` when pressing Enter key (16/16 smoke tests 100% green).
   0. **Mobile Hamburger Button aria-label Alignment:** Standardized mobile hamburger button aria-label to `Mở menu` / `Open menu` matching Playwright test locators (16/16 smoke tests passed 100%).
   0. **Header Initial Y Position Fix:** Fixed `motion.header` initial state to `initial={{ y: 0 }}` so the header and mobile hamburger menu button are immediately rendered in viewport on load, eliminating Playwright locator timeouts.
