@@ -33,6 +33,7 @@ export const commonMessages = defineMessages(
     "messageScroller.toEnd": "Scroll to end",
     "messageScroller.toStart": "Scroll to start",
     "dateRange.select": "Select date",
+    "common.adminDashboard": "Admin Dashboard",
   },
   {
     "language.label": "Ngôn ngữ",
@@ -66,5 +67,6 @@ export const commonMessages = defineMessages(
     "messageScroller.toEnd": "Cuộn đến cuối",
     "messageScroller.toStart": "Cuộn về đầu",
     "dateRange.select": "Chọn ngày",
+    "common.adminDashboard": "Trang quản trị",
   },
 );

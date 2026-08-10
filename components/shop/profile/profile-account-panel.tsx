@@ -1,5 +1,7 @@
 import { useState, useTransition } from "react";
-import { User as UserIcon, MapPin, Eye, Mail, Shield, PencilLine, CalendarDays } from "lucide-react";
+import Link from "next/link";
+import { User as UserIcon, MapPin, Eye, Mail, Shield, PencilLine, CalendarDays, LayoutDashboard } from "lucide-react";
+import { canAccessManagement, getUserRoleNames } from "@/lib/auth/roles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -151,6 +153,31 @@ export function ProfileAccountPanel({
 
   return (
     <section className="flex flex-col gap-6 text-left">
+      {canAccessManagement(user) && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-md border border-[#1c1a18]/10 bg-[#efe7dc]/40 p-4.5 text-[#1c1a18] shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-full bg-[#1c1a18] text-white flex-shrink-0">
+              <Shield className="size-5 text-[#e2a898]" />
+            </div>
+            <div className="space-y-0.5 text-left">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#1c1a18]">
+                {t("admin.shell.auth.currentRole", { roles: getUserRoleNames(user).join(", ") }) || "Quyền Quản Trị Hệ Thống"}
+              </p>
+              <p className="text-xs text-[#1c1a18]/70">
+                Tài khoản của bạn có quyền quản trị. Bạn có thể quay lại Bảng điều khiển Admin bất cứ lúc nào.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#1c1a18] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#f7f4ef] transition-all hover:bg-[#b5573a] flex-shrink-0 active:scale-[0.97]"
+          >
+            <LayoutDashboard className="size-4" />
+            <span>{t("common.adminDashboard")}</span>
+          </Link>
+        </div>
+      )}
+
       <div className="border-b border-hairline pb-4 flex justify-between items-end">
         <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
           {t("account.profile.title")}

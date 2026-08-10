@@ -10,7 +10,8 @@ import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Product, mapBackendProduct } from "@/lib/vela-data";
+import { Product, mapBackendProduct, getProductById } from "@/lib/vela-data";
+import { localizeFixtureProduct } from "@/lib/i18n/fixture-products";
 import apiClient from "@/lib/api-client";
 import { classifyApiError } from "@/lib/api/errors";
 
@@ -28,7 +29,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
     async function loadProduct() {
       try {
-        const response = await apiClient.get(`/products/slug/${slug}?locale=${activeLocale}`);
+        const response = await apiClient.get(`/products/slug/${encodeURIComponent(slug)}?locale=${activeLocale}`);
         if (!isMounted) return;
 
         if (response.data?.data) {
@@ -38,12 +39,30 @@ export function ProductDetailPage({ slug }: { slug: string }) {
           setLoadError(null);
           setIsMissing(false);
         } else if (!productRef.current) {
-          setIsMissing(true);
-          setLoadError(null);
+          const fixture = getProductById(slug);
+          if (fixture) {
+            const localized = localizeFixtureProduct(fixture, activeLocale);
+            productRef.current = localized;
+            setProduct(localized);
+            setLoadError(null);
+            setIsMissing(false);
+          } else {
+            setIsMissing(true);
+            setLoadError(null);
+          }
         }
       } catch (err) {
         if (isMounted && classifyApiError(err).kind !== "cancelled") {
-          setLoadError(err);
+          const fixture = getProductById(slug);
+          if (fixture) {
+            const localized = localizeFixtureProduct(fixture, activeLocale);
+            productRef.current = localized;
+            setProduct(localized);
+            setLoadError(null);
+            setIsMissing(false);
+          } else {
+            setLoadError(err);
+          }
         }
       } finally {
         if (isMounted) {
@@ -254,7 +273,7 @@ function ProductDetailContent({ product }: { product: Product }) {
       </div>
 
       <RelatedProducts
-        categoryId={product.realId}
+        categoryId={product.categoryId}
         categoryCode={product.category}
         currentProductSlug={product.id}
       />

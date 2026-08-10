@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { EASE_VELA } from "@/lib/motion-tokens";
-import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X, User } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X, User, Shield } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useAuth } from "@/components/auth/auth-provider";
+import { canAccessManagement } from "@/lib/auth/roles";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -399,12 +400,12 @@ export function SiteHeader() {
                       <div
                         data-slot="storefront-mega-menu-panel"
                         className={cn(
-                          "flex gap-2.5 rounded-lg bg-white p-2.5",
+                          "flex gap-2.5 rounded-lg bg-white p-2.5 shadow-xl border border-[#1c1a18]/10",
                           item.groups.length >= 3
-                            ? "w-[min(1000px,calc(100vw-64px))]"
+                            ? "w-[min(880px,calc(100vw-48px))]"
                             : item.groups.length === 2
-                              ? "w-[min(800px,calc(100vw-48px))]"
-                              : "w-[min(600px,calc(100vw-48px))]"
+                              ? "w-[min(660px,calc(100vw-48px))]"
+                              : "w-[min(480px,calc(100vw-48px))]"
                         )}
                       >
                         <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-md bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
@@ -445,7 +446,7 @@ export function SiteHeader() {
                         </div>
                         <div
                           className={cn(
-                            "grid min-w-0 flex-1 content-start gap-x-4 gap-y-5 px-4 py-5",
+                            "grid min-w-0 flex-1 content-start gap-x-6 md:gap-x-8 gap-y-5 px-5 py-5",
                             item.groups.length >= 3
                               ? "grid-cols-3"
                               : item.groups.length === 2
@@ -772,42 +773,71 @@ export function SiteHeader() {
               </button>
 
               {/* Account Profile / Login */}
-              <div className="hidden md:flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-3">
                 {safeIsAuthenticated && safeUser ? (
-                  <div className="relative group">
-                    <Link
-                      href="/profile"
-                      aria-label={t("storefront.nav.viewProfile")}
-                      className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-[#1c1a18] text-xs font-semibold group-hover:bg-[#b5573a] group-hover:text-white group-hover:border-[#b5573a] transition-all duration-300 flex-shrink-0 cursor-pointer`}
-                    >
-                      {safeUser.fullName
-                        ? safeUser.fullName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .substring(0, 2)
-                            .toUpperCase()
-                        : "U"}
-                    </Link>
+                  <>
+                    {canAccessManagement(safeUser) && (
+                      <Link href="/dashboard" title={t("common.adminDashboard")} aria-label={t("common.adminDashboard")}>
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.96 }}
+                          transition={{ duration: 0.16, ease: "easeOut" }}
+                          className={`hidden xl:inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider transition-all duration-200 cursor-pointer shadow-xs ${
+                            shouldBeTransparent
+                              ? "bg-white/15 text-white border border-white/25 hover:bg-white/30 backdrop-blur-md"
+                              : "border border-[#1c1a18]/15 bg-[#efe7dc]/60 text-[#1c1a18] hover:bg-[#efe7dc] hover:border-[#1c1a18]/30"
+                          }`}
+                        >
+                          <Shield className="size-3.5 text-[#b5573a]" />
+                          <span>{t("common.adminDashboard")}</span>
+                        </motion.button>
+                      </Link>
+                    )}
+                    <div className="relative group">
+                      <Link
+                        href="/profile"
+                        aria-label={t("storefront.nav.viewProfile")}
+                        className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-[#1c1a18] text-xs font-semibold group-hover:bg-[#b5573a] group-hover:text-white group-hover:border-[#b5573a] transition-all duration-300 flex-shrink-0 cursor-pointer`}
+                      >
+                        {safeUser.fullName
+                          ? safeUser.fullName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .substring(0, 2)
+                              .toUpperCase()
+                          : "U"}
+                      </Link>
 
-                    {/* Invisible bridge to keep hover state active */}
-                    <div className="absolute right-0 top-8 h-4 w-32 bg-transparent" />
-                    
-                    {/* Dropdown Menu */}
-                    <div className="absolute right-0 top-12 w-40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-md overflow-hidden">
-                      <div className="px-4 py-2.5 border-b border-[#1c1a18]/10">
-                        <span className="font-sans text-sm font-semibold text-[#1c1a18]">{t("storefront.nav.account")}</span>
-                      </div>
-                      <div className="flex flex-col py-1">
-                        <Link href="/profile" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.profile")}</Link>
-                        <Link href="/profile?tab=orders" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.orders")}</Link>
-                        <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.favourites")}</Link>
-                        <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.coupons")}</Link>
-                        <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.reviews")}</Link>
-                        <button onClick={handleLogout} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
+                      {/* Invisible bridge to keep hover state active - scoped strictly to avatar circle */}
+                      <div className="absolute inset-x-0 top-8 h-4 bg-transparent" />
+                      
+                      {/* Dropdown Menu */}
+                      <div className="absolute right-0 top-11 w-44 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-md overflow-hidden">
+                        <div className="px-4 py-2.5 border-b border-[#1c1a18]/10 flex items-center justify-between">
+                          <span className="font-sans text-sm font-semibold text-[#1c1a18]">{t("storefront.nav.account")}</span>
+                        </div>
+                        <div className="flex flex-col py-1">
+                          {canAccessManagement(safeUser) && (
+                            <Link
+                              href="/dashboard"
+                              className="px-4 py-2 text-[13px] font-semibold text-[#1c1a18] hover:text-[#b5573a] hover:bg-[#efe7dc]/60 transition-colors flex items-center gap-2 border-b border-[#1c1a18]/10 mb-1"
+                            >
+                              <Shield className="size-3.5 text-[#b5573a]" />
+                              <span>{t("common.adminDashboard")}</span>
+                            </Link>
+                          )}
+                          <Link href="/profile" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.profile")}</Link>
+                          <Link href="/profile?tab=orders" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.orders")}</Link>
+                          <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.favourites")}</Link>
+                          <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.coupons")}</Link>
+                          <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.reviews")}</Link>
+                          <button onClick={handleLogout} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </>
                 ) : (
                   <Link
                     href="/sign-in"
@@ -940,24 +970,36 @@ export function SiteHeader() {
                     <LanguageSwitcher />
                   </div>
                   {safeIsAuthenticated && safeUser ? (
-                    <div className="flex items-center justify-between pt-2">
-                      <Link
-                        href="/profile"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-xs font-semibold text-[#1c1a18] hover:text-[#b5573a]"
-                      >
-                        {safeUser.fullName || safeUser.email}
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className="text-xs text-red-600 font-medium cursor-pointer"
-                      >
-                        {t("storefront.nav.logOut")}
-                      </button>
+                    <div className="space-y-3 pt-2">
+                      {canAccessManagement(safeUser) && (
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex h-10 w-full items-center justify-center gap-2 rounded-sm bg-[#1c1a18] text-xs font-bold uppercase tracking-wider text-white hover:bg-[#8f2f20] transition-colors"
+                        >
+                          <Shield className="size-4 text-[#e2a898]" />
+                          <span>{t("common.adminDashboard")}</span>
+                        </Link>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="text-xs font-semibold text-[#1c1a18] hover:text-[#b5573a]"
+                        >
+                          {safeUser.fullName || safeUser.email}
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            handleLogout();
+                          }}
+                          className="text-xs text-red-600 font-medium cursor-pointer"
+                        >
+                          {t("storefront.nav.logOut")}
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <Link

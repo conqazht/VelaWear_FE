@@ -52,6 +52,7 @@ export interface Product {
   pricing?: Pricing;
   image: string;
   category: string;
+  categoryId?: number;
   categorySlug?: string;
   badge?: string;
   color: string;
@@ -468,6 +469,7 @@ export function mapBackendProduct(
   return {
     id: bp.slug,
     realId: bp.id,
+    categoryId: bp.categoryId,
     name: bp.name,
     description: bp.description || localizedMatch?.description || "",
     price: bp.pricing?.effectivePrice ?? bp.price ?? 0,

@@ -161,7 +161,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
       </div>
 
       {/* Pagination dots */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-30">
         {slides.map((_, i) => (
           <button
             key={i}
@@ -170,14 +170,14 @@ export function HeroSlider({ slides }: HeroSliderProps) {
               setDirection(i > current ? "right" : "left");
               setCurrent(i);
             }}
-            className="group relative py-2 px-1 focus:outline-none cursor-pointer"
+            className="group relative p-1 focus:outline-none cursor-pointer"
             aria-label={t("storefront.home.goToSlide", { number: i + 1 })}
           >
             <div
-              className={`h-1.5 w-10 origin-left rounded-full transition-[transform,background-color] duration-300 ease-out ${
+              className={`size-2 rounded-full transition-all duration-300 ease-out ${
                 i === current
-                  ? "scale-x-100 bg-white"
-                  : "scale-x-[0.25] bg-white/40 group-hover:bg-white/60"
+                  ? "bg-white opacity-100 shadow-xs"
+                  : "bg-white/45 opacity-90 group-hover:bg-white/80"
               }`}
             />
           </button>

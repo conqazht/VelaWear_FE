@@ -146,7 +146,7 @@ export function RelatedProducts({
             >
               {/* Image box with no borders/shadows */}
               <div className="relative aspect-[3/4] w-full bg-[#efe7dc] overflow-hidden">
-                <Link href={`/products/${product.id}`} className="relative block h-full w-full">
+                <Link href={`/products/${encodeURIComponent(product.id)}`} className="relative block h-full w-full">
                     <Image
                       suppressHydrationWarning
                       src={product.image}
@@ -162,7 +162,7 @@ export function RelatedProducts({
               {/* Text Info */}
               <div className="pt-4 flex flex-col text-left">
                 {/* Title */}
-                <Link href={`/products/${product.id}`} className="block">
+                <Link href={`/products/${encodeURIComponent(product.id)}`} className="block">
                   <h3 className="font-serif text-[18px] font-medium leading-snug text-[#1c1a18] hover:text-[#b5573a] transition-colors line-clamp-1">
                     {product.name}
                   </h3>

@@ -5,10 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGetMyCart = vi.fn();
 const mockReplaceMyCartItems = vi.fn();
+const mockGetProductVariants = vi.fn();
 
 vi.mock("@/lib/api/commerce", () => ({
   getMyCart: (...args: unknown[]) => mockGetMyCart(...args),
   replaceMyCartItems: (...args: unknown[]) => mockReplaceMyCartItems(...args),
+}));
+
+vi.mock("@/lib/api/catalog", () => ({
+  getProductVariants: (...args: unknown[]) => mockGetProductVariants(...args),
 }));
 
 vi.mock("@/components/auth/auth-provider", () => ({
@@ -25,7 +30,7 @@ vi.mock("@/lib/i18n", () => ({
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { CartProvider, useCart } from "@/components/shop/cart-provider";
-import type { CartItem } from "@/lib/vela-data";
+import type { CartItem, Product } from "@/lib/vela-data";
 import { useCartStore } from "@/store/cart-store";
 
 describe("CartProvider ownership", () => {
@@ -47,6 +52,8 @@ describe("CartProvider ownership", () => {
     mockGetMyCart.mockResolvedValue({ items: [] });
     mockReplaceMyCartItems.mockReset();
     mockReplaceMyCartItems.mockResolvedValue({ items: [] });
+    mockGetProductVariants.mockReset();
+    mockGetProductVariants.mockResolvedValue({ result: [] });
   });
 
   afterEach(() => {
@@ -122,5 +129,43 @@ describe("CartProvider ownership", () => {
     if (latestCall) {
       expect(latestCall[0].items).toEqual([]);
     }
+  });
+
+  it("giải phóng owner cũ thành anonymous khi auth load xong và chưa login", async () => {
+    useCartStore.setState({ cart: [makeItem(1)], owner: "user:42" });
+    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, isLoading: false } as ReturnType<typeof useAuth>);
+
+    renderHook(() => useCart(), { wrapper });
+
+    await waitFor(() => {
+      expect(useCartStore.getState().owner).toBe("anonymous");
+      expect(useCartStore.getState().cart).toEqual([]);
+    });
+  });
+
+  it("cho phép guest thêm sản phẩm vào giỏ hàng ngay cả khi storedOwner từng là user:42", async () => {
+    useCartStore.setState({ cart: [], owner: "user:42" });
+    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, isLoading: false } as ReturnType<typeof useAuth>);
+
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    const dummyProduct = {
+      id: "product-1",
+      realId: 101,
+      name: "Áo sơ mi Linen",
+      price: 250000,
+      image: "/shirt.jpg",
+      color: "Trắng",
+      size: "L",
+    };
+
+    result.current.addToCart(dummyProduct as unknown as Product);
+
+    await waitFor(() => {
+      expect(useCartStore.getState().owner).toBe("anonymous");
+      expect(result.current.cart).toHaveLength(1);
+      expect(result.current.itemCount).toBe(1);
+      expect(result.current.cart[0].name).toBe("Áo sơ mi Linen");
+    });
   });
 });
