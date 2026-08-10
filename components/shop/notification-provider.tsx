@@ -84,7 +84,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       {/* Floating Notification Panel */}
       {notification && (
         <div
-          className={`fixed top-24 right-4 md:right-16 z-50 transition-[transform,opacity] duration-300 ease-out max-w-sm md:max-w-md w-[calc(100vw-2rem)] ${
+          className={`fixed top-20 right-4 sm:right-6 md:right-8 z-50 transition-[transform,opacity] duration-300 ease-out max-w-sm w-[calc(100vw-2rem)] ${
             isVisible
               ? "translate-y-0 opacity-100"
               : "-translate-y-4 opacity-0 pointer-events-none"
@@ -92,42 +92,42 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           style={{ transitionProperty: "transform, opacity" }}
         >
           {notification.type === "bag" ? (
-            /* ADDED TO BAG NOTIFICATION (Nike Style) */
-            <div className="bg-canvas w-full max-w-[360px] shadow-2xl border border-hairline relative flex flex-col p-6 rounded-md ml-auto text-ink">
+            /* ADDED TO BAG NOTIFICATION (Nike / Fashion Style) */
+            <div className="bg-canvas w-full max-w-[340px] shadow-2xl border border-hairline relative flex flex-col p-5 rounded-md ml-auto text-ink">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="size-6 rounded-full bg-emerald-700 text-white flex items-center justify-center flex-shrink-0">
-                    <Check className="size-3.5 stroke-[3px]" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-5 rounded-full bg-emerald-700 text-white flex items-center justify-center flex-shrink-0">
+                    <Check className="size-3 stroke-[3px]" />
                   </div>
-                  <h2 className="font-sans text-lg font-bold text-ink leading-none mt-0.5">
+                  <h2 className="font-sans text-base font-bold text-ink leading-none mt-0.5">
                     {t("notification.addedToBag")}
                   </h2>
                 </div>
                 <button
                   onClick={closeNotification}
                   aria-label={t("notification.close")}
-                  className="size-8 flex items-center justify-center text-ink/60 transition-colors hover:text-primary rounded-full hover:bg-surface-card"
+                  className="size-7 flex items-center justify-center text-ink/60 transition-colors hover:text-primary rounded-full hover:bg-surface-card"
                 >
-                  <X className="size-4" />
+                  <X className="size-3.5" />
                 </button>
               </div>
 
               {/* Content Area */}
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
                 {/* Main Product */}
-                <div className="flex gap-4">
-                  <div className="w-[88px] h-[88px] flex-shrink-0 bg-surface-card rounded-none overflow-hidden border border-hairline/30">
+                <div className="flex gap-3.5 items-center">
+                  <div className="w-[72px] h-[90px] flex-shrink-0 bg-surface-card rounded-sm overflow-hidden border border-hairline/30">
                     <Image
                       src={notification.product.image}
                       alt={notification.product.name}
-                      width={88}
-                      height={88}
+                      width={72}
+                      height={90}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <div className="flex flex-col justify-center text-left">
-                    <h3 className="font-sans text-sm font-semibold text-ink leading-tight">
+                  <div className="flex flex-col justify-center text-left min-w-0 flex-1">
+                    <h3 className="font-sans text-sm font-semibold text-ink leading-tight truncate">
                       {notification.product.name}
                     </h3>
                     <p className="text-xs text-on-surface-variant/75 mt-1">
@@ -136,25 +136,25 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     <p className="text-xs text-on-surface-variant/75 mt-0.5">
                       {t("common.size")} {notification.size}
                     </p>
-                    <p className="font-sans text-sm font-bold text-ink mt-1.5 font-numeric">
+                    <p className="font-sans text-sm font-bold text-ink mt-1 font-numeric">
                       {money(notification.product.price, locale)}
                     </p>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-2 pt-1">
                   <Link
                     href="/cart"
                     onClick={closeNotification}
-                    className="w-full bg-canvas text-ink text-center font-semibold text-xs tracking-wider uppercase py-3.5 px-6 border border-ink hover:bg-surface-card transition-colors duration-200 rounded-sm"
+                    className="w-full bg-canvas text-ink text-center font-semibold text-xs tracking-wider uppercase py-2.5 px-4 border border-ink hover:bg-surface-card transition-colors duration-200 rounded-sm"
                   >
                     {t("notification.viewBag", { count: itemCount })}
                   </Link>
                   <Link
                     href="/checkout"
                     onClick={closeNotification}
-                    className="w-full bg-primary-container text-on-primary text-center font-semibold text-xs tracking-wider uppercase py-3.5 px-6 hover:bg-[#964025] transition-colors duration-200 rounded-sm"
+                    className="w-full bg-primary-container text-on-primary text-center font-semibold text-xs tracking-wider uppercase py-2.5 px-4 hover:bg-[#964025] transition-colors duration-200 rounded-sm"
                   >
                     {t("notification.checkout")}
                   </Link>
@@ -163,12 +163,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             </div>
           ) : (
             /* ADDED TO FAVORITES NOTIFICATION (Sharp Style) */
-            <div className="w-full max-w-[400px] bg-canvas border border-hairline shadow-[0_20px_40px_-15px_rgba(28,26,24,0.15)] flex flex-col rounded-md ml-auto overflow-hidden text-ink">
+            <div className="w-full max-w-[340px] bg-canvas border border-hairline shadow-[0_20px_40px_-15px_rgba(28,26,24,0.15)] flex flex-col rounded-md ml-auto overflow-hidden text-ink">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 border-b border-hairline bg-surface py-3.5">
+              <div className="flex items-center justify-between px-5 border-b border-hairline bg-surface py-3">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="text-emerald-600 size-5 flex-shrink-0" />
-                  <h2 className="font-sans text-base font-semibold text-ink m-0 mt-0.5">
+                  <CheckCircle2 className="text-emerald-600 size-4 flex-shrink-0" />
+                  <h2 className="font-sans text-sm font-semibold text-ink m-0 mt-0.5">
                     {t("notification.addedToFavorites")}
                   </h2>
                 </div>
@@ -177,50 +177,50 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                   aria-label={t("notification.close")}
                   className="text-on-surface-variant/70 hover:text-ink transition-colors p-1 rounded-sm hover:bg-surface-card/50"
                 >
-                  <X className="size-4" />
+                  <X className="size-3.5" />
                 </button>
               </div>
 
               {/* Content */}
-              <div className="p-6 flex gap-6 text-left">
+              <div className="p-5 flex gap-4 text-left items-center">
                 {/* Product Image */}
-                <div className="w-[100px] h-[133px] flex-shrink-0 bg-surface-card border border-hairline/30 rounded-none overflow-hidden">
+                <div className="w-[72px] h-[90px] flex-shrink-0 bg-surface-card border border-hairline/30 rounded-sm overflow-hidden">
                   <Image
                     src={notification.product.image}
                     alt={notification.product.name}
-                    width={100}
-                    height={133}
+                    width={72}
+                    height={90}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 {/* Product Details */}
-                <div className="flex flex-col justify-center flex-grow">
-                  <p className="text-[9px] font-semibold text-on-surface-variant/80 uppercase tracking-widest mb-1.5">
+                <div className="flex flex-col justify-center flex-grow min-w-0">
+                  <p className="text-[9px] font-semibold text-on-surface-variant/80 uppercase tracking-widest mb-1">
                     {getCategoryLabel(notification.product.category, locale)}
                   </p>
-                  <h3 className="font-sans text-sm font-semibold text-ink leading-snug mb-1">
+                  <h3 className="font-sans text-sm font-semibold text-ink leading-snug mb-1 truncate">
                     {notification.product.name}
                   </h3>
-                  <p className="text-xs text-on-surface-variant/75 mb-2.5">
+                  <p className="text-xs text-on-surface-variant/75 mb-1.5">
                     {t("common.size")}: {notification.size}
                   </p>
-                  <p className="font-sans text-sm font-bold text-ink mt-auto font-numeric">
+                  <p className="font-sans text-sm font-bold text-ink font-numeric">
                     {money(notification.product.price, locale)}
                   </p>
                 </div>
               </div>
 
               {/* Action */}
-              <div className="px-6 pb-6">
+              <div className="px-5 pb-5">
                 <button
                   onClick={() => {
                     closeNotification();
                     router.push("/favorites");
                   }}
-                  className="w-full text-on-dark font-semibold text-xs tracking-wider uppercase py-4 hover:bg-surface-dark/95 transition-colors border-none cursor-pointer flex items-center justify-center gap-2 bg-primary-container rounded-sm"
+                  className="w-full text-on-dark font-semibold text-xs tracking-wider uppercase py-3 hover:bg-surface-dark/95 transition-colors border-none cursor-pointer flex items-center justify-center gap-2 bg-primary-container rounded-sm"
                 >
                   {t("notification.viewFavorites")}
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5" />
                 </button>
               </div>
             </div>
