@@ -6,7 +6,6 @@ import Link from "next/link";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 type ProductCardShellProps = {
   href: string;
@@ -38,7 +37,7 @@ export function ProductCardShell({
   footerAction,
 }: ProductCardShellProps) {
   return (
-    <Card className="group relative h-full gap-0 overflow-hidden rounded-md border-transparent bg-white p-0 transition-[border-color,box-shadow] duration-200 ease-out hover:border-[#1c1a18]/5 hover:shadow-xl">
+    <Card className="group relative h-full gap-0 overflow-hidden rounded-md border-transparent bg-white p-0">
       <div className="relative aspect-square overflow-hidden rounded-none bg-[#efebe4]">
         <Link href={href} className="block h-full w-full">
           {badge ? (
@@ -49,10 +48,7 @@ export function ProductCardShell({
           <FashionImage
             src={imageSrc}
             alt={imageAlt}
-            className={cn(
-              "[@media(hover:hover)_and_(pointer:fine)]:transition-transform [@media(hover:hover)_and_(pointer:fine)]:duration-500 [@media(hover:hover)_and_(pointer:fine)]:ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03]",
-              imageClassName
-            )}
+            className={imageClassName}
           />
           {imageOverlay ? (
             <span className="pointer-events-none absolute inset-0 z-10">
