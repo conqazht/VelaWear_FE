@@ -1,3 +1,11 @@
+## 2026-08-10 (Fix Guest Add To Cart State Resolution)
+
+- **Fix Delivered:**
+  - Resolved an issue where guest users (unauthenticated) who previously had a logged-in session key stored in `useCartStore` (`storedOwner !== "anonymous"`) had added items suppressed to `[]` by `CartProvider`'s ownership guard despite seeing the "Added to Bag" toast.
+  - Automatically release stale cart ownership to `"anonymous"` when authentication finishes loading as unauthenticated (`!isAuthenticated`), and enforce release to `"anonymous"` when a guest calls `addToCart`.
+  - Fixed `existingIndex` matching in `store/cart-store.ts` when `variantId` is `undefined` by checking `item.productSlug === product.id || item.id === product.id`.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors), `pnpm exec vitest run components/shop/cart-provider.test.tsx` (6/6 tests passed 100%).
+
 ## 2026-08-10 (Remove Product Card Hover Animation)
 
 - **Branch:** `fix/remove-product-card-hover-animation`

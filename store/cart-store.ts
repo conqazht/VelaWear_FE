@@ -59,7 +59,9 @@ export const useCartStore = create<CartStore>()(
           const existingIndex = state.cart.findIndex((item) =>
             product.variantId !== undefined
               ? item.variantId === product.variantId
-              : item.id === product.id && item.color === color && item.size === size
+              : (item.productSlug === product.id || item.id === product.id) &&
+                item.color === color &&
+                item.size === size
           );
 
           if (existingIndex >= 0) {

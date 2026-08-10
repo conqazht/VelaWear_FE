@@ -297,6 +297,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = useCallback(
     (product: Product, color = product.color, size = product.size) => {
+      if (!isAuthenticated && useCartStore.getState().owner !== "anonymous") {
+        useCartStore.getState().releaseToAnonymous();
+      }
       addToLocalCart(product, color, size);
       if (product.variantId !== undefined || product.realId === undefined) return;
 
@@ -313,12 +316,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
       );
     },
-    [addToLocalCart, attachVariant]
+    [addToLocalCart, attachVariant, isAuthenticated]
   );
 
   useEffect(() => {
     if (isAuthLoading) return;
     if (!isAuthenticated || userId === undefined) {
+      if (useCartStore.getState().owner !== "anonymous") {
+        useCartStore.getState().releaseToAnonymous();
+      }
       syncedUserIdRef.current = null;
       clearScheduledCartSync();
       return;
