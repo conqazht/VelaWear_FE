@@ -402,10 +402,10 @@ export function SiteHeader() {
                         className={cn(
                           "flex gap-2.5 rounded-lg bg-white p-2.5 shadow-xl border border-[#1c1a18]/10",
                           item.groups.length >= 3
-                            ? "w-[min(680px,calc(100vw-48px))]"
+                            ? "w-[min(880px,calc(100vw-48px))]"
                             : item.groups.length === 2
-                              ? "w-[min(540px,calc(100vw-48px))]"
-                              : "w-[min(440px,calc(100vw-48px))]"
+                              ? "w-[min(660px,calc(100vw-48px))]"
+                              : "w-[min(480px,calc(100vw-48px))]"
                         )}
                       >
                         <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-md bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
@@ -446,7 +446,7 @@ export function SiteHeader() {
                         </div>
                         <div
                           className={cn(
-                            "grid min-w-0 flex-1 content-start gap-x-4 gap-y-5 px-4 py-5",
+                            "grid min-w-0 flex-1 content-start gap-x-6 md:gap-x-8 gap-y-5 px-5 py-5",
                             item.groups.length >= 3
                               ? "grid-cols-3"
                               : item.groups.length === 2
