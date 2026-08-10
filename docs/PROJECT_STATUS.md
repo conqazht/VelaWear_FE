@@ -1,3 +1,16 @@
+## 2026-08-10 (UI Polish & Admin Navigation Fixes)
+
+- **Branch:** `fix/guest-cart-state-resolution`
+- **PR Pushed:** `fix/guest-cart-state-resolution` to `origin/fix/guest-cart-state-resolution`
+- **Fixes & Enhancements Delivered:**
+  - **Blank `/dashboard` Route Fix:** Added `redirect(ADMIN_HOME_PATH)` (`/dashboard/default`) to `app/(admin)/dashboard/page.tsx` so visiting `/dashboard` automatically redirects to the main Admin Dashboard overview.
+  - **React 19 Script Tag Warning Fix:** Removed redundant `<Script>` component from nested `app/(admin)/layout.tsx` layout. `AdminThemeEnforcer` (`"use client"`) handles theme attribute enforcement in `useLayoutEffect` with 0 console warnings.
+  - **Header Admin Button Styling:** Refined Admin button on header to use light oat tones (`border border-[#1c1a18]/15 bg-[#efe7dc]/60 text-[#1c1a18]`) and titlecase `Quản trị` matching all other header icon buttons.
+  - **Hover Bridge Overlap Bug Fix:** Scoped invisible hover bridge on account avatar to `inset-x-0 w-full` (32px width) and added `pointer-events-none` when dropdown is hidden to prevent accidental triggering when hovering adjacent header buttons.
+  - **Mega Menu Alignment (`thẳng hàng với chữ ở trên`):** Compacted mega menu panel widths (`440px` - `680px`), allowing Floating UI `align="start"` to align the popup left edge directly underneath the hovered menu item text.
+  - **Hero Slider Indicators:** Updated pagination indicators in `components/shop/hero-slider.tsx` to compact round dots (`size-2 rounded-full`) with tight spacing (`gap-1.5`) matching user reference image.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors), `pnpm lint` (0 errors), `pnpm test:unit` (53/53 test files passed, 205/205 tests 100%).
+
 ## 2026-08-10 (Fix Guest Add To Cart State Resolution)
 
 - **Fix Delivered:**
