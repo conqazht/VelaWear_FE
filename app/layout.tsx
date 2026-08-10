@@ -5,6 +5,8 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { I18nProvider } from "@/components/providers/i18n-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 
+import Script from "next/script";
+
 import {
   LOCALE_BOOTSTRAP_SCRIPT,
   LOCALE_COOKIE_KEY,
@@ -30,7 +32,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOTSTRAP_SCRIPT }} />
+        <Script
+          id="locale-bootstrap"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: LOCALE_BOOTSTRAP_SCRIPT }}
+        />
         <React.Suspense fallback={null}>
           <LocalizedAppProviders>{children}</LocalizedAppProviders>
         </React.Suspense>

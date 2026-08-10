@@ -1,7 +1,10 @@
 import Link from "next/link";
 import React from "react";
 import { motion } from "motion/react";
+import { Shield } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { useAuth } from "@/components/auth/auth-provider";
+import { canAccessManagement } from "@/lib/auth/roles";
 import { type ProfileTabId } from "./profile-formatters";
 
 interface ProfileShellProps {
@@ -11,6 +14,7 @@ interface ProfileShellProps {
 
 export function ProfileShell({ activeTab, children }: ProfileShellProps) {
   const { t } = useI18n();
+  const { user } = useAuth();
 
   const tabs: { id: ProfileTabId; label: string }[] = [
     { id: "profile", label: t("account.tabs.profile") },
@@ -24,7 +28,7 @@ export function ProfileShell({ activeTab, children }: ProfileShellProps) {
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
       {/* Navigation Bar */}
       <div className="border-b border-hairline bg-canvas sticky top-0 z-10">
-        <div className="w-full px-6 md:px-16 flex items-center justify-between h-14 overflow-x-auto no-scrollbar">
+        <div className="w-full px-6 md:px-16 flex items-center justify-between h-14 overflow-x-auto no-scrollbar gap-4">
           <div className="flex items-center gap-8 min-w-max">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -50,6 +54,16 @@ export function ProfileShell({ activeTab, children }: ProfileShellProps) {
               );
             })}
           </div>
+
+          {canAccessManagement(user) && (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#1c1a18] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white hover:bg-[#8f2f20] transition-colors flex-shrink-0"
+            >
+              <Shield className="size-3.5 text-[#e2a898]" />
+              <span>{t("common.adminDashboard")}</span>
+            </Link>
+          )}
         </div>
       </div>
 

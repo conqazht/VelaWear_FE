@@ -5,10 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGetMyCart = vi.fn();
 const mockReplaceMyCartItems = vi.fn();
+const mockGetProductVariants = vi.fn();
 
 vi.mock("@/lib/api/commerce", () => ({
   getMyCart: (...args: unknown[]) => mockGetMyCart(...args),
   replaceMyCartItems: (...args: unknown[]) => mockReplaceMyCartItems(...args),
+}));
+
+vi.mock("@/lib/api/catalog", () => ({
+  getProductVariants: (...args: unknown[]) => mockGetProductVariants(...args),
 }));
 
 vi.mock("@/components/auth/auth-provider", () => ({
@@ -47,6 +52,8 @@ describe("CartProvider ownership", () => {
     mockGetMyCart.mockResolvedValue({ items: [] });
     mockReplaceMyCartItems.mockReset();
     mockReplaceMyCartItems.mockResolvedValue({ items: [] });
+    mockGetProductVariants.mockReset();
+    mockGetProductVariants.mockResolvedValue({ result: [] });
   });
 
   afterEach(() => {
