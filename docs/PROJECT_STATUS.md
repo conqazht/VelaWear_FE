@@ -1,3 +1,10 @@
+## 2026-08-10 (Remove Product Card Hover Animation)
+
+- **Branch:** `fix/remove-product-card-hover-animation`
+- **Changes:** Removed card elevation shadow transition (`hover:shadow-xl`) and image scale zoom animation (`group-hover:scale-[1.03]`) from `ProductCardShell` in `components/shop/product-card-shell.tsx`. Collection and catalog product cards now present a flat, refined, static editorial aesthetic on hover.
+- **Verification:** `pnpm exec tsc --noEmit` (0 errors), `pnpm lint` (clean), `pnpm test:e2e:smoke` (16/16 passed 100%).
+- **Git State:** Local branch `fix/remove-product-card-hover-animation` ready (unpushed per user request).
+
 ## 2026-08-09 (E2E Fullstack & Mobile Overflow Hotfix)
 
 - **Branch:** `fix/e2e-catalog-overflow-hotfix`
