@@ -67,7 +67,7 @@ export default function MemberProfile() {
     return (
       <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
-          <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+          <LockKeyhole className="mb-6 size-12 text-[#b5573a]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
             {t("account.signIn.profileTitle")}
           </h2>
@@ -76,7 +76,7 @@ export default function MemberProfile() {
           </p>
           <Link
             href="/sign-in"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]"
           >
             {t("account.signIn.action")}
           </Link>

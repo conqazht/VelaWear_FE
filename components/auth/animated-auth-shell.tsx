@@ -68,11 +68,7 @@ export function AnimatedAuthShell({
               panelClassName
             )}
             initial={false}
-            animate={
-              status === "success"
-                ? { opacity: 0, x: 40, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
-                : { opacity: 1, x: 0 }
-            }
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="mb-7 text-center">

@@ -12,7 +12,7 @@ export function AuthField({ className, trailing, ...props }: AuthFieldProps) {
       <input
         {...props}
         className={cn(
-          "h-12 w-full rounded border border-[#e3dccf] bg-[#f7f4ef] px-4 text-base text-[#1c1a18] outline-none transition-colors placeholder:text-[#55423d]/50 focus:border-[#964025] focus:ring-2 focus:ring-[#964025]/15",
+          "h-12 w-full rounded-[12px] border border-[#e3dccf] bg-[#f7f4ef] px-4 text-base text-[#1c1a18] outline-none transition-colors placeholder:text-[#55423d]/50 focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/15",
           trailing && "pr-12",
           className
         )}

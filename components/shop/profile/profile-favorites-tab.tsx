@@ -55,7 +55,7 @@ export function ProfileFavoritesTab({
           </p>
           <Link
             href="/collection"
-            className="inline-flex bg-primary-container text-on-primary text-xs font-semibold uppercase tracking-widest py-3.5 px-8 hover:bg-[#964025] transition-colors duration-200 rounded-sm shadow-sm"
+            className="inline-flex bg-primary-container text-on-primary text-xs font-semibold uppercase tracking-widest py-3.5 px-8 hover:bg-primary-active transition-colors duration-200 rounded-sm shadow-sm"
           >
             {t("account.favourites.explore")}
           </Link>
@@ -75,7 +75,7 @@ export function ProfileFavoritesTab({
                   aria-label={t("account.favourites.remove", { product: product.name })}
                   className="flex items-center justify-center size-8 rounded-full bg-[#1c1a18]/5 hover:scale-110 transition-transform"
                 >
-                  <Heart className="size-4 text-[#b85a3c] fill-[#b85a3c]" />
+                  <Heart className="size-4 text-[#b5573a] fill-[#b5573a]" />
                 </button>
               }
               footerAction={

@@ -30,7 +30,7 @@ export function StorefrontStaleWarning({
       role="status"
     >
       <span className="flex items-start gap-2">
-        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#964025]" aria-hidden="true" />
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#b5573a]" aria-hidden="true" />
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span>{description}</span>
           {classification?.status !== null && classification?.status !== undefined ? (
@@ -41,7 +41,7 @@ export function StorefrontStaleWarning({
       {classification === null || classification.retryable ? (
         <button
           type="button"
-          className="shrink-0 self-start text-xs font-semibold uppercase tracking-[0.16em] text-[#964025] underline underline-offset-4 sm:self-auto"
+          className="shrink-0 self-start text-xs font-semibold uppercase tracking-[0.16em] text-[#b5573a] underline underline-offset-4 sm:self-auto"
           onClick={onRetry}
         >
           {t("errors.common.retry")}

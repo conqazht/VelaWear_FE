@@ -24,6 +24,7 @@ export type OtpErrorKind =
   | "session_revoked"
   | "validation"
   | "service"
+  | "duplicate"
   | "unknown";
 
 export interface OtpRequestPayload {
@@ -113,6 +114,7 @@ function isOtpErrorCode(value: unknown): value is OtpErrorCode {
 
 function getFallbackErrorKind(status: number | null): OtpErrorKind {
   if (status === 429) return "rate_limited";
+  if (status === 409) return "duplicate";
   if (status === 401) return "session_revoked";
   if (status !== null && status >= 500) return "service";
   return "unknown";
@@ -134,6 +136,8 @@ function getDefaultOtpMessage(kind: OtpErrorKind): string {
       return "Invalid verification request. Check the entered information and try again.";
     case "service":
       return "Verification service is currently unavailable. Please try again later.";
+    case "duplicate":
+      return "This email address is already in use.";
     default:
       return "Something went wrong. Please try again.";
   }

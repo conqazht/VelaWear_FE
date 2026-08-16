@@ -186,7 +186,7 @@ function PriceRangeInputs({
         <button
           type="button"
           onClick={commit}
-          className="h-9 rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#b5573a] hover:border-[#b5573a] shrink-0"
+          className="h-9 rounded-full border border-[#1c1a18] bg-[#1c1a18] px-4 text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-[#b5573a] hover:border-[#b5573a] shrink-0 active:scale-[0.96] cursor-pointer"
         >
           {locale === "vi" ? "Lọc" : "Apply"}
         </button>
@@ -201,10 +201,10 @@ function PriceRangeInputs({
               type="button"
               onClick={() => applyPreset(preset.min, preset.max)}
               className={cn(
-                "rounded-sm border px-2 py-1 text-[11px] transition-colors",
+                "rounded-full border px-3 py-1 text-[11px] font-medium transition-all active:scale-[0.96] cursor-pointer",
                 isActive
-                  ? "border-[#1c1a18] bg-[#efe7dc] font-semibold text-[#1c1a18]"
-                  : "border-[#1c1a18]/15 text-[#1c1a18]/60 hover:border-[#1c1a18]/40 hover:text-[#1c1a18]"
+                  ? "border-[#1c1a18] bg-[#efe7dc] font-bold text-[#1c1a18]"
+                  : "border-[#1c1a18]/15 text-[#1c1a18]/70 hover:border-[#1c1a18]/40 hover:text-[#1c1a18]"
               )}
             >
               {preset.label}
@@ -328,6 +328,7 @@ function CatalogFilters({
                     key={size.id}
                     type="button"
                     disabled={disabled}
+                    aria-pressed={selected}
                     onClick={() =>
                       onChange({
                         ...state,
@@ -374,6 +375,7 @@ function CatalogFilters({
                     key={color.id}
                     type="button"
                     disabled={disabled}
+                    aria-pressed={selected}
                     onClick={() =>
                       onChange({
                         ...state,
@@ -428,7 +430,7 @@ function CatalogFilters({
           <button
             type="button"
             onClick={onClear}
-            className="w-full rounded-sm border border-[#b5573a] py-2.5 text-xs font-semibold uppercase tracking-wider text-[#b5573a] transition-colors hover:bg-[#b5573a] hover:text-white"
+            className="w-full rounded-full border border-[#b5573a] py-2.5 text-xs font-bold uppercase tracking-wider text-[#b5573a] transition-all hover:bg-[#b5573a] hover:text-white active:scale-[0.96] cursor-pointer shadow-2xs"
           >
             {t("storefront.common.clearAllFilters")}
           </button>
@@ -499,7 +501,7 @@ function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
           key={chip.key}
           type="button"
           onClick={chip.remove}
-          className="inline-flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/12 bg-white/50 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:border-[#1c1a18]/35"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-white px-3.5 py-1 text-xs font-medium text-[#1c1a18] shadow-2xs transition-all hover:border-[#b5573a] hover:text-[#b5573a] active:scale-[0.96] cursor-pointer"
         >
           {chip.label}
           <X className="size-3" aria-hidden />
@@ -873,7 +875,7 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
             <span className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/80">{t("storefront.catalog.lookbookLabel")}</span>
             <h2 className="mb-4 font-serif text-3xl font-light uppercase tracking-[0.1em] text-white">{t("storefront.catalog.comingSoon")}</h2>
             <div className="mb-6 h-px w-10 bg-white/40" />
-            <Link href="/collection" className="rounded-sm bg-white px-6 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-black hover:bg-[#efebe4]">
+            <Link href="/collection" className="rounded-sm bg-white px-6 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-black hover:bg-[#efe7dc]">
               {t("storefront.catalog.exploreNow")}
             </Link>
           </div>

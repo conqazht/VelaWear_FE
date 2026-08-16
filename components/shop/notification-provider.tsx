@@ -84,6 +84,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       {/* Floating Notification Panel */}
       {notification && (
         <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           className={`fixed top-20 right-4 sm:right-6 md:right-8 z-50 transition-[transform,opacity] duration-300 ease-out max-w-sm w-[calc(100vw-2rem)] ${
             isVisible
               ? "translate-y-0 opacity-100"
@@ -154,7 +157,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                   <Link
                     href="/checkout"
                     onClick={closeNotification}
-                    className="w-full bg-primary-container text-on-primary text-center font-semibold text-xs tracking-wider uppercase py-2.5 px-4 hover:bg-[#964025] transition-colors duration-200 rounded-sm"
+                    className="w-full bg-primary-container text-on-primary text-center font-semibold text-xs tracking-wider uppercase py-2.5 px-4 hover:bg-primary-active transition-colors duration-200 rounded-sm"
                   >
                     {t("notification.checkout")}
                   </Link>

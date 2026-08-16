@@ -436,7 +436,7 @@ export function SiteHeader() {
                                 }}
                               />
                             }
-                            className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#964025] transition-colors hover:text-[#6f2e1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
+                            className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#b5573a] transition-colors hover:text-[#8f4329] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
                           >
                             <span className="max-w-[10rem] leading-4">{item.ctaLabel}</span>
                             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1c1a18] text-[#f7f4ef] transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-0.5">
@@ -476,7 +476,7 @@ export function SiteHeader() {
                                         }}
                                       />
                                     }
-                                    className="group/item flex min-h-9 items-center justify-between rounded-lg px-2.5 py-1.5 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#964025] focus-visible:bg-[#f4eee6] focus-visible:text-[#964025] focus-visible:outline-none"
+                                    className="group/item flex min-h-9 items-center justify-between rounded-lg px-2.5 py-1.5 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#b5573a] focus-visible:bg-[#f4eee6] focus-visible:text-[#b5573a] focus-visible:outline-none"
                                   >
                                     <span>{sub.label}</span>
                                     <ArrowUpRight
@@ -783,7 +783,7 @@ export function SiteHeader() {
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.96 }}
                           transition={{ duration: 0.16, ease: "easeOut" }}
-                          className={`hidden xl:inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider transition-all duration-200 cursor-pointer shadow-xs ${
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider transition-all duration-200 cursor-pointer shadow-xs ${
                             shouldBeTransparent
                               ? "bg-white/15 text-white border border-white/25 hover:bg-white/30 backdrop-blur-md"
                               : "border border-[#1c1a18]/15 bg-[#efe7dc]/60 text-[#1c1a18] hover:bg-[#efe7dc] hover:border-[#1c1a18]/30"
@@ -814,26 +814,27 @@ export function SiteHeader() {
                       <div className="absolute inset-x-0 top-8 h-4 bg-transparent" />
                       
                       {/* Dropdown Menu */}
-                      <div className="absolute right-0 top-11 w-44 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-md overflow-hidden">
-                        <div className="px-4 py-2.5 border-b border-[#1c1a18]/10 flex items-center justify-between">
-                          <span className="font-sans text-sm font-semibold text-[#1c1a18]">{t("storefront.nav.account")}</span>
+                      <div className="absolute right-0 top-11 w-48 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-lg overflow-hidden">
+                        <div className="px-4 py-3 border-b border-[#1c1a18]/10 flex items-center justify-between bg-canvas/40">
+                          <span className="font-sans text-xs font-bold uppercase tracking-wider text-[#1c1a18]">{t("storefront.nav.account")}</span>
                         </div>
-                        <div className="flex flex-col py-1">
+                        <div className="flex flex-col py-0">
                           {canAccessManagement(safeUser) && (
                             <Link
                               href="/dashboard"
-                              className="px-4 py-2 text-[13px] font-semibold text-[#1c1a18] hover:text-[#b5573a] hover:bg-[#efe7dc]/60 transition-colors flex items-center gap-2 border-b border-[#1c1a18]/10 mb-1"
+                              className="px-4 py-2.5 text-[13px] font-semibold text-[#1c1a18] hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors flex items-center gap-2 border-b border-[#1c1a18]/10"
                             >
                               <Shield className="size-3.5 text-[#b5573a]" />
                               <span>{t("common.adminDashboard")}</span>
                             </Link>
                           )}
-                          <Link href="/profile" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.profile")}</Link>
-                          <Link href="/profile?tab=orders" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.orders")}</Link>
-                          <Link href="/favorites" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.favourites")}</Link>
-                          <Link href="/profile?tab=coupons" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.coupons")}</Link>
-                          <Link href="/profile?tab=reviews" className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors">{t("storefront.nav.reviews")}</Link>
-                          <button onClick={handleLogout} className="px-4 py-1.5 text-[13px] font-medium text-[#1c1a18]/75 hover:text-[#b5573a] hover:bg-[#efe7dc]/50 transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
+                          <Link href="/profile" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.profile")}</Link>
+                          <Link href="/profile?tab=orders" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.orders")}</Link>
+                          <Link href="/profile?tab=favourites" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.favourites")}</Link>
+                          <Link href="/coupons" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.coupons")}</Link>
+                          <Link href="/reviews" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.reviews")}</Link>
+                          <div className="border-t border-[#1c1a18]/8" />
+                          <button onClick={handleLogout} className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
                         </div>
                       </div>
                     </div>
@@ -884,7 +885,7 @@ export function SiteHeader() {
                     type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="grid size-9 place-items-center rounded-full text-[#1c1a18] hover:bg-[#1c1a18]/5 transition-colors cursor-pointer"
-                    aria-label="Đóng"
+                    aria-label={t("common.close")}
                   >
                     <X className="size-5" />
                   </button>
@@ -1151,7 +1152,7 @@ export function SiteHeader() {
                               type="button"
                               onClick={() => removeSearchHistoryItem(term)}
                               className="p-1 text-[#1c1a18]/40 hover:text-[#1c1a18] transition-colors cursor-pointer flex-none"
-                              aria-label={`Remove ${term} from history`}
+                              aria-label={t("storefront.nav.deleteSearch", { term })}
                             >
                               <X className="size-4" />
                             </button>

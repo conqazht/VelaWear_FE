@@ -120,8 +120,8 @@ function FavoritesSignInState() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 py-24">
-      <div className="mx-auto flex max-w-md flex-col items-center rounded-sm border border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
-        <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+      <div className="mx-auto flex max-w-md flex-col items-center rounded-xl border border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
+        <LockKeyhole className="mb-6 size-12 text-[#b5573a]" />
         <h1 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
           {t("favorites.signInTitle")}
         </h1>
@@ -130,7 +130,7 @@ function FavoritesSignInState() {
         </p>
         <Link
           href="/sign-in"
-          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+          className="inline-flex w-full justify-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-[#b5573a] active:scale-[0.96]"
         >
           {t("favorites.signIn")}
         </Link>
@@ -153,7 +153,7 @@ function FavoritesContent({
   const { t } = useI18n();
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px] min-h-[calc(100vh-200px)]">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
         <Link href="/" className="hover:text-[#1c1a18]">
           {t("common.home")}
@@ -162,26 +162,34 @@ function FavoritesContent({
         <span className="font-medium text-[#1c1a18]">{t("favorites.title")}</span>
       </div>
 
-      <div className="mb-4">
-        <h1 className="mb-1 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
-          {t("favorites.title")}
-        </h1>
-        {favorites.length > 0 && (
-          <p className="text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50 mt-1">
-            {t("favorites.savedCount", { count: favorites.length })}
-          </p>
-        )}
+      <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+            {t("favorites.title")}
+          </h1>
+          {favorites.length > 0 && (
+            <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
+              {t("favorites.savedCount", { count: favorites.length })}
+            </p>
+          )}
+        </div>
+        <Link
+          href="/collection"
+          className="text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:underline animate-none"
+        >
+          ← {t("cart.continueShopping")}
+        </Link>
       </div>
 
       {favorites.length === 0 ? (
-        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[80vh] flex flex-col justify-start pt-24 items-center">
+        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[50vh] flex flex-col justify-start pt-16 items-center">
           <Heart className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
           <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
             {t("favorites.emptyDescription")}
           </p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b5573a]"
+            className="inline-flex items-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-[#b5573a] active:scale-[0.96]"
           >
             {t("favorites.explore")}
           </Link>
@@ -219,7 +227,7 @@ function FavoritesGrid({
             <button
               onClick={() => removeFromFavorites(product.id)}
               aria-label={t("favorites.remove", { product: product.name })}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-[#1c1a18]/10 bg-white/95 text-[#964025] shadow-sm transition-colors hover:bg-[#efebe4]"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-[#1c1a18]/10 bg-white/95 text-[#b5573a] shadow-sm transition-colors hover:bg-[#efe7dc]"
             >
               <Heart className="size-4 fill-current stroke-current" />
             </button>
@@ -227,7 +235,7 @@ function FavoritesGrid({
           footerAction={
             <button
               onClick={() => handleAddToBag(product)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e3dccf] bg-[#f3ede9] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] transition-all hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e3dccf] bg-[#efe7dc] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] transition-all hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white active:scale-[0.96]"
             >
               <ShoppingBag className="size-4" />
               <span>{t("favorites.addToBag")}</span>

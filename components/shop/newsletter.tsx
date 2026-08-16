@@ -54,8 +54,12 @@ export function Newsletter() {
             onSubmit={handleSubmit} 
             className="w-full max-w-lg bg-white/[0.03] border border-white/10 rounded-full p-1.5 flex flex-col sm:flex-row items-center gap-2 focus-within:border-[#b5573a]/50 transition-all duration-300"
           >
+            <label htmlFor="newsletter-email" className="sr-only">
+              {t("storefront.newsletter.placeholder")}
+            </label>
             <input
               type="email"
+              id="newsletter-email"
               placeholder={t("storefront.newsletter.placeholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -75,7 +79,7 @@ export function Newsletter() {
           </form>
 
           {/* Feedback message */}
-          <div className="h-6 mt-4">
+          <div className="h-6 mt-4" role="status" aria-live="polite" aria-atomic="true">
             <AnimatePresence>
               {subscribed && (
                 <motion.p

@@ -148,6 +148,8 @@ function getLocalizedOtpError(
       return t("auth.otp.validationError");
     case "service":
       return t("auth.otp.serviceError");
+    case "duplicate":
+      return t("auth.otp.duplicateError");
     default:
       return t("auth.otp.genericError");
   }

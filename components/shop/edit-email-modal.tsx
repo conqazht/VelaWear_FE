@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { changeEmail } from "@/lib/auth-otp-api";
 import { OtpEntry } from "@/components/auth/otp-entry";
 import { createEmailSchema } from "@/lib/validations";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function EditEmailModal({
   isOpen,
@@ -16,7 +21,7 @@ export function EditEmailModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { clearRevokedSession } = useAuth();
+  const { user, clearRevokedSession } = useAuth();
   const { t, locale } = useI18n();
 
   const [newEmail, setNewEmail] = useState("");
@@ -25,9 +30,19 @@ export function EditEmailModal({
 
   const emailValidation = createEmailSchema(locale).safeParse(newEmail);
   const isEmailValid = emailValidation.success;
-  const emailValidationMessage = emailValidation.success
-    ? null
-    : emailValidation.error.issues[0]?.message;
+  const isSameAsCurrent = Boolean(
+    user?.email && newEmail.trim().toLowerCase() === user.email.trim().toLowerCase(),
+  );
+
+  const emailValidationMessage = !newEmail.trim()
+    ? t("account.profile.emailRequired")
+    : isSameAsCurrent
+      ? t("account.settings.emailSameAsCurrent")
+      : emailValidation.success
+        ? null
+        : (emailValidation.error.issues[0]?.message ?? t("account.profile.emailInvalid"));
+
+  const isFormValid = isEmailValid && !isSameAsCurrent;
 
   const {
     showOtpStep,
@@ -49,30 +64,29 @@ export function EditEmailModal({
           otpProofToken: proofToken,
         });
         await clearRevokedSession();
-        onClose();
+        handleModalClose();
       } catch (error) {
         setSubmitError(getApiErrorMessage(error));
       }
     },
   });
 
-  if (!isOpen) return null;
-
   const getApiErrorMessage = (error: unknown) => {
     const apiError = error as { response?: { data?: { message?: string } }; message?: string };
-    return apiError.response?.data?.message ?? apiError.message ?? "An error occurred";
+    return (
+      apiError.response?.data?.message ??
+      apiError.message ??
+      t("account.settings.updateEmailError")
+    );
   };
 
   const handleNext = async () => {
     setSubmitError(null);
-    if (!isEmailValid) {
+    if (!isFormValid) {
       setEmailTouched(true);
       return;
     }
-    const success = await handleRequestOtp();
-    if (!success) {
-      setSubmitError(t("account.password.updateError"));
-    }
+    await handleRequestOtp();
   };
 
   const handleModalClose = () => {
@@ -83,28 +97,16 @@ export function EditEmailModal({
     onClose();
   };
 
-  return (
-    <div 
-      className="fixed inset-0 bg-[#1c1a18]/40 z-50 flex items-center justify-center p-4"
-      onClick={handleModalClose}
-    >
-      <div 
-        className="bg-canvas rounded-2xl w-full max-w-[500px] p-6 md:p-8 relative shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <button 
-          onClick={handleModalClose}
-          aria-label={t("account.password.close")}
-          className="absolute top-6 right-6 p-2 bg-[#1c1a18]/5 rounded-full hover:bg-[#1c1a18]/10 transition-colors cursor-pointer"
-        >
-          <X className="size-5 text-ink" />
-        </button>
+  const displayError = submitError || otpError;
 
-        <h2 className="text-2xl font-serif font-light text-ink tracking-tight mb-8">
-          {t("account.profile.email")}
-        </h2>
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleModalClose()}>
+      <DialogContent className="max-w-[500px] rounded-md border-[#e3dccf] bg-canvas p-6 md:p-8 text-ink shadow-2xl">
+        <DialogHeader className="mb-4 text-left">
+          <DialogTitle className="text-2xl font-serif font-light text-ink tracking-tight">
+            {t("account.profile.email")}
+          </DialogTitle>
+        </DialogHeader>
 
         {!showOtpStep ? (
           <div className="flex flex-col gap-6">
@@ -113,7 +115,7 @@ export function EditEmailModal({
             </p>
             <div>
               <div className="relative">
-                <input 
+                <input
                   type="email"
                   id="newEmail"
                   placeholder={t("account.profile.email")}
@@ -121,41 +123,45 @@ export function EditEmailModal({
                   onChange={(e) => {
                     setNewEmail(e.target.value);
                     setEmailTouched(true);
+                    setSubmitError(null);
                   }}
                   onBlur={() => setEmailTouched(true)}
-                  className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
-                    emailTouched && !isEmailValid
-                      ? "border-red-600 focus:border-red-600"
+                  className={`peer w-full px-4 py-3.5 rounded-sm border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
+                    emailTouched && !isFormValid
+                      ? "border-error focus:border-error"
                       : "border-[#1c1a18]/20 focus:border-ink/60"
                   }`}
                 />
-                <label 
+                <label
                   htmlFor="newEmail"
                   className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
-                    emailTouched && !isEmailValid
-                      ? "text-red-600 peer-focus:text-red-600"
+                    emailTouched && !isFormValid
+                      ? "text-error peer-focus:text-error"
                       : "text-ink/70 peer-focus:text-ink/70"
                   }`}
                 >
                   {t("account.profile.email")}
                 </label>
               </div>
-              {emailTouched && !isEmailValid && (
-                <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{emailValidationMessage || t("account.profile.emailInvalid")}</p>
+              {emailTouched && !isFormValid && (
+                <p className="text-error text-xs mt-1.5 transition-opacity duration-500">
+                  {emailValidationMessage}
+                </p>
               )}
             </div>
 
-            {submitError && (
-              <p className="text-sm text-red-600">{submitError}</p>
+            {displayError && (
+              <p className="text-sm text-error">{displayError}</p>
             )}
 
             <div className="flex justify-end mt-4">
-              <button 
+              <button
+                type="button"
                 onClick={handleNext}
-                disabled={!isEmailValid || isOtpSubmitting}
-                className={`px-8 py-2.5 rounded-full border text-sm font-medium transition-colors cursor-pointer ${
-                  isEmailValid && !isOtpSubmitting
-                    ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90"
+                disabled={!isFormValid || isOtpSubmitting}
+                className={`px-8 py-2.5 rounded-sm border text-sm font-medium transition-colors cursor-pointer ${
+                  isFormValid && !isOtpSubmitting
+                    ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 shadow-sm"
                     : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed pointer-events-none"
                 }`}
               >
@@ -172,7 +178,7 @@ export function EditEmailModal({
               setOtpCode={setOtpCode}
               cooldown={cooldown}
               isSubmitting={isOtpSubmitting}
-              error={otpError || submitError}
+              error={displayError}
               onVerify={handleVerifyOtp}
               onResend={handleRequestOtp}
               onCancel={() => {
@@ -184,7 +190,7 @@ export function EditEmailModal({
             />
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

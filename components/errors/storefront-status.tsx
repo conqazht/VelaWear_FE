@@ -60,7 +60,7 @@ function StorefrontStatusActionLink({
     "relative z-20 inline-flex min-h-11 min-w-40 items-center justify-center rounded-sm border px-6 text-xs font-semibold uppercase tracking-[0.16em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f4ef]",
     primary
       ? "border-[#1c1a18] bg-[#1c1a18] text-[#f7f4ef] hover:border-[#b5573a] hover:bg-[#b5573a]"
-      : "border-[#b5573a]/55 bg-transparent text-[#964025] hover:border-[#b5573a] hover:bg-[#efe7dc]",
+      : "border-[#b5573a]/55 bg-transparent text-[#b5573a] hover:border-[#b5573a] hover:bg-[#efe7dc]",
   );
 
   if (action.href) {
@@ -184,7 +184,7 @@ function StorefrontStatusView({
         <div className="relative z-10 flex items-center justify-between border-b border-[#e3dccf] pb-5">
           <Link
             href="/"
-            className="text-sm font-semibold uppercase tracking-[0.28em] text-[#1c1a18] transition-colors hover:text-[#964025]"
+            className="text-sm font-semibold uppercase tracking-[0.28em] text-[#1c1a18] transition-colors hover:text-[#b5573a]"
           >
             Vela Wear
           </Link>
@@ -224,7 +224,7 @@ function StorefrontStatusView({
         </div>
 
         <div className={cn(compact ? "text-center sm:text-left" : "text-center md:text-left")}>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#964025]">{copy.eyebrow}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#b5573a]">{copy.eyebrow}</p>
           <div className={cn("bg-[#b5573a]", compact ? "mx-auto my-4 h-px w-12 sm:mx-0" : "mx-auto my-5 h-px w-16 md:mx-0")} />
           <h1
             id={titleId}

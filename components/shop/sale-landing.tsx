@@ -234,13 +234,12 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
     <section className="border-b border-[#1c1a18]/10 pb-16 last:border-b-0 last:pb-0">
       {bannerUrl ? (
         <motion.div
-          initial={{ clipPath: reduceMotion ? "inset(0 0 0 0)" : "inset(0 100% 0 0)" }}
-          whileInView={{ clipPath: "inset(0 0 0 0)" }}
-          viewport={{ once: true }}
+          initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: reduceMotion ? 0.2 : 0.6, ease: [0.16, 1, 0.3, 1] }}
           role="img"
           aria-label={t("storefront.sale.bannerAria", { name: campaign.name })}
-          className="mb-8 h-40 overflow-hidden rounded-lg bg-[#e8ded2] bg-cover bg-center md:h-64"
+          className="mb-8 h-40 overflow-hidden rounded-xl bg-[#e8ded2] bg-cover bg-center md:h-64 shadow-xs"
           style={{ backgroundImage: `url(${JSON.stringify(bannerUrl)})` }}
         />
       ) : null}
@@ -250,13 +249,13 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
             <Badge
               className={
                 isFlash
-                  ? "rounded-sm bg-[#8f2f20] text-white"
-                  : "rounded-sm bg-[#1c1a18] text-white"
+                  ? "rounded-full bg-[#8f4329] text-white px-3 py-0.5"
+                  : "rounded-full bg-[#1c1a18] text-white px-3 py-0.5"
               }
             >
               {campaignTypeLabel}
             </Badge>
-            <Badge variant="outline" className="rounded-sm">
+            <Badge variant="outline" className="rounded-full px-3 py-0.5 border-[#1c1a18]/20">
               {campaignPhaseLabel}
             </Badge>
             <span className="text-xs text-[#1c1a18]/50">
@@ -271,7 +270,7 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
               {campaign.description}
             </p>
           ) : null}
-          <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#8f2f20]">
+          <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#8f4329]">
             {isFlash
               ? t("storefront.sale.coupon.flashIneligible")
               : t("storefront.sale.coupon.standardEligible")}
@@ -288,11 +287,11 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
       </header>
 
       {products.length === 0 ? (
-        <p className="border-y border-[#1c1a18]/10 py-16 text-center text-sm text-[#1c1a18]/55">
-          {t("storefront.sale.noProducts")}
-        </p>
+        <div className="rounded-2xl border border-dashed border-[#1c1a18]/15 bg-white/60 p-12 text-center">
+          <p className="text-sm text-[#1c1a18]/60">{t("storefront.sale.noProducts")}</p>
+        </div>
       ) : (
-        <ProductGrid>
+        <ProductGrid className="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product, index) => (
             <motion.div
               key={product.productId}
@@ -341,8 +340,8 @@ function CountdownBlock({ label, countdown }: { label: string; countdown: Return
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1c1a18]/45">{label}</p>
       <div className="flex gap-2">
         {values.map(([value, unit]) => (
-          <div key={unit} className="min-w-14 rounded-lg border border-[#1c1a18]/10 bg-white px-2 py-2 text-center">
-            <strong className="block font-mono text-lg tabular-nums">{String(value).padStart(2, "0")}</strong>
+          <div key={unit} className="min-w-14 rounded-lg border border-[#1c1a18]/10 bg-white px-2.5 py-2 text-center shadow-xs">
+            <strong className="block font-numeric text-lg tabular-nums text-ink">{String(value).padStart(2, "0")}</strong>
             <span className="text-[9px] uppercase tracking-wider text-[#1c1a18]/45">{unit}</span>
           </div>
         ))}

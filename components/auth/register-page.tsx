@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useState, useRef } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { OtpEntry } from "@/components/auth/otp-entry";
 import { AnimatedAuthShell } from "@/components/auth/animated-auth-shell";
 import { FloatingInput } from "@/components/auth/floating-input";
+import { PasswordRequirements } from "@/components/auth/password-requirements";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
@@ -197,7 +198,7 @@ export function RegisterPage() {
             {t("auth.register.alreadyMember")} {" "}
             <Link
               href="/sign-in"
-              className="font-medium text-[#964025] underline decoration-[#964025]/30 underline-offset-2 transition-colors hover:text-[#87391f] border-none"
+              className="font-medium text-[#b5573a] underline decoration-[#b5573a]/30 underline-offset-2 transition-colors hover:text-[#8f4329] border-none"
             >
               {t("auth.common.signIn")}
             </Link>
@@ -223,7 +224,7 @@ export function RegisterPage() {
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 border-none">
           {otpError && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded border-solid">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded-[12px] border-solid">
               {otpError}
             </div>
           )}
@@ -357,21 +358,12 @@ export function RegisterPage() {
                 </button>
               }
             />
-            {isSubmitted && (errors.passwordMin || errors.passwordRules) && (
-              <div className="mt-2 flex flex-col gap-1 border-none">
-                {errors.passwordMin && (
-                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider border-none">
-                    <X className="size-3 text-destructive" strokeWidth={2.5} />{" "}
-                    {t("auth.validation.passwordMin")}
-                  </span>
-                )}
-                {errors.passwordRules && (
-                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider border-none">
-                    <X className="size-3 text-destructive" strokeWidth={2.5} />{" "}
-                    {t("auth.validation.passwordRules")}
-                  </span>
-                )}
-              </div>
+            {(password.length > 0 || isSubmitted || sceneFocus === "password") && (
+              <PasswordRequirements
+                password={password}
+                showTitle={false}
+                className="mt-2.5 px-1 border-none"
+              />
             )}
           </div>
 
@@ -409,7 +401,7 @@ export function RegisterPage() {
                       errors.gender
                         ? "border-red-500 bg-white/60 focus:border-red-500"
                         : isSelectFocused
-                        ? "border-[#964025] bg-white/85 ring-2 ring-black/5"
+                        ? "border-[#b5573a] bg-white/85 ring-2 ring-black/5"
                         : "border-black/20"
                     )}
                   >
@@ -427,10 +419,10 @@ export function RegisterPage() {
                     sideOffset={4}
                     className="bg-[#efe7dc] border border-black/20 rounded-[12px] shadow-none text-ink w-[var(--anchor-width)]"
                   >
-                    <SelectItem value="mens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
+                    <SelectItem value="mens" className="hover:bg-[#b5573a]/10 focus:bg-[#b5573a]/10 rounded-sm cursor-pointer py-3 px-4">
                       {t("auth.register.male")}
                     </SelectItem>
-                    <SelectItem value="womens" className="hover:bg-[#964025]/10 focus:bg-[#964025]/10 rounded-sm cursor-pointer py-3 px-4">
+                    <SelectItem value="womens" className="hover:bg-[#b5573a]/10 focus:bg-[#b5573a]/10 rounded-sm cursor-pointer py-3 px-4">
                       {t("auth.register.female")}
                     </SelectItem>
                   </SelectContent>
@@ -477,7 +469,7 @@ export function RegisterPage() {
                     "col-span-1 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
                     errors.dob
                       ? "border-red-500 bg-white/60 focus:border-red-500"
-                      : "border-black/20 focus:border-[#964025] bg-white/60 focus:bg-white/85"
+                      : "border-black/20 focus:border-[#b5573a] bg-white/60 focus:bg-white/85"
                   )}
                 />
                 <input
@@ -509,7 +501,7 @@ export function RegisterPage() {
                     "col-span-1 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
                     errors.dob
                       ? "border-red-500 bg-white/60 focus:border-red-500"
-                      : "border-black/20 focus:border-[#964025] bg-white/60 focus:bg-white/85"
+                      : "border-black/20 focus:border-[#b5573a] bg-white/60 focus:bg-white/85"
                   )}
                 />
                 <input
@@ -538,7 +530,7 @@ export function RegisterPage() {
                     "col-span-2 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
                     errors.dob
                       ? "border-red-500 bg-white/60 focus:border-red-500"
-                      : "border-black/20 focus:border-[#964025] bg-white/60 focus:bg-white/85"
+                      : "border-black/20 focus:border-[#b5573a] bg-white/60 focus:bg-white/85"
                   )}
                 />
               </div>
@@ -557,7 +549,7 @@ export function RegisterPage() {
                 id="emailConsent"
                 checked={emailConsent}
                 onCheckedChange={(checked) => setEmailConsent(!!checked)}
-                className="mt-1 size-5 rounded-[4px] border-[#1c1a18]/30 data-checked:bg-[#964025] data-checked:border-[#964025] cursor-pointer shrink-0"
+                className="mt-1 size-5 rounded-[4px] border-[#1c1a18]/30 data-checked:bg-[#b5573a] data-checked:border-[#b5573a] cursor-pointer shrink-0"
               />
               <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
                 {t("auth.register.emailConsent")}
@@ -581,16 +573,16 @@ export function RegisterPage() {
                   "mt-1 size-5 rounded-[4px] cursor-pointer shrink-0 transition-all duration-200",
                   errors.terms
                     ? "border-red-500 bg-red-500/10 shadow-[0_0_0_2px_rgba(239,68,68,0.2)]"
-                    : "border-[#1c1a18]/30 data-checked:bg-[#964025] data-checked:border-[#964025]"
+                    : "border-[#1c1a18]/30 data-checked:bg-[#b5573a] data-checked:border-[#b5573a]"
                 )}
               />
               <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
                 {t("auth.register.termsPrefix")} {" "}
-                <Link href="#" className="underline hover:text-[#964025] border-none">
+                <Link href="#" className="underline hover:text-[#b5573a] border-none">
                   {t("auth.register.privacyPolicy")}
                 </Link>{" "}
                 {t("auth.register.termsJoin")} {" "}
-                <Link href="#" className="underline hover:text-[#964025] border-none">
+                <Link href="#" className="underline hover:text-[#b5573a] border-none">
                   {t("auth.register.termsOfUse")}
                 </Link>
                 .
@@ -603,7 +595,7 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={isOtpSubmitting}
-              className="w-full h-12 bg-[#964025] text-white rounded-[12px] font-medium hover:bg-[#87391f] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50 border-none"
+              className="w-full h-12 bg-[#b5573a] text-white rounded-[12px] font-medium hover:bg-[#8f4329] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50 border-none shadow-sm"
             >
               {isOtpSubmitting ? t("auth.register.creating") : t("auth.register.create")}
             </button>

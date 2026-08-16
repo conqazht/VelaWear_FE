@@ -143,12 +143,12 @@ export function OrderReviewDialog({
                   aria-checked={rating === value}
                   aria-label={t("reviews.write.ratingValue", { rating: value })}
                   onClick={() => setRating(value)}
-                  className="rounded-sm p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b85a3c]"
+                  className="rounded-sm p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b5573a]"
                 >
                   <Star
                     className={cn(
                       "size-8 transition-colors",
-                      value <= rating ? "fill-[#b85a3c] text-[#b85a3c]" : "text-[#1c1a18]/20",
+                      value <= rating ? "fill-[#b5573a] text-[#b5573a]" : "text-[#1c1a18]/20",
                     )}
                   />
                 </button>
@@ -166,7 +166,7 @@ export function OrderReviewDialog({
               maxLength={1_000}
               rows={6}
               placeholder={t("reviews.write.commentPlaceholder")}
-              className="mt-3 w-full resize-y rounded-sm border border-[#1c1a18]/15 bg-white px-4 py-3 text-sm leading-6 outline-none transition-colors focus:border-[#b85a3c]"
+              className="mt-3 w-full resize-y rounded-sm border border-[#1c1a18]/15 bg-white px-4 py-3 text-sm leading-6 outline-none transition-colors focus:border-[#b5573a]"
             />
             <span className="mt-1 block text-right text-xs tabular-nums text-[#1c1a18]/45">
               {comment.length}/1.000
@@ -201,7 +201,7 @@ export function OrderReviewDialog({
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
-                  className="flex size-24 flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-[#1c1a18]/25 bg-white text-xs text-[#1c1a18]/60 hover:border-[#b85a3c] hover:text-[#b85a3c]"
+                  className="flex size-24 flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-[#1c1a18]/25 bg-white text-xs text-[#1c1a18]/60 hover:border-[#b5573a] hover:text-[#b5573a]"
                 >
                   <ImagePlus className="size-5" />
                   {t("reviews.write.addImages")}
@@ -236,7 +236,7 @@ export function OrderReviewDialog({
             <button
               type="submit"
               disabled={mutation.isPending || !item}
-              className="min-h-11 bg-[#1c1a18] px-7 text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#b85a3c] disabled:opacity-50"
+              className="min-h-11 bg-[#1c1a18] px-7 text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#b5573a] disabled:opacity-50"
             >
               {mutation.isPending ? t("reviews.write.submitting") : t("reviews.write.submit")}
             </button>

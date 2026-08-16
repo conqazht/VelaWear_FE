@@ -1,10 +1,16 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Star, Quote, Plus, X, Check } from "lucide-react";
+import { motion } from "motion/react";
+import { Star, Quote, Plus, Check } from "lucide-react";
 import { ScrollReveal } from "./scroll-reveal";
 import { useI18n } from "@/components/providers/i18n-provider";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Locale } from "@/lib/i18n";
 import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
 import { formatDate } from "@/lib/i18n/format";
@@ -232,6 +238,7 @@ export function Testimonials() {
             <button
               key={tab}
               onClick={() => setFilter(tab)}
+              aria-pressed={filter === tab}
               className={`px-5 py-2.5 rounded-full text-xs font-medium uppercase tracking-[1.5px] transition-all cursor-pointer ${
                 filter === tab
                   ? "bg-[#b5573a] text-white shadow-sm"
@@ -290,147 +297,124 @@ export function Testimonials() {
       </div>
 
       {/* Modal - Write Review */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
-              className="fixed inset-0 bg-black/40 z-50 backdrop-blur-[2px]"
-            />
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-lg rounded-2xl border-[#e3dccf] bg-[#f7f4ef] p-6 sm:p-8 text-[#1c1a18] shadow-2xl">
+          <DialogHeader className="border-b border-[#e3dccf] pb-4">
+            <DialogTitle className="font-serif text-2xl font-medium text-[#1c1a18]">
+              {t("testimonials.modal.title")}
+            </DialogTitle>
+          </DialogHeader>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed inset-0 m-auto w-full max-w-lg h-fit bg-[#f7f4ef] rounded-[24px] border border-[#e3dccf] shadow-2xl p-8 z-50 flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
-            >
-              <div className="flex justify-between items-center pb-4 border-b border-[#e3dccf]">
-                <h3 className="font-serif text-2xl text-[#1c1a18] font-medium">{t("testimonials.modal.title")}</h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-1 rounded-full text-[#1c1a18] hover:text-[#b5573a] hover:bg-black/5 transition-all cursor-pointer"
-                  aria-label={t("testimonials.modal.close")}
-                >
-                  <X className="w-5 h-5" />
-                </button>
+          {isSuccess ? (
+            <div className="py-10 flex flex-col items-center justify-center text-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-[#5d8a6c]/10 flex items-center justify-center text-[#5d8a6c]">
+                <Check className="w-8 h-8" />
+              </div>
+              <h4 className="font-serif text-xl font-medium text-[#1c1a18]">{t("testimonials.success.title")}</h4>
+              <p className="text-xs text-[#8a857c] max-w-xs leading-relaxed">
+                {t("testimonials.success.description")}
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitReview} className="flex flex-col gap-4 mt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.name")}</label>
+                  <input
+                    type="text"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder={t("testimonials.form.namePlaceholder")}
+                    className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-sm px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.location")}</label>
+                  <input
+                    type="text"
+                    required
+                    value={formLocation}
+                    onChange={(e) => setFormLocation(e.target.value)}
+                    placeholder={t("testimonials.form.locationPlaceholder")}
+                    className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-sm px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50"
+                  />
+                </div>
               </div>
 
-              {isSuccess ? (
-                <div className="py-12 flex flex-col items-center justify-center text-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-[#5d8a6c]/10 flex items-center justify-center text-[#5d8a6c]">
-                    <Check className="w-8 h-8" />
-                  </div>
-                  <h4 className="font-serif text-xl font-medium text-[#1c1a18]">{t("testimonials.success.title")}</h4>
-                  <p className="text-xs text-[#8a857c] max-w-xs leading-relaxed">
-                    {t("testimonials.success.description")}
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmitReview} className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.name")}</label>
-                      <input
-                        type="text"
-                        required
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
-                        placeholder={t("testimonials.form.namePlaceholder")}
-                        className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.location")}</label>
-                      <input
-                        type="text"
-                        required
-                        value={formLocation}
-                        onChange={(e) => setFormLocation(e.target.value)}
-                        placeholder={t("testimonials.form.locationPlaceholder")}
-                        className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.product")}</label>
-                      <select
-                        value={formProduct}
-                        onChange={(e) => setFormProduct(e.target.value)}
-                        className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
-                      >
-                        {reviewProducts.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.category")}</label>
-                      <select
-                        value={formCategory}
-                        onChange={(e) =>
-                          setFormCategory(
-                            e.target.value as "essentials" | "outerwear" | "accessories"
-                          )
-                        }
-                        className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
-                      >
-                        <option value="essentials">{t("testimonials.filter.essentials")}</option>
-                        <option value="outerwear">{t("testimonials.filter.outerwear")}</option>
-                        <option value="accessories">{t("testimonials.filter.accessories")}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.rating")}</label>
-                    <div className="flex gap-2 text-[#b5573a]">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setFormRating(star)}
-                          aria-label={t("testimonials.form.star", { count: star })}
-                          className="p-1 hover:scale-110 transition-transform cursor-pointer"
-                        >
-                          <Star className={`w-6 h-6 ${star <= formRating ? "fill-current" : "text-[#e3dccf]"}`} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.review")}</label>
-                    <textarea
-                      required
-                      value={formQuote}
-                      onChange={(e) => setFormQuote(e.target.value)}
-                      placeholder={t("testimonials.form.reviewPlaceholder")}
-                      rows={4}
-                      className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-[8px] px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50 resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="mt-2 w-full bg-[#1c1a18] hover:bg-[#b5573a] text-white text-xs font-semibold uppercase tracking-[1.5px] py-4 rounded-[8px] transition-colors duration-300 shadow-md cursor-pointer"
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.product")}</label>
+                  <select
+                    value={formProduct}
+                    onChange={(e) => setFormProduct(e.target.value)}
+                    className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-sm px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
                   >
-                    {t("testimonials.form.submit")}
-                  </button>
-                </form>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                    {reviewProducts.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.category")}</label>
+                  <select
+                    value={formCategory}
+                    onChange={(e) =>
+                      setFormCategory(
+                        e.target.value as "essentials" | "outerwear" | "accessories"
+                      )
+                    }
+                    className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-sm px-3 py-2.5 text-xs text-[#1c1a18] focus:outline-none focus:border-[#b5573a]/50"
+                  >
+                    <option value="essentials">{t("testimonials.filter.essentials")}</option>
+                    <option value="outerwear">{t("testimonials.filter.outerwear")}</option>
+                    <option value="accessories">{t("testimonials.filter.accessories")}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.rating")}</label>
+                <div className="flex gap-2 text-[#b5573a]">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFormRating(star)}
+                      aria-label={t("testimonials.form.star", { count: star })}
+                      className="p-1 hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <Star className={`w-6 h-6 ${star <= formRating ? "fill-current" : "text-[#e3dccf]"}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-semibold uppercase tracking-[1px] text-[#8a857c]">{t("testimonials.form.review")}</label>
+                <textarea
+                  required
+                  value={formQuote}
+                  onChange={(e) => setFormQuote(e.target.value)}
+                  placeholder={t("testimonials.form.reviewPlaceholder")}
+                  rows={4}
+                  className="bg-[#efe7dc]/50 border border-[#e3dccf] rounded-sm px-3.5 py-2.5 text-xs text-[#1c1a18] placeholder-[#8a857c]/50 focus:outline-none focus:border-[#b5573a]/50 resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="mt-2 w-full bg-[#1c1a18] hover:bg-[#b5573a] text-white text-xs font-semibold uppercase tracking-[1.5px] py-3.5 rounded-sm transition-colors duration-300 shadow-md cursor-pointer"
+              >
+                {t("testimonials.form.submit")}
+              </button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

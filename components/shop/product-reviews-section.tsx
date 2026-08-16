@@ -143,14 +143,14 @@ export function ProductReviewsSection({
           </h2>
           {count > 0 ? (
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <RatingStars rating={average} sizeClassName="size-4" activeClassName="text-[#b85a3c]" />
+              <RatingStars rating={average} sizeClassName="size-4" activeClassName="text-[#b5573a]" />
               <span className="text-xs text-[#1c1a18]/55">
                 {average.toFixed(1)} · {t("reviews.total", { count })}
               </span>
             </div>
           ) : null}
         </div>
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#b85a3c]">
+        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#b5573a]">
           {t("reviews.viewAll", { count })}<ChevronRight className="size-4" />
         </span>
       </button>

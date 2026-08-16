@@ -91,7 +91,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
           <p className="text-sm text-[#1c1a18]/50 mb-6">{t("account.orders.empty")}</p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c] transition-colors"
+            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#b5573a] transition-colors"
           >
             {t("account.orders.shopNow")}
           </Link>
@@ -113,7 +113,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
                 className="border border-hairline/60 rounded-sm bg-surface-card/30 p-6 flex flex-col md:flex-row gap-6 justify-between hover:bg-surface-card/65 transition-colors cursor-pointer"
               >
                 <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-surface-card overflow-hidden rounded-sm flex-shrink-0 border border-hairline/25 relative flex items-center justify-center bg-[#efebe4]">
+                  <div className="w-20 h-20 bg-surface-card overflow-hidden rounded-sm flex-shrink-0 border border-hairline/25 relative flex items-center justify-center">
                     <span className="font-serif text-xl font-light text-ink/40">V</span>
                   </div>
                   <div className="flex flex-col justify-center">

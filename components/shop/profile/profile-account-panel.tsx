@@ -153,6 +153,15 @@ export function ProfileAccountPanel({
 
   return (
     <section className="flex flex-col gap-6 text-left">
+      <div className="border-b border-[#1c1a18]/10 pb-4 flex justify-between items-end">
+        <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
+          {t("account.profile.title")}
+        </h2>
+        <span className="text-xs text-[#55423d]/65">
+          {t("account.member")}
+        </span>
+      </div>
+
       {canAccessManagement(user) && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-md border border-[#1c1a18]/10 bg-[#efe7dc]/40 p-4.5 text-[#1c1a18] shadow-xs">
           <div className="flex items-center gap-3">
@@ -178,73 +187,64 @@ export function ProfileAccountPanel({
         </div>
       )}
 
-      <div className="border-b border-hairline pb-4 flex justify-between items-end">
-        <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
-          {t("account.profile.title")}
-        </h2>
-        <span className="text-xs text-[#55423d]/65">
-          {t("account.member")}
-        </span>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-12 md:gap-40 lg:gap-56 mt-2 text-left">
+      <div className="flex flex-col md:flex-row gap-10 md:gap-16 lg:gap-24 mt-2 text-left">
         {/* Sidebar */}
-        <aside className="w-full md:w-52 flex-shrink-0">
+        <aside className="w-full md:w-64 flex-shrink-0">
           <nav className="flex flex-col gap-2">
             <button
               onClick={() => setActiveSidebarTab("account")}
-              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer text-left whitespace-nowrap ${
                 activeSidebarTab === "account"
                   ? "bg-surface-card text-ink"
                   : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
               }`}
             >
-              <UserIcon className="size-4" />
-              {t("account.sidebar.account")}
+              <UserIcon className="size-4 shrink-0" />
+              <span>{t("account.sidebar.account")}</span>
             </button>
             <button
               onClick={() => setActiveSidebarTab("delivery")}
-              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer text-left whitespace-nowrap ${
                 activeSidebarTab === "delivery"
                   ? "bg-surface-card text-ink"
                   : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
               }`}
             >
-              <MapPin className="size-4" />
-              {t("account.sidebar.addresses")}
+              <MapPin className="size-4 shrink-0" />
+              <span>{t("account.sidebar.addresses")}</span>
             </button>
             <button
               onClick={() => setActiveSidebarTab("visibility")}
-              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer text-left whitespace-nowrap ${
                 activeSidebarTab === "visibility"
                   ? "bg-surface-card text-ink"
                   : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
               }`}
             >
-              <Eye className="size-4" />
-              {t("account.sidebar.visibility")}
+              <Eye className="size-4 shrink-0" />
+              <span>{t("account.sidebar.visibility")}</span>
             </button>
             <button
               onClick={() => setActiveSidebarTab("communication")}
-              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer text-left whitespace-nowrap ${
                 activeSidebarTab === "communication"
                   ? "bg-surface-card text-ink"
                   : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
               }`}
             >
-              <Mail className="size-4" />
-              {t("account.sidebar.communication")}
+              <Mail className="size-4 shrink-0" />
+              <span>{t("account.sidebar.communication")}</span>
             </button>
             <button
               onClick={() => setActiveSidebarTab("privacy")}
-              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+              className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors cursor-pointer text-left whitespace-nowrap ${
                 activeSidebarTab === "privacy"
                   ? "bg-surface-card text-ink"
                   : "text-ink/70 hover:bg-surface-card/50 hover:text-ink"
               }`}
             >
-              <Shield className="size-4" />
-              {t("account.sidebar.privacy")}
+              <Shield className="size-4 shrink-0" />
+              <span>{t("account.sidebar.privacy")}</span>
             </button>
           </nav>
         </aside>
@@ -270,9 +270,9 @@ export function ProfileAccountPanel({
                         setFormTouched(prev => ({...prev, fullName: false}));
                       }}
                       onBlur={() => setFormTouched(prev => ({...prev, fullName: true}))}
-                      className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
+                      className={`peer w-full px-4 py-3.5 rounded-sm border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
                         formTouched.fullName && editForm.fullName.trim() === ""
-                          ? "border-red-600 focus:border-red-600"
+                          ? "border-error focus:border-error"
                           : "border-[#1c1a18]/20 focus:border-ink/60"
                       }`}
                     />
@@ -280,7 +280,7 @@ export function ProfileAccountPanel({
                       htmlFor="fullName"
                       className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
                         formTouched.fullName && editForm.fullName.trim() === ""
-                          ? "text-red-600 peer-focus:text-red-600"
+                          ? "text-error peer-focus:text-error"
                           : "text-ink/70 peer-focus:text-ink/70"
                       }`}
                     >
@@ -288,7 +288,7 @@ export function ProfileAccountPanel({
                     </label>
                   </div>
                   {formTouched.fullName && editForm.fullName.trim() === "" && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.fullNameRequired")}</p>
+                    <p className="text-error text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.fullNameRequired")}</p>
                   )}
                 </div>
 
@@ -307,9 +307,9 @@ export function ProfileAccountPanel({
                         setFormTouched(prev => ({...prev, email: false}));
                       }}
                       onBlur={() => setFormTouched(prev => ({...prev, email: true}))}
-                      className={`peer w-full px-4 py-3.5 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
+                      className={`peer w-full px-4 py-3.5 rounded-sm border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
                         formTouched.email && formModified.email && !emailValidation.success
-                          ? "border-red-600 focus:border-red-600"
+                          ? "border-error focus:border-error"
                           : "border-[#1c1a18]/20 focus:border-ink/60"
                       }`}
                     />
@@ -317,7 +317,7 @@ export function ProfileAccountPanel({
                       htmlFor="email"
                       className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
                         formTouched.email && formModified.email && !emailValidation.success
-                          ? "text-red-600 peer-focus:text-red-600"
+                          ? "text-error peer-focus:text-error"
                           : "text-ink/70 peer-focus:text-ink/70"
                       }`}
                     >
@@ -325,10 +325,10 @@ export function ProfileAccountPanel({
                     </label>
                   </div>
                   {formTouched.email && formModified.email && editForm.email.trim() === "" && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailRequired")}</p>
+                    <p className="text-error text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailRequired")}</p>
                   )}
                   {formTouched.email && formModified.email && editForm.email.trim() !== "" && !emailValidation.success && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailInvalid")}</p>
+                    <p className="text-error text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.emailInvalid")}</p>
                   )}
                   <div className="flex items-center justify-between mt-1.5">
                     <p className="text-xs text-ink/45">
@@ -378,15 +378,15 @@ export function ProfileAccountPanel({
                     >
                       <SelectTrigger
                         id="gender"
-                        className={`!w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink focus:ring-0 focus:outline-none transition-colors duration-500 ease-out flex items-center justify-between ${
+                        className={`!w-full !h-[52px] px-4 rounded-sm border bg-transparent text-sm text-ink focus:ring-0 focus:outline-none transition-colors duration-500 ease-out flex items-center justify-between ${
                           formTouched.gender && editForm.gender === ""
-                            ? "border-red-600 focus:border-red-600"
+                            ? "border-error focus:border-error"
                             : (isGenderOpen ? "border-ink/60" : "border-[#1c1a18]/20")
                         }`}
                       >
                         <SelectValue placeholder="" />
                       </SelectTrigger>
-                      <SelectContent alignItemWithTrigger={false} className="bg-canvas border-hairline rounded-lg shadow-sm">
+                      <SelectContent alignItemWithTrigger={false} className="bg-canvas border-hairline rounded-sm shadow-sm">
                         {genderOptions.map((option) => (
                           <SelectItem key={option.value} value={option.value} className="cursor-pointer">
                             {option.label}
@@ -402,7 +402,7 @@ export function ProfileAccountPanel({
                           : "-top-2 text-xs"
                       } ${
                         formTouched.gender && editForm.gender === ""
-                          ? "text-red-600"
+                          ? "text-error"
                           : "text-ink/70"
                       }`}
                     >
@@ -410,7 +410,7 @@ export function ProfileAccountPanel({
                     </label>
                   </div>
                   {formTouched.gender && editForm.gender === "" && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.genderRequired")}</p>
+                    <p className="text-error text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.genderRequired")}</p>
                   )}
                 </div>
 
@@ -424,16 +424,16 @@ export function ProfileAccountPanel({
                       value={editForm.dob ? formatDate(editForm.dob, locale, { day: "2-digit", month: "2-digit", year: "numeric" }) : ""}
                       readOnly
                       onBlur={() => setFormTouched(prev => ({...prev, dob: true}))}
-                      className={`peer !w-full !h-[52px] px-4 rounded-lg border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out cursor-default ${
+                      className={`peer !w-full !h-[52px] px-4 rounded-sm border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out cursor-default ${
                         formTouched.dob && editForm.dob.trim() === ""
-                          ? "border-red-600 focus:border-red-600"
+                          ? "border-error focus:border-error"
                           : (isDobOpen ? "border-ink/60" : "border-[#1c1a18]/20 focus:border-ink/60")
                       }`}
                     />
                     <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
                       <PopoverTrigger
                         aria-label={t("account.profile.openCalendar")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#1c1a18]/5 rounded-md transition-colors cursor-pointer text-ink/70 hover:text-ink outline-none"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#1c1a18]/5 rounded-sm transition-colors cursor-pointer text-ink/70 hover:text-ink outline-none"
                       >
                         <CalendarDays className="size-4" />
                       </PopoverTrigger>
@@ -450,7 +450,7 @@ export function ProfileAccountPanel({
                               setIsDobOpen(false);
                             }
                           }}
-                          className="rounded-md border-hairline shadow-sm"
+                          className="rounded-sm border-hairline shadow-sm"
                           captionLayout="dropdown"
                         />
                       </PopoverContent>
@@ -463,7 +463,7 @@ export function ProfileAccountPanel({
                           : "-top-2 text-xs"
                       } ${
                         formTouched.dob && editForm.dob.trim() === ""
-                          ? "text-red-600"
+                          ? "text-error"
                           : "text-ink/70"
                       }`}
                     >
@@ -471,7 +471,7 @@ export function ProfileAccountPanel({
                     </label>
                   </div>
                   {formTouched.dob && editForm.dob.trim() === "" && (
-                    <p className="text-red-600 text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.birthDateRequired")}</p>
+                    <p className="text-error text-xs mt-1.5 transition-opacity duration-500">{t("account.profile.birthDateRequired")}</p>
                   )}
                 </div>
 
@@ -479,10 +479,10 @@ export function ProfileAccountPanel({
                 <div className="flex justify-between items-center border-t border-[#1c1a18]/10 pt-8">
                   <p className="text-sm font-medium text-ink">{t("account.profile.deleteAccount")}</p>
                   <AlertDialog>
-                    <AlertDialogTrigger className="px-6 py-2 rounded-full border border-red-600/30 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+                    <AlertDialogTrigger className="px-5 py-2.5 rounded-sm border border-error/30 text-sm font-medium text-error hover:bg-error/10 transition-colors cursor-pointer">
                       {t("account.profile.deleteAccount")}
                     </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-canvas border-[#1c1a18]/10 max-w-md">
+                    <AlertDialogContent className="bg-canvas border-[#1c1a18]/10 max-w-md rounded-md">
                       <AlertDialogHeader>
                         <AlertDialogTitle className="font-serif font-light text-xl text-ink">
                           {t("account.profile.deleteAccountTitle")}
@@ -492,13 +492,13 @@ export function ProfileAccountPanel({
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter className="mt-6">
-                        <AlertDialogCancel className="border-[#1c1a18]/20 text-ink hover:bg-[#1c1a18]/5">
+                        <AlertDialogCancel className="rounded-sm border-[#1c1a18]/20 text-ink hover:bg-[#1c1a18]/5">
                           {t("account.settings.cancel")}
                         </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDeleteAccount}
                           disabled={isDeleting}
-                          className="bg-red-600 text-white hover:bg-red-700 border-0"
+                          className="rounded-sm bg-error text-white hover:bg-error/90 border-0"
                         >
                           {isDeleting ? t("account.profile.deleting") : t("account.profile.deleteAccount")}
                         </AlertDialogAction>
@@ -508,7 +508,7 @@ export function ProfileAccountPanel({
                 </div>
 
                 {profileSaveError && (
-                  <p className="text-sm text-red-600">{profileSaveError}</p>
+                  <p className="text-sm text-error">{profileSaveError}</p>
                 )}
                 {profileSaveMessage && (
                   <p className="text-sm text-emerald-700">{t("account.profile.saveSuccess")}</p>
@@ -519,9 +519,9 @@ export function ProfileAccountPanel({
                   <button 
                     onClick={handleSaveProfile}
                     disabled={!isFormDirty || updateProfileMutation.isPending}
-                    className={`px-6 py-2 rounded-full border text-sm font-medium transition-colors ${
+                    className={`px-6 py-2.5 rounded-sm border text-sm font-medium transition-colors ${
                       isFormDirty && !updateProfileMutation.isPending
-                        ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 cursor-pointer"
+                        ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 cursor-pointer shadow-xs"
                         : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed"
                     }`}
                   >

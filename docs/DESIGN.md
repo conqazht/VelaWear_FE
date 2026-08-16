@@ -18,7 +18,7 @@ Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (f
 - Các banner lookbook nền tối (`{colors.surface-dark}` — #1c1a18) hiển thị **ảnh chụp sản phẩm/người mẫu thật** — thương hiệu thể hiện sản phẩm thực tế chứ không phải illustration trừu tượng.
 - Card sản phẩm nền kem nhạt (`{colors.surface-card}` — #efe7dc) — đậm hơn canvas một chút, dùng cho grid sản phẩm và feature block.
 - Logo Vela Wear — một dấu ngoặc/đường nét đơn giản (xem phần Shapes) — xuất hiện như tiền tố wordmark và như dấu phân đoạn nội dung.
-- Border radius theo phong cách Vercel/Geist — 3 tier rõ ràng: `{rounded.none}` (0px) cho ảnh sản phẩm/lookbook, `{rounded.sm}` (6px) cho controls, `{rounded.md}` (12px) cho cards, `{rounded.lg}` (16px) cho surfaces lớn, `{rounded.pill}` cho badge/chip. Nhất quán, không pha trộn sharp và round trong cùng một view.
+- Border radius theo phong cách Anthropic & /better-ui — 4 tầng rõ ràng: `{rounded.pill}` (9999px / `rounded-full`) cho các nút CTA chính và bộ lọc; `{rounded.2xl}` (20px) & `{rounded.xl}` (16px) cho cards, voucher tickets, modal dialogs (chuẩn concentric `outer = inner + padding`); `{rounded.md}` (8px-12px) cho dropdowns & form inputs; `{rounded.sm}` (6px) cho bảng biểu & data cells. Mọi nút tương tác dạng Pill đều áp dụng micro-motion `active:scale-[0.96]`.
 - Nhịp section `{spacing.section}` (88px) — hơi chặt hơn chuẩn SaaS để phù hợp mật độ hình ảnh sản phẩm. Padding nội bộ card vẫn rộng ở `{spacing.xl}` (32px).
 
 ## Colors
@@ -135,21 +135,24 @@ Triết lý elevation là **color-block trước, shadow hiếm**. Phần lớn 
 
 ### Border Radius Scale
 
-Hệ thống bo tròn theo triết lý Vercel/Geist: **3 tier rõ ràng**, không pha trộn sharp và round trong cùng một view. Mỗi tier phục vụ một nhóm element cụ thể — controls, cards, surfaces lớn — giúp hierarchy trực quan và nhất quán hơn so với nhiều bậc radius khác nhau.
+Hệ thống bo tròn theo triết lý **Anthropic & /better-ui: 4 tầng theo ngữ cảnh (Contextual Multi-Tier)**, phân định rõ ràng giữa nút CTA / bộ lọc mang tính xúc giác cao, thẻ chứa nội dung sang trọng, và các điều khiển nhập liệu chính xác:
 
 | Token | Value | Use |
 |---|---|---|
-| `{rounded.none}` | 0px | Ảnh sản phẩm trong grid chính, ảnh lookbook full-bleed, `button-add-to-cart-overlay` (khớp cạnh ảnh). Flat-edge = cảm giác catalogue cao cấp. |
-| `{rounded.sm}` | 6px | **Tier controls:** Nút CTA (`button-primary`, `button-secondary`), input (`text-input`), tab filter (`category-tab`), `button-icon-circular`. Mọi control tương tác dùng tier này. |
-| `{rounded.md}` | 12px | **Tier cards:** Feature card, card nội dung biên tập, dropdown menus. |
-| `{rounded.lg}` | 16px | **Tier surfaces lớn:** Banner sale (`callout-card-terracotta`), card lookbook (`collection-banner-dark` khi không full-bleed), `newsletter-band-dark`. |
-| `{rounded.pill}` | 9999px | Badge ("MỚI", "SALE", "HẾT HÀNG"), filter chip, avatar đánh giá khách hàng, swatch màu tròn. |
+| `{rounded.pill}` | 9999px / `rounded-full` | **Tier 1 (Pill / Capsule):** Nút CTA chính (`button-primary`, Hero "Khám phá ngay", PDP "Thêm vào giỏ" / "Yêu thích", Cart "Tiến hành thanh toán", Voucher "Sao chép mã"), Cụm chuyển đổi tab con (Size Guide Unit `in/cm`, Sub-section Switcher), Chip bộ lọc (`filter-chip`, `Active chips`, `Price presets`), Badge ("MỚI", "SALE", "HẾT HÀNG"), Swatch màu tròn. Nút Pill kết hợp hiệu ứng `active:scale-[0.96]`. |
+| `{rounded.2xl}` | 20px–24px | **Tier 2 (Expressive Surface):** Khung bao ngoài của Modal Dialog (Reviews Dialog), Thẻ Voucher Ticket, Card Hướng dẫn đo chuẩn (Size Guide), Card tóm tắt đơn hàng (Order Summary). |
+| `{rounded.xl}` | 16px | **Tier 2.1 (Cards & Inset Containers):** Product Card (`product-card`), Cart Item Card (`cart-item-card`), 4 ô bước đo bên trong Card hướng dẫn đo (chuẩn concentric `outer = inner + padding`), Campaign Banner. |
+| `{rounded.md}` | 8px–12px | **Tier 3 (Structured Controls):** Form Inputs, Ô chọn Sort Dropdown (`SelectTrigger` / `SelectContent`), Ô chọn kích cỡ hình vuông trên PDP (`size-selector`), Ô đếm ngược thời gian (`countdown-block`). Đảm bảo độ thẳng hàng tuyệt đối cho dữ liệu. |
+| `{rounded.sm}` | 6px | **Tier 4 (Sub-elements):** Bảng số đo chi tiết (Size guide tables), Table cell highlights, Sub-items. Giữ các ô nhỏ gọn, sắc nét, không chiếm dụng không gian số liệu. |
+| `{rounded.none}` | 0px | Ảnh lookbook full-bleed, `button-add-to-cart-overlay` (khớp cạnh ảnh phẳng). |
 
-> **Lưu ý bỏ `{rounded.xs}` (4px cũ):** Token này đã được hợp nhất vào `{rounded.sm}` (6px) để giảm số bậc và giữ nhất quán với Geist. Mọi chỗ trước đây dùng `{rounded.xs}` nay dùng `{rounded.sm}`.
+> **Nguyên tắc `/better-ui`:**
+> 1. **Concentric Radii:** Khi lồng các khối bo tròn, `outerRadius = innerRadius + padding` (ví dụ Card ngoài `rounded-2xl` 24px, card trong `rounded-xl` 16px với padding 8px).
+> 2. **Scale on Press:** Mọi nút bấm Pill (`rounded-full`) đều áp dụng `active:scale-[0.96]` và `transition-transform` để phản hồi xúc giác tức thì.
 
 ### Photography & Illustrations
 Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu thật** — đây là khác biệt cốt lõi so với hệ thống gốc:
-- Ảnh sản phẩm tỉ lệ 3:4 (chân dung), nền studio sáng hoặc on-location, không bo góc trong grid chính (`{rounded.none}`)
+- Ảnh sản phẩm tỉ lệ 3:4 (chân dung), nền studio sáng hoặc on-location, bo góc nhẹ theo card (`{rounded.xl}`) hoặc không bo góc trong lookbook full-bleed (`{rounded.none}`)
 - Ảnh lookbook full-bleed trên nền `{colors.surface-dark}`, overlay gradient tối nhẹ cho text, không bo góc
 - Ảnh chi tiết vải/texture dùng trong card "Chất liệu" — crop vuông 1:1
 - Illustration chỉ xuất hiện ở mức tối thiểu: icon line-art đơn sắc (ink hoặc terracotta) cho size guide, hướng dẫn bảo quản vải
@@ -163,43 +166,43 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 
 ### Buttons
 
-**`button-primary`** — CTA terracotta chính. Nền `{colors.primary}` (#b5573a), text `{colors.on-primary}` (trắng), type `{typography.button}` (Inter 14px/500, tracking 0.5px, có thể uppercase), padding 14px × 24px, height 44px, rounded `{rounded.sm}` **(6px)**. Trạng thái active `button-primary-active` đậm về `{colors.primary-active}` (#8f4329).
+**`button-primary`** — CTA terracotta chính phong cách Anthropic Pill. Nền `{colors.primary}` (#b5573a), text `{colors.on-primary}` (trắng), type `{typography.button}` (Inter 14px/500, tracking 0.5px, uppercase nhẹ), padding 14px × 28px, rounded `{rounded.pill}` **(rounded-full)** kèm `active:scale-[0.96] transition-all`. Trạng thái active `button-primary-active` đậm về `{colors.primary-active}` (#8f4329).
 
-**`button-secondary`** — Nút kem viền hairline. Nền `{colors.canvas}`, text `{colors.ink}`, viền hairline 1px, cùng padding/height với primary, rounded `{rounded.sm}` **(6px)**. Dùng cho "Thêm vào giỏ" trên product card khi chưa hover.
+**`button-secondary`** — Nút kem viền hairline phong cách Pill. Nền `{colors.canvas}`, text `{colors.ink}`, viền hairline 1px, cùng padding/height với primary, rounded `{rounded.pill}` **(rounded-full)** kèm `active:scale-[0.96]`. Dùng cho "Tiếp tục mua sắm", "Xem tất cả".
 
-**`button-secondary-on-dark`** — Dùng trên các banner `{colors.surface-dark}`. Nền `{colors.surface-dark-elevated}` (#28241f), text `{colors.on-dark}`, rounded `{rounded.sm}` **(6px)**. Giữ tối — hệ thống không đảo sang nút sáng trên nền tối.
+**`button-secondary-on-dark`** — Dùng trên các banner `{colors.surface-dark}`. Nền `{colors.surface-dark-elevated}` (#28241f), text `{colors.on-dark}`, rounded `{rounded.pill}` **(rounded-full)** kèm `active:scale-[0.96]`. Giữ tối — hệ thống không đảo sang nút sáng trên nền tối.
 
 **`button-add-to-cart-overlay`** — Nút "Thêm vào giỏ" xuất hiện đè lên ảnh sản phẩm khi hover, nền `{colors.canvas}` ở 95% opacity, text `{colors.ink}`, full-width đáy ảnh, rounded `{rounded.none}` **(0px)** để khớp cạnh ảnh phẳng.
 
-**`button-icon-circular`** — Nút icon tròn 40px. Nền `{colors.canvas}`, viền hairline, icon màu ink, rounded `{rounded.sm}` **(6px)** — hoặc `{rounded.pill}` nếu muốn hoàn toàn tròn (tùy context). Dùng cho Tìm kiếm, Yêu thích (icon tim), điều hướng carousel.
+**`button-icon-circular`** — Nút icon tròn 40px. Nền `{colors.canvas}`, viền hairline, icon màu ink, rounded `{rounded.pill}` **(rounded-full)**. Dùng cho Tìm kiếm, Yêu thích (icon tim), điều hướng carousel.
 
 **`text-link`** — Link inline trong `{colors.primary}` (terracotta). Gạch chân khi nhấn; dùng cho "Xem tất cả", "Chi tiết sản phẩm".
 
 ### Cards & Containers
 
-**`hero-band`** — Hero full-bleed ảnh lookbook trên `{colors.surface-dark}` với overlay gradient, headline + sub-headline + CTA đặt ở góc dưới-trái hoặc giữa-trái, text `{colors.on-dark}`. Padding dọc `{spacing.section}` (88px). Rounded `{rounded.none}` — full-bleed không bo góc. Phương án thay thế: 6-6 split với text trên canvas bên trái, ảnh bên phải.
+**`hero-band`** — Hero full-bleed ảnh lookbook trên `{colors.surface-dark}` với overlay gradient, headline + sub-headline + CTA Pill (`rounded-full`) đặt ở góc dưới-trái hoặc giữa-trái, text `{colors.on-dark}`. Padding dọc `{spacing.section}` (88px). Rounded `{rounded.none}` — full-bleed không bo góc. Phương án thay thế: 6-6 split với text trên canvas bên trái, ảnh bên phải.
 
-**`product-card`** — Đơn vị cốt lõi của Vela Wear. Ảnh sản phẩm 3:4 rounded `{rounded.none}` **(0px)**, badge (nếu có: "MỚI"/"SALE") ở góc trên-trái dạng `{component.badge-pill}`, icon yêu thích góc trên-phải. Dưới ảnh: tên sản phẩm `{typography.title-md}`, giá `{typography.price}` (+ giá gốc gạch nếu sale), swatch màu nhỏ (chấm tròn 16px). Padding text dưới ảnh `{spacing.sm}` (12px). Hover: hiện `{component.button-add-to-cart-overlay}` + shadow nhẹ `0 2px 8px rgba(28,26,24,0.06)`.
+**`product-card`** — Đơn vị cốt lõi của Vela Wear. Card ngoài `{rounded.xl}` **(16px)**, ảnh sản phẩm 3:4 rounded `{rounded.lg}` **(12px)**, badge ("MỚI"/"SALE") ở góc trên-trái dạng `{component.badge-pill}`, icon yêu thích dạng nút tròn góc trên-phải. Dưới ảnh: tên sản phẩm `{typography.title-md}`, giá `{typography.price}` (+ giá gốc gạch nếu sale), swatch màu nhỏ (chấm tròn 16px). Padding text dưới ảnh `{spacing.sm}` (12px). Hover: hiện shadow nhẹ và nút quick action.
 
-**`feature-card`** — Dùng trong các block biên tập (ví dụ "Vì sao chọn Vela", "Chất liệu bền vững"). Nền `{colors.surface-card}` (#efe7dc), rounded `{rounded.md}` **(12px)**, padding `{spacing.xl}` (32px). Icon nhỏ ở trên, tiêu đề `{typography.title-lg}`, mô tả `{typography.body-md}`.
+**`feature-card`** — Dùng trong các block biên tập (ví dụ "Vì sao chọn Vela", "Chất liệu bền vững"). Nền `{colors.surface-card}` (#efe7dc), rounded `{rounded.xl}` **(16px)**, padding `{spacing.xl}` (32px). Icon nhỏ ở trên, tiêu đề `{typography.title-lg}`, mô tả `{typography.body-md}`.
 
-**`collection-banner-dark`** — Card lookbook nền tối lớn, hiển thị ảnh bộ sưu tập + tên collection (serif, on-dark) + CTA "Khám phá ngay". Nền `{colors.surface-dark}`, rounded `{rounded.lg}` **(16px)** hoặc full-bleed (`{rounded.none}`), padding `{spacing.xl}` (32px) cho vùng text overlay.
+**`collection-banner-dark`** — Card lookbook nền tối lớn, hiển thị ảnh bộ sưu tập + tên collection (serif, on-dark) + CTA Pill "Khám phá ngay". Nền `{colors.surface-dark}`, rounded `{rounded.xl}` **(16px)** hoặc full-bleed (`{rounded.none}`), padding `{spacing.xl}` (32px) cho vùng text overlay.
 
-**`size-color-selector`** — Khối chọn size/màu trên trang chi tiết sản phẩm. Size: các ô vuông `{rounded.sm}` **(6px)** viền hairline, active có viền `{colors.primary}`. Màu: chấm tròn `{rounded.pill}` 28px, active có viền ngoài `{colors.ink}` cách 2px.
+**`size-color-selector`** — Khối chọn size/màu trên trang chi tiết sản phẩm. Size: các ô vuông `{rounded.md}` **(8px)** viền hairline, active có viền `{colors.primary}`. Màu: chấm tròn `{rounded.pill}` 28px, active có viền ngoài `{colors.ink}` cách 2px.
 
 **`price-tag`** — Cụm hiển thị giá. Giá hiện tại `{typography.price}` màu `{colors.ink}`; nếu có sale, giá gốc `{typography.price-strike}` màu `{colors.muted}` gạch ngang đặt trước, và badge phần trăm giảm dùng `{component.badge-coral}`.
 
-**`callout-card-terracotta`** — Banner full-bleed cho khuyến mãi lớn (ví dụ "Sale cuối mùa — giảm đến 40%"). Nền `{colors.primary}` (#b5573a), text `{colors.on-primary}` (trắng), rounded `{rounded.lg}` **(16px)**, padding `{spacing.xxl}` (48px). CTA bên trong dùng nút đảo màu kem/canvas trên nền terracotta.
+**`callout-card-terracotta`** — Banner full-bleed cho khuyến mãi lớn (ví dụ "Sale cuối mùa — giảm đến 40%"). Nền `{colors.primary}` (#b5573a), text `{colors.on-primary}` (trắng), rounded `{rounded.2xl}` **(20px)**, padding `{spacing.xxl}` (48px). CTA bên trong dùng nút Pill đảo màu kem/canvas trên nền terracotta.
 
-**`category-tile`** — Dùng trong grid danh mục trang chủ (Áo, Quần, Phụ kiện...). Ảnh nền vuông 1:1, rounded `{rounded.none}` **(0px)**, tên danh mục overlay ở dưới với gradient tối nhẹ, text `{colors.on-dark}` `{typography.title-md}`.
+**`category-tile`** — Dùng trong grid danh mục trang chủ (Áo, Quần, Phụ kiện...). Ảnh nền vuông 1:1, rounded `{rounded.xl}` **(16px)**, tên danh mục overlay ở dưới với gradient tối nhẹ, text `{colors.on-dark}` `{typography.title-md}`.
 
 ### Inputs & Forms
 
-**`text-input`** — Input chuẩn (tìm kiếm, email newsletter, form thanh toán). Nền `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.sm}` **(6px)**, padding 12px × 16px, height 44px. Viền hairline 1px `{colors.hairline}`.
+**`text-input`** — Input chuẩn (tìm kiếm, email newsletter, form thanh toán). Nền `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-md}`, rounded `{rounded.md}` **(8px)** (hoặc `rounded-full` trong Floating Pill Search), padding 12px × 16px, height 44px. Viền hairline 1px `{colors.hairline}`.
 
 **`text-input-focused`** — Trạng thái focus. Viền chuyển sang `{colors.primary}` (terracotta), thêm outer ring 3px terracotta ở 15% alpha.
 
-**`newsletter-band-dark`** — Băng đăng ký nhận tin trong footer hoặc giữa trang. Nền `{colors.surface-dark}`, rounded `{rounded.lg}` **(16px)**, text `{colors.on-dark}`, chứa `{component.text-input}` (nền tối hơn: `{colors.surface-dark-elevated}`) + `{component.button-primary}`.
+**`newsletter-band-dark`** — Băng đăng ký nhận tin trong footer hoặc giữa trang. Nền `{colors.surface-dark}`, rounded `{rounded.2xl}` **(20px)**, text `{colors.on-dark}`, chứa form dạng Floating Pill Bar (`rounded-full`) + nút CTA Pill (`rounded-full`).
 
 ### Tags / Badges
 
@@ -211,9 +214,9 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 
 ### Tab / Filter
 
-**`category-tab`** + **`category-tab-active`** — Dùng trong sub-nav trang danh mục (Áo thun, Áo sơ mi, Quần...). Inactive: nền trong suốt, text `{colors.muted}`. Active: nền `{colors.surface-card}`, text `{colors.ink}`. Padding 8px × 16px, rounded `{rounded.sm}` **(6px)**.
+**`category-tab`** + **`category-tab-active`** — Dùng trong sub-nav trang danh mục và cụm chuyển đổi tab con. Nền Capsule Pill Group (`rounded-full bg-[#efe7dc] p-1`), tab con `rounded-full px-4 py-1.5 active:scale-[0.96]`.
 
-**`filter-chip`** — Chip filter có thể xóa (ví dụ "Size: M ×", "Màu: Đen ×"). Nền `{colors.surface-card}`, rounded `{rounded.pill}`, padding 6px × 12px, icon × để xóa filter.
+**`filter-chip`** — Chip filter có thể xóa (ví dụ "Size: M ×", "Màu: Đen ×"). Nền `{colors.surface-card}`, rounded `{rounded.pill}`, padding 6px × 14px, icon × để xóa filter kèm `active:scale-[0.96]`.
 
 ### Storefront Catalog UX (2026-07-16)
 

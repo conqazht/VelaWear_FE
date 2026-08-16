@@ -240,7 +240,7 @@ function ProductDetailLoadingFallback() {
             <Skeleton className="h-3 w-3/4 rounded-none bg-[#efe7dc]" />
           </div>
         </div>
-        <Skeleton className="aspect-[16/10] w-full rounded-sm bg-[#efebe4]" />
+        <Skeleton className="aspect-[16/10] w-full rounded-sm bg-[#efe7dc]" />
       </section>
     </div>
   );
@@ -258,7 +258,7 @@ function ProductDetailContent({ product }: { product: Product }) {
         <span>/</span>
         <Link
           href="/collection"
-          className="font-medium text-[#1c1a18] underline decoration-[#1c1a18]/20 underline-offset-4 hover:text-[#b85a3c]"
+          className="font-medium text-[#1c1a18] underline decoration-[#1c1a18]/20 underline-offset-4 hover:text-[#b5573a]"
         >
           {t("storefront.common.collections")}
         </Link>
@@ -280,7 +280,7 @@ function ProductDetailContent({ product }: { product: Product }) {
 
       <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
         <div className="md:pr-6 text-left">
-          <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
+          <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b5573a]">
             {t("storefront.product.craftEyebrow")}
           </span>
           <h2 className="mb-6 font-serif text-2xl font-light leading-tight tracking-[0.05em] text-[#1c1a18] md:text-4xl">
@@ -294,7 +294,7 @@ function ProductDetailContent({ product }: { product: Product }) {
           </p>
         </div>
 
-        <div className="relative aspect-[16/10] overflow-hidden rounded-sm border border-[#1c1a18]/5 bg-[#efebe4]">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-sm border border-[#1c1a18]/5 bg-[#efe7dc]">
           <FashionImage
             src="/images/product-detail/craftsmanship.webp"
             alt={t("storefront.product.craftImageAlt")}

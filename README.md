@@ -215,11 +215,12 @@ Hệ thống test đảm bảo chất lượng codebase:
 Các tài liệu quan trọng của dự án:
 - [Hệ thống thiết kế UI/UX (Design System)](docs/DESIGN.md): Bảng màu thương hiệu (Cream/Terracotta), typography (Slab-serif/Sans-serif), spacing, radius và quy chuẩn phong cách editorial.
 - [Tiến độ dự án](docs/PROJECT_STATUS.md)
-- [Quy ước tích hợp FE-BE](docs/convention.md)
+- [Quy ước tích hợp FE-BE](docs/convention.md): Hướng dẫn quy chuẩn tích hợp giữa Frontend và Backend (Base URL `/api/v1`, định dạng phản hồi `ApiResponse<T>`, xử lý lỗi, token authentication và customer self-scoped endpoints).
 - [Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
 - [Sale campaign frontend](docs/SALE_CAMPAIGN_FRONTEND.md)
 - [Storefront catalog UX](docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md)
 - [Quản trị nội dung i18n](docs/I18N_ADMIN_GUIDE_VI.md)
+- [Kế hoạch bổ sung Race-Condition tests & Playwright CI](docs/PLAN_RACE_CONDITION_PLAYWRIGHT_CI_VI.md)
 
 ## Lộ Trình Cải Tiến & Refactoring (Improvement Plans)
 

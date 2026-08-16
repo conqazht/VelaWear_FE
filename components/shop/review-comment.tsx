@@ -43,7 +43,7 @@ export function ReviewComment({
       {mayOverflow ? (
         <button
           type="button"
-          className="mt-2 text-xs font-semibold underline underline-offset-4 hover:text-[#b85a3c]"
+          className="mt-2 text-xs font-semibold underline underline-offset-4 hover:text-[#b5573a]"
           aria-expanded={expanded}
           onClick={() => setExpanded((current) => !current)}
         >

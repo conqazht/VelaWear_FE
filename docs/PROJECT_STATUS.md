@@ -1,3 +1,119 @@
+## 2026-08-16 (Standardized Border Radius on Auth Buttons & Form Controls)
+
+- **Auth Controls Radius Alignment (`sign-in-page.tsx`, `register-page.tsx`, `forgot-password-page.tsx`, `otp-entry.tsx`, `auth-field.tsx`):**
+  - Harmonized primary action buttons ("Sign In", "Create Account", "Reset Password", "Verify OTP", "Go to Sign In") from `rounded-sm` (2px) to `rounded-[12px]` (matching the `h-12` inputs and `GoogleOAuthButton`).
+  - Standardized error callout banners to `rounded-[12px]`.
+  - Result: 100% visual harmony across all auth form components, eliminating sharp rectangular buttons next to smooth rounded inputs.
+- **Verification:**
+  - `pnpm tsc --noEmit`: 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+
+## 2026-08-15 (Unified Full-Screen AuthLoader on Password Login)
+
+- **AuthLoader Alignment (`sign-in-page.tsx`, `animated-auth-shell.tsx`):**
+  - Replaced the delayed animated-shell transition with the standard full-screen [AuthLoader](file:///d:/CANH/Java/side%20project/commercial-fe/components/auth/auth-loader.tsx) component upon successful password login.
+  - Now both password login and Google OAuth login use the exact same editorial full-screen loading screen with the animated Vela Wear logo, progress bar, and localized session status (`Checking {role} session...` / `Authenticating your account...`).
+- **Verification:**
+  - `pnpm tsc --noEmit`: 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+
+## 2026-08-15 (Interactive Password Requirements Checklist)
+
+- **Dynamic 3-Line Password Requirements Indicator (`password-requirements.tsx`):**
+  - Created reusable `PasswordRequirements` component splitting password rules into 3 distinct interactive criteria lines:
+    1. **At least 8 characters** (`length >= 8`)
+    2. **Uppercase and lowercase letters** (`/[A-Z]/.test && /[a-z]/.test`)
+    3. **At least one number** (`/[0-9]/.test`)
+  - Each requirement dynamically shows a **green checkmark** (`Check`, `text-emerald-600`) when satisfied, or a **red X** (`X`, `text-red-500`) when unmet.
+  - Integrated across all password entry flows:
+    - **Edit Password Modal** (`edit-password-modal.tsx`) in Profile.
+    - **Register / Sign-Up Page** (`register-page.tsx`).
+    - **Forgot / Reset Password Page** (`forgot-password-page.tsx`).
+  - Added localized i18n keys (`account.password.reqMinChars`, `account.password.reqCase`, `account.password.reqNumber`) in EN and VI catalogs.
+- **Verification:**
+  - `pnpm tsc --noEmit`: 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+
+## 2026-08-15 (Edit Email Modal Bug Fix & OTP Error Handling)
+
+- **Edit Email Modal & OTP Flow Fixes (`edit-email-modal.tsx`, `use-otp-flow.ts`, `auth-otp-api.ts`):**
+  - Fixed copy-paste regression where `t("account.password.updateError")` was displayed in `EditEmailModal` upon OTP request failure.
+  - Added localized i18n keys for email updating errors (`account.settings.updateEmailError`, `account.settings.emailSameAsCurrent`, `account.settings.emailAlreadyInUse`, `auth.otp.duplicateError`) in both EN and VI catalogs.
+  - Added client-side guard and instant validation preventing users from submitting their current email (`isSameAsCurrent`).
+  - Added HTTP 409 Conflict handling in `lib/auth-otp-api.ts` (`kind: "duplicate"`) and `use-otp-flow.ts` so duplicate email errors from the backend are translated accurately.
+- **Verification:**
+  - `pnpm lint`: Passed with 0 errors.
+  - `pnpm test`: 53/53 test suites passed (205/205 tests).
+
+## 2026-08-15 (Storefront & Auth Interface Review & Quality Polish)
+
+- **Comprehensive 6-Domain Audit & Implementation Completed:**
+  - **A11y (Accessibility):**
+    - Added `<SkipToContent />` component linked to `<main id="main-content">` in `app/(shop)/layout.tsx`.
+    - Integrated `useReducedMotion()` in `HeroSlider` and added high-contrast focus rings on carousel controls.
+    - Added accessible `<label className="sr-only">` and live region status announcement to `Newsletter`.
+    - Migrated review modal in `Testimonials` from custom fixed `<div>` to standard shadcn `Dialog`.
+    - Added `role="status"` and `aria-live="polite"` to `NotificationProvider` toast container.
+    - Standardized `aria-pressed` on filter swatches/sizes (`CollectionClient`, `ProductDetailClient`) and `aria-expanded` on PDP accordion triggers.
+    - Fully mapped `FieldLabel htmlFor` to inputs and selects in `CheckoutPageClient` with `aria-invalid` and `aria-describedby` for error states.
+    - Migrated order cancellation from raw `window.confirm` to shadcn `AlertDialog` in `order-details-client.tsx`.
+    - Localized `aria-label` for unit toggle in `SizeGuideClient`.
+  - **Colors & Tokens:**
+    - Purged legacy rogue hexes `#964025` and `#87391f` across auth (`sign-in`, `register`, `forgot-password`, `otp-entry`, `floating-input`, `auth-field`), error status components, and help pages in favor of brand terracotta `#b5573a` and `hover:bg-primary-active` (`#8f4329`).
+    - Standardized semantic error tokens (`text-error`, `border-error`, `bg-error/10`) across profile panels, dialogs, and order status badges.
+  - **Layout & Control Standard:**
+    - Standardized control radius (`rounded-sm` / 6px) across auth inputs/buttons, profile forms, and modal dialogs.
+    - Migrated custom `motion.div` overlay modals (`EditPasswordModal`, `EditEmailModal`) to accessible shadcn `Dialog` primitives with proper focus trapping and keyboard dismissal.
+    - **Removed Duplicate Profile Header Navigation:** Cleaned up `ProfileShell` (`components/shop/profile/profile-shell.tsx`) to remove redundant secondary tab bar, keeping single canonical `CachedProfileNavigation`.
+    - **Header Account Menu Gap Fix (`site-header.tsx`):** Removed container padding gap above first item (`Profile`) so hover highlight seamlessly touches the header divider line without floating gaps.
+    - **Profile Tabs Title Vertical Alignment:** Moved admin banner below the title header in `ProfileAccountPanel` and standardized `<main>` padding (`py-8 md:py-12`) across `ProfileShell`, `CouponsClient`, and `ReviewsClient` so all tab titles sit at the exact same pixel-perfect vertical height when switching tabs.
+    - **Review Sort Dropdown Ergonomics (`product-reviews-dialog.tsx`):** Increased Sort trigger width to `min-w-[190px]` (`h-9`), added clean capitalization, and configured full-box edge-to-edge hover item styling (`min-w-[200px]`, `p-0`).
+    - **Large Modal & Dialog Radius Refinement (`product-reviews-dialog.tsx`):**
+      - Adjusted `DialogContent` outer modal radius to `rounded-lg` (8px-12px) for crisp, refined architectural structure on large overlay dialogs instead of overly rounded bubbles.
+    - **Profile Sidebar Alignment & Width Fix (`profile-account-panel.tsx`):**
+      - Increased sidebar width from `w-52` (208px) to `w-64` (256px), reduced layout horizontal gap (`gap-10 md:gap-16 lg:gap-24`), and added `whitespace-nowrap` with `shrink-0` icons so "Communication Preferences" remains on a single line and aligns straight with other menu items.
+    - **Favorites & Cart Consistency Harmonization (`favorites-page-client.tsx`):**
+      - Added the top-right `← Continue shopping` action link to the Favorites page header to match Cart.
+      - Synchronized empty state container dimensions (`min-h-[50vh] pt-16`), typography scale, and button styling (`rounded-full active:scale-[0.96]`) across both Favorites and Cart.
+    - **Anthropic Contextual Border-Radius Hierarchy (`/better-ui`):**
+      - **Tier 1 (Pills `rounded-full`):** Hero CTA buttons, PDP "Add to Bag" and "Favourite" buttons, Cart "Proceed to Checkout" CTA, Voucher 1-click Copy button, Size Guide `in/cm` Unit Toggle & Sub-section Switcher, Active Filter chips, Price preset chips, Category & discount badges. Added tactile press micro-motion (`active:scale-[0.96]`).
+      - **Tier 2 (Expressive `rounded-2xl` / `rounded-xl`):** Size Guide "How to Measure" card & inner steps (`rounded-2xl` & `rounded-xl` concentric), Coupon ticket cards (`rounded-2xl`), Cart Item & Order Summary cards (`rounded-xl` & `rounded-2xl`), Reviews Dialog modal (`rounded-2xl`), Sale campaign cards (`rounded-2xl`).
+      - **Tier 3 & 4 (Structured `rounded-md` / `rounded-sm`):** Maintained crisp, alignment-accurate rectangular forms for data tables, Sort dropdown triggers, Search & number inputs, and PDP size selector grid.
+      - **Documentation Sync:** Synchronized `docs/DESIGN.md` and `artifacts/vela-wear-style-guide.md` with the full 4-tier Anthropic / better-ui radius hierarchy, concentric radii rules (`outer = inner + padding`), and press micro-motion standards.
+    - **Size Guide UX & Compact Redesign (`size-guide-client.tsx`):**
+      - Removed duplicate `in / cm` toggle (now single canonical switch in hero header).
+      - Removed external `Measurement references` (H&M / Nike links) completely.
+      - Redesigned "How to Measure" section into a single elegant, numbered visual guide card.
+      - Removed `Available` badges and checkmark icons from table headers for a minimalist, clean look.
+      - Compacted table width (`max-w-4xl`) and reduced cell padding (`py-3`, `w-36` first column, `min-w-16` size columns) to eliminate horizontal sprawl.
+      - Established high-contrast solid dark ink typography (`text-[#1c1a18] font-semibold text-sm tabular-nums`), tinted header backgrounds (`bg-[#efe7dc]/80`), and distinct zebra striping.
+      - Added sleek sub-section selector for Apparel (`Standard XXS–XXL`, `Plus Size 0X–4X`, `International Conversion`).
+    - **Voucher Ticket Redesign (`coupons-client.tsx`):** Restructured voucher card into a balanced ticket layout: Benefit section on top (eyebrow, status badge, hero discount `20% OFF`, conditions), perforated ticket separator with cutouts, and bottom redemption strip with monospace code capsule + 1-click **Copy** button + expiry progress bar.
+    - **Reviews Dialog UX Polish (`product-reviews-dialog.tsx`):** Unified star rating filtering into interactive sidebar distribution rows (removed redundant header pill bar), added active filter indicator with 1-click reset (`X Clear filter`), and integrated shadcn `Select` for the sort dropdown.
+    - Implemented 1-click **Copy Voucher** button on both Desktop and Mobile in `app/(shop)/coupons/coupons-client.tsx` with clipboard copy, state toggle, icon transition (`Copy` → `Check`), and toast feedback.
+  - **Typography:**
+    - Added `font-numeric tabular-nums` to cart quantity indicator and sale countdown digit blocks.
+  - **Writing & i18n:**
+    - Added missing translation keys across `common.ts`, `customer-activity.ts`, `storefront.ts`, and `account.ts` for English and Vietnamese.
+- **Verification:**
+  - `pnpm exec tsc --noEmit`: Passed with 0 errors.
+  - `pnpm lint`: Passed with 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 unit tests 100%).
+
+## 2026-08-14 (Storefront Color & Hover Consistency Audit & Unification)
+
+- **Fixes & Enhancements Delivered:**
+  - **New Theme Tokens (`app/globals.css`):** Expanded `@theme inline` block with full semantic tokens from `docs/DESIGN.md` (`--color-surface-soft`, `--color-surface-cream-strong`, `--color-surface-dark-elevated`, `--color-hairline-soft`, `--color-primary-active`, `--color-body`, `--color-body-strong`, `--color-muted-text`, `--color-muted-soft`, `--color-on-dark-soft`, `--color-success`, `--color-warning`, `--color-error`) and removed dead conflicting `--color-primary: #964025`.
+  - **Terracotta Primary Color Unification:** Replaced all ~40+ occurrences of rogue terracotta hex `#b85a3c` across cart, checkout, coupons, reviews, profile, PDP, and dialogs with standard brand terracotta `#b5573a`.
+  - **Primary CTA Button Hover Unification:** Unified dark CTA buttons across cart, checkout, collection, favorites, profile, coupons, and reviews to `bg-surface-dark hover:bg-primary-container text-on-dark`.
+  - **Product Detail Page (PDP) Purchasing Flow Fixes:** Replaced cold neutral `bg-black hover:bg-neutral-800 rounded-full` Add to Cart button with brand warm dark `bg-[#1c1a18] hover:bg-[#b5573a] rounded-sm` matching Vercel/Geist control radius rules. Updated PDP variant/favourite buttons to warm palette tokens.
+  - **Subtle Surface & Skeleton Background Unification:** Replaced non-standard cream `#efebe4`, `#f3ede9`, `#f2ebe1` on skeletons, image placeholders, and subtle hover states with `#efe7dc` (`bg-surface-card` / `hover:bg-surface-card`).
+  - **Checkout Dark Red Button Fix:** Converted checkout "Đã thanh toán" button from non-standard `#8f2f20` / `#6f2318` to brand `bg-primary-active` (`#8f4329`).
+- **Verification:** `pnpm build` (successfully built 68 static/dynamic routes in 9.7s, TypeScript check passed with 0 errors).
+
 ## 2026-08-10 (UI Polish & Admin Navigation Fixes)
 
 - **Branch:** `fix/guest-cart-state-resolution`

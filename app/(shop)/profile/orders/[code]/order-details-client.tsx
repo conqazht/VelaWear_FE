@@ -21,6 +21,17 @@ import { StorefrontStatus } from "@/components/errors/storefront-status";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   getMyOrderByCode,
   getMyOrderStatusHistories,
 } from "@/lib/api/commerce";
@@ -64,12 +75,12 @@ const paymentStatusKeys = {
 } as const;
 
 const statusClasses: Record<string, string> = {
-  PENDING: "border-amber-200 bg-amber-50 text-amber-700",
-  CONFIRMED: "border-blue-200 bg-blue-50 text-blue-700",
-  PROCESSING: "border-violet-200 bg-violet-50 text-violet-700",
-  SHIPPED: "border-sky-200 bg-sky-50 text-sky-700",
-  DELIVERED: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  CANCELLED: "border-red-200 bg-red-50 text-red-700",
+  PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-700",
+  CONFIRMED: "border-blue-500/30 bg-blue-500/10 text-blue-700",
+  PROCESSING: "border-purple-500/30 bg-purple-500/10 text-purple-700",
+  SHIPPED: "border-sky-500/30 bg-sky-500/10 text-sky-700",
+  DELIVERED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700",
+  CANCELLED: "border-error/30 bg-error/10 text-error",
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -145,7 +156,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     value ? formatDateTime(value, locale) : t("account.order.notAvailable");
 
   const handleCancel = async () => {
-    if (!order || !window.confirm(t("account.order.cancelConfirm"))) return;
+    if (!order) return;
 
     try {
       await cancelMutation.mutateAsync(order.id);
@@ -171,12 +182,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     return (
       <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 py-24">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
-          <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+          <LockKeyhole className="mb-6 size-12 text-[#b5573a]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">{t("account.signIn.orderTitle")}</h2>
           <p className="mb-8 text-xs leading-relaxed text-[#1c1a18]/65">
             {t("account.signIn.orderDescription")}
           </p>
-          <Link href="/sign-in" className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]">
+          <Link href="/sign-in" className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]">
             {t("account.signIn.action")}
           </Link>
         </Card>
@@ -211,32 +222,21 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     );
   }
 
-  if (historiesQuery.isError && histories.length === 0) {
-    return (
-      <StorefrontApiStatus
-        error={historiesQuery.error}
-        onRetry={() => void historiesQuery.refetch()}
-        resourceLabel={t("account.order.historyResource")}
-        returnHref="/profile?tab=orders"
-        returnLabel={t("account.order.historyAction")}
-        variant="route"
-      />
-    );
-  }
-
-  const canCancel =
-    order.status === "PENDING" &&
-    order.paymentStatus !== "PAID" &&
-    !order.resourcesReleasedAt;
+  const canCancel = order.status === "PENDING";
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <main className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <Link href="/profile?tab=orders" className="mb-8 inline-flex text-xs font-semibold uppercase tracking-widest text-[#1c1a18]/55 hover:text-[#1c1a18]">← {t("account.order.back")}</Link>
+        <div className="mb-8">
+          <Link href="/profile?tab=orders" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#1c1a18]/60 hover:text-[#1c1a18]">
+            ← {t("account.order.back")}
+          </Link>
+        </div>
 
-        {orderQuery.isError ? (
+        {orderQuery.isError && order ? (
           <StorefrontStaleWarning
             onRetry={() => void orderQuery.refetch()}
+            error={orderQuery.error}
             resourceLabel={t("account.order.title")}
             className="mb-6"
           />
@@ -256,19 +256,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           </span>
         </header>
 
-        {error && <div className="mb-6 rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        {error && <div className="mb-6 rounded-sm border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">{error}</div>}
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="flex flex-col gap-8 lg:col-span-8">
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
               <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-[#1c1a18]">{t("account.order.items", { count: order.items?.length ?? 0 })}</h2>
-              {completedOrder && reviewsQuery.isError ? (
-                <StorefrontStaleWarning
-                  onRetry={() => void reviewsQuery.refetch()}
-                  resourceLabel={t("reviews.write.statusResource")}
-                  className="mb-5"
-                />
-              ) : null}
               {order.items?.length ? (
                 <div className="divide-y divide-[#1c1a18]/8">
                   {order.items.map((item) => (
@@ -296,20 +289,6 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                             quantity: item.quantity,
                           })}
                         </p>
-                        {item.priceSource && item.priceSource !== "BASE" ? (
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[#8f2f20]">
-                            <span className="rounded-full bg-[#8f2f20]/8 px-2 py-1">
-                              {item.priceSource === "FLASH_SALE"
-                                ? t("storefront.sale.type.flash")
-                                : t("storefront.sale.type.standard")}
-                            </span>
-                            {item.saleCampaignName || item.saleCampaignCode ? (
-                              <span>
-                                {item.saleCampaignName ?? item.saleCampaignCode}
-                              </span>
-                            ) : null}
-                          </div>
-                        ) : null}
                         {completedOrder ? (
                           <div className="mt-4">
                             {reviewsQuery.isLoading && !reviewsQuery.data ? (
@@ -319,25 +298,27 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                             ) : reviewedOrderItemIds.has(item.id) ? (
                               item.productSlug ? (
                                 <Link
-                                  href={`/products/${encodeURIComponent(item.productSlug)}?reviews=1#reviews`}
-                                  className="inline-flex min-h-9 items-center border border-emerald-200 bg-emerald-50 px-4 text-xs font-bold uppercase tracking-[0.12em] text-emerald-700"
+                                  href={`/product/${item.productSlug}?tab=reviews`}
+                                  className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 hover:text-emerald-800"
                                 >
-                                  {t("reviews.write.done")}
+                                  <CheckCircle2 className="size-3.5 shrink-0" />
+                                  <span>{t("reviews.write.done")}</span>
                                 </Link>
                               ) : (
-                                <span className="inline-flex min-h-9 items-center border border-emerald-200 bg-emerald-50 px-4 text-xs font-bold uppercase tracking-[0.12em] text-emerald-700">
-                                  {t("reviews.write.done")}
+                                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                                  <CheckCircle2 className="size-3.5 shrink-0" />
+                                  <span>{t("reviews.write.done")}</span>
                                 </span>
                               )
-                            ) : !reviewsQuery.isError ? (
+                            ) : (
                               <button
                                 type="button"
                                 onClick={() => setReviewItem(item)}
-                                className="min-h-9 border border-[#1c1a18] px-4 text-xs font-bold uppercase tracking-[0.12em] text-[#1c1a18] transition-colors hover:bg-[#1c1a18] hover:text-white"
+                                className="inline-flex items-center rounded-sm border border-[#1c1a18]/20 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-[#efe7dc]"
                               >
                                 {t("reviews.write.cta")}
                               </button>
-                            ) : null}
+                            )}
                           </div>
                         ) : null}
                       </div>
@@ -347,11 +328,6 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               ) : (
                 <p className="py-8 text-center text-sm text-[#1c1a18]/50">{t("account.order.noItems")}</p>
               )}
-              {order.items?.some((item) => item.priceSource && item.priceSource !== "BASE") ? (
-                <p className="mt-6 border-t border-[#1c1a18]/8 pt-4 text-[11px] leading-5 text-[#1c1a18]/50">
-                  {t("sale.order.snapshotNotice")}
-                </p>
-              ) : null}
             </Card>
 
             <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
@@ -370,7 +346,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 </div>
                 {histories.map((history) => (
                   <div key={history.id} className="flex gap-4">
-                    <Clock3 className="mt-0.5 size-5 text-[#b85a3c]" />
+                    <Clock3 className="mt-0.5 size-5 text-[#b5573a]" />
                     <div>
                       <p className="text-sm font-medium">{t("account.order.statusChange", { from: getStatusLabel(history.fromStatus), to: getStatusLabel(history.toStatus) })}</p>
                       {history.reason && <p className="mt-1 text-xs text-[#1c1a18]/65">{history.reason}</p>}
@@ -382,8 +358,36 @@ export default function OrderDetailsClient({ code }: { code: string }) {
             </Card>
 
             <div className="flex flex-wrap gap-3">
-              {canCancel && <button type="button" disabled={cancelMutation.isPending} onClick={handleCancel} className="rounded-sm border border-red-200 px-6 py-3 text-xs font-bold uppercase tracking-widest text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">{cancelMutation.isPending ? t("account.order.cancelling") : t("account.order.cancel")}</button>}
-              <Link href="/help" className="rounded-sm border border-[#1c1a18]/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[#1c1a18] hover:bg-[#f7f4ef]">{t("account.order.support")}</Link>
+              {canCancel && (
+                <AlertDialog>
+                  <AlertDialogTrigger className="rounded-sm border border-error/30 px-6 py-3 text-xs font-bold uppercase tracking-widest text-error hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50 transition-colors cursor-pointer">
+                    {cancelMutation.isPending ? t("account.order.cancelling") : t("account.order.cancel")}
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-canvas border-[#1c1a18]/10 max-w-md rounded-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="font-serif font-light text-xl text-ink">
+                        {t("account.order.cancelTitle")}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="text-ink/70 text-sm">
+                        {t("account.order.cancelDescription")}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-6">
+                      <AlertDialogCancel className="rounded-sm border-[#1c1a18]/20 text-ink hover:bg-[#1c1a18]/5">
+                        {t("account.order.cancelDismiss")}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleCancel}
+                        disabled={cancelMutation.isPending}
+                        className="rounded-sm bg-error text-white hover:bg-error/90 border-0"
+                      >
+                        {cancelMutation.isPending ? t("account.order.cancelling") : t("account.order.cancelAction")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              <Link href="/help" className="rounded-sm border border-[#1c1a18]/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-[#1c1a18] hover:bg-[#f7f4ef] transition-colors">{t("account.order.support")}</Link>
             </div>
           </div>
 
@@ -393,7 +397,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               <div className="mb-6 flex flex-col gap-4 border-b border-[#1c1a18]/10 pb-6 text-sm text-[#1c1a18]/70">
                 <div className="flex justify-between"><span>{t("account.order.subtotal")}</span><span>{money(Number(order.subtotal ?? 0), locale)}</span></div>
                 <div className="flex justify-between"><span>{t("account.order.shippingFee")}</span><span>{Number(order.shippingFee) > 0 ? money(Number(order.shippingFee), locale) : t("account.order.free")}</span></div>
-                <div className="flex justify-between text-[#b85a3c]"><span>{t("account.order.discount")}</span><span>-{money(Number(order.discountAmount ?? 0), locale)}</span></div>
+                <div className="flex justify-between text-[#b5573a]"><span>{t("account.order.discount")}</span><span>-{money(Number(order.discountAmount ?? 0), locale)}</span></div>
               </div>
               <div className="flex items-end justify-between"><span className="text-sm font-semibold">{t("account.order.total")}</span><span className="font-serif text-2xl">{money(Number(order.finalAmount ?? 0), locale)}</span></div>
             </Card>

@@ -422,7 +422,7 @@ export default function HelpCenter() {
 
                 <div className="bg-[#f9f7f4] p-6 rounded-sm border border-hairline/30 flex flex-col justify-between">
                   <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#964025] bg-[#964025]/10 px-2.5 py-0.5 rounded-sm inline-block mb-3">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#b5573a] bg-[#b5573a]/10 px-2.5 py-0.5 rounded-sm inline-block mb-3">
                       {isVi ? "Nội thành" : "Same Day"}
                     </span>
                     <h4 className="font-serif text-lg font-medium text-[#1c1a18] mb-2">
@@ -436,7 +436,7 @@ export default function HelpCenter() {
                   </div>
                   <div className="border-t border-hairline/30 pt-4 text-xs font-medium text-[#1c1a18] flex justify-between">
                     <span>{isVi ? "Thời gian: 2 - 4 giờ" : "Time: 2–4 hours"}</span>
-                    <span className="text-[#964025]">55.000 VNĐ</span>
+                    <span className="text-[#b5573a]">55.000 VNĐ</span>
                   </div>
                 </div>
 

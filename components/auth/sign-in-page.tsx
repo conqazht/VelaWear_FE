@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { AnimatedAuthShell } from "@/components/auth/animated-auth-shell";
+import { AuthLoader } from "@/components/auth/auth-loader";
 import { FloatingInput } from "@/components/auth/floating-input";
 import { useAuth } from "@/components/auth/auth-provider";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
@@ -33,6 +34,7 @@ export function SignInPage() {
   const redirectTo = getSafeInternalRedirect(searchParams.get("redirect"));
 
   const [apiError, setApiError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [sessionRoleLabel, setSessionRoleLabel] = useState<string | null>(null);
   const [sceneFocus, setSceneFocus] = useState<AuthSceneFocus>("none");
   const [sceneStatus, setSceneStatus] = useState<AuthSceneStatus>("idle");
@@ -59,10 +61,10 @@ export function SignInPage() {
     try {
       const profile = await signIn(data.email, data.password);
       setSessionRoleLabel(getRoleSessionLabel(profile));
-      setSceneStatus("success");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setIsRedirecting(true);
       router.replace(redirectTo ?? getPostSignInPath(profile));
     } catch {
+      setIsRedirecting(false);
       setSessionRoleLabel(null);
       setApiError(t("auth.signIn.invalidCredentials"));
       setSceneStatus("error");
@@ -81,6 +83,21 @@ export function SignInPage() {
   const emailRegister = register("email");
   const passwordRegister = register("password");
 
+  if (isRedirecting) {
+    return (
+      <AuthLoader
+        message={
+          sessionRoleLabel
+            ? t("auth.common.checkingSession", {
+                role: t(getAuthRoleMessageKey(sessionRoleLabel)),
+              })
+            : t("auth.loader.authenticating")
+        }
+        mode="authenticating"
+      />
+    );
+  }
+
   return (
     <AnimatedAuthShell
       mode="sign-in"
@@ -94,7 +111,7 @@ export function SignInPage() {
           {t("auth.signIn.newMember")} {" "}
           <Link
             href="/register"
-            className="font-medium text-[#964025] underline decoration-[#964025]/30 underline-offset-2 transition-colors hover:text-[#87391f]"
+            className="font-medium text-[#b5573a] underline decoration-[#b5573a]/30 underline-offset-2 transition-colors hover:text-[#8f4329]"
           >
             {t("auth.signIn.joinCommunity")}
           </Link>
@@ -103,7 +120,7 @@ export function SignInPage() {
     >
       <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-6">
         {apiError && (
-          <div className="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+          <div className="rounded-[12px] border border-error/20 bg-error/10 p-3 text-sm text-error">
             {apiError}
           </div>
         )}
@@ -175,7 +192,7 @@ export function SignInPage() {
           <div className="mt-2 flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-sm leading-[1.55] text-[#1c1a18] transition-colors hover:text-[#964025]"
+              className="text-sm leading-[1.55] text-[#1c1a18] transition-colors hover:text-[#b5573a]"
             >
               {t("auth.signIn.forgotPassword")}
             </Link>
@@ -184,7 +201,7 @@ export function SignInPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
+          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#8f4329] disabled:opacity-50 cursor-pointer shadow-sm"
         >
           {isSubmitting
             ? sessionRoleLabel

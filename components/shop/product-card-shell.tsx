@@ -37,11 +37,11 @@ export function ProductCardShell({
   footerAction,
 }: ProductCardShellProps) {
   return (
-    <Card className="group relative h-full gap-0 overflow-hidden rounded-md border-transparent bg-white p-0">
-      <div className="relative aspect-square overflow-hidden rounded-none bg-[#efebe4]">
+    <Card className="group relative h-full gap-0 overflow-hidden rounded-xl border-transparent bg-white p-0 shadow-2xs hover:shadow-md transition-shadow">
+      <div className="relative aspect-square overflow-hidden rounded-t-xl bg-[#efe7dc]">
         <Link href={href} className="block h-full w-full">
           {badge ? (
-            <Badge className="absolute left-4 top-4 z-20 rounded-sm bg-[#1c1a18] px-2 text-[9px] font-bold uppercase tracking-widest text-[#f7f4ef]">
+            <Badge className="absolute left-4 top-4 z-20 rounded-full bg-[#1c1a18] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[#f7f4ef]">
               {badge}
             </Badge>
           ) : null}
@@ -66,7 +66,7 @@ export function ProductCardShell({
           {eyebrow}
         </div>
         <Link href={href}>
-          <h3 className="mb-2.5 font-serif text-[16px] font-medium leading-snug text-[#1c1a18] transition-colors hover:text-[#b85a3c] md:text-[18px]">
+          <h3 className="mb-2.5 font-serif text-[16px] font-medium leading-snug text-[#1c1a18] transition-colors hover:text-[#b5573a] md:text-[18px]">
             {title}
           </h3>
         </Link>

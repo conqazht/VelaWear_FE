@@ -36,7 +36,7 @@ export function ReviewsClient() {
 
   return (
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
-      <main className="flex-grow w-full px-6 md:px-16 py-10 md:py-16 flex flex-col gap-10">
+      <main className="flex-grow w-full px-6 md:px-16 py-8 md:py-12 flex flex-col gap-10">
         <section className="flex flex-col gap-6 text-left">
           <div className="border-b border-[#1c1a18]/10 pb-4 flex justify-between items-end">
             <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
@@ -64,7 +64,7 @@ export function ReviewsClient() {
             <p className="text-sm text-[#1c1a18]/60 max-w-md mx-auto">
               {t("reviews.emptyDescription")}
             </p>
-            <Link href="/" className="mt-8 px-8 py-3.5 bg-[#1c1a18] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#b85a3c] transition-colors">
+            <Link href="/" className="mt-8 px-8 py-3.5 bg-[#1c1a18] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#b5573a] transition-colors">
               {t("reviews.shopNow")}
             </Link>
           </div>
@@ -84,7 +84,7 @@ export function ReviewsClient() {
                   ? `/products/${encodeURIComponent(review.productSlug)}?reviews=1#reviews`
                   : "/collection"}
                 aria-label={t("reviews.viewProduct", { product: review.productName })}
-                className="bg-white border border-[#1c1a18]/10 rounded-md p-8 shadow-sm flex flex-col md:flex-row md:items-start gap-8 transition-all hover:-translate-y-0.5 hover:border-[#b85a3c]/35 hover:shadow-md"
+                className="bg-white border border-[#1c1a18]/10 rounded-md p-8 shadow-sm flex flex-col md:flex-row md:items-start gap-8 transition-all hover:-translate-y-0.5 hover:border-[#b5573a]/35 hover:shadow-md"
               >
                 <div className="md:w-1/3 flex-shrink-0 flex flex-col gap-4">
                   <div>
@@ -121,7 +121,7 @@ export function ReviewsClient() {
 function ReviewsPageLoading() {
   return (
     <div className="bg-canvas text-ink flex min-h-screen flex-col" aria-busy="true">
-      <main className="flex w-full flex-grow flex-col gap-10 px-6 py-10 md:px-16 md:py-16">
+      <main className="flex w-full flex-grow flex-col gap-10 px-6 md:px-16 py-8 md:py-12">
         <section className="flex flex-col gap-6 text-left" aria-hidden="true">
           <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
             <Skeleton className="h-8 w-40 bg-[#efe7dc] md:h-9 md:w-52" />
