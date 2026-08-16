@@ -47,7 +47,7 @@ export function OtpEntry({
   const formContent = (
     <form onSubmit={onVerify} className="flex flex-col gap-6">
       {error && (
-        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded">
+        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded-[12px]">
           {error}
         </div>
       )}
@@ -70,7 +70,7 @@ export function OtpEntry({
         <button
           type="button"
           onClick={onCancel}
-          className="text-[#55423d] hover:text-[#964025] underline cursor-pointer bg-transparent border-0"
+          className="text-[#55423d] hover:text-[#b5573a] underline cursor-pointer bg-transparent border-0"
         >
           {resolvedCancelLabel}
         </button>
@@ -78,7 +78,7 @@ export function OtpEntry({
           type="button"
           disabled={cooldown > 0 || isSubmitting}
           onClick={onResend}
-          className="text-[#964025] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer bg-transparent border-0"
+          className="text-[#b5573a] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer bg-transparent border-0"
         >
           {cooldown > 0
             ? t("auth.otp.resendIn", { seconds: cooldown })
@@ -90,7 +90,7 @@ export function OtpEntry({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
+          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#8f4329] disabled:opacity-50 cursor-pointer shadow-sm"
         >
           {isSubmitting ? t("auth.otp.verifying") : resolvedActionLabel}
         </button>
@@ -103,7 +103,7 @@ export function OtpEntry({
   }
 
   const content = (
-    <div className={cn("w-full text-left", !inline && "max-w-[460px] bg-[#efe7dc] p-6 md:p-8 rounded")}>
+    <div className={cn("w-full text-left", !inline && "max-w-[460px] bg-[#efe7dc] p-6 md:p-8 rounded-[16px]")}>
       {!inline && (
         <div className="mb-6 text-center">
           <Link
@@ -133,7 +133,7 @@ export function OtpEntry({
   );
 
   if (inline) {
-    return <div className="p-5 border border-hairline/60 rounded bg-[#efe7dc]/30 mt-2">{content}</div>;
+    return <div className="p-5 border border-hairline/60 rounded-[12px] bg-[#efe7dc]/30 mt-2">{content}</div>;
   }
 
   return (

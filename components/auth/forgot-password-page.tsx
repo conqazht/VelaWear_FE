@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Eye, EyeOff, Check, X } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { AnimatedAuthShell } from "@/components/auth/animated-auth-shell";
 import { FloatingInput } from "@/components/auth/floating-input";
+import { PasswordRequirements } from "@/components/auth/password-requirements";
 import { resetPassword } from "@/lib/auth-otp-api";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { OtpEntry } from "@/components/auth/otp-entry";
@@ -59,6 +60,11 @@ export function ForgotPasswordPage() {
     control: requestForm.control,
     name: "email",
   });
+
+  const newPasswordValue = useWatch({
+    control: resetForm.control,
+    name: "newPassword",
+  }) ?? "";
 
   const {
     showOtpStep,
@@ -153,7 +159,7 @@ export function ForgotPasswordPage() {
       footer={
         step !== "SUCCESS" && (
           <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d]">
-            <Link href="/sign-in" className="text-sm text-[#55423d] hover:text-[#964025] underline decoration-[#964025]/30 underline-offset-4">
+            <Link href="/sign-in" className="text-sm text-[#55423d] hover:text-[#b5573a] underline decoration-[#b5573a]/30 underline-offset-4">
               {t("auth.common.backToSignIn")}
             </Link>
           </p>
@@ -170,7 +176,7 @@ export function ForgotPasswordPage() {
           </p>
           <Link
             href="/sign-in"
-            className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] cursor-pointer"
+            className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#8f4329] cursor-pointer"
           >
             {t("auth.forgot.goToSignIn")}
           </Link>
@@ -228,13 +234,12 @@ export function ForgotPasswordPage() {
                   </button>
                 }
               />
-              {resetForm.formState.errors.newPassword && (
-                <div className="mt-2 flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-[11px] font-medium text-destructive uppercase tracking-wider">
-                    <X className="size-3 text-destructive" strokeWidth={2.5} />{" "}
-                    {resetForm.formState.errors.newPassword.message}
-                  </span>
-                </div>
+              {(newPasswordValue.length > 0 || resetForm.formState.isSubmitted || sceneFocus === "password") && (
+                <PasswordRequirements
+                  password={newPasswordValue}
+                  showTitle={false}
+                  className="mt-2.5 px-1"
+                />
               )}
             </div>
           </OtpEntry>
@@ -244,7 +249,7 @@ export function ForgotPasswordPage() {
       {step === "REQUEST" && (
         <form onSubmit={requestForm.handleSubmit(onRequestSubmit, onInvalid)} className="flex flex-col gap-6">
           {otpError && (
-            <div className="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+            <div className="rounded-[12px] border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
               {otpError}
             </div>
           )}
@@ -274,7 +279,7 @@ export function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={isOtpSubmitting}
-            className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#964025] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#87391f] disabled:opacity-50 cursor-pointer"
+            className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#8f4329] disabled:opacity-50 cursor-pointer shadow-sm"
           >
             {isOtpSubmitting ? t("auth.forgot.requesting") : t("auth.forgot.sendCode")}
           </button>

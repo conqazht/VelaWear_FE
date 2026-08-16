@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -25,15 +25,16 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   const [isAutoplay, setIsAutoplay] = useState(true);
   const router = useRouter();
   const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (!isAutoplay) return;
+    if (!isAutoplay || reduceMotion) return;
     const interval = setInterval(() => {
       setDirection("right");
       setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 6000);
     return () => clearInterval(interval);
-  }, [isAutoplay, slides.length]);
+  }, [isAutoplay, reduceMotion, slides.length]);
 
   const handlePrev = () => {
     setIsAutoplay(false);
@@ -125,7 +126,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                 initial={{ opacity: 0, transform: "translateY(15px)" }}
                 animate={{ opacity: 1, transform: "translateY(0px)" }}
                 transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-[#b5573a] hover:bg-[#8f4329] text-white font-medium text-sm tracking-[1.5px] uppercase px-10 py-4.5 rounded-[6px] transition-colors duration-300 shadow-lg cursor-pointer flex items-center gap-2"
+                className="bg-[#b5573a] hover:bg-[#8f4329] text-white font-medium text-sm tracking-[1.5px] uppercase px-10 py-4.5 rounded-full transition-colors duration-300 shadow-lg cursor-pointer flex items-center gap-2"
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => router.push("/collection")}
@@ -138,10 +139,10 @@ export function HeroSlider({ slides }: HeroSliderProps) {
       </AnimatePresence>
 
       {/* Navigation Buttons */}
-      <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between items-center pointer-events-none z-30 opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300">
+      <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between items-center pointer-events-none z-30 opacity-0 group-hover/hero:opacity-100 group-focus-within/hero:opacity-100 transition-opacity duration-300">
         <motion.button
           onClick={handlePrev}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10"
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18]"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={t("storefront.home.previousSlide")}
@@ -151,7 +152,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 
         <motion.button
           onClick={handleNext}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10"
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18]"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={t("storefront.home.nextSlide")}
@@ -170,7 +171,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
               setDirection(i > current ? "right" : "left");
               setCurrent(i);
             }}
-            className="group relative p-1 focus:outline-none cursor-pointer"
+            className="group relative p-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18] cursor-pointer"
             aria-label={t("storefront.home.goToSlide", { number: i + 1 })}
           >
             <div

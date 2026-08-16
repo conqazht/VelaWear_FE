@@ -87,7 +87,7 @@ function BadRequestNotice({
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(181,87,58,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(181,87,58,0.045)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
       <div className="relative z-10 mx-auto w-full max-w-3xl border-l-2 border-[#b5573a]/55 pl-5 sm:pl-8">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#964025]">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#b5573a]">
           Vela Wear / HTTP 400
         </p>
         <h1

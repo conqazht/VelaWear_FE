@@ -306,7 +306,7 @@ test("filter 400 giữ grid và không đề nghị Retry request sai", { tag: "
   await expect(warning.getByRole("button", { name: "Thử lại" })).toHaveCount(0);
 });
 
-test("size guide đổi cm/in và dùng accordion plus-size", { tag: "@smoke" }, async ({ page }) => {
+test("size guide đổi cm/in và chọn bảng cỡ mở rộng plus-size", { tag: "@smoke" }, async ({ page }) => {
   await page.goto("/size-guide?category=ao&size=M&product=ao-linen-kiem-thu&available=M,L");
 
   await expect(page.getByRole("heading", { name: "Hướng dẫn chọn cỡ" })).toBeVisible();
@@ -314,9 +314,9 @@ test("size guide đổi cm/in và dùng accordion plus-size", { tag: "@smoke" },
   await page.getByRole("button", { name: "in" }).first().click();
   await expect(page.getByRole("button", { name: "in" }).first()).toHaveAttribute("aria-pressed", "true");
 
-  const plusSummary = page.getByText("Bảng size mở rộng 0X – 4X", { exact: true });
-  await plusSummary.click();
-  await expect(plusSummary.locator("xpath=ancestor::details")).toHaveAttribute("open", "");
+  const plusTab = page.getByRole("button", { name: /Cỡ mở rộng/i });
+  await plusTab.click();
+  await expect(page.getByRole("heading", { name: "Bảng kích cỡ mở rộng 0X – 4X" })).toBeVisible();
 });
 
 test("PDP rút gọn 3 review và modal phân trang server-side có lightbox", { tag: "@smoke" }, async ({ page }) => {

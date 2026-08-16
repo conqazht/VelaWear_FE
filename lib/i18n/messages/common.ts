@@ -34,6 +34,8 @@ export const commonMessages = defineMessages(
     "messageScroller.toStart": "Scroll to start",
     "dateRange.select": "Select date",
     "common.adminDashboard": "Admin Dashboard",
+    "common.skipToContent": "Skip to main content",
+    "common.copied": "Copied",
   },
   {
     "language.label": "Ngôn ngữ",
@@ -68,5 +70,7 @@ export const commonMessages = defineMessages(
     "messageScroller.toStart": "Cuộn về đầu",
     "dateRange.select": "Chọn ngày",
     "common.adminDashboard": "Trang quản trị",
+    "common.skipToContent": "Chuyển đến nội dung chính",
+    "common.copied": "Đã sao chép",
   },
 );

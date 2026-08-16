@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, ImageIcon, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Star, X } from "lucide-react";
 
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
@@ -16,6 +16,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/i18n/format";
 import {
@@ -90,19 +96,20 @@ export function ProductReviewsDialog({
           onOpenChange(nextOpen);
         }}
       >
-        <DialogContent className="h-[92dvh] max-h-[920px] w-[calc(100%-1rem)] max-w-[1180px] overflow-hidden rounded-none bg-[#f8f5f0] p-0 sm:max-w-[1180px]">
+        <DialogContent className="h-[92dvh] max-h-[920px] w-[calc(100%-1rem)] max-w-[1180px] overflow-hidden rounded-lg bg-canvas p-0 sm:max-w-[1180px] shadow-2xl">
           <div className="grid h-full min-h-0 grid-rows-[auto_1fr]">
-            <DialogHeader className="border-b border-[#1c1a18]/10 bg-white px-5 py-5 pr-14 md:px-10 md:py-7">
-              <DialogTitle className="font-serif text-2xl font-light md:text-4xl">
+            <DialogHeader className="border-b border-[#1c1a18]/10 bg-white px-5 py-5 pr-14 md:px-10 md:py-6 text-left">
+              <DialogTitle className="font-serif text-2xl font-light md:text-3xl text-ink tracking-tight">
                 {t("reviews.allTitle", { product: productName })}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-xs text-[#55423d]/70 mt-1">
                 {t("reviews.allDescription")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="grid min-h-0 overflow-y-auto lg:grid-cols-[300px_1fr] lg:overflow-hidden">
-              <aside className="border-b border-[#1c1a18]/10 bg-[#efe7dc]/55 p-5 md:p-8 lg:overflow-y-auto lg:border-r lg:border-b-0">
+              {/* Left Sidebar: Rating Summary & Unified Interactive Filter */}
+              <aside className="border-b border-[#1c1a18]/10 bg-[#efe7dc]/55 p-5 md:p-7 lg:overflow-y-auto lg:border-r lg:border-b-0">
                 {summaryQuery.isLoading ? (
                   <ReviewSummarySkeleton />
                 ) : summaryQuery.isError && !summary ? (
@@ -119,25 +126,43 @@ export function ProductReviewsDialog({
                         onRetry={() => void summaryQuery.refetch()}
                         resourceLabel={t("reviews.summaryResource")}
                         error={summaryQuery.error}
+                        className="mb-4"
                       />
                     ) : null}
-                    <div className="flex items-end gap-3">
-                      <strong className="font-serif text-6xl font-light tabular-nums">
+                    <div className="flex items-baseline gap-3">
+                      <strong className="font-serif text-5xl md:text-6xl font-light tabular-nums text-ink">
                         {Number(summary.averageRating ?? 0).toFixed(1)}
                       </strong>
-                      <span className="pb-2 text-sm text-[#1c1a18]/55">/ 5</span>
+                      <span className="text-sm font-medium text-[#55423d]/60">/ 5.0</span>
                     </div>
                     <RatingStars
                       rating={summary.averageRating ?? 0}
-                      className="mt-3"
-                      sizeClassName="size-5"
-                      activeClassName="text-[#b85a3c]"
+                      className="mt-2.5"
+                      sizeClassName="size-4"
+                      activeClassName="text-[#b5573a]"
                     />
-                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[#1c1a18]/55">
+                    <p className="mt-2 text-xs uppercase tracking-[0.14em] font-medium text-[#55423d]/65">
                       {t("reviews.total", { count: summary.total })}
                     </p>
 
-                    <div className="mt-8 space-y-2" aria-label={t("reviews.distribution")}>
+                    <div className="mt-7 space-y-2" aria-label={t("reviews.distribution")}>
+                      {/* All Ratings Option */}
+                      <button
+                        type="button"
+                        onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-xs transition-all cursor-pointer border",
+                          state.rating === undefined
+                            ? "bg-white border-[#1c1a18]/30 shadow-xs text-ink font-semibold ring-1 ring-[#1c1a18]/20"
+                            : "bg-transparent border-transparent hover:bg-white/60 text-[#55423d]/80"
+                        )}
+                        aria-pressed={state.rating === undefined}
+                      >
+                        <span className="font-medium">{t("reviews.filterAll")}</span>
+                        <span className="tabular-nums text-[#55423d]/65">{summary.total}</span>
+                      </button>
+
+                      {/* 5 to 1 Star Breakdown Filter Rows */}
                       {[5, 4, 3, 2, 1].map((rating) => {
                         const count = summary.ratingCounts[String(rating) as "1" | "2" | "3" | "4" | "5"] ?? 0;
                         const percentage = summary.total > 0 ? (count / summary.total) * 100 : 0;
@@ -147,17 +172,21 @@ export function ProductReviewsDialog({
                             key={rating}
                             type="button"
                             className={cn(
-                              "grid w-full grid-cols-[34px_1fr_28px] items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors hover:bg-white/70 focus-visible:outline-2 focus-visible:outline-offset-2",
-                              selected && "bg-white ring-1 ring-[#b85a3c]/35",
+                              "grid w-full grid-cols-[40px_1fr_28px] items-center gap-2.5 rounded-sm px-3 py-2 text-left text-xs transition-all cursor-pointer border",
+                              selected
+                                ? "bg-white border-[#b5573a] shadow-xs text-ink font-semibold ring-1.5 ring-[#b5573a]"
+                                : "bg-transparent border-transparent hover:bg-white/60 text-[#55423d]/80",
                             )}
                             aria-pressed={selected}
                             onClick={() => onStateChange({ ...state, rating: selected ? undefined : rating, page: 1 })}
                           >
-                            <span className="inline-flex items-center gap-1">{rating}<Star className="size-3 fill-current" /></span>
-                            <span className="h-1.5 overflow-hidden rounded-full bg-[#1c1a18]/10">
-                              <span className="block h-full bg-[#b85a3c]" style={{ width: `${percentage}%` }} />
+                            <span className="inline-flex items-center gap-1 font-medium">
+                              {rating} <Star className="size-3 fill-[#b5573a] text-[#b5573a]" />
                             </span>
-                            <span className="text-right tabular-nums text-[#1c1a18]/55">{count}</span>
+                            <span className="h-1.5 overflow-hidden rounded-full bg-[#1c1a18]/10">
+                              <span className="block h-full rounded-full bg-[#b5573a] transition-all duration-300" style={{ width: `${percentage}%` }} />
+                            </span>
+                            <span className="text-right tabular-nums text-[#55423d]/65">{count}</span>
                           </button>
                         );
                       })}
@@ -166,48 +195,92 @@ export function ProductReviewsDialog({
                 ) : null}
               </aside>
 
+              {/* Right Content: Filter Status Header + Review List + Pagination */}
               <section className="flex min-h-0 flex-col bg-white">
-                <div className="flex flex-col gap-3 border-b border-[#1c1a18]/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-8">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
-                      className={cn(
-                        "rounded-full border px-4 py-2 text-xs font-semibold",
-                        state.rating === undefined ? "border-[#1c1a18] bg-[#1c1a18] text-white" : "border-[#1c1a18]/15",
-                      )}
-                      aria-pressed={state.rating === undefined}
-                    >
-                      {t("reviews.filterAll")}
-                    </button>
-                    {[5, 4, 3, 2, 1].map((rating) => (
-                      <button
-                        key={rating}
+                <div className="flex flex-col gap-3 border-b border-[#1c1a18]/10 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between md:px-8">
+                  {/* Left: Active Filter Status */}
+                  <div>
+                    {state.rating !== undefined ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-[#1c1a18]">
+                          {t("reviews.filterActive", { rating: state.rating })}
+                        </span>
+                        <button
                         type="button"
-                        onClick={() => onStateChange({ ...state, rating, page: 1 })}
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-semibold",
-                          state.rating === rating ? "border-[#b85a3c] bg-[#b85a3c] text-white" : "border-[#1c1a18]/15",
-                        )}
-                        aria-pressed={state.rating === rating}
+                        onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-white px-3.5 py-1 text-xs font-semibold text-[#1c1a18] shadow-2xs hover:bg-[#efe7dc] cursor-pointer transition-colors active:scale-[0.96]"
                       >
-                        {rating}<Star className="size-3 fill-current" />
+                        <X className="size-3" />
+                        <span>{t("reviews.clearFilter")}</span>
                       </button>
-                    ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs font-medium uppercase tracking-[0.1em] text-[#55423d]/65">
+                        {t("reviews.total", { count: summary?.total ?? meta?.total ?? reviews.length })}
+                      </span>
+                    )}
                   </div>
-                  <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#1c1a18]/60">
-                    <span>{t("reviews.sortLabel")}</span>
-                    <select
+
+                  {/* Right: Shadcn Sort Select */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-medium uppercase tracking-[0.1em] text-[#55423d]/60 shrink-0">
+                      {t("reviews.sortLabel")}
+                    </span>
+                    <Select
                       value={state.sort}
-                      onChange={(event) => onStateChange({ ...state, sort: event.target.value as ProductReviewSort, page: 1 })}
-                      className="min-h-10 rounded-sm border border-[#1c1a18]/15 bg-white px-3 text-sm font-normal normal-case tracking-normal text-[#1c1a18] outline-none focus:border-[#b85a3c]"
+                      onValueChange={(value) =>
+                        onStateChange({
+                          ...state,
+                          sort: value as ProductReviewSort,
+                          page: 1,
+                        })
+                      }
                     >
-                      <option value="newest">{t("reviews.sortNewest")}</option>
-                      <option value="oldest">{t("reviews.sortOldest")}</option>
-                      <option value="rating-high">{t("reviews.sortHigh")}</option>
-                      <option value="rating-low">{t("reviews.sortLow")}</option>
-                    </select>
-                  </label>
+                      <SelectTrigger
+                        size="sm"
+                        className="h-8.5 w-40 sm:w-44 rounded-sm border border-[#1c1a18]/20 bg-white px-3 text-xs font-medium text-[#1c1a18] shadow-xs hover:border-[#1c1a18]/40 cursor-pointer transition-colors"
+                      >
+                        <span className="truncate">
+                          {{
+                            newest: t("reviews.sortNewest"),
+                            oldest: t("reviews.sortOldest"),
+                            "rating-high": t("reviews.sortHigh"),
+                            "rating-low": t("reviews.sortLow"),
+                          }[state.sort] ?? t("reviews.sortNewest")}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent
+                        align="end"
+                        alignItemWithTrigger={false}
+                        className="w-(--anchor-width) min-w-(--anchor-width) rounded-sm border border-[#1c1a18]/20 bg-white p-0 shadow-lg overflow-hidden"
+                      >
+                        <SelectItem
+                          value="newest"
+                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors"
+                        >
+                          {t("reviews.sortNewest")}
+                        </SelectItem>
+                        <SelectItem
+                          value="oldest"
+                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors border-t border-[#1c1a18]/8"
+                        >
+                          {t("reviews.sortOldest")}
+                        </SelectItem>
+                        <SelectItem
+                          value="rating-high"
+                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors border-t border-[#1c1a18]/8"
+                        >
+                          {t("reviews.sortHigh")}
+                        </SelectItem>
+                        <SelectItem
+                          value="rating-low"
+                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors border-t border-[#1c1a18]/8"
+                        >
+                          {t("reviews.sortLow")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto px-5 md:px-8">
@@ -223,11 +296,22 @@ export function ProductReviewsDialog({
                       />
                     </div>
                   ) : reviews.length === 0 ? (
-                    <p className="py-20 text-center text-sm text-[#1c1a18]/55">
-                      {state.rating
-                        ? t("reviews.emptyForRating", { rating: state.rating })
-                        : t("reviews.emptyTitle")}
-                    </p>
+                    <div className="py-20 text-center">
+                      <p className="text-sm text-[#1c1a18]/55">
+                        {state.rating
+                          ? t("reviews.emptyForRating", { rating: state.rating })
+                          : t("reviews.emptyTitle")}
+                      </p>
+                      {state.rating !== undefined && (
+                        <button
+                          type="button"
+                          onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
+                          className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#b5573a] hover:underline cursor-pointer"
+                        >
+                          {t("reviews.clearFilter")}
+                        </button>
+                      )}
+                    </div>
                   ) : (
                     <>
                       {reviewsQuery.isError ? (
@@ -241,7 +325,7 @@ export function ProductReviewsDialog({
                       ) : null}
                       <div className="divide-y divide-[#1c1a18]/10">
                         {reviews.map((review) => (
-                          <article key={review.id} id={`review-${review.id}`} className="py-7">
+                          <article key={review.id} id={`review-${review.id}`} className="py-6">
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div>
                                 <p className="font-semibold text-[#1c1a18]">{review.userName}</p>
@@ -253,18 +337,18 @@ export function ProductReviewsDialog({
                               <RatingStars rating={review.rating ?? 0} sizeClassName="size-4" />
                             </div>
                             {review.variantName ? (
-                              <p className="mt-3 text-xs uppercase tracking-[0.12em] text-[#1c1a18]/45">{review.variantName}</p>
+                              <p className="mt-2.5 text-xs uppercase tracking-[0.12em] text-[#1c1a18]/45 font-medium">{review.variantName}</p>
                             ) : null}
                             <ReviewComment comment={review.comment} className="mt-3" />
                             {review.images?.length ? (
-                              <div className="mt-5 flex flex-wrap gap-3">
+                              <div className="mt-4 flex flex-wrap gap-3">
                                 {review.images.map((image, index) => {
                                   const resolvedImage = resolveImageUrl(image);
                                   return (
                                     <button
                                       type="button"
                                       key={`${image}-${index}`}
-                                      className="relative size-20 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-[#f7f4ef] focus-visible:outline-2 focus-visible:outline-offset-2"
+                                      className="relative size-20 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-[#f7f4ef] focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer"
                                       onClick={() => setLightboxImage(resolvedImage)}
                                       aria-label={t("reviews.openImage", { index: index + 1 })}
                                     >
@@ -281,6 +365,7 @@ export function ProductReviewsDialog({
                   )}
                 </div>
 
+                {/* Pagination footer */}
                 <div className="flex items-center justify-between gap-3 border-t border-[#1c1a18]/10 px-5 py-4 md:px-8">
                   <span className="text-xs text-[#1c1a18]/50">
                     {t("reviews.page", { page: state.page, pages })}
@@ -290,7 +375,7 @@ export function ProductReviewsDialog({
                       type="button"
                       disabled={state.page <= 1 || reviewsQuery.isFetching}
                       onClick={() => onStateChange({ ...state, page: state.page - 1 })}
-                      className="inline-flex size-9 items-center justify-center border border-[#1c1a18]/10 disabled:opacity-30"
+                      className="inline-flex size-9 items-center justify-center rounded-sm border border-[#1c1a18]/10 hover:bg-[#f7f4ef] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed transition-colors"
                       aria-label={t("reviews.previous")}
                     >
                       <ChevronLeft className="size-4" />
@@ -302,8 +387,10 @@ export function ProductReviewsDialog({
                         onClick={() => onStateChange({ ...state, page })}
                         aria-current={page === state.page ? "page" : undefined}
                         className={cn(
-                          "size-9 border text-xs tabular-nums",
-                          page === state.page ? "border-[#1c1a18] bg-[#1c1a18] text-white" : "border-[#1c1a18]/10",
+                          "size-9 rounded-sm border text-xs tabular-nums cursor-pointer transition-colors",
+                          page === state.page
+                            ? "border-[#1c1a18] bg-[#1c1a18] text-white font-medium"
+                            : "border-[#1c1a18]/10 hover:bg-[#f7f4ef]",
                         )}
                       >
                         {page}
@@ -313,7 +400,7 @@ export function ProductReviewsDialog({
                       type="button"
                       disabled={state.page >= pages || reviewsQuery.isFetching}
                       onClick={() => onStateChange({ ...state, page: state.page + 1 })}
-                      className="inline-flex size-9 items-center justify-center border border-[#1c1a18]/10 disabled:opacity-30"
+                      className="inline-flex size-9 items-center justify-center rounded-sm border border-[#1c1a18]/10 hover:bg-[#f7f4ef] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed transition-colors"
                       aria-label={t("reviews.next")}
                     >
                       <ChevronRight className="size-4" />
@@ -346,11 +433,11 @@ export function ProductReviewsDialog({
 function ReviewSummarySkeleton() {
   return (
     <div className="space-y-4" aria-hidden="true">
-      <Skeleton className="h-16 w-28" />
-      <Skeleton className="h-5 w-36" />
-      <Skeleton className="h-3 w-24" />
-      <div className="space-y-3 pt-5">
-        {Array.from({ length: 5 }, (_, index) => <Skeleton key={index} className="h-8 w-full" />)}
+      <Skeleton className="h-14 w-24 bg-[#efe7dc]" />
+      <Skeleton className="h-4 w-32 bg-[#efe7dc]" />
+      <Skeleton className="h-3 w-20 bg-[#efe7dc]" />
+      <div className="space-y-2.5 pt-5">
+        {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-9 w-full bg-[#efe7dc]" />)}
       </div>
     </div>
   );
@@ -360,11 +447,11 @@ function ReviewsListSkeleton() {
   return (
     <div className="divide-y divide-[#1c1a18]/10" aria-hidden="true">
       {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="space-y-3 py-7">
-          <div className="flex justify-between"><Skeleton className="h-4 w-28" /><Skeleton className="h-4 w-24" /></div>
-          <Skeleton className="h-3 w-20" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
+        <div key={index} className="space-y-3 py-6">
+          <div className="flex justify-between"><Skeleton className="h-4 w-28 bg-[#efe7dc]" /><Skeleton className="h-4 w-24 bg-[#efe7dc]" /></div>
+          <Skeleton className="h-3 w-20 bg-[#efe7dc]" />
+          <Skeleton className="h-4 w-full bg-[#efe7dc]" />
+          <Skeleton className="h-4 w-3/4 bg-[#efe7dc]" />
         </div>
       ))}
     </div>

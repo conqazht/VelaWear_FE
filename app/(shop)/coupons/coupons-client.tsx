@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { CalendarClock, History, PiggyBank, Ticket } from "lucide-react";
+import { CalendarClock, Check, Copy, History, PiggyBank, Ticket } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
@@ -13,6 +13,7 @@ import { money } from "@/lib/vela-data";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { Locale } from "@/lib/i18n";
 import { formatDate } from "@/lib/i18n/format";
+import { cn } from "@/lib/utils";
 
 const formatCouponValue = (coupon: Coupon, locale: Locale) =>
   coupon.type.includes("PERCENT")
@@ -31,6 +32,35 @@ export function CouponsClient() {
   const coupons = couponsQuery.data?.availableCoupons ?? [];
   const usageHistory = couponsQuery.data?.usageHistory ?? [];
   const [referenceTime] = useState(() => Date.now());
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const handleCopyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => {
+        setCopiedCode((current) => (current === code ? null : current));
+      }, 2000);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = code;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        setCopiedCode(code);
+        setTimeout(() => {
+          setCopiedCode((current) => (current === code ? null : current));
+        }, 2000);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+  };
+
   const totalSavings = usageHistory.reduce(
     (total, usage) => total + Number(usage.discountAmount || 0),
     0
@@ -67,7 +97,7 @@ export function CouponsClient() {
 
   return (
     <div className="bg-canvas text-ink min-h-screen flex flex-col">
-      <main className="flex-grow w-full px-6 md:px-16 py-10 md:py-16 flex flex-col gap-10">
+      <main className="flex-grow w-full px-6 md:px-16 py-8 md:py-12 flex flex-col gap-10">
         <section className="flex flex-col gap-6 text-left">
           <div className="border-b border-[#1c1a18]/10 pb-4 flex justify-between items-end">
             <h2 className="font-serif text-2xl md:text-3xl text-[#1c1a18] font-light tracking-tight">
@@ -104,7 +134,7 @@ export function CouponsClient() {
             <p className="text-sm text-[#1c1a18]/60 max-w-md mx-auto">
               {t("coupons.emptyDescription")}
             </p>
-            <Link href="/" className="mt-8 px-8 py-3.5 bg-[#1c1a18] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#b85a3c] transition-colors">
+            <Link href="/" className="mt-8 px-8 py-3.5 bg-[#1c1a18] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#b5573a] transition-colors">
               {t("coupons.explore")}
             </Link>
           </div>
@@ -112,71 +142,126 @@ export function CouponsClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {coupons.map((coupon) => {
               const usagePercentage = getUsagePercentage(coupon);
+              const isCopied = copiedCode === coupon.code;
+              const isPercent = coupon.type.includes("PERCENT");
+
               return (
                 <div
                   key={coupon.id}
-                  className="group relative bg-white border border-[#1c1a18]/10 rounded-md p-8 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                  className="group relative flex flex-col justify-between bg-white border border-[#1c1a18]/10 rounded-2xl shadow-xs hover:shadow-md transition-shadow overflow-hidden"
                 >
-                <div className="absolute top-1/2 -left-4 w-8 h-8 bg-[#f7f4ef] rounded-full -translate-y-1/2 border-r border-[#1c1a18]/10"></div>
-                <div className="absolute top-1/2 -right-4 w-8 h-8 bg-[#f7f4ef] rounded-full -translate-y-1/2 border-l border-[#1c1a18]/10"></div>
-                <div className="absolute top-1/2 left-6 right-6 h-px bg-transparent border-t border-dashed border-[#1c1a18]/15 -translate-y-1/2"></div>
-
-                <div className="pb-8">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#b85a3c]">
-                      {coupon.type.includes("PERCENT") ? t("coupons.type.percentage") : t("coupons.type.fixed")}
-                    </p>
-                    <span className="rounded-sm bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-700">
-                      {{
-                        ACTIVE: t("coupons.status.available"),
-                        INACTIVE: t("coupons.status.inactive"),
-                        EXPIRED: t("coupons.status.expired"),
-                      }[coupon.status.toUpperCase()] ?? coupon.status}
-                    </span>
-                  </div>
-                  <h3 className="font-serif text-2xl font-light tracking-tight text-[#1c1a18]">
-                    {coupon.code}
-                  </h3>
-                </div>
-
-                <div className="pt-8 flex flex-col gap-1 relative z-10">
-                  <p className="text-3xl font-semibold text-[#1c1a18] font-numeric mb-2">
-                    {formatCouponValue(coupon, locale)}
-                  </p>
-                  <p className="text-xs text-[#1c1a18]/60">
-                    {t("coupons.minimum", { amount: money(Number(coupon.minOrderAmount ?? 0), locale) })}
-                  </p>
-                  {coupon.maxDiscount && (
-                    <p className="text-xs text-[#1c1a18]/60">
-                      {t("coupons.maximum", { amount: money(Number(coupon.maxDiscount), locale) })}
-                    </p>
-                  )}
-
-                  <div className="mt-6 flex items-center justify-between gap-3 text-[11px] text-[#1c1a18]/50 font-medium">
-                    <p>{t("coupons.expires", { date: coupon.endDate ? formatDate(coupon.endDate, locale) : t("coupons.noExpiry") })}</p>
-                    <p>
-                      {usagePercentage === null
-                        ? t("coupons.unlimited")
-                        : t("coupons.usedPercentage", { percentage: usagePercentage })}
-                    </p>
-                  </div>
-                  {usagePercentage !== null && (
-                    <div
-                      className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#1c1a18]/8"
-                      role="progressbar"
-                      aria-label={t("coupons.usageLabel", { code: coupon.code })}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={usagePercentage}
-                    >
-                      <div
-                        className="h-full rounded-full bg-[#b85a3c] transition-[width] duration-500"
-                        style={{ width: `${usagePercentage}%` }}
-                      />
+                  {/* Top Section: Benefit & Conditions */}
+                  <div className="p-6 md:p-7 pb-5">
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#b5573a]">
+                        {isPercent ? t("coupons.type.percentage") : t("coupons.type.fixed")}
+                      </span>
+                      <span className={cn(
+                        "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest border",
+                        coupon.status.toUpperCase() === "ACTIVE"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-[#1c1a18]/5 text-[#1c1a18]/60 border-[#1c1a18]/10"
+                      )}>
+                        {{
+                          ACTIVE: t("coupons.status.available"),
+                          INACTIVE: t("coupons.status.inactive"),
+                          EXPIRED: t("coupons.status.expired"),
+                        }[coupon.status.toUpperCase()] ?? coupon.status}
+                      </span>
                     </div>
-                  )}
+
+                    {/* Hero Discount Value */}
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="font-serif text-3xl md:text-4xl font-normal tracking-tight text-[#1c1a18]">
+                        {formatCouponValue(coupon, locale)}
+                      </span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#b5573a]">
+                        {isPercent ? "OFF" : "GIẢM"}
+                      </span>
+                    </div>
+
+                    {/* Conditions */}
+                    <div className="space-y-1.5 text-xs text-[#55423d]/75">
+                      <p className="flex items-center gap-2">
+                        <span className="size-1 shrink-0 rounded-full bg-[#b5573a]/60" />
+                        <span>{t("coupons.minimum", { amount: money(Number(coupon.minOrderAmount ?? 0), locale) })}</span>
+                      </p>
+                      {coupon.maxDiscount ? (
+                        <p className="flex items-center gap-2">
+                          <span className="size-1 shrink-0 rounded-full bg-[#b5573a]/60" />
+                          <span>{t("coupons.maximum", { amount: money(Number(coupon.maxDiscount), locale) })}</span>
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Perforated Ticket Divider */}
+                  <div className="relative flex items-center px-4">
+                    <div className="absolute -left-3 size-6 rounded-full bg-canvas border-r border-[#1c1a18]/10" />
+                    <div className="w-full border-t border-dashed border-[#1c1a18]/15" />
+                    <div className="absolute -right-3 size-6 rounded-full bg-canvas border-l border-[#1c1a18]/10" />
+                  </div>
+
+                  {/* Bottom Section: Code Box & Validity Meta */}
+                  <div className="p-6 md:p-7 pt-5 flex flex-col gap-4 bg-[#fcfbfa]/80">
+                    <div className="flex items-center justify-between gap-2 rounded-xl border border-dashed border-[#1c1a18]/25 bg-white p-2 pl-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="block font-mono text-sm md:text-base font-bold tracking-wider text-[#1c1a18] select-all truncate">
+                          {coupon.code}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyCode(coupon.code)}
+                        aria-label={isCopied ? t("coupons.copied", { code: coupon.code }) : t("coupons.copyCode", { code: coupon.code })}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer border shrink-0 active:scale-[0.96]",
+                          isCopied
+                            ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                            : "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#b5573a] hover:border-[#b5573a] shadow-xs"
+                        )}
+                      >
+                        {isCopied ? (
+                          <>
+                            <Check className="size-3.5" strokeWidth={2.5} />
+                            <span>{t("coupons.copied", { code: "" }).trim() || "Copied"}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="size-3.5" strokeWidth={2} />
+                            <span>{t("coupons.copyAction")}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-[#55423d]/65 font-medium">
+                        <p>{t("coupons.expires", { date: coupon.endDate ? formatDate(coupon.endDate, locale) : t("coupons.noExpiry") })}</p>
+                        <p className="tabular-nums font-numeric">
+                          {usagePercentage === null
+                            ? t("coupons.unlimited")
+                            : t("coupons.usedPercentage", { percentage: usagePercentage })}
+                        </p>
+                      </div>
+                      {usagePercentage !== null && (
+                        <div
+                          className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#1c1a18]/8"
+                          role="progressbar"
+                          aria-label={t("coupons.usageLabel", { code: coupon.code })}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={usagePercentage}
+                        >
+                          <div
+                            className="h-full rounded-full bg-[#b5573a] transition-[width] duration-500"
+                            style={{ width: `${usagePercentage}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
               );
             })}
           </div>
@@ -187,7 +272,7 @@ export function CouponsClient() {
           <section className="flex flex-col gap-6 text-left">
             <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
               <div>
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#b85a3c]">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#b5573a]">
                   {t("coupons.recent")}
                 </p>
                 <h2 className="font-serif text-2xl font-light tracking-tight text-[#1c1a18] md:text-3xl">
@@ -213,7 +298,7 @@ export function CouponsClient() {
                     <div>
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-sm font-semibold text-[#1c1a18]">{usage.coupon.code}</span>
-                        <span className="rounded-sm bg-[#b85a3c]/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#9e452c]">
+                        <span className="rounded-sm bg-[#b5573a]/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#8f4329]">
                           {t("coupons.usedBadge")}
                         </span>
                       </div>
@@ -241,7 +326,7 @@ export function CouponsClient() {
 function CouponStat({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
   return (
     <div className="rounded-md border border-[#1c1a18]/8 bg-white p-4 md:p-5">
-      <div className="mb-4 flex items-center justify-between text-[#b85a3c]">
+      <div className="mb-4 flex items-center justify-between text-[#b5573a]">
         <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1c1a18]/45">{label}</span>
         {icon}
       </div>
@@ -253,7 +338,7 @@ function CouponStat({ label, value, icon }: { label: string; value: string; icon
 function CouponsPageLoading() {
   return (
     <div className="bg-canvas text-ink flex min-h-screen flex-col" aria-busy="true">
-      <main className="flex w-full flex-grow flex-col gap-10 px-6 py-10 md:px-16 md:py-16">
+      <main className="flex w-full flex-grow flex-col gap-10 px-6 md:px-16 py-8 md:py-12">
         <section className="flex flex-col gap-6 text-left" aria-hidden="true">
           <div className="flex items-end justify-between border-b border-[#1c1a18]/10 pb-4">
             <Skeleton className="h-8 w-40 bg-[#efe7dc] md:h-9 md:w-52" />
@@ -289,26 +374,34 @@ function CouponsLoadingSkeleton() {
       {Array.from({ length: 6 }).map((_, index) => (
         <article
           key={index}
-          className="relative min-h-72 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white p-8"
+          className="relative flex flex-col justify-between overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white"
         >
-          <div className="flex items-start justify-between gap-4">
-            <Skeleton className="h-2.5 w-20 bg-[#efe7dc]" />
-            <Skeleton className="h-5 w-16 bg-[#efe7dc]" />
+          <div className="p-6 md:p-7 pb-5">
+            <div className="flex items-center justify-between gap-4">
+              <Skeleton className="h-2.5 w-20 bg-[#efe7dc]" />
+              <Skeleton className="h-5 w-16 bg-[#efe7dc]" />
+            </div>
+            <Skeleton className="mt-4 h-9 w-28 bg-[#efe7dc]" />
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-3 w-4/5 bg-[#efe7dc]" />
+              <Skeleton className="h-3 w-3/5 bg-[#efe7dc]" />
+            </div>
           </div>
-          <Skeleton className="mt-4 h-7 w-32 bg-[#efe7dc]" />
 
-          <div className="my-8 border-t border-dashed border-[#1c1a18]/15" />
+          <div className="relative flex items-center px-4">
+            <div className="absolute -left-3 size-6 rounded-full bg-[#f7f4ef] border-r border-[#1c1a18]/10" />
+            <div className="w-full border-t border-dashed border-[#1c1a18]/15" />
+            <div className="absolute -right-3 size-6 rounded-full bg-[#f7f4ef] border-l border-[#1c1a18]/10" />
+          </div>
 
-          <Skeleton className="h-9 w-24 bg-[#efe7dc]" />
-          <div className="mt-4 space-y-2">
-            <Skeleton className="h-3 w-4/5 bg-[#efe7dc]" />
-            <Skeleton className="h-3 w-3/5 bg-[#efe7dc]" />
+          <div className="p-6 md:p-7 pt-5 space-y-4 bg-[#fcfbfa]/80">
+            <Skeleton className="h-10 w-full rounded-sm bg-[#efe7dc]" />
+            <div className="flex items-center justify-between gap-4">
+              <Skeleton className="h-2.5 w-24 bg-[#efe7dc]" />
+              <Skeleton className="h-2.5 w-16 bg-[#efe7dc]" />
+            </div>
+            <Skeleton className="h-1.5 w-full rounded-full bg-[#efe7dc]" />
           </div>
-          <div className="mt-6 flex items-center justify-between gap-4">
-            <Skeleton className="h-2.5 w-24 bg-[#efe7dc]" />
-            <Skeleton className="h-2.5 w-16 bg-[#efe7dc]" />
-          </div>
-          <Skeleton className="mt-2 h-1.5 w-full rounded-full bg-[#efe7dc]" />
         </article>
       ))}
     </div>

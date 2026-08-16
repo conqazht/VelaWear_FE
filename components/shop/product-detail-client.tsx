@@ -195,7 +195,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               type="button"
               onClick={() => setActiveImage(detail.src)}
               className={cn(
-                "relative aspect-[4/5] overflow-hidden rounded-none border bg-[#efebe4] transition-all cursor-pointer",
+                "relative aspect-[4/5] overflow-hidden rounded-none border bg-[#efe7dc] transition-all cursor-pointer",
                 displayedImage === detail.src
                   ? "border-[#1c1a18] opacity-100"
                   : "border-transparent opacity-60 hover:opacity-100"
@@ -212,7 +212,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* Main Product Image */}
-        <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4] xl:h-[668.75px] xl:w-[535px] xl:flex-none">
+        <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc] xl:h-[668.75px] xl:w-[535px] xl:flex-none">
           <FashionImage
             src={displayedImage}
             alt={product.name}
@@ -224,7 +224,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
       {/* RIGHT COLUMN: Product Info & Actions */}
       <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
-        <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b85a3c]">
+        <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b5573a]">
           {getCategoryLabel(product.category, activeLocale)} / {t("storefront.product.craftsmanship")}
         </span>
         <h1 className="mb-4 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-display-lg leading-tight">
@@ -306,6 +306,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   type="button"
                   onClick={() => setSelectedColor(color)}
                   aria-label={color}
+                  aria-pressed={resolvedSelectedColor === color}
                   style={hexCode ? { backgroundColor: hexCode } : undefined}
                   className={cn(
                     "w-8 h-8 rounded-full border transition-all cursor-pointer ring-2 ring-offset-2",
@@ -324,7 +325,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         <div className="mb-10">
           <div className="flex justify-between items-center mb-4">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60">{t("storefront.product.size")}</span>
-            <Link className="text-[10px] font-semibold uppercase tracking-widest underline hover:text-[#b85a3c] transition-colors" href={sizeGuideHref}>
+            <Link className="text-[10px] font-semibold uppercase tracking-widest underline hover:text-[#b5573a] transition-colors" href={sizeGuideHref}>
               {t("storefront.product.sizeGuide")}
             </Link>
           </div>
@@ -334,6 +335,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 key={size}
                 type="button"
                 onClick={() => setSelectedSize(size)}
+                aria-pressed={resolvedSelectedSize === size}
                 className={cn(
                   "py-3 border font-semibold text-xs tracking-wider transition-colors cursor-pointer rounded-sm",
                   resolvedSelectedSize === size
@@ -363,7 +365,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               addToCart(cartProduct, resolvedSelectedColor, resolvedSelectedSize);
               showAddedToBag(cartProduct, resolvedSelectedSize, resolvedSelectedColor);
             }}
-            className="w-full h-14 bg-black hover:bg-neutral-800 active:scale-[0.97] text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-all cursor-pointer border-none shadow-sm flex items-center justify-center overflow-hidden"
+            className="w-full h-14 bg-[#1c1a18] hover:bg-[#b5573a] active:scale-[0.96] text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-all cursor-pointer border-none shadow-md flex items-center justify-center overflow-hidden"
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -396,10 +398,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
             type="button"
             onClick={() => toggleFavorite(product, resolvedSelectedSize)}
             className={cn(
-              "w-full h-14 border font-semibold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer rounded-full",
+              "w-full h-14 border font-semibold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer rounded-full active:scale-[0.96]",
               favorited
-                ? "bg-neutral-100 border-neutral-300 text-black hover:bg-neutral-200"
-                : "border-neutral-300 bg-white text-black hover:border-black"
+                ? "bg-[#efe7dc] border-[#e3dccf] text-[#1c1a18] hover:bg-[#e6dccb]"
+                : "border-[#e3dccf] bg-white text-[#1c1a18] hover:border-[#1c1a18] hover:bg-[#efe7dc]/50"
             )}
           >
             <span>{favorited ? t("storefront.product.favourited") : t("storefront.product.favourite")}</span>
@@ -430,9 +432,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
             <button
               type="button"
               onClick={() => toggleSection("sizeAndFit")}
+              aria-expanded={openSections.sizeAndFit}
               className="flex justify-between items-center w-full group text-left cursor-pointer"
             >
-              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
+              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b5573a] transition-colors">
                 {t("storefront.product.sizeAndFit")}
               </h3>
               <motion.span
@@ -458,7 +461,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                       <li>{t("storefront.product.modelSize")}</li>
                       <li>{t("storefront.product.looseFit")}</li>
                       <li>
-                        <Link className="underline hover:text-[#b85a3c] transition-colors" href={sizeGuideHref}>
+                        <Link className="underline hover:text-[#b5573a] transition-colors" href={sizeGuideHref}>
                           {t("storefront.product.sizeGuide")}
                         </Link>
                       </li>
@@ -475,9 +478,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={() => toggleSection("materialAndCare")}
+                aria-expanded={openSections.materialAndCare}
                 className="flex justify-between items-center w-full group text-left cursor-pointer"
               >
-                <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
+                <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b5573a] transition-colors">
                   {t("storefront.product.materialCare")}
                 </h3>
                 <motion.span
@@ -525,7 +529,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               onClick={() => toggleSection("delivery")}
               className="flex justify-between items-center w-full group text-left cursor-pointer"
             >
-              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b85a3c] transition-colors">
+              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b5573a] transition-colors">
                 {t("storefront.product.deliveryTitle")}
               </h3>
               <motion.span
@@ -559,7 +563,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                     </p>
                     <p className="mt-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
                       {t("storefront.product.memberReturnsPrefix")}{" "}
-                      <a className="underline hover:text-[#b85a3c] transition-colors" href="#">
+                      <a className="underline hover:text-[#b5573a] transition-colors" href="#">
                         {t("storefront.product.freeReturns")}
                       </a>
                       .

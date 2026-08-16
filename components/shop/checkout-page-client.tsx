@@ -440,7 +440,7 @@ export function CheckoutPageClient() {
     return (
       <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
-          <LockKeyhole className="mb-6 size-12 text-[#b85a3c]" />
+          <LockKeyhole className="mb-6 size-12 text-[#b5573a]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
             {t("checkout.signInTitle")}
           </h2>
@@ -449,7 +449,7 @@ export function CheckoutPageClient() {
           </p>
           <Link
             href="/sign-in"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]"
           >
             {t("checkout.signIn")}
           </Link>
@@ -470,7 +470,7 @@ export function CheckoutPageClient() {
     return (
       <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] items-center justify-center px-6 py-24">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
-          <ShoppingBag className="mb-6 size-12 text-[#b85a3c]" />
+          <ShoppingBag className="mb-6 size-12 text-[#b5573a]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
             {t("checkout.emptyTitle")}
           </h2>
@@ -479,7 +479,7 @@ export function CheckoutPageClient() {
           </p>
           <Link
             href="/collection"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b85a3c]"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]"
           >
             {t("cart.continueShopping")}
           </Link>
@@ -496,7 +496,7 @@ export function CheckoutPageClient() {
         </h1>
         <Link
           href="/cart"
-          className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c] hover:underline"
+          className="text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:underline"
         >
           ← {t("checkout.viewCart")}
         </Link>
@@ -577,19 +577,22 @@ export function CheckoutPageClient() {
               />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <FieldLabel>{t("checkout.province")}</FieldLabel>
+                  <FieldLabel htmlFor="provinceCode">{t("checkout.province")}</FieldLabel>
                   {isLoadingProvinces ? (
                     <AddressSelectLoading />
                   ) : (
                     <select
+                      id="provinceCode"
                       autoComplete="address-level1"
+                      aria-invalid={!!errors.provinceCode}
+                      aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
                       {...register("provinceCode", {
                         onChange: () => {
                           setValue("wardCode", "");
                           setWards([]);
                         },
                       })}
-                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <option value="">{t("checkout.selectProvince")}</option>
                       {provinces.map((province) => (
@@ -600,20 +603,23 @@ export function CheckoutPageClient() {
                     </select>
                   )}
                   {errors.provinceCode?.message && (
-                    <p className="text-xs text-red-600">{errors.provinceCode.message}</p>
+                    <p id="provinceCode-error" className="text-xs text-error">{errors.provinceCode.message}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <FieldLabel>{t("checkout.ward")}</FieldLabel>
+                  <FieldLabel htmlFor="wardCode">{t("checkout.ward")}</FieldLabel>
                   {isLoadingWards ? (
                     <AddressSelectLoading />
                   ) : (
                     <select
+                      id="wardCode"
                       autoComplete="address-level2"
                       disabled={!selectedProvinceCode}
+                      aria-invalid={!!errors.wardCode}
+                      aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
                       {...register("wardCode")}
-                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b85a3c] focus:ring-2 focus:ring-[#b85a3c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <option value="">{t("checkout.selectWard")}</option>
                       {wards.map((ward) => (
@@ -624,12 +630,12 @@ export function CheckoutPageClient() {
                     </select>
                   )}
                   {errors.wardCode?.message && (
-                    <p className="text-xs text-red-600">{errors.wardCode.message}</p>
+                    <p id="wardCode-error" className="text-xs text-error">{errors.wardCode.message}</p>
                   )}
                 </div>
               </div>
               {addressApiError && (
-                <div className="flex items-start gap-2 rounded border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-700">
+                <div className="flex items-start gap-2 rounded-sm border border-error/20 bg-error/10 p-3 text-xs text-error">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                   <span>{addressApiError}</span>
                 </div>
@@ -646,7 +652,7 @@ export function CheckoutPageClient() {
                       method.disabled
                         ? "cursor-not-allowed border-[#1c1a18]/5 bg-[#f7f4ef]/20 opacity-50"
                         : paymentMethod === method.value
-                          ? "border-[#b85a3c] bg-[#b85a3c]/5"
+                          ? "border-[#b5573a] bg-[#b5573a]/5"
                           : "border-[#1c1a18]/10 bg-white hover:border-[#1c1a18]/25"
                     }`}
                   >
@@ -657,7 +663,7 @@ export function CheckoutPageClient() {
                       checked={paymentMethod === method.value}
                       onChange={() => setPaymentMethod(method.value)}
                       disabled={method.disabled}
-                      className="size-4 accent-[#b85a3c]"
+                      className="size-4 accent-[#b5573a]"
                     />
                     <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
                       {method.value === "COD" && (
@@ -676,7 +682,7 @@ export function CheckoutPageClient() {
           <Button
             type="submit"
             disabled={isSubmitting || isPreviewLoading}
-            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b85a3c] disabled:opacity-50"
+            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b5573a] disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
@@ -699,7 +705,7 @@ export function CheckoutPageClient() {
           <div className="no-scrollbar mb-8 max-h-[280px] space-y-4 overflow-y-auto pr-1">
             {activeItemsList.map((item) => (
               <div key={`${item.id}-${item.size}`} className="flex items-center gap-4">
-                <div className="relative h-18 w-14 shrink-0 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efebe4]">
+                <div className="relative h-18 w-14 shrink-0 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc]">
                   <FashionImage src={item.image} alt={item.name} />
                 </div>
                 <div className="min-w-0 flex-grow text-xs">
@@ -710,7 +716,7 @@ export function CheckoutPageClient() {
                     {t("checkout.quantityShort", { count: item.quantity })} / {item.size || "—"} / {item.color || "—"}
                   </p>
                   {item.priceSource && item.priceSource !== "BASE" ? (
-                    <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#8f2f20]">
+                    <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#8f4329]">
                       {item.priceSource === "FLASH_SALE"
                         ? t("storefront.sale.type.flash")
                         : t("storefront.sale.type.standard")}
@@ -741,7 +747,7 @@ export function CheckoutPageClient() {
                 }}
                 autoComplete="off"
                 placeholder={t("checkout.couponPlaceholder")}
-                className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold uppercase tracking-wider focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
+                className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold uppercase tracking-wider focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
               />
               <Button
                 type="button"
@@ -756,7 +762,7 @@ export function CheckoutPageClient() {
                     setAppliedCouponCode(normalizedCoupon);
                   }
                 }}
-                className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b85a3c]"
+                className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b5573a]"
               >
                 {isPreviewLoading
                   ? t("sale.checkout.preview.checkingCoupon")
@@ -804,7 +810,7 @@ export function CheckoutPageClient() {
             <Separator className="my-4 bg-[#1c1a18]/10" />
             <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
               <span>{t("checkout.estimatedTotal")}</span>
-              <span className="font-serif text-lg tracking-wider text-[#b85a3c] font-numeric">
+              <span className="font-serif text-lg tracking-wider text-[#b5573a] font-numeric">
                 {money(displayedTotal, locale)}
               </span>
             </div>
@@ -838,19 +844,28 @@ function SectionTitle({ number, title }: { number: string; title: string }) {
 function CheckoutInput({
   label,
   error,
+  id,
+  name,
   ...props
 }: ComponentProps<typeof Input> & {
   label: string;
   error?: string;
 }) {
+  const inputId = id || name;
+  const errorId = inputId && error ? `${inputId}-error` : undefined;
+
   return (
     <div>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
       <Input
+        id={inputId}
+        name={name}
+        aria-invalid={!!error}
+        aria-describedby={errorId}
         {...props}
-        className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-4 text-sm focus-visible:border-[#b85a3c] focus-visible:ring-[#b85a3c]/20"
+        className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-4 text-sm focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
       />
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p id={errorId} className="mt-1 text-xs text-error">{error}</p>}
     </div>
   );
 }
@@ -868,7 +883,7 @@ function LedgerRow({
     <div
       className={
         highlight
-          ? "flex justify-between text-[#b85a3c]"
+          ? "flex justify-between text-[#b5573a]"
           : "flex justify-between text-[#1c1a18]/65"
       }
     >
@@ -1041,7 +1056,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
           }
           className="mb-6"
         >
-          <CheckCircle2 className="size-14 text-[#b85a3c]" />
+          <CheckCircle2 className="size-14 text-[#b5573a]" />
         </motion.div>
 
         <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
@@ -1105,7 +1120,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
         </p>
         <Link
           href="/"
-          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
+          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b5573a]"
         >
           {t("checkout.backHome")}
         </Link>

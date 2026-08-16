@@ -53,7 +53,7 @@ export function FloatingInput({
             error
               ? "border-red-500 bg-white/60 focus:border-red-500 focus:bg-white/85 focus:ring-2 focus:ring-red-500/5"
               : isFocused
-              ? "border-[#964025] bg-white/85 ring-2 ring-black/5"
+              ? "border-[#b5573a] bg-white/85 ring-2 ring-black/5"
               : "border-black/20",
             trailing && "pr-12",
             className

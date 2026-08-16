@@ -62,7 +62,7 @@ export function CartPageClient() {
         </div>
         <Link
           href="/collection"
-          className="text-xs font-semibold uppercase tracking-wider text-[#b85a3c] hover:underline animate-none"
+          className="text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:underline animate-none"
         >
           ← {t("cart.continueShopping")}
         </Link>
@@ -76,7 +76,7 @@ export function CartPageClient() {
           </p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#b85a3c]"
+            className="inline-flex items-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-[#b5573a] active:scale-[0.96]"
           >
             {t("cart.shopAll")}
           </Link>
@@ -85,7 +85,7 @@ export function CartPageClient() {
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 min-h-[80vh]">
           <div className="space-y-6 lg:col-span-8">
             {hasFlashItem ? (
-              <div className="flex gap-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+              <div className="flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
                 <AlertTriangle className="mt-0.5 size-5 shrink-0" />
                 <div>
                   <p className="font-semibold">{t("sale.cart.flashNotReserved.title")}</p>
@@ -112,7 +112,7 @@ export function CartPageClient() {
             </AnimatePresence>
           </div>
 
-          <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-4">
+          <Card className="rounded-2xl border border-[#1c1a18]/8 bg-white p-8 py-8 shadow-xs lg:col-span-4">
             <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
               {t("cart.orderSummary")}
             </h2>
@@ -138,8 +138,8 @@ export function CartPageClient() {
               </div>
             </div>
 
-            <div className="mt-6 flex items-start gap-2.5 rounded-md bg-[#f7f4ef] p-3 text-[10px] leading-relaxed text-[#1c1a18]/65">
-              <Tag className="mt-0.5 size-4 shrink-0 text-[#b85a3c]" />
+            <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-[#f7f4ef] p-3.5 text-[10px] leading-relaxed text-[#1c1a18]/65">
+              <Tag className="mt-0.5 size-4 shrink-0 text-[#b5573a]" />
               <span>
                 {t("cart.giftPackaging")}
               </span>
@@ -147,7 +147,7 @@ export function CartPageClient() {
 
             <Link
               href="/checkout"
-              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#1c1a18] py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md transition-colors hover:bg-[#b85a3c]"
+              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1c1a18] py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md transition-all hover:bg-[#b5573a] active:scale-[0.96]"
             >
               {t("cart.checkout")}
               <ArrowRight className="size-4" />
@@ -234,7 +234,7 @@ function CartPageLoadingFallback() {
                 </div>
 
                 <div className="mt-6 flex items-center justify-between border-t border-[#1c1a18]/5 pt-4">
-                  <div className="flex items-center gap-2 rounded-sm border border-[#1c1a18]/10 bg-[#efebe4]/30 px-2 py-1">
+                  <div className="flex items-center gap-2 rounded-sm border border-[#1c1a18]/10 bg-[#efe7dc]/30 px-2 py-1">
                     <Skeleton className="size-8 rounded-full bg-[#efe7dc]" />
                     <Skeleton className="h-3 w-6 rounded-none bg-[#efe7dc]" />
                     <Skeleton className="size-8 rounded-full bg-[#efe7dc]" />
@@ -333,10 +333,10 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
             }
       }
     >
-      <Card className="flex gap-6 rounded-md border-[#1c1a18]/5 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row">
+      <Card className="flex gap-6 rounded-xl border border-[#1c1a18]/8 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row overflow-hidden">
         <Link
           href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
-          className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-none bg-[#efebe4] sm:mx-0 sm:h-36 sm:w-28"
+          className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-lg bg-[#efe7dc] sm:mx-0 sm:h-36 sm:w-28"
           aria-label={t("cart.viewProduct", { product: item.name })}
         >
           <FashionImage src={item.image} alt={item.name} />
@@ -347,7 +347,7 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
             <div className="flex items-start justify-between gap-4">
               <Link
                 href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
-                className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b85a3c]"
+                className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b5573a]"
               >
                 {item.name}
               </Link>
@@ -374,7 +374,7 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
             </p>
             {item.priceSource && item.priceSource !== "BASE" ? (
               <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
-                <span className={item.priceSource === "FLASH_SALE" ? "rounded bg-[#8f2f20] px-2 py-1 text-white" : "rounded bg-[#1c1a18] px-2 py-1 text-white"}>
+                <span className={item.priceSource === "FLASH_SALE" ? "rounded-full bg-[#8f2f20] px-2.5 py-0.5 text-white" : "rounded-full bg-[#1c1a18] px-2.5 py-0.5 text-white"}>
                   {item.priceSource === "FLASH_SALE"
                     ? t("storefront.sale.type.flash")
                     : t("storefront.sale.type.standard")}
@@ -395,7 +395,7 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
           </div>
 
           <div className="mt-6 flex items-center justify-between border-t border-[#1c1a18]/5 pt-4">
-            <div className="flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/15 bg-[#efebe4]/30 px-2 py-1">
+            <div className="flex items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-[#efe7dc]/30 px-2 py-1">
               <Button
                 type="button"
                 variant="ghost"
@@ -403,11 +403,11 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                 disabled={item.quantity <= 1}
                 aria-label={t("cart.decreaseQuantity")}
-                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
+                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efe7dc] cursor-pointer"
               >
                 <Minus className="size-3" />
               </Button>
-              <span className="w-8 text-center text-xs font-bold text-[#1c1a18]">
+              <span className="w-8 text-center text-xs font-bold text-[#1c1a18] font-numeric tabular-nums">
                 {item.quantity}
               </span>
               <Button
@@ -417,7 +417,7 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                 disabled={getCartItemMaximum(item) !== null && item.quantity >= (getCartItemMaximum(item) as number)}
                 aria-label={t("cart.increaseQuantity")}
-                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efebe4]"
+                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efe7dc] cursor-pointer"
               >
                 <Plus className="size-3" />
               </Button>
@@ -427,7 +427,7 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
               type="button"
               variant="ghost"
               onClick={() => removeItem(item.id)}
-              className="h-8 rounded-sm text-[10px] font-bold uppercase tracking-widest text-[#b85a3c] hover:bg-[#efebe4]"
+              className="h-8 rounded-full px-3 text-[10px] font-bold uppercase tracking-widest text-[#b5573a] hover:bg-[#efe7dc] cursor-pointer active:scale-[0.96] transition-all"
             >
               <Trash2 className="size-3.5" />
               {t("cart.remove")}
