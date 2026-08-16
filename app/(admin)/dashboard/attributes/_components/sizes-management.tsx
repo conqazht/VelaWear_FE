@@ -108,7 +108,7 @@ export function SizesManagement() {
             setFormOpen(false);
           },
           onError: (error) => toast.error(getApiErrorMessage(error)),
-        }
+        },
       );
       return;
     }
@@ -144,7 +144,7 @@ export function SizesManagement() {
       className: "min-w-64",
       cell: (size) => (
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
             <Ruler className="size-4" />
           </div>
           <span className="font-medium">{size.name}</span>
@@ -220,7 +220,7 @@ export function SizesManagement() {
               id: size.id,
               name: size.name,
               sortOrder: size.sortOrder,
-            }))
+            })),
           )
         }
         isLoading={sizesQuery.isPending}

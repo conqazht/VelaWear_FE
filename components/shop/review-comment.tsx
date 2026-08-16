@@ -11,21 +11,13 @@ type ReviewCommentProps = {
   className?: string;
 };
 
-export function ReviewComment({
-  comment,
-  clamp = false,
-  className,
-}: ReviewCommentProps) {
+export function ReviewComment({ comment, clamp = false, className }: ReviewCommentProps) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const content = comment?.trim();
 
   if (!content) {
-    return (
-      <p className={cn("italic text-[#1c1a18]/45", className)}>
-        {t("reviews.noComment")}
-      </p>
-    );
+    return <p className={cn("text-[#1c1a18]/45 italic", className)}>{t("reviews.noComment")}</p>;
   }
 
   const mayOverflow = clamp && content.length > 140;
@@ -34,7 +26,7 @@ export function ReviewComment({
     <div className={className}>
       <p
         className={cn(
-          "whitespace-pre-wrap text-[15px] leading-6 text-[#1c1a18]/75",
+          "text-[15px] leading-6 whitespace-pre-wrap text-[#1c1a18]/75",
           mayOverflow && !expanded && "line-clamp-3",
         )}
       >

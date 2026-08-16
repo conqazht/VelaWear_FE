@@ -11,7 +11,7 @@ export function InvoiceForm() {
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
+    <div className="bg-card flex flex-col gap-4 rounded-xl border p-4">
       <Tabs defaultValue="invoice">
         <TabsList className="w-full">
           <TabsTrigger value="invoice">{t("admin.workflows.invoice.invoice")}</TabsTrigger>

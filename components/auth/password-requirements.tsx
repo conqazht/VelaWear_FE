@@ -42,7 +42,7 @@ export function PasswordRequirements({
   return (
     <div className={cn("space-y-2 text-left select-none", className)}>
       {showTitle && (
-        <p className="text-xs font-semibold uppercase tracking-wider text-ink/70 mb-2">
+        <p className="text-ink/70 mb-2 text-xs font-semibold tracking-wider uppercase">
           {t("account.password.requirements")}
         </p>
       )}
@@ -52,13 +52,13 @@ export function PasswordRequirements({
             key={req.id}
             className={cn(
               "flex items-center gap-2 transition-colors duration-200",
-              req.met ? "text-emerald-700 font-medium" : "text-red-500"
+              req.met ? "font-medium text-emerald-700" : "text-red-500",
             )}
           >
             {req.met ? (
-              <Check className="size-3.5 text-emerald-600 stroke-[2.5] shrink-0" />
+              <Check className="size-3.5 shrink-0 stroke-[2.5] text-emerald-600" />
             ) : (
-              <X className="size-3.5 text-red-500 stroke-[2.5] shrink-0" />
+              <X className="size-3.5 shrink-0 stroke-[2.5] text-red-500" />
             )}
             <span>{req.label}</span>
           </div>

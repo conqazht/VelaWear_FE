@@ -4,17 +4,40 @@ import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Download, Plus, RefreshCw, Search } from "lucide-react";
 
-import { getApiErrorMessage, getApiErrorStatus } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import {
+  getApiErrorMessage,
+  getApiErrorStatus,
+} from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { AnimatedStatus } from "@/components/errors/animated-status";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { getIntlLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -223,7 +246,9 @@ export function ResourcePage<T extends { id: number }>({
               <AlertTitle className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>{t("admin.shell.resource.unableToLoad", { resource: title })}</span>
                 {errorStatus !== null ? (
-                  <span className="font-mono text-[11px] font-normal opacity-70">HTTP {errorStatus}</span>
+                  <span className="font-mono text-[11px] font-normal opacity-70">
+                    HTTP {errorStatus}
+                  </span>
                 ) : null}
               </AlertTitle>
               <AlertDescription>{errorMessage}</AlertDescription>
@@ -238,7 +263,7 @@ export function ResourcePage<T extends { id: number }>({
                 {columns.map((column) => (
                   <TableHead
                     key={column.key}
-                    className={cn("h-11 whitespace-nowrap font-normal", column.headerClassName)}
+                    className={cn("h-11 font-normal whitespace-nowrap", column.headerClassName)}
                   >
                     {column.header}
                   </TableHead>
@@ -260,7 +285,10 @@ export function ResourcePage<T extends { id: number }>({
                 rows.map((row) => (
                   <TableRow key={row.id} className="border-border/60 hover:bg-muted/30">
                     {columns.map((column) => (
-                      <TableCell key={column.key} className={cn("py-3 align-middle", column.className)}>
+                      <TableCell
+                        key={column.key}
+                        className={cn("py-3 align-middle", column.className)}
+                      >
                         {column.cell(row)}
                       </TableCell>
                     ))}
@@ -291,8 +319,13 @@ export function ResourcePage<T extends { id: number }>({
             })}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground text-sm">{t("admin.shell.resource.rowsPerPage")}</span>
-            <Select value={`${pageSize}`} onValueChange={(value) => onPageSizeChange(Number(value))}>
+            <span className="text-muted-foreground text-sm">
+              {t("admin.shell.resource.rowsPerPage")}
+            </span>
+            <Select
+              value={`${pageSize}`}
+              onValueChange={(value) => onPageSizeChange(Number(value))}
+            >
               <SelectTrigger size="sm" className="w-20">
                 <SelectValue />
               </SelectTrigger>
@@ -304,7 +337,7 @@ export function ResourcePage<T extends { id: number }>({
                 ))}
               </SelectContent>
             </Select>
-            <span className="min-w-24 text-center text-muted-foreground text-sm tabular-nums">
+            <span className="text-muted-foreground min-w-24 text-center text-sm tabular-nums">
               {t("admin.shell.resource.pageOf", {
                 page: numberFormatter.format(currentPage),
                 pageCount: numberFormatter.format(safePageCount),

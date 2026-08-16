@@ -58,6 +58,7 @@ của FE-009.
 
   Dependency plan sẽ rename/gate một số hook; giữ ownership của merged
   orchestrator, không khôi phục legacy signature này.
+
 - Profile tab có sidebar panel account, delivery, visibility, communication và
   privacy. FE-004 phải đã xóa/disable mock action và đặt `/profile/settings`
   làm canonical.
@@ -72,21 +73,22 @@ của FE-009.
 
 ## Các lệnh cần dùng
 
-| Mục đích | Lệnh | Kết quả thành công |
-|---|---|---|
-| Cài dependency | `pnpm install --frozen-lockfile` | exit 0; lockfile không đổi |
-| Characterization | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx' components/shop/profile/profile-formatters.test.ts` | mọi FE-009 test pass không đổi |
-| Scoped lint | `pnpm exec eslint 'app/(shop)/profile/page.tsx' 'app/(shop)/profile/page.test.tsx' components/shop/profile --max-warnings 0` | exit 0, không warning |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, không error |
-| Unit suite | `pnpm test:unit` | mọi test pass |
-| Build | `pnpm build` | production build thành công |
-| Smoke | `pnpm test:e2e:smoke` | mọi `@smoke` test pass |
+| Mục đích         | Lệnh                                                                                                                         | Kết quả thành công             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Cài dependency   | `pnpm install --frozen-lockfile`                                                                                             | exit 0; lockfile không đổi     |
+| Characterization | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx' components/shop/profile/profile-formatters.test.ts`                 | mọi FE-009 test pass không đổi |
+| Scoped lint      | `pnpm exec eslint 'app/(shop)/profile/page.tsx' 'app/(shop)/profile/page.test.tsx' components/shop/profile --max-warnings 0` | exit 0, không warning          |
+| Typecheck        | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                  | exit 0, không error            |
+| Unit suite       | `pnpm test:unit`                                                                                                             | mọi test pass                  |
+| Build            | `pnpm build`                                                                                                                 | production build thành công    |
+| Smoke            | `pnpm test:e2e:smoke`                                                                                                        | mọi `@smoke` test pass         |
 
 ## Phạm vi
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong phạm vi** (chỉ được sửa các file này):
+
 - `app/(shop)/profile/page.tsx`
 - `app/(shop)/profile/page.test.tsx`
 - `components/shop/profile/profile-formatters.ts`
@@ -99,6 +101,7 @@ của FE-009.
 - `components/shop/profile/profile-favorites-tab.tsx` (tạo mới)
 
 **Ngoài phạm vi** (KHÔNG sửa):
+
 - Backend/API contract, query hook, query key hoặc request enabling.
 - Auth, cart, favorites-provider, notification-provider hoặc global state behavior.
 - Route/query-parameter name, translation, CSS token, visual design hoặc DOM semantics.

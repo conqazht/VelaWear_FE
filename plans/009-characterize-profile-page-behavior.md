@@ -71,22 +71,23 @@ stable baseline.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Install | `pnpm install --frozen-lockfile` | exit 0; lockfile unchanged |
-| Characterization | `pnpm exec vitest run "app/(shop)/profile/page.test.tsx"` | all semantic behavior tests pass |
-| Utility tests | `pnpm exec vitest run components/shop/profile/profile-formatters.test.ts` | all pure-helper tests pass |
-| Lint | `pnpm exec eslint "app/(shop)/profile/page.tsx" "app/(shop)/profile/page.test.tsx" components/shop/profile/profile-formatters.ts components/shop/profile/profile-formatters.test.ts components/shop/profile/profile-loading.tsx --max-warnings 0` | exit 0, no warnings |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, no errors |
-| Unit suite | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
-| Smoke | `pnpm test:e2e:smoke` | all `@smoke` tests pass |
+| Purpose          | Command                                                                                                                                                                                                                                           | Expected on success              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Install          | `pnpm install --frozen-lockfile`                                                                                                                                                                                                                  | exit 0; lockfile unchanged       |
+| Characterization | `pnpm exec vitest run "app/(shop)/profile/page.test.tsx"`                                                                                                                                                                                         | all semantic behavior tests pass |
+| Utility tests    | `pnpm exec vitest run components/shop/profile/profile-formatters.test.ts`                                                                                                                                                                         | all pure-helper tests pass       |
+| Lint             | `pnpm exec eslint "app/(shop)/profile/page.tsx" "app/(shop)/profile/page.test.tsx" components/shop/profile/profile-formatters.ts components/shop/profile/profile-formatters.test.ts components/shop/profile/profile-loading.tsx --max-warnings 0` | exit 0, no warnings              |
+| Typecheck        | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                                                                                                       | exit 0, no errors                |
+| Unit suite       | `pnpm test:unit`                                                                                                                                                                                                                                  | all tests pass                   |
+| Build            | `pnpm build`                                                                                                                                                                                                                                      | production build succeeds        |
+| Smoke            | `pnpm test:e2e:smoke`                                                                                                                                                                                                                             | all `@smoke` tests pass          |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope** (the only files you should modify):
+
 - `app/(shop)/profile/page.tsx`
 - `app/(shop)/profile/page.test.tsx` (extend the FE-008 file)
 - `components/shop/profile/profile-formatters.ts` (create)
@@ -94,6 +95,7 @@ stable baseline.
 - `components/shop/profile/profile-loading.tsx` (create)
 
 **Out of scope** (do NOT touch):
+
 - API calls, query keys, enabled predicates, auth/session/cart state or backend contracts.
 - Route URLs, translation messages, visual styling, DOM semantics or responsive layout.
 - Splitting live profile panels into components; FE-010 owns that work.

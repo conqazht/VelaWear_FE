@@ -91,7 +91,7 @@ const categoryFallbackLabels = {
 
 export function getCategoryLabel(
   category: string,
-  locale: keyof typeof categoryFallbackLabels = "vi"
+  locale: keyof typeof categoryFallbackLabels = "vi",
 ) {
   const labels = locale === "en" ? englishCategoryLabels : categoryLabels;
 
@@ -115,15 +115,16 @@ const productBadgeLabels = {
 
 export function getProductBadgeLabel(badge: string, locale: Locale): string {
   const normalized = badge.trim().toLocaleLowerCase();
-  const key = normalized === "new" || normalized === "mới"
-    ? "new"
-    : normalized === "sale" || normalized === "giảm giá"
-      ? "sale"
-      : normalized === "seasonal pick" || normalized === "gợi ý theo mùa"
-        ? "seasonal"
-        : normalized === "most loved" || normalized === "được yêu thích nhất"
-          ? "loved"
-          : null;
+  const key =
+    normalized === "new" || normalized === "mới"
+      ? "new"
+      : normalized === "sale" || normalized === "giảm giá"
+        ? "sale"
+        : normalized === "seasonal pick" || normalized === "gợi ý theo mùa"
+          ? "seasonal"
+          : normalized === "most loved" || normalized === "được yêu thích nhất"
+            ? "loved"
+            : null;
 
   return key ? productBadgeLabels[locale][key] : badge;
 }
@@ -134,16 +135,14 @@ export const money = (value: number, locale: Locale = "vi") => {
   return formatCurrency(value, locale);
 };
 
-export const getProductById = (id: string) =>
-  PRODUCTS.find((product) => product.id === id);
+export const getProductById = (id: string) => PRODUCTS.find((product) => product.id === id);
 
 export const PRODUCTS: Product[] = [
   {
     id: "linen-blazer",
     name: "Linen Blend Blazer",
     price: 2450000,
-    image:
-      "/images/fixtures/products/linen-blazer/card.webp",
+    image: "/images/fixtures/products/linen-blazer/card.webp",
     category: "AO",
     badge: "Seasonal Pick",
     color: "Sand",
@@ -155,8 +154,7 @@ export const PRODUCTS: Product[] = [
     id: "silk-blouse",
     name: "Silk Drape Blouse",
     price: 1800000,
-    image:
-      "/images/fixtures/products/silk-blouse/card.webp",
+    image: "/images/fixtures/products/silk-blouse/card.webp",
     category: "AO",
     badge: "Most Loved",
     color: "Cream",
@@ -169,8 +167,7 @@ export const PRODUCTS: Product[] = [
     name: "Wide Leg Trousers",
     price: 1440000,
     originalPrice: 1800000,
-    image:
-      "/images/fixtures/products/wide-trousers/card.webp",
+    image: "/images/fixtures/products/wide-trousers/card.webp",
     category: "QUAN",
     badge: "Sale",
     color: "Terracotta",
@@ -182,8 +179,7 @@ export const PRODUCTS: Product[] = [
     id: "leather-tote",
     name: "Structured Leather Tote",
     price: 3200000,
-    image:
-      "/images/fixtures/products/leather-tote/card.webp",
+    image: "/images/fixtures/products/leather-tote/card.webp",
     category: "PHU KIEN",
     badge: "New",
     color: "Tan",
@@ -195,8 +191,7 @@ export const PRODUCTS: Product[] = [
     id: "signature-hemp-tee",
     name: "Signature Hemp Tee",
     price: 1100000,
-    image:
-      "/images/fixtures/products/signature-hemp-tee/card.webp",
+    image: "/images/fixtures/products/signature-hemp-tee/card.webp",
     category: "AO",
     color: "Grey",
     size: "M",
@@ -207,8 +202,7 @@ export const PRODUCTS: Product[] = [
     id: "artisan-linen-overshirt",
     name: "Artisan Linen Over-Shirt",
     price: 2450000,
-    image:
-      "/images/fixtures/products/artisan-linen-overshirt/card.webp",
+    image: "/images/fixtures/products/artisan-linen-overshirt/card.webp",
     category: "AO",
     color: "Terracotta",
     size: "S",
@@ -219,8 +213,7 @@ export const PRODUCTS: Product[] = [
     id: "chunky-wool-knit",
     name: "Chunky Wool Knit",
     price: 3200000,
-    image:
-      "/images/fixtures/products/chunky-wool-knit/card.webp",
+    image: "/images/fixtures/products/chunky-wool-knit/card.webp",
     category: "AO",
     color: "Olive",
     size: "L",
@@ -231,8 +224,7 @@ export const PRODUCTS: Product[] = [
     id: "oversized-linen-shirt",
     name: "Oversized Linen Shirt",
     price: 1850000,
-    image:
-      "/images/fixtures/products/oversized-linen-shirt/card.webp",
+    image: "/images/fixtures/products/oversized-linen-shirt/card.webp",
     category: "AO",
     badge: "New",
     color: "Natural",
@@ -244,8 +236,7 @@ export const PRODUCTS: Product[] = [
     id: "relaxed-trousers",
     name: "Relaxed Trousers",
     price: 2100000,
-    image:
-      "/images/fixtures/products/relaxed-trousers/card.webp",
+    image: "/images/fixtures/products/relaxed-trousers/card.webp",
     category: "QUAN",
     color: "Sand",
     size: "M",
@@ -256,8 +247,7 @@ export const PRODUCTS: Product[] = [
     id: "lightweight-jacket",
     name: "Lightweight Jacket",
     price: 1800000,
-    image:
-      "/images/fixtures/products/lightweight-jacket/card.webp",
+    image: "/images/fixtures/products/lightweight-jacket/card.webp",
     category: "AO",
     badge: "Sale",
     color: "Olive",
@@ -269,8 +259,7 @@ export const PRODUCTS: Product[] = [
     id: "classic-linen-shirt",
     name: "Classic Linen Shirt",
     price: 550000,
-    image:
-      "/images/fixtures/products/classic-linen-shirt/card.webp",
+    image: "/images/fixtures/products/classic-linen-shirt/card.webp",
     category: "AO",
     badge: "New",
     color: "Sage",
@@ -282,8 +271,7 @@ export const PRODUCTS: Product[] = [
     id: "pleated-wool-trousers",
     name: "Pleated Wool Trousers",
     price: 1000000,
-    image:
-      "/images/fixtures/products/pleated-wool-trousers/card.webp",
+    image: "/images/fixtures/products/pleated-wool-trousers/card.webp",
     category: "QUAN",
     badge: "New",
     color: "Charcoal",
@@ -296,8 +284,7 @@ export const PRODUCTS: Product[] = [
     name: "The Heritage Tote",
     price: 1600000,
     originalPrice: 1900000,
-    image:
-      "/images/fixtures/products/the-heritage-tote/card.webp",
+    image: "/images/fixtures/products/the-heritage-tote/card.webp",
     category: "PHU KIEN",
     badge: "Sale",
     color: "Terracotta",
@@ -309,8 +296,7 @@ export const PRODUCTS: Product[] = [
     id: "merino-wool-coat",
     name: "Merino Wool Coat",
     price: 2400000,
-    image:
-      "/images/fixtures/products/merino-wool-coat/card.webp",
+    image: "/images/fixtures/products/merino-wool-coat/card.webp",
     category: "AO",
     color: "Charcoal",
     size: "M",
@@ -326,8 +312,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     price: 4850000,
     color: "Oat",
     size: "M",
-    image:
-      "/images/fixtures/cart/silk-coat.webp",
+    image: "/images/fixtures/cart/silk-coat.webp",
     quantity: 1,
     variantId: 1001,
   },
@@ -337,8 +322,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     price: 2200000,
     color: "Charcoal",
     size: "32",
-    image:
-      "/images/fixtures/cart/pleated-trousers-cart.webp",
+    image: "/images/fixtures/cart/pleated-trousers-cart.webp",
     quantity: 1,
     variantId: 1002,
   },
@@ -351,8 +335,7 @@ export const CHECKOUT_DEFAULT_ITEMS = [
     price: 2850000,
     color: "Desert Beige",
     size: "L",
-    image:
-      "/images/fixtures/checkout/linen-overcoat.webp",
+    image: "/images/fixtures/checkout/linen-overcoat.webp",
   },
   {
     id: "organic-poplin-shirt2",
@@ -360,8 +343,7 @@ export const CHECKOUT_DEFAULT_ITEMS = [
     price: 1450000,
     color: "Optical White",
     size: "M",
-    image:
-      "/images/fixtures/checkout/organic-poplin-shirt2.webp",
+    image: "/images/fixtures/checkout/organic-poplin-shirt2.webp",
   },
 ];
 
@@ -429,7 +411,7 @@ export function mapBackendProduct(
     categoryName?: string | null;
     categorySlug?: string | null;
   },
-  locale: Locale = "vi"
+  locale: Locale = "vi",
 ): Product {
   // Find local match by matching originalSlug, slug, or name
   const match = PRODUCTS.find(
@@ -437,7 +419,7 @@ export function mapBackendProduct(
       (bp.originalSlug && p.id === bp.originalSlug) ||
       p.id === bp.slug ||
       p.id === bp.slug.replace(/-[0-9]+$/, "") ||
-      p.name.toLowerCase() === bp.name.toLowerCase()
+      p.name.toLowerCase() === bp.name.toLowerCase(),
   );
   const localizedMatch = match ? localizeFixtureProduct(match, locale) : undefined;
 
@@ -454,17 +436,15 @@ export function mapBackendProduct(
     };
   });
   const mainImg =
-    bp.image ||
-    bp.thumbnail ||
-    colorImages[0]?.thumbnail ||
-    (match ? match.image : undefined);
+    bp.image || bp.thumbnail || colorImages[0]?.thumbnail || (match ? match.image : undefined);
   const resolvedMainImg = resolveImageUrl(mainImg);
 
-  const rawImages = bp.images && bp.images.length > 0 
-    ? bp.images 
-    : (match && match.id === "linen-blazer" 
-        ? DETAIL_IMAGES.map((img) => img.src) 
-        : [mainImg || "/images/products/product-placeholder.webp"]);
+  const rawImages =
+    bp.images && bp.images.length > 0
+      ? bp.images
+      : match && match.id === "linen-blazer"
+        ? DETAIL_IMAGES.map((img) => img.src)
+        : [mainImg || "/images/products/product-placeholder.webp"];
 
   return {
     id: bp.slug,
@@ -485,9 +465,18 @@ export function mapBackendProduct(
           ? "Sale"
           : localizedMatch?.badge,
     pricing: bp.pricing ?? undefined,
-    color: colorImages[0]?.colorName || localizedMatch?.color || (locale === "vi" ? "Đen" : "Black"),
+    color:
+      colorImages[0]?.colorName || localizedMatch?.color || (locale === "vi" ? "Đen" : "Black"),
     size: match ? match.size : "M",
-    category: bp.categoryName || (match ? match.category : (bp.categoryId === 2 ? "AO" : bp.categoryId === 3 ? "QUAN" : "PHU KIEN")),
+    category:
+      bp.categoryName ||
+      (match
+        ? match.category
+        : bp.categoryId === 2
+          ? "AO"
+          : bp.categoryId === 3
+            ? "QUAN"
+            : "PHU KIEN"),
     categorySlug: bp.categorySlug ?? undefined,
     seoTitle: bp.seoTitle,
     seoDescription: bp.seoDescription,

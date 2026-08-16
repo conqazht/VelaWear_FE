@@ -37,36 +37,28 @@ export function ProductCardShell({
   footerAction,
 }: ProductCardShellProps) {
   return (
-    <Card className="group relative h-full gap-0 overflow-hidden rounded-xl border-transparent bg-white p-0 shadow-2xs hover:shadow-md transition-shadow">
+    <Card className="group relative h-full gap-0 overflow-hidden rounded-xl border-transparent bg-white p-0 shadow-2xs transition-shadow hover:shadow-md">
       <div className="relative aspect-square overflow-hidden rounded-t-xl bg-[#efe7dc]">
         <Link href={href} className="block h-full w-full">
           {badge ? (
-            <Badge className="absolute left-4 top-4 z-20 rounded-full bg-[#1c1a18] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[#f7f4ef]">
+            <Badge className="absolute top-4 left-4 z-20 rounded-full bg-[#1c1a18] px-2.5 py-0.5 text-[9px] font-bold tracking-widest text-[#f7f4ef] uppercase">
               {badge}
             </Badge>
           ) : null}
-          <FashionImage
-            src={imageSrc}
-            alt={imageAlt}
-            className={imageClassName}
-          />
+          <FashionImage src={imageSrc} alt={imageAlt} className={imageClassName} />
           {imageOverlay ? (
-            <span className="pointer-events-none absolute inset-0 z-10">
-              {imageOverlay}
-            </span>
+            <span className="pointer-events-none absolute inset-0 z-10">{imageOverlay}</span>
           ) : null}
         </Link>
-        {imageAction ? (
-          <div className="absolute right-4 top-4 z-20">{imageAction}</div>
-        ) : null}
+        {imageAction ? <div className="absolute top-4 right-4 z-20">{imageAction}</div> : null}
       </div>
 
-      <div className="flex flex-grow flex-col items-start px-4 pb-6 pt-5 text-left">
-        <div className="mb-1.5 text-[12px] font-medium uppercase tracking-widest text-[#1c1a18]/60 md:text-[13px]">
+      <div className="flex flex-grow flex-col items-start px-4 pt-5 pb-6 text-left">
+        <div className="mb-1.5 text-[12px] font-medium tracking-widest text-[#1c1a18]/60 uppercase md:text-[13px]">
           {eyebrow}
         </div>
         <Link href={href}>
-          <h3 className="mb-2.5 font-serif text-[16px] font-medium leading-snug text-[#1c1a18] transition-colors hover:text-[#b5573a] md:text-[18px]">
+          <h3 className="mb-2.5 font-serif text-[16px] leading-snug font-medium text-[#1c1a18] transition-colors hover:text-[#b5573a] md:text-[18px]">
             {title}
           </h3>
         </Link>

@@ -12,7 +12,9 @@ export function getSafeInternalRedirect(value: string | null | undefined) {
   try {
     const parsed = new URL(candidate, "https://vela-wear.local");
     if (parsed.origin !== "https://vela-wear.local") return null;
-    if (AUTH_PATHS.some((path) => parsed.pathname === path || parsed.pathname.startsWith(`${path}/`))) {
+    if (
+      AUTH_PATHS.some((path) => parsed.pathname === path || parsed.pathname.startsWith(`${path}/`))
+    ) {
       return null;
     }
 

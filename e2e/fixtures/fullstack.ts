@@ -1,9 +1,4 @@
-import {
-  expect,
-  test as base,
-  type APIRequestContext,
-  type Response,
-} from "@playwright/test";
+import { expect, test as base, type APIRequestContext, type Response } from "@playwright/test";
 
 export const fullstackApiUrl = process.env.PLAYWRIGHT_API_URL ?? "http://localhost:8080/api/v1";
 export const fullstackUserEmail = process.env.E2E_USER_EMAIL ?? "user@velawear.local";
@@ -67,9 +62,11 @@ type FullstackFixtures = {
 
 function isCheckoutResponse(response: Response) {
   const url = new URL(response.url());
-  return response.request().method() === "POST" &&
+  return (
+    response.request().method() === "POST" &&
     url.pathname === "/api/v1/checkout" &&
-    response.status() === 201;
+    response.status() === 201
+  );
 }
 
 async function loginFullstackAccount(
@@ -85,7 +82,7 @@ async function loginFullstackAccount(
     loginResponse.ok(),
     `${accountLabel} E2E account login failed with HTTP ${loginResponse.status()}`,
   ).toBeTruthy();
-  const loginBody = await loginResponse.json() as ApiEnvelope<LoginResponse>;
+  const loginBody = (await loginResponse.json()) as ApiEnvelope<LoginResponse>;
   if (!loginBody.data?.accessToken) {
     throw new Error(`${accountLabel} E2E account login returned no access token`);
   }
@@ -187,7 +184,9 @@ export const test = base.extend<FullstackFixtures>({
       `${fullstackApiUrl}/product-variants?sku=${encodeURIComponent(variantSku)}&size=100`,
     );
     expect(variantsResponse.ok(), await variantsResponse.text()).toBeTruthy();
-    const variantsBody = await variantsResponse.json() as ApiEnvelope<PaginatedResult<ProductVariant>>;
+    const variantsBody = (await variantsResponse.json()) as ApiEnvelope<
+      PaginatedResult<ProductVariant>
+    >;
     const variant = variantsBody.data.result.find((item) => item.sku === variantSku);
     expect(variant, `Missing seeded product variant ${variantSku}`).toBeTruthy();
 
@@ -209,26 +208,30 @@ export const test = base.extend<FullstackFixtures>({
         ],
       });
     });
-    await page.route(/https:\/\/provinces\.open-api\.vn\/api\/v2\/w\/\?province=79$/, async (route) => {
-      await route.fulfill({
-        json: [
-          {
-            code: 760,
-            name: "Ben Nghe",
-            division_type: "ward",
-            codename: "ben_nghe",
-            province_code: 79,
-          },
-        ],
-      });
-    });
+    await page.route(
+      /https:\/\/provinces\.open-api\.vn\/api\/v2\/w\/\?province=79$/,
+      async (route) => {
+        await route.fulfill({
+          json: [
+            {
+              code: 760,
+              name: "Ben Nghe",
+              division_type: "ward",
+              codename: "ben_nghe",
+              province_code: 79,
+            },
+          ],
+        });
+      },
+    );
 
     const createdOrderIds = new Set<number>();
     const responseTasks: Promise<void>[] = [];
     const captureCreatedOrder = (response: Response) => {
       if (!isCheckoutResponse(response)) return;
       responseTasks.push(
-        response.json()
+        response
+          .json()
           .then((body: ApiEnvelope<CheckoutResponse>) => {
             if (body.data?.orderId) createdOrderIds.add(body.data.orderId);
           })

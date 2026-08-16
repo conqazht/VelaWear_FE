@@ -243,5 +243,7 @@ for (const file of files) {
   totalErrors += errors.length;
 }
 
-console.log(`Checked ${files.length} file(s), ${totalLinks} local link(s), ${totalErrors} error(s).`);
+console.log(
+  `Checked ${files.length} file(s), ${totalLinks} local link(s), ${totalErrors} error(s).`,
+);
 process.exit(totalErrors > 0 ? 1 : 0);

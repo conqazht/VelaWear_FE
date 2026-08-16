@@ -1,7 +1,4 @@
-import type {
-  StorefrontCatalogFilters,
-  StorefrontCatalogSort,
-} from "@/lib/api/types";
+import type { StorefrontCatalogFilters, StorefrontCatalogSort } from "@/lib/api/types";
 
 export const STOREFRONT_SORTS: readonly StorefrontCatalogSort[] = [
   "featured",
@@ -36,7 +33,12 @@ function unique<T>(values: T[]): T[] {
 
 function parseCsv(value: string | null): string[] {
   if (!value) return [];
-  return unique(value.split(",").map((item) => item.trim()).filter(Boolean));
+  return unique(
+    value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
 }
 
 function parseIds(value: string | null): number[] {
@@ -64,9 +66,7 @@ function parseSort(value: string | null): StorefrontCatalogSort {
     : "featured";
 }
 
-export function parseCatalogUrlState(
-  searchParams: Pick<URLSearchParams, "get">,
-): CatalogUrlState {
+export function parseCatalogUrlState(searchParams: Pick<URLSearchParams, "get">): CatalogUrlState {
   return {
     q: (searchParams.get("q") ?? "").trim().slice(0, 160),
     categories: parseCsv(searchParams.get("categories")),
@@ -132,9 +132,7 @@ export function toggleCatalogValue<T>(values: T[], value: T): T[] {
 
 export function isValidCatalogPriceRange(state: CatalogUrlState): boolean {
   return (
-    state.minPrice === undefined ||
-    state.maxPrice === undefined ||
-    state.minPrice <= state.maxPrice
+    state.minPrice === undefined || state.maxPrice === undefined || state.minPrice <= state.maxPrice
   );
 }
 

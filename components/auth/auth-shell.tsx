@@ -13,16 +13,12 @@ interface AuthShellProps {
   className?: string;
 }
 
-export function AuthShell({
-  children,
-  includeHeader = false,
-  className,
-}: AuthShellProps) {
+export function AuthShell({ children, includeHeader = false, className }: AuthShellProps) {
   const { t } = useI18n();
 
   return (
     <main className="relative min-h-screen bg-[#f7f4ef] text-[#1c1a18]">
-      <LanguageSwitcher className="absolute right-5 top-5 z-50 border-[#1c1a18]/15 bg-[#f7f4ef]/90 shadow-sm md:right-7 md:top-7" />
+      <LanguageSwitcher className="absolute top-5 right-5 z-50 border-[#1c1a18]/15 bg-[#f7f4ef]/90 shadow-sm md:top-7 md:right-7" />
       {includeHeader && (
         <header className="flex h-[71px] items-center justify-center border-b border-[#e3dccf] bg-[#f7f4ef] px-4">
           <Link

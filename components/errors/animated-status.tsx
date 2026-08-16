@@ -79,21 +79,21 @@ export function AnimatedStatus({
           background: `radial-gradient(circle at 50% 42%, ${accent}1f 0, transparent 34%), radial-gradient(circle at 15% 15%, ${accent}12 0, transparent 24%)`,
         }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]" />
-      <StatusCodeRain
-        code={code}
-        color={accent}
-        compact={compact}
-        hint={t("status.dropHint")}
-      />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)] bg-[size:36px_36px]" />
+      <StatusCodeRain code={code} color={accent} compact={compact} hint={t("status.dropHint")} />
 
-      <div className={cn("relative z-10 mx-auto text-center", compact ? "max-w-lg px-6 py-12" : "max-w-xl")}>
-        <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.3em] text-white/48">
+      <div
+        className={cn(
+          "relative z-10 mx-auto text-center",
+          compact ? "max-w-lg px-6 py-12" : "max-w-xl",
+        )}
+      >
+        <p className="mb-4 text-[11px] font-medium tracking-[0.3em] text-white/48 uppercase">
           {eyebrow ?? t("status.system")}
         </p>
         <p
           className={cn(
-            "font-numeric font-bold leading-none tracking-[-0.07em] text-white",
+            "font-numeric leading-none font-bold tracking-[-0.07em] text-white",
             compact ? "text-7xl sm:text-8xl" : "text-8xl sm:text-9xl md:text-[10rem]",
           )}
           aria-hidden="true"
@@ -101,15 +101,23 @@ export function AnimatedStatus({
           {code}
         </p>
         <div className="mx-auto my-5 h-px w-16" style={{ backgroundColor: accent }} />
-        <h1 id={titleId} className={cn("font-serif font-semibold", compact ? "text-2xl" : "text-3xl sm:text-4xl")}>
+        <h1
+          id={titleId}
+          className={cn("font-serif font-semibold", compact ? "text-2xl" : "text-3xl sm:text-4xl")}
+        >
           {title}
         </h1>
-        <p className={cn("mx-auto mt-3 text-white/58", compact ? "max-w-md text-sm leading-6" : "max-w-lg leading-7")}>
+        <p
+          className={cn(
+            "mx-auto mt-3 text-white/58",
+            compact ? "max-w-md text-sm leading-6" : "max-w-lg leading-7",
+          )}
+        >
           {description}
         </p>
 
         {reference ? (
-          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/34">
+          <p className="mt-3 font-mono text-[11px] tracking-[0.16em] text-white/34 uppercase">
             {t("status.reference", { reference })}
           </p>
         ) : null}

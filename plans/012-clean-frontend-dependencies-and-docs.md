@@ -85,27 +85,28 @@ tooling, and leaves one internally consistent documentation set.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Install | `pnpm install --frozen-lockfile` | exit 0; lockfile and manifest agree |
-| CLI dependency | `pnpm why shadcn` | package resolves |
-| Runtime dependency | `pnpm why @shadcn/react` | package resolves |
-| Classification | `node -e "const p=require('./package.json'); if(p.dependencies?.shadcn||!p.devDependencies?.shadcn||!p.dependencies?.['@shadcn/react']) process.exit(1)"` | exit 0 |
-| Documentation links | `node scripts/check-markdown-links.mjs README.md AGENTS.md docs/PROJECT_STATUS.md convention.md` | exit 0; every local file/anchor target resolves |
-| Link-checker tests | `node --test scripts/check-markdown-links.test.mjs` | same/cross-file anchors, duplicate-heading suffixes and encoded paths pass; missing targets fail deterministically; no network access |
-| Link-checker lint | `pnpm exec eslint scripts/check-markdown-links.mjs scripts/check-markdown-links.test.mjs --max-warnings 0` | exit 0, no warnings |
-| Documentation control chars | `node -e "const fs=require('fs');for(const f of ['README.md','AGENTS.md','docs/PROJECT_STATUS.md','convention.md']){if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(fs.readFileSync(f,'utf8')))process.exit(1)}"` | exit 0 |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, no errors |
-| Unit suite | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | build resolves `shadcn/tailwind.css` and succeeds |
-| Smoke | `pnpm test:e2e:smoke` | all `@smoke` tests pass |
+| Purpose                     | Command                                                                                                                                                                                                              | Expected on success                                                                                                                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Install                     | `pnpm install --frozen-lockfile`                                                                                                                                                                                     | exit 0; lockfile and manifest agree                                                                                                   |
+| CLI dependency              | `pnpm why shadcn`                                                                                                                                                                                                    | package resolves                                                                                                                      |
+| Runtime dependency          | `pnpm why @shadcn/react`                                                                                                                                                                                             | package resolves                                                                                                                      |
+| Classification              | `node -e "const p=require('./package.json'); if(p.dependencies?.shadcn                                                                                                                                               |                                                                                                                                       | !p.devDependencies?.shadcn |     | !p.dependencies?.['@shadcn/react']) process.exit(1)"` | exit 0 |
+| Documentation links         | `node scripts/check-markdown-links.mjs README.md AGENTS.md docs/PROJECT_STATUS.md convention.md`                                                                                                                     | exit 0; every local file/anchor target resolves                                                                                       |
+| Link-checker tests          | `node --test scripts/check-markdown-links.test.mjs`                                                                                                                                                                  | same/cross-file anchors, duplicate-heading suffixes and encoded paths pass; missing targets fail deterministically; no network access |
+| Link-checker lint           | `pnpm exec eslint scripts/check-markdown-links.mjs scripts/check-markdown-links.test.mjs --max-warnings 0`                                                                                                           | exit 0, no warnings                                                                                                                   |
+| Documentation control chars | `node -e "const fs=require('fs');for(const f of ['README.md','AGENTS.md','docs/PROJECT_STATUS.md','convention.md']){if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(fs.readFileSync(f,'utf8')))process.exit(1)}"` | exit 0                                                                                                                                |
+| Lint                        | `pnpm exec eslint . --max-warnings 25`                                                                                                                                                                               | exit 0                                                                                                                                |
+| Typecheck                   | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                                                                          | exit 0, no errors                                                                                                                     |
+| Unit suite                  | `pnpm test:unit`                                                                                                                                                                                                     | all tests pass                                                                                                                        |
+| Build                       | `pnpm build`                                                                                                                                                                                                         | build resolves `shadcn/tailwind.css` and succeeds                                                                                     |
+| Smoke                       | `pnpm test:e2e:smoke`                                                                                                                                                                                                | all `@smoke` tests pass                                                                                                               |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope** (the only files you should modify):
+
 - `README.md`
 - `AGENTS.md`
 - `convention.md`
@@ -116,6 +117,7 @@ tooling, and leaves one internally consistent documentation set.
 - `scripts/check-markdown-links.test.mjs` (create)
 
 **Out of scope** (do NOT touch):
+
 - Removing or moving `@shadcn/react`; it is a runtime dependency.
 - Changing component code, CSS imports, Next.js/pnpm/Node versions or application behavior.
 - Upgrading unrelated packages or resolving the separate transitive PostCSS advisory.

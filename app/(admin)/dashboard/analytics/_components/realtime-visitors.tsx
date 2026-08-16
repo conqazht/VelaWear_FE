@@ -5,7 +5,12 @@ import { Bar, BarChart, type BarShapeProps, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { getIntlLocale } from "@/lib/i18n";
 
 const realtimeData = [
@@ -96,7 +101,9 @@ export function RealtimeVisitors() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">{t("admin.dashboardsA.analytics.realtimeVisitors")}</CardTitle>
+        <CardTitle className="font-normal">
+          {t("admin.dashboardsA.analytics.realtimeVisitors")}
+        </CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -105,10 +112,14 @@ export function RealtimeVisitors() {
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-end justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl tabular-nums leading-none tracking-tight">{numberFormatter.format(24)}</span>
-            <span className="text-muted-foreground text-sm">{t("admin.dashboardsA.analytics.perMinute")}</span>
+            <span className="text-2xl leading-none tracking-tight tabular-nums">
+              {numberFormatter.format(24)}
+            </span>
+            <span className="text-muted-foreground text-sm">
+              {t("admin.dashboardsA.analytics.perMinute")}
+            </span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-500 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-green-500" />
@@ -117,35 +128,64 @@ export function RealtimeVisitors() {
           </div>
         </div>
         <ChartContainer config={chartConfig} className="h-36 w-full">
-          <BarChart data={realtimeData} margin={{ bottom: 0, left: 0, right: 0, top: 0 }} barCategoryGap={3}>
+          <BarChart
+            data={realtimeData}
+            margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
+            barCategoryGap={3}
+          >
             <XAxis dataKey="minute" hide />
             <YAxis hide domain={[0, 22]} />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel formatter={(value) => numberFormatter.format(Number(value))} />}
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  formatter={(value) => numberFormatter.format(Number(value))}
+                />
+              }
             />
             <Bar dataKey="visitors" fill="var(--color-visitors)" shape={RealtimeBarShape} />
           </BarChart>
         </ChartContainer>
         <div className="grid grid-cols-2">
-          <div className="flex items-center gap-3 border-border/50 border-r border-b pt-1 pr-5 pb-4">
-            <span aria-hidden="true" className="flag:US shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.unitedStates")}</span>
+          <div className="border-border/50 flex items-center gap-3 border-r border-b pt-1 pr-5 pb-4">
+            <span
+              aria-hidden="true"
+              className="flag:US ring-foreground/10 shrink-0 rounded-xs text-lg ring-1"
+            />
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {t("admin.dashboardsA.analytics.unitedStates")}
+            </span>
             <span className="text-sm tabular-nums">{numberFormatter.format(14)}</span>
           </div>
-          <div className="flex items-center gap-3 border-border/50 border-b pt-1 pb-4 pl-5">
-            <span aria-hidden="true" className="flag:GB shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.unitedKingdom")}</span>
+          <div className="border-border/50 flex items-center gap-3 border-b pt-1 pb-4 pl-5">
+            <span
+              aria-hidden="true"
+              className="flag:GB ring-foreground/10 shrink-0 rounded-xs text-lg ring-1"
+            />
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {t("admin.dashboardsA.analytics.unitedKingdom")}
+            </span>
             <span className="text-sm tabular-nums">{numberFormatter.format(4)}</span>
           </div>
-          <div className="flex items-center gap-3 border-border/50 border-r pt-4 pr-5 pb-1">
-            <span aria-hidden="true" className="flag:CA shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.canada")}</span>
+          <div className="border-border/50 flex items-center gap-3 border-r pt-4 pr-5 pb-1">
+            <span
+              aria-hidden="true"
+              className="flag:CA ring-foreground/10 shrink-0 rounded-xs text-lg ring-1"
+            />
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {t("admin.dashboardsA.analytics.canada")}
+            </span>
             <span className="text-sm tabular-nums">{numberFormatter.format(3)}</span>
           </div>
           <div className="flex items-center gap-3 pt-4 pb-1 pl-5">
-            <span aria-hidden="true" className="flag:IN shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">{t("admin.dashboardsA.analytics.india")}</span>
+            <span
+              aria-hidden="true"
+              className="flag:IN ring-foreground/10 shrink-0 rounded-xs text-lg ring-1"
+            />
+            <span className="min-w-0 flex-1 truncate text-sm">
+              {t("admin.dashboardsA.analytics.india")}
+            </span>
             <span className="text-sm tabular-nums">{numberFormatter.format(3)}</span>
           </div>
         </div>

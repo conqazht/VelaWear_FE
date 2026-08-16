@@ -16,11 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SaleCampaign, SaleCampaignType } from "@/lib/api/types";
 import { usePublicSalesQuery, saleQueryKeys } from "@/lib/queries/sales";
-import {
-  getCountdown,
-  getServerClockOffset,
-  groupSaleItems,
-} from "@/lib/sale-utils";
+import { getCountdown, getServerClockOffset, groupSaleItems } from "@/lib/sale-utils";
 
 export function SaleLanding({ type }: { type: SaleCampaignType }) {
   const isFlash = type === "FLASH";
@@ -65,9 +61,9 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
           : campaign.phase === "LIVE",
       )
       .sort((left, right) => {
-      if (left.phase !== right.phase) return left.phase === "LIVE" ? -1 : 1;
-      return Date.parse(left.startsAt) - Date.parse(right.startsAt);
-    });
+        if (left.phase !== right.phase) return left.phase === "LIVE" ? -1 : 1;
+        return Date.parse(left.startsAt) - Date.parse(right.startsAt);
+      });
   }, [isFlash, salesQuery.data?.campaigns]);
 
   useEffect(() => {
@@ -78,9 +74,12 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
       .sort((left, right) => left - right)[0];
     if (!nextBoundary) return;
 
-    const timeoutId = window.setTimeout(() => {
-      void queryClient.invalidateQueries({ queryKey: saleQueryKeys.root });
-    }, Math.min(nextBoundary - now + 500, 2_147_000_000));
+    const timeoutId = window.setTimeout(
+      () => {
+        void queryClient.invalidateQueries({ queryKey: saleQueryKeys.root });
+      },
+      Math.min(nextBoundary - now + 500, 2_147_000_000),
+    );
     return () => window.clearTimeout(timeoutId);
   }, [campaigns, now, queryClient]);
 
@@ -89,7 +88,9 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
       <StorefrontApiStatus
         error={salesQuery.error}
         onRetry={() => void salesQuery.refetch()}
-        resourceLabel={isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
+        resourceLabel={
+          isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")
+        }
         returnHref="/collection"
         returnLabel={t("storefront.sale.continueShopping")}
         variant="route"
@@ -98,39 +99,33 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f4ef] pb-24 pt-[104px] text-[#1c1a18] md:pt-[120px]">
+    <main className="min-h-screen bg-[#f7f4ef] pt-[104px] pb-24 text-[#1c1a18] md:pt-[120px]">
       <div className="mx-auto w-full max-w-[1800px] px-6 md:px-16">
         <nav
           aria-label={t("storefront.common.home")}
-          className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50"
+          className="mb-4 flex gap-2 text-[10px] tracking-[0.15em] text-[#1c1a18]/50 uppercase"
         >
           <Link href="/" className="transition-colors hover:text-[#1c1a18]">
             {t("storefront.common.home")}
           </Link>
           <span aria-hidden="true">/</span>
           <span className="font-medium text-[#1c1a18]">
-            {isFlash
-              ? t("storefront.sale.flash.title")
-              : t("storefront.sale.standard.title")}
+            {isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
           </span>
         </nav>
 
         <header className="mb-12 grid gap-8 border-b border-[#1c1a18]/10 pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="max-w-3xl">
-            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#b5573a]">
+            <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold tracking-[0.22em] text-[#b5573a] uppercase">
               {isFlash ? (
                 <AlarmClock className="size-3.5" />
               ) : (
                 <BadgePercent className="size-3.5" />
               )}
-              {isFlash
-                ? t("storefront.sale.flash.eyebrow")
-                : t("storefront.sale.standard.eyebrow")}
+              {isFlash ? t("storefront.sale.flash.eyebrow") : t("storefront.sale.standard.eyebrow")}
             </div>
             <h1 className="font-serif text-3xl font-light tracking-wide md:text-5xl">
-              {isFlash
-                ? t("storefront.sale.flash.title")
-                : t("storefront.sale.standard.title")}
+              {isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-[#1c1a18]/60 md:text-base md:leading-7">
               {isFlash
@@ -141,7 +136,7 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
 
           <nav
             aria-label={`${t("storefront.sale.standard.title")} / ${t("storefront.sale.flash.title")}`}
-            className="flex items-center gap-6 text-xs font-semibold uppercase tracking-[0.16em]"
+            className="flex items-center gap-6 text-xs font-semibold tracking-[0.16em] uppercase"
           >
             <Link
               href="/sale"
@@ -175,7 +170,9 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
 
           {salesQuery.isError ? (
             <StorefrontStaleWarning
-              resourceLabel={isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")}
+              resourceLabel={
+                isFlash ? t("storefront.sale.flash.title") : t("storefront.sale.standard.title")
+              }
               onRetry={() => void salesQuery.refetch()}
               error={salesQuery.error}
             />
@@ -185,9 +182,7 @@ export function SaleLanding({ type }: { type: SaleCampaignType }) {
             <section className="grid min-h-[440px] place-items-center border-y border-[#1c1a18]/10 py-20 text-center">
               <div>
                 <ShoppingBag className="mx-auto mb-5 size-10 text-[#1c1a18]/25" />
-                <h2 className="font-serif text-2xl">
-                  {t("storefront.sale.empty.title")}
-                </h2>
+                <h2 className="font-serif text-2xl">{t("storefront.sale.empty.title")}</h2>
                 <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#1c1a18]/55">
                   {t("storefront.sale.empty.description")}
                 </p>
@@ -239,7 +234,7 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
           transition={{ duration: reduceMotion ? 0.2 : 0.6, ease: [0.16, 1, 0.3, 1] }}
           role="img"
           aria-label={t("storefront.sale.bannerAria", { name: campaign.name })}
-          className="mb-8 h-40 overflow-hidden rounded-xl bg-[#e8ded2] bg-cover bg-center md:h-64 shadow-xs"
+          className="mb-8 h-40 overflow-hidden rounded-xl bg-[#e8ded2] bg-cover bg-center shadow-xs md:h-64"
           style={{ backgroundImage: `url(${JSON.stringify(bannerUrl)})` }}
         />
       ) : null}
@@ -249,20 +244,20 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
             <Badge
               className={
                 isFlash
-                  ? "rounded-full bg-[#8f4329] text-white px-3 py-0.5"
-                  : "rounded-full bg-[#1c1a18] text-white px-3 py-0.5"
+                  ? "rounded-full bg-[#8f4329] px-3 py-0.5 text-white"
+                  : "rounded-full bg-[#1c1a18] px-3 py-0.5 text-white"
               }
             >
               {campaignTypeLabel}
             </Badge>
-            <Badge variant="outline" className="rounded-full px-3 py-0.5 border-[#1c1a18]/20">
+            <Badge variant="outline" className="rounded-full border-[#1c1a18]/20 px-3 py-0.5">
               {campaignPhaseLabel}
             </Badge>
             <span className="text-xs text-[#1c1a18]/50">
               {t("storefront.sale.code", { code: campaign.code })}
             </span>
           </div>
-          <h2 className="text-balance font-serif text-3xl font-light md:text-4xl">
+          <h2 className="font-serif text-3xl font-light text-balance md:text-4xl">
             {campaign.name}
           </h2>
           {campaign.description ? (
@@ -270,7 +265,7 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
               {campaign.description}
             </p>
           ) : null}
-          <p className="mt-3 text-xs font-medium uppercase tracking-[0.14em] text-[#8f4329]">
+          <p className="mt-3 text-xs font-medium tracking-[0.14em] text-[#8f4329] uppercase">
             {isFlash
               ? t("storefront.sale.coupon.flashIneligible")
               : t("storefront.sale.coupon.standardEligible")}
@@ -303,11 +298,7 @@ function CampaignSection({ campaign, now }: { campaign: SaleCampaign; now: numbe
                 ease: [0.16, 1, 0.3, 1],
               }}
             >
-              <SaleProductCard
-                product={product}
-                isFlash={isFlash}
-                isUpcoming={isUpcoming}
-              />
+              <SaleProductCard product={product} isFlash={isFlash} isUpcoming={isUpcoming} />
             </motion.div>
           ))}
         </ProductGrid>
@@ -326,7 +317,13 @@ function safeBannerUrl(value?: string | null) {
   }
 }
 
-function CountdownBlock({ label, countdown }: { label: string; countdown: ReturnType<typeof getCountdown> }) {
+function CountdownBlock({
+  label,
+  countdown,
+}: {
+  label: string;
+  countdown: ReturnType<typeof getCountdown>;
+}) {
   const { t } = useI18n();
   const values = [
     [countdown.days, t("storefront.sale.countdown.days")],
@@ -337,12 +334,19 @@ function CountdownBlock({ label, countdown }: { label: string; countdown: Return
 
   return (
     <div>
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1c1a18]/45">{label}</p>
+      <p className="mb-2 text-[10px] font-semibold tracking-[0.2em] text-[#1c1a18]/45 uppercase">
+        {label}
+      </p>
       <div className="flex gap-2">
         {values.map(([value, unit]) => (
-          <div key={unit} className="min-w-14 rounded-lg border border-[#1c1a18]/10 bg-white px-2.5 py-2 text-center shadow-xs">
-            <strong className="block font-numeric text-lg tabular-nums text-ink">{String(value).padStart(2, "0")}</strong>
-            <span className="text-[9px] uppercase tracking-wider text-[#1c1a18]/45">{unit}</span>
+          <div
+            key={unit}
+            className="min-w-14 rounded-lg border border-[#1c1a18]/10 bg-white px-2.5 py-2 text-center shadow-xs"
+          >
+            <strong className="font-numeric text-ink block text-lg tabular-nums">
+              {String(value).padStart(2, "0")}
+            </strong>
+            <span className="text-[9px] tracking-wider text-[#1c1a18]/45 uppercase">{unit}</span>
           </div>
         ))}
       </div>
@@ -354,16 +358,9 @@ function SaleLoading() {
   const { t } = useI18n();
 
   return (
-    <div
-      className="space-y-16"
-      aria-label={t("storefront.sale.loadingAria")}
-      role="status"
-    >
+    <div className="space-y-16" aria-label={t("storefront.sale.loadingAria")} role="status">
       {[0, 1].map((item) => (
-        <section
-          key={item}
-          className="border-b border-[#1c1a18]/10 pb-16 last:border-b-0"
-        >
+        <section key={item} className="border-b border-[#1c1a18]/10 pb-16 last:border-b-0">
           <div className="mb-8 animate-pulse">
             <div className="h-3 w-28 bg-[#efe7dc]" />
             <div className="mt-4 h-9 w-full max-w-md bg-[#efe7dc]" />

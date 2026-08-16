@@ -4,7 +4,6 @@ You are an expert frontend engineer specializing in premium ecommerce UI, React 
 
 The result must feel like a **luxury fashion storefront auth experience**, not a playful cartoon demo. Keep the reactive animation architecture, live focus-state feedback, and polished success/fail choreography from the reference, but translate them into a more editorial, restrained, premium direction that fits the current Vela Wear sign-in and register pages.
 
-
 # 1. CORE GOAL
 
 Create a **shared auth visual system** that can support both:
@@ -24,7 +23,6 @@ The final direction should feel consistent with the existing Vela Wear auth scre
 Do **not** simply recreate the original four blob characters. Preserve the idea of a left-side animated scene that reacts to the user, but reinterpret it in a more elevated way.
 
 Important: the reference project is useful for its **interaction model and motion orchestration**, not for its raw implementation format. We are **not** building a static HTML/CSS/vanilla-JS clone. We are rebuilding the concept inside the current Vela Wear app architecture.
-
 
 # 2. EXPERIENCE DIRECTION
 
@@ -52,7 +50,6 @@ From the reference source code, keep these core engineering ideas:
 - form events that only update scene state rather than manually animating many nodes
 - CSS-variable driven transforms for most live motion
 - success and error handled as short-lived state transitions with staged overlays
-
 
 # 3. REQUIRED TECH STACK
 
@@ -89,7 +86,6 @@ The implementation should fit naturally around the current files such as:
 - `components/auth/floating-input.tsx`
 - `components/auth/use-otp-flow.ts`
 
-
 # 4. ARCHITECTURE TO FOLLOW
 
 Translate the reference source into a React architecture.
@@ -118,7 +114,6 @@ Recommended motion plumbing:
 - use a small amount of scoped CSS or Tailwind arbitrary values only when needed for advanced transform behavior
 
 Do not create an over-engineered animation framework. Keep the implementation compact and legible.
-
 
 # 5. PAGE LAYOUT
 
@@ -152,7 +147,6 @@ Mobile / tablet:
 - preserve motion, but reduce complexity and scale
 - form remains fully readable and touch-friendly
 
-
 # 6. BRAND STYLE TO MATCH
 
 Follow the current Vela Wear auth/product aesthetic.
@@ -185,7 +179,6 @@ Typography direction:
 - refined letter-spacing, not loud or sporty
 - keep the current Vela Wear tone: graceful, clean, understated
 
-
 # 7. LEFT PANEL CONCEPT
 
 Replace the four cartoon characters with a **set of 3 to 4 abstract vertical forms** that behave like a living composition.
@@ -215,7 +208,6 @@ Recommended shape mix:
 
 The scene should feel premium enough that it could sit inside a luxury brand campaign page.
 
-
 # 8. IMAGE ASSET STRATEGY
 
 Use image assets deliberately. This redesign should not discard every visual from the reference project.
@@ -243,7 +235,6 @@ For the other reference image asset:
 Fashion image prompt direction if a new image needs to be generated:
 
 `Premium editorial fashion authentication page background for Vela Wear, refined minimalist clothing brand, warm studio light, linen and wool textures, elegant garment silhouettes on sculptural forms, boutique atelier atmosphere, parchment ivory and soft clay palette, cinematic but restrained, no text, no logo, no cartoon characters, no mascots, no exaggerated fantasy elements, high-end ecommerce campaign mood.`
-
 
 # 9. REACTION SYSTEM
 
@@ -279,7 +270,6 @@ Scene reactions:
 - success: composition resolves into a graceful celebratory release
 - failure: composition tightens, compresses, and briefly shudders
 
-
 # 10. ABSTRACT “GAZE” LANGUAGE
 
 The original project used cartoon pupils. Keep the same interaction intent, but refine the implementation.
@@ -303,7 +293,6 @@ If a face-like behavior is used, it must remain:
 - minimal
 - elegant
 - almost architectural
-
 
 # 11. DISTORTION AND BODY MOTION
 
@@ -331,7 +320,6 @@ Use only GPU-friendly transforms:
 - rotate very sparingly
 - opacity
 
-
 # 12. STATE MACHINE
 
 Implement a clean shared state model.
@@ -348,31 +336,37 @@ States:
 Behavior guidance:
 
 `idle`
+
 - scene follows mouse softly
 - ambient breathing is active
 - subtle highlight drift / aperture tracking
 
 `email-focus`
+
 - forms lean toward the right panel
 - tracking shifts toward the form fields
 - atmosphere feels open and welcoming
 
 `password-hidden`
+
 - scene closes slightly, as if respecting privacy
 - apertures / highlights narrow
 - motion compresses and lowers
 
 `password-visible`
+
 - scene opens and lifts a little
 - details widen or brighten
 - attention moves back toward the form
 
 `success`
+
 - forms rise, expand, or glide downward out of frame in a graceful sequence
 - background bloom / wash can take over the screen
 - should feel luxurious, not gamified
 
 `error`
+
 - brief lateral shake / pressure pulse
 - small compression of the forms
 - quickly recover back to the current input state
@@ -381,7 +375,6 @@ Implementation note from the reference source:
 
 - the original project used a central `updateState(...)` function that maps form focus + password visibility into scene classes and target gaze values
 - keep that concept, but express it in typed React state and derived scene props/classes
-
 
 # 13. ENTRANCE ANIMATION
 
@@ -403,7 +396,6 @@ Requirements:
 - form UI on the right also enters with its own staggered reveal
 
 The entire page should feel intentionally art-directed on load.
-
 
 # 14. FORM UI DIRECTION
 
@@ -449,7 +441,6 @@ Keep these current-project constraints intact:
 - floating label behavior remains consistent with the current implementation
 - password visibility toggle must preserve focus like the current app already does
 
-
 # 15. PASSWORD TOGGLE BEHAVIOR
 
 Keep the good interaction behavior from the current app and the reference:
@@ -471,7 +462,6 @@ Reference behavior to preserve:
 - the original source prevented blur on toggle `mousedown`
 - it flipped visible/hidden scene state immediately
 - we should keep the same UX, but implemented inside the existing React input pattern using refs and local state
-
 
 # 16. SUCCESS SEQUENCE
 
@@ -505,7 +495,6 @@ Avoid:
 - playful stickers
 - loud neon splashes
 
-
 # 17. ERROR SEQUENCE
 
 On invalid credentials or failed validation:
@@ -528,7 +517,6 @@ Reference behavior worth preserving:
 - short-lived error state around ~700ms to 900ms
 - scene tension resets automatically
 - no permanent broken state after one invalid submit
-
 
 # 18. BACKGROUNDS AND ATMOSPHERE
 
@@ -553,7 +541,6 @@ Avoid:
 
 The left panel should feel rich through a mix of image texture, abstract motion, and fashion editorial restraint.
 
-
 # 19. PERFORMANCE REQUIREMENTS
 
 - one animation loop only
@@ -570,7 +557,6 @@ React-specific performance guardrails:
 - avoid storing live mouse positions in top-level React state if that would trigger 60fps component renders
 - reserve React state for discrete scene mode changes, not frame-by-frame motion
 - keep client boundaries tight so auth pages do not become unnecessarily heavy
-
 
 # 20. RESPONSIVENESS REQUIREMENTS
 
@@ -591,7 +577,6 @@ Mobile:
 - animated scene height reduced
 - preserve identity of the concept
 - maintain comfortable input spacing and button sizing
-
 
 # 21. IMPLEMENTATION NOTES
 
@@ -628,7 +613,6 @@ Avoid:
 - moving everything into one giant client component
 - duplicating sign-in/register field logic between pages
 - importing large data or unrelated storefront code into auth client components
-
 
 # 22. FINAL BAR
 

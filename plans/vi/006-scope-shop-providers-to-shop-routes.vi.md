@@ -29,22 +29,23 @@ Root layout mount cart/notification/favorites cho storefront, auth và Managemen
 
 ## Commands cần dùng
 
-| Mục đích | Command | Kết quả mong đợi |
-|---|---|---|
-| Consumer audit | `rg -n 'useCart\(|useFavorites\(|useNotification\(' app components --glob '*.tsx'` | mọi runtime caller thuộc shop tree |
-| Boundary unit | `pnpm exec vitest run app/provider-boundaries.test.ts` | consumer allowlist, root exclusions và Cart → Notification → Favorites order pass |
-| Boundary E2E | `pnpm exec playwright test e2e/provider-boundaries.spec.ts --grep "authenticated admin performs no shop data request"` | admin shell render; không có cart/wishlist/shop-provider request |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | tất cả pass |
-| Build | `pnpm build` | production build thành công |
-| Smoke | `pnpm test:e2e:smoke` | smoke pass |
+| Mục đích       | Command                                                                                                                | Kết quả mong đợi                                                                  |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Consumer audit | `rg -n 'useCart\(                                                                                                      | useFavorites\(                                                                    | useNotification\(' app components --glob '*.tsx'` | mọi runtime caller thuộc shop tree |
+| Boundary unit  | `pnpm exec vitest run app/provider-boundaries.test.ts`                                                                 | consumer allowlist, root exclusions và Cart → Notification → Favorites order pass |
+| Boundary E2E   | `pnpm exec playwright test e2e/provider-boundaries.spec.ts --grep "authenticated admin performs no shop data request"` | admin shell render; không có cart/wishlist/shop-provider request                  |
+| Lint           | `pnpm exec eslint . --max-warnings 25`                                                                                 | exit 0                                                                            |
+| Typecheck      | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                            | exit 0                                                                            |
+| Unit           | `pnpm test:unit`                                                                                                       | tất cả pass                                                                       |
+| Build          | `pnpm build`                                                                                                           | production build thành công                                                       |
+| Smoke          | `pnpm test:e2e:smoke`                                                                                                  | smoke pass                                                                        |
 
 ## Scope
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong scope**:
+
 - `app/layout.tsx`
 - `app/(shop)/layout.tsx`
 - `components/shop/shop-providers.tsx` (tạo mới)
@@ -52,6 +53,7 @@ Root layout mount cart/notification/favorites cho storefront, auth và Managemen
 - `e2e/provider-boundaries.spec.ts` (tạo mới)
 
 **Ngoài scope**:
+
 - Đổi cart/session behavior FE-003.
 - Wishlist query optimization FE-007.
 - Di chuyển Query/I18n/Auth khỏi root.

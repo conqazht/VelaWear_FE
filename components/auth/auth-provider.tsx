@@ -56,8 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         return profile.data as User;
       },
-      register: async (data) =>
-        registerMutation.mutateAsync(data),
+      register: async (data) => registerMutation.mutateAsync(data),
       signOut: async () => {
         await logoutMutation.mutateAsync();
         releaseToAnonymous();
@@ -86,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       registerMutation,
       releaseToAnonymous,
       sessionQuery,
-    ]
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

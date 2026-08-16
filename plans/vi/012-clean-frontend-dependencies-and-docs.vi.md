@@ -79,27 +79,28 @@ nội bộ nhất quán thay cho mô tả prototype/API đã cũ.
 
 ## Các lệnh cần dùng
 
-| Mục đích | Lệnh | Kết quả thành công |
-|---|---|---|
-| Cài dependency | `pnpm install --frozen-lockfile` | exit 0; lockfile/manifest đồng bộ |
-| CLI dependency | `pnpm why shadcn` | package resolve |
-| Runtime dependency | `pnpm why @shadcn/react` | package resolve |
-| Classification | `node -e "const p=require('./package.json'); if(p.dependencies?.shadcn||!p.devDependencies?.shadcn||!p.dependencies?.['@shadcn/react']) process.exit(1)"` | exit 0 |
-| Documentation links | `node scripts/check-markdown-links.mjs README.md AGENTS.md docs/PROJECT_STATUS.md convention.md` | exit 0; local file/anchor resolve |
-| Link-checker test | `node --test scripts/check-markdown-links.test.mjs` | same/cross-file anchor, duplicate-heading suffix và encoded path pass; missing target fail deterministic; không network |
-| Link-checker lint | `pnpm exec eslint scripts/check-markdown-links.mjs scripts/check-markdown-links.test.mjs --max-warnings 0` | exit 0, không warning |
-| Control chars | `node -e "const fs=require('fs');for(const f of ['README.md','AGENTS.md','docs/PROJECT_STATUS.md','convention.md']){if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(fs.readFileSync(f,'utf8')))process.exit(1)}"` | exit 0 |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, không error |
-| Unit suite | `pnpm test:unit` | mọi test pass |
-| Build | `pnpm build` | resolve `shadcn/tailwind.css`, build thành công |
-| Smoke | `pnpm test:e2e:smoke` | mọi `@smoke` test pass |
+| Mục đích            | Lệnh                                                                                                                                                                                                                 | Kết quả thành công                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Cài dependency      | `pnpm install --frozen-lockfile`                                                                                                                                                                                     | exit 0; lockfile/manifest đồng bộ                                                                                       |
+| CLI dependency      | `pnpm why shadcn`                                                                                                                                                                                                    | package resolve                                                                                                         |
+| Runtime dependency  | `pnpm why @shadcn/react`                                                                                                                                                                                             | package resolve                                                                                                         |
+| Classification      | `node -e "const p=require('./package.json'); if(p.dependencies?.shadcn                                                                                                                                               |                                                                                                                         | !p.devDependencies?.shadcn |     | !p.dependencies?.['@shadcn/react']) process.exit(1)"` | exit 0 |
+| Documentation links | `node scripts/check-markdown-links.mjs README.md AGENTS.md docs/PROJECT_STATUS.md convention.md`                                                                                                                     | exit 0; local file/anchor resolve                                                                                       |
+| Link-checker test   | `node --test scripts/check-markdown-links.test.mjs`                                                                                                                                                                  | same/cross-file anchor, duplicate-heading suffix và encoded path pass; missing target fail deterministic; không network |
+| Link-checker lint   | `pnpm exec eslint scripts/check-markdown-links.mjs scripts/check-markdown-links.test.mjs --max-warnings 0`                                                                                                           | exit 0, không warning                                                                                                   |
+| Control chars       | `node -e "const fs=require('fs');for(const f of ['README.md','AGENTS.md','docs/PROJECT_STATUS.md','convention.md']){if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(fs.readFileSync(f,'utf8')))process.exit(1)}"` | exit 0                                                                                                                  |
+| Lint                | `pnpm exec eslint . --max-warnings 25`                                                                                                                                                                               | exit 0                                                                                                                  |
+| Typecheck           | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                                                                          | exit 0, không error                                                                                                     |
+| Unit suite          | `pnpm test:unit`                                                                                                                                                                                                     | mọi test pass                                                                                                           |
+| Build               | `pnpm build`                                                                                                                                                                                                         | resolve `shadcn/tailwind.css`, build thành công                                                                         |
+| Smoke               | `pnpm test:e2e:smoke`                                                                                                                                                                                                | mọi `@smoke` test pass                                                                                                  |
 
 ## Phạm vi
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong phạm vi** (chỉ được sửa các file này):
+
 - `README.md`
 - `AGENTS.md`
 - `convention.md`
@@ -110,6 +111,7 @@ nội bộ nhất quán thay cho mô tả prototype/API đã cũ.
 - `scripts/check-markdown-links.test.mjs` (tạo mới)
 
 **Ngoài phạm vi** (KHÔNG sửa):
+
 - Xóa/move `@shadcn/react`; đây là runtime dependency.
 - Đổi component code, CSS import, Next.js/pnpm/Node version hoặc app behavior.
 - Upgrade package không liên quan hoặc xử lý transitive PostCSS advisory riêng.

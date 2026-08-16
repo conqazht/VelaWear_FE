@@ -101,7 +101,7 @@ function EditorLoading() {
   return (
     <Card>
       <CardContent className="flex min-h-80 items-center justify-center">
-        <div className="flex items-center gap-2 text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2">
           <Loader2 className="size-4 animate-spin" />
           {t("admin.sales.editor.loading")}
         </div>
@@ -121,10 +121,7 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
     status: "ACTIVE",
   });
 
-  if (
-    campaignId !== undefined &&
-    (!Number.isInteger(campaignId) || campaignId <= 0)
-  ) {
+  if (campaignId !== undefined && (!Number.isInteger(campaignId) || campaignId <= 0)) {
     return (
       <AnimatedStatus
         code="404"
@@ -158,7 +155,11 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
             </AlertDescription>
           </Alert>
           <div className="flex gap-2">
-            <Button onClick={() => void Promise.all([campaignQuery.refetch(), translationsQuery.refetch()])}>
+            <Button
+              onClick={() =>
+                void Promise.all([campaignQuery.refetch(), translationsQuery.refetch()])
+              }
+            >
               <RefreshCw /> {t("admin.sales.editor.tryAgain")}
             </Button>
             <Button variant="outline" render={<Link href="/dashboard/sales" />}>
@@ -182,9 +183,7 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
       translations={translationsQuery.data?.translations ?? []}
       availableVariants={variantsQuery.data?.result ?? []}
       variantsLoading={variantsQuery.isPending}
-      variantsError={
-        variantsQuery.isError ? getApiErrorMessage(variantsQuery.error) : null
-      }
+      variantsError={variantsQuery.isError ? getApiErrorMessage(variantsQuery.error) : null}
       onRefresh={() => void Promise.all([campaignQuery.refetch(), translationsQuery.refetch()])}
     />
   );
@@ -215,20 +214,16 @@ function SaleCampaignEditorForm({
   );
   const [persistedCampaign, setPersistedCampaign] = useState<AdminSaleCampaign | null>(null);
   const [contentLocale, setContentLocale] = useState<"vi" | "en">("vi");
-  const [lifecycleAction, setLifecycleAction] =
-    useState<LifecycleAction | null>(null);
+  const [lifecycleAction, setLifecycleAction] = useState<LifecycleAction | null>(null);
   const [cloneDraft, setCloneDraft] = useState<CloneDraftValues>(() => ({
     code: campaign ? `${campaign.code}_NEXT`.slice(0, 50) : "",
-    name: campaign
-      ? t("admin.sales.editor.clone.defaultName", { name: campaign.name })
-      : "",
+    name: campaign ? t("admin.sales.editor.clone.defaultName", { name: campaign.name }) : "",
     startsAt: campaign ? toLocalDateTimeInput(campaign.endsAt) : "",
     endsAt: campaign
       ? toLocalDateTimeInput(
           new Date(
             new Date(campaign.endsAt).getTime() +
-              (new Date(campaign.endsAt).getTime() -
-                new Date(campaign.startsAt).getTime()),
+              (new Date(campaign.endsAt).getTime() - new Date(campaign.startsAt).getTime()),
           ),
         )
       : "",
@@ -265,12 +260,10 @@ function SaleCampaignEditorForm({
         : t("admin.sales.management.phase.ended")
     : null;
   const isDraft = campaign?.status === "DRAFT";
-  const isPublishedUpcoming =
-    campaign?.status === "PUBLISHED" && phase === "UPCOMING";
+  const isPublishedUpcoming = campaign?.status === "PUBLISHED" && phase === "UPCOMING";
   const isLive = campaign?.status === "PUBLISHED" && phase === "LIVE";
   const isReadOnly =
-    campaign?.status === "CANCELLED" ||
-    (campaign?.status === "PUBLISHED" && phase === "ENDED");
+    campaign?.status === "CANCELLED" || (campaign?.status === "PUBLISHED" && phase === "ENDED");
   const canEditAll = !campaign || isDraft || isPublishedUpcoming;
   const canEditDisplay = canEditAll || isLive;
   const isSaving =
@@ -296,7 +289,9 @@ function SaleCampaignEditorForm({
       if (!validation.valid && validation.step < nextStep) {
         setStep(validation.step);
         if (validation.step === 1) {
-          setContentLocale(values.englishDescription.trim() && !values.englishName.trim() ? "en" : "vi");
+          setContentLocale(
+            values.englishDescription.trim() && !values.englishName.trim() ? "en" : "vi",
+          );
         }
         toast.error(validation.message);
         return;
@@ -326,9 +321,7 @@ function SaleCampaignEditorForm({
       setContentLocale("en");
       toast.success(t("admin.contentGeneration.success"));
     } catch (error) {
-      toast.error(
-        `${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`,
-      );
+      toast.error(`${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`);
     }
   }
 
@@ -368,7 +361,9 @@ function SaleCampaignEditorForm({
     if (!validation.valid) {
       setStep(validation.step);
       if (validation.step === 1) {
-        setContentLocale(values.englishDescription.trim() && !values.englishName.trim() ? "en" : "vi");
+        setContentLocale(
+          values.englishDescription.trim() && !values.englishName.trim() ? "en" : "vi",
+        );
       }
       toast.error(validation.message);
       return;
@@ -417,9 +412,7 @@ function SaleCampaignEditorForm({
           id: saved.id,
           version: saved.version,
         });
-        toast.success(
-          t("admin.sales.editor.toast.published", { name: published.name }),
-        );
+        toast.success(t("admin.sales.editor.toast.published", { name: published.name }));
         router.replace(`/dashboard/sales/${published.id}`);
       } catch (error) {
         toast.error(
@@ -441,26 +434,20 @@ function SaleCampaignEditorForm({
     try {
       if (lifecycleAction === "DELETE") {
         await deleteMutation.mutateAsync(campaign.id);
-        toast.success(
-          t("admin.sales.editor.toast.deleted", { name: campaign.name }),
-        );
+        toast.success(t("admin.sales.editor.toast.deleted", { name: campaign.name }));
         router.replace("/dashboard/sales");
       } else if (lifecycleAction === "CANCEL") {
         const cancelled = await cancelMutation.mutateAsync({
           id: campaign.id,
           version: campaign.version,
         });
-        toast.success(
-          t("admin.sales.editor.toast.cancelled", { name: cancelled.name }),
-        );
+        toast.success(t("admin.sales.editor.toast.cancelled", { name: cancelled.name }));
       } else if (lifecycleAction === "END") {
         const ended = await endMutation.mutateAsync({
           id: campaign.id,
           version: campaign.version,
         });
-        toast.success(
-          t("admin.sales.editor.toast.ended", { name: ended.name }),
-        );
+        toast.success(t("admin.sales.editor.toast.ended", { name: ended.name }));
       } else {
         const code = cloneDraft.code.trim().toUpperCase();
         const name = cloneDraft.name.trim();
@@ -555,13 +542,11 @@ function SaleCampaignEditorForm({
                   <Badge variant={campaign.status === "CANCELLED" ? "destructive" : "outline"}>
                     {statusLabel}
                   </Badge>
-                  {phase ? (
-                    <Badge variant={phaseVariant(phase)}>{phaseLabel}</Badge>
-                  ) : null}
+                  {phase ? <Badge variant={phaseVariant(phase)}>{phaseLabel}</Badge> : null}
                 </>
               ) : null}
             </div>
-            <p className="mt-1 max-w-2xl text-muted-foreground text-sm">
+            <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
               {campaign
                 ? t("admin.sales.editor.editDescription")
                 : t("admin.sales.editor.createDescription")}
@@ -613,18 +598,14 @@ function SaleCampaignEditorForm({
         <Alert>
           <LockKeyhole />
           <AlertTitle>{t("admin.sales.editor.liveAlert.title")}</AlertTitle>
-          <AlertDescription>
-            {t("admin.sales.editor.liveAlert.description")}
-          </AlertDescription>
+          <AlertDescription>{t("admin.sales.editor.liveAlert.description")}</AlertDescription>
         </Alert>
       ) : null}
       {isReadOnly ? (
         <Alert>
           <LockKeyhole />
           <AlertTitle>{t("admin.sales.editor.readOnlyAlert.title")}</AlertTitle>
-          <AlertDescription>
-            {t("admin.sales.editor.readOnlyAlert.description")}
-          </AlertDescription>
+          <AlertDescription>{t("admin.sales.editor.readOnlyAlert.description")}</AlertDescription>
         </Alert>
       ) : null}
 
@@ -686,7 +667,7 @@ function SaleCampaignEditorForm({
         </CardContent>
       </Card>
 
-      <footer className="sticky bottom-0 z-10 -mx-4 border-t bg-background/90 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <footer className="bg-background/90 sticky bottom-0 z-10 -mx-4 border-t px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-2">
             <Button
@@ -784,10 +765,8 @@ function LiveQuotaManager({
   return (
     <div className="grid gap-3 rounded-xl border p-4">
       <div>
-        <h2 className="font-heading font-medium">
-          {t("admin.sales.editor.liveQuota.title")}
-        </h2>
-        <p className="mt-1 text-muted-foreground text-sm">
+        <h2 className="font-heading font-medium">{t("admin.sales.editor.liveQuota.title")}</h2>
+        <p className="text-muted-foreground mt-1 text-sm">
           {t("admin.sales.editor.liveQuota.description")}
         </p>
       </div>
@@ -800,7 +779,7 @@ function LiveQuotaManager({
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{item.productName}</p>
-              <p className="font-mono text-muted-foreground text-xs">{item.sku}</p>
+              <p className="text-muted-foreground font-mono text-xs">{item.sku}</p>
             </div>
             <div className="text-sm tabular-nums sm:text-right">
               <p>
@@ -884,15 +863,13 @@ function LifecycleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {copy?.title ?? t("admin.sales.editor.lifecycle.confirmTitle")}
-          </DialogTitle>
+          <DialogTitle>{copy?.title ?? t("admin.sales.editor.lifecycle.confirmTitle")}</DialogTitle>
           <DialogDescription>{copy?.description}</DialogDescription>
         </DialogHeader>
         {action === "END_AND_CLONE" ? (
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <label htmlFor="clone-code" className="font-medium text-sm">
+              <label htmlFor="clone-code" className="text-sm font-medium">
                 {t("admin.sales.editor.clone.code")}
               </label>
               <Input
@@ -909,7 +886,7 @@ function LifecycleDialog({
               />
             </div>
             <div className="grid gap-2">
-              <label htmlFor="clone-name" className="font-medium text-sm">
+              <label htmlFor="clone-name" className="text-sm font-medium">
                 {t("admin.sales.editor.clone.name")}
               </label>
               <Input
@@ -924,7 +901,7 @@ function LifecycleDialog({
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <label htmlFor="clone-start" className="font-medium text-sm">
+                <label htmlFor="clone-start" className="text-sm font-medium">
                   {t("admin.sales.editor.clone.startsAt")}
                 </label>
                 <Input
@@ -938,7 +915,7 @@ function LifecycleDialog({
                 />
               </div>
               <div className="grid gap-2">
-                <label htmlFor="clone-end" className="font-medium text-sm">
+                <label htmlFor="clone-end" className="text-sm font-medium">
                   {t("admin.sales.editor.clone.endsAt")}
                 </label>
                 <Input
@@ -1003,7 +980,7 @@ function QuotaIncreaseDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
-          <label htmlFor="additional-quota" className="font-medium text-sm">
+          <label htmlFor="additional-quota" className="text-sm font-medium">
             {t("admin.sales.editor.quotaDialog.additionalQuantity")}
           </label>
           <Input

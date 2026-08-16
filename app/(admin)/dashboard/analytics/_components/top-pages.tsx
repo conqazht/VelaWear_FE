@@ -4,7 +4,14 @@ import { Ellipsis } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { getIntlLocale } from "@/lib/i18n";
 
 const pages = [
@@ -18,14 +25,19 @@ const pages = [
 export function TopPages() {
   const { locale, t } = useI18n();
   const intlLocale = getIntlLocale(locale);
-  const compactFormatter = new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 1, notation: "compact" });
+  const compactFormatter = new Intl.NumberFormat(intlLocale, {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  });
   const numberFormatter = new Intl.NumberFormat(intlLocale, { minimumIntegerDigits: 2 });
   const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
 
   return (
     <Card className="h-full gap-2">
       <CardHeader>
-        <CardTitle className="font-normal">{t("admin.dashboardsA.analytics.pagePerformance")}</CardTitle>
+        <CardTitle className="font-normal">
+          {t("admin.dashboardsA.analytics.pagePerformance")}
+        </CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -51,14 +63,16 @@ export function TopPages() {
             {pages.map((page) => (
               <TableRow className="hover:bg-transparent" key={page.path}>
                 <TableCell className="max-w-0 truncate py-4 font-medium">{page.path}</TableCell>
-                <TableCell className="text-right tabular-nums">{compactFormatter.format(page.views)}</TableCell>
-                <TableCell className="text-right text-muted-foreground tabular-nums">
+                <TableCell className="text-right tabular-nums">
+                  {compactFormatter.format(page.views)}
+                </TableCell>
+                <TableCell className="text-muted-foreground text-right tabular-nums">
                   {t("admin.dashboardsA.analytics.duration", {
                     minutes: Math.floor(page.seconds / 60),
                     seconds: numberFormatter.format(page.seconds % 60),
                   })}
                 </TableCell>
-                <TableCell className="text-right text-muted-foreground tabular-nums">
+                <TableCell className="text-muted-foreground text-right tabular-nums">
                   {percentFormatter.format(page.bounce)}
                 </TableCell>
               </TableRow>

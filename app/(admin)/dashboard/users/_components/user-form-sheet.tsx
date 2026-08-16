@@ -3,9 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 
-import {
-  ResourceFormSheet,
-} from "@/app/(admin)/dashboard/_components/management/resource-overlays";
+import { ResourceFormSheet } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,11 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type {
-  AdminGender,
-  AdminRole,
-  AdminUser,
-} from "@/lib/api/admin-rbac";
+import type { AdminGender, AdminRole, AdminUser } from "@/lib/api/admin-rbac";
 
 export type UserFormValues = {
   fullName: string;
@@ -75,9 +69,7 @@ export function UserFormSheet({
     gender: user?.gender ?? "OTHER",
     roles: user?.roles.map((role) => role.name) ?? [],
   });
-  const [rolesValidationError, setRolesValidationError] = useState<string | null>(
-    null
-  );
+  const [rolesValidationError, setRolesValidationError] = useState<string | null>(null);
 
   function toggleRole(roleName: string, checked: boolean) {
     setValues((current) => ({
@@ -133,7 +125,9 @@ export function UserFormSheet({
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="user-full-name">{t("admin.commerce.users.form.fullName")}</FieldLabel>
+          <FieldLabel htmlFor="user-full-name">
+            {t("admin.commerce.users.form.fullName")}
+          </FieldLabel>
           <Input
             id="user-full-name"
             value={values.fullName}
@@ -167,9 +161,7 @@ export function UserFormSheet({
             required
           />
           {mode === "edit" ? (
-            <FieldDescription>
-              {t("admin.commerce.users.form.emailImmutable")}
-            </FieldDescription>
+            <FieldDescription>{t("admin.commerce.users.form.emailImmutable")}</FieldDescription>
           ) : null}
         </Field>
 
@@ -199,7 +191,9 @@ export function UserFormSheet({
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor="user-birth-date">{t("admin.commerce.users.form.birthDate")}</FieldLabel>
+            <FieldLabel htmlFor="user-birth-date">
+              {t("admin.commerce.users.form.birthDate")}
+            </FieldLabel>
             <Input
               id="user-birth-date"
               type="date"
@@ -252,17 +246,13 @@ export function UserFormSheet({
             maxLength={500}
             placeholder="/uploads/avatars/user.png"
           />
-          <FieldDescription>
-            {t("admin.commerce.users.form.avatarHelp")}
-          </FieldDescription>
+          <FieldDescription>{t("admin.commerce.users.form.avatarHelp")}</FieldDescription>
         </Field>
       </FieldGroup>
 
       <FieldSet>
         <FieldLegend variant="label">{t("admin.commerce.users.form.roles")}</FieldLegend>
-        <FieldDescription>
-          {t("admin.commerce.users.form.rolesHelp")}
-        </FieldDescription>
+        <FieldDescription>{t("admin.commerce.users.form.rolesHelp")}</FieldDescription>
 
         {rolesError ? (
           <Alert variant="destructive">
@@ -271,7 +261,8 @@ export function UserFormSheet({
           </Alert>
         ) : isRolesLoading ? (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
-            <Loader2 className="size-4 animate-spin" /> {t("admin.commerce.users.form.loadingRoles")}
+            <Loader2 className="size-4 animate-spin" />{" "}
+            {t("admin.commerce.users.form.loadingRoles")}
           </div>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
@@ -280,9 +271,7 @@ export function UserFormSheet({
                 <Field orientation="horizontal">
                   <Checkbox
                     checked={values.roles.includes(role.name)}
-                    onCheckedChange={(checked) =>
-                      toggleRole(role.name, Boolean(checked))
-                    }
+                    onCheckedChange={(checked) => toggleRole(role.name, Boolean(checked))}
                     disabled={isPending}
                     aria-label={t("admin.commerce.users.form.assignRole", { name: role.name })}
                   />

@@ -16,7 +16,14 @@ import { EventCalendarViews } from "@/components/calendar/event-calendar-views";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getIntlLocale } from "@/lib/i18n";
 
 import { demoEvents } from "./events-data";
@@ -56,9 +63,9 @@ export function Calendar() {
 
   return (
     <div className="flex flex-col overflow-hidden rounded-md border">
-      <div className="flex flex-col gap-4 border-b bg-sidebar p-4 text-sidebar-foreground lg:flex-row lg:items-center lg:justify-between">
+      <div className="bg-sidebar text-sidebar-foreground flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 shrink-0 flex-col gap-1">
-          <div className="font-medium text-lg leading-none">{title}</div>
+          <div className="text-lg leading-none font-medium">{title}</div>
           <p className="text-muted-foreground text-sm">
             {t("admin.workflows.calendar.summary", {
               days: numberFormatter.format(days),
@@ -143,7 +150,9 @@ export function Calendar() {
         locale={locale}
         locales={[viLocale]}
         plugins={[...plugins]}
-        popoverCloseContent={() => <XIcon className="size-5 text-muted-foreground group-hover:text-foreground" />}
+        popoverCloseContent={() => (
+          <XIcon className="text-muted-foreground group-hover:text-foreground size-5" />
+        )}
         events={demoEvents}
         nowIndicator
         datesSet={(info) => {

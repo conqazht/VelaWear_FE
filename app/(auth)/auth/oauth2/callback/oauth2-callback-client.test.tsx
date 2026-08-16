@@ -39,9 +39,7 @@ vi.mock("@/lib/api/auth", () => ({
 vi.mock("@/lib/auth/post-auth-redirect", () => ({
   clearPostAuthRedirect: postAuthMocks.clearPostAuthRedirect,
   createSignInHref: (redirectTo?: string | null) =>
-    redirectTo
-      ? `/sign-in?redirect=${encodeURIComponent(redirectTo)}`
-      : "/sign-in",
+    redirectTo ? `/sign-in?redirect=${encodeURIComponent(redirectTo)}` : "/sign-in",
   getStoredPostAuthRedirect: () => postAuthMocks.redirectTo,
 }));
 

@@ -8,7 +8,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   getVariantStatusToggleState,
@@ -81,9 +87,13 @@ export function ProductVariantsForm({
   function updateVariant<Key extends keyof ProductVariantFormValue>(
     index: number,
     key: Key,
-    value: ProductVariantFormValue[Key]
+    value: ProductVariantFormValue[Key],
   ) {
-    onChange(variants.map((variant, itemIndex) => (itemIndex === index ? { ...variant, [key]: value } : variant)));
+    onChange(
+      variants.map((variant, itemIndex) =>
+        itemIndex === index ? { ...variant, [key]: value } : variant,
+      ),
+    );
   }
 
   function addVariant() {
@@ -101,9 +111,7 @@ export function ProductVariantsForm({
     const status = getVariantStatusToggleTarget(variant.status, checked);
     if (!status) return;
     onChange((current) =>
-      current.map((item) =>
-        item.id === variant.id ? { ...item, status } : item,
-      ),
+      current.map((item) => (item.id === variant.id ? { ...item, status } : item)),
     );
     try {
       await onPersistedStatusToggle(variant.id, status);
@@ -129,7 +137,7 @@ export function ProductVariantsForm({
           if (stock > 0 && status === "OUT_OF_STOCK") status = "ACTIVE";
         }
         return { ...variant, stockQuantity: value, status };
-      })
+      }),
     );
   }
 
@@ -137,10 +145,8 @@ export function ProductVariantsForm({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="font-medium text-base">
-            {t("admin.commerce.products.variants.title")}
-          </h3>
-          <p className="mt-1 text-muted-foreground text-sm">
+          <h3 className="text-base font-medium">{t("admin.commerce.products.variants.title")}</h3>
+          <p className="text-muted-foreground mt-1 text-sm">
             {t("admin.commerce.products.variants.description")}
           </p>
         </div>
@@ -158,10 +164,10 @@ export function ProductVariantsForm({
 
       <div className="space-y-4">
         {variants.map((variant, index) => (
-          <section key={variant.key} className="rounded-lg border bg-muted/10 p-4">
+          <section key={variant.key} className="bg-muted/10 rounded-lg border p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <p className="font-medium text-sm">
+                <p className="text-sm font-medium">
                   {t("admin.commerce.products.variants.label", { number: index + 1 })}
                 </p>
                 {variant.id ? (
@@ -203,7 +209,9 @@ export function ProductVariantsForm({
                 </FieldLabel>
                 <Select
                   value={variant.colorId || NONE}
-                  onValueChange={(value) => updateVariant(index, "colorId", value === NONE ? "" : (value ?? ""))}
+                  onValueChange={(value) =>
+                    updateVariant(index, "colorId", value === NONE ? "" : (value ?? ""))
+                  }
                   disabled={isCatalogLoading}
                 >
                   <SelectTrigger id={`variant-${variant.key}-color`} className="w-full">
@@ -228,7 +236,9 @@ export function ProductVariantsForm({
                 </FieldLabel>
                 <Select
                   value={variant.sizeId || NONE}
-                  onValueChange={(value) => updateVariant(index, "sizeId", value === NONE ? "" : (value ?? ""))}
+                  onValueChange={(value) =>
+                    updateVariant(index, "sizeId", value === NONE ? "" : (value ?? ""))
+                  }
                   disabled={isCatalogLoading}
                 >
                   <SelectTrigger id={`variant-${variant.key}-size`} className="w-full">
@@ -291,7 +301,7 @@ export function ProductVariantsForm({
                     disabled={
                       !variant.id ||
                       getVariantStatusToggleState(variant.status).disabled ||
-                      pendingStatusVariantId !== null && pendingStatusVariantId !== undefined
+                      (pendingStatusVariantId !== null && pendingStatusVariantId !== undefined)
                     }
                     aria-label={t("admin.commerce.translation.toggleAria", { name: variant.sku })}
                     onCheckedChange={(checked) => void togglePersistedStatus(index, checked)}
@@ -302,7 +312,9 @@ export function ProductVariantsForm({
                 </div>
                 <Select
                   value={variant.status}
-                  onValueChange={(value) => updateVariant(index, "status", value as ProductVariantStatus)}
+                  onValueChange={(value) =>
+                    updateVariant(index, "status", value as ProductVariantStatus)
+                  }
                 >
                   <SelectTrigger id={`variant-${variant.key}-status`} className="w-full">
                     <SelectValue />
@@ -321,9 +333,7 @@ export function ProductVariantsForm({
         ))}
       </div>
 
-      <FieldDescription>
-        {t("admin.commerce.products.variants.help")}
-      </FieldDescription>
+      <FieldDescription>{t("admin.commerce.products.variants.help")}</FieldDescription>
     </div>
   );
 }

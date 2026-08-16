@@ -7,7 +7,14 @@ import { ArrowUpRight } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -124,7 +131,10 @@ function getTrafficData() {
 
   return trafficPoints.map((point, index) => ({
     ...point,
-    timestamp: subMinutes(now, (trafficPoints.length - 1 - index) * trafficIntervalMinutes).toISOString(),
+    timestamp: subMinutes(
+      now,
+      (trafficPoints.length - 1 - index) * trafficIntervalMinutes,
+    ).toISOString(),
   }));
 }
 
@@ -132,7 +142,10 @@ export function StoreTraffic() {
   const { locale, t } = useI18n();
   const intlLocale = getIntlLocale(locale);
   const numberFormatter = new Intl.NumberFormat(intlLocale);
-  const compactFormatter = new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 1, notation: "compact" });
+  const compactFormatter = new Intl.NumberFormat(intlLocale, {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  });
   const tooltipDateFormatter = new Intl.DateTimeFormat(intlLocale, {
     day: "numeric",
     hour: "numeric",
@@ -165,10 +178,10 @@ export function StoreTraffic() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">
+        <CardTitle className="text-muted-foreground text-sm font-normal">
           {t("admin.dashboardsA.ecommerce.storeTraffic")}
         </CardTitle>
-        <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
+        <CardDescription className="text-foreground text-xl leading-none tracking-tight tabular-nums">
           {t("admin.dashboardsA.ecommerce.visitCount", { count: compactFormatter.format(12_900) })}
         </CardDescription>
         <CardAction>
@@ -178,7 +191,11 @@ export function StoreTraffic() {
 
       <CardContent>
         <ChartContainer config={trafficConfig} className="h-54 w-full">
-          <AreaChart accessibilityLayer data={trafficData} margin={{ bottom: 0, left: 0, right: 0, top: 8 }}>
+          <AreaChart
+            accessibilityLayer
+            data={trafficData}
+            margin={{ bottom: 0, left: 0, right: 0, top: 8 }}
+          >
             <defs>
               <linearGradient id="fillVisitors" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor="var(--color-visitors)" stopOpacity={0.28} />
@@ -195,7 +212,14 @@ export function StoreTraffic() {
               tickMargin={10}
               ticks={[trafficData[0].timestamp, trafficData.at(-1)?.timestamp ?? ""]}
             />
-            <YAxis axisLine={false} domain={[0, 650]} tickLine={false} tickMargin={6} width={36} yAxisId="traffic" />
+            <YAxis
+              axisLine={false}
+              domain={[0, 650]}
+              tickLine={false}
+              tickMargin={6}
+              width={36}
+              yAxisId="traffic"
+            />
             <ChartTooltip
               content={
                 <ChartTooltipContent
@@ -205,7 +229,11 @@ export function StoreTraffic() {
               }
               cursor={{ stroke: "var(--border)", strokeDasharray: "4 4" }}
             />
-            <ChartLegend align="right" verticalAlign="top" className="justify-end" content={<ChartLegendContent />} />
+            <ChartLegend
+              align="right"
+              verticalAlign="top"
+              content={<ChartLegendContent className="justify-end" />}
+            />
             <Area
               dataKey="visitors"
               dot={false}

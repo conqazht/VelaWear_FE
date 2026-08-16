@@ -67,7 +67,7 @@ export function InvoiceItems() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="hidden items-center gap-2 px-1 font-medium text-muted-foreground text-xs md:grid md:grid-cols-[24px_minmax(0,1fr)_64px_112px_112px_32px]">
+        <div className="text-muted-foreground hidden items-center gap-2 px-1 text-xs font-medium md:grid md:grid-cols-[24px_minmax(0,1fr)_64px_112px_112px_32px]">
           <span />
           <span>{t("admin.workflows.invoice.description")}</span>
           <span className="px-2">{t("admin.workflows.invoice.units")}</span>
@@ -118,7 +118,15 @@ function SortableInvoiceItemRow({
 }) {
   const { locale, t } = useI18n();
   const itemNumber = new Intl.NumberFormat(getIntlLocale(locale)).format(index + 1);
-  const { attributes, isDragging, listeners, setActivatorNodeRef, setNodeRef, transform, transition } = useSortable({
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
     id,
   });
 
@@ -139,7 +147,7 @@ function SortableInvoiceItemRow({
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="-ml-2 cursor-grab text-muted-foreground active:cursor-grabbing"
+        className="text-muted-foreground -ml-2 cursor-grab active:cursor-grabbing"
         aria-label={t("admin.workflows.invoice.reorderItem", { id })}
         {...attributes}
         {...listeners}
@@ -165,8 +173,10 @@ function SortableInvoiceItemRow({
         aria-label={t("admin.workflows.invoice.itemUnitPrice", { number: itemNumber })}
         {...register(`items.${index}.unitPrice` as const, { valueAsNumber: true })}
       />
-      <div className="min-w-0 text-right font-medium text-sm max-md:col-span-3 max-md:col-start-2 max-md:row-start-3 max-md:flex max-md:items-center max-md:justify-between max-md:text-left">
-        <span className="hidden text-muted-foreground max-md:inline">{t("admin.workflows.invoice.lineTotal")}</span>
+      <div className="min-w-0 text-right text-sm font-medium max-md:col-span-3 max-md:col-start-2 max-md:row-start-3 max-md:flex max-md:items-center max-md:justify-between max-md:text-left">
+        <span className="text-muted-foreground hidden max-md:inline">
+          {t("admin.workflows.invoice.lineTotal")}
+        </span>
         <span>{formatInvoiceCurrency(getLineAmount(item), getIntlLocale(locale))}</span>
       </div>
       <Button

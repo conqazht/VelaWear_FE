@@ -13,7 +13,7 @@ export function MailDashboardPreview() {
     <div className="flex h-full flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-medium text-sm leading-none">
+          <h1 className="text-sm leading-none font-medium">
             {t("admin.communications.mail.preview.title")}
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -41,7 +41,7 @@ export function MailDashboardPreview() {
       <iframe
         src="/mail"
         title={t("admin.communications.mail.preview.frameTitle")}
-        className="min-h-0 flex-1 rounded-lg border bg-background"
+        className="bg-background min-h-0 flex-1 rounded-lg border"
       />
     </div>
   );

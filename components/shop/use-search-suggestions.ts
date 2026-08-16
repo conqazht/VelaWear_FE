@@ -40,9 +40,8 @@ export function useSearchSuggestions(searchQuery: string, activeLocale: Locale) 
         });
         if (requestGeneration !== requestGenerationRef.current) return;
 
-        const mapped = (data.result || []).map(
-          (product: Parameters<typeof mapBackendProduct>[0]) =>
-            mapBackendProduct(product, activeLocale),
+        const mapped = (data.result || []).map((product: Parameters<typeof mapBackendProduct>[0]) =>
+          mapBackendProduct(product, activeLocale),
         );
         setResult({
           locale: activeLocale,
@@ -62,11 +61,7 @@ export function useSearchSuggestions(searchQuery: string, activeLocale: Locale) 
     };
   }, [activeLocale, trimmedQuery]);
 
-  if (
-    !trimmedQuery ||
-    result?.locale !== activeLocale ||
-    result.query !== trimmedQuery
-  ) {
+  if (!trimmedQuery || result?.locale !== activeLocale || result.query !== trimmedQuery) {
     return [];
   }
 

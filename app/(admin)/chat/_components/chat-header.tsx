@@ -11,17 +11,14 @@ export function ChatHeader() {
   const { t } = useI18n();
 
   return (
-    <header className="sticky top-0 z-50 flex h-(--header-height) w-full items-center border-b bg-background">
+    <header className="bg-background sticky top-0 z-50 flex h-(--header-height) w-full items-center border-b">
       <div className="flex h-full w-full items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <h1 className="text-nowrap font-medium text-base">
+          <h1 className="text-base font-medium text-nowrap">
             {t("admin.communications.chat.title")}
           </h1>
           <InputGroup className="hidden h-7 w-full max-w-sm sm:flex">
-            <InputGroupInput
-              className="h-7"
-              placeholder={t("admin.communications.chat.search")}
-            />
+            <InputGroupInput className="h-7" placeholder={t("admin.communications.chat.search")} />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>

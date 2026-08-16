@@ -33,9 +33,7 @@ export function createProductVariantWorkflowCheckpoint({
     desiredVariants.map((variant) => Object.freeze(cloneVariant(variant))),
   );
   const desiredPersistedIds = new Set(
-    desiredVariants.flatMap((variant) =>
-      variant.id === undefined ? [] : [variant.id],
-    ),
+    desiredVariants.flatMap((variant) => (variant.id === undefined ? [] : [variant.id])),
   );
 
   return {
@@ -44,10 +42,7 @@ export function createProductVariantWorkflowCheckpoint({
     desiredVariants: desiredSnapshot,
     workingVariants: desiredVariants.map((variant) => ({
       ...cloneVariant(variant),
-      status:
-        needsActivationStage && variant.status === "ACTIVE"
-          ? "INACTIVE"
-          : variant.status,
+      status: needsActivationStage && variant.status === "ACTIVE" ? "INACTIVE" : variant.status,
     })),
     persistedIds: [...knownVariantIds],
     persistedBaselines: baselineVariants.map(cloneVariant),
@@ -60,17 +55,17 @@ export function recordPersistedVariant(
   index: number,
   savedVariant: ProductVariantFormValue,
 ): ProductVariantWorkflowCheckpoint {
-  const persistedIds = savedVariant.id === undefined
-    ? checkpoint.persistedIds
-    : [...new Set([...checkpoint.persistedIds, savedVariant.id])];
-  const persistedBaselines = savedVariant.id === undefined
-    ? checkpoint.persistedBaselines
-    : [
-        ...checkpoint.persistedBaselines.filter(
-          (variant) => variant.id !== savedVariant.id,
-        ),
-        cloneVariant(savedVariant),
-      ];
+  const persistedIds =
+    savedVariant.id === undefined
+      ? checkpoint.persistedIds
+      : [...new Set([...checkpoint.persistedIds, savedVariant.id])];
+  const persistedBaselines =
+    savedVariant.id === undefined
+      ? checkpoint.persistedBaselines
+      : [
+          ...checkpoint.persistedBaselines.filter((variant) => variant.id !== savedVariant.id),
+          cloneVariant(savedVariant),
+        ];
 
   return {
     ...checkpoint,
@@ -89,9 +84,7 @@ export function recordDeletedVariant(
   return {
     ...checkpoint,
     persistedIds: checkpoint.persistedIds.filter((id) => id !== variantId),
-    persistedBaselines: checkpoint.persistedBaselines.filter(
-      (variant) => variant.id !== variantId,
-    ),
+    persistedBaselines: checkpoint.persistedBaselines.filter((variant) => variant.id !== variantId),
     staleVariantIds: checkpoint.staleVariantIds.filter((id) => id !== variantId),
   };
 }

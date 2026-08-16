@@ -4,11 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 
-import {
-  getPublicSale,
-  getPublicSales,
-  type PublicSaleFilters,
-} from "@/lib/api/sales";
+import { getPublicSale, getPublicSales, type PublicSaleFilters } from "@/lib/api/sales";
 
 export const saleQueryKeys = {
   root: ["sales"] as const,

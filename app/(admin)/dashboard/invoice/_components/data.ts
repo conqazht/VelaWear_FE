@@ -159,7 +159,9 @@ export function getInvoiceSubtotal(invoice: InvoiceFormValues) {
 }
 
 export function getInvoiceTaxOption(invoice: InvoiceFormValues) {
-  return invoiceTaxOptions.find((taxOption) => taxOption.id === invoice.taxId) ?? invoiceTaxOptions[0];
+  return (
+    invoiceTaxOptions.find((taxOption) => taxOption.id === invoice.taxId) ?? invoiceTaxOptions[0]
+  );
 }
 
 export function getInvoiceTax(invoice: InvoiceFormValues) {
@@ -171,11 +173,14 @@ export function getInvoiceTax(invoice: InvoiceFormValues) {
 export function getInvoiceDiscount(invoice: InvoiceFormValues) {
   const subtotal = getInvoiceSubtotal(invoice);
   const discountValue = Number.isFinite(invoice.discountValue) ? invoice.discountValue : 0;
-  const discount = invoice.discountType === "percent" ? subtotal * (discountValue / 100) : discountValue;
+  const discount =
+    invoice.discountType === "percent" ? subtotal * (discountValue / 100) : discountValue;
 
   return Math.min(Math.max(discount, 0), subtotal);
 }
 
 export function getInvoiceTotal(invoice: InvoiceFormValues) {
-  return Math.max(getInvoiceSubtotal(invoice) - getInvoiceDiscount(invoice), 0) + getInvoiceTax(invoice);
+  return (
+    Math.max(getInvoiceSubtotal(invoice) - getInvoiceDiscount(invoice), 0) + getInvoiceTax(invoice)
+  );
 }

@@ -29,24 +29,26 @@ Shared Axios instance ép JSON cho mọi request. Axios có thể biến `FormDa
 
 ## Commands cần dùng
 
-| Mục đích | Command | Kết quả mong đợi |
-|---|---|---|
-| Target tests | `pnpm exec vitest run lib/api/commerce-review.test.ts lib/api-client.test.ts` | tất cả pass |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | tất cả pass |
-| Build | `pnpm build` | production build thành công |
+| Mục đích     | Command                                                                       | Kết quả mong đợi            |
+| ------------ | ----------------------------------------------------------------------------- | --------------------------- |
+| Target tests | `pnpm exec vitest run lib/api/commerce-review.test.ts lib/api-client.test.ts` | tất cả pass                 |
+| Lint         | `pnpm exec eslint . --max-warnings 25`                                        | exit 0                      |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                   | exit 0                      |
+| Unit         | `pnpm test:unit`                                                              | tất cả pass                 |
+| Build        | `pnpm build`                                                                  | production build thành công |
 
 ## Scope
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong scope**:
+
 - `lib/api-client.ts`
 - `lib/api/commerce-review.test.ts`
 - `lib/api-client.test.ts` nếu shared transport assertion phù hợp
 
 **Ngoài scope**:
+
 - Đổi review part names/payload/validation/backend storage.
 - Upload quota hoặc generic upload.
 - Thêm Axios client riêng cho review.

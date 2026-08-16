@@ -8,8 +8,7 @@ export const GEMINI_CONTENT_MODELS = [
 
 export type GeminiContentModel = (typeof GEMINI_CONTENT_MODELS)[number];
 
-export const DEFAULT_GEMINI_CONTENT_MODEL: GeminiContentModel =
-  "gemini-3.1-flash-lite";
+export const DEFAULT_GEMINI_CONTENT_MODEL: GeminiContentModel = "gemini-3.1-flash-lite";
 
 export function isGeminiContentModel(value: string): value is GeminiContentModel {
   return GEMINI_CONTENT_MODELS.some((model) => model === value);
@@ -65,18 +64,14 @@ export type SaleCampaignEnglishSuggestion = EnglishSuggestionBase & {
   description: string | null;
 };
 
-export function generateProductEnglishSuggestion(
-  request: ProductEnglishSuggestionRequest,
-) {
+export function generateProductEnglishSuggestion(request: ProductEnglishSuggestionRequest) {
   return apiPost<ProductEnglishSuggestion, ProductEnglishSuggestionRequest>(
     "/products/translation-suggestions/en",
     request,
   );
 }
 
-export function generateCategoryEnglishSuggestion(
-  request: CategoryEnglishSuggestionRequest,
-) {
+export function generateCategoryEnglishSuggestion(request: CategoryEnglishSuggestionRequest) {
   return apiPost<CategoryEnglishSuggestion, CategoryEnglishSuggestionRequest>(
     "/categories/translation-suggestions/en",
     request,
@@ -86,8 +81,8 @@ export function generateCategoryEnglishSuggestion(
 export function generateSaleCampaignEnglishSuggestion(
   request: SaleCampaignEnglishSuggestionRequest,
 ) {
-  return apiPost<
-    SaleCampaignEnglishSuggestion,
-    SaleCampaignEnglishSuggestionRequest
-  >("/sale-campaigns/translation-suggestions/en", request);
+  return apiPost<SaleCampaignEnglishSuggestion, SaleCampaignEnglishSuggestionRequest>(
+    "/sale-campaigns/translation-suggestions/en",
+    request,
+  );
 }

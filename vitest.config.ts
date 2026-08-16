@@ -14,11 +14,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: [
-        "lib/sale-utils.ts",
-        "lib/checkout-api.ts",
-        "lib/api/sales.ts",
-      ],
+      include: ["lib/sale-utils.ts", "lib/checkout-api.ts", "lib/api/sales.ts"],
     },
   },
 });

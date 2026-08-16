@@ -30,19 +30,16 @@ describe("admin Sale public cache invalidation", () => {
     function Wrapper({ children }: { children: ReactNode }) {
       return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
     }
-    const { result } = renderHook(
-      () => useUpdateAdminSaleCampaignTranslationsMutation(),
-      { wrapper: Wrapper },
-    );
+    const { result } = renderHook(() => useUpdateAdminSaleCampaignTranslationsMutation(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({
         id: 5,
         request: {
           version: 1,
-          translations: [
-            { localeCode: "vi", name: "Sale hè", description: null },
-          ],
+          translations: [{ localeCode: "vi", name: "Sale hè", description: null }],
         },
       });
     });

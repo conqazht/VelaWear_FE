@@ -49,11 +49,12 @@ export const useCartStore = create<CartStore>()(
       cart: [],
       owner: "anonymous" as CartOwner,
       setCart: (cart) => set({ cart }),
-      attachVariant: (id, variantId) => set((state) => ({
-        cart: state.cart.map((item) =>
-          item.id === id ? { ...item, id: `variant-${variantId}`, variantId } : item
-        ),
-      })),
+      attachVariant: (id, variantId) =>
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.id === id ? { ...item, id: `variant-${variantId}`, variantId } : item,
+          ),
+        })),
       addToCart: (product, color = product.color, size = product.size) => {
         set((state) => {
           const existingIndex = state.cart.findIndex((item) =>
@@ -61,15 +62,13 @@ export const useCartStore = create<CartStore>()(
               ? item.variantId === product.variantId
               : (item.productSlug === product.id || item.id === product.id) &&
                 item.color === color &&
-                item.size === size
+                item.size === size,
           );
 
           if (existingIndex >= 0) {
             return {
               cart: state.cart.map((item, index) =>
-                index === existingIndex
-                  ? { ...item, quantity: item.quantity + 1 }
-                  : item
+                index === existingIndex ? { ...item, quantity: item.quantity + 1 } : item,
               ),
             };
           }
@@ -78,9 +77,10 @@ export const useCartStore = create<CartStore>()(
             cart: [
               ...state.cart,
               {
-                id: product.variantId !== undefined
-                  ? `variant-${product.variantId}`
-                  : `${product.id}-${color}-${size}`,
+                id:
+                  product.variantId !== undefined
+                    ? `variant-${product.variantId}`
+                    : `${product.id}-${color}-${size}`,
                 productId: product.realId,
                 productSlug: product.id,
                 name: product.name,
@@ -109,9 +109,7 @@ export const useCartStore = create<CartStore>()(
         if (quantity < 1) return;
 
         set((state) => ({
-          cart: state.cart.map((item) =>
-            item.id === id ? { ...item, quantity } : item
-          ),
+          cart: state.cart.map((item) => (item.id === id ? { ...item, quantity } : item)),
         }));
       },
       removeItem: (id) => {
@@ -120,16 +118,17 @@ export const useCartStore = create<CartStore>()(
         }));
       },
       clearCart: () => set({ cart: [] }),
-      claimForUser: (userId) => set((state) => {
-        const targetOwner: CartOwner = `user:${userId}`;
-        if (state.owner === targetOwner) return state;
-        // Anonymous → user: claim existing items
-        if (state.owner === "anonymous") {
-          return { owner: targetOwner };
-        }
-        // Different user → clear and assign
-        return { cart: [], owner: targetOwner };
-      }),
+      claimForUser: (userId) =>
+        set((state) => {
+          const targetOwner: CartOwner = `user:${userId}`;
+          if (state.owner === targetOwner) return state;
+          // Anonymous → user: claim existing items
+          if (state.owner === "anonymous") {
+            return { owner: targetOwner };
+          }
+          // Different user → clear and assign
+          return { cart: [], owner: targetOwner };
+        }),
       releaseToAnonymous: () => set({ cart: [], owner: "anonymous" }),
     }),
     {

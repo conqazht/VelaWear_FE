@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createAdminPermission,
@@ -40,22 +35,19 @@ export const adminRbacKeys = {
   root: ["admin-rbac"] as const,
   users: {
     root: ["admin-rbac", "users"] as const,
-    list: (filters: AdminUserFilters) =>
-      ["admin-rbac", "users", "list", filters] as const,
+    list: (filters: AdminUserFilters) => ["admin-rbac", "users", "list", filters] as const,
     detail: (id: number) => ["admin-rbac", "users", "detail", id] as const,
   },
   roles: {
     root: ["admin-rbac", "roles"] as const,
-    list: (filters: AdminRoleFilters) =>
-      ["admin-rbac", "roles", "list", filters] as const,
+    list: (filters: AdminRoleFilters) => ["admin-rbac", "roles", "list", filters] as const,
     detail: (id: number) => ["admin-rbac", "roles", "detail", id] as const,
   },
   permissions: {
     root: ["admin-rbac", "permissions"] as const,
     list: (filters: AdminPermissionFilters) =>
       ["admin-rbac", "permissions", "list", filters] as const,
-    detail: (id: number) =>
-      ["admin-rbac", "permissions", "detail", id] as const,
+    detail: (id: number) => ["admin-rbac", "permissions", "detail", id] as const,
   },
 };
 
@@ -107,13 +99,8 @@ export function useUpdateAdminUserRolesMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      request,
-    }: {
-      id: number;
-      request: UpdateAdminUserRolesRequest;
-    }) => updateAdminUserRoles(id, request),
+    mutationFn: ({ id, request }: { id: number; request: UpdateAdminUserRolesRequest }) =>
+      updateAdminUserRoles(id, request),
     onSuccess: async (_, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminRbacKeys.users.root }),
@@ -195,9 +182,7 @@ export function useDeleteAdminRoleMutation() {
   });
 }
 
-export function useAdminPermissionsQuery(
-  filters: AdminPermissionFilters = {}
-) {
+export function useAdminPermissionsQuery(filters: AdminPermissionFilters = {}) {
   return useQuery({
     queryKey: adminRbacKeys.permissions.list(filters),
     queryFn: () => getAdminPermissions(filters),
@@ -217,8 +202,7 @@ export function useCreateAdminPermissionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateAdminPermissionRequest) =>
-      createAdminPermission(request),
+    mutationFn: (request: CreateAdminPermissionRequest) => createAdminPermission(request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: adminRbacKeys.permissions.root,
@@ -231,13 +215,8 @@ export function useUpdateAdminPermissionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      request,
-    }: {
-      id: number;
-      request: UpdateAdminPermissionRequest;
-    }) => updateAdminPermission(id, request),
+    mutationFn: ({ id, request }: { id: number; request: UpdateAdminPermissionRequest }) =>
+      updateAdminPermission(id, request),
     onSuccess: async (_, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({

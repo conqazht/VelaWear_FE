@@ -33,22 +33,23 @@ Một browser-wide cart key không có owner. Sau expiry/revocation, item của 
 
 ## Commands cần dùng
 
-| Mục đích | Command | Kết quả mong đợi |
-|---|---|---|
-| Store/provider/auth tests | `pnpm exec vitest run store/cart-store.test.ts components/shop/cart-provider.test.tsx components/auth/auth-provider.test.tsx lib/api-client.test.ts` | tất cả pass |
-| Logout caller tests | `pnpm exec vitest run components/shop/site-header.test.tsx 'app/(admin)/dashboard/_components/sidebar/app-sidebar.test.tsx'` | desktop/mobile/admin await, chặn duplicate và không navigate khi fail |
-| A-to-B full-stack | `pnpm exec playwright test e2e/fullstack/auth-session.spec.ts --grep "cart ownership survives account transitions"` | named flow pass với disposable BE/DB/Redis |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | tất cả pass |
-| Build | `pnpm build` | production build thành công |
-| Full stack | `pnpm test:e2e:fullstack` | auth/session cases pass với disposable BE/DB/Redis |
+| Mục đích                  | Command                                                                                                                                              | Kết quả mong đợi                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Store/provider/auth tests | `pnpm exec vitest run store/cart-store.test.ts components/shop/cart-provider.test.tsx components/auth/auth-provider.test.tsx lib/api-client.test.ts` | tất cả pass                                                           |
+| Logout caller tests       | `pnpm exec vitest run components/shop/site-header.test.tsx 'app/(admin)/dashboard/_components/sidebar/app-sidebar.test.tsx'`                         | desktop/mobile/admin await, chặn duplicate và không navigate khi fail |
+| A-to-B full-stack         | `pnpm exec playwright test e2e/fullstack/auth-session.spec.ts --grep "cart ownership survives account transitions"`                                  | named flow pass với disposable BE/DB/Redis                            |
+| Lint                      | `pnpm exec eslint . --max-warnings 25`                                                                                                               | exit 0                                                                |
+| Typecheck                 | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                          | exit 0                                                                |
+| Unit                      | `pnpm test:unit`                                                                                                                                     | tất cả pass                                                           |
+| Build                     | `pnpm build`                                                                                                                                         | production build thành công                                           |
+| Full stack                | `pnpm test:e2e:fullstack`                                                                                                                            | auth/session cases pass với disposable BE/DB/Redis                    |
 
 ## Scope
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong scope**:
+
 - `store/cart-store.ts`
 - `components/shop/cart-provider.tsx`
 - `components/auth/auth-provider.tsx`
@@ -65,6 +66,7 @@ Một browser-wide cart key không có owner. Sau expiry/revocation, item của 
 - `e2e/fullstack/auth-session.spec.ts`
 
 **Ngoài scope**:
+
 - JavaScript đọc/xóa `HttpOnly` refresh cookie.
 - Backend logout/session change.
 - Di chuyển provider (FE-006).
@@ -107,12 +109,12 @@ Khi auth loading, không expose account cart như anonymous. Chỉ merge guest c
 Thực hiện phần API/session của exact logout settlement matrix trong Web Lock hiện
 có, rồi giữ nguyên layer boundary:
 
-| Server outcome | Settlement |
-|---|---|
-| Initial Bearer request trả 401 | retry đúng một lần không Bearer, dùng refresh cookie |
-| Một trong hai request trả 2xx | `lib/api-client.ts` chỉ clear in-memory access token trong lock rồi resolve; `useLogoutMutation.onSuccess` clear auth query cache, `AuthProvider.signOut` clear owned cart trước khi caller navigate |
-| Final response là 401 với stable `SESSION_REVOKED` hoặc `AUTHENTICATION_REQUIRED` | xem server session đã mất; dùng cùng token-clear-and-resolve path, rồi success chain hiện có clear query/cart và navigate sign-in |
-| Network/timeout, 5xx hoặc final 4xx/code khác | API client reject, không clear token; success callback không chạy nên query/cart/local auth giữ nguyên, caller báo retryable error và không navigate |
+| Server outcome                                                                    | Settlement                                                                                                                                                                                           |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial Bearer request trả 401                                                    | retry đúng một lần không Bearer, dùng refresh cookie                                                                                                                                                 |
+| Một trong hai request trả 2xx                                                     | `lib/api-client.ts` chỉ clear in-memory access token trong lock rồi resolve; `useLogoutMutation.onSuccess` clear auth query cache, `AuthProvider.signOut` clear owned cart trước khi caller navigate |
+| Final response là 401 với stable `SESSION_REVOKED` hoặc `AUTHENTICATION_REQUIRED` | xem server session đã mất; dùng cùng token-clear-and-resolve path, rồi success chain hiện có clear query/cart và navigate sign-in                                                                    |
+| Network/timeout, 5xx hoặc final 4xx/code khác                                     | API client reject, không clear token; success callback không chạy nên query/cart/local auth giữ nguyên, caller báo retryable error và không navigate                                                 |
 
 Bỏ local token clear khỏi unconditional `finally`. Không import React Query/cart
 state vào `lib/api-client.ts`; không classify final 401 bằng raw message. Giữ

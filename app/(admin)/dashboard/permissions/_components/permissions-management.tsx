@@ -91,7 +91,9 @@ export function PermissionsManagement() {
   const rows = permissionsQuery.data?.result ?? [];
   const meta = permissionsQuery.data?.meta;
   const moduleOptions = Array.from(
-    new Set((modulesQuery.data?.result ?? []).map((permission) => permission.module).filter(Boolean))
+    new Set(
+      (modulesQuery.data?.result ?? []).map((permission) => permission.module).filter(Boolean),
+    ),
   ).sort((left, right) => left.localeCompare(right));
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
@@ -137,7 +139,7 @@ export function PermissionsManagement() {
             setFormOpen(false);
           },
           onError: (error) => toast.error(getApiErrorMessage(error)),
-        }
+        },
       );
       return;
     }
@@ -173,7 +175,7 @@ export function PermissionsManagement() {
       className: "min-w-56",
       cell: (permission) => (
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
             <ShieldCheck className="size-4" />
           </div>
           <span className="font-medium">{permission.name}</span>
@@ -293,7 +295,7 @@ export function PermissionsManagement() {
               module: permission.module,
               createdAt: permission.createdAt,
               updatedAt: permission.updatedAt,
-            }))
+            })),
           )
         }
         isLoading={permissionsQuery.isPending}
@@ -322,7 +324,11 @@ export function PermissionsManagement() {
             : t("admin.commerce.permissions.create")
         }
       >
-        <PermissionForm values={formValues} onChange={setFormValues} moduleOptions={moduleOptions} />
+        <PermissionForm
+          values={formValues}
+          onChange={setFormValues}
+          moduleOptions={moduleOptions}
+        />
       </ResourceFormSheet>
 
       <DeleteResourceDialog

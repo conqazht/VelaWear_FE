@@ -4,11 +4,14 @@ export const accountMessages = defineMessages(
   {
     "account.signIn.action": "Sign in now",
     "account.signIn.profileTitle": "Sign in to view your profile",
-    "account.signIn.profileDescription": "Sign in to your Vela Member account to view order history, favourites, and account settings.",
+    "account.signIn.profileDescription":
+      "Sign in to your Vela Member account to view order history, favourites, and account settings.",
     "account.signIn.settingsTitle": "Sign in to view settings",
-    "account.signIn.settingsDescription": "Sign in to your Vela Member account to manage your personal information.",
+    "account.signIn.settingsDescription":
+      "Sign in to your Vela Member account to manage your personal information.",
     "account.signIn.orderTitle": "Sign in to view this order",
-    "account.signIn.orderDescription": "Sign in to your Vela Member account to view the details of this order.",
+    "account.signIn.orderDescription":
+      "Sign in to your Vela Member account to view the details of this order.",
     "account.member": "Vela Member",
     "account.tabs.profile": "Profile",
     "account.tabs.orders": "Orders",
@@ -28,7 +31,8 @@ export const accountMessages = defineMessages(
     "account.profile.email": "Email*",
     "account.profile.emailRequired": "Please enter your email.",
     "account.profile.emailInvalid": "Please enter a valid email address.",
-    "account.profile.emailSettingsNote": "Email changes are handled in account settings with OTP verification.",
+    "account.profile.emailSettingsNote":
+      "Email changes are handled in account settings with OTP verification.",
     "account.profile.password": "Password",
     "account.profile.edit": "Edit",
     "account.profile.gender": "Gender*",
@@ -41,7 +45,8 @@ export const accountMessages = defineMessages(
     "account.profile.openCalendar": "Choose date of birth",
     "account.profile.deleteAccount": "Delete Account",
     "account.profile.deleteAccountTitle": "Delete Account",
-    "account.profile.deleteAccountConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+    "account.profile.deleteAccountConfirm":
+      "Are you sure you want to delete your account? This action cannot be undone.",
     "account.profile.deleting": "Deleting...",
     "account.profile.delete": "Delete",
     "account.profile.save": "Save",
@@ -56,12 +61,14 @@ export const accountMessages = defineMessages(
     "account.addresses.noPhone": "Phone number not provided",
     "account.addresses.noAddress": "Address not provided",
     "account.visibility.title": "Profile Visibility",
-    "account.visibility.description": "Your Vela Wear profile represents you in product reviews and across the Vela family of apps.",
+    "account.visibility.description":
+      "Your Vela Wear profile represents you in product reviews and across the Vela family of apps.",
     "account.visibility.editAvatar": "Edit profile picture",
     "account.visibility.display": "Profile Display",
     "account.visibility.memberSince": "Vela Member since {date}",
     "account.visibility.reviewTitle": "Product Review Visibility",
-    "account.visibility.reviewDescription": "Choose how you appear in Vela product reviews. These settings also affect your visibility when connecting with friends.",
+    "account.visibility.reviewDescription":
+      "Choose how you appear in Vela product reviews. These settings also affect your visibility when connecting with friends.",
     "account.visibility.learnMore": "Learn more",
     "account.visibility.private": "Private: Profile visible only to you",
     "account.visibility.social": "Social: Profile visible to friends",
@@ -71,20 +78,25 @@ export const accountMessages = defineMessages(
     "account.visibility.locationNone": "Do not share my location",
     "account.communication.title": "Communication Preferences",
     "account.communication.general": "General Communication",
-    "account.communication.description": "Get updates on products, offers, and your Member benefits.",
+    "account.communication.description":
+      "Get updates on products, offers, and your Member benefits.",
     "account.communication.email": "Yes, send me emails.",
     "account.privacy.title": "Privacy",
-    "account.privacy.description": "We use your data to show relevant ads and measure their performance, including data about how you use our site and apps. Adjust the settings below to control how your data is used for advertising.",
+    "account.privacy.description":
+      "We use your data to show relevant ads and measure their performance, including data about how you use our site and apps. Adjust the settings below to control how your data is used for advertising.",
     "account.privacy.policyLead": "For more information, see our Privacy Policy.",
     "account.privacy.policy": "Vela Privacy Policy",
     "account.privacy.personalisedAds": "Personalised advertising",
-    "account.privacy.personalisedAdsDescription": "Allows data about how you use our site and apps to be shared with advertising partners.",
+    "account.privacy.personalisedAdsDescription":
+      "Allows data about how you use our site and apps to be shared with advertising partners.",
     "account.privacy.personalisedAdsLearn": "Learn more about personalised advertising",
     "account.privacy.profileAds": "Profile-based personalised advertising",
-    "account.privacy.profileAdsDescription": "Allows your email address and phone number to be shared with advertising partners so ads can be personalised to your interests.",
+    "account.privacy.profileAdsDescription":
+      "Allows your email address and phone number to be shared with advertising partners so ads can be personalised to your interests.",
     "account.privacy.profileAdsLearn": "Learn more about profile-based advertising",
     "account.privacy.workoutData": "Use workout data",
-    "account.privacy.workoutDataDescription": "Use my workout data for adaptive training plans, personalised product recommendations, and special event invitations.",
+    "account.privacy.workoutDataDescription":
+      "Use my workout data for adaptive training plans, personalised product recommendations, and special event invitations.",
     "account.orders.title": "Order History",
     "account.orders.count.one": "{count} order placed",
     "account.orders.count.many": "{count} orders placed",
@@ -108,7 +120,8 @@ export const accountMessages = defineMessages(
     "account.favourites.count.one": "{count} item saved",
     "account.favourites.count.many": "{count} items saved",
     "account.favourites.resource": "favourites",
-    "account.favourites.empty": "Your favourites list is empty. Explore Vela Wear products and save the ones you love.",
+    "account.favourites.empty":
+      "Your favourites list is empty. Explore Vela Wear products and save the ones you love.",
     "account.favourites.explore": "Explore collections",
     "account.favourites.remove": "Remove {product} from favourites",
     "account.favourites.addToBag": "Add to Bag",
@@ -124,7 +137,8 @@ export const accountMessages = defineMessages(
     "account.password.confirmRequired": "Please confirm your new password.",
     "account.password.mismatch": "Passwords do not match.",
     "account.password.requirements": "Password requirements:",
-    "account.password.strongRequirement": "At least 8 characters, including uppercase, lowercase, and a number",
+    "account.password.strongRequirement":
+      "At least 8 characters, including uppercase, lowercase, and a number",
     "account.password.reqMinChars": "At least 8 characters",
     "account.password.reqCase": "Uppercase and lowercase letters",
     "account.password.reqNumber": "At least one number",
@@ -132,15 +146,19 @@ export const accountMessages = defineMessages(
     "account.password.create": "Create Password",
     "account.password.set": "Set password",
     "account.password.changeDescription": "Change your password using your current password.",
-    "account.password.createDescription": "Your account was created with Google. Add a password to also sign in with email.",
+    "account.password.createDescription":
+      "Your account was created with Google. Add a password to also sign in with email.",
     "account.password.updateSuccess": "Your password has been successfully updated.",
-    "account.password.createSuccess": "Password created. You can now sign in with email and password.",
+    "account.password.createSuccess":
+      "Password created. You can now sign in with email and password.",
     "account.password.updateError": "Could not update your password. Please try again.",
     "account.settings.title": "Settings",
     "account.settings.verifyEmail": "Verify & Update Email",
     "account.settings.updateEmailError": "Could not update your email. Please try again.",
-    "account.settings.emailSameAsCurrent": "The new email must be different from your current email.",
-    "account.settings.emailAlreadyInUse": "This email address is already in use by another account.",
+    "account.settings.emailSameAsCurrent":
+      "The new email must be different from your current email.",
+    "account.settings.emailAlreadyInUse":
+      "This email address is already in use by another account.",
     "account.settings.emailUpdated": "Your email has been successfully updated.",
     "account.settings.confirmCode": "Confirm Code",
     "account.settings.cancel": "Cancel",
@@ -156,15 +174,18 @@ export const accountMessages = defineMessages(
     "account.order.cancelError": "Could not cancel this order. Please try again.",
     "account.order.cancelConfirm": "Are you sure you want to cancel this order?",
     "account.order.cancelTitle": "Cancel order",
-    "account.order.cancelDescription": "Are you sure you want to cancel this order? This action cannot be undone.",
+    "account.order.cancelDescription":
+      "Are you sure you want to cancel this order? This action cannot be undone.",
     "account.order.cancelAction": "Confirm cancellation",
     "account.order.cancelDismiss": "Keep order",
     "account.order.notFoundEyebrow": "VELA MEMBER / ORDERS",
     "account.order.notFoundTitle": "Order not found",
-    "account.order.notFoundDescription": "The order code may no longer be valid or the link may have changed. Return to your order history to choose another order.",
+    "account.order.notFoundDescription":
+      "The order code may no longer be valid or the link may have changed. Return to your order history to choose another order.",
     "account.order.forbiddenEyebrow": "VELA MEMBER / ACCESS",
     "account.order.forbiddenTitle": "This order does not belong to your account",
-    "account.order.forbiddenDescription": "You are signed in, but the current account does not have permission to view this order.",
+    "account.order.forbiddenDescription":
+      "You are signed in, but the current account does not have permission to view this order.",
     "account.order.historyAction": "Back to order history",
     "account.order.myOrdersAction": "Back to my orders",
     "account.order.homeAction": "Back to home",
@@ -206,11 +227,14 @@ export const accountMessages = defineMessages(
   {
     "account.signIn.action": "Đăng nhập ngay",
     "account.signIn.profileTitle": "Đăng nhập để xem hồ sơ",
-    "account.signIn.profileDescription": "Đăng nhập tài khoản Vela Member để xem lịch sử đơn hàng, sản phẩm yêu thích và cài đặt tài khoản.",
+    "account.signIn.profileDescription":
+      "Đăng nhập tài khoản Vela Member để xem lịch sử đơn hàng, sản phẩm yêu thích và cài đặt tài khoản.",
     "account.signIn.settingsTitle": "Đăng nhập để xem cài đặt",
-    "account.signIn.settingsDescription": "Đăng nhập tài khoản Vela Member để quản lý thông tin cá nhân.",
+    "account.signIn.settingsDescription":
+      "Đăng nhập tài khoản Vela Member để quản lý thông tin cá nhân.",
     "account.signIn.orderTitle": "Đăng nhập để xem đơn hàng",
-    "account.signIn.orderDescription": "Đăng nhập tài khoản Vela Member để xem chi tiết đơn đặt hàng này.",
+    "account.signIn.orderDescription":
+      "Đăng nhập tài khoản Vela Member để xem chi tiết đơn đặt hàng này.",
     "account.member": "Thành viên Vela",
     "account.tabs.profile": "Hồ sơ",
     "account.tabs.orders": "Đơn hàng",
@@ -230,7 +254,8 @@ export const accountMessages = defineMessages(
     "account.profile.email": "Email*",
     "account.profile.emailRequired": "Vui lòng nhập email.",
     "account.profile.emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ.",
-    "account.profile.emailSettingsNote": "Email được thay đổi trong phần cài đặt tài khoản và cần xác minh bằng OTP.",
+    "account.profile.emailSettingsNote":
+      "Email được thay đổi trong phần cài đặt tài khoản và cần xác minh bằng OTP.",
     "account.profile.password": "Mật khẩu",
     "account.profile.edit": "Chỉnh sửa",
     "account.profile.gender": "Giới tính*",
@@ -243,7 +268,8 @@ export const accountMessages = defineMessages(
     "account.profile.openCalendar": "Chọn ngày sinh",
     "account.profile.deleteAccount": "Xóa tài khoản",
     "account.profile.deleteAccountTitle": "Xóa tài khoản",
-    "account.profile.deleteAccountConfirm": "Bạn có chắc chắn muốn xóa tài khoản của mình không? Hành động này không thể hoàn tác.",
+    "account.profile.deleteAccountConfirm":
+      "Bạn có chắc chắn muốn xóa tài khoản của mình không? Hành động này không thể hoàn tác.",
     "account.profile.deleting": "Đang xóa...",
     "account.profile.delete": "Xóa",
     "account.profile.save": "Lưu",
@@ -258,12 +284,14 @@ export const accountMessages = defineMessages(
     "account.addresses.noPhone": "Chưa cập nhật số điện thoại",
     "account.addresses.noAddress": "Chưa cập nhật địa chỉ",
     "account.visibility.title": "Hiển thị hồ sơ",
-    "account.visibility.description": "Hồ sơ Vela Wear đại diện cho bạn trong các bài đánh giá sản phẩm và trên hệ sinh thái ứng dụng Vela.",
+    "account.visibility.description":
+      "Hồ sơ Vela Wear đại diện cho bạn trong các bài đánh giá sản phẩm và trên hệ sinh thái ứng dụng Vela.",
     "account.visibility.editAvatar": "Chỉnh sửa ảnh hồ sơ",
     "account.visibility.display": "Thông tin hiển thị",
     "account.visibility.memberSince": "Thành viên Vela từ {date}",
     "account.visibility.reviewTitle": "Hiển thị trong đánh giá sản phẩm",
-    "account.visibility.reviewDescription": "Chọn cách bạn xuất hiện trong các bài đánh giá sản phẩm Vela. Cài đặt này cũng ảnh hưởng đến khả năng hiển thị khi kết nối với bạn bè.",
+    "account.visibility.reviewDescription":
+      "Chọn cách bạn xuất hiện trong các bài đánh giá sản phẩm Vela. Cài đặt này cũng ảnh hưởng đến khả năng hiển thị khi kết nối với bạn bè.",
     "account.visibility.learnMore": "Tìm hiểu thêm",
     "account.visibility.private": "Riêng tư: Chỉ bạn xem được hồ sơ",
     "account.visibility.social": "Bạn bè: Bạn bè xem được hồ sơ",
@@ -273,20 +301,25 @@ export const accountMessages = defineMessages(
     "account.visibility.locationNone": "Không chia sẻ vị trí",
     "account.communication.title": "Tùy chọn liên lạc",
     "account.communication.general": "Thông tin chung",
-    "account.communication.description": "Nhận thông tin mới về sản phẩm, ưu đãi và quyền lợi thành viên.",
+    "account.communication.description":
+      "Nhận thông tin mới về sản phẩm, ưu đãi và quyền lợi thành viên.",
     "account.communication.email": "Có, hãy gửi email cho tôi.",
     "account.privacy.title": "Quyền riêng tư",
-    "account.privacy.description": "Chúng tôi dùng dữ liệu của bạn để hiển thị quảng cáo phù hợp và đo lường hiệu quả, bao gồm dữ liệu về cách bạn sử dụng trang web và ứng dụng. Hãy điều chỉnh các cài đặt bên dưới để kiểm soát cách dữ liệu được dùng cho quảng cáo.",
+    "account.privacy.description":
+      "Chúng tôi dùng dữ liệu của bạn để hiển thị quảng cáo phù hợp và đo lường hiệu quả, bao gồm dữ liệu về cách bạn sử dụng trang web và ứng dụng. Hãy điều chỉnh các cài đặt bên dưới để kiểm soát cách dữ liệu được dùng cho quảng cáo.",
     "account.privacy.policyLead": "Xem thêm thông tin trong Chính sách quyền riêng tư.",
     "account.privacy.policy": "Chính sách quyền riêng tư Vela",
     "account.privacy.personalisedAds": "Quảng cáo được cá nhân hóa",
-    "account.privacy.personalisedAdsDescription": "Cho phép chia sẻ dữ liệu về cách bạn sử dụng trang web và ứng dụng với các đối tác quảng cáo.",
+    "account.privacy.personalisedAdsDescription":
+      "Cho phép chia sẻ dữ liệu về cách bạn sử dụng trang web và ứng dụng với các đối tác quảng cáo.",
     "account.privacy.personalisedAdsLearn": "Tìm hiểu thêm về quảng cáo được cá nhân hóa",
     "account.privacy.profileAds": "Quảng cáo cá nhân hóa theo hồ sơ",
-    "account.privacy.profileAdsDescription": "Cho phép chia sẻ email và số điện thoại với đối tác quảng cáo để cá nhân hóa quảng cáo theo sở thích của bạn.",
+    "account.privacy.profileAdsDescription":
+      "Cho phép chia sẻ email và số điện thoại với đối tác quảng cáo để cá nhân hóa quảng cáo theo sở thích của bạn.",
     "account.privacy.profileAdsLearn": "Tìm hiểu thêm về quảng cáo cá nhân hóa theo hồ sơ",
     "account.privacy.workoutData": "Sử dụng dữ liệu luyện tập",
-    "account.privacy.workoutDataDescription": "Dùng dữ liệu luyện tập của tôi để tạo kế hoạch thích ứng, gợi ý sản phẩm cá nhân hóa và gửi lời mời sự kiện đặc biệt.",
+    "account.privacy.workoutDataDescription":
+      "Dùng dữ liệu luyện tập của tôi để tạo kế hoạch thích ứng, gợi ý sản phẩm cá nhân hóa và gửi lời mời sự kiện đặc biệt.",
     "account.orders.title": "Lịch sử đơn hàng",
     "account.orders.count.one": "Đã đặt {count} đơn hàng",
     "account.orders.count.many": "Đã đặt {count} đơn hàng",
@@ -310,7 +343,8 @@ export const accountMessages = defineMessages(
     "account.favourites.count.one": "Đã lưu {count} sản phẩm",
     "account.favourites.count.many": "Đã lưu {count} sản phẩm",
     "account.favourites.resource": "danh sách yêu thích",
-    "account.favourites.empty": "Danh sách yêu thích đang trống. Hãy khám phá sản phẩm Vela Wear và lưu lại những món bạn yêu thích.",
+    "account.favourites.empty":
+      "Danh sách yêu thích đang trống. Hãy khám phá sản phẩm Vela Wear và lưu lại những món bạn yêu thích.",
     "account.favourites.explore": "Khám phá bộ sưu tập",
     "account.favourites.remove": "Xóa {product} khỏi danh sách yêu thích",
     "account.favourites.addToBag": "Thêm vào giỏ",
@@ -326,7 +360,8 @@ export const accountMessages = defineMessages(
     "account.password.confirmRequired": "Vui lòng xác nhận mật khẩu mới.",
     "account.password.mismatch": "Mật khẩu xác nhận không khớp.",
     "account.password.requirements": "Yêu cầu mật khẩu:",
-    "account.password.strongRequirement": "Tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và chữ số",
+    "account.password.strongRequirement":
+      "Tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và chữ số",
     "account.password.reqMinChars": "Tối thiểu 8 ký tự",
     "account.password.reqCase": "Chữ hoa và chữ thường",
     "account.password.reqNumber": "Ít nhất một chữ số",
@@ -334,9 +369,11 @@ export const accountMessages = defineMessages(
     "account.password.create": "Tạo mật khẩu",
     "account.password.set": "Đặt mật khẩu",
     "account.password.changeDescription": "Đổi mật khẩu bằng mật khẩu hiện tại của bạn.",
-    "account.password.createDescription": "Tài khoản của bạn được tạo bằng Google. Hãy thêm mật khẩu để có thể đăng nhập bằng email.",
+    "account.password.createDescription":
+      "Tài khoản của bạn được tạo bằng Google. Hãy thêm mật khẩu để có thể đăng nhập bằng email.",
     "account.password.updateSuccess": "Mật khẩu của bạn đã được cập nhật thành công.",
-    "account.password.createSuccess": "Đã tạo mật khẩu. Bạn có thể đăng nhập bằng email và mật khẩu.",
+    "account.password.createSuccess":
+      "Đã tạo mật khẩu. Bạn có thể đăng nhập bằng email và mật khẩu.",
     "account.password.updateError": "Không thể cập nhật mật khẩu. Vui lòng thử lại.",
     "account.settings.title": "Cài đặt",
     "account.settings.verifyEmail": "Xác minh & cập nhật email",
@@ -358,15 +395,18 @@ export const accountMessages = defineMessages(
     "account.order.cancelError": "Không thể hủy đơn hàng. Vui lòng thử lại.",
     "account.order.cancelConfirm": "Bạn chắc chắn muốn hủy đơn hàng này?",
     "account.order.cancelTitle": "Hủy đơn hàng",
-    "account.order.cancelDescription": "Bạn có chắc chắn muốn hủy đơn hàng này không? Thao tác này không thể hoàn tác.",
+    "account.order.cancelDescription":
+      "Bạn có chắc chắn muốn hủy đơn hàng này không? Thao tác này không thể hoàn tác.",
     "account.order.cancelAction": "Xác nhận hủy đơn",
     "account.order.cancelDismiss": "Giữ lại đơn hàng",
     "account.order.notFoundEyebrow": "VELA MEMBER / ĐƠN HÀNG",
     "account.order.notFoundTitle": "Không tìm thấy đơn hàng",
-    "account.order.notFoundDescription": "Mã đơn có thể không còn hợp lệ hoặc đường dẫn đã thay đổi. Hãy quay lại lịch sử để chọn một đơn hàng khác.",
+    "account.order.notFoundDescription":
+      "Mã đơn có thể không còn hợp lệ hoặc đường dẫn đã thay đổi. Hãy quay lại lịch sử để chọn một đơn hàng khác.",
     "account.order.forbiddenEyebrow": "VELA MEMBER / QUYỀN TRUY CẬP",
     "account.order.forbiddenTitle": "Đơn hàng này không thuộc tài khoản của bạn",
-    "account.order.forbiddenDescription": "Bạn đã đăng nhập nhưng tài khoản hiện tại không có quyền xem đơn hàng này.",
+    "account.order.forbiddenDescription":
+      "Bạn đã đăng nhập nhưng tài khoản hiện tại không có quyền xem đơn hàng này.",
     "account.order.historyAction": "Về lịch sử đơn hàng",
     "account.order.myOrdersAction": "Về đơn hàng của tôi",
     "account.order.homeAction": "Về trang chủ",

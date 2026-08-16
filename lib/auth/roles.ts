@@ -14,7 +14,10 @@ export function normalizeRoleName(role: unknown): string | null {
 
   if (typeof rawRole !== "string") return null;
 
-  const normalizedRole = rawRole.trim().toUpperCase().replace(/^ROLE_/, "");
+  const normalizedRole = rawRole
+    .trim()
+    .toUpperCase()
+    .replace(/^ROLE_/, "");
   return normalizedRole || null;
 }
 
@@ -22,11 +25,7 @@ export function getUserRoleNames(user: Pick<User, "roles"> | null | undefined) {
   if (!Array.isArray(user?.roles)) return [];
 
   return Array.from(
-    new Set(
-      user.roles
-        .map(normalizeRoleName)
-        .filter((role): role is string => role !== null),
-    ),
+    new Set(user.roles.map(normalizeRoleName).filter((role): role is string => role !== null)),
   );
 }
 
@@ -48,11 +47,7 @@ export function canAccessManagement(user: Pick<User, "roles"> | null | undefined
 export function getPrimaryRoleName(user: Pick<User, "roles"> | null | undefined) {
   const roleNames = getUserRoleNames(user);
 
-  return (
-    MANAGEMENT_ROLE_NAMES.find((role) => roleNames.includes(role)) ??
-    roleNames[0] ??
-    null
-  );
+  return MANAGEMENT_ROLE_NAMES.find((role) => roleNames.includes(role)) ?? roleNames[0] ?? null;
 }
 
 export function getRoleSessionLabel(user: Pick<User, "roles"> | null | undefined) {

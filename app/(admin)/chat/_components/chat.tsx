@@ -51,7 +51,9 @@ export function Chat() {
           onOpenContact={() => setShowContact(true)}
           className={cn(
             "transition-transform duration-300 ease-out will-change-transform max-md:col-start-1 max-md:row-start-1",
-            showThread ? "max-md:translate-x-0" : "max-md:pointer-events-none max-md:translate-x-full",
+            showThread
+              ? "max-md:translate-x-0"
+              : "max-md:pointer-events-none max-md:translate-x-full",
           )}
         />
         <div
@@ -67,7 +69,10 @@ export function Chat() {
               showContact ? "translate-x-0 opacity-100" : "translate-x-full opacity-0",
             )}
           >
-            <ChatProfileDetails contact={activeConversation.contact} onClose={() => setShowContact(false)} />
+            <ChatProfileDetails
+              contact={activeConversation.contact}
+              onClose={() => setShowContact(false)}
+            />
           </div>
         </div>
       </div>
@@ -82,7 +87,10 @@ export function Chat() {
             <SheetDescription className="sr-only">
               {t("admin.communications.chat.profile.description")}
             </SheetDescription>
-            <ChatProfileDetails contact={activeConversation.contact} onClose={() => setShowContact(false)} />
+            <ChatProfileDetails
+              contact={activeConversation.contact}
+              onClose={() => setShowContact(false)}
+            />
           </SheetContent>
         </Sheet>
       )}

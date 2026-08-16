@@ -67,7 +67,7 @@ export function ChatSidebar() {
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="top-(--header-height) h-[calc(100svh-var(--header-height))]! **:data-[sidebar=sidebar]:bg-background"
+      className="**:data-[sidebar=sidebar]:bg-background top-(--header-height) h-[calc(100svh-var(--header-height))]!"
     >
       <SidebarContent>
         <SidebarGroup>
@@ -85,7 +85,9 @@ export function ChatSidebar() {
                     {t(NAV_MESSAGE_KEYS[item.id as keyof typeof NAV_MESSAGE_KEYS])}
                   </span>
                 </SidebarMenuButton>
-                {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
+                {item.label && (
+                  <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -105,7 +107,9 @@ export function ChatSidebar() {
                   tooltip={t(CHANNEL_MESSAGE_KEYS[item.id as keyof typeof CHANNEL_MESSAGE_KEYS])}
                 >
                   {item.id in channelBrandIcons ? (
-                    <SimpleIcon icon={channelBrandIcons[item.id as keyof typeof channelBrandIcons]} />
+                    <SimpleIcon
+                      icon={channelBrandIcons[item.id as keyof typeof channelBrandIcons]}
+                    />
                   ) : (
                     <item.icon />
                   )}
@@ -113,7 +117,9 @@ export function ChatSidebar() {
                     {t(CHANNEL_MESSAGE_KEYS[item.id as keyof typeof CHANNEL_MESSAGE_KEYS])}
                   </span>
                 </SidebarMenuButton>
-                {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
+                {item.label && (
+                  <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -137,7 +143,9 @@ export function ChatSidebar() {
                     {t(VIEW_MESSAGE_KEYS[item.id as keyof typeof VIEW_MESSAGE_KEYS])}
                   </span>
                 </SidebarMenuButton>
-                {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
+                {item.label && (
+                  <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -158,23 +166,34 @@ export function ChatSidebar() {
                 }
               >
                 <Avatar>
-                  <AvatarFallback className="text-xs">{getInitials(currentUser.name)}</AvatarFallback>
+                  <AvatarFallback className="text-xs">
+                    {getInitials(currentUser.name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{currentUser.name}</span>
-                  <span className="truncate text-muted-foreground text-xs">{currentUser.email}</span>
+                  <span className="text-muted-foreground truncate text-xs">
+                    {currentUser.email}
+                  </span>
                 </div>
                 <EllipsisVertical className="ml-auto size-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-56" side="top">
+              <DropdownMenuContent
+                className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
+                side="top"
+              >
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar>
-                      <AvatarFallback className="text-xs">{getInitials(currentUser.name)}</AvatarFallback>
+                      <AvatarFallback className="text-xs">
+                        {getInitials(currentUser.name)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-medium">{currentUser.name}</span>
-                      <span className="truncate text-muted-foreground text-xs">{currentUser.email}</span>
+                      <span className="text-muted-foreground truncate text-xs">
+                        {currentUser.email}
+                      </span>
                     </div>
                   </div>
                 </DropdownMenuLabel>

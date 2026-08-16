@@ -3,7 +3,14 @@
 import { ArrowUpRight } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getIntlLocale } from "@/lib/i18n";
 
@@ -64,10 +71,10 @@ export function TopProducts() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">
+        <CardTitle className="text-muted-foreground text-sm font-normal">
           {t("admin.dashboardsA.ecommerce.topProducts")}
         </CardTitle>
-        <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
+        <CardDescription className="text-foreground text-xl leading-none tracking-tight tabular-nums">
           {t("admin.dashboardsA.ecommerce.salesShare", { percent: percentFormatter.format(0.73) })}
         </CardDescription>
         <CardAction>
@@ -79,7 +86,7 @@ export function TopProducts() {
         <div className="flex flex-col gap-2">
           <div
             aria-label={t("admin.dashboardsA.ecommerce.salesByCategory")}
-            className="flex h-2 gap-1 overflow-hidden bg-muted"
+            className="bg-muted flex h-2 gap-1 overflow-hidden"
             role="img"
           >
             {categories.map((category) => (
@@ -98,7 +105,11 @@ export function TopProducts() {
           <div className="flex flex-wrap gap-4">
             {categories.map((category) => (
               <div className="flex items-center gap-1" key={category.name}>
-                <span aria-hidden="true" className="size-2 rounded-full" style={{ backgroundColor: category.color }} />
+                <span
+                  aria-hidden="true"
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: category.color }}
+                />
                 <span className="text-muted-foreground text-xs">
                   {categoryLabels[category.name] ?? category.name}
                 </span>
@@ -110,9 +121,15 @@ export function TopProducts() {
         <Separator />
 
         <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-3">
-          <div className="text-muted-foreground text-xs">{t("admin.dashboardsA.ecommerce.products")}</div>
-          <div className="text-muted-foreground text-xs">{t("admin.dashboardsA.ecommerce.share")}</div>
-          <div className="text-muted-foreground text-xs">{t("admin.dashboardsA.ecommerce.sales")}</div>
+          <div className="text-muted-foreground text-xs">
+            {t("admin.dashboardsA.ecommerce.products")}
+          </div>
+          <div className="text-muted-foreground text-xs">
+            {t("admin.dashboardsA.ecommerce.share")}
+          </div>
+          <div className="text-muted-foreground text-xs">
+            {t("admin.dashboardsA.ecommerce.sales")}
+          </div>
 
           {products.map((product) => (
             <div className="contents text-sm" key={product.name}>
@@ -122,10 +139,12 @@ export function TopProducts() {
                   {categoryLabels[product.category] ?? product.category}
                 </div>
               </div>
-              <div className="self-center text-muted-foreground tabular-nums">
+              <div className="text-muted-foreground self-center tabular-nums">
                 {percentFormatter.format(product.share)}
               </div>
-              <div className="self-center font-medium tabular-nums">{currencyFormatter.format(product.sales)}</div>
+              <div className="self-center font-medium tabular-nums">
+                {currencyFormatter.format(product.sales)}
+              </div>
             </div>
           ))}
         </div>

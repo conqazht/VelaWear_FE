@@ -67,7 +67,10 @@ export function OrderStatusBadge({ status }: { status: AdminOrderStatus }) {
   const { t } = useI18n();
 
   return (
-    <Badge variant="outline" className={cn("gap-1.5 rounded-sm font-medium", orderStatusClasses[status])}>
+    <Badge
+      variant="outline"
+      className={cn("gap-1.5 rounded-sm font-medium", orderStatusClasses[status])}
+    >
       <span className="size-1.5 rounded-full bg-current" />
       {getOrderStatusLabel(status, t)}
     </Badge>
@@ -78,7 +81,10 @@ export function PaymentStatusBadge({ status }: { status: AdminPaymentStatus }) {
   const { t } = useI18n();
 
   return (
-    <Badge variant="outline" className={cn("gap-1.5 rounded-sm font-medium", paymentStatusClasses[status])}>
+    <Badge
+      variant="outline"
+      className={cn("gap-1.5 rounded-sm font-medium", paymentStatusClasses[status])}
+    >
       <span className="size-1.5 rounded-full bg-current" />
       {getPaymentStatusLabel(status, t)}
     </Badge>

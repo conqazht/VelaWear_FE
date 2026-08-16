@@ -32,7 +32,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDateTime } from "@/lib/i18n/format";
@@ -217,7 +222,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
         {mail ? (
           <div className="flex min-h-0 flex-1 flex-col gap-3">
             <div className="space-y-1.5">
-              <div className="font-medium leading-none">{mail.subject}</div>
+              <div className="leading-none font-medium">{mail.subject}</div>
 
               <div className="text-muted-foreground text-xs leading-none">
                 {formatDateTime(mail.receivedAt, locale)}
@@ -228,7 +233,9 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
 
             <div className="flex gap-2">
               <Avatar className="size-9 after:rounded-sm">
-                <AvatarFallback className="rounded-sm bg-background">{mail.from.name[0]}</AvatarFallback>
+                <AvatarFallback className="bg-background rounded-sm">
+                  {mail.from.name[0]}
+                </AvatarFallback>
               </Avatar>
 
               <div className="flex h-full flex-col gap-1">
@@ -248,7 +255,9 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                   {mail.cc?.length ? (
                     <div className="text-muted-foreground text-xs">
                       {t("admin.communications.mail.view.cc")}{" "}
-                      <span className="text-foreground">{mail.cc.map((recipient) => recipient.name).join(", ")}</span>
+                      <span className="text-foreground">
+                        {mail.cc.map((recipient) => recipient.name).join(", ")}
+                      </span>
                     </div>
                   ) : null}
                 </div>
@@ -266,9 +275,9 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                         variant="ghost"
                         size="sm"
                         className={cn(
-                          "group p-0 font-normal text-muted-foreground",
-                          "hover:bg-transparent hover:text-muted-foreground dark:hover:bg-transparent",
-                          "data-[state=open]:bg-transparent data-[state=open]:text-muted-foreground",
+                          "group text-muted-foreground p-0 font-normal",
+                          "hover:text-muted-foreground hover:bg-transparent dark:hover:bg-transparent",
+                          "data-[state=open]:text-muted-foreground data-[state=open]:bg-transparent",
                         )}
                       />
                     }
@@ -285,7 +294,9 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                         <Button size="xs" variant="secondary" key={attachment.id}>
                           <SimpleIcon icon={attachment.icon} className="size-3 fill-current" />
                           <span className="font-normal">{attachment.name}</span>
-                          <span className="font-normal text-muted-foreground">{attachment.size}</span>
+                          <span className="text-muted-foreground font-normal">
+                            {attachment.size}
+                          </span>
                         </Button>
                       ))}
                     </div>
@@ -296,7 +307,9 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
               </>
             ) : null}
 
-            <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto whitespace-pre-wrap text-sm">{mail.body}</div>
+            <div className="min-h-0 flex-1 scrollbar-none overflow-y-auto text-sm whitespace-pre-wrap">
+              {mail.body}
+            </div>
 
             <div className="mt-auto flex flex-col gap-3">
               <Separator />
@@ -334,7 +347,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
             </div>
           </div>
         ) : (
-          <div className="grid h-full place-items-center text-muted-foreground text-sm">
+          <div className="text-muted-foreground grid h-full place-items-center text-sm">
             {t("admin.communications.mail.view.empty")}
           </div>
         )}

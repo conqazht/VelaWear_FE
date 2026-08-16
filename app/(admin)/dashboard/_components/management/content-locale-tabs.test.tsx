@@ -22,7 +22,9 @@ function Harness({ onSave }: { onSave: () => void }) {
             vi: (
               <div>
                 Nội dung tiếng Việt
-                <button type="button" onClick={onSave}>Lưu</button>
+                <button type="button" onClick={onSave}>
+                  Lưu
+                </button>
               </div>
             ),
             en: <div>English content</div>,

@@ -9,7 +9,8 @@ export const shoppingMessages = defineMessages(
     "cart.title": "Cart",
     "cart.savedCount": "Handpicked designs: {count}",
     "cart.continueShopping": "Continue shopping",
-    "cart.emptyDescription": "Your bag is empty. Return to the collection to discover more considered Vela Wear pieces.",
+    "cart.emptyDescription":
+      "Your bag is empty. Return to the collection to discover more considered Vela Wear pieces.",
     "cart.shopAll": "Shop all products",
     "cart.viewProduct": "View {product}",
     "cart.decreaseQuantity": "Decrease quantity",
@@ -20,16 +21,19 @@ export const shoppingMessages = defineMessages(
     "cart.standardShipping": "Standard shipping",
     "cart.estimatedTaxes": "Estimated taxes (8%)",
     "cart.total": "Total amount",
-    "cart.giftPackaging": "Complimentary premium dust bags and signature gift boxing are included with every Vela Wear shipment.",
+    "cart.giftPackaging":
+      "Complimentary premium dust bags and signature gift boxing are included with every Vela Wear shipment.",
     "cart.checkout": "Proceed to checkout",
     "cart.freeShipping": "Free shipping on orders from ₫500,000",
     "favorites.title": "Favorites",
     "favorites.signInTitle": "Sign in to view favorites",
-    "favorites.signInDescription": "Favorites are saved to your account. Sign in to save and revisit the pieces you love.",
+    "favorites.signInDescription":
+      "Favorites are saved to your account. Sign in to save and revisit the pieces you love.",
     "favorites.signIn": "Sign in now",
     "favorites.resource": "favorites",
     "favorites.savedCount": "Saved designs: {count}",
-    "favorites.emptyDescription": "Your favorites list is empty. Save the pieces you love to find them quickly next time.",
+    "favorites.emptyDescription":
+      "Your favorites list is empty. Save the pieces you love to find them quickly next time.",
     "favorites.explore": "Explore the collection",
     "favorites.remove": "Remove {product} from favorites",
     "favorites.addToBag": "Add to bag",
@@ -42,7 +46,8 @@ export const shoppingMessages = defineMessages(
     "checkout.title": "Checkout",
     "checkout.viewCart": "View cart",
     "checkout.signInTitle": "Sign in to checkout",
-    "checkout.signInDescription": "Sign in to your Vela Member account to place an order and receive member benefits.",
+    "checkout.signInDescription":
+      "Sign in to your Vela Member account to place an order and receive member benefits.",
     "checkout.signIn": "Sign in now",
     "checkout.successTitle": "Order placed successfully!",
     "checkout.successDescription": "Thank you for choosing the considered essentials of {brand}.",
@@ -81,15 +86,19 @@ export const shoppingMessages = defineMessages(
     "checkout.shipping": "Shipping",
     "checkout.coupon": "Coupon",
     "checkout.estimatedTotal": "Estimated total",
-    "checkout.discountNote": "Any discount will be applied after the system validates the coupon code.",
+    "checkout.discountNote":
+      "Any discount will be applied after the system validates the coupon code.",
     "checkout.provinceLoadError": "Unable to load provinces and cities. Please try again.",
     "checkout.wardLoadError": "Unable to load wards and communes. Please try again.",
     "checkout.addressRequired": "Select both a province/city and a ward/commune.",
-    "checkout.error.validation": "Some checkout details are invalid. Review the form and try again.",
-    "checkout.error.insufficientStock": "One or more items are out of stock or no longer available in the requested quantity.",
+    "checkout.error.validation":
+      "Some checkout details are invalid. Review the form and try again.",
+    "checkout.error.insufficientStock":
+      "One or more items are out of stock or no longer available in the requested quantity.",
     "checkout.error.invalidCoupon": "This coupon code is invalid or no longer available.",
     "checkout.error.unauthenticated": "Your session has expired. Sign in again to continue.",
-    "checkout.error.conflict": "The order could not be completed because its details changed. Please try again.",
+    "checkout.error.conflict":
+      "The order could not be completed because its details changed. Please try again.",
     "checkout.error.unknown": "We could not place your order. Please try again.",
     "order.status.pending": "Pending",
     "order.status.confirmed": "Confirmed",
@@ -106,7 +115,8 @@ export const shoppingMessages = defineMessages(
     "cart.title": "Giỏ hàng",
     "cart.savedCount": "{count} thiết kế được bạn chọn",
     "cart.continueShopping": "Tiếp tục mua sắm",
-    "cart.emptyDescription": "Giỏ hàng của bạn đang trống. Hãy quay lại bộ sưu tập để khám phá thêm những thiết kế tinh tuyển từ Vela Wear.",
+    "cart.emptyDescription":
+      "Giỏ hàng của bạn đang trống. Hãy quay lại bộ sưu tập để khám phá thêm những thiết kế tinh tuyển từ Vela Wear.",
     "cart.shopAll": "Xem tất cả sản phẩm",
     "cart.viewProduct": "Xem {product}",
     "cart.decreaseQuantity": "Giảm số lượng",
@@ -117,16 +127,19 @@ export const shoppingMessages = defineMessages(
     "cart.standardShipping": "Giao hàng tiêu chuẩn",
     "cart.estimatedTaxes": "Thuế dự kiến (8%)",
     "cart.total": "Tổng cộng",
-    "cart.giftPackaging": "Mỗi đơn hàng Vela Wear đều được tặng kèm túi vải cao cấp và hộp quà đặc trưng.",
+    "cart.giftPackaging":
+      "Mỗi đơn hàng Vela Wear đều được tặng kèm túi vải cao cấp và hộp quà đặc trưng.",
     "cart.checkout": "Tiến hành thanh toán",
     "cart.freeShipping": "Miễn phí giao hàng cho đơn từ 500.000 ₫",
     "favorites.title": "Yêu thích",
     "favorites.signInTitle": "Đăng nhập để xem yêu thích",
-    "favorites.signInDescription": "Danh sách yêu thích được lưu theo tài khoản. Hãy đăng nhập để lưu và xem lại những thiết kế bạn yêu thích.",
+    "favorites.signInDescription":
+      "Danh sách yêu thích được lưu theo tài khoản. Hãy đăng nhập để lưu và xem lại những thiết kế bạn yêu thích.",
     "favorites.signIn": "Đăng nhập ngay",
     "favorites.resource": "danh sách yêu thích",
     "favorites.savedCount": "Đã lưu {count} thiết kế vào danh sách yêu thích",
-    "favorites.emptyDescription": "Danh sách yêu thích của bạn đang trống. Hãy lưu những thiết kế bạn yêu thích để dễ dàng tìm lại.",
+    "favorites.emptyDescription":
+      "Danh sách yêu thích của bạn đang trống. Hãy lưu những thiết kế bạn yêu thích để dễ dàng tìm lại.",
     "favorites.explore": "Khám phá bộ sưu tập",
     "favorites.remove": "Xóa {product} khỏi danh sách yêu thích",
     "favorites.addToBag": "Thêm vào giỏ",
@@ -139,7 +152,8 @@ export const shoppingMessages = defineMessages(
     "checkout.title": "Thanh toán",
     "checkout.viewCart": "Xem giỏ hàng",
     "checkout.signInTitle": "Đăng nhập để thanh toán",
-    "checkout.signInDescription": "Hãy đăng nhập tài khoản Vela Member để đặt hàng và nhận các quyền lợi thành viên.",
+    "checkout.signInDescription":
+      "Hãy đăng nhập tài khoản Vela Member để đặt hàng và nhận các quyền lợi thành viên.",
     "checkout.signIn": "Đăng nhập ngay",
     "checkout.successTitle": "Đặt hàng thành công!",
     "checkout.successDescription": "Cảm ơn bạn đã lựa chọn những thiết kế tinh tuyển của {brand}.",
@@ -182,11 +196,15 @@ export const shoppingMessages = defineMessages(
     "checkout.provinceLoadError": "Không thể tải danh sách tỉnh/thành. Vui lòng thử lại.",
     "checkout.wardLoadError": "Không thể tải danh sách phường/xã. Vui lòng thử lại.",
     "checkout.addressRequired": "Vui lòng chọn đầy đủ tỉnh/thành và phường/xã.",
-    "checkout.error.validation": "Một số thông tin thanh toán chưa hợp lệ. Vui lòng kiểm tra và thử lại.",
-    "checkout.error.insufficientStock": "Một số sản phẩm đã hết hàng hoặc không còn đủ số lượng bạn yêu cầu.",
+    "checkout.error.validation":
+      "Một số thông tin thanh toán chưa hợp lệ. Vui lòng kiểm tra và thử lại.",
+    "checkout.error.insufficientStock":
+      "Một số sản phẩm đã hết hàng hoặc không còn đủ số lượng bạn yêu cầu.",
     "checkout.error.invalidCoupon": "Mã giảm giá không hợp lệ hoặc không còn khả dụng.",
-    "checkout.error.unauthenticated": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.",
-    "checkout.error.conflict": "Không thể hoàn tất đơn hàng vì thông tin đã thay đổi. Vui lòng thử lại.",
+    "checkout.error.unauthenticated":
+      "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.",
+    "checkout.error.conflict":
+      "Không thể hoàn tất đơn hàng vì thông tin đã thay đổi. Vui lòng thử lại.",
     "checkout.error.unknown": "Không thể đặt hàng. Vui lòng thử lại.",
     "order.status.pending": "Chờ xác nhận",
     "order.status.confirmed": "Đã xác nhận",

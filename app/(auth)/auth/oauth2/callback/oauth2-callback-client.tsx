@@ -41,7 +41,9 @@ export function OAuth2CallbackClient() {
     const redirectTo = getStoredPostAuthRedirect();
     if (!code) {
       const signInHref = createSignInHref(redirectTo);
-      router.replace(`${signInHref}${signInHref.includes("?") ? "&" : "?"}error=oauth2_login_failed`);
+      router.replace(
+        `${signInHref}${signInHref.includes("?") ? "&" : "?"}error=oauth2_login_failed`,
+      );
       return;
     }
 
@@ -61,7 +63,9 @@ export function OAuth2CallbackClient() {
         if (!cancelled) {
           clearPostAuthRedirect();
           const signInHref = createSignInHref(redirectTo);
-          router.replace(`${signInHref}${signInHref.includes("?") ? "&" : "?"}error=oauth2_login_failed`);
+          router.replace(
+            `${signInHref}${signInHref.includes("?") ? "&" : "?"}error=oauth2_login_failed`,
+          );
         }
       }
     }

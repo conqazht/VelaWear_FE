@@ -7,6 +7,7 @@ This change adds the client experience that consumes those backend APIs. The fro
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add reusable OTP UI and state handling for request, code entry, resend cooldown, verification, expiration, and error display.
 - Update registration to verify `REGISTER` OTP before final account creation.
 - Add a forgot-password flow that verifies `FORGOT_PASSWORD` OTP before password reset.
@@ -15,6 +16,7 @@ This change adds the client experience that consumes those backend APIs. The fro
 - Keep backend as the source of truth for OTP delivery, verification, rate limits, and account updates.
 
 **Non-Goals:**
+
 - Do not send email from the frontend.
 - Do not generate, store, or validate OTP codes locally beyond user input state.
 - Do not implement payment UI in this change.
@@ -23,6 +25,7 @@ This change adds the client experience that consumes those backend APIs. The fro
 ## Decisions
 
 ### 1. Shared OTP component and hook
+
 - **Decision:** Add a reusable OTP entry component plus a small state hook or helper for request/verify/resend flows.
 - **Rationale:** Register, forgot password, and change email need the same interaction pattern with different purposes and completion actions.
 - **Alternatives considered:**
@@ -30,22 +33,27 @@ This change adds the client experience that consumes those backend APIs. The fro
   - Put all OTP state in `AuthProvider`: convenient globally, but mixes temporary form state into session/auth identity state.
 
 ### 2. Purpose-specific flows
+
 - **Decision:** Each flow passes a backend purpose: `REGISTER`, `FORGOT_PASSWORD`, or `CHANGE_EMAIL`.
 - **Rationale:** The backend scopes OTPs by purpose. The frontend should mirror that contract instead of using one generic "email verification" action.
 
 ### 3. Registration remains a guided single-screen journey
+
 - **Decision:** Keep the register page as the main surface, but add an OTP step after validating account fields and before final registration.
 - **Rationale:** This avoids routing users away from an already detailed membership form and preserves the current editorial auth layout.
 
 ### 4. Forgot password gets its own route
+
 - **Decision:** Add a dedicated forgot-password page with email entry, OTP verification, and new-password entry.
 - **Rationale:** Password recovery is a separate mental model from sign-in and should be linkable from the sign-in page.
 
 ### 5. Change email stays inside settings
+
 - **Decision:** Keep change-email inside profile settings and use inline OTP verification for the new email.
 - **Rationale:** Users should not leave account settings to complete a simple email change.
 
 ### 6. Error and cooldown behavior follows backend
+
 - **Decision:** Display backend validation, cooldown, expired, and attempts-exhausted responses without trying to outguess them locally.
 - **Rationale:** Rate limits and OTP validity are backend-owned. Frontend cooldown timers are only UX affordances.
 

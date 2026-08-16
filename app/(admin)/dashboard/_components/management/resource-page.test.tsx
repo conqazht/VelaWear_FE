@@ -20,13 +20,7 @@ const cachedRow: TestRow = {
   name: "Áo linen đã lưu",
 };
 
-function renderResourcePage({
-  rows,
-  status,
-}: {
-  rows: TestRow[];
-  status: number;
-}) {
+function renderResourcePage({ rows, status }: { rows: TestRow[]; status: number }) {
   return render(
     <I18nProvider initialLocale="vi">
       <ResourcePage

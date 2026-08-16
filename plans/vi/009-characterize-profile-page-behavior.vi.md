@@ -67,22 +67,23 @@ decomposition sau có baseline ổn định.
 
 ## Các lệnh cần dùng
 
-| Mục đích | Lệnh | Kết quả thành công |
-|---|---|---|
-| Cài dependency | `pnpm install --frozen-lockfile` | exit 0; lockfile không đổi |
-| Characterization | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx'` | mọi semantic behavior test pass |
-| Utility test | `pnpm exec vitest run components/shop/profile/profile-formatters.test.ts` | mọi pure-helper test pass |
-| Lint | `pnpm exec eslint 'app/(shop)/profile/page.tsx' 'app/(shop)/profile/page.test.tsx' components/shop/profile/profile-formatters.ts components/shop/profile/profile-formatters.test.ts components/shop/profile/profile-loading.tsx --max-warnings 0` | exit 0, không warning |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, không error |
-| Unit suite | `pnpm test:unit` | mọi test pass |
-| Build | `pnpm build` | production build thành công |
-| Smoke | `pnpm test:e2e:smoke` | mọi `@smoke` test pass |
+| Mục đích         | Lệnh                                                                                                                                                                                                                                              | Kết quả thành công              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Cài dependency   | `pnpm install --frozen-lockfile`                                                                                                                                                                                                                  | exit 0; lockfile không đổi      |
+| Characterization | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx'`                                                                                                                                                                                         | mọi semantic behavior test pass |
+| Utility test     | `pnpm exec vitest run components/shop/profile/profile-formatters.test.ts`                                                                                                                                                                         | mọi pure-helper test pass       |
+| Lint             | `pnpm exec eslint 'app/(shop)/profile/page.tsx' 'app/(shop)/profile/page.test.tsx' components/shop/profile/profile-formatters.ts components/shop/profile/profile-formatters.test.ts components/shop/profile/profile-loading.tsx --max-warnings 0` | exit 0, không warning           |
+| Typecheck        | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                                                                                                       | exit 0, không error             |
+| Unit suite       | `pnpm test:unit`                                                                                                                                                                                                                                  | mọi test pass                   |
+| Build            | `pnpm build`                                                                                                                                                                                                                                      | production build thành công     |
+| Smoke            | `pnpm test:e2e:smoke`                                                                                                                                                                                                                             | mọi `@smoke` test pass          |
 
 ## Phạm vi
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong phạm vi** (chỉ được sửa các file này):
+
 - `app/(shop)/profile/page.tsx`
 - `app/(shop)/profile/page.test.tsx` (mở rộng file FE-008)
 - `components/shop/profile/profile-formatters.ts` (tạo mới)
@@ -90,6 +91,7 @@ decomposition sau có baseline ổn định.
 - `components/shop/profile/profile-loading.tsx` (tạo mới)
 
 **Ngoài phạm vi** (KHÔNG sửa):
+
 - API call, query key, enabled predicate, auth/session/cart state hoặc Backend contract.
 - Route URL, translation message, visual styling, DOM semantics hoặc responsive layout.
 - Tách live profile panel thành component; FE-010 quản lý phần đó.

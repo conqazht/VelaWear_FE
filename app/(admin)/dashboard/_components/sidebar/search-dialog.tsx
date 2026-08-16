@@ -54,9 +54,7 @@ export function SearchDialog() {
     );
 
     return sidebarItems.flatMap((group) => {
-      const groupLabel = group.labelKey
-        ? t(group.labelKey)
-        : t("admin.shell.navigation.other");
+      const groupLabel = group.labelKey ? t(group.labelKey) : t("admin.shell.navigation.other");
 
       return group.items.flatMap((item) => {
         const itemTitle = t(item.titleKey);
@@ -143,11 +141,11 @@ export function SearchDialog() {
         onClick={() => handleOpenChange(true)}
         variant="link"
         aria-label={t("admin.shell.search.label")}
-        className="px-0! font-normal text-muted-foreground hover:no-underline"
+        className="text-muted-foreground px-0! font-normal hover:no-underline"
       >
         <Search data-icon="inline-start" />
         {t("admin.shell.search.label")}
-        <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium text-[10px]">
+        <kbd className="bg-muted inline-flex h-5 items-center gap-1 rounded border px-1.5 text-[10px] font-medium select-none">
           <span className="text-xs">⌘</span>J
         </kbd>
       </Button>

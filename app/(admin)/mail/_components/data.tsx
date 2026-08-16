@@ -1,4 +1,14 @@
-import { Archive, CircleHelp, File, Inbox, Keyboard, type LucideIcon, Send, Star, Trash2 } from "lucide-react";
+import {
+  Archive,
+  CircleHelp,
+  File,
+  Inbox,
+  Keyboard,
+  type LucideIcon,
+  Send,
+  Star,
+  Trash2,
+} from "lucide-react";
 import { siFigma, siGoogledocs, siGooglephotos } from "simple-icons";
 
 import type { Locale } from "@/lib/i18n";

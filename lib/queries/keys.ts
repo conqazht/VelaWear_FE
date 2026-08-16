@@ -10,8 +10,7 @@ export const queryKeys = {
   },
   storefrontCatalog: {
     root: ["storefront-catalog"] as const,
-    list: (filters: unknown, locale?: string) =>
-      ["storefront-catalog", filters, locale] as const,
+    list: (filters: unknown, locale?: string) => ["storefront-catalog", filters, locale] as const,
   },
   catalog: {
     categories: (params?: unknown, locale?: string) => ["categories", params, locale] as const,
@@ -22,8 +21,7 @@ export const queryKeys = {
   },
   cart: {
     root: ["cart"] as const,
-    me: (accountId: number | undefined) =>
-      ["cart", "me", accountId ?? "anonymous"] as const,
+    me: (accountId: number | undefined) => ["cart", "me", accountId ?? "anonymous"] as const,
   },
   wishlists: {
     root: ["wishlists"] as const,
@@ -47,15 +45,16 @@ export const queryKeys = {
       accountId: number | undefined,
       orderId: number | undefined,
       params?: unknown,
-    ) => [
-      "orders",
-      "me",
-      accountId ?? "anonymous",
-      "id",
-      orderId ?? "pending",
-      "status-histories",
-      params,
-    ] as const,
+    ) =>
+      [
+        "orders",
+        "me",
+        accountId ?? "anonymous",
+        "id",
+        orderId ?? "pending",
+        "status-histories",
+        params,
+      ] as const,
   },
   payments: {
     root: ["payments"] as const,
@@ -65,18 +64,13 @@ export const queryKeys = {
     meList: (accountId: number | undefined, params?: unknown) =>
       ["user-addresses", "me", accountId ?? "anonymous", "list", params] as const,
     meById: (accountId: number | undefined, addressId: number | undefined) =>
-      [
-        "user-addresses",
-        "me",
-        accountId ?? "anonymous",
-        "id",
-        addressId ?? "pending",
-      ] as const,
+      ["user-addresses", "me", accountId ?? "anonymous", "id", addressId ?? "pending"] as const,
   },
   reviews: {
     root: ["reviews"] as const,
     list: (params?: unknown) => ["reviews", params] as const,
-    product: (productId: number, params?: unknown) => ["reviews", "product", productId, params] as const,
+    product: (productId: number, params?: unknown) =>
+      ["reviews", "product", productId, params] as const,
     summary: (productId: number) => ["reviews", "product", productId, "summary"] as const,
     me: (params?: unknown) => ["reviews", "me", params] as const,
   },

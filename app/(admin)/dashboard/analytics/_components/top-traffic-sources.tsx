@@ -5,7 +5,12 @@ import { Bar, BarChart, CartesianGrid, LabelList, type LabelProps, XAxis, YAxis 
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getIntlLocale } from "@/lib/i18n";
 
@@ -83,10 +88,27 @@ function TrafficSourceBarChart({ data }: { data: TrafficSourceDatum[] }) {
         <XAxis dataKey="visitors" hide type="number" />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent indicator="line" formatter={(value) => numberFormatter.format(Number(value))} />}
+          content={
+            <ChartTooltipContent
+              indicator="line"
+              formatter={(value) => numberFormatter.format(Number(value))}
+            />
+          }
         />
-        <Bar barSize={40} dataKey="visitors" fill="var(--color-visitors)" fillOpacity={0.5} radius={8}>
-          <LabelList className="fill-foreground" dataKey="source" fontSize={14} offset={12} position="insideLeft" />
+        <Bar
+          barSize={40}
+          dataKey="visitors"
+          fill="var(--color-visitors)"
+          fillOpacity={0.5}
+          radius={8}
+        >
+          <LabelList
+            className="fill-foreground"
+            dataKey="source"
+            fontSize={14}
+            offset={12}
+            position="insideLeft"
+          />
           <LabelList content={renderValueLabel} dataKey="label" />
         </Bar>
       </BarChart>
@@ -122,7 +144,9 @@ export function TopTrafficSources() {
   return (
     <Card className="h-full gap-2">
       <CardHeader>
-        <CardTitle className="font-normal">{t("admin.dashboardsA.analytics.trafficSources")}</CardTitle>
+        <CardTitle className="font-normal">
+          {t("admin.dashboardsA.analytics.trafficSources")}
+        </CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>

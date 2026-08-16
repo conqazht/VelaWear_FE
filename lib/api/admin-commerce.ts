@@ -224,11 +224,7 @@ export type CreateAdminSizeRequest = {
 
 export type UpdateAdminSizeRequest = CreateAdminSizeRequest;
 
-export type ProductVariantStatus =
-  | "ACTIVE"
-  | "INACTIVE"
-  | "OUT_OF_STOCK"
-  | "DISCONTINUED";
+export type ProductVariantStatus = "ACTIVE" | "INACTIVE" | "OUT_OF_STOCK" | "DISCONTINUED";
 
 export type AdminProductVariantReference = {
   id: number;
@@ -272,10 +268,7 @@ export type CreateAdminProductVariantRequest = {
   status?: ProductVariantStatus;
 };
 
-export type UpdateAdminProductVariantRequest = Omit<
-  CreateAdminProductVariantRequest,
-  "status"
-> & {
+export type UpdateAdminProductVariantRequest = Omit<CreateAdminProductVariantRequest, "status"> & {
   status: ProductVariantStatus;
 };
 
@@ -365,10 +358,9 @@ export function deleteAdminProductTranslation(id: number, locale: Locale) {
 }
 
 export async function updateAdminProductStatus(id: number, status: ProductStatus) {
-  const response = await apiClient.patch<ApiResponse<AdminProduct>>(
-    `/products/${id}/status`,
-    { status },
-  );
+  const response = await apiClient.patch<ApiResponse<AdminProduct>>(`/products/${id}/status`, {
+    status,
+  });
   return unwrapApiResponse(response);
 }
 
@@ -411,10 +403,9 @@ export function deleteAdminCategoryTranslation(id: number, locale: Locale) {
 }
 
 export async function updateAdminCategoryStatus(id: number, status: AdminCatalogStatus) {
-  const response = await apiClient.patch<ApiResponse<AdminCategory>>(
-    `/categories/${id}/status`,
-    { status },
-  );
+  const response = await apiClient.patch<ApiResponse<AdminCategory>>(`/categories/${id}/status`, {
+    status,
+  });
   return unwrapApiResponse(response);
 }
 
@@ -439,10 +430,9 @@ export function updateAdminBrand(id: number, request: UpdateAdminBrandRequest) {
 }
 
 export async function updateAdminBrandStatus(id: number, status: AdminCatalogStatus) {
-  const response = await apiClient.patch<ApiResponse<AdminBrand>>(
-    `/brands/${id}/status`,
-    { status },
-  );
+  const response = await apiClient.patch<ApiResponse<AdminBrand>>(`/brands/${id}/status`, {
+    status,
+  });
   return unwrapApiResponse(response);
 }
 
@@ -501,24 +491,18 @@ export function getAdminProductVariant(id: number) {
 export function createAdminProductVariant(request: CreateAdminProductVariantRequest) {
   return apiPost<AdminProductVariant, CreateAdminProductVariantRequest>(
     "/product-variants",
-    request
+    request,
   );
 }
 
-export function updateAdminProductVariant(
-  id: number,
-  request: UpdateAdminProductVariantRequest
-) {
+export function updateAdminProductVariant(id: number, request: UpdateAdminProductVariantRequest) {
   return apiPut<AdminProductVariant, UpdateAdminProductVariantRequest>(
     `/product-variants/${id}`,
-    request
+    request,
   );
 }
 
-export async function updateAdminProductVariantStatus(
-  id: number,
-  status: ProductVariantStatus,
-) {
+export async function updateAdminProductVariantStatus(id: number, status: ProductVariantStatus) {
   const response = await apiClient.patch<ApiResponse<AdminProductVariant>>(
     `/product-variants/${id}/status`,
     { status },

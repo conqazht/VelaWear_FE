@@ -56,10 +56,7 @@ async function requestFreshAccessToken() {
 
 export async function withAuthSessionLock<T>(operation: () => Promise<T>): Promise<T> {
   if (typeof navigator !== "undefined" && navigator.locks) {
-    return await navigator.locks.request(
-      authSessionLockName,
-      async () => await operation(),
-    );
+    return await navigator.locks.request(authSessionLockName, async () => await operation());
   }
   return operation();
 }
@@ -84,11 +81,7 @@ export async function logoutAuthSession(): Promise<void> {
       );
       isSettled = true;
     } catch (error) {
-      if (
-        !currentAccessToken ||
-        !axios.isAxiosError(error) ||
-        error.response?.status !== 401
-      ) {
+      if (!currentAccessToken || !axios.isAxiosError(error) || error.response?.status !== 401) {
         throw error; // Network, 5xx, or non-401 errors are rejected immediately
       }
 
@@ -137,7 +130,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Interceptor to handle automatic token refresh on 401 Unauthorized
@@ -147,19 +140,16 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     // Avoid infinite loop if refresh token endpoint itself returns 401
-    if ([
-      "/auth/refresh",
-      "/auth/login",
-      "/auth/logout",
-      "/auth/oauth2/exchange",
-    ].some((pathname) => originalRequest.url?.includes(pathname))) {
+    if (
+      ["/auth/refresh", "/auth/login", "/auth/logout", "/auth/oauth2/exchange"].some((pathname) =>
+        originalRequest.url?.includes(pathname),
+      )
+    ) {
       return Promise.reject(error);
     }
 
     if (error.response?.status === 401 && error.response?.data?.code === "SESSION_REVOKED") {
-      const requestHadAccessToken = Boolean(
-        accessToken || originalRequest.headers?.Authorization,
-      );
+      const requestHadAccessToken = Boolean(accessToken || originalRequest.headers?.Authorization);
       clearLocalAuthSession();
       if (requestHadAccessToken) redirectExpiredSessionToSignIn();
       return Promise.reject(error);
@@ -167,9 +157,7 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const requestHadAccessToken = Boolean(
-        accessToken || originalRequest.headers?.Authorization,
-      );
+      const requestHadAccessToken = Boolean(accessToken || originalRequest.headers?.Authorization);
 
       try {
         const newAccessToken = await refreshAccessTokenOnce();
@@ -187,7 +175,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

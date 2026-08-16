@@ -46,9 +46,7 @@ export async function CachedProfileNavigation() {
  */
 export function PersonalizedRouteBoundary({ children }: { children: ReactNode }) {
   return (
-    <Suspense
-      fallback={<AccountContentLoadingFallback />}
-    >
+    <Suspense fallback={<AccountContentLoadingFallback />}>
       <RequestTimeAccountContent>{children}</RequestTimeAccountContent>
     </Suspense>
   );

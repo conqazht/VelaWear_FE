@@ -58,9 +58,7 @@ export function EnglishContentGenerator({
   onGenerate,
 }: EnglishContentGeneratorProps) {
   const { t } = useI18n();
-  const [model, setModel] = useState<GeminiContentModel>(
-    DEFAULT_GEMINI_CONTENT_MODEL,
-  );
+  const [model, setModel] = useState<GeminiContentModel>(DEFAULT_GEMINI_CONTENT_MODEL);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const modelSelectId = useId();
   const actionDisabled = disabled || isPending || !sourceReady;
@@ -80,7 +78,7 @@ export function EnglishContentGenerator({
   }
 
   return (
-    <div className="grid gap-3 rounded-lg border bg-muted/30 p-4">
+    <div className="bg-muted/30 grid gap-3 rounded-lg border p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="grid min-w-0 flex-1 gap-1.5">
           <FieldLabel htmlFor={modelSelectId}>
@@ -126,21 +124,17 @@ export function EnglishContentGenerator({
         </p>
       ) : null}
       {!sourceReady ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t("admin.contentGeneration.sourceRequired")}
         </p>
       ) : (
-        <p className="text-xs text-muted-foreground">
-          {t("admin.contentGeneration.reviewNotice")}
-        </p>
+        <p className="text-muted-foreground text-xs">{t("admin.contentGeneration.reviewNotice")}</p>
       )}
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("admin.contentGeneration.confirm.title")}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.contentGeneration.confirm.title")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("admin.contentGeneration.confirm.description")}
             </AlertDialogDescription>

@@ -30,8 +30,7 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.quota.none": "No quota",
     "admin.sales.management.quota.allocated": "{count} allocated",
     "admin.sales.management.quota.total": "{count} total",
-    "admin.sales.management.quota.breakdown":
-      "{reserved} reserved · {sold} sold",
+    "admin.sales.management.quota.breakdown": "{reserved} reserved · {sold} sold",
     "admin.sales.management.action.publishAria": "Publish {name}",
     "admin.sales.management.action.publishTitle": "Publish campaign",
     "admin.sales.management.action.viewAria": "View {name}",
@@ -64,15 +63,11 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.chooseDescription":
       "A campaign can contain variants from one or many products.",
     "admin.sales.management.picker.selectedCount": "{count} selected",
-    "admin.sales.management.picker.searchPlaceholder":
-      "Search products, SKU, color, or size...",
-    "admin.sales.management.picker.searchAria":
-      "Search available product variants",
+    "admin.sales.management.picker.searchPlaceholder": "Search products, SKU, color, or size...",
+    "admin.sales.management.picker.searchAria": "Search available product variants",
     "admin.sales.management.picker.loading": "Loading sellable variants...",
-    "admin.sales.management.picker.empty":
-      "No active variants match this search.",
-    "admin.sales.management.picker.selectAllAria":
-      "Select all variants of {name}",
+    "admin.sales.management.picker.empty": "No active variants match this search.",
+    "admin.sales.management.picker.selectAllAria": "Select all variants of {name}",
     "admin.sales.management.picker.selectVariantAria": "Select {sku}",
     "admin.sales.management.picker.pricingTitle": "Sale pricing",
     "admin.sales.management.picker.pricingDescription":
@@ -80,10 +75,8 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.bulkModeAria": "Bulk price mode",
     "admin.sales.management.picker.discountPercent": "Discount percent",
     "admin.sales.management.picker.fixedPrice": "Fixed sale price",
-    "admin.sales.management.picker.bulkPercentageAria":
-      "Bulk discount percentage",
-    "admin.sales.management.picker.bulkFixedPriceAria":
-      "Bulk fixed sale price",
+    "admin.sales.management.picker.bulkPercentageAria": "Bulk discount percentage",
+    "admin.sales.management.picker.bulkFixedPriceAria": "Bulk fixed sale price",
     "admin.sales.management.picker.applySelected": "Apply to selected",
     "admin.sales.management.picker.column.productVariant": "Product / variant",
     "admin.sales.management.picker.column.referencePrice": "Reference price",
@@ -92,35 +85,28 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.column.customerLimit": "Limit / customer",
     "admin.sales.management.picker.column.used": "Used",
     "admin.sales.management.picker.column.remove": "Remove",
-    "admin.sales.management.picker.selectPrompt":
-      "Select one or more variants above.",
+    "admin.sales.management.picker.selectPrompt": "Select one or more variants above.",
     "admin.sales.management.picker.salePriceAria": "Sale price for {sku}",
     "admin.sales.management.picker.quotaAria": "Quota for {sku}",
     "admin.sales.management.picker.noLimit": "No limit",
-    "admin.sales.management.picker.customerLimitAria":
-      "Customer limit for {sku}",
-    "admin.sales.management.picker.usedBreakdown":
-      "{reserved} reserved · {sold} sold",
+    "admin.sales.management.picker.customerLimitAria": "Customer limit for {sku}",
+    "admin.sales.management.picker.usedBreakdown": "{reserved} reserved · {sold} sold",
     "admin.sales.management.picker.removeAria": "Remove {sku}",
 
     "admin.sales.management.validation.nameRequired": "Enter a campaign name.",
     "admin.sales.management.validation.englishPartial":
       "Enter an English campaign name, or clear the English description to use Vietnamese fallback.",
-    "admin.sales.management.validation.bannerUrl":
-      "Banner URL must be a valid http or https URL.",
+    "admin.sales.management.validation.bannerUrl": "Banner URL must be a valid http or https URL.",
     "admin.sales.management.validation.code":
       "Campaign code must contain 3–50 uppercase letters, numbers, dashes, or underscores.",
     "admin.sales.management.validation.schedule": "Choose a valid schedule.",
-    "admin.sales.management.validation.scheduleOrder":
-      "End time must be later than start time.",
-    "admin.sales.management.validation.itemRequired":
-      "Select at least one product variant.",
+    "admin.sales.management.validation.scheduleOrder": "End time must be later than start time.",
+    "admin.sales.management.validation.itemRequired": "Select at least one product variant.",
     "admin.sales.management.validation.duplicateVariant":
       "Variant {sku} is selected more than once.",
     "admin.sales.management.validation.salePrice":
       "{sku} needs a sale price above 0 and below its reference price.",
-    "admin.sales.management.validation.quotaPositive":
-      "{sku} needs a positive whole-number quota.",
+    "admin.sales.management.validation.quotaPositive": "{sku} needs a positive whole-number quota.",
     "admin.sales.management.validation.quotaUsed":
       "{sku} quota cannot be lower than its reserved and sold quantity.",
     "admin.sales.management.validation.customerLimit":
@@ -155,8 +141,7 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.quota.none": "Không giới hạn hạn ngạch",
     "admin.sales.management.quota.allocated": "Đã phân bổ {count}",
     "admin.sales.management.quota.total": "Tổng {count}",
-    "admin.sales.management.quota.breakdown":
-      "{reserved} đang giữ · {sold} đã bán",
+    "admin.sales.management.quota.breakdown": "{reserved} đang giữ · {sold} đã bán",
     "admin.sales.management.action.publishAria": "Xuất bản {name}",
     "admin.sales.management.action.publishTitle": "Xuất bản chiến dịch",
     "admin.sales.management.action.viewAria": "Xem {name}",
@@ -189,15 +174,11 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.chooseDescription":
       "Một chiến dịch có thể chứa biến thể của một hoặc nhiều sản phẩm.",
     "admin.sales.management.picker.selectedCount": "Đã chọn {count}",
-    "admin.sales.management.picker.searchPlaceholder":
-      "Tìm sản phẩm, SKU, màu sắc hoặc kích cỡ...",
-    "admin.sales.management.picker.searchAria":
-      "Tìm biến thể sản phẩm có thể bán",
+    "admin.sales.management.picker.searchPlaceholder": "Tìm sản phẩm, SKU, màu sắc hoặc kích cỡ...",
+    "admin.sales.management.picker.searchAria": "Tìm biến thể sản phẩm có thể bán",
     "admin.sales.management.picker.loading": "Đang tải biến thể có thể bán...",
-    "admin.sales.management.picker.empty":
-      "Không có biến thể đang hoạt động khớp với tìm kiếm.",
-    "admin.sales.management.picker.selectAllAria":
-      "Chọn tất cả biến thể của {name}",
+    "admin.sales.management.picker.empty": "Không có biến thể đang hoạt động khớp với tìm kiếm.",
+    "admin.sales.management.picker.selectAllAria": "Chọn tất cả biến thể của {name}",
     "admin.sales.management.picker.selectVariantAria": "Chọn {sku}",
     "admin.sales.management.picker.pricingTitle": "Giá khuyến mãi",
     "admin.sales.management.picker.pricingDescription":
@@ -205,10 +186,8 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.bulkModeAria": "Chế độ đặt giá hàng loạt",
     "admin.sales.management.picker.discountPercent": "Phần trăm giảm giá",
     "admin.sales.management.picker.fixedPrice": "Giá khuyến mãi cố định",
-    "admin.sales.management.picker.bulkPercentageAria":
-      "Phần trăm giảm giá hàng loạt",
-    "admin.sales.management.picker.bulkFixedPriceAria":
-      "Giá khuyến mãi cố định hàng loạt",
+    "admin.sales.management.picker.bulkPercentageAria": "Phần trăm giảm giá hàng loạt",
+    "admin.sales.management.picker.bulkFixedPriceAria": "Giá khuyến mãi cố định hàng loạt",
     "admin.sales.management.picker.applySelected": "Áp dụng cho mục đã chọn",
     "admin.sales.management.picker.column.productVariant": "Sản phẩm / biến thể",
     "admin.sales.management.picker.column.referencePrice": "Giá tham chiếu",
@@ -217,15 +196,12 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.picker.column.customerLimit": "Giới hạn / khách",
     "admin.sales.management.picker.column.used": "Đã dùng",
     "admin.sales.management.picker.column.remove": "Bỏ chọn",
-    "admin.sales.management.picker.selectPrompt":
-      "Hãy chọn một hoặc nhiều biến thể ở phía trên.",
+    "admin.sales.management.picker.selectPrompt": "Hãy chọn một hoặc nhiều biến thể ở phía trên.",
     "admin.sales.management.picker.salePriceAria": "Giá khuyến mãi của {sku}",
     "admin.sales.management.picker.quotaAria": "Hạn ngạch của {sku}",
     "admin.sales.management.picker.noLimit": "Không giới hạn",
-    "admin.sales.management.picker.customerLimitAria":
-      "Giới hạn mỗi khách của {sku}",
-    "admin.sales.management.picker.usedBreakdown":
-      "{reserved} đang giữ · {sold} đã bán",
+    "admin.sales.management.picker.customerLimitAria": "Giới hạn mỗi khách của {sku}",
+    "admin.sales.management.picker.usedBreakdown": "{reserved} đang giữ · {sold} đã bán",
     "admin.sales.management.picker.removeAria": "Bỏ chọn {sku}",
 
     "admin.sales.management.validation.nameRequired": "Nhập tên chiến dịch.",
@@ -238,14 +214,12 @@ export const salesAdminManagementMessages = defineMessages(
     "admin.sales.management.validation.schedule": "Chọn lịch chạy hợp lệ.",
     "admin.sales.management.validation.scheduleOrder":
       "Thời gian kết thúc phải sau thời gian bắt đầu.",
-    "admin.sales.management.validation.itemRequired":
-      "Chọn ít nhất một biến thể sản phẩm.",
+    "admin.sales.management.validation.itemRequired": "Chọn ít nhất một biến thể sản phẩm.",
     "admin.sales.management.validation.duplicateVariant":
       "Biến thể {sku} được chọn nhiều hơn một lần.",
     "admin.sales.management.validation.salePrice":
       "{sku} cần có giá khuyến mãi lớn hơn 0 và thấp hơn giá tham chiếu.",
-    "admin.sales.management.validation.quotaPositive":
-      "{sku} cần có hạn ngạch là số nguyên dương.",
+    "admin.sales.management.validation.quotaPositive": "{sku} cần có hạn ngạch là số nguyên dương.",
     "admin.sales.management.validation.quotaUsed":
       "Hạn ngạch của {sku} không được thấp hơn số lượng đang giữ và đã bán.",
     "admin.sales.management.validation.customerLimit":
@@ -253,5 +227,4 @@ export const salesAdminManagementMessages = defineMessages(
   },
 );
 
-export type SalesAdminManagementTranslationKey =
-  keyof (typeof salesAdminManagementMessages)["en"];
+export type SalesAdminManagementTranslationKey = keyof (typeof salesAdminManagementMessages)["en"];

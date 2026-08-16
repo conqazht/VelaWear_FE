@@ -4,9 +4,21 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getIntlLocale } from "@/lib/i18n";
 
 const pipelineChartValues = [34, 38, 31, 47, 42, 51, 44, 40, 58, 46, 43, 49] as const;
@@ -29,7 +41,10 @@ export function PipelineActivity() {
   const numberFormatter = new Intl.NumberFormat(intlLocale);
   const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
   const axisMonthFormatter = new Intl.DateTimeFormat(intlLocale, { month: "short" });
-  const tooltipMonthFormatter = new Intl.DateTimeFormat(intlLocale, { month: "short", year: "2-digit" });
+  const tooltipMonthFormatter = new Intl.DateTimeFormat(intlLocale, {
+    month: "short",
+    year: "2-digit",
+  });
   const pipelineChartConfig = {
     qualified: {
       label: t("admin.dashboardsA.crm.qualified"),
@@ -71,7 +86,11 @@ export function PipelineActivity() {
         <CardContent>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             <ChartContainer config={pipelineChartConfig} className="h-72 w-full lg:col-span-8">
-              <BarChart data={pipelineChartData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }} barSize={38}>
+              <BarChart
+                data={pipelineChartData}
+                margin={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                barSize={38}
+              >
                 <defs>
                   <pattern
                     id="crm-qualified-pattern"
@@ -105,7 +124,9 @@ export function PipelineActivity() {
                   content={
                     <ChartTooltipContent
                       hideIndicator
-                      labelFormatter={(value) => tooltipMonthFormatter.format(new Date(String(value)))}
+                      labelFormatter={(value) =>
+                        tooltipMonthFormatter.format(new Date(String(value)))
+                      }
                     />
                   }
                 />
@@ -122,9 +143,9 @@ export function PipelineActivity() {
 
             <div className="flex flex-col gap-5 rounded-lg p-4 lg:col-span-4">
               <div className="flex flex-col gap-1">
-                <div className="font-medium text-4xl tabular-nums leading-none">
+                <div className="text-4xl leading-none font-medium tabular-nums">
                   {numberFormatter.format(totalQualified)}{" "}
-                  <span className="font-normal text-lg text-muted-foreground">
+                  <span className="text-muted-foreground text-lg font-normal">
                     {t("admin.dashboardsA.crm.leads")}
                   </span>
                 </div>
@@ -133,15 +154,15 @@ export function PipelineActivity() {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3">
-                <div className="text-[11px] text-muted-foreground uppercase tracking-widest">
+              <div className="border-border/60 flex flex-col gap-3 rounded-lg border p-3">
+                <div className="text-muted-foreground text-[11px] tracking-widest uppercase">
                   {t("admin.dashboardsA.crm.discoveryCalls")}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <div className="font-medium text-2xl tabular-nums leading-none">
+                  <div className="text-2xl leading-none font-medium tabular-nums">
                     {numberFormatter.format(discoveryCallsBooked)}{" "}
-                    <span className="font-normal text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-sm font-normal">
                       {t("admin.dashboardsA.crm.meetings")}
                     </span>
                   </div>
@@ -155,7 +176,7 @@ export function PipelineActivity() {
                 <div className="flex flex-col gap-2 pt-0.5">
                   <Progress
                     value={discoveryProgress}
-                    className="h-2.5 bg-chart-2/12 *:data-[slot='progress-indicator']:bg-chart-2"
+                    className="bg-chart-2/12 *:data-[slot='progress-indicator']:bg-chart-2 h-2.5"
                   />
                   <div className="flex items-center justify-between text-xs">
                     <div className="font-medium tabular-nums">

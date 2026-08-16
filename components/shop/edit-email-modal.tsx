@@ -7,20 +7,9 @@ import { useOtpFlow } from "@/components/auth/use-otp-flow";
 import { changeEmail } from "@/lib/auth-otp-api";
 import { OtpEntry } from "@/components/auth/otp-entry";
 import { createEmailSchema } from "@/lib/validations";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export function EditEmailModal({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { user, clearRevokedSession } = useAuth();
   const { t, locale } = useI18n();
 
@@ -74,9 +63,7 @@ export function EditEmailModal({
   const getApiErrorMessage = (error: unknown) => {
     const apiError = error as { response?: { data?: { message?: string } }; message?: string };
     return (
-      apiError.response?.data?.message ??
-      apiError.message ??
-      t("account.settings.updateEmailError")
+      apiError.response?.data?.message ?? apiError.message ?? t("account.settings.updateEmailError")
     );
   };
 
@@ -101,18 +88,16 @@ export function EditEmailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleModalClose()}>
-      <DialogContent className="max-w-[500px] rounded-md border-[#e3dccf] bg-canvas p-6 md:p-8 text-ink shadow-2xl">
+      <DialogContent className="bg-canvas text-ink max-w-[500px] rounded-md border-[#e3dccf] p-6 shadow-2xl md:p-8">
         <DialogHeader className="mb-4 text-left">
-          <DialogTitle className="text-2xl font-serif font-light text-ink tracking-tight">
+          <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight">
             {t("account.profile.email")}
           </DialogTitle>
         </DialogHeader>
 
         {!showOtpStep ? (
           <div className="flex flex-col gap-6">
-            <p className="text-sm text-ink/70">
-              {t("account.profile.emailSettingsNote")}
-            </p>
+            <p className="text-ink/70 text-sm">{t("account.profile.emailSettingsNote")}</p>
             <div>
               <div className="relative">
                 <input
@@ -126,15 +111,15 @@ export function EditEmailModal({
                     setSubmitError(null);
                   }}
                   onBlur={() => setEmailTouched(true)}
-                  className={`peer w-full px-4 py-3.5 rounded-sm border bg-transparent text-sm text-ink placeholder-transparent focus:outline-none transition-colors duration-500 ease-out ${
+                  className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
                     emailTouched && !isFormValid
                       ? "border-error focus:border-error"
-                      : "border-[#1c1a18]/20 focus:border-ink/60"
+                      : "focus:border-ink/60 border-[#1c1a18]/20"
                   }`}
                 />
                 <label
                   htmlFor="newEmail"
-                  className={`absolute left-3 -top-2 bg-canvas px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:text-sm peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs cursor-text ${
+                  className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
                     emailTouched && !isFormValid
                       ? "text-error peer-focus:text-error"
                       : "text-ink/70 peer-focus:text-ink/70"
@@ -144,25 +129,23 @@ export function EditEmailModal({
                 </label>
               </div>
               {emailTouched && !isFormValid && (
-                <p className="text-error text-xs mt-1.5 transition-opacity duration-500">
+                <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
                   {emailValidationMessage}
                 </p>
               )}
             </div>
 
-            {displayError && (
-              <p className="text-sm text-error">{displayError}</p>
-            )}
+            {displayError && <p className="text-error text-sm">{displayError}</p>}
 
-            <div className="flex justify-end mt-4">
+            <div className="mt-4 flex justify-end">
               <button
                 type="button"
                 onClick={handleNext}
                 disabled={!isFormValid || isOtpSubmitting}
-                className={`px-8 py-2.5 rounded-sm border text-sm font-medium transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors ${
                   isFormValid && !isOtpSubmitting
-                    ? "bg-[#1c1a18] text-white border-[#1c1a18] hover:bg-[#1c1a18]/90 shadow-sm"
-                    : "border-[#1c1a18]/20 text-ink/40 bg-transparent cursor-not-allowed pointer-events-none"
+                    ? "border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
+                    : "text-ink/40 pointer-events-none cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
                 }`}
               >
                 {t("account.settings.verifyEmail")}

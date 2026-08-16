@@ -1,6 +1,10 @@
 "use client";
 
-import { PREFERENCE_REGISTRY, type PreferenceKey, type PreferenceValueMap } from "./preferences-config";
+import {
+  PREFERENCE_REGISTRY,
+  type PreferenceKey,
+  type PreferenceValueMap,
+} from "./preferences-config";
 import type { ResolvedThemeMode } from "./theme";
 import { applyThemeMode } from "./theme-utils";
 

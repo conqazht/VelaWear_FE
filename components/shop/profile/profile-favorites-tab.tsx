@@ -30,12 +30,17 @@ export function ProfileFavoritesTab({
 
   return (
     <section className="flex flex-col gap-6 text-left">
-      <div className="border-b border-hairline pb-4 flex justify-between items-end">
-        <h2 className="font-serif text-2xl md:text-3xl text-ink font-light tracking-tight">
+      <div className="border-hairline flex items-end justify-between border-b pb-4">
+        <h2 className="text-ink font-serif text-2xl font-light tracking-tight md:text-3xl">
           {t("account.favourites.title")}
         </h2>
         <span className="text-xs text-[#55423d]/65">
-          {t(favorites.length === 1 ? "account.favourites.count.one" : "account.favourites.count.many", { count: favorites.length })}
+          {t(
+            favorites.length === 1
+              ? "account.favourites.count.one"
+              : "account.favourites.count.many",
+            { count: favorites.length },
+          )}
         </span>
       </div>
       {favoritesLoading ? (
@@ -49,23 +54,23 @@ export function ProfileFavoritesTab({
           variant="panel"
         />
       ) : favorites.length === 0 ? (
-        <div className="py-16 text-center flex flex-col items-center gap-6">
-          <p className="text-sm text-on-surface-variant/80 font-light max-w-md">
+        <div className="flex flex-col items-center gap-6 py-16 text-center">
+          <p className="text-on-surface-variant/80 max-w-md text-sm font-light">
             {t("account.favourites.empty")}
           </p>
           <Link
             href="/collection"
-            className="inline-flex bg-primary-container text-on-primary text-xs font-semibold uppercase tracking-widest py-3.5 px-8 hover:bg-primary-active transition-colors duration-200 rounded-sm shadow-sm"
+            className="bg-primary-container text-on-primary hover:bg-primary-active inline-flex rounded-sm px-8 py-3.5 text-xs font-semibold tracking-widest uppercase shadow-sm transition-colors duration-200"
           >
             {t("account.favourites.explore")}
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {favorites.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
+            <ProductCard
+              key={product.id}
+              product={product}
               imageAction={
                 <button
                   onClick={(e) => {
@@ -73,19 +78,23 @@ export function ProfileFavoritesTab({
                     toggleFavorite(product);
                   }}
                   aria-label={t("account.favourites.remove", { product: product.name })}
-                  className="flex items-center justify-center size-8 rounded-full bg-[#1c1a18]/5 hover:scale-110 transition-transform"
+                  className="flex size-8 items-center justify-center rounded-full bg-[#1c1a18]/5 transition-transform hover:scale-110"
                 >
-                  <Heart className="size-4 text-[#b5573a] fill-[#b5573a]" />
+                  <Heart className="size-4 fill-[#b5573a] text-[#b5573a]" />
                 </button>
               }
               footerAction={
-                <button 
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     addToCart(product);
-                    showAddedToBag(product, product.size || "M", product.color || t("account.favourites.defaultOption"));
+                    showAddedToBag(
+                      product,
+                      product.size || "M",
+                      product.color || t("account.favourites.defaultOption"),
+                    );
                   }}
-                  className="w-full py-3 rounded-sm border border-[#1c1a18] text-xs font-semibold uppercase tracking-widest text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
+                  className="w-full rounded-sm border border-[#1c1a18] py-3 text-xs font-semibold tracking-widest text-[#1c1a18] uppercase transition-colors hover:bg-[#1c1a18] hover:text-white"
                 >
                   {t("account.favourites.addToBag")}
                 </button>

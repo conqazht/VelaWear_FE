@@ -4,8 +4,20 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatCurrency, formatDate } from "@/lib/i18n/format";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -55,8 +67,10 @@ const chartDomain = [weekStart, weekStart + 7 * DAY_MS];
 
 export function TransactionsOverviewCard() {
   const { locale, t } = useI18n();
-  const formatWeekday = (value: number) => formatDate(value, locale, { timeZone: "UTC", weekday: "long" });
-  const formatTooltipCurrency = (value: number | string) => formatCurrency(Number(value), locale, "USD");
+  const formatWeekday = (value: number) =>
+    formatDate(value, locale, { timeZone: "UTC", weekday: "long" });
+  const formatTooltipCurrency = (value: number | string) =>
+    formatCurrency(Number(value), locale, "USD");
   const chartConfig = {
     expense: {
       color: "var(--chart-4)",
@@ -90,7 +104,11 @@ export function TransactionsOverviewCard() {
 
       <CardContent>
         <ChartContainer config={chartConfig} className="h-50 w-full">
-          <LineChart accessibilityLayer data={chartData} margin={{ bottom: 0, left: 0, right: 0, top: 0 }}>
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               axisLine={false}
@@ -114,7 +132,10 @@ export function TransactionsOverviewCard() {
                   label={label}
                   payload={payload?.map((item) => ({
                     ...item,
-                    value: typeof item.value === "number" ? formatTooltipCurrency(item.value) : item.value,
+                    value:
+                      typeof item.value === "number"
+                        ? formatTooltipCurrency(item.value)
+                        : item.value,
                   }))}
                 />
               )}

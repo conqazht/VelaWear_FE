@@ -52,7 +52,11 @@ export function FavoritesPageClient() {
         <>
           {error ? (
             <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] md:px-16 md:pt-[120px]">
-              <StorefrontStaleWarning resourceLabel={t("favorites.resource")} onRetry={retry} error={error} />
+              <StorefrontStaleWarning
+                resourceLabel={t("favorites.resource")}
+                onRetry={retry}
+                error={error}
+              />
             </div>
           ) : null}
           <FavoritesContent
@@ -95,10 +99,10 @@ function FavoritesPageLoadingFallback({ loadingLabel }: { loadingLabel: string }
             >
               <div className="relative aspect-square">
                 <Skeleton className="size-full rounded-none bg-[#efe7dc]" />
-                <Skeleton className="absolute right-4 top-4 size-10 rounded-full bg-white/85" />
+                <Skeleton className="absolute top-4 right-4 size-10 rounded-full bg-white/85" />
               </div>
 
-              <div className="flex flex-grow flex-col items-start px-4 pb-6 pt-5">
+              <div className="flex flex-grow flex-col items-start px-4 pt-5 pb-6">
                 <Skeleton className="mb-2 h-3 w-2/5 rounded-none bg-[#efe7dc]" />
                 <Skeleton className="mb-3 h-5 w-4/5 rounded-none bg-[#efe7dc]" />
                 <div className="mt-1 flex items-center gap-2.5">
@@ -130,7 +134,7 @@ function FavoritesSignInState() {
         </p>
         <Link
           href="/sign-in"
-          className="inline-flex w-full justify-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-[#b5573a] active:scale-[0.96]"
+          className="inline-flex w-full justify-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-white uppercase transition-all hover:bg-[#b5573a] active:scale-[0.96]"
         >
           {t("favorites.signIn")}
         </Link>
@@ -154,7 +158,7 @@ function FavoritesContent({
 
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
-      <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+      <div className="mb-6 flex gap-2 text-[10px] tracking-[0.15em] text-[#1c1a18]/50 uppercase">
         <Link href="/" className="hover:text-[#1c1a18]">
           {t("common.home")}
         </Link>
@@ -168,28 +172,28 @@ function FavoritesContent({
             {t("favorites.title")}
           </h1>
           {favorites.length > 0 && (
-            <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
+            <p className="mt-2 block text-xs tracking-widest text-[#1c1a18]/60 uppercase">
               {t("favorites.savedCount", { count: favorites.length })}
             </p>
           )}
         </div>
         <Link
           href="/collection"
-          className="text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:underline animate-none"
+          className="animate-none text-xs font-semibold tracking-wider text-[#b5573a] uppercase hover:underline"
         >
           ← {t("cart.continueShopping")}
         </Link>
       </div>
 
       {favorites.length === 0 ? (
-        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[50vh] flex flex-col justify-start pt-16 items-center">
-          <Heart className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
-          <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
+        <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-start pt-16 pb-12 text-center select-none">
+          <Heart className="mx-auto mb-6 size-16 stroke-[1.2] text-[#1c1a18]/20" />
+          <p className="mb-8 max-w-xs text-sm leading-relaxed text-[#1c1a18]/60">
             {t("favorites.emptyDescription")}
           </p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-[#b5573a] active:scale-[0.96]"
+            className="inline-flex items-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#b5573a] active:scale-[0.96]"
           >
             {t("favorites.explore")}
           </Link>
@@ -235,7 +239,7 @@ function FavoritesGrid({
           footerAction={
             <button
               onClick={() => handleAddToBag(product)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e3dccf] bg-[#efe7dc] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] transition-all hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white active:scale-[0.96]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#e3dccf] bg-[#efe7dc] px-4 py-3 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-all hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white active:scale-[0.96]"
             >
               <ShoppingBag className="size-4" />
               <span>{t("favorites.addToBag")}</span>

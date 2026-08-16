@@ -41,7 +41,7 @@ export function CartPageClient() {
   return (
     <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       {/* Breadcrumbs */}
-      <div className="mb-6 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+      <div className="mb-6 flex gap-2 text-[10px] tracking-[0.15em] text-[#1c1a18]/50 uppercase">
         <Link href="/" className="hover:text-[#1c1a18]">
           {t("common.home")}
         </Link>
@@ -55,34 +55,34 @@ export function CartPageClient() {
             {t("cart.title")}
           </h1>
           {cart.length > 0 && (
-            <p className="block text-xs uppercase tracking-widest text-[#1c1a18]/60 mt-2">
+            <p className="mt-2 block text-xs tracking-widest text-[#1c1a18]/60 uppercase">
               {t("cart.savedCount", { count: cart.length })}
             </p>
           )}
         </div>
         <Link
           href="/collection"
-          className="text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:underline animate-none"
+          className="animate-none text-xs font-semibold tracking-wider text-[#b5573a] uppercase hover:underline"
         >
           ← {t("cart.continueShopping")}
         </Link>
       </div>
 
       {cart.length === 0 ? (
-        <div className="mx-auto max-w-md pb-12 text-center select-none min-h-[50vh] flex flex-col justify-start pt-16 items-center">
-          <ShoppingBag className="mx-auto mb-6 size-16 text-[#1c1a18]/20 stroke-[1.2]" />
-          <p className="mb-8 text-sm leading-relaxed text-[#1c1a18]/60 max-w-xs">
+        <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-start pt-16 pb-12 text-center select-none">
+          <ShoppingBag className="mx-auto mb-6 size-16 stroke-[1.2] text-[#1c1a18]/20" />
+          <p className="mb-8 max-w-xs text-sm leading-relaxed text-[#1c1a18]/60">
             {t("cart.emptyDescription")}
           </p>
           <Link
             href="/collection"
-            className="inline-flex items-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-[#b5573a] active:scale-[0.96]"
+            className="inline-flex items-center rounded-full bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#b5573a] active:scale-[0.96]"
           >
             {t("cart.shopAll")}
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 min-h-[80vh]">
+        <div className="grid min-h-[80vh] grid-cols-1 items-start gap-12 lg:grid-cols-12">
           <div className="space-y-6 lg:col-span-8">
             {hasFlashItem ? (
               <div className="flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
@@ -119,7 +119,7 @@ export function CartPageClient() {
             <div className="space-y-4 text-xs tracking-wide">
               <div className="flex justify-between text-[#1c1a18]/65">
                 <span>{t("cart.subtotal")}</span>
-                <span className="font-semibold text-[#1c1a18] font-numeric">
+                <span className="font-numeric font-semibold text-[#1c1a18]">
                   {money(subtotal, locale)}
                 </span>
               </div>
@@ -132,7 +132,7 @@ export function CartPageClient() {
               <Separator className="my-6 bg-[#1c1a18]/10" />
               <div className="flex justify-between text-sm font-semibold text-[#1c1a18] md:text-base">
                 <span>{t("cart.total")}</span>
-                <span className="font-serif text-lg tracking-wider font-numeric">
+                <span className="font-numeric font-serif text-lg tracking-wider">
                   {money(total, locale)}
                 </span>
               </div>
@@ -140,20 +140,18 @@ export function CartPageClient() {
 
             <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-[#f7f4ef] p-3.5 text-[10px] leading-relaxed text-[#1c1a18]/65">
               <Tag className="mt-0.5 size-4 shrink-0 text-[#b5573a]" />
-              <span>
-                {t("cart.giftPackaging")}
-              </span>
+              <span>{t("cart.giftPackaging")}</span>
             </div>
 
             <Link
               href="/checkout"
-              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1c1a18] py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md transition-all hover:bg-[#b5573a] active:scale-[0.96]"
+              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1c1a18] py-4 text-xs font-bold tracking-[0.2em] text-white uppercase shadow-md transition-all hover:bg-[#b5573a] active:scale-[0.96]"
             >
               {t("cart.checkout")}
               <ArrowRight className="size-4" />
             </Link>
 
-            <p className="mt-4 text-center text-[10px] uppercase leading-relaxed tracking-widest text-[#1c1a18]/50">
+            <p className="mt-4 text-center text-[10px] leading-relaxed tracking-widest text-[#1c1a18]/50 uppercase">
               {t("sale.cart.estimateNotice")}
             </p>
           </Card>
@@ -162,17 +160,13 @@ export function CartPageClient() {
 
       {/* Recommended Products */}
       <div className="mt-8">
-        <RelatedProducts 
-          categoryId={undefined}
-          categoryCode={"AO"}
-          currentProductSlug={""}
-        />
+        <RelatedProducts categoryId={undefined} categoryCode={"AO"} currentProductSlug={""} />
       </div>
     </div>
   );
 }
 
-function getCartItemMaximum(item: (ReturnType<typeof useCart>["cart"])[number]) {
+function getCartItemMaximum(item: ReturnType<typeof useCart>["cart"][number]) {
   const limits = [item.availableQuantity, item.remainingQuota, item.customerRemaining].filter(
     (value): value is number => typeof value === "number" && value >= 0,
   );
@@ -191,7 +185,7 @@ function useCartHydration() {
       };
     },
     () => useCartStore.persist.hasHydrated(),
-    () => false
+    () => false,
   );
 }
 
@@ -333,9 +327,11 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
             }
       }
     >
-      <Card className="flex gap-6 rounded-xl border border-[#1c1a18]/8 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row overflow-hidden">
+      <Card className="flex gap-6 overflow-hidden rounded-xl border border-[#1c1a18]/8 bg-white p-6 py-6 transition-shadow hover:shadow-md sm:flex-row">
         <Link
-          href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
+          href={
+            item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"
+          }
           className="relative mx-auto block h-32 w-24 shrink-0 overflow-hidden rounded-lg bg-[#efe7dc] sm:mx-0 sm:h-36 sm:w-28"
           aria-label={t("cart.viewProduct", { product: item.name })}
         >
@@ -346,13 +342,17 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
           <div>
             <div className="flex items-start justify-between gap-4">
               <Link
-                href={item.productSlug ? `/products/${encodeURIComponent(item.productSlug)}` : "/collection"}
+                href={
+                  item.productSlug
+                    ? `/products/${encodeURIComponent(item.productSlug)}`
+                    : "/collection"
+                }
                 className="font-serif text-lg font-semibold text-[#1c1a18] transition-colors hover:text-[#b5573a]"
               >
                 {item.name}
               </Link>
               <div className="text-right">
-                <span className="block whitespace-nowrap font-serif text-base font-light tracking-wider text-[#1c1a18] font-numeric">
+                <span className="font-numeric block font-serif text-base font-light tracking-wider whitespace-nowrap text-[#1c1a18]">
                   {money(item.price * item.quantity, locale)}
                 </span>
                 {item.listPrice && item.listPrice > item.price ? (
@@ -362,24 +362,30 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
                 ) : null}
               </div>
             </div>
-            <p className="mt-2 flex gap-4 text-[11px] uppercase tracking-wider text-[#1c1a18]/60">
+            <p className="mt-2 flex gap-4 text-[11px] tracking-wider text-[#1c1a18]/60 uppercase">
               <span>
-                {t("common.color")}:{" "}
-                <strong className="text-[#1c1a18]">{item.color}</strong>
+                {t("common.color")}: <strong className="text-[#1c1a18]">{item.color}</strong>
               </span>
               <span>
-                {t("common.size")}:{" "}
-                <strong className="text-[#1c1a18]">{item.size}</strong>
+                {t("common.size")}: <strong className="text-[#1c1a18]">{item.size}</strong>
               </span>
             </p>
             {item.priceSource && item.priceSource !== "BASE" ? (
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
-                <span className={item.priceSource === "FLASH_SALE" ? "rounded-full bg-[#8f2f20] px-2.5 py-0.5 text-white" : "rounded-full bg-[#1c1a18] px-2.5 py-0.5 text-white"}>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold tracking-[0.12em] uppercase">
+                <span
+                  className={
+                    item.priceSource === "FLASH_SALE"
+                      ? "rounded-full bg-[#8f2f20] px-2.5 py-0.5 text-white"
+                      : "rounded-full bg-[#1c1a18] px-2.5 py-0.5 text-white"
+                  }
+                >
                   {item.priceSource === "FLASH_SALE"
                     ? t("storefront.sale.type.flash")
                     : t("storefront.sale.type.standard")}
                 </span>
-                {item.campaignName ? <span className="text-[#1c1a18]/50">{item.campaignName}</span> : null}
+                {item.campaignName ? (
+                  <span className="text-[#1c1a18]/50">{item.campaignName}</span>
+                ) : null}
                 {item.priceSource === "FLASH_SALE" && item.remainingQuota != null ? (
                   <span className="text-[#8f2f20]">
                     {t("sale.cart.remainingQuota", { count: item.remainingQuota })}
@@ -403,11 +409,11 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                 disabled={item.quantity <= 1}
                 aria-label={t("cart.decreaseQuantity")}
-                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efe7dc] cursor-pointer"
+                className="size-8 cursor-pointer rounded-full text-[#1c1a18] hover:bg-[#efe7dc]"
               >
                 <Minus className="size-3" />
               </Button>
-              <span className="w-8 text-center text-xs font-bold text-[#1c1a18] font-numeric tabular-nums">
+              <span className="font-numeric w-8 text-center text-xs font-bold text-[#1c1a18] tabular-nums">
                 {item.quantity}
               </span>
               <Button
@@ -415,9 +421,12 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
                 variant="ghost"
                 size="icon"
                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                disabled={getCartItemMaximum(item) !== null && item.quantity >= (getCartItemMaximum(item) as number)}
+                disabled={
+                  getCartItemMaximum(item) !== null &&
+                  item.quantity >= (getCartItemMaximum(item) as number)
+                }
                 aria-label={t("cart.increaseQuantity")}
-                className="size-8 rounded-full text-[#1c1a18] hover:bg-[#efe7dc] cursor-pointer"
+                className="size-8 cursor-pointer rounded-full text-[#1c1a18] hover:bg-[#efe7dc]"
               >
                 <Plus className="size-3" />
               </Button>
@@ -427,7 +436,7 @@ function CartItemRow({ item, locale, t, updateQuantity, removeItem }: CartItemRo
               type="button"
               variant="ghost"
               onClick={() => removeItem(item.id)}
-              className="h-8 rounded-full px-3 text-[10px] font-bold uppercase tracking-widest text-[#b5573a] hover:bg-[#efe7dc] cursor-pointer active:scale-[0.96] transition-all"
+              className="h-8 cursor-pointer rounded-full px-3 text-[10px] font-bold tracking-widest text-[#b5573a] uppercase transition-all hover:bg-[#efe7dc] active:scale-[0.96]"
             >
               <Trash2 className="size-3.5" />
               {t("cart.remove")}

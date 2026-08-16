@@ -14,19 +14,19 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
   const consoleErrors: string[] = [];
   const pageErrors: string[] = [];
   const shopDataRequests: string[] = [];
-  
+
   page.on("console", (message) => {
     if (message.type() === "error" && !message.text().startsWith("Failed to load resource:")) {
       consoleErrors.push(message.text());
     }
   });
-  
+
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const headers = corsHeaders(request);
-    
+
     if (request.method() === "OPTIONS") {
       await route.fulfill({ status: 204, headers });
       return;
@@ -44,7 +44,7 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
             accessToken: "fake-admin-token",
             refreshToken: "fake-admin-refresh-token",
             expiresIn: 900,
-            tokenType: "Bearer"
+            tokenType: "Bearer",
           },
           message: "Success",
         },
@@ -63,7 +63,7 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
             email: "admin@example.com",
             fullName: "Admin",
             roles: [{ id: 1, name: "ADMIN" }],
-            permissions: []
+            permissions: [],
           },
           message: "Success",
         },
@@ -72,9 +72,9 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
     }
 
     if (
-      pathname.includes("/carts") || 
-      pathname.includes("/wishlists") || 
-      pathname.includes("/favorites") || 
+      pathname.includes("/carts") ||
+      pathname.includes("/wishlists") ||
+      pathname.includes("/favorites") ||
       pathname.includes("/notifications")
     ) {
       shopDataRequests.push(`${request.method()} ${pathname}`);
@@ -88,7 +88,7 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
         statusCode: 200,
         data: {
           meta: { page: 1, pageSize: 10, pages: 0, total: 0 },
-          result: []
+          result: [],
         },
         message: "OK",
       },
@@ -97,14 +97,14 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
 
   // Navigate directly to an admin route
   await page.goto("/dashboard/default", { waitUntil: "networkidle" });
-  
+
   // Assert admin shell rendered
   await expect(page).toHaveURL(/\/dashboard\/default/);
 
   // Assert no page or console errors
   expect(consoleErrors, "Admin page emitted a console error").toEqual([]);
   expect(pageErrors, "Admin page emitted an uncaught JavaScript error").toEqual([]);
-  
+
   // Assert no shop provider data requests were made
   expect(shopDataRequests, "Admin page made shop data requests").toEqual([]);
 });

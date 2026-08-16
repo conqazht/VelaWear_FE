@@ -29,10 +29,7 @@ describe("admin English translation suggestion API", () => {
 
     await generateProductEnglishSuggestion(request);
 
-    expect(apiPostMock).toHaveBeenCalledWith(
-      "/products/translation-suggestions/en",
-      request,
-    );
+    expect(apiPostMock).toHaveBeenCalledWith("/products/translation-suggestions/en", request);
     expect(request).not.toHaveProperty("slug");
   });
 
@@ -47,10 +44,7 @@ describe("admin English translation suggestion API", () => {
 
     await generateCategoryEnglishSuggestion(request);
 
-    expect(apiPostMock).toHaveBeenCalledWith(
-      "/categories/translation-suggestions/en",
-      request,
-    );
+    expect(apiPostMock).toHaveBeenCalledWith("/categories/translation-suggestions/en", request);
   });
 
   it("uses the Sale Campaign suggestion endpoint", async () => {
@@ -62,9 +56,6 @@ describe("admin English translation suggestion API", () => {
 
     await generateSaleCampaignEnglishSuggestion(request);
 
-    expect(apiPostMock).toHaveBeenCalledWith(
-      "/sale-campaigns/translation-suggestions/en",
-      request,
-    );
+    expect(apiPostMock).toHaveBeenCalledWith("/sale-campaigns/translation-suggestions/en", request);
   });
 });

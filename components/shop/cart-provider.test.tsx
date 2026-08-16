@@ -85,7 +85,11 @@ describe("CartProvider ownership", () => {
 
   it("không expose cart của user khác (user:42) khi đang auth loading", () => {
     useCartStore.setState({ cart: [makeItem(1)], owner: "user:42" });
-    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, isLoading: true } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: true,
+    } as ReturnType<typeof useAuth>);
 
     const { result } = renderHook(() => useCart(), { wrapper });
 
@@ -95,7 +99,11 @@ describe("CartProvider ownership", () => {
 
   it("expose guest cart (anonymous) khi đang auth loading", () => {
     useCartStore.setState({ cart: [makeItem(1)], owner: "anonymous" });
-    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, isLoading: true } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: true,
+    } as ReturnType<typeof useAuth>);
 
     const { result } = renderHook(() => useCart(), { wrapper });
 
@@ -105,7 +113,11 @@ describe("CartProvider ownership", () => {
 
   it("merge guest cart vào user 42 khi mount (guest claim)", async () => {
     useCartStore.setState({ cart: [makeItem(1)], owner: "anonymous" });
-    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: { id: 42 }, isLoading: false } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: true,
+      user: { id: 42 },
+      isLoading: false,
+    } as ReturnType<typeof useAuth>);
 
     renderHook(() => useCart(), { wrapper });
 
@@ -116,7 +128,11 @@ describe("CartProvider ownership", () => {
 
   it("không gửi item của user 42 lên server khi user 99 login (A→B clear mismatch)", async () => {
     useCartStore.setState({ cart: [makeItem(1)], owner: "user:42" });
-    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: true, user: { id: 99 }, isLoading: false } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: true,
+      user: { id: 99 },
+      isLoading: false,
+    } as ReturnType<typeof useAuth>);
 
     renderHook(() => useCart(), { wrapper });
 
@@ -133,7 +149,11 @@ describe("CartProvider ownership", () => {
 
   it("giải phóng owner cũ thành anonymous khi auth load xong và chưa login", async () => {
     useCartStore.setState({ cart: [makeItem(1)], owner: "user:42" });
-    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, isLoading: false } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: false,
+    } as ReturnType<typeof useAuth>);
 
     renderHook(() => useCart(), { wrapper });
 
@@ -145,7 +165,11 @@ describe("CartProvider ownership", () => {
 
   it("cho phép guest thêm sản phẩm vào giỏ hàng ngay cả khi storedOwner từng là user:42", async () => {
     useCartStore.setState({ cart: [], owner: "user:42" });
-    vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null, isLoading: false } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      isLoading: false,
+    } as ReturnType<typeof useAuth>);
 
     const { result } = renderHook(() => useCart(), { wrapper });
 

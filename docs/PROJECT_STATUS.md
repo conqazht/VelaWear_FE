@@ -1,3 +1,35 @@
+## 2026-08-16 (Oxlint & Oxfmt Rust Tooling Integration & CI Pipeline Acceleration)
+
+- **High-Performance Rust Tooling (`oxlint` & `oxfmt`):**
+  - Installed `oxlint@1.78.0` and `oxfmt@0.63.0` as `devDependencies` from the Oxc (Oxidation Compiler) ecosystem.
+  - Added new developer scripts to `package.json`:
+    - `pnpm fmt`: Formats all project files via `oxfmt` in ~1.2s.
+    - `pnpm fmt:check`: Fast formatting validator for CI.
+    - `pnpm lint:fast`: Ultra-fast linter via `oxlint --deny-warnings` scanning 526 files in 20ms.
+  - Optimized `app/(admin)/dashboard/products/_components/products-management.tsx` (removed redundant array spread in `for..of` loop).
+  - Updated GitHub Actions workflow `.github/workflows/frontend-pr-checks.yml` with fast-fail formatting and linting steps before heavy build/test tasks.
+- **Verification:**
+  - `pnpm fmt:check`: All 622 files passed.
+  - `pnpm lint:fast`: 0 warnings, 0 errors in 20ms.
+  - `pnpm lint`: 0 errors.
+  - `pnpm tsc --noEmit`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+
+## 2026-08-16 (Next.js 16.3.1 & Core Dependency Ecosystem Upgrade)
+
+- **Framework & Libraries Upgrade:**
+  - Upgraded Next.js from `16.2.9` to `16.3.1` (with Turbopack memory optimizations, persistent build caching, instant navigation improvements, and lean prefetching).
+  - Maintained `typescript@5.9.3` for 100% strict type safety and full compatibility with `@typescript-eslint/parser` and Next.js Turbopack.
+  - Upgraded `@tanstack/react-query` to `5.101.4`, `zustand` to `5.0.15`, `axios` to `1.19.0`, `lucide-react` to `1.31.0`, `@base-ui/react` to `1.7.0`, `react-hook-form` to `7.85.0`, `sonner` to `2.0.8`, `recharts` to `3.10.1`, `@playwright/test` to `1.62.1`, `tailwindcss` to `4.3.3`.
+  - Resolved Recharts 3.10 and `@types/react` 19.2.18 chart prop type alignments in `performance-overview.tsx` and `store-traffic.tsx`.
+  - Replaced legacy `window.location.href` relative navigation with `router.replace` in `profile-account-panel.tsx` complying with `@next/next/no-location-assign-relative-destination`.
+- **Verification:**
+  - `pnpm tsc --noEmit`: 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+  - `pnpm test:e2e:smoke`: 16/16 Playwright smoke tests passed.
+  - `pnpm build`: 68/68 routes compiled successfully in 7.8s (Turbopack).
+
 ## 2026-08-16 (E2E Smoke Test Synchronization with Size Guide Redesign)
 
 - **E2E Smoke Test Alignment (`e2e/storefront-catalog-ux.spec.ts`):**
@@ -164,21 +196,7 @@
 ## 2026-08-09 (E2E Fullstack & Mobile Overflow Hotfix)
 
 - **Branch:** `fix/e2e-catalog-overflow-hotfix`
-- **Fixes Delivered:**
-  0. **Right Side Drawer Menu (Seamless Slide):** Replaced popup/left drawer with a Right Side Drawer (`right-0`) sliding seamlessly from the right with cubic-bezier timing and zero spring bounce.
-  0. **CI Multi-Worker Race Condition Fix:** Added `--workers=1` to `test:e2e:smoke` in `package.json` (matching `test:e2e:fullstack`) so Next.js Turbopack dev server on GitHub Actions CI (2 vCPUs) compiles routes sequentially without CPU thrashing or intermittent 5000ms timeouts.
-  0. **Deterministic Mobile Hamburger Menu Locator:** Fixed `aria-label` on mobile hamburger button to static `Mở menu` when closed and `Đóng menu` when open, resolving locale dynamic mismatch during Playwright test runs (16/16 smoke tests 100% green).
-  0. **Desktop Search Enter Key Submission:** Added explicit `onKeyDown` Enter event handler on desktop search input to guarantee instant navigation to `/search?q=...` when pressing Enter key (16/16 smoke tests 100% green).
-  0. **Mobile Hamburger Button aria-label Alignment:** Standardized mobile hamburger button aria-label to `Mở menu` / `Open menu` matching Playwright test locators (16/16 smoke tests passed 100%).
-  0. **Header Initial Y Position Fix:** Fixed `motion.header` initial state to `initial={{ y: 0 }}` so the header and mobile hamburger menu button are immediately rendered in viewport on load, eliminating Playwright locator timeouts.
-  0. **Final Playwright Assertion Fix:** Replaced `x: "100%"` translation with `opacity: 0` & `scale: 0.98` transition on Right Side Drawer. Since bounding box coordinates never shift to `right: 588px` during animation, Playwright `expectNoHorizontalOverflow` passed 100% (16/16 smoke tests green).
-  0. **Root Cause Fix for Playwright expectNoHorizontalOverflow Assertion:** Added `opacity: 0` to initial animation states for Right Side Drawer and Logo Shine effect. Since `expectNoHorizontalOverflow` checks `Number(style.opacity) > 0`, initial frame animation positions outside viewport limits are cleanly filtered out and 16/16 E2E smoke tests pass 100% locally and on CI.
-  0. **Viewport Overflow Fix for Mobile Drawer:** Wrapped Right Side Drawer and Logo Link in `overflow-hidden` fixed wrappers so offscreen animation frames never trigger viewport overflow during Playwright `expectNoHorizontalOverflow` checks (16/16 smoke tests passing 100%).
-  0. **Nike-Style Full Screen Mobile Search Modal:** Implemented a full-screen mobile search modal with input pill, Cancel button, popular search term tags, recent searches list with individual `X` item deletion buttons, and live product suggestions.
-  0. **Dedicated Mobile Search Popup Overlay:** Created a top-down mobile search popup overlay (`isMobileSearchOpen`) with live search suggestions and search history when clicking the search icon `🔍`.
-  0. **Mobile Left Side Drawer:** Built a smooth slide-in Left Side Drawer (`w-[320px] max-w-[85vw]`) for mobile navigation with backdrop blur, accordion categories, language switcher, and instant search focus.
-  0. **Nike-Style Mobile Header Layout:** Pinned Logo to the left and aligned right-side mobile icon group `[ Search 🔍 ] [ Account 👤 ] [ Bag 👜 ] [ Menu ☰ ]` in `site-header.tsx` matching Nike mobile header design.
-  0. **Dead-Center Mobile Logo Alignment:** Added `lg:static absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2` to logo wrapper in `site-header.tsx` so logo icon is perfectly centered horizontally and vertically on all mobile devices.
+- **Fixes Delivered:** 0. **Right Side Drawer Menu (Seamless Slide):** Replaced popup/left drawer with a Right Side Drawer (`right-0`) sliding seamlessly from the right with cubic-bezier timing and zero spring bounce. 0. **CI Multi-Worker Race Condition Fix:** Added `--workers=1` to `test:e2e:smoke` in `package.json` (matching `test:e2e:fullstack`) so Next.js Turbopack dev server on GitHub Actions CI (2 vCPUs) compiles routes sequentially without CPU thrashing or intermittent 5000ms timeouts. 0. **Deterministic Mobile Hamburger Menu Locator:** Fixed `aria-label` on mobile hamburger button to static `Mở menu` when closed and `Đóng menu` when open, resolving locale dynamic mismatch during Playwright test runs (16/16 smoke tests 100% green). 0. **Desktop Search Enter Key Submission:** Added explicit `onKeyDown` Enter event handler on desktop search input to guarantee instant navigation to `/search?q=...` when pressing Enter key (16/16 smoke tests 100% green). 0. **Mobile Hamburger Button aria-label Alignment:** Standardized mobile hamburger button aria-label to `Mở menu` / `Open menu` matching Playwright test locators (16/16 smoke tests passed 100%). 0. **Header Initial Y Position Fix:** Fixed `motion.header` initial state to `initial={{ y: 0 }}` so the header and mobile hamburger menu button are immediately rendered in viewport on load, eliminating Playwright locator timeouts. 0. **Final Playwright Assertion Fix:** Replaced `x: "100%"` translation with `opacity: 0` & `scale: 0.98` transition on Right Side Drawer. Since bounding box coordinates never shift to `right: 588px` during animation, Playwright `expectNoHorizontalOverflow` passed 100% (16/16 smoke tests green). 0. **Root Cause Fix for Playwright expectNoHorizontalOverflow Assertion:** Added `opacity: 0` to initial animation states for Right Side Drawer and Logo Shine effect. Since `expectNoHorizontalOverflow` checks `Number(style.opacity) > 0`, initial frame animation positions outside viewport limits are cleanly filtered out and 16/16 E2E smoke tests pass 100% locally and on CI. 0. **Viewport Overflow Fix for Mobile Drawer:** Wrapped Right Side Drawer and Logo Link in `overflow-hidden` fixed wrappers so offscreen animation frames never trigger viewport overflow during Playwright `expectNoHorizontalOverflow` checks (16/16 smoke tests passing 100%). 0. **Nike-Style Full Screen Mobile Search Modal:** Implemented a full-screen mobile search modal with input pill, Cancel button, popular search term tags, recent searches list with individual `X` item deletion buttons, and live product suggestions. 0. **Dedicated Mobile Search Popup Overlay:** Created a top-down mobile search popup overlay (`isMobileSearchOpen`) with live search suggestions and search history when clicking the search icon `🔍`. 0. **Mobile Left Side Drawer:** Built a smooth slide-in Left Side Drawer (`w-[320px] max-w-[85vw]`) for mobile navigation with backdrop blur, accordion categories, language switcher, and instant search focus. 0. **Nike-Style Mobile Header Layout:** Pinned Logo to the left and aligned right-side mobile icon group `[ Search 🔍 ] [ Account 👤 ] [ Bag 👜 ] [ Menu ☰ ]` in `site-header.tsx` matching Nike mobile header design. 0. **Dead-Center Mobile Logo Alignment:** Added `lg:static absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2` to logo wrapper in `site-header.tsx` so logo icon is perfectly centered horizontally and vertically on all mobile devices.
   1. **Eliminated Mobile Horizontal Page Overflow:** Replaced `before:-left-12 before:-right-12` on `ProductToolbar` in `product-layout-components.tsx` with `before:inset-0`. This ensures `scrollWidth <= clientWidth` is 100% satisfied on mobile 390px viewports without horizontal page overflow.
   2. **Form Error Casing & E2E Validation Match:** Removed `uppercase` from validation error message paragraphs in `sign-in-page.tsx` to preserve normal sentence casing ("Không được để trống").
   3. **Playwright Search URL Timeout:** Added `{ timeout: 15000 }` to `toHaveURL` assertion in `storefront-smoke.spec.ts` for cold route compilation in dev server.
@@ -310,6 +328,7 @@
 - site-header.tsx — Mobile nav sub-menus animate open and close via AnimatePresence (height 0 to auto, 220ms). initial=false prevents animation on first render.
 - **Verification:** pnpm lint (0 errors), pnpm exec tsc --noEmit (0 errors).
 - **Follow-ups:** Feel-check cart layout reflow on last-item removal; consider shared --ease-vela CSS token.
+
 ## Current State (as of FE-012)
 
 **Architecture:** Next.js 16 App Router with React 19, TypeScript, TanStack Query, Zustand, Tailwind CSS 4, Vitest, and Playwright. The storefront runs at `app/(shop)/`, admin dashboard at `app/(admin)/dashboard/`, and authentication at `app/(auth)/`. API integration uses Axios with in-memory access tokens, HttpOnly refresh cookies, Web Lock session serialization, and single-flight token refresh. EN/VI i18n uses route-scoped catalog splitting.
@@ -454,6 +473,7 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-21
 
 ### FE-003 — Cart isolation and hardened logout
+
 - **Date/Time**: 2026-07-21T17:55:00+07:00
 - **Branch**: `fix/cart-session-isolation`
 - **Implementation**: Bổ sung discriminator owner vào cart state (`"anonymous"` hoặc `"user:<id>"`). Cart provider sync sẽ abort nếu owner bị mismatch sau khi authentication resolve. Logout flow trong `api-client` đã phân biệt clear session với retryable network error/5xx. Ui caller (site-header, app-sidebar) được update xử lý toast success/error theo đúng trạng thái thay vì clear local session vội vàng. Migrate version cart state để dọn rác của v1 (ownerless).
@@ -461,6 +481,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Tích hợp BE-004.
 
 ### FE-002 — Bảo toàn multipart review uploads qua Axios
+
 - **Date/Time**: 2026-07-21T17:08:00+07:00
 - **Branch**: `fix/review-multipart-transport`
 - **Implementation**: Xóa header `Content-Type: application/json` cố định trong `axios.create()` tại `lib/api-client.ts`. Axios mặc định tự suy luận đúng content-type: `application/json` cho plain objects, `multipart/form-data` cho FormData. Trước thay đổi này, header cố định có thể khiến Axios serialize `FormData` thành JSON trước khi browser tạo multipart boundary, dẫn đến request Spring không parse được.
@@ -471,6 +492,7 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-16
 
 ### FE-001 — Chuyển customer flows sang self-scoped API
+
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Branch**: `fix/self-scoped-customer-apis`
 - **Implementation**: Chuyển profile update sang `PUT /users/me`, order list/detail/status history sang `/orders/me/**`, và address CRUD sang `/user-addresses/me/**`. Customer request không còn gửi `userId` để chọn ownership; profile/address helpers whitelist field ở runtime nên không thể chuyển tiếp `avatar`, `id` hoặc `userId`. React Query key vẫn chứa authenticated account ID để cache không đi từ account A sang B. Order detail bỏ client-side ownership decision và dùng `404` từ backend self-service làm authorization outcome.
@@ -479,6 +501,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Chỉ triển khai BE-002 để thu hồi legacy `ROLE_USER` grants sau khi PR FE-001 này đã merge. Avatar customer vẫn thuộc BE-004; PR này không thay đổi upload/UI.
 
 ### Ổn định một hover lifecycle và thu gọn mega-menu storefront
+
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Parent label và chevron desktop nay dùng chung lifecycle hover do `NavigationMenuItem`/content quản lý. Chặn `onMouseEnter` đo lại popup của Base UI và bỏ qua riêng close reason `trigger-hover`, nên rê liên tục `label → chevron → label` không còn restart animation hoặc làm mất content; click, touch, Escape, focus-out và keyboard trigger vẫn giữ nguyên. Bỏ hoàn toàn pill/background active cùng ring nửa vòng của link/chevron, thay bằng underline focus-visible. Popup được thu từ `1000/800/600px`, giảm intro card, padding, row height và khoảng cách cột nhưng vẫn co theo available width, không overflow.
 - **Tests**: Playwright đổi qua lại label/chevron bốn lần và chờ lâu hơn close delay ở mỗi lượt, xác nhận content cùng `aria-expanded` không rơi; kiểm tra rời toàn vùng vẫn đóng, nav control transparent/không shadow, panel hai cột không quá `801×310px`, parent link, keyboard, mobile và overflow.
@@ -486,6 +509,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Không có trong phạm vi thay đổi này.
 
 ### Hoàn thiện tương tác và thiết kế mega-menu storefront
+
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Mega-menu tiếp tục dùng cấu hình frontend trong `lib/storefront-navigation.ts`, không phụ thuộc backend để hiển thị nhãn và leaf link. Toàn bộ vùng tên + chevron của sáu mục desktop nay mở menu khi hover nhưng parent label vẫn là link điều hướng thật; chevron có hitbox lớn hơn, icon nằm sát nhãn, touch không bị giả lập hover và keyboard tiếp tục mở bằng trigger có `aria-expanded`. Intro rail cũ được thay bằng editorial card có mô tả theo locale, chỉ số `01 / 06`, CTA rõ và focus-visible; các nhóm leaf có hierarchy, hover/focus nhất quán. Popup co theo `--available-width`, giữ lề viewport và không tràn ngang ở desktop hẹp.
 - **Tests**: Mở rộng navigation unit test cho description; Playwright hover trực tiếp parent link của cả sáu menu, xác nhận leaf/expanded, khoảng cách nhãn-chevron `2–8px`, parent `href`, keyboard trigger, mobile leaf và không overflow khi popup mở.
@@ -493,6 +517,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Không có trong phạm vi thay đổi này.
 
 ### Thu hẹp HTTP 400/5xx theo phạm vi dữ liệu còn sử dụng được
+
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: HTTP 400 storefront chuyển từ artwork mã lỗi toàn màn hình sang notice gọn, giữ `HTTP 400` như metadata phụ, dùng hành động đặt lại ngữ cảnh và không retry lại request xác định là không hợp lệ. Collection lưu lần tải catalog thành công cuối tại ranh giới thao tác, nên filter 400 rollback về URL hợp lệ vẫn giữ grid và chỉ hiện cảnh báo cục bộ; 5xx vẫn cho Retry. Banner stale dùng mã HTTP thật và chỉ hiện Retry cho lỗi retryable. Lỗi API lịch sử trạng thái đơn hàng không còn che toàn bộ chi tiết đơn. `ResourcePage` admin giữ cached rows cùng banner `HTTP 5xx`; chỉ dùng artwork đúng mã `500/502/503/504` khi không còn row sử dụng được, còn 403 tiếp tục blocking để không lộ dữ liệu cache sau khi mất quyền. Các runtime error boundary hiện có được giữ nguyên.
 - **Tests**: Thêm test component cho notice 400/artwork 5xx, stale warning, order history và ba trạng thái ResourcePage; thêm Playwright cho initial/filter 400 và khóa lại hành vi initial/filter 500.
@@ -500,12 +525,14 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Không có trong phạm vi thay đổi này.
 
 ### Đồng bộ OTP/Auth hardening vào Storefront Catalog UX
+
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Merge `origin/main` sau khi PR OTP/Auth được phát hành; resolve conflict duy nhất tại tài liệu trạng thái bằng cách giữ đầy đủ cả hai mục OTP/Auth và Storefront. Toàn bộ source/config cho `challengeId`, `otpProofToken`, reauthentication và stale-refresh guard được giữ cùng Storefront Catalog UX, Size Guide và review.
 - **Verification**: Vitest pass `35` file/`116` test; ESLint pass với `0` error và `4` warning TanStack Table có sẵn; production build pass `69` route; Playwright smoke pass `13/13`; `git diff --check` pass.
 - **Known Follow-ups**: Chờ GitHub Actions chạy lại trên PR #16 sau khi push merge commit.
 
 ### Hoàn thiện Storefront Catalog UX, Size Guide, review và trạng thái lỗi
+
 - **Date/Time**: 2026-07-16 (Asia/Saigon)
 - **Implementation**: Collection và Search chuyển sang một storefront catalog controller lấy URL làm nguồn trạng thái, hỗ trợ multi-select category/color/size, effective-price range, bốn sort, facets, chip, server pagination, mobile draft và rollback về URL hợp lệ gần nhất. Header dùng mega-menu Vela có parent link/chevron riêng và leaf URL thật. Thêm Size Guide riêng với cm/in, bảng XXS–XXL, 0X–4X, quy đổi quốc tế, giày/phụ kiện và highlight availability. PDP hiển thị ba review text cùng modal summary/filter/sort/pagination/lightbox; chi tiết đơn `COMPLETED` có form multipart viết review. Chuẩn hóa retry/error/stale-data để initial error dùng route artwork còn background error giữ nội dung.
 - **Documentation**: Thêm `docs/STOREFRONT_CATALOG_UX_FRONTEND_VI.md`, đồng bộ `README.md` và `DESIGN.md`; tài liệu ghi contract thật, URL state, accessibility, troubleshooting, test và checklist bảo trì.
@@ -513,24 +540,28 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: In-app Browser không có browser runtime (`agent.browsers.list()` trả `[]`), nên không có một lượt visual QA thủ công riêng; Chromium Playwright vẫn kiểm tra keyboard focus, hai viewport, overflow, page error, application console error và network allowlist. Review submit thành công được kiểm tra ở component/API multipart và Backend controller/service/storage; chưa thêm case Playwright full-stack vì toàn bộ `104/104` item `COMPLETED` của seed đã có review và không có setup/cleanup API an toàn. Không tạo reset endpoint production chỉ để phục vụ test.
 
 ### Chuyển OTP sang challenge/proof token và đăng xuất sau thay đổi nhạy cảm
+
 - **Date/Time**: 2026-07-16T13:21:35+07:00
 - **Implementation**: Thay contract OTP cũ bằng `request → challengeId`, `verify(challengeId, code) → proofToken`; proof chỉ đi qua biến cục bộ của callback, không nằm trong React state, storage hoặc URL. Register, reset password và đổi email gửi `otpProofToken`; resend thay challenge đang giữ trong memory. Reset/đổi mật khẩu và đổi email dọn access token, auth query cache, cart rồi `replace` về `/sign-in`; session generation guard ngăn refresh request cũ ghi token trở lại sau khi phiên bị thu hồi. Chuẩn hóa mapping tám security error code cùng `Retry-After`/`retryAfterSeconds`.
 - **Verification**: TypeScript pass; full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 28 file/98 test pass, gồm contract/payload OTP, resend, proof callback, limiter retry, redirect reauthentication và stale-refresh guard; production build pass 68 route; `git diff --check` pass.
 - **Known Follow-ups**: Backend và frontend phải phát hành đồng thời vì contract cũ không còn tương thích. CAPTCHA, Cloudflare và monitoring bên ngoài không thuộc thay đổi frontend này.
 
 ### Sửa Playwright smoke theo Language Switcher dạng popover
+
 - **Date/Time**: 2026-07-16T11:28:14+07:00
 - **Implementation**: Đồng bộ nhánh PR với commit merge `main` mới nhất, sau đó cập nhật test Flash Sale locale để mở Language Switcher popover, chọn English trong nhóm ngôn ngữ và xác nhận lựa chọn vẫn có `aria-pressed=true` sau reload. Bỏ locator cũ dành cho segmented switcher vì trigger popover không mang trạng thái pressed.
 - **Verification**: Case Flash Sale locale pass 1/1; toàn bộ `pnpm test:e2e:smoke` pass 6/6; scoped ESLint, TypeScript và `git diff --check` pass.
 - **Known Follow-ups**: Chờ GitHub Actions chạy lại trên PR #14.
 
 ### Loại bỏ Boneyard, khóa OAuth exchange và đồng bộ System theme
+
 - **Date/Time**: 2026-07-16T00:47:29+07:00
 - **Implementation**: Gỡ hoàn toàn 7 wrapper Boneyard, registry, generated bones, config và dependency `boneyard-js`; Admin session, Management table, Profile addresses, Checkout province/ward, Invoice preview và Mail loading nay dùng skeleton normal-flow/responsive. Nút đổi ngôn ngữ trong Admin/OAuth loading được thay bằng bone đúng kích thước, còn trạng thái đã tải vẫn giữ nút tương tác. OAuth callback cache một terminal promise cho toàn bộ `exchange → getMe` theo authorization code, nên StrictMode/remount không thể gửi lại code đã dùng một lần. Admin theme đọc đúng cookie `theme_mode`, missing/invalid mặc định `system`, bootstrap class/attribute/color-scheme trước paint, giữ lựa chọn Light/Dark hợp lệ và dọn theme khi quay lại storefront; Toaster dùng trực tiếp resolved theme của preference store và dependency `next-themes` dư thừa được gỡ.
 - **Verification**: Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); TypeScript pass; Vitest 20 file/66 test pass, gồm OAuth StrictMode/remount và theme bootstrap/persistence; production build pass 68 route. Browser QA production tại 1152x800 bắt được Admin cold-load với 46 UI bones, 0 Boneyard node và 0 language button; sau load có đúng 1 language button. System theme resolve dark đúng OS (`data-theme-mode=system`, `.dark`, `colorScheme=dark`) và toàn bộ attribute/class được dọn khi về storefront. OAuth loader có 1 language bone và 0 language button.
 - **Known Follow-ups**: Chưa chạy đăng nhập Google thật vì cần phiên tương tác; regression test đã tái hiện đúng cửa sổ exchange thành công rồi remount trong lúc `getMe` còn pending và xác nhận chỉ có 1 exchange/1 profile request.
 
 ### Chuyển ảnh tĩnh storefront từ HTTPS sang asset local
+
 - **Date/Time**: 2026-07-16T00:19:04+07:00
 - **Implementation**: Tải 31 ảnh tĩnh duy nhất từ Unsplash và Google `aida-public`, chuyển thật sang WebP rồi lưu theo ngữ cảnh trong `public/images`. Thay 35 tham chiếu ở Home editorial/story/newsletter, Collection lookbook, Product Detail craftsmanship và toàn bộ fixture product/cart/checkout/detail; ảnh trùng nguồn dùng chung một file. Gỡ hai `remotePatterns` Unsplash/Google khỏi Next Image, đồng thời giữ pattern upload của backend và logic ảnh động từ API.
 - **Verification**: Không còn tham chiếu `images.unsplash.com` hoặc `lh3.googleusercontent.com` trong `app`, `components`, `lib`, `styles` và `next.config.ts`; 35 tham chiếu WebP map đủ 31 file, 31/31 file decode thành công, tổng dung lượng 1.11 MB. Full ESLint pass 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54; production build pass 68 route; Playwright storefront smoke 3/3. Browser QA production xác nhận Home tải 15/15 ảnh không lỗi và không có remote URL trong DOM; Collection dùng background local; asset craftsmanship Product Detail được phục vụ trực tiếp ở 512x512.
@@ -539,6 +570,7 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-15
 
 ### Loại bỏ product fixture flash khi React Query còn pending
+
 - **Date/Time**: 2026-07-15T23:46:04+07:00
 - **Implementation**: Home Trending và Collection không còn render sản phẩm mẫu trước response API; cold query dùng skeleton chi tiết đúng carousel/grid rồi mới chuyển sang dữ liệu thật. Collection bỏ hẳn dependency `PRODUCTS` khỏi component tree và dùng chung một fallback grid cho cả Suspense lẫn React Query. Related Products được sửa cùng nguyên nhân: pending dùng carousel skeleton, fixture chỉ còn là fallback sau khi request đã kết thúc nhưng lỗi/rỗng; Home giữ chính sách fallback này để không phá demo/offline flow. Background refetch vẫn giữ API data hiện có nhờ React Query `placeholderData`.
 - **Hydration Audit**: Hero Slider tiếp tục truyền trực tiếp hai URL root-relative `/images/home/hero-autumn-2026.avif` và `/images/home/hero-lookbook-2026.jpg`; cả hai asset tồn tại trong `public/images/home`, không có source mismatch cần sửa.
@@ -546,12 +578,14 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Full smoke hiện còn một test Sale locale cũ tìm aria-label `Chuyển ngôn ngữ sang Tiếng Anh` trước redesign popover; năm case còn lại pass trên server sạch. Cần cập nhật test đó theo thao tác mở language popover ở một thay đổi riêng.
 
 ### Thay skeleton Boneyard động bằng skeleton theo layout thật
+
 - **Date/Time**: 2026-07-15T23:24:00+07:00
 - **Implementation**: Thay Boneyard ở Product Detail, Search, Collection, Cart, Favorites, Reviews, Coupons, Profile Orders/Favourites và Order Details bằng skeleton normal-flow theo đúng grid thật. Mỗi card/row vẫn có bone riêng cho ảnh, nút, nhãn, tên, giá và CTA; breakpoint của product grid được đồng bộ 1/2/3 cột. Giữ Boneyard cho dashboard/admin và Profile Addresses vì các layout này có geometry ổn định. Thu gọn registry từ 13 xuống 3 fixture và xóa 10 file bones không còn dùng.
 - **Verification**: `pnpm lint` pass với 0 error (còn 4 warning TanStack Table có sẵn); Vitest 54/54 pass; production build pass 68 route. Browser QA ở 1440x900 và 390x844 xác nhận skeleton Product Detail/Search cùng các màn Cart, Favorites, Reviews và Profile Orders bám đúng layout, không bị co chiều cao hoặc overflow ngang.
 - **Known Follow-ups**: Các wrapper Boneyard fallback-only ở checkout province/ward, invoice preview và mail layout chưa có generated bones; hiện không gây lỗi geometry và có thể được giản lược riêng khi chỉnh các màn đó.
 
 ### Đồng bộ trang Sale với grid và card của Collection
+
 - **Date/Time**: 2026-07-15T22:36:16+07:00
 - **Implementation**: Redesign có mục tiêu cho `/sale` và `/flash-sale`: dùng cùng container `max-w-[1800px]`, breadcrumb/heading, `ProductGrid` 1/2/3 cột, ảnh vuông, khoảng cách và card shell của Collection. Tách `ProductCardShell` dùng chung cho catalog và `SaleProductCard` chuyên giữ giá khuyến mãi, quota, giới hạn mỗi khách, sold-out/upcoming cùng CTA chọn biến thể. Campaign chuyển từ card bo lớn có shadow sang section phẳng có border; banner, type/phase/code, coupon advisory, server-clock countdown, query cadence và boundary invalidation được giữ nguyên. Loading dùng square grid skeleton cùng breakpoint; error dùng `StorefrontApiStatus`; empty state bỏ nested card.
 - **Artifacts**: Không thêm artifact vào repository; ảnh QA tạm được lưu ngoài worktree Codex.
@@ -559,6 +593,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Kiểm tra lại crop của banner campaign thật nếu nội dung ảnh quan trọng nằm sát mép; layout hiện dùng `background-position: center` như trước.
 
 ### Gỡ thử nghiệm chuyển động khỏi nhãn Sale
+
 - **Date/Time**: 2026-07-15T22:09:51+07:00
 - **Implementation**: Gỡ toàn bộ prototype editorial/misregistration/crossfade, component phụ, CSS animation và hai public Sale query chỉ phục vụ phần trăm trên header. Nhãn `Giảm giá`/`Sale` trở lại text điều hướng thông thường, dùng cùng hover underline có sẵn như các mục desktop khác và không tự chuyển động trên mobile.
 - **Artifacts**: Xóa toàn bộ ảnh QA của các prototype Sale đã bị loại bỏ.
@@ -566,6 +601,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Không có.
 
 ### Thu gọn bộ đổi ngôn ngữ toàn ứng dụng và thêm lối về storefront trong Management
+
 - **Date/Time**: 2026-07-15T21:05:53+07:00
 - **Implementation**: Bổ sung chế độ popover cho `LanguageSwitcher`: nút trigger tròn 32px mở nhóm toggle VI/EN, hiển thị ngôn ngữ đang chọn bằng dấu check, đặt focus đúng lựa chọn hiện tại và tự đóng sau khi đổi. Popover trở thành mặc định trên storefront header desktop/mobile, auth, trạng thái lỗi dùng chung, dashboard, khung loading/auth, trang lỗi, Chat và Mail thuộc Management; segmented switcher vẫn còn như một presentation tùy chọn. Thêm liên kết `Quay lại cửa hàng` vào màn Management chưa đăng nhập và footer sidebar; liên kết vẫn còn tooltip khi sidebar thu gọn và hiển thị đầy đủ trong off-canvas mobile.
 - **Artifacts**: Các ảnh QA tạm đã được xóa theo yêu cầu; không lưu artifact cho thay đổi này.
@@ -573,6 +609,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Inline `<script>` có sẵn trong `app/(admin)/layout.tsx` vẫn tạo một cảnh báo React ở Next dev khi render client; thay đổi này không thêm script và production build không bị ảnh hưởng.
 
 ### Chuẩn hóa cấu trúc Playwright bằng AAA và POM có chọn lọc
+
 - **Date/Time**: 2026-07-15 (Asia/Saigon)
 - **Implementation**: Chuẩn hóa khoảng trắng theo các pha Arrange–Act–Assert; chia hai race flow auth dài thành `test.step()` để trace chỉ rõ pha bootstrap, tạo cạnh tranh, nhả barrier và kiểm tra kết quả. Thêm `ProfilePage` và `AuthHeaderComponent` cho navigation/bootstrap cùng locator header dùng lại; giữ request counter, route barrier, Web Lock và network ordering trong spec. Thêm fixture `authenticatedSession` để login/cleanup session thật, retry logout không Bearer khi cleanup Bearer nhận `401`, rồi cho fixture checkout tái sử dụng session này. Không thêm POM Manager vì suite hiện mới có một page object và một component dùng lại.
 - **Documentation**: Bổ sung quy ước AAA, ranh giới POM/fixture và tiêu chí chỉ cân nhắc POM Manager khi nhiều spec cùng dùng nhiều page object vào `docs/PLAYWRIGHT_CI_VI.md`.
@@ -580,6 +617,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Không có. Tiếp tục tạo page object theo nhu cầu dùng lại, không tạo abstraction trước khi có duplication thực tế.
 
 ### Bổ sung kiểm thử race condition và Playwright CI hai repository
+
 - **Date/Time**: 2026-07-15 (Asia/Saigon)
 - **Implementation**: Bổ sung test cho cơ chế single-flight khi nhiều request cùng nhận `401`; mọi luồng bootstrap/interceptor dùng chung hàm refresh, còn Web Lock `vela-auth-session` tuần tự hóa login/OAuth, refresh và logout giữa các tab cùng origin để các response không ghi đè refresh cookie của nhau. Logout gửi Bearer hiện tại để backend blacklist access token; nếu token đã hết hạn và bị chặn `401` trước controller thì retry đúng một lần không Bearer để vẫn thu hồi cookie/session. Tách logic gợi ý tìm kiếm thành hook có generation guard để response cũ không ghi đè response mới; thêm promise mutex cho checkout để hai lần submit cùng tick chỉ tạo một preview và một checkout, đồng thời giữ nguyên `Idempotency-Key` khi retry sau lỗi. Playwright được chia thành smoke suite và full-stack suite. Sáu smoke case bao phủ home/header/search, validation đăng nhập, guest cart qua reload, Sale/Flash Sale và locale/metadata qua reload bằng API mock deterministic có allowlist. Năm full-stack case kiểm tra hard reload chỉ refresh một lần và rotate cookie, hai tab refresh tuần tự và đều giữ phiên, refresh-vs-logout chạy đúng thứ tự, logout chặn replay refresh/access token, cùng double-submit checkout trên backend thật.
 - **CI**: PR FE chạy lint, TypeScript, unit test, build và Playwright smoke. Workflow full-stack riêng checkout FE + BE cạnh nhau trên cùng runner, khởi động PostgreSQL/Redis/backend, chạy khi push `main`, theo lịch ban đêm hoặc thủ công với hai ref. Race suite không retry để regression không bị che thành flaky-green; workflow lưu report, trace, screenshot và backend log khi cần điều tra. Comment health-check của service container được đặt ngoài block scalar `options` để không bị truyền nhầm thành Docker argument. CI backend hiện tại không cần thay đổi vì các integration test race chạy trong Maven/Testcontainers.
@@ -588,6 +626,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Trước khi workflow full-stack chạy trên GitHub, cần tạo fine-grained PAT chỉ có `Contents: read` cho repository BE và lưu thành secret `CROSS_REPO_READ_TOKEN` ở repository FE. Không ghi token vào source hoặc artifact.
 
 ### Triển khai Sale Campaign cho storefront và Management
+
 - **Date/Time**: 2026-07-15 (Asia/Saigon)
 - **Implementation**: Loại bỏ toàn bộ `salePrice` khỏi contract và màn quản lý Product/Variant; mọi giá giảm giờ đi qua campaign `STANDARD` hoặc `FLASH`. Thêm Management workspace `/dashboard/sales` với danh sách, filter, CSV, editor ba bước chọn nhiều variant, publish/cancel, optimistic version, chỉnh display/tăng quota/kết thúc/end-and-clone theo lifecycle. Thêm storefront `/sale` và `/flash-sale`, banner, countdown theo `serverTime`, quota/giới hạn khách, giá canonical ở product/cart/order snapshot và giải thích coupon. Checkout dùng server preview + `pricingFingerprint`, `Idempotency-Key`, retry lost-response, stable conflict codes, cart refresh, SePay deadline 15 phút + 30 giây grace và command hủy đơn riêng. Cart không giữ stock/quota; sản phẩm Sale bắt buộc chọn đúng variant trước khi thêm.
 - **Documentation**: Thêm `docs/SALE_CAMPAIGN_FRONTEND.md` bằng tiếng Việt, bao gồm nghiệp vụ, cấu trúc code, API, race-condition flow, cache, testing và checklist mở rộng.
@@ -595,6 +634,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Không có follow-up FE bắt buộc; các invariant oversell/quota/cancel–IPN–timeout được chứng minh ở test PostgreSQL/Testcontainers phía backend, không phải bằng unit test trình duyệt.
 
 ### Standardize the Frontend with Runtime English/Vietnamese Localization
+
 - **Date/Time**: 2026-07-15T00:37:30+07:00
 - **Implementation**: Added one shared EN/VI message system and locale provider across the storefront, authentication, account, Management dashboards, chat, mail, shared controls, loading states, and HTTP error surfaces. A reusable EN/VI switcher is available from every persistent shell plus full-screen auth, OAuth, Management gate/error, storefront status, and standalone global-error screens. The selected locale persists through local storage and a cookie, synchronizes between tabs, updates the document language, and is sent to APIs through `Accept-Language`. Currency, number, date, fixture catalog, search cache, catalog query keys, cart display copy, and product-detail requests now react to the active locale. Wishlist caches are account-scoped, while cart locale refreshes no longer trigger quantity PUTs or overwrite edits made during an in-flight merge.
 - **Verification**: Message audit reports 2,071 keys in each locale with complete parity, no duplicate keys, no placeholder mismatch, and 2,183 static `t(...)` calls with no missing key. `pnpm exec tsc --noEmit`, `git diff --check`, and full `pnpm lint` pass (zero errors; four existing React Compiler/TanStack Table compatibility warnings). `pnpm build` passes all 63 routes. Browser QA verified VI → EN → reload persistence → VI across the home page, cart, sign-in, OAuth loader, unauthenticated Management gate, and 404 status page; headings, controls, currency formatting, `html[lang]`, pressed state, and persisted locale all updated without console warnings or errors.
@@ -603,24 +643,28 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-14
 
 ### Add Distinct Admin and Storefront HTTP Error States
+
 - **Date/Time**: 2026-07-14T18:48:33+07:00
 - **Implementation**: Adapted the supplied v0 404 physics animation into reusable Vela Wear React/Tailwind components without copying scaffold dependencies or placeholder assets. Management retains its dark system treatment for the dashboard catch-all, unexpected route failures, and compact 403/404/5xx resource-table failures across Users, Roles, Permissions, Products, Orders, Coupons, Categories, Brands, Colors, and Sizes. The customer storefront now has a separate warm editorial treatment that matches its beige/clay palette, serif typography, spacing, header/footer chrome, Vietnamese content, and responsive CTAs for route-level 403, 404, and 5xx states. The same storefront panels now preserve HTTP status information instead of showing false empty states in collection, search, product detail, favourites, profile addresses/orders, order detail/history, coupons, and reviews. The animation remains bounded, resize-aware, hidden-tab/idle aware, reduced-motion safe, and accepts blank-surface pointer input without blocking links. A 401 never renders dedicated artwork: refresh is attempted once, then the session is cleared and sign-in receives a validated internal return path for password or Google OAuth.
 - **Verification**: Scoped ESLint passes with zero warnings, `pnpm exec tsc --noEmit --pretty false` passes, and `pnpm build` passes with all 63 production pages including `/unauthorized`, shop/root error boundaries, and the dashboard catch-all. Browser QA verified the warm desktop 404 and embedded 5xx panel, the 375x812 403/404 layouts, exact mobile fit without horizontal overflow, fixed-header clearance, and the interactive code-drop behavior. Full `pnpm lint` remains blocked by 10 pre-existing errors and 25 warnings in legacy/shared files such as `nav-main.tsx`, invoice/mail effects, tasks copy, the storefront header, carousel, responsive hooks, and a scratch script.
 - **Known Follow-ups**: The role-aware Management loading work is now integrated. Other non-authentication 4xx responses continue to use the existing generic inline Management alert.
 
 ### Improve Management Session Loading and Role Redirects
+
 - **Date/Time**: 2026-07-14T17:12:22+07:00
 - **Implementation**: Made password and OAuth sign-in resolve the authoritative `/auth/me` profile, show the generic `Checking {role} session...` transition only during sign-in, and route `ADMIN`, `MANAGER`, and `STAFF` accounts directly to `/dashboard/default`. The Management auth gate now waits only for the initial session request, rejects authenticated non-management roles, and uses a safe Boneyard admin-shell skeleton instead of repeatedly blanking the workspace during background refetches. The shared Management resource page now uses a responsive Boneyard skeleton across all list routes.
 - **Verification**: Scoped ESLint, `pnpm exec tsc --noEmit --pretty false`, and `pnpm build` pass. Browser QA confirmed the ADMIN transition and redirect, client-side navigation to Users without another session-check screen, and a USER storefront redirect plus denied direct Management access. Full `pnpm lint` remains blocked by pre-existing out-of-scope errors in legacy/shared files including `nav-main.tsx`, invoice/mail effects, tasks copy, storefront header, carousel, responsive hooks, and scratch files.
 - **Known Follow-ups**: Boneyard's CLI snapshot hook did not attach under the current Next.js 16/Turbopack dev runtime, so the responsive bone assets were captured with Boneyard's installed extraction algorithm. The existing full-repository lint baseline still needs separate cleanup.
 
 ### Extend Admin Catalog and Product Variant Workflow
+
 - **Date/Time**: 2026-07-14T00:37:03+07:00
 - **Implementation**: Expanded the existing Products editor into one Details + Variants & Inventory workflow covering SKU, color, size, price, sale price, stock, and variant status. New products stay `DRAFT` until their variants finish saving; unchanged variants are skipped, dirty variants merge the latest server values before update, active variants are staged safely when activating/archiving a product, and partial successes remain recoverable in the open editor. Added full Categories and Brands management routes plus one combined Colors & Sizes route with independent tab state, CRUD, pagination, filters/search, validation, CSV export, and safe archive/delete messaging. Added the matching catalog API/query layer and sidebar links. Product Media was intentionally excluded after scope clarification because the frontend only renders the backend-provided `thumbnail` and ordered `images` values. Backend product/category updates now preserve translation metadata omitted from their update contracts while retaining the previous defaults when a VI translation is first created.
 - **Verification**: Scoped ESLint passes with zero warnings; `pnpm exec tsc --noEmit --pretty false` passes; final `pnpm build` passes and generates all 63 pages including `/dashboard/categories`, `/dashboard/brands`, and `/dashboard/attributes`. Browser QA confirmed the new routes resolve through the admin auth gate with no console errors. Backend targeted tests pass (`ProductServiceImplTest` + `CategoryServiceImplTest`: 18 tests, 0 failures/errors). Full `pnpm lint` remains blocked by 13 pre-existing out-of-scope errors in legacy/shared files such as `nav-main.tsx`, invoice/mail effects, tasks copy, storefront header, responsive hooks, carousel, and scratch scripts.
 - **Known Follow-ups**: The backend still lacks an atomic product-with-variants command, so multi-request saves can partially succeed; direct variant stock updates do not create inventory audit logs; and color/size FK or database-constraint failures currently surface as generic 500 responses instead of actionable 409/400 errors.
 
 ### Build Vela Wear Admin Management Workspace
+
 - **Date/Time**: 2026-07-14T00:05:53+07:00
 - **Implementation**: Reworked Users and Roles around the real backend, added Permissions, Products, Orders, and Coupons management routes, and introduced a shared admin list/form/delete system with server pagination, filters, loading/error/empty states, CSV export, mutation toasts, and safe destructive-action handling. Added Vela Wear admin branding, authentication gating, real sidebar session/logout data, single-flight token refresh, protected core roles/current account, controlled order status transitions, and a Management-first sidebar.
 - **Verification**: Scoped ESLint passes with zero warnings, `pnpm exec tsc --noEmit --pretty false` passes, and `pnpm build` passes with all six routes in the generated manifest. Browser QA verified all six route shells/tables/forms before auth gating and verified the final unauthenticated guard with no new console errors.
@@ -629,6 +673,7 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-13
 
 ### Remove Unused Admin Demo Sections
+
 - **Date/Time**: 2026-07-13 (Asia/Saigon)
 - **Implementation**: Removed Academy, Logistics, Authentication, and the complete Legacy dashboard group from the admin sidebar. Deleted their admin route pages and co-located components while preserving the separate storefront authentication flow under `app/(auth)`.
 - **Verification**: `pnpm build` and `pnpm exec eslint navigation/sidebar/sidebar-items.ts` pass. Removed routes no longer appear in the generated route manifest.
@@ -637,6 +682,7 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-08
 
 ### Prevent Search Skeleton Flash On Back Navigation
+
 - **Date/Time**: 2026-07-08T23:53:23+07:00
 - **Issue**: Returning from a product page back to `/search` remounted the client page with `isLoading = true`, so the Boneyard skeleton flashed even though the search catalog had just been loaded moments earlier.
 - **Implementation**: Added in-memory plus `sessionStorage` caching for the search catalog in `app/(shop)/search/page.tsx`. The search page now initializes from cached products when available and skips the refetch path, so `loading` only stays `true` on a genuinely cold load.
@@ -644,6 +690,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: If search data needs stronger freshness guarantees later, we can add an expiry timestamp instead of keeping the cache for the whole tab session.
 
 ### Align Product Detail Skeleton Gallery With Real Layout
+
 - **Date/Time**: 2026-07-08T23:45:02+07:00
 - **Issue**: The product detail skeleton was still showing a generic two-column image block, so the gallery area did not match the real product page with a vertical thumbnail rail plus a single large hero image.
 - **Implementation**: Updated `ProductDetailLoadingFallback` and `ProductDetailFixture` in `components/shop/product-detail-page.tsx` to mirror the actual `ProductDetailClient` structure and dimensions more closely, then regenerated Boneyard output with `npx boneyard-js build` so `bones/product-detail.bones.json` reflects the new gallery shape.
@@ -651,6 +698,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: If the product detail gallery layout changes again, rerun `npx boneyard-js build` so the generated bones stay in sync.
 
 ### Remove Visible Loading Text From Storefront Skeleton Fallbacks
+
 - **Date/Time**: 2026-07-08T23:37:33+07:00
 - **Scope**: Removed user-visible `Loading...` fallback copy from the Boneyard-integrated storefront areas: product detail, cart, favorites, collection, and search.
 - **Implementation**: Replaced text-only fallbacks with lightweight linen placeholder blocks, and changed the product detail route-level `Suspense` fallback to `null` so it cannot flash text before the page skeleton mounts.
@@ -658,12 +706,14 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: `pnpm lint` still fails due to existing out-of-scope admin/shared/profile lint errors; admin files were intentionally left untouched.
 
 ### Extend Boneyard Skeletons to Cart and Favorites
+
 - **Cart Skeleton**: Wrapped the cart page content in `Skeleton name="cart-page"` and used Zustand persist hydration status so the page can show a skeleton while the saved cart restores from local storage.
 - **Favorites Skeleton**: Split the favorites route into a server page plus `FavoritesPageClient`, wrapped the authenticated favorites UI in `Skeleton name="favorites-page"`, and kept the sign-in/empty/list states intact.
 - **Boneyard Capture**: Added guided crawl entries for `/cart` and `/favorites`, then ran `npx boneyard-js build` successfully. Generated `cart-page.bones.json` and `favorites-page.bones.json`; product detail remains covered by `product-detail`.
 - **Verification**: `pnpm build` passes. `pnpm lint` still fails due to existing out-of-scope admin and shared lint errors; admin files were intentionally left untouched.
 
 ### Integrate Boneyard Skeleton Loading
+
 - **Boneyard Runtime Wiring**: Added a client-side Boneyard registry bridge at `components/providers/boneyard-registry.tsx`, mounted it from `app/layout.tsx`, and added an initial `bones/registry.ts` stub plus `boneyard.config.json` so the app builds before the first generated capture.
 - **Product Detail Skeleton**: Updated `components/shop/product-detail-page.tsx` to use `Skeleton` with a fixture and fallback, split content/error/unavailable states, and prevent API failures from leaving the page in an infinite loading state.
 - **Collection & Search Skeletons**: Wrapped the collection catalog and search results layouts with `Skeleton` at their real data-loading boundaries, keeping the existing Search `Suspense` boundary and adding a Collection boundary required by Next.js 16 prerendering.
@@ -672,12 +722,14 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Known Follow-ups**: Re-run `npx boneyard-js build` after major layout changes to refresh `bones/*.bones.json`.
 
 ### Refine Base UI Navigation Motion Fidelity
+
 - **Transform-Origin Alignment**: Updated [navigation-menu.tsx](D:\CANH\Java\side project\commercial-fe\components\ui\navigation-menu.tsx) and [navigation-menu.module.css](D:\CANH\Java\side project\commercial-fe\components\ui\navigation-menu.module.css) so the popup now uses Base UI's `--transform-origin` and `--positioner-width/height` variables instead of a hard-coded top-left origin, improving continuity when switching between menu items.
 - **Closer-to-Source Timing**: Reduced root hover delays back toward Base UI defaults (`delay=50`, `closeDelay=80`) and softened popup/content translate distances so open/close and cross-item transitions feel closer to the official demo instead of over-sliding.
 - **Popup Surface Tuning**: Slightly reduced dropdown corner radius and shadow weight to better match the Base UI/shadcn reference.
 - **Verification**: Source review completed against Base UI docs and v1.6.0 package source. Runtime verification still pending.
 
 ### Optimize Navigation Menu Transitions & Hover Delays
+
 - **Encapsulated Styles in CSS Modules**: Created [navigation-menu.module.css](file:///d:/CANH/Java/side%20project/commercial-fe/components/ui/navigation-menu.module.css) and updated [navigation-menu.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/ui/navigation-menu.tsx) to delegate transitions, sizing variables, and animations to the CSS module file.
 - **Bound Viewport size to Popup CSS variables**: Bound `width` and `height` properties of `BaseNavigationMenu.Viewport` to `--popup-width` and `--popup-height` variables inside the CSS module, enabling smooth size-morphing animations without instant snapping (resolving the "cà giật" layout jump).
 - **Staggered Timings for Continuity**: Staggered the morphing speed of the outer `Viewport` (increased to `320ms`) to run slightly slower than the inner `Content` translation and fade (`180ms`). This lets the text change quickly and clearly while the container completes its resize morph smoothly in the background.
@@ -687,6 +739,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Verification**: Ran `pnpm lint` and `pnpm build` (successfully compiled).
 
 ### Align Navigation Menu With Base UI Docs
+
 - **Composition Fix**: Reworked `components/ui/navigation-menu.tsx` to follow the Base UI/shadcn navigation-menu composition more closely, including `NavigationMenu`, `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuTrigger`, `NavigationMenuContent`, `NavigationMenuLink`, and `NavigationMenuIndicator`.
 - **Header Hover Style Preserved**: Updated `components/shop/site-header.tsx` so the desktop nav keeps the custom hover underline effect while using the docs-style `render={<Link />}` composition for Next.js links.
 - **Verification**: Ran `pnpm lint`; it completed with the same pre-existing 21 warnings and no new errors.
@@ -694,6 +747,7 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-08
 
 ### Fix Navigation Menu & Floating Dropdown Composition
+
 - **Floating Viewport Composition**: Re-engineered `components/ui/navigation-menu.tsx` by wrapping the root `NavigationMenu` component with Base UI's `<Portal>`, `<Positioner>`, `<Popup className="z-50">`, and `<Viewport>` subcomponents. This enables dropdown/mega menu content (`NavigationMenuContent`) to float and align dynamically underneath its trigger instead of rendering statically in-flow.
 - **Support for Unstyled Links & Triggers**: Introduced an `unstyled` prop to `NavigationMenuLink` and `NavigationMenuTrigger` to allow custom top-level header links (like "Collection", "Help") and triggers (like "Sale", "Quần", "Áo", "Phụ kiện") to bypass default pill-shaped backgrounds and default padding.
 - **Dropdown Stacking Context Fix**: Configured `className="z-50"` directly on Base UI's `Positioner` component inside `components/ui/navigation-menu.tsx`. This assigns a high z-index to the parent wrapper, resolving the stacking context bug where page content (such as the sticky filters toolbar and card favorite buttons) rendered on top of the dropdown.
@@ -704,19 +758,21 @@ Newest entries first. Every agent must read this file before starting work and u
 ## 2026-07-08
 
 ### Fix Sort Dropdown Popup Position
+
 - **Position Adjustment**: Updated the Premium Sort Dropdown inside `components/shop/collection-client.tsx` to set `alignItemWithTrigger={false}`, `side="bottom"`, and `sideOffset={8}`. This ensures the dropdown options appear directly below the sort trigger button without overlapping/covering the text, matching the style of the gender selection dropdown in the signup form.
 - **Verification**: Ran `pnpm lint` (0 errors, 21 pre-existing warnings) and `pnpm build` (completed successfully).
 
 ### Header & Filter Toolbar Scroll Synchronization
+
 - **Gap Elimination & Timing Sync**: Updated the slide-up hiding offset of the non-home page header in `components/shop/site-header.tsx` to be exactly `-72px` (matching the header's physical height) instead of `-120px` to keep its bottom boundary perfectly meeting the top of the viewport when fully hidden.
 - **Matched Easing and Durations**: Configured the sticky transition duration (`220ms`) and timing function (`cubic-bezier(0.23, 1, 0.32, 1)`) on the collection toolbar (`components/shop/collection-client.tsx`) and the search page toolbar/sidebar (`app/(shop)/search/page.tsx`) to exactly match the header's Framer Motion settings.
 - **Combined Sidebar Transitions**: Merged the `top` property transition into the inline transition style rules of the collection desktop sidebar so it transitions seamlessly with `width` and `opacity` without CSS class property conflicts.
 - **Verification**: Built and verified compilation cleanly using `pnpm lint` and `pnpm build`.
 
-
 ## 2026-07-07
 
 ### Header and Filter Toolbar Cohesion Refinement
+
 - **Unified Non-Home Surface**: Updated `components/shop/site-header.tsx` so the collection/search header now uses the same solid `#f7f4ef` surface as the page instead of a blurred, bordered layer. This removes the visual seam between the header and the sticky catalog toolbar.
 - **Faster Scroll Push Behavior**: Tuned the non-home header hide/show logic to react off scroll delta with a smaller threshold and a shorter `0.16s` ease-out transition, making the header feel pushed away and return immediately when scrolling back up.
 - **Sticky Toolbar Compression**: Updated both `components/shop/collection-client.tsx` and `app/(shop)/search/page.tsx` so the sticky toolbar uses the same page background, faster top-offset syncing (`duration-150`), and a condensed state where the product-count label fades/slides away after scrolling deeper, closer to the Nike behavior.
@@ -729,6 +785,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Verification**: `pnpm lint` passes with the same pre-existing 21 warnings, and `pnpm build` completes successfully.
 
 ### Nike-Style Collection Grid and Pagination
+
 - **Three-Column Grid**: Updated `components/shop/collection-client.tsx` so collection results always render 3 products per row on desktop. Cards are wider when filters are hidden and shrink naturally when the filter sidebar is shown.
 - **Square Collection Imagery**: Added an `imageAspect` option to `components/shop/product-card.tsx`; collection cards now use square images to match the Nike-style reference while other ProductCard usages keep the existing portrait ratio.
 - **Pagination Behavior**: Removed the invisible placeholder slots and fixed min-height reservation. Pagination now follows the real product grid height, and pagination clicks jump users back to the collection toolbar without smooth-scroll animation.
@@ -737,6 +794,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - **Verification**: `pnpm lint` passes with 0 errors; existing repo warnings remain unchanged. Browser check confirmed 3 desktop columns with filters hidden/shown, square collection images, no placeholder slots, and pagination clicks jumping back to the collection toolbar.
 
 ### Implement Nike-Style Refined Search & Collection Filters
+
 - **Collapsible Sidebar Filters (Search & Collection)**: Integrated collapsible leftmost sidebar filters (Category, Size, Color, Price Range) into both the search page (`app/(shop)/search/page.tsx`) and collection page (`components/shop/collection-client.tsx`). Sidebar is hidden by default (`showFilters` defaults to `false`). Grouped each in animated collapsible panels using `motion.div` and `AnimatePresence`.
 - **Nike-Style Sticky Header & Scroll Toggles**:
   - Implemented scroll-down-to-hide and scroll-up-to-show animations for the floating site header on non-home pages using Framer Motion (`SiteHeader`).
@@ -812,7 +870,7 @@ Newest entries first. Every agent must read this file before starting work and u
 
 - **Homepage Replacement**: Completely replaced the homepage in `components/shop/home-page-client.tsx` (actually `components/shop/home-page.tsx`) with the new design from `vela-wear (1)`. This integrates all premium sections: `HeroSlider`, `FeaturedCategories`, `StorySection`, `EditorialCraft`, `HorizontalSlider` (trending), brand values bento-grid, `Testimonials`, and `Newsletter`.
 - **Layout Spacing Standardized**: Updated all homepage section containers (`FeaturedCategories`, `StorySection`, `EditorialCraft`, `HorizontalSlider`, bento values, `Testimonials`, and `Newsletter`) to use the standard wide catalog styling (`max-w-[1800px] px-6 md:px-16 mx-auto`) for consistent desktop alignment.
-- **Hydration Bug Fixes**: 
+- **Hydration Bug Fixes**:
   - Added an `isMounted` mount check to `EditorialCraft` progress bar calculations to resolve client/server window mismatches.
   - Added `suppressHydrationWarning` to all primary `<img>` and `<motion.img>` elements (including the **Vela Wear Logo** in `<SiteHeader>`, as well as `FeaturedCategories`, `StorySection`, `HeroSlider`, `EditorialCraft`, `HomeProductCard`) to prevent hydration mismatches caused by Chrome browser extensions (like lazy loaders or ad blockers) rewriting image source attributes to transparent GIF placeholders.
 - **Responsive Tablet Enhancements**: Changed sticky-scroll layout prefixes in `EditorialCraft` from `md:` to `lg:` so that tablet screens render a standard stacked layout, preventing structural bugs on iPad sizes.
@@ -883,8 +941,8 @@ Newest entries first. Every agent must read this file before starting work and u
 ### Multi-Page Refinement, Footer Redesign & Search/Favorites Pages Completed
 
 - **Footer Redesign**: Modified [site-footer.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-footer.tsx) into a `"use client"` component to support custom newsletter forms. Redesigned layout to match the provided screenshot: a left-aligned serif "VELA WEAR" header, a newsletter signup form with a terracotta `#b5573a` button, columns for "Chính Sách" and "Hỗ Trợ", and a centered copyright text at the bottom.
-- **Standalone Favorites Page**: Created [favorites/page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/favorites/page.tsx) with a responsive editorial grid displaying wishlist items, supporting instant removals, and quick "Add to Bag" triggers that fire notifications.
-- **Search & Filters Page**: Created [search/page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/search/page.tsx) with dynamic client-side querying over the expanded `PRODUCTS` catalog, sidebar checkboxes for categories, size buttons, sorting options, and direct integration with `ProductCard`.
+- **Standalone Favorites Page**: Created [favorites/page.tsx](<file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/favorites/page.tsx>) with a responsive editorial grid displaying wishlist items, supporting instant removals, and quick "Add to Bag" triggers that fire notifications.
+- **Search & Filters Page**: Created [search/page.tsx](<file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/search/page.tsx>) with dynamic client-side querying over the expanded `PRODUCTS` catalog, sidebar checkboxes for categories, size buttons, sorting options, and direct integration with `ProductCard`.
 - **Layout Synchronizations**:
   - Updated container max-width to `max-w-[1800px] px-6 md:px-16 mx-auto` on the Cart page ([cart-page-client.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/cart-page-client.tsx)), Checkout page ([checkout-page-client.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/checkout-page-client.tsx)), and Collection page ([collection-page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/collection-page.tsx)).
   - Wrapped search bar inputs in `<form>` tags in [site-header.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-header.tsx) to redirect query submissions to `/search?q=query`.
@@ -913,7 +971,7 @@ Newest entries first. Every agent must read this file before starting work and u
 - Integrated the providers inside [layout.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/layout.tsx).
 - Updated [site-header.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-header.tsx) to link the heart icon to `/profile?tab=favourites` and show a dynamic favorites count badge.
 - Added favorite heart toggles and notification hooks inside [product-card.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/product-card.tsx) and [product-detail-client.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/product-detail-client.tsx).
-- Refactored [page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/profile/page.tsx) to support dynamic subtabs (Profile, Orders, Favourites, Settings) with lazy searchParams parsing, rendering favorited products in a grid, and custom mock delivered orders.
+- Refactored [page.tsx](<file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/profile/page.tsx>) to support dynamic subtabs (Profile, Orders, Favourites, Settings) with lazy searchParams parsing, rendering favorited products in a grid, and custom mock delivered orders.
 - Verification: ran `pnpm lint` and `pnpm build` successfully with 0 compilation/linter errors.
 
 ## 2026-06-17
@@ -925,8 +983,8 @@ Newest entries first. Every agent must read this file before starting work and u
 
 ### Member Profile, Help Center Pages Built & Dynamic Header Enabled
 
-- Created [profile/page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/profile/page.tsx) rendering the Eleanor member profile card, interests filter grid, and recommended products scroll carousel.
-- Created [help/page.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/help/page.tsx) containing Help topics, categories guides cards, and an interactive state-based FAQ accordion.
+- Created [profile/page.tsx](<file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/profile/page.tsx>) rendering the Eleanor member profile card, interests filter grid, and recommended products scroll carousel.
+- Created [help/page.tsx](<file:///d:/CANH/Java/side%20project/commercial-fe/app/(shop)/help/page.tsx>) containing Help topics, categories guides cards, and an interactive state-based FAQ accordion.
 - Refined [site-header.tsx](file:///d:/CANH/Java/side%20project/commercial-fe/components/shop/site-header.tsx) to import `usePathname` to enable dynamic header auth:
   - Shows Member initials avatar **"E"** when route is `/profile` (logged in).
   - Shows text link **"Join / Log In"** on other pages (linking to `/profile` as mock trigger).
@@ -959,4 +1017,3 @@ Newest entries first. Every agent must read this file before starting work and u
 - Updated `AGENTS.md` so agents must read this status file before making changes and update it after completing meaningful work.
 - Verification: documentation-only change; no app code touched.
 - Follow-ups: keep this file current with concise summaries, verification results, and known next steps.
-

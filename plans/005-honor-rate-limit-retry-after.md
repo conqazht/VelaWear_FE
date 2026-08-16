@@ -31,33 +31,34 @@ Queries classify HTTP 429 as retryable but use React Query's default delay inste
 
 After BE-005 merges, freeze this code/status matrix in tests; response messages are never machine identifiers:
 
-| HTTP status | Stable code(s) | Frontend machine behavior |
-|---|---|---|
-| 400 | `REQUEST_BODY_INVALID`, `INVALID_REQUEST`, plus established OTP validation codes | no automatic retry; OTP kind comes only from its known code |
-| 401 | `AUTHENTICATION_REQUIRED`, `SESSION_REVOKED` | no automatic retry; preserve the existing authentication/session-revoked handling |
-| 403 | `ACCESS_DENIED` | no automatic retry |
-| 405 | `METHOD_NOT_ALLOWED` | no automatic retry |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` | no automatic retry |
-| 429 | `OTP_RATE_LIMITED`, `AUTH_RATE_LIMITED`, or another documented finite rate-limit code | parse `data.retryAfterSeconds` first, then `Retry-After`; a known code may select OTP copy, but status controls retry eligibility |
-| 500 | `INTERNAL_SERVER_ERROR` | query may use the existing single fallback retry; mutations remain zero-retry |
+| HTTP status | Stable code(s)                                                                        | Frontend machine behavior                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 400         | `REQUEST_BODY_INVALID`, `INVALID_REQUEST`, plus established OTP validation codes      | no automatic retry; OTP kind comes only from its known code                                                                       |
+| 401         | `AUTHENTICATION_REQUIRED`, `SESSION_REVOKED`                                          | no automatic retry; preserve the existing authentication/session-revoked handling                                                 |
+| 403         | `ACCESS_DENIED`                                                                       | no automatic retry                                                                                                                |
+| 405         | `METHOD_NOT_ALLOWED`                                                                  | no automatic retry                                                                                                                |
+| 415         | `UNSUPPORTED_MEDIA_TYPE`                                                              | no automatic retry                                                                                                                |
+| 429         | `OTP_RATE_LIMITED`, `AUTH_RATE_LIMITED`, or another documented finite rate-limit code | parse `data.retryAfterSeconds` first, then `Retry-After`; a known code may select OTP copy, but status controls retry eligibility |
+| 500         | `INTERNAL_SERVER_ERROR`                                                               | query may use the existing single fallback retry; mutations remain zero-retry                                                     |
 
 Established `OTP_INVALID_OR_EXPIRED`, `OTP_ATTEMPTS_EXHAUSTED`, `OTP_PROOF_INVALID_OR_EXPIRED`, `OTP_SERVICE_UNAVAILABLE`, and `OTP_DELIVERY_UNAVAILABLE` mappings remain code-based. If a code is absent or unknown, derive only a generic behavior from HTTP/network status; never inspect message substrings.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Target tests | `pnpm exec vitest run lib/api/errors.test.ts lib/auth-otp-api.test.ts components/providers/query-provider.test.tsx` | all pass |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
+| Purpose      | Command                                                                                                             | Expected on success       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Target tests | `pnpm exec vitest run lib/api/errors.test.ts lib/auth-otp-api.test.ts components/providers/query-provider.test.tsx` | all pass                  |
+| Lint         | `pnpm exec eslint . --max-warnings 25`                                                                              | exit 0                    |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                         | exit 0                    |
+| Unit         | `pnpm test:unit`                                                                                                    | all tests pass            |
+| Build        | `pnpm build`                                                                                                        | production build succeeds |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope**:
+
 - `lib/api/errors.ts`
 - `lib/api/errors.test.ts`
 - `components/providers/query-provider.tsx`
@@ -66,6 +67,7 @@ Established `OTP_INVALID_OR_EXPIRED`, `OTP_ATTEMPTS_EXHAUSTED`, `OTP_PROOF_INVAL
 - `lib/auth-otp-api.test.ts`
 
 **Out of scope**:
+
 - Increasing retry counts or enabling mutation retries.
 - Changing backend thresholds/error codes.
 - UI countdowns outside existing OTP flow.

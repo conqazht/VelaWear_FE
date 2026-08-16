@@ -46,27 +46,28 @@ Một số màn customer vẫn tạo request từ `userId` mà client biết ho�
 
 ## Commands cần dùng
 
-| Mục đích | Command | Kết quả mong đợi |
-|---|---|---|
-| Fetch | `git fetch origin` | exit 0 |
-| Chuyển base | `git switch main` | đang ở local `main` |
-| Fast-forward | `git pull --ff-only origin main` | exit 0; không có merge commit |
-| Worktree | `git status --short` | không có output |
-| Base SHA | chạy `git rev-parse HEAD`, rồi `git rev-parse origin/main` | hai output giống nhau |
-| Branch collision | `git branch --list fix/self-scoped-customer-apis` | không có output |
-| Target tests | `pnpm exec vitest run lib/api/commerce-self-service.test.ts lib/queries/commerce-self-service.test.tsx` | tất cả pass |
-| Order-detail caller | `pnpm exec vitest run 'app/(shop)/profile/orders/[code]/order-details-client.test.tsx'` | detail/status-history chỉ dùng `/orders/me/**` helper |
+| Mục đích             | Command                                                                                                                         | Kết quả mong đợi                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Fetch                | `git fetch origin`                                                                                                              | exit 0                                                                                  |
+| Chuyển base          | `git switch main`                                                                                                               | đang ở local `main`                                                                     |
+| Fast-forward         | `git pull --ff-only origin main`                                                                                                | exit 0; không có merge commit                                                           |
+| Worktree             | `git status --short`                                                                                                            | không có output                                                                         |
+| Base SHA             | chạy `git rev-parse HEAD`, rồi `git rev-parse origin/main`                                                                      | hai output giống nhau                                                                   |
+| Branch collision     | `git branch --list fix/self-scoped-customer-apis`                                                                               | không có output                                                                         |
+| Target tests         | `pnpm exec vitest run lib/api/commerce-self-service.test.ts lib/queries/commerce-self-service.test.tsx`                         | tất cả pass                                                                             |
+| Order-detail caller  | `pnpm exec vitest run 'app/(shop)/profile/orders/[code]/order-details-client.test.tsx'`                                         | detail/status-history chỉ dùng `/orders/me/**` helper                                   |
 | Ownership full stack | `pnpm exec playwright test e2e/fullstack/customer-self-scope.spec.ts --grep "two accounts cannot cross self-service ownership"` | case `{ tag: "@fullstack" }` chạy; configured A/B own read pass, foreign identifier 404 |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0, tối đa 25 warning |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit suite | `pnpm test:unit` | tất cả pass |
-| Build | `pnpm build` | production build thành công |
+| Lint                 | `pnpm exec eslint . --max-warnings 25`                                                                                          | exit 0, tối đa 25 warning                                                               |
+| Typecheck            | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                     | exit 0                                                                                  |
+| Unit suite           | `pnpm test:unit`                                                                                                                | tất cả pass                                                                             |
+| Build                | `pnpm build`                                                                                                                    | production build thành công                                                             |
 
 ## Scope
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong scope**:
+
 - `lib/api/commerce.ts`
 - `lib/queries/commerce.ts`
 - `lib/queries/keys.ts`
@@ -79,6 +80,7 @@ Một số màn customer vẫn tạo request từ `userId` mà client biết ho�
 - `e2e/fullstack/customer-self-scope.spec.ts` (tạo mới)
 
 **Ngoài scope**:
+
 - Backend source hoặc contract khác BE-001 đã merge.
 - Admin API/module/route.
 - Thu hồi legacy permission (BE-002).

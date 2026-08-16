@@ -40,7 +40,12 @@ export function AccountSwitcher({
         <AvatarImage src={activeUser.avatar || undefined} alt={activeUser.name} />
         <AvatarFallback>{getInitials(activeUser.name)}</AvatarFallback>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="min-w-56 space-y-1 rounded-lg" side="bottom" align="end" sideOffset={4}>
+      <DropdownMenuContent
+        className="min-w-56 space-y-1 rounded-lg"
+        side="bottom"
+        align="end"
+        sideOffset={4}
+      >
         {users.map((user) => (
           <DropdownMenuItem
             key={user.email}
@@ -59,7 +64,7 @@ export function AccountSwitcher({
               </div>
               <span
                 className={cn(
-                  "mr-1 flex size-5 items-center justify-center rounded-full text-primary opacity-0",
+                  "text-primary mr-1 flex size-5 items-center justify-center rounded-full opacity-0",
                   user.id === activeUser.id && "opacity-100",
                 )}
               >

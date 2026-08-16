@@ -182,13 +182,10 @@ export function getMyOrderById(id: number) {
   return apiGet<Order>(`/orders/me/${id}`);
 }
 
-export function getMyOrderStatusHistories(
-  id: number,
-  params: OrderStatusHistoryFilters = {}
-) {
+export function getMyOrderStatusHistories(id: number, params: OrderStatusHistoryFilters = {}) {
   return apiGet<ResultPaginationDTO<OrderStatusHistory>>(
     `/orders/me/${id}/status-histories`,
-    params
+    params,
   );
 }
 
@@ -270,19 +267,23 @@ export function createReview(request: CreateReviewRequest) {
   formData.append(
     "review",
     new Blob(
-      [JSON.stringify({
-        orderItemId: request.orderItemId,
-        rating: request.rating,
-        comment: request.comment?.trim() || null,
-      })],
+      [
+        JSON.stringify({
+          orderItemId: request.orderItemId,
+          rating: request.rating,
+          comment: request.comment?.trim() || null,
+        }),
+      ],
       { type: "application/json" },
     ),
   );
   request.images?.forEach((image) => formData.append("images", image));
 
-  return apiClient
-    // Axios/the browser must set the multipart boundary; forcing Content-Type here
-    // can produce a request Spring cannot parse.
-    .post<ApiResponse<Review>>("/reviews", formData)
-    .then(unwrapApiResponse);
+  return (
+    apiClient
+      // Axios/the browser must set the multipart boundary; forcing Content-Type here
+      // can produce a request Spring cannot parse.
+      .post<ApiResponse<Review>>("/reviews", formData)
+      .then(unwrapApiResponse)
+  );
 }

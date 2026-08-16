@@ -8,9 +8,7 @@ import {
   type ManagementColumn,
   type ManagementFilter,
 } from "@/app/(admin)/dashboard/_components/management/resource-page";
-import {
-  downloadCsv,
-} from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { downloadCsv } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
@@ -69,7 +67,7 @@ export function OrdersManagement() {
         <div className="grid gap-1">
           <Button
             variant="link"
-            className="h-auto w-fit p-0 font-medium text-foreground"
+            className="text-foreground h-auto w-fit p-0 font-medium"
             onClick={() => setSelectedOrder({ id: order.id, orderCode: order.orderCode })}
           >
             {order.orderCode}
@@ -85,8 +83,10 @@ export function OrdersManagement() {
       header: t("admin.commerce.orders.column.customer"),
       cell: (order) => (
         <div className="grid max-w-52 gap-0.5">
-          <span className="truncate font-medium">{order.userFullName || order.receiverName || "—"}</span>
-          <span className="truncate text-muted-foreground text-xs">{order.userEmail || "—"}</span>
+          <span className="truncate font-medium">
+            {order.userFullName || order.receiverName || "—"}
+          </span>
+          <span className="text-muted-foreground truncate text-xs">{order.userEmail || "—"}</span>
         </div>
       ),
     },
@@ -113,7 +113,9 @@ export function OrdersManagement() {
       cell: (order) => (
         <div className="grid max-w-44 gap-0.5">
           <span className="truncate">{order.receiverName || "—"}</span>
-          <span className="truncate text-muted-foreground text-xs">{order.receiverPhone || "—"}</span>
+          <span className="text-muted-foreground truncate text-xs">
+            {order.receiverPhone || "—"}
+          </span>
         </div>
       ),
     },
@@ -183,9 +185,7 @@ export function OrdersManagement() {
   ];
 
   const authenticationError =
-    !isAuthLoading && !isAuthenticated
-      ? t("admin.commerce.orders.authenticationRequired")
-      : null;
+    !isAuthLoading && !isAuthenticated ? t("admin.commerce.orders.authenticationRequired") : null;
   const queryError = ordersQuery.isError ? ordersQuery.error : null;
 
   return (

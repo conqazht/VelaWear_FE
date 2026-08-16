@@ -82,11 +82,20 @@ describe("extractRetryAfterSeconds and getQueryRetryDelayMs", () => {
 
   it("returns undefined for malformed, zero, negative or past values", () => {
     const now = Date.now();
-    expect(extractRetryAfterSeconds({ response: { data: { retryAfterSeconds: -10 } } })).toBeUndefined();
-    expect(extractRetryAfterSeconds({ response: { headers: { "retry-after": "0" } } })).toBeUndefined();
-    expect(extractRetryAfterSeconds({ response: { headers: { "retry-after": "invalid" } } })).toBeUndefined();
     expect(
-      extractRetryAfterSeconds({ response: { headers: { "retry-after": new Date(now - 10000).toUTCString() } } }, now),
+      extractRetryAfterSeconds({ response: { data: { retryAfterSeconds: -10 } } }),
+    ).toBeUndefined();
+    expect(
+      extractRetryAfterSeconds({ response: { headers: { "retry-after": "0" } } }),
+    ).toBeUndefined();
+    expect(
+      extractRetryAfterSeconds({ response: { headers: { "retry-after": "invalid" } } }),
+    ).toBeUndefined();
+    expect(
+      extractRetryAfterSeconds(
+        { response: { headers: { "retry-after": new Date(now - 10000).toUTCString() } } },
+        now,
+      ),
     ).toBeUndefined();
   });
 

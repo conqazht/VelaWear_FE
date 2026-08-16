@@ -50,7 +50,9 @@ export function NavDocuments({
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger
-                render={<SidebarMenuAction showOnHover className="rounded-sm data-popup-open:bg-accent" />}
+                render={
+                  <SidebarMenuAction showOnHover className="data-popup-open:bg-accent rounded-sm" />
+                }
               >
                 <Ellipsis />
                 <span className="sr-only">{t("admin.shell.navigation.more")}</span>

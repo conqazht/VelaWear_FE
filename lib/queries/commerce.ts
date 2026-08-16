@@ -41,7 +41,7 @@ export function useWishlistsQuery(
   userId: number | undefined,
   params: PageParams = {},
   enabled = true,
-  locale?: string
+  locale?: string,
 ) {
   return useQuery({
     queryKey: queryKeys.wishlists.list(userId, params, locale),
@@ -114,11 +114,7 @@ export function useCreatePaymentMutation() {
   });
 }
 
-export function useMyOrdersQuery(
-  accountId?: number,
-  params: PageParams = {},
-  enabled = true
-) {
+export function useMyOrdersQuery(accountId?: number, params: PageParams = {}, enabled = true) {
   return useQuery({
     queryKey: queryKeys.orders.meList(accountId, params),
     queryFn: () => getMyOrders(params),
@@ -137,11 +133,7 @@ export function useMyReviewsQuery(
   });
 }
 
-export function useMyAddressesQuery(
-  accountId?: number,
-  params: PageParams = {},
-  enabled = true
-) {
+export function useMyAddressesQuery(accountId?: number, params: PageParams = {}, enabled = true) {
   return useQuery({
     queryKey: queryKeys.addresses.meList(accountId, params),
     queryFn: () => getMyAddresses(params),
@@ -164,13 +156,8 @@ export function useUpdateMyAddressMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      request,
-    }: {
-      id: number;
-      request: UpdateMyAddressRequest;
-    }) => updateMyAddress(id, request),
+    mutationFn: ({ id, request }: { id: number; request: UpdateMyAddressRequest }) =>
+      updateMyAddress(id, request),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.addresses.root });
     },

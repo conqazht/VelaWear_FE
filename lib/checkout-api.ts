@@ -273,11 +273,9 @@ export async function submitCheckout(
   request: CheckoutRequest,
   idempotencyKey: string,
 ): Promise<CheckoutResponse> {
-  const response = await apiClient.post<ApiResponse<CheckoutResponse>>(
-    "/checkout",
-    request,
-    { headers: { "Idempotency-Key": idempotencyKey } },
-  );
+  const response = await apiClient.post<ApiResponse<CheckoutResponse>>("/checkout", request, {
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
 
   const data = response.data.data;
   if (!data) {

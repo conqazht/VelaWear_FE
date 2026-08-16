@@ -52,13 +52,11 @@ test(
     });
 
     const response = await checkoutResponse;
-    const responseBody = await response.json() as ApiEnvelope<{ orderId: number }>;
+    const responseBody = (await response.json()) as ApiEnvelope<{ orderId: number }>;
 
     expect(response.status()).toBe(201);
     expect(responseBody.data.orderId).toBeGreaterThan(0);
-    await expect(
-      page.getByText(/Đặt hàng thành công|Order placed successfully/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Đặt hàng thành công|Order placed successfully/i)).toBeVisible();
     expect(checkoutPreviewRequestCount).toBe(1);
     expect(checkoutRequestCount).toBe(1);
   },

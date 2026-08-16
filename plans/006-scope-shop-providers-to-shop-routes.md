@@ -25,7 +25,11 @@ The root layout mounts cart, notification and favorites state for storefront, au
 - `app/layout.tsx:48-59` wraps every route with:
   ```tsx
   <AuthProvider>
-    <CartProvider><NotificationProvider><FavoritesProvider>{children}</FavoritesProvider></NotificationProvider></CartProvider>
+    <CartProvider>
+      <NotificationProvider>
+        <FavoritesProvider>{children}</FavoritesProvider>
+      </NotificationProvider>
+    </CartProvider>
   </AuthProvider>
   ```
 - `app/(shop)/layout.tsx:6-17` currently renders only cached header, main and footer.
@@ -34,22 +38,23 @@ The root layout mounts cart, notification and favorites state for storefront, au
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Consumer audit | `rg -n 'useCart\(|useFavorites\(|useNotification\(' app components --glob '*.tsx'` | every runtime caller is in the shop tree/components used by it |
-| Boundary unit | `pnpm exec vitest run app/provider-boundaries.test.ts` | consumer allowlist, root exclusions, and Cart → Notification → Favorites order pass |
-| Boundary E2E | `pnpm exec playwright test e2e/provider-boundaries.spec.ts --grep "authenticated admin performs no shop data request"` | admin shell renders; zero cart/wishlist/shop-provider request is observed |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
-| Smoke | `pnpm test:e2e:smoke` | all smoke tests pass |
+| Purpose        | Command                                                                                                                | Expected on success                                                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Consumer audit | `rg -n 'useCart\(                                                                                                      | useFavorites\(                                                                      | useNotification\(' app components --glob '*.tsx'` | every runtime caller is in the shop tree/components used by it |
+| Boundary unit  | `pnpm exec vitest run app/provider-boundaries.test.ts`                                                                 | consumer allowlist, root exclusions, and Cart → Notification → Favorites order pass |
+| Boundary E2E   | `pnpm exec playwright test e2e/provider-boundaries.spec.ts --grep "authenticated admin performs no shop data request"` | admin shell renders; zero cart/wishlist/shop-provider request is observed           |
+| Lint           | `pnpm exec eslint . --max-warnings 25`                                                                                 | exit 0                                                                              |
+| Typecheck      | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                            | exit 0                                                                              |
+| Unit           | `pnpm test:unit`                                                                                                       | all tests pass                                                                      |
+| Build          | `pnpm build`                                                                                                           | production build succeeds                                                           |
+| Smoke          | `pnpm test:e2e:smoke`                                                                                                  | all smoke tests pass                                                                |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope**:
+
 - `app/layout.tsx`
 - `app/(shop)/layout.tsx`
 - `components/shop/shop-providers.tsx` (create)
@@ -57,6 +62,7 @@ The root layout mounts cart, notification and favorites state for storefront, au
 - `e2e/provider-boundaries.spec.ts` (create)
 
 **Out of scope**:
+
 - Changing cart/session behavior from FE-003.
 - Wishlist response/query optimization (FE-007).
 - Moving `QueryProvider`, `I18nProvider` or `AuthProvider` out of root.

@@ -103,7 +103,7 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
         setIsSubmitting(false);
       }
     },
-    [otpCode, onVerifySuccess, t]
+    [otpCode, onVerifySuccess, t],
   );
 
   const resetFlow = useCallback(() => {

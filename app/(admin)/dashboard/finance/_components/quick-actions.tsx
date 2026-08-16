@@ -17,7 +17,12 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 
 const contacts = [
   { id: 1, initials: "AR" },
@@ -49,7 +54,7 @@ export function QuickActions() {
             <div className="flex items-center gap-1">
               <div className="flex -space-x-2">
                 {contacts.map((contact) => (
-                  <Avatar key={contact.id} className="size-7 border-2 border-background">
+                  <Avatar key={contact.id} className="border-background size-7 border-2">
                     <AvatarFallback className="text-[10px]">{contact.initials}</AvatarFallback>
                   </Avatar>
                 ))}
@@ -84,10 +89,16 @@ export function QuickActions() {
               const Icon = shortcut.icon;
               return (
                 <div key={shortcut.id} className="flex flex-col items-center gap-2.5">
-                  <Button variant="outline" className="size-12 rounded-full" aria-label={t(shortcut.labelKey)}>
+                  <Button
+                    variant="outline"
+                    className="size-12 rounded-full"
+                    aria-label={t(shortcut.labelKey)}
+                  >
                     <Icon className="size-5" />
                   </Button>
-                  <span className="text-center text-muted-foreground text-xs">{t(shortcut.labelKey)}</span>
+                  <span className="text-muted-foreground text-center text-xs">
+                    {t(shortcut.labelKey)}
+                  </span>
                 </div>
               );
             })}

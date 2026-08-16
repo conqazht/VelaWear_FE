@@ -55,7 +55,8 @@ export const adminDashboardsAMessages = defineMessages(
     "admin.dashboardsA.default.growthRate": "Growth Rate",
     "admin.dashboardsA.default.growthNote": "Meets growth projections",
     "admin.dashboardsA.default.customerActivity": "Customer Activity",
-    "admin.dashboardsA.default.customerActivityDescription": "Customer activity for the last 3 months",
+    "admin.dashboardsA.default.customerActivityDescription":
+      "Customer activity for the last 3 months",
     "admin.dashboardsA.default.returningUsers": "Returning Users",
     "admin.dashboardsA.default.customersTitle": "{count} Customers",
     "admin.dashboardsA.default.customersDescription":
@@ -310,7 +311,8 @@ export const adminDashboardsAMessages = defineMessages(
     "admin.dashboardsA.default.growthRate": "Tỷ lệ tăng trưởng",
     "admin.dashboardsA.default.growthNote": "Đạt dự báo tăng trưởng",
     "admin.dashboardsA.default.customerActivity": "Hoạt động khách hàng",
-    "admin.dashboardsA.default.customerActivityDescription": "Hoạt động khách hàng trong 3 tháng qua",
+    "admin.dashboardsA.default.customerActivityDescription":
+      "Hoạt động khách hàng trong 3 tháng qua",
     "admin.dashboardsA.default.returningUsers": "Người dùng quay lại",
     "admin.dashboardsA.default.customersTitle": "{count} khách hàng",
     "admin.dashboardsA.default.customersDescription":

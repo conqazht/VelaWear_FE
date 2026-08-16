@@ -7,11 +7,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 
 import Script from "next/script";
 
-import {
-  LOCALE_BOOTSTRAP_SCRIPT,
-  LOCALE_COOKIE_KEY,
-  parseLocale,
-} from "@/lib/i18n";
+import { LOCALE_BOOTSTRAP_SCRIPT, LOCALE_COOKIE_KEY, parseLocale } from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,13 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="vi"
-      data-locale="vi"
-      className="h-full antialiased"
-      suppressHydrationWarning
-    >
-      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+    <html lang="vi" data-locale="vi" className="h-full antialiased" suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <Script
           id="locale-bootstrap"
           strategy="beforeInteractive"
@@ -52,9 +43,7 @@ async function LocalizedAppProviders({ children }: { children: React.ReactNode }
   return (
     <QueryProvider>
       <I18nProvider initialLocale={initialLocale}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </I18nProvider>
     </QueryProvider>
   );

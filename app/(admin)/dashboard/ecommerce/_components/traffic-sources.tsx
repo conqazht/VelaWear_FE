@@ -6,7 +6,14 @@ import { siEbay, siGoogle, siMeta, siShopify, siTiktok } from "simple-icons";
 
 import { SimpleIcon } from "@/components/simple-icon";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { getIntlLocale } from "@/lib/i18n";
 
@@ -95,7 +102,7 @@ function TrafficSourceIconLabel({ height, index, width, x, y }: IconLabelProps) 
 
   return (
     <foreignObject height={iconSize} x={iconX} y={iconY} width={iconSize}>
-      <SimpleIcon icon={source.icon} className="size-4 fill-foreground" />
+      <SimpleIcon icon={source.icon} className="fill-foreground size-4" />
     </foreignObject>
   );
 }
@@ -117,10 +124,20 @@ function TrafficSourceNameLabel({ height, index, x, y }: SourceLabelProps) {
 
   return (
     <text dominantBaseline="middle" textAnchor="start" x={2} y={yValue + heightValue / 2}>
-      <tspan className="fill-foreground font-medium" fontSize={13} x={2} y={yValue + heightValue / 2 - 7}>
+      <tspan
+        className="fill-foreground font-medium"
+        fontSize={13}
+        x={2}
+        y={yValue + heightValue / 2 - 7}
+      >
         {source.name}
       </tspan>
-      <tspan className="fill-muted-foreground" fontSize={12} x={2} y={yValue + heightValue / 2 + 11}>
+      <tspan
+        className="fill-muted-foreground"
+        fontSize={12}
+        x={2}
+        y={yValue + heightValue / 2 + 11}
+      >
         {new Intl.NumberFormat(getIntlLocale(locale)).format(source.visits)}
       </tspan>
     </text>
@@ -173,10 +190,10 @@ export function TrafficSources() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">
+        <CardTitle className="text-muted-foreground text-sm font-normal">
           {t("admin.dashboardsA.ecommerce.trafficSources")}
         </CardTitle>
-        <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
+        <CardDescription className="text-foreground text-xl leading-none tracking-tight tabular-nums">
           {t("admin.dashboardsA.ecommerce.visitCount", { count: compactFormatter.format(14_800) })}
         </CardDescription>
         <CardAction>

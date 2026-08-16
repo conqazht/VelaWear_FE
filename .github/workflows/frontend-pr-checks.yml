@@ -46,7 +46,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
+      - name: Check code formatting (Prettier)
+        run: pnpm format:check
+
+      - name: Fast Lint (oxlint)
+        run: pnpm lint:fast
+
+      - name: ESLint
         run: pnpm exec eslint . --max-warnings 25
 
       - name: Type check

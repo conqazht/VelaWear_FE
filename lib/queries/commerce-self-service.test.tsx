@@ -75,14 +75,12 @@ describe("customer self-service query hooks", () => {
 
   it("keeps guest order and address queries disabled", () => {
     const { Wrapper } = createQueryHarness();
-    const orders = renderHook(
-      () => useMyOrdersQuery(undefined, { page: 1, size: 10 }),
-      { wrapper: Wrapper },
-    );
-    const addresses = renderHook(
-      () => useMyAddressesQuery(undefined, { page: 1, size: 10 }),
-      { wrapper: Wrapper },
-    );
+    const orders = renderHook(() => useMyOrdersQuery(undefined, { page: 1, size: 10 }), {
+      wrapper: Wrapper,
+    });
+    const addresses = renderHook(() => useMyAddressesQuery(undefined, { page: 1, size: 10 }), {
+      wrapper: Wrapper,
+    });
 
     expect(orders.result.current.fetchStatus).toBe("idle");
     expect(addresses.result.current.fetchStatus).toBe("idle");
@@ -120,24 +118,26 @@ describe("customer self-service query hooks", () => {
       });
     const { queryClient, Wrapper } = createQueryHarness();
     const params = { page: 1, size: 10 };
-    const { rerender } = renderHook(
-      ({ accountId }) => useMyOrdersQuery(accountId, params),
-      { initialProps: { accountId: 11 }, wrapper: Wrapper },
-    );
+    const { rerender } = renderHook(({ accountId }) => useMyOrdersQuery(accountId, params), {
+      initialProps: { accountId: 11 },
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(getMyOrdersMock).toHaveBeenCalledTimes(1));
     rerender({ accountId: 22 });
     await waitFor(() => expect(getMyOrdersMock).toHaveBeenCalledTimes(2));
 
-    expect(queryKeys.orders.meList(11, params)).not.toEqual(
-      queryKeys.orders.meList(22, params),
-    );
-    expect(queryClient.getQueryData<{ result: Array<{ id: number }> }>(
-      queryKeys.orders.meList(11, params),
-    )?.result[0]?.id).toBe(101);
-    expect(queryClient.getQueryData<{ result: Array<{ id: number }> }>(
-      queryKeys.orders.meList(22, params),
-    )?.result[0]?.id).toBe(202);
+    expect(queryKeys.orders.meList(11, params)).not.toEqual(queryKeys.orders.meList(22, params));
+    expect(
+      queryClient.getQueryData<{ result: Array<{ id: number }> }>(
+        queryKeys.orders.meList(11, params),
+      )?.result[0]?.id,
+    ).toBe(101);
+    expect(
+      queryClient.getQueryData<{ result: Array<{ id: number }> }>(
+        queryKeys.orders.meList(22, params),
+      )?.result[0]?.id,
+    ).toBe(202);
   });
 
   it("uses self address mutations and preserves root invalidation", async () => {

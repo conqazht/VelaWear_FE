@@ -79,10 +79,7 @@ describe("check-markdown-links", () => {
 
   it("passes for same-file heading anchors", async () => {
     const dir = makeTmpDir();
-    writeFileSync(
-      join(dir, "doc.md"),
-      "# Getting Started\n\nSee [section](#getting-started).\n",
-    );
+    writeFileSync(join(dir, "doc.md"), "# Getting Started\n\nSee [section](#getting-started).\n");
 
     const result = await run(["doc.md"], dir);
     assert.equal(result.code, 0);
@@ -92,10 +89,7 @@ describe("check-markdown-links", () => {
   it("passes for cross-file heading anchors", async () => {
     const dir = makeTmpDir();
     writeFileSync(join(dir, "api.md"), "# Error Handling\n\nDetails here.\n");
-    writeFileSync(
-      join(dir, "readme.md"),
-      "See [errors](api.md#error-handling).\n",
-    );
+    writeFileSync(join(dir, "readme.md"), "See [errors](api.md#error-handling).\n");
 
     const result = await run(["readme.md"], dir);
     assert.equal(result.code, 0);
@@ -128,10 +122,7 @@ describe("check-markdown-links", () => {
     const subDir = join(dir, "my docs");
     mkdirSync(subDir);
     writeFileSync(join(subDir, "guide.md"), "# Setup\n");
-    writeFileSync(
-      join(dir, "index.md"),
-      "See [guide](my%20docs/guide.md#setup).\n",
-    );
+    writeFileSync(join(dir, "index.md"), "See [guide](my%20docs/guide.md#setup).\n");
 
     const result = await run(["index.md"], dir);
     assert.equal(result.code, 0);
@@ -151,10 +142,7 @@ describe("check-markdown-links", () => {
   it("fails for a missing anchor", async () => {
     const dir = makeTmpDir();
     writeFileSync(join(dir, "target.md"), "# Real Heading\n");
-    writeFileSync(
-      join(dir, "source.md"),
-      "See [bad anchor](target.md#fake-heading).\n",
-    );
+    writeFileSync(join(dir, "source.md"), "See [bad anchor](target.md#fake-heading).\n");
 
     const result = await run(["source.md"], dir);
     assert.equal(result.code, 1);

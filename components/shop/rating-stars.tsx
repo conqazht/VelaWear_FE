@@ -21,9 +21,7 @@ export function RatingStars({
   inactiveClassName = "text-[#1c1a18]/15",
 }: RatingStarsProps) {
   const { t } = useI18n();
-  const normalizedRating = Number.isFinite(rating)
-    ? Math.min(5, Math.max(0, rating))
-    : 0;
+  const normalizedRating = Number.isFinite(rating) ? Math.min(5, Math.max(0, rating)) : 0;
 
   return (
     <div

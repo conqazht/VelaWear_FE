@@ -75,8 +75,7 @@ export function BrandsManagement() {
     size: pageSize,
     sort: "updatedAt,desc",
     name: deferredSearch || undefined,
-    status:
-      statusFilter === ALL_FILTER ? undefined : (statusFilter as AdminCatalogStatus),
+    status: statusFilter === ALL_FILTER ? undefined : (statusFilter as AdminCatalogStatus),
   });
   const createMutation = useCreateAdminBrandMutation();
   const updateMutation = useUpdateAdminBrandMutation();
@@ -103,8 +102,10 @@ export function BrandsManagement() {
     statusMutation.mutate(
       { id: brand.id, status: getCatalogStatusToggleTarget(checked) },
       {
-        onSuccess: () => toast.success(t("admin.commerce.translation.statusUpdated", { name: brand.name })),
-        onError: () => toast.error(t("admin.commerce.translation.statusFailed", { name: brand.name })),
+        onSuccess: () =>
+          toast.success(t("admin.commerce.translation.statusUpdated", { name: brand.name })),
+        onError: () =>
+          toast.error(t("admin.commerce.translation.statusFailed", { name: brand.name })),
       },
     );
   }
@@ -154,7 +155,7 @@ export function BrandsManagement() {
             setPage(1);
           },
           onError: (error) => toast.error(getApiErrorMessage(error)),
-        }
+        },
       );
       return;
     }
@@ -194,12 +195,12 @@ export function BrandsManagement() {
       className: "min-w-64",
       cell: (brand) => (
         <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
             <Tags className="size-4" />
           </div>
           <div className="min-w-0">
             <p className="truncate font-medium">{brand.name}</p>
-            <p className="max-w-64 truncate text-muted-foreground text-xs">/{brand.slug}</p>
+            <p className="text-muted-foreground max-w-64 truncate text-xs">/{brand.slug}</p>
           </div>
         </div>
       ),
@@ -209,7 +210,7 @@ export function BrandsManagement() {
       header: t("admin.commerce.common.description"),
       className: "min-w-72",
       cell: (brand) => (
-        <p className="max-w-md truncate text-muted-foreground">
+        <p className="text-muted-foreground max-w-md truncate">
           {brand.description || t("admin.commerce.common.noDescription")}
         </p>
       ),
@@ -318,7 +319,7 @@ export function BrandsManagement() {
               status: t(BRAND_STATUS_MESSAGE_KEYS[brand.status]),
               createdAt: brand.createdAt,
               updatedAt: brand.updatedAt,
-            }))
+            })),
           )
         }
         isLoading={brandsQuery.isPending}
@@ -341,11 +342,7 @@ export function BrandsManagement() {
           editingBrand ? t("admin.commerce.brands.save") : t("admin.commerce.brands.create")
         }
       >
-        <BrandForm
-          values={formValues}
-          onChange={setFormValues}
-          isEditing={Boolean(editingBrand)}
-        />
+        <BrandForm values={formValues} onChange={setFormValues} isEditing={Boolean(editingBrand)} />
       </ResourceFormSheet>
 
       <DeleteResourceDialog

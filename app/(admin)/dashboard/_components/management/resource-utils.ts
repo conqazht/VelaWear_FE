@@ -37,7 +37,12 @@ export function formatCurrency(value?: number | null, locale: Locale = getActive
 }
 
 export function resolveAdminAssetUrl(value?: string | null) {
-  if (!value || value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:")) {
+  if (
+    !value ||
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("data:")
+  ) {
     return value ?? undefined;
   }
 
@@ -55,7 +60,10 @@ export function resolveAdminAssetUrl(value?: string | null) {
   return value;
 }
 
-export function downloadCsv(filename: string, rows: Array<Record<string, string | number | null | undefined>>) {
+export function downloadCsv(
+  filename: string,
+  rows: Array<Record<string, string | number | null | undefined>>,
+) {
   if (rows.length === 0) return;
 
   const headers = Object.keys(rows[0]);
@@ -64,7 +72,10 @@ export function downloadCsv(filename: string, rows: Array<Record<string, string 
     const normalized = typeof value === "string" && /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
     return `"${normalized.replaceAll('"', '""')}"`;
   };
-  const csv = [headers.map(escape).join(","), ...rows.map((row) => headers.map((key) => escape(row[key])).join(","))].join("\n");
+  const csv = [
+    headers.map(escape).join(","),
+    ...rows.map((row) => headers.map((key) => escape(row[key])).join(",")),
+  ].join("\n");
   const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

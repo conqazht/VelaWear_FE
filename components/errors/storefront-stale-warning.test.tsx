@@ -7,11 +7,7 @@ import { I18nProvider } from "@/components/providers/i18n-provider";
 function renderWarning(error: unknown) {
   return render(
     <I18nProvider initialLocale="vi">
-      <StorefrontStaleWarning
-        error={error}
-        onRetry={vi.fn()}
-        resourceLabel="bộ sưu tập"
-      />
+      <StorefrontStaleWarning error={error} onRetry={vi.fn()} resourceLabel="bộ sưu tập" />
     </I18nProvider>,
   );
 }

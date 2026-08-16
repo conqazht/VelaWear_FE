@@ -2,7 +2,9 @@
 
 # This is NOT the Next.js you know
 
-This project uses Next.js 16, which has breaking changes compared with older versions. Before changing framework-specific code, read the relevant local guide in `node_modules/next/dist/docs/` and follow any deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
 
@@ -27,25 +29,27 @@ Keep the experience refined, editorial, and purchase-focused. The storefront sho
 
 Source of truth: `package.json` and `components.json`.
 
-| Technology | Version / Config | Notes |
-| :--- | :--- | :--- |
-| Next.js | `16.2.9` | App Router |
-| React | `19.2.4` | React Server Components capable |
-| React DOM | `19.2.4` | DOM renderer |
-| TypeScript | `^5` | Strict typed TS/TSX preferred |
-| Tailwind CSS | `^4` | Uses `@tailwindcss/postcss` |
-| shadcn CLI | `^4.11.0` | Build tooling in `devDependencies` |
-| shadcn style | `base-nova` | Keep generated components consistent with this style |
-| `@shadcn/react` | `0.2.1` | Runtime component library in `dependencies` |
-| Base UI | `@base-ui/react ^1.5.0` | Headless primitives when needed |
-| Icons | `lucide-react ^1.18.0` | Import only the icons used |
-| Animation | `motion ^12.40.0` | Existing app uses `motion/react` |
-| TanStack Query | `5.101.2` | Server state, cache, retry, `Retry-After` |
-| Zustand | `5.0.14` | Client-side state (cart, auth, theme, locale) |
-| Axios | `^1.18.1` | HTTP client with interceptors |
-| Vitest | `^4.1.10` | Unit testing |
-| Playwright | `^1.61.1` | E2E smoke and full-stack tests |
-| Package manager | `pnpm` | Lockfile is `pnpm-lock.yaml` |
+| Technology      | Version / Config        | Notes                                                |
+| :-------------- | :---------------------- | :--------------------------------------------------- |
+| Next.js         | `16.3.1`                | App Router with Turbopack & Cache Components         |
+| React           | `19.2.8`                | React Server Components capable                      |
+| React DOM       | `19.2.8`                | DOM renderer                                         |
+| TypeScript      | `^5`                    | Strict typed TS/TSX preferred (TypeScript 5.9.3)     |
+| Tailwind CSS    | `^4`                    | Uses `@tailwindcss/postcss 4.3.3`                    |
+| shadcn CLI      | `^4.11.0`               | Build tooling in `devDependencies`                   |
+| shadcn style    | `base-nova`             | Keep generated components consistent with this style |
+| `@shadcn/react` | `0.2.1`                 | Runtime component library in `dependencies`          |
+| Base UI         | `@base-ui/react ^1.7.0` | Headless primitives when needed                      |
+| Icons           | `lucide-react ^1.31.0`  | Import only the icons used                           |
+| Animation       | `motion ^12.40.0`       | Existing app uses `motion/react`                     |
+| TanStack Query  | `5.101.4`               | Server state, cache, retry, `Retry-After`            |
+| Zustand         | `5.0.15`                | Client-side state (cart, auth, theme, locale)        |
+| Axios           | `^1.19.0`               | HTTP client with interceptors                        |
+| Vitest          | `^4.1.10`               | Unit testing                                         |
+| Playwright      | `^1.62.1`               | E2E smoke and full-stack tests                       |
+| Formatter       | `prettier ^3.9.6`       | With `prettier-plugin-tailwindcss ^0.8.1` & `oxfmt`  |
+| Linter          | `oxlint ^1.78.0`        | Fast Rust linter + `eslint ^9` for Next.js rules     |
+| Package manager | `pnpm`                  | Lockfile is `pnpm-lock.yaml`                         |
 
 ## Repository Shape
 
@@ -123,14 +127,23 @@ Source of truth: `package.json` and `components.json`.
 - Preserve existing behavior unless the task explicitly asks to change it.
 - Do not remove code broadly just to simplify a change.
 - Use `apply_patch` for manual file edits.
-- Follow the existing formatting style and Tailwind conventions.
+
+### Code Formatting & Tooling
+
+- Use `pnpm format` (Prettier + `prettier-plugin-tailwindcss`) to ensure clean code formatting and standard Tailwind CSS class order.
+- Use `pnpm lint:fast` (`oxlint`) for instant (20ms) syntax, React, and logic verification during active development.
+- Use `pnpm fmt` (`oxfmt`) for rapid project-wide formatting when needed.
 
 ### Verification
 
-Run the relevant checks before finishing:
+Run all mandatory checks to ensure 100% pass rate before requesting review or finishing:
 
-- `pnpm lint` for syntax and linting.
-- `pnpm build` when changing app structure, Next.js behavior, or anything likely to affect production build output.
+- `pnpm format:check` to ensure code formatting and Tailwind class ordering adhere to project standards.
+- `pnpm lint:fast` for instant fast-fail lint checks, followed by `pnpm lint` for Next.js 16 framework rules.
+- `pnpm exec tsc --noEmit` to ensure 100% strict TypeScript type safety with 0 errors.
+- `pnpm test:unit` to verify all Vitest unit test suites pass (205+ tests).
+- `pnpm test:e2e:smoke` when editing storefront UI, routes, navigation, auth, catalog, cart, or checkout to guarantee 100% Playwright smoke pass (16/16 smoke cases).
+- `pnpm build` to verify Next.js Turbopack compiles all 68+ routes without errors.
 - For visual/frontend changes, run the dev server and verify the affected screens in a browser. Capture or update artifacts when useful.
 
 If a required check cannot run because the repo lacks a script or dependency, state that clearly in the final note.
@@ -148,10 +161,11 @@ If a required check cannot run because the repo lacks a script or dependency, st
   - known follow-ups.
 - Keep entries concise and newest-first so future agents can quickly recover context.
 
-### Git
+### Git & Commit Gate
 
+- **STRICT PRE-COMMIT / PRE-PUSH GATE**: NEVER commit or push code unless ALL verification checks (`pnpm format:check`, `pnpm lint:fast`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test:unit`, `pnpm test:e2e:smoke`, `pnpm build`) have passed 100% with 0 errors and 0 failures. If any test fails, diagnose and fix the root cause first, re-run all checks, and only proceed when all tests are green.
 - Do NOT automatically commit completed work. The user will review the changes first and explicitly instruct you to commit when ready.
-- Use a clear commit message when instructed to commit, for example `docs: align agent instructions with vela wear app`.
+- Use a clear conventional commit message when instructed to commit, for example `feat(storefront): ...` or `fix(cart): ...`.
 - Do not include unrelated user changes in the commit.
 - If only documentation instructions are changed, a documentation commit is appropriate after checks pass.
 

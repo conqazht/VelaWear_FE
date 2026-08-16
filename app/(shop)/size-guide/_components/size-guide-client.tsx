@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Footprints, Info, Ruler, Shirt, SlidersHorizontal, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Footprints,
+  Info,
+  Ruler,
+  Shirt,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -37,7 +45,11 @@ function SizeUnitToggle({
   const { t } = useI18n();
 
   return (
-    <div className="inline-flex rounded-full bg-[#efe7dc] p-1 border border-[#1c1a18]/15 shadow-2xs" role="group" aria-label={t("storefront.sizeGuide.unitAria")}>
+    <div
+      className="inline-flex rounded-full border border-[#1c1a18]/15 bg-[#efe7dc] p-1 shadow-2xs"
+      role="group"
+      aria-label={t("storefront.sizeGuide.unitAria")}
+    >
       {(["in", "cm"] as const).map((option) => (
         <button
           key={option}
@@ -45,9 +57,9 @@ function SizeUnitToggle({
           onClick={() => onChange(option)}
           aria-pressed={unit === option}
           className={cn(
-            "min-w-14 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-[0.96]",
+            "min-w-14 cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wider uppercase transition-all active:scale-[0.96]",
             unit === option
-              ? "bg-white text-[#1c1a18] shadow-xs border border-[#1c1a18]/15 font-bold"
+              ? "border border-[#1c1a18]/15 bg-white font-bold text-[#1c1a18] shadow-xs"
               : "text-[#1c1a18]/65 hover:text-[#1c1a18]",
           )}
         >
@@ -80,7 +92,7 @@ function HighContrastBodyTable({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-[#1c1a18]/15 bg-[#efe7dc]/80">
-            <th className="sticky left-0 z-10 w-36 min-w-32 bg-[#efe7dc] px-4 py-3 text-left font-bold text-xs uppercase tracking-wider text-[#1c1a18] border-r border-[#1c1a18]/12">
+            <th className="sticky left-0 z-10 w-36 min-w-32 border-r border-[#1c1a18]/12 bg-[#efe7dc] px-4 py-3 text-left text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
               {labels.size}
             </th>
             {sizes.map((size) => {
@@ -91,10 +103,10 @@ function HighContrastBodyTable({
                 <th
                   key={size.size}
                   className={cn(
-                    "min-w-16 md:min-w-20 px-3 py-3 text-center font-bold text-xs tracking-wider border-l border-[#1c1a18]/10 transition-colors",
+                    "min-w-16 border-l border-[#1c1a18]/10 px-3 py-3 text-center text-xs font-bold tracking-wider transition-colors md:min-w-20",
                     isSelected
-                      ? "bg-[#efe7dc] text-[#b5573a] ring-1 ring-inset ring-[#b5573a]"
-                      : "bg-[#efe7dc]/60 text-[#1c1a18]"
+                      ? "bg-[#efe7dc] text-[#b5573a] ring-1 ring-[#b5573a] ring-inset"
+                      : "bg-[#efe7dc]/60 text-[#1c1a18]",
                   )}
                 >
                   {size.size}
@@ -108,11 +120,11 @@ function HighContrastBodyTable({
             <tr
               key={row.key}
               className={cn(
-                "border-b border-[#1c1a18]/10 last:border-0 transition-colors hover:bg-[#efe7dc]/30",
-                index % 2 === 1 ? "bg-[#faf8f5]" : "bg-white"
+                "border-b border-[#1c1a18]/10 transition-colors last:border-0 hover:bg-[#efe7dc]/30",
+                index % 2 === 1 ? "bg-[#faf8f5]" : "bg-white",
               )}
             >
-              <th className="sticky left-0 z-10 bg-inherit px-4 py-3 text-left font-bold text-xs text-[#1c1a18] border-r border-[#1c1a18]/10">
+              <th className="sticky left-0 z-10 border-r border-[#1c1a18]/10 bg-inherit px-4 py-3 text-left text-xs font-bold text-[#1c1a18]">
                 {row.label} <span className="font-normal text-[#55423d]/70">({unit})</span>
               </th>
               {sizes.map((size) => {
@@ -123,10 +135,8 @@ function HighContrastBodyTable({
                   <td
                     key={`${size.size}-${row.key}`}
                     className={cn(
-                      "min-w-16 md:min-w-20 px-3 py-3 text-center font-numeric tabular-nums text-sm font-semibold border-l border-[#1c1a18]/10",
-                      isSelected
-                        ? "bg-[#efe7dc]/60 text-[#b5573a] font-bold"
-                        : "text-[#1c1a18]"
+                      "font-numeric min-w-16 border-l border-[#1c1a18]/10 px-3 py-3 text-center text-sm font-semibold tabular-nums md:min-w-20",
+                      isSelected ? "bg-[#efe7dc]/60 font-bold text-[#b5573a]" : "text-[#1c1a18]",
                     )}
                   >
                     {formatMeasurement(size[row.key], unit)}
@@ -148,78 +158,90 @@ export function SizeGuideClient() {
   const selectedSize = (searchParams.get("size") ?? "").trim().toLocaleUpperCase();
   const productSlug = (searchParams.get("product") ?? "").trim();
   const [unit, setUnit] = useState<MeasurementUnit>("cm");
-  const [activeSection, setActiveSection] = useState<GuideSection>(() => guideSectionForCategory(category));
+  const [activeSection, setActiveSection] = useState<GuideSection>(() =>
+    guideSectionForCategory(category),
+  );
   const [apparelSubSection, setApparelSubSection] = useState<ApparelSubSection>("standard");
 
-  const copy = locale === "vi"
-    ? {
-        title: "Hướng dẫn chọn cỡ",
-        eyebrow: "Vela Wear / Bảng Số Đo Chuẩn",
-        intro: "Đối chiếu số đo cơ thể với bảng kích cỡ chuẩn bên dưới để chọn trang phục vừa vặn nhất. Phom dáng và chất liệu vải của từng dòng sản phẩm có thể tạo cảm giác mặc linh hoạt.",
-        back: "Quay lại sản phẩm",
-        apparel: "Trang phục",
-        shoes: "Giày dép",
-        accessories: "Phụ kiện",
-        subStandard: "Cỡ chuẩn (XXS – XXL)",
-        subPlus: "Cỡ mở rộng (0X – 4X)",
-        subInternational: "Quy đổi quốc tế (US/UK/EU)",
-        standardTitle: "Bảng kích cỡ chuẩn XXS – XXL",
-        plusTitle: "Bảng kích cỡ mở rộng 0X – 4X",
-        international: "Bảng quy đổi kích cỡ quốc tế",
-        shoeTitle: "Kích cỡ giày & Chiều dài bàn chân",
-        accessoryTitle: "Kích cỡ & Thông số phụ kiện",
-        reference: "Số đo hiển thị là kích cỡ cơ thể tiêu chuẩn; độ co giãn phụ thuộc vào từng chất liệu vải.",
-        size: "Kích cỡ",
-        bust: "Vòng ngực",
-        waist: "Vòng eo",
-        hip: "Vòng mông",
-        euSize: "Cỡ EU",
-        footLength: "Chiều dài bàn chân",
-        howToMeasureTitle: "Hướng dẫn lấy số đo chuẩn",
-        howToMeasureSub: "Dùng thước dây mềm để đo trực tiếp trên cơ thể",
-        step1: "Vòng ngực",
-        step1Desc: "Quấn thước quanh phần đầy nhất của ngực, giữ thước phẳng và song song với sàn.",
-        step2: "Vòng eo",
-        step2Desc: "Đo quanh điểm nhỏ nhất của eo tự nhiên (khoảng trên rốn 2-3cm), không siết quá chặt.",
-        step3: "Vòng mông",
-        step3Desc: "Đứng thẳng khép chân và đo quanh phần nở nhất của vòng 3.",
-        step4: "Bàn chân",
-        step4Desc: "Đặt chân lên tờ giấy, đánh dấu từ gót đến ngón chân dài nhất rồi đo chiều dài.",
-      }
-    : {
-        title: "Size guide",
-        eyebrow: "Vela Wear / Reference Measurements",
-        intro: "Compare your body measurements with our standard tables below to find your perfect fit. Product fit and stretch may vary depending on material.",
-        back: "Back to product",
-        apparel: "Apparel",
-        shoes: "Shoes",
-        accessories: "Accessories",
-        subStandard: "Standard (XXS – XXL)",
-        subPlus: "Plus Size (0X – 4X)",
-        subInternational: "International (US/UK/EU)",
-        standardTitle: "Standard size chart XXS – XXL",
-        plusTitle: "Extended size chart 0X – 4X",
-        international: "International size conversion",
-        shoeTitle: "Shoe sizing & Foot length",
-        accessoryTitle: "Accessory sizing & specifications",
-        reference: "Values shown are body measurements; fabric drape and elasticity may vary across collections.",
-        size: "Size",
-        bust: "Bust",
-        waist: "Waist",
-        hip: "Hip",
-        euSize: "EU Size",
-        footLength: "Foot length",
-        howToMeasureTitle: "How to take accurate measurements",
-        howToMeasureSub: "Use a soft tape measure held comfortably without pulling tight",
-        step1: "Bust",
-        step1Desc: "Measure around the fullest part of your chest, keeping the tape horizontal to the ground.",
-        step2: "Waist",
-        step2Desc: "Measure around your natural waistline (the narrowest point above your hips).",
-        step3: "Hip",
-        step3Desc: "Stand with feet together and measure around the fullest part of your hips/seat.",
-        step4: "Foot Length",
-        step4Desc: "Stand on paper, mark your heel and longest toe, then measure the distance.",
-      };
+  const copy =
+    locale === "vi"
+      ? {
+          title: "Hướng dẫn chọn cỡ",
+          eyebrow: "Vela Wear / Bảng Số Đo Chuẩn",
+          intro:
+            "Đối chiếu số đo cơ thể với bảng kích cỡ chuẩn bên dưới để chọn trang phục vừa vặn nhất. Phom dáng và chất liệu vải của từng dòng sản phẩm có thể tạo cảm giác mặc linh hoạt.",
+          back: "Quay lại sản phẩm",
+          apparel: "Trang phục",
+          shoes: "Giày dép",
+          accessories: "Phụ kiện",
+          subStandard: "Cỡ chuẩn (XXS – XXL)",
+          subPlus: "Cỡ mở rộng (0X – 4X)",
+          subInternational: "Quy đổi quốc tế (US/UK/EU)",
+          standardTitle: "Bảng kích cỡ chuẩn XXS – XXL",
+          plusTitle: "Bảng kích cỡ mở rộng 0X – 4X",
+          international: "Bảng quy đổi kích cỡ quốc tế",
+          shoeTitle: "Kích cỡ giày & Chiều dài bàn chân",
+          accessoryTitle: "Kích cỡ & Thông số phụ kiện",
+          reference:
+            "Số đo hiển thị là kích cỡ cơ thể tiêu chuẩn; độ co giãn phụ thuộc vào từng chất liệu vải.",
+          size: "Kích cỡ",
+          bust: "Vòng ngực",
+          waist: "Vòng eo",
+          hip: "Vòng mông",
+          euSize: "Cỡ EU",
+          footLength: "Chiều dài bàn chân",
+          howToMeasureTitle: "Hướng dẫn lấy số đo chuẩn",
+          howToMeasureSub: "Dùng thước dây mềm để đo trực tiếp trên cơ thể",
+          step1: "Vòng ngực",
+          step1Desc:
+            "Quấn thước quanh phần đầy nhất của ngực, giữ thước phẳng và song song với sàn.",
+          step2: "Vòng eo",
+          step2Desc:
+            "Đo quanh điểm nhỏ nhất của eo tự nhiên (khoảng trên rốn 2-3cm), không siết quá chặt.",
+          step3: "Vòng mông",
+          step3Desc: "Đứng thẳng khép chân và đo quanh phần nở nhất của vòng 3.",
+          step4: "Bàn chân",
+          step4Desc:
+            "Đặt chân lên tờ giấy, đánh dấu từ gót đến ngón chân dài nhất rồi đo chiều dài.",
+        }
+      : {
+          title: "Size guide",
+          eyebrow: "Vela Wear / Reference Measurements",
+          intro:
+            "Compare your body measurements with our standard tables below to find your perfect fit. Product fit and stretch may vary depending on material.",
+          back: "Back to product",
+          apparel: "Apparel",
+          shoes: "Shoes",
+          accessories: "Accessories",
+          subStandard: "Standard (XXS – XXL)",
+          subPlus: "Plus Size (0X – 4X)",
+          subInternational: "International (US/UK/EU)",
+          standardTitle: "Standard size chart XXS – XXL",
+          plusTitle: "Extended size chart 0X – 4X",
+          international: "International size conversion",
+          shoeTitle: "Shoe sizing & Foot length",
+          accessoryTitle: "Accessory sizing & specifications",
+          reference:
+            "Values shown are body measurements; fabric drape and elasticity may vary across collections.",
+          size: "Size",
+          bust: "Bust",
+          waist: "Waist",
+          hip: "Hip",
+          euSize: "EU Size",
+          footLength: "Foot length",
+          howToMeasureTitle: "How to take accurate measurements",
+          howToMeasureSub: "Use a soft tape measure held comfortably without pulling tight",
+          step1: "Bust",
+          step1Desc:
+            "Measure around the fullest part of your chest, keeping the tape horizontal to the ground.",
+          step2: "Waist",
+          step2Desc: "Measure around your natural waistline (the narrowest point above your hips).",
+          step3: "Hip",
+          step3Desc:
+            "Stand with feet together and measure around the fullest part of your hips/seat.",
+          step4: "Foot Length",
+          step4Desc: "Stand on paper, mark your heel and longest toe, then measure the distance.",
+        };
 
   const tabs: Array<{ id: GuideSection; label: string; icon: typeof Shirt }> = [
     { id: "apparel", label: copy.apparel, icon: Shirt },
@@ -234,16 +256,17 @@ export function SizeGuideClient() {
     { num: "04", title: copy.step4, desc: copy.step4Desc, icon: Footprints },
   ];
 
-  const productHref = productSlug && /^[a-z0-9-]+$/i.test(productSlug)
-    ? `/products/${encodeURIComponent(productSlug)}`
-    : "/collection";
+  const productHref =
+    productSlug && /^[a-z0-9-]+$/i.test(productSlug)
+      ? `/products/${encodeURIComponent(productSlug)}`
+      : "/collection";
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-160px)] w-full max-w-[1320px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
+    <main className="mx-auto min-h-[calc(100vh-160px)] w-full max-w-[1320px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
       {/* Back Link */}
       <Link
         href={productHref}
-        className="mb-8 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#1c1a18]/70 hover:text-[#b5573a] transition-colors"
+        className="mb-8 inline-flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-[#1c1a18]/70 uppercase transition-colors hover:text-[#b5573a]"
       >
         <ArrowLeft className="size-4" />
         {copy.back}
@@ -252,13 +275,13 @@ export function SizeGuideClient() {
       {/* Hero Header with SINGLE Unit Toggle */}
       <div className="flex flex-col justify-between gap-6 border-b border-[#1c1a18]/12 pb-8 md:flex-row md:items-end">
         <div className="max-w-3xl">
-          <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-[#b5573a]">
+          <p className="mb-2.5 text-[10px] font-bold tracking-[0.25em] text-[#b5573a] uppercase">
             {copy.eyebrow}
           </p>
-          <h1 className="font-serif text-3xl md:text-5xl font-light tracking-tight text-[#1c1a18]">
+          <h1 className="font-serif text-3xl font-light tracking-tight text-[#1c1a18] md:text-5xl">
             {copy.title}
           </h1>
-          <p className="mt-4 max-w-2xl text-xs md:text-sm leading-relaxed text-[#55423d]/80 font-normal">
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed font-normal text-[#55423d]/80 md:text-sm">
             {copy.intro}
           </p>
         </div>
@@ -269,36 +292,35 @@ export function SizeGuideClient() {
       </div>
 
       {/* Unified Elegant "How to Measure" Card */}
-      <div className="mt-8 rounded-2xl border border-[#1c1a18]/12 bg-white p-6 md:p-8 shadow-xs max-w-5xl">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#1c1a18]/10 mb-6">
+      <div className="mt-8 max-w-5xl rounded-2xl border border-[#1c1a18]/12 bg-white p-6 shadow-xs md:p-8">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-2 border-b border-[#1c1a18]/10 pb-4">
           <div className="flex items-center gap-2.5">
             <Ruler className="size-4 text-[#b5573a]" />
-            <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#1c1a18]">
+            <h2 className="text-xs font-bold tracking-[0.16em] text-[#1c1a18] uppercase">
               {copy.howToMeasureTitle}
             </h2>
           </div>
-          <span className="text-xs text-[#55423d]/70 font-medium">
-            {copy.howToMeasureSub}
-          </span>
+          <span className="text-xs font-medium text-[#55423d]/70">{copy.howToMeasureSub}</span>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {measureSteps.map((step) => {
             const Icon = step.icon;
             return (
-              <div key={step.title} className="flex flex-col gap-2 rounded-xl bg-[#faf8f5] p-4.5 border border-[#1c1a18]/8">
+              <div
+                key={step.title}
+                className="flex flex-col gap-2 rounded-xl border border-[#1c1a18]/8 bg-[#faf8f5] p-4.5"
+              >
                 <div className="flex items-center justify-between">
                   <span className="flex size-6 items-center justify-center rounded-full bg-[#efe7dc] text-[11px] font-bold text-[#b5573a]">
                     {step.num}
                   </span>
                   <Icon className="size-4 text-[#55423d]/50" />
                 </div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#1c1a18] mt-1">
+                <h3 className="mt-1 text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
                   {step.title}
                 </h3>
-                <p className="text-xs leading-relaxed text-[#55423d]/85">
-                  {step.desc}
-                </p>
+                <p className="text-xs leading-relaxed text-[#55423d]/85">{step.desc}</p>
               </div>
             );
           })}
@@ -306,7 +328,11 @@ export function SizeGuideClient() {
       </div>
 
       {/* Main Category Tabs */}
-      <div className="mt-10 flex flex-wrap gap-2 border-b border-[#1c1a18]/12" role="tablist" aria-label={copy.title}>
+      <div
+        className="mt-10 flex flex-wrap gap-2 border-b border-[#1c1a18]/12"
+        role="tablist"
+        aria-label={copy.title}
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSection === tab.id;
@@ -318,10 +344,10 @@ export function SizeGuideClient() {
               aria-selected={isActive}
               onClick={() => setActiveSection(tab.id)}
               className={cn(
-                "inline-flex items-center gap-2 border-b-2 px-6 py-4 text-xs font-bold uppercase tracking-[0.14em] transition-all cursor-pointer",
+                "inline-flex cursor-pointer items-center gap-2 border-b-2 px-6 py-4 text-xs font-bold tracking-[0.14em] uppercase transition-all",
                 isActive
                   ? "border-[#b5573a] text-[#b5573a]"
-                  : "border-transparent text-[#1c1a18]/55 hover:text-[#1c1a18] hover:border-[#1c1a18]/25",
+                  : "border-transparent text-[#1c1a18]/55 hover:border-[#1c1a18]/25 hover:text-[#1c1a18]",
               )}
             >
               <Icon className="size-4" />
@@ -335,16 +361,16 @@ export function SizeGuideClient() {
       {activeSection === "apparel" && (
         <div role="tabpanel" className="mt-8 space-y-8">
           {/* Sub-Section Switcher for Apparel */}
-          <div className="flex flex-wrap items-center justify-between gap-4 max-w-4xl">
-            <div className="inline-flex rounded-full bg-[#efe7dc]/70 p-1 border border-[#1c1a18]/12 shadow-2xs">
+          <div className="flex max-w-4xl flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex rounded-full border border-[#1c1a18]/12 bg-[#efe7dc]/70 p-1 shadow-2xs">
               <button
                 type="button"
                 onClick={() => setApparelSubSection("standard")}
                 className={cn(
-                  "px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer active:scale-[0.96]",
+                  "cursor-pointer rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase transition-all active:scale-[0.96]",
                   apparelSubSection === "standard"
-                    ? "bg-white text-[#1c1a18] shadow-xs border border-[#1c1a18]/12 font-bold"
-                    : "text-[#1c1a18]/65 hover:text-[#1c1a18]"
+                    ? "border border-[#1c1a18]/12 bg-white font-bold text-[#1c1a18] shadow-xs"
+                    : "text-[#1c1a18]/65 hover:text-[#1c1a18]",
                 )}
               >
                 {copy.subStandard}
@@ -353,10 +379,10 @@ export function SizeGuideClient() {
                 type="button"
                 onClick={() => setApparelSubSection("plus")}
                 className={cn(
-                  "px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer active:scale-[0.96]",
+                  "cursor-pointer rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase transition-all active:scale-[0.96]",
                   apparelSubSection === "plus"
-                    ? "bg-white text-[#1c1a18] shadow-xs border border-[#1c1a18]/12 font-bold"
-                    : "text-[#1c1a18]/65 hover:text-[#1c1a18]"
+                    ? "border border-[#1c1a18]/12 bg-white font-bold text-[#1c1a18] shadow-xs"
+                    : "text-[#1c1a18]/65 hover:text-[#1c1a18]",
                 )}
               >
                 {copy.subPlus}
@@ -365,17 +391,17 @@ export function SizeGuideClient() {
                 type="button"
                 onClick={() => setApparelSubSection("international")}
                 className={cn(
-                  "px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-full transition-all cursor-pointer active:scale-[0.96]",
+                  "cursor-pointer rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase transition-all active:scale-[0.96]",
                   apparelSubSection === "international"
-                    ? "bg-white text-[#1c1a18] shadow-xs border border-[#1c1a18]/12 font-bold"
-                    : "text-[#1c1a18]/65 hover:text-[#1c1a18]"
+                    ? "border border-[#1c1a18]/12 bg-white font-bold text-[#1c1a18] shadow-xs"
+                    : "text-[#1c1a18]/65 hover:text-[#1c1a18]",
                 )}
               >
                 {copy.subInternational}
               </button>
             </div>
 
-            <div className="text-xs text-[#55423d]/75 flex items-center gap-1.5 font-medium">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#55423d]/75">
               <Info className="size-3.5 text-[#b5573a]" />
               <span>{copy.reference}</span>
             </div>
@@ -399,9 +425,7 @@ export function SizeGuideClient() {
           {/* Plus Size Apparel Table */}
           {apparelSubSection === "plus" && (
             <section className="space-y-4">
-              <h2 className="font-serif text-2xl font-light text-[#1c1a18]">
-                {copy.plusTitle}
-              </h2>
+              <h2 className="font-serif text-2xl font-light text-[#1c1a18]">{copy.plusTitle}</h2>
               <HighContrastBodyTable
                 sizes={PLUS_BODY_SIZES}
                 unit={unit}
@@ -421,13 +445,13 @@ export function SizeGuideClient() {
                 <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-[#1c1a18]/15 bg-[#efe7dc]/80">
-                      <th className="sticky left-0 z-10 w-36 min-w-32 bg-[#efe7dc] px-4 py-3 text-left font-bold text-xs uppercase tracking-wider text-[#1c1a18] border-r border-[#1c1a18]/12">
+                      <th className="sticky left-0 z-10 w-36 min-w-32 border-r border-[#1c1a18]/12 bg-[#efe7dc] px-4 py-3 text-left text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
                         {copy.size}
                       </th>
                       {STANDARD_BODY_SIZES.map((item) => (
                         <th
                           key={item.size}
-                          className="min-w-16 md:min-w-20 border-l border-[#1c1a18]/12 px-3 py-3 text-center font-bold text-xs tracking-wider text-[#1c1a18]"
+                          className="min-w-16 border-l border-[#1c1a18]/12 px-3 py-3 text-center text-xs font-bold tracking-wider text-[#1c1a18] md:min-w-20"
                         >
                           {item.size}
                         </th>
@@ -439,17 +463,17 @@ export function SizeGuideClient() {
                       <tr
                         key={row.label}
                         className={cn(
-                          "border-b border-[#1c1a18]/10 last:border-0 transition-colors hover:bg-[#efe7dc]/30",
-                          index % 2 === 1 ? "bg-[#faf8f5]" : "bg-white"
+                          "border-b border-[#1c1a18]/10 transition-colors last:border-0 hover:bg-[#efe7dc]/30",
+                          index % 2 === 1 ? "bg-[#faf8f5]" : "bg-white",
                         )}
                       >
-                        <th className="sticky left-0 z-10 bg-inherit px-4 py-3 text-left font-bold text-xs text-[#1c1a18] border-r border-[#1c1a18]/10">
+                        <th className="sticky left-0 z-10 border-r border-[#1c1a18]/10 bg-inherit px-4 py-3 text-left text-xs font-bold text-[#1c1a18]">
                           {row.label}
                         </th>
                         {row.values.map((value, valIdx) => (
                           <td
                             key={`${row.label}-${STANDARD_BODY_SIZES[valIdx].size}`}
-                            className="border-l border-[#1c1a18]/10 px-3 py-3 text-center font-numeric tabular-nums font-semibold text-sm text-[#1c1a18]"
+                            className="font-numeric border-l border-[#1c1a18]/10 px-3 py-3 text-center text-sm font-semibold text-[#1c1a18] tabular-nums"
                           >
                             {value}
                           </td>
@@ -468,17 +492,15 @@ export function SizeGuideClient() {
       {activeSection === "shoes" && (
         <section role="tabpanel" className="mt-8 space-y-6">
           <div>
-            <h2 className="font-serif text-2xl font-light text-[#1c1a18]">
-              {copy.shoeTitle}
-            </h2>
-            <p className="mt-1.5 text-xs text-[#55423d]/75 font-medium">{copy.reference}</p>
+            <h2 className="font-serif text-2xl font-light text-[#1c1a18]">{copy.shoeTitle}</h2>
+            <p className="mt-1.5 text-xs font-medium text-[#55423d]/75">{copy.reference}</p>
           </div>
 
           <div className="max-w-5xl overflow-x-auto rounded-xl border border-[#1c1a18]/15 bg-white shadow-xs">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-[#1c1a18]/15 bg-[#efe7dc]/80">
-                  <th className="sticky left-0 z-10 w-36 min-w-32 bg-[#efe7dc] px-4 py-3 text-left font-bold text-xs uppercase tracking-wider text-[#1c1a18] border-r border-[#1c1a18]/12">
+                  <th className="sticky left-0 z-10 w-36 min-w-32 border-r border-[#1c1a18]/12 bg-[#efe7dc] px-4 py-3 text-left text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
                     {copy.euSize}
                   </th>
                   {SHOE_SIZES.map((shoe) => {
@@ -487,10 +509,10 @@ export function SizeGuideClient() {
                       <th
                         key={shoe.eu}
                         className={cn(
-                          "min-w-14 md:min-w-16 border-l border-[#1c1a18]/12 px-2.5 py-3 text-center font-bold text-xs tracking-wider transition-colors",
+                          "min-w-14 border-l border-[#1c1a18]/12 px-2.5 py-3 text-center text-xs font-bold tracking-wider transition-colors md:min-w-16",
                           isSelected
-                            ? "bg-[#efe7dc] text-[#b5573a] ring-1 ring-inset ring-[#b5573a]"
-                            : "bg-[#efe7dc]/60 text-[#1c1a18]"
+                            ? "bg-[#efe7dc] text-[#b5573a] ring-1 ring-[#b5573a] ring-inset"
+                            : "bg-[#efe7dc]/60 text-[#1c1a18]",
                         )}
                       >
                         {shoe.eu}
@@ -500,9 +522,10 @@ export function SizeGuideClient() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-white hover:bg-[#efe7dc]/30 transition-colors">
-                  <th className="sticky left-0 z-10 bg-inherit px-4 py-3 text-left font-bold text-xs text-[#1c1a18] border-r border-[#1c1a18]/10">
-                    {copy.footLength} <span className="font-normal text-[#55423d]/70">({unit})</span>
+                <tr className="bg-white transition-colors hover:bg-[#efe7dc]/30">
+                  <th className="sticky left-0 z-10 border-r border-[#1c1a18]/10 bg-inherit px-4 py-3 text-left text-xs font-bold text-[#1c1a18]">
+                    {copy.footLength}{" "}
+                    <span className="font-normal text-[#55423d]/70">({unit})</span>
                   </th>
                   {SHOE_SIZES.map((shoe) => {
                     const isSelected = selectedSize === shoe.eu;
@@ -510,10 +533,10 @@ export function SizeGuideClient() {
                       <td
                         key={shoe.eu}
                         className={cn(
-                          "border-l border-[#1c1a18]/10 px-2.5 py-3 text-center font-numeric tabular-nums text-sm font-semibold",
+                          "font-numeric border-l border-[#1c1a18]/10 px-2.5 py-3 text-center text-sm font-semibold tabular-nums",
                           isSelected
-                            ? "bg-[#efe7dc]/60 text-[#b5573a] font-bold"
-                            : "text-[#1c1a18]"
+                            ? "bg-[#efe7dc]/60 font-bold text-[#b5573a]"
+                            : "text-[#1c1a18]",
                         )}
                       >
                         {formatMeasurement(shoe.footLengthCm, unit)}
@@ -531,20 +554,18 @@ export function SizeGuideClient() {
       {activeSection === "accessories" && (
         <section role="tabpanel" className="mt-8 space-y-6">
           <div>
-            <h2 className="font-serif text-2xl font-light text-[#1c1a18]">
-              {copy.accessoryTitle}
-            </h2>
-            <p className="mt-1.5 text-xs text-[#55423d]/75 font-medium">{copy.reference}</p>
+            <h2 className="font-serif text-2xl font-light text-[#1c1a18]">{copy.accessoryTitle}</h2>
+            <p className="mt-1.5 text-xs font-medium text-[#55423d]/75">{copy.reference}</p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 max-w-4xl">
+          <div className="grid max-w-4xl gap-4 sm:grid-cols-2">
             {ACCESSORY_SIZE_NOTES.map((note) => {
               const isSelected = selectedSize === note.size;
               return (
                 <article
                   key={note.size}
                   className={cn(
-                    "rounded-xl border p-6 transition-all shadow-xs",
+                    "rounded-xl border p-6 shadow-xs transition-all",
                     isSelected
                       ? "border-[#b5573a] bg-[#efe7dc]/60 ring-1 ring-[#b5573a]"
                       : "border-[#1c1a18]/12 bg-white hover:border-[#1c1a18]/30",
@@ -553,7 +574,7 @@ export function SizeGuideClient() {
                   <h3 className="font-mono text-sm font-bold tracking-wider text-[#1c1a18]">
                     {note.size}
                   </h3>
-                  <p className="mt-3 text-xs leading-relaxed text-[#55423d]/85 font-normal">
+                  <p className="mt-3 text-xs leading-relaxed font-normal text-[#55423d]/85">
                     {note[locale]}
                   </p>
                 </article>

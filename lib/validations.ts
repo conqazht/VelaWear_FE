@@ -102,14 +102,10 @@ export function createFullNameSchema(locale: Locale) {
 
 export function createNameSchema(locale: Locale) {
   const copy = validationMessages[locale];
-  return z
-    .string({ message: copy.nameRequired })
-    .min(1, copy.nameRequired)
-    .max(50, copy.nameMax);
+  return z.string({ message: copy.nameRequired }).min(1, copy.nameRequired).max(50, copy.nameMax);
 }
 
-export const requiredStringSchema = (message: string) =>
-  z.string({ message }).min(1, message);
+export const requiredStringSchema = (message: string) => z.string({ message }).min(1, message);
 
 export function createSignInSchema(locale: Locale) {
   return z.object({
@@ -143,9 +139,7 @@ export function createSignUpSchema(locale: Locale) {
 
         const date = new Date(year, month - 1, day);
         return (
-          date.getFullYear() === year &&
-          date.getMonth() === month - 1 &&
-          date.getDate() === day
+          date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
         );
       },
       { message: copy.invalidBirthDate, path: ["dobDay"] },

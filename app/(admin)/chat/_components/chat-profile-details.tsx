@@ -43,8 +43,8 @@ export function ChatProfileDetails({ contact, onClose }: ChatProfileDetailsProps
         </Avatar>
 
         <div className="min-w-0 flex-1">
-          <div className="truncate font-medium leading-5">{contact.name}</div>
-          <div className="truncate text-muted-foreground text-xs">{contact.role}</div>
+          <div className="truncate leading-5 font-medium">{contact.name}</div>
+          <div className="text-muted-foreground truncate text-xs">{contact.role}</div>
         </div>
 
         <Button
@@ -96,31 +96,38 @@ export function ChatProfileDetails({ contact, onClose }: ChatProfileDetailsProps
       </div>
 
       <Tabs defaultValue="details">
-        <TabsList variant="line" className="w-full justify-between border-b px-0 **:data-[slot=tabs-trigger]:flex-1">
-          <TabsTrigger value="details">{t("admin.communications.chat.profile.details")}</TabsTrigger>
+        <TabsList
+          variant="line"
+          className="w-full justify-between border-b px-0 **:data-[slot=tabs-trigger]:flex-1"
+        >
+          <TabsTrigger value="details">
+            {t("admin.communications.chat.profile.details")}
+          </TabsTrigger>
           <TabsTrigger value="files">{t("admin.communications.chat.profile.files")}</TabsTrigger>
-          <TabsTrigger value="activity">{t("admin.communications.chat.profile.activity")}</TabsTrigger>
+          <TabsTrigger value="activity">
+            {t("admin.communications.chat.profile.activity")}
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 text-sm">
           <div className="flex items-center gap-2">
-            <Mail className="size-4 shrink-0 text-muted-foreground" />
+            <Mail className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.email")}
             </span>
             <span className="ml-auto truncate text-sm">{contact.email}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Phone className="size-4 shrink-0 text-muted-foreground" />
+            <Phone className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.phone")}
             </span>
             <span className="ml-auto truncate text-sm">{contact.phone}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Globe className="size-4 shrink-0 text-muted-foreground" />
+            <Globe className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.website")}
             </span>
@@ -132,21 +139,21 @@ export function ChatProfileDetails({ contact, onClose }: ChatProfileDetailsProps
 
         <div className="flex flex-col gap-3 text-sm">
           <div className="flex items-center gap-2">
-            <Building2 className="size-4 shrink-0 text-muted-foreground" />
+            <Building2 className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.company")}
             </span>
             <span className="ml-auto truncate text-sm">{contact.company}</span>
           </div>
           <div className="flex items-center gap-2">
-            <UserRound className="size-4 shrink-0 text-muted-foreground" />
+            <UserRound className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.role")}
             </span>
             <span className="ml-auto truncate text-sm">{contact.role}</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 shrink-0 text-muted-foreground" />
+            <CheckCircle2 className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.stage")}
             </span>
@@ -155,14 +162,14 @@ export function ChatProfileDetails({ contact, onClose }: ChatProfileDetailsProps
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="size-4 shrink-0 text-muted-foreground" />
+            <Calendar className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.qualifiedSince")}
             </span>
             <span className="ml-auto truncate text-sm">{contact.qualifiedAt}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Monitor className="size-4 shrink-0 text-muted-foreground" />
+            <Monitor className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.timezone")}
             </span>
@@ -174,14 +181,14 @@ export function ChatProfileDetails({ contact, onClose }: ChatProfileDetailsProps
 
         <div className="flex flex-col gap-3 text-sm">
           <div className="flex items-center gap-2">
-            <MapPin className="size-4 shrink-0 text-muted-foreground" />
+            <MapPin className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.location")}
             </span>
             <span className="ml-auto truncate text-sm">{contact.location}</span>
           </div>
           <div className="flex items-start gap-2">
-            <Tag className="size-4 shrink-0 text-muted-foreground" />
+            <Tag className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm">
               {t("admin.communications.chat.profile.tags")}
             </span>

@@ -1,10 +1,7 @@
 import apiClient from "./api-client";
 import { getApiErrorStatus, extractRetryAfterSeconds } from "./api/errors";
 
-export type OtpPurpose =
-  | "REGISTER"
-  | "FORGOT_PASSWORD"
-  | "CHANGE_EMAIL";
+export type OtpPurpose = "REGISTER" | "FORGOT_PASSWORD" | "CHANGE_EMAIL";
 
 export type OtpErrorCode =
   | "OTP_INVALID_OR_EXPIRED"
@@ -193,30 +190,24 @@ export function normalizeOtpError(
   const responseData = apiError.response?.data;
   const rawCode = responseData?.code ?? responseData?.errorCode ?? responseData?.error;
   const code = isOtpErrorCode(rawCode) ? rawCode : undefined;
-  
+
   const status = getApiErrorStatus(error);
-  
-  const kind = code
-    ? ERROR_KIND_BY_CODE[code]
-    : getFallbackErrorKind(status);
-    
+
+  const kind = code ? ERROR_KIND_BY_CODE[code] : getFallbackErrorKind(status);
+
   const retryAfterSeconds = extractRetryAfterSeconds(error);
 
   return {
     code,
     kind,
     message:
-      responseData?.message ??
-      (kind === "unknown" ? fallbackMessage : getDefaultOtpMessage(kind)),
+      responseData?.message ?? (kind === "unknown" ? fallbackMessage : getDefaultOtpMessage(kind)),
     retryAfterSeconds,
   };
 }
 
 export async function requestOtp(payload: OtpRequestPayload): Promise<OtpRequestResult> {
-  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>(
-    "/auth/otp/request",
-    payload,
-  );
+  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>("/auth/otp/request", payload);
   const data = response.data?.data;
 
   return {
@@ -227,10 +218,7 @@ export async function requestOtp(payload: OtpRequestPayload): Promise<OtpRequest
 }
 
 export async function verifyOtp(payload: OtpVerifyPayload): Promise<OtpVerifyResult> {
-  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>(
-    "/auth/otp/verify",
-    payload,
-  );
+  const response = await apiClient.post<ApiEnvelope<OtpResponseData>>("/auth/otp/verify", payload);
   const data = response.data?.data;
 
   return {

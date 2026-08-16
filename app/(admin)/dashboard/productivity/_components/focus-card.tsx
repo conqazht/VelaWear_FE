@@ -21,7 +21,7 @@ export function FocusCard() {
             <Button className="min-w-24">{t("admin.productivity.focus.start")}</Button>
           </div>
 
-          <div className="flex items-center gap-2 text-muted-foreground text-xs">
+          <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <BellOff className="size-3" />
             <span>{t("admin.productivity.focus.quiet")}</span>
           </div>

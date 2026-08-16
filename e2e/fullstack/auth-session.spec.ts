@@ -31,8 +31,7 @@ async function getRefreshCookie(context: BrowserContext) {
 }
 
 function getCookieHeaderValue(cookieHeader: string | null, cookieName: string) {
-  return cookieHeader
-    ?.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1];
+  return cookieHeader?.match(new RegExp(`(?:^|;\\s*)${cookieName}=([^;]+)`))?.[1];
 }
 
 async function getAuthSessionLockCount(page: Page) {
@@ -53,10 +52,8 @@ test(
     let countRefreshRequests: ((request: Request) => void) | undefined;
 
     try {
-      const {
-        meResponse: bootstrapMe,
-        refreshResponse: bootstrapRefresh,
-      } = await profilePage.gotoAndWaitForBootstrap();
+      const { meResponse: bootstrapMe, refreshResponse: bootstrapRefresh } =
+        await profilePage.gotoAndWaitForBootstrap();
 
       expect(bootstrapRefresh.status()).toBe(200);
       expect(bootstrapMe.status()).toBe(200);
@@ -75,17 +72,15 @@ test(
 
       const [refreshResponse, meResponse] = await Promise.all([
         page.waitForResponse((response) =>
-          isApiCall(response.url(), response.request().method(), "/api/v1/auth/refresh")
+          isApiCall(response.url(), response.request().method(), "/api/v1/auth/refresh"),
         ),
-        page.waitForResponse((response) =>
-          isMeCall(response.url(), response.request().method())
-        ),
+        page.waitForResponse((response) => isMeCall(response.url(), response.request().method())),
         page.reload({ waitUntil: "domcontentloaded" }),
       ]);
 
       expect(refreshResponse.status()).toBe(200);
       expect(meResponse.status()).toBe(200);
-      const refreshBody = await refreshResponse.json() as TokenEnvelope;
+      const refreshBody = (await refreshResponse.json()) as TokenEnvelope;
       expect(refreshBody.data.accessToken).toBeTruthy();
       authenticatedSession.setCleanupAccessToken(refreshBody.data.accessToken);
 
@@ -97,8 +92,7 @@ test(
       // Quan sát một khoảng yên tĩnh có giới hạn để bắt refresh thứ hai đến muộn.
       await expect(
         page.waitForRequest(
-          (request) =>
-            isApiCall(request.url(), request.method(), "/api/v1/auth/refresh"),
+          (request) => isApiCall(request.url(), request.method(), "/api/v1/auth/refresh"),
           { timeout: 500 },
         ),
       ).rejects.toThrow();
@@ -136,10 +130,7 @@ test(
       activeRefreshRequests += 1;
       const requestNumber = refreshRequestCookies.length + 1;
       refreshRequestCookies.push(await route.request().headerValue("cookie"));
-      maxConcurrentRefreshRequests = Math.max(
-        maxConcurrentRefreshRequests,
-        activeRefreshRequests,
-      );
+      maxConcurrentRefreshRequests = Math.max(maxConcurrentRefreshRequests, activeRefreshRequests);
       try {
         if (requestNumber === 1) await firstRefreshGate;
         const upstreamResponse = await route.fetch();
@@ -165,12 +156,14 @@ test(
         await expect.poll(() => refreshRequestCookies.length).toBe(1);
 
         await secondProfilePage.goto();
-        await expect.poll(() =>
-          secondPage.evaluate(async () => {
-            const snapshot = await navigator.locks.query();
-            return snapshot.pending?.some((lock) => lock.name === "vela-auth-session") ?? false;
-          })
-        ).toBe(true);
+        await expect
+          .poll(() =>
+            secondPage.evaluate(async () => {
+              const snapshot = await navigator.locks.query();
+              return snapshot.pending?.some((lock) => lock.name === "vela-auth-session") ?? false;
+            }),
+          )
+          .toBe(true);
 
         expect(refreshRequestCookies).toHaveLength(1);
       });
@@ -187,9 +180,7 @@ test(
         expect(await secondPage.evaluate(() => Boolean(navigator.locks))).toBe(true);
         expect(refreshStatuses).toEqual([200, 200]);
         expect(refreshRequestCookies).toHaveLength(2);
-        expect(refreshRequestCookies[0]).toContain(
-          `refresh_token=${cookieBeforeBootstrap!.value}`,
-        );
+        expect(refreshRequestCookies[0]).toContain(`refresh_token=${cookieBeforeBootstrap!.value}`);
         expect(refreshRequestCookies[1]).not.toBe(refreshRequestCookies[0]);
         expect(maxConcurrentRefreshRequests).toBe(1);
 
@@ -200,10 +191,15 @@ test(
     } finally {
       releaseFirstRefresh();
       try {
-        await expect.poll(async () => ({
-          activeRequests: activeRefreshRequests,
-          activeLocks: await getAuthSessionLockCount(firstPage),
-        }), { timeout: 5_000 }).toEqual({ activeRequests: 0, activeLocks: 0 });
+        await expect
+          .poll(
+            async () => ({
+              activeRequests: activeRefreshRequests,
+              activeLocks: await getAuthSessionLockCount(firstPage),
+            }),
+            { timeout: 5_000 },
+          )
+          .toEqual({ activeRequests: 0, activeLocks: 0 });
         await context.unroute("**/api/v1/auth/refresh", gateRefreshRequest);
       } finally {
         await Promise.allSettled([firstPage.close(), secondPage.close()]);
@@ -264,24 +260,23 @@ test(
     };
 
     try {
-      const cookieBeforeRace = await test.step("Bootstrap profile và cài barrier session", async () => {
-        expect(authenticatedSession.accessToken).toBeTruthy();
+      const cookieBeforeRace =
+        await test.step("Bootstrap profile và cài barrier session", async () => {
+          expect(authenticatedSession.accessToken).toBeTruthy();
 
-        const {
-          meResponse: bootstrapMe,
-          refreshResponse: bootstrapRefresh,
-        } = await profilePage.gotoAndWaitForBootstrap();
+          const { meResponse: bootstrapMe, refreshResponse: bootstrapRefresh } =
+            await profilePage.gotoAndWaitForBootstrap();
 
-        expect(bootstrapRefresh.status()).toBe(200);
-        expect(bootstrapMe.status()).toBe(200);
-        await expect(profilePage.authHeader.profileLink).toBeVisible();
+          expect(bootstrapRefresh.status()).toBe(200);
+          expect(bootstrapMe.status()).toBe(200);
+          await expect(profilePage.authHeader.profileLink).toBeVisible();
 
-        const cookie = await getRefreshCookie(context);
-        expect(cookie).toBeTruthy();
+          const cookie = await getRefreshCookie(context);
+          expect(cookie).toBeTruthy();
 
-        await context.route(authMutationPattern, gateAuthMutation);
-        return cookie;
-      });
+          await context.route(authMutationPattern, gateAuthMutation);
+          return cookie;
+        });
 
       await test.step("Giữ refresh và đưa logout vào hàng đợi Web Lock", async () => {
         await refreshProfilePage.goto();
@@ -289,20 +284,22 @@ test(
 
         await profilePage.authHeader.profileLink.hover();
         logoutResponsePromise = page.waitForResponse((response) =>
-          isApiCall(response.url(), response.request().method(), "/api/v1/auth/logout")
+          isApiCall(response.url(), response.request().method(), "/api/v1/auth/logout"),
         );
         await profilePage.authHeader.logoutButton.click();
 
-        await expect.poll(() =>
-          page.evaluate(async () => {
-            const snapshot = await navigator.locks.query();
-            const lockName = "vela-auth-session";
-            return {
-              held: snapshot.held?.filter((lock) => lock.name === lockName).length ?? 0,
-              pending: snapshot.pending?.filter((lock) => lock.name === lockName).length ?? 0,
-            };
-          })
-        ).toEqual({ held: 1, pending: 1 });
+        await expect
+          .poll(() =>
+            page.evaluate(async () => {
+              const snapshot = await navigator.locks.query();
+              const lockName = "vela-auth-session";
+              return {
+                held: snapshot.held?.filter((lock) => lock.name === lockName).length ?? 0,
+                pending: snapshot.pending?.filter((lock) => lock.name === lockName).length ?? 0,
+              };
+            }),
+          )
+          .toEqual({ held: 1, pending: 1 });
 
         expect(logoutRequestCount).toBe(0);
         expect(maxConcurrentSessionMutations).toBe(1);
@@ -338,10 +335,15 @@ test(
     } finally {
       releaseRefresh();
       try {
-        await expect.poll(async () => ({
-          activeRequests: activeSessionMutations,
-          activeLocks: await getAuthSessionLockCount(page),
-        }), { timeout: 5_000 }).toEqual({ activeRequests: 0, activeLocks: 0 });
+        await expect
+          .poll(
+            async () => ({
+              activeRequests: activeSessionMutations,
+              activeLocks: await getAuthSessionLockCount(page),
+            }),
+            { timeout: 5_000 },
+          )
+          .toEqual({ activeRequests: 0, activeLocks: 0 });
         await context.unroute(authMutationPattern, gateAuthMutation);
       } finally {
         await Promise.allSettled([refreshPage.close()]);
@@ -355,16 +357,14 @@ test(
   { tag: "@fullstack" },
   async ({ authenticatedSession, context, page, request }) => {
     const profilePage = new ProfilePage(page);
-    const {
-      meResponse: bootstrapMe,
-      refreshResponse: bootstrapRefresh,
-    } = await profilePage.gotoAndWaitForBootstrap();
+    const { meResponse: bootstrapMe, refreshResponse: bootstrapRefresh } =
+      await profilePage.gotoAndWaitForBootstrap();
 
     expect(authenticatedSession.accessToken).toBeTruthy();
     expect(bootstrapRefresh.status()).toBe(200);
     expect(bootstrapMe.status()).toBe(200);
 
-    const bootstrapBody = await bootstrapRefresh.json() as TokenEnvelope;
+    const bootstrapBody = (await bootstrapRefresh.json()) as TokenEnvelope;
     expect(bootstrapBody.data.accessToken).toBeTruthy();
 
     const activeRefreshCookie = await getRefreshCookie(context);
@@ -373,7 +373,7 @@ test(
 
     await profilePage.authHeader.profileLink.hover();
     const logoutResponsePromise = page.waitForResponse((response) =>
-      isApiCall(response.url(), response.request().method(), "/api/v1/auth/logout")
+      isApiCall(response.url(), response.request().method(), "/api/v1/auth/logout"),
     );
     await profilePage.authHeader.logoutButton.click();
 
@@ -408,29 +408,38 @@ test(
   { tag: "@fullstack" },
   async ({ context, page, request }) => {
     // 1. Fetch real variant ID
-    const variantsResponse = await request.get(`${fullstackApiUrl}/product-variants?sku=VW-TEE-BLK-M&size=100`);
-    const variantsBody = await variantsResponse.json() as { data: { result: Array<{ sku: string, id: number }> } };
+    const variantsResponse = await request.get(
+      `${fullstackApiUrl}/product-variants?sku=VW-TEE-BLK-M&size=100`,
+    );
+    const variantsBody = (await variantsResponse.json()) as {
+      data: { result: Array<{ sku: string; id: number }> };
+    };
     const variantId = variantsBody.data.result.find((i) => i.sku === "VW-TEE-BLK-M")!.id;
 
     // 2. Guest cart
     await page.goto("/");
     await page.evaluate((vid) => {
-      localStorage.setItem("vela-cart-v1", JSON.stringify({
-        state: {
-          cart: [{ id: `variant-${vid}`, variantId: vid, quantity: 1, price: 100, name: "Test" }],
-          owner: "anonymous"
-        },
-        version: 0
-      }));
+      localStorage.setItem(
+        "vela-cart-v1",
+        JSON.stringify({
+          state: {
+            cart: [{ id: `variant-${vid}`, variantId: vid, quantity: 1, price: 100, name: "Test" }],
+            owner: "anonymous",
+          },
+          version: 0,
+        }),
+      );
     }, variantId);
 
     // 3. Login A and sync
     await loginFullstackUser(context.request);
     await page.reload();
-    
+
     // Wait for the sync request
-    const syncReqA = await page.waitForResponse(res => 
-      res.request().method() === "PUT" && new URL(res.url()).pathname === "/api/v1/carts/me/items"
+    const syncReqA = await page.waitForResponse(
+      (res) =>
+        res.request().method() === "PUT" &&
+        new URL(res.url()).pathname === "/api/v1/carts/me/items",
     );
     expect(syncReqA.status()).toBe(200);
 
@@ -444,14 +453,14 @@ test(
     // 5. Login B and check
     const accessTokenB = await loginFullstackSecondUser(context.request);
     await page.reload();
-    
+
     const cartRes = await context.request.get(`${fullstackApiUrl}/carts/me`, {
       headers: { Authorization: `Bearer ${accessTokenB}` },
     });
-    const cartBody = await cartRes.json() as { data: { items: Array<{ variantId: number }> } };
-    
+    const cartBody = (await cartRes.json()) as { data: { items: Array<{ variantId: number }> } };
+
     // B's cart shouldn't sync A's item.
     const hasVariantId = cartBody.data.items?.some((i) => i.variantId === variantId);
     expect(hasVariantId).toBeFalsy();
-  }
+  },
 );

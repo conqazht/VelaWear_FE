@@ -42,24 +42,24 @@ dependency drift là an toàn.
 
 ## Thứ tự thực hiện và trạng thái
 
-| ID | Kế hoạch tiếng Việt | Branch | Priority | Effort | Dependency | Wave | Status canonical |
-|---|---|---|---:|---:|---|---:|---|
-| FE-001 | [Chuyển sang customer API self-scoped](vi/001-migrate-to-self-scoped-customer-apis.vi.md) | `fix/self-scoped-customer-apis` | P1 | L | BE-001 | 1 | [xem English index](README.md#execution-order-and-status) |
-| FE-002 | [Bảo toàn review multipart request](vi/002-preserve-review-multipart-requests.vi.md) | `fix/review-multipart-transport` | P1 | M | FE-001 | 2 | [xem English index](README.md#execution-order-and-status) |
-| FE-003 | [Cô lập cart theo account và harden logout](vi/003-isolate-cart-by-account-and-harden-logout.vi.md) | `fix/cart-session-isolation` | P1 | L | FE-002 | 2 | [xem English index](README.md#execution-order-and-status) |
-| FE-004 | [Hợp nhất account settings và hydration](vi/004-consolidate-account-settings-and-hydration.vi.md) | `fix/account-settings-integrity` | P1 | L | FE-001 | 2 | [xem English index](README.md#execution-order-and-status) |
-| FE-005 | [Tuân thủ rate-limit Retry-After](vi/005-honor-rate-limit-retry-after.vi.md) | `fix/rate-limit-retry-after` | P2 | M | FE-003 và BE-005 | 2 | [xem English index](README.md#execution-order-and-status) |
-| FE-006 | [Giới hạn shop provider vào shop route](vi/006-scope-shop-providers-to-shop-routes.vi.md) | `perf/shop-provider-scope` | P2 | M | FE-003 | 3 | [xem English index](README.md#execution-order-and-status) |
-| FE-007 | [Dùng wishlist product summary](vi/007-consume-wishlist-product-summaries.vi.md) | `perf/wishlist-summary-client` | P2 | M | FE-006 và BE-009 | 3 | [xem English index](README.md#execution-order-and-status) |
-| FE-008 | [Load profile data theo nhu cầu](vi/008-load-profile-data-on-demand.vi.md) | `perf/profile-demand-loading` | P2 | M | FE-001, FE-004 | 3 | [xem English index](README.md#execution-order-and-status) |
-| FE-009 | [Characterization hành vi profile page](vi/009-characterize-profile-page-behavior.vi.md) | `test/profile-characterization` | P2 | M | FE-004, FE-008 | 4 | [xem English index](README.md#execution-order-and-status) |
-| FE-010 | [Tách nhỏ profile page](vi/010-decompose-profile-page.vi.md) | `refactor/profile-page` | P3 | L | FE-009 | 4 | [xem English index](README.md#execution-order-and-status) |
-| FE-011 | [Tách i18n message namespace](vi/011-split-i18n-message-namespaces.vi.md) | `perf/i18n-message-splitting` | P3 | L | FE-001–FE-010 | 5 | [xem English index](README.md#execution-order-and-status) |
-| FE-012 | [Dọn dependency và tài liệu Frontend](vi/012-clean-frontend-dependencies-and-docs.vi.md) | `chore/frontend-maintenance-docs` | P3 | M | FE-001–FE-011 và external BE-015 | 5 | [xem English index](README.md#execution-order-and-status) |
-| FE-013 | [Hợp nhất CSS animation token dùng chung](013-consolidate-animation-tokens.md) | `feat/storefront-animations` | P2 | S | FE-012 | 6 | [xem English index](README.md#execution-order-and-status) |
-| FE-014 | [Thêm hiệu ứng spring pop cho icon Yêu thích](014-product-detail-favorite-spring.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | [xem English index](README.md#execution-order-and-status) |
-| FE-015 | [Thêm thanh chuyển tab trượt trên trang Profile](015-profile-tab-layout-indicator.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | [xem English index](README.md#execution-order-and-status) |
-| FE-016 | [Thêm fallback tuân thủ reduced motion cho editorial craft](016-editorial-craft-reduced-motion.md) | `feat/storefront-animations` | P2 | S | FE-013 | 6 | [xem English index](README.md#execution-order-and-status) |
+| ID     | Kế hoạch tiếng Việt                                                                                 | Branch                            | Priority | Effort | Dependency                       | Wave | Status canonical                                          |
+| ------ | --------------------------------------------------------------------------------------------------- | --------------------------------- | -------: | -----: | -------------------------------- | ---: | --------------------------------------------------------- |
+| FE-001 | [Chuyển sang customer API self-scoped](vi/001-migrate-to-self-scoped-customer-apis.vi.md)           | `fix/self-scoped-customer-apis`   |       P1 |      L | BE-001                           |    1 | [xem English index](README.md#execution-order-and-status) |
+| FE-002 | [Bảo toàn review multipart request](vi/002-preserve-review-multipart-requests.vi.md)                | `fix/review-multipart-transport`  |       P1 |      M | FE-001                           |    2 | [xem English index](README.md#execution-order-and-status) |
+| FE-003 | [Cô lập cart theo account và harden logout](vi/003-isolate-cart-by-account-and-harden-logout.vi.md) | `fix/cart-session-isolation`      |       P1 |      L | FE-002                           |    2 | [xem English index](README.md#execution-order-and-status) |
+| FE-004 | [Hợp nhất account settings và hydration](vi/004-consolidate-account-settings-and-hydration.vi.md)   | `fix/account-settings-integrity`  |       P1 |      L | FE-001                           |    2 | [xem English index](README.md#execution-order-and-status) |
+| FE-005 | [Tuân thủ rate-limit Retry-After](vi/005-honor-rate-limit-retry-after.vi.md)                        | `fix/rate-limit-retry-after`      |       P2 |      M | FE-003 và BE-005                 |    2 | [xem English index](README.md#execution-order-and-status) |
+| FE-006 | [Giới hạn shop provider vào shop route](vi/006-scope-shop-providers-to-shop-routes.vi.md)           | `perf/shop-provider-scope`        |       P2 |      M | FE-003                           |    3 | [xem English index](README.md#execution-order-and-status) |
+| FE-007 | [Dùng wishlist product summary](vi/007-consume-wishlist-product-summaries.vi.md)                    | `perf/wishlist-summary-client`    |       P2 |      M | FE-006 và BE-009                 |    3 | [xem English index](README.md#execution-order-and-status) |
+| FE-008 | [Load profile data theo nhu cầu](vi/008-load-profile-data-on-demand.vi.md)                          | `perf/profile-demand-loading`     |       P2 |      M | FE-001, FE-004                   |    3 | [xem English index](README.md#execution-order-and-status) |
+| FE-009 | [Characterization hành vi profile page](vi/009-characterize-profile-page-behavior.vi.md)            | `test/profile-characterization`   |       P2 |      M | FE-004, FE-008                   |    4 | [xem English index](README.md#execution-order-and-status) |
+| FE-010 | [Tách nhỏ profile page](vi/010-decompose-profile-page.vi.md)                                        | `refactor/profile-page`           |       P3 |      L | FE-009                           |    4 | [xem English index](README.md#execution-order-and-status) |
+| FE-011 | [Tách i18n message namespace](vi/011-split-i18n-message-namespaces.vi.md)                           | `perf/i18n-message-splitting`     |       P3 |      L | FE-001–FE-010                    |    5 | [xem English index](README.md#execution-order-and-status) |
+| FE-012 | [Dọn dependency và tài liệu Frontend](vi/012-clean-frontend-dependencies-and-docs.vi.md)            | `chore/frontend-maintenance-docs` |       P3 |      M | FE-001–FE-011 và external BE-015 |    5 | [xem English index](README.md#execution-order-and-status) |
+| FE-013 | [Hợp nhất CSS animation token dùng chung](013-consolidate-animation-tokens.md)                      | `feat/storefront-animations`      |       P2 |      S | FE-012                           |    6 | [xem English index](README.md#execution-order-and-status) |
+| FE-014 | [Thêm hiệu ứng spring pop cho icon Yêu thích](014-product-detail-favorite-spring.md)                | `feat/storefront-animations`      |       P3 |      S | FE-013                           |    6 | [xem English index](README.md#execution-order-and-status) |
+| FE-015 | [Thêm thanh chuyển tab trượt trên trang Profile](015-profile-tab-layout-indicator.md)               | `feat/storefront-animations`      |       P3 |      S | FE-013                           |    6 | [xem English index](README.md#execution-order-and-status) |
+| FE-016 | [Thêm fallback tuân thủ reduced motion cho editorial craft](016-editorial-craft-reduced-motion.md)  | `feat/storefront-animations`      |       P2 |      S | FE-013                           |    6 | [xem English index](README.md#execution-order-and-status) |
 
 Xem trạng thái `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED` hoặc `REJECTED` tại
 index tiếng Anh canonical.
@@ -76,14 +76,14 @@ Phần authorization phải đi theo thứ tự **expand → migrate → revoke*
 
 ## Các wave
 
-| Wave | Thứ tự | Checkpoint bắt buộc |
-|---:|---|---|
-| 0 | PR plan Backend → PR plan Frontend | Cả hai đã merge; hai `main` clean và đồng bộ |
-| 1 | BE-001 → FE-001 → BE-002 | Backend verify, Frontend CI suite, full-stack ownership smoke |
-| 2 | FE-002 → BE-003 → FE-003 → BE-004 → BE-005 → FE-004 → FE-005 | Backend verify, Frontend CI suite, full-stack security/correctness smoke |
-| 3 | BE-006 → BE-007 → BE-008 → BE-009 → FE-006 → FE-007 → FE-008 | Full test, full-stack smoke, query-count assertions |
-| 4 | BE-010 → BE-011 → BE-012 → BE-013 → BE-014 → FE-009 → FE-010 | Full regression và full-stack smoke |
-| 5 | FE-011 → BE-015 → FE-012 | Final Backend verify, Frontend CI suite, full-stack smoke |
+| Wave | Thứ tự                                                       | Checkpoint bắt buộc                                                      |
+| ---: | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+|    0 | PR plan Backend → PR plan Frontend                           | Cả hai đã merge; hai `main` clean và đồng bộ                             |
+|    1 | BE-001 → FE-001 → BE-002                                     | Backend verify, Frontend CI suite, full-stack ownership smoke            |
+|    2 | FE-002 → BE-003 → FE-003 → BE-004 → BE-005 → FE-004 → FE-005 | Backend verify, Frontend CI suite, full-stack security/correctness smoke |
+|    3 | BE-006 → BE-007 → BE-008 → BE-009 → FE-006 → FE-007 → FE-008 | Full test, full-stack smoke, query-count assertions                      |
+|    4 | BE-010 → BE-011 → BE-012 → BE-013 → BE-014 → FE-009 → FE-010 | Full regression và full-stack smoke                                      |
+|    5 | FE-011 → BE-015 → FE-012                                     | Final Backend verify, Frontend CI suite, full-stack smoke                |
 
 ## Preflight trước mỗi PR
 

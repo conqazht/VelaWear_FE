@@ -1,9 +1,4 @@
-import {
-  expect,
-  test as base,
-  type Request,
-  type Route,
-} from "@playwright/test";
+import { expect, test as base, type Request, type Route } from "@playwright/test";
 
 type SmokeFixtures = {
   guestApi: void;
@@ -124,9 +119,7 @@ export const test = base.extend<SmokeFixtures>({
         }
       });
       page.on("pageerror", (error) => pageErrors.push(error.message));
-      await page.route("**/api/v1/**", (route) =>
-        fulfillGuestApi(route, unexpectedApiRequests)
-      );
+      await page.route("**/api/v1/**", (route) => fulfillGuestApi(route, unexpectedApiRequests));
 
       await use();
 

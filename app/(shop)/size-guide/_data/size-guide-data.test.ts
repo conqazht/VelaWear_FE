@@ -37,6 +37,8 @@ describe("size guide reference data", () => {
     expect(url.pathname).toBe("/size-guide");
     expect(url.searchParams.get("category")).toBe("ao");
     expect(url.searchParams.get("size")).toBe("M");
-    expect(parseAvailableSizes(url.searchParams.get("available"))).toEqual(new Set(["S", "M", "L"]));
+    expect(parseAvailableSizes(url.searchParams.get("available"))).toEqual(
+      new Set(["S", "M", "L"]),
+    );
   });
 });

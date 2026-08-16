@@ -38,8 +38,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { getIntlLocale } from "@/lib/i18n";
 
 import { useRecentCustomersColumns } from "./columns";
@@ -123,8 +137,10 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
 
   const searchQuery = (table.getColumn("search")?.getFilterValue() as string | undefined) ?? "";
   const statusFilter = (table.getColumn("status")?.getFilterValue() as string | undefined) ?? "all";
-  const billingFilter = (table.getColumn("billing")?.getFilterValue() as string | undefined) ?? "all";
-  const joinedDateFilter = (table.getColumn("joinedWindow")?.getFilterValue() as string | undefined) ?? "all";
+  const billingFilter =
+    (table.getColumn("billing")?.getFilterValue() as string | undefined) ?? "all";
+  const joinedDateFilter =
+    (table.getColumn("joinedWindow")?.getFilterValue() as string | undefined) ?? "all";
   const sortValue = React.useMemo(() => {
     const currentSort = sorting[0];
 
@@ -142,7 +158,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative w-full lg:w-80">
-            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
             <Input
               className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
               placeholder={t("admin.dashboardsA.default.searchCustomers")}
@@ -183,7 +199,9 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
               <DropdownMenuRadioGroup
                 value={joinedDateFilter}
                 onValueChange={(value) => {
-                  table.getColumn("joinedWindow")?.setFilterValue(value === "all" ? undefined : value);
+                  table
+                    .getColumn("joinedWindow")
+                    ?.setFilterValue(value === "all" ? undefined : value);
                   table.setPageIndex(0);
                 }}
               >
@@ -227,7 +245,10 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
               <DropdownMenuRadioGroup
                 value={sortValue}
                 onValueChange={(value) => {
-                  table.setSorting(sortOptionState[value as keyof typeof sortOptionState] ?? sortOptionState.newest);
+                  table.setSorting(
+                    sortOptionState[value as keyof typeof sortOptionState] ??
+                      sortOptionState.newest,
+                  );
                   table.setPageIndex(0);
                 }}
               >
@@ -242,14 +263,20 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-card">
+      <div className="bg-card overflow-hidden rounded-lg border">
         <Table>
           <TableHeader className="bg-muted/15">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan} className="h-11 p-3 font-medium">
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className="h-11 p-3 font-medium"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -268,7 +295,10 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
+                <TableCell
+                  colSpan={table.getVisibleLeafColumns().length}
+                  className="h-24 text-center"
+                >
                   {t("admin.dashboardsA.common.noResults")}
                 </TableCell>
               </TableRow>
@@ -278,7 +308,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
       </div>
 
       <div className="flex items-center justify-between px-1">
-        <div className="hidden flex-1 text-muted-foreground text-sm lg:flex">
+        <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
           {t("admin.dashboardsA.common.selectedRows", {
             selected: numberFormatter.format(table.getFilteredSelectedRowModel().rows.length),
             total: numberFormatter.format(table.getFilteredRowModel().rows.length),
@@ -286,7 +316,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
         </div>
         <div className="flex w-full items-center gap-8 lg:w-fit">
           <div className="hidden items-center gap-2 lg:flex">
-            <Label htmlFor="recent-customers-rows-per-page" className="font-medium text-sm">
+            <Label htmlFor="recent-customers-rows-per-page" className="text-sm font-medium">
               {t("admin.dashboardsA.common.rowsPerPage")}
             </Label>
             <Select
@@ -310,7 +340,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-fit items-center justify-center font-medium text-sm">
+          <div className="flex w-fit items-center justify-center text-sm font-medium">
             {t("admin.dashboardsA.common.pageOf", {
               page: numberFormatter.format(table.getState().pagination.pageIndex + 1),
               total: numberFormatter.format(table.getPageCount()),

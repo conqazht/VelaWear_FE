@@ -57,9 +57,7 @@ export function Roles() {
     sort: "createdAt,desc",
     ...(searchValue.trim() ? { [searchField]: searchValue.trim() } : {}),
   });
-  const roleDetailQuery = useAdminRoleQuery(
-    formMode === "edit" ? activeRole?.id : undefined
-  );
+  const roleDetailQuery = useAdminRoleQuery(formMode === "edit" ? activeRole?.id : undefined);
   const createMutation = useCreateAdminRoleMutation();
   const updateMutation = useUpdateAdminRoleMutation();
   const deleteMutation = useDeleteAdminRoleMutation();
@@ -181,35 +179,35 @@ export function Roles() {
 
         return (
           <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t("admin.commerce.common.openActions", { name: role.name })}
-              />
-            }
-          >
-            <MoreHorizontal />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => openEdit(role)}>
-                <Pencil /> {t("admin.commerce.roles.editInspect")}
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={isProtectedRole}
-              onClick={() => setDeleteTarget(role)}
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("admin.commerce.common.openActions", { name: role.name })}
+                />
+              }
             >
-              <Trash2 />
-              {isProtectedRole
-                ? t("admin.commerce.roles.protected")
-                : t("admin.commerce.roles.delete")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+              <MoreHorizontal />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => openEdit(role)}>
+                  <Pencil /> {t("admin.commerce.roles.editInspect")}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isProtectedRole}
+                onClick={() => setDeleteTarget(role)}
+              >
+                <Trash2 />
+                {isProtectedRole
+                  ? t("admin.commerce.roles.protected")
+                  : t("admin.commerce.roles.delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         );
       },
@@ -259,13 +257,16 @@ export function Roles() {
         primaryAction={{ label: t("admin.commerce.roles.create"), onClick: openCreate, icon: Plus }}
         onRefresh={() => void rolesQuery.refetch()}
         onExport={() =>
-          downloadCsv("vela-roles.csv", rows.map((role) => ({
-            id: role.id,
-            name: role.name,
-            description: role.description,
-            createdAt: role.createdAt,
-            updatedAt: role.updatedAt,
-          })))
+          downloadCsv(
+            "vela-roles.csv",
+            rows.map((role) => ({
+              id: role.id,
+              name: role.name,
+              description: role.description,
+              createdAt: role.createdAt,
+              updatedAt: role.updatedAt,
+            })),
+          )
         }
         isLoading={rolesQuery.isPending}
         isFetching={rolesQuery.isFetching}

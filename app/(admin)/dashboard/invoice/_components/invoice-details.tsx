@@ -73,7 +73,15 @@ export function InvoiceDetails() {
   );
 }
 
-function DatePicker({ id, value, onChange }: { id: string; value: string; onChange: (value: string) => void }) {
+function DatePicker({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   const { locale, t } = useI18n();
   const [open, setOpen] = React.useState(false);
   const date = parseDateValue(value);
@@ -93,7 +101,7 @@ function DatePicker({ id, value, onChange }: { id: string; value: string; onChan
             id={id}
             variant="outline"
             data-empty={!date}
-            className="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
+            className="data-[empty=true]:text-muted-foreground w-full justify-between text-left font-normal"
           />
         }
       >

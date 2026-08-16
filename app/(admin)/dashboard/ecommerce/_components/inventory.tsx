@@ -4,13 +4,21 @@ import { ArrowUpRight, PackageCheck, PackageX, TriangleAlert } from "lucide-reac
 import { Label, Pie, PieChart } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { Separator } from "@/components/ui/separator";
 import { getIntlLocale } from "@/lib/i18n";
 
 const chartData = [{ month: "current", "in-stock": 760, "low-stock": 320, "out-of-stock": 160 }];
-const totalUnits = chartData[0]["in-stock"] + chartData[0]["low-stock"] + chartData[0]["out-of-stock"];
+const totalUnits =
+  chartData[0]["in-stock"] + chartData[0]["low-stock"] + chartData[0]["out-of-stock"];
 const availablePercent = Math.round((chartData[0]["in-stock"] / totalUnits) * 100);
 const gaugeSegmentCount = 32;
 const inStockSegments = Math.round((chartData[0]["in-stock"] / totalUnits) * gaugeSegmentCount);
@@ -79,10 +87,10 @@ export function Inventory() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">
+        <CardTitle className="text-muted-foreground text-sm font-normal">
           {t("admin.dashboardsA.ecommerce.inventory")}
         </CardTitle>
-        <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
+        <CardDescription className="text-foreground text-xl leading-none tracking-tight tabular-nums">
           {t("admin.dashboardsA.ecommerce.availablePercent", { percent: availableLabel })}
         </CardDescription>
         <CardAction>
@@ -112,13 +120,17 @@ export function Inventory() {
                     return (
                       <text textAnchor="middle" x={viewBox.cx} y={viewBox.cy}>
                         <tspan
-                          className="fill-foreground font-medium text-2xl tabular-nums"
+                          className="fill-foreground text-2xl font-medium tabular-nums"
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 22}
                         >
                           {availableLabel}
                         </tspan>
-                        <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy || 0) + 38}>
+                        <tspan
+                          className="fill-muted-foreground text-xs"
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 38}
+                        >
                           {t("admin.dashboardsA.ecommerce.available")}
                         </tspan>
                       </text>
@@ -134,12 +146,14 @@ export function Inventory() {
         <div className="grid grid-cols-3 divide-x">
           {inventorySummary.map((item) => (
             <div key={item.label} className="flex flex-col items-center gap-3 text-center">
-              <div className="grid size-9 place-items-center rounded-full bg-muted">
-                <item.icon className="size-4 text-muted-foreground" />
+              <div className="bg-muted grid size-9 place-items-center rounded-full">
+                <item.icon className="text-muted-foreground size-4" />
               </div>
               <div>
                 <div className="text-muted-foreground text-xs leading-none">{item.label}</div>
-                <div className="font-medium text-sm tabular-nums">{numberFormatter.format(item.value)}</div>
+                <div className="text-sm font-medium tabular-nums">
+                  {numberFormatter.format(item.value)}
+                </div>
               </div>
             </div>
           ))}

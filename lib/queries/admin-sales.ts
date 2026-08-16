@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   cancelAdminSaleCampaign,
@@ -34,16 +30,13 @@ import { invalidatePublicQueries } from "@/lib/queries/public-cache";
 export const adminSalesQueryKeys = {
   root: ["admin-sales"] as const,
   lists: ["admin-sales", "list"] as const,
-  list: (params: AdminSaleCampaignListParams) =>
-    ["admin-sales", "list", params] as const,
+  list: (params: AdminSaleCampaignListParams) => ["admin-sales", "list", params] as const,
   details: ["admin-sales", "detail"] as const,
   detail: (id: number) => ["admin-sales", "detail", id] as const,
   translations: (id: number) => ["admin-sales", "detail", id, "translations"] as const,
 };
 
-export function useAdminSaleCampaignsQuery(
-  params: AdminSaleCampaignListParams,
-) {
+export function useAdminSaleCampaignsQuery(params: AdminSaleCampaignListParams) {
   return useQuery({
     queryKey: adminSalesQueryKeys.list(params),
     queryFn: () => getAdminSaleCampaigns(params),
@@ -125,8 +118,7 @@ export function useCreateAdminSaleCampaignMutation() {
   const invalidate = useInvalidateAdminSales();
 
   return useMutation({
-    mutationFn: (request: CreateAdminSaleCampaignRequest) =>
-      createAdminSaleCampaign(request),
+    mutationFn: (request: CreateAdminSaleCampaignRequest) => createAdminSaleCampaign(request),
     onSuccess: async (campaign) => invalidate(campaign.id),
   });
 }
@@ -135,13 +127,8 @@ export function useUpdateAdminSaleCampaignMutation() {
   const invalidate = useInvalidateAdminSales();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      request,
-    }: {
-      id: number;
-      request: UpdateAdminSaleCampaignRequest;
-    }) => updateAdminSaleCampaign(id, request),
+    mutationFn: ({ id, request }: { id: number; request: UpdateAdminSaleCampaignRequest }) =>
+      updateAdminSaleCampaign(id, request),
     onSuccess: async (campaign) => invalidate(campaign.id),
   });
 }
@@ -179,13 +166,8 @@ export function useUpdateAdminSaleDisplayMutation() {
   const invalidate = useInvalidateAdminSales();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      request,
-    }: {
-      id: number;
-      request: UpdateAdminSaleDisplayRequest;
-    }) => updateAdminSaleDisplay(id, request),
+    mutationFn: ({ id, request }: { id: number; request: UpdateAdminSaleDisplayRequest }) =>
+      updateAdminSaleDisplay(id, request),
     onSuccess: async (campaign) => invalidate(campaign.id),
   });
 }

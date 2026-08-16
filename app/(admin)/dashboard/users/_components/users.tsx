@@ -4,9 +4,7 @@ import { useState } from "react";
 import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  DeleteResourceDialog,
-} from "@/app/(admin)/dashboard/_components/management/resource-overlays";
+import { DeleteResourceDialog } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
   ResourcePage,
   type ManagementColumn,
@@ -55,8 +53,7 @@ function resolveAvatarUrl(value: string | null) {
   if (!value) return undefined;
   if (/^https?:\/\//i.test(value)) return value;
   if (value.startsWith("/uploads/") || value.startsWith("uploads/")) {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
     const backendOrigin = apiUrl.replace(/\/api\/v1\/?$/, "");
     return `${backendOrigin}/${value.replace(/^\//, "")}`;
   }
@@ -67,7 +64,9 @@ function RoleBadges({ user }: { user: AdminUser }) {
   const { t } = useI18n();
 
   if (user.roles.length === 0) {
-    return <span className="text-muted-foreground text-sm">{t("admin.commerce.users.noRoles")}</span>;
+    return (
+      <span className="text-muted-foreground text-sm">{t("admin.commerce.users.noRoles")}</span>
+    );
   }
 
   return (
@@ -77,9 +76,7 @@ function RoleBadges({ user }: { user: AdminUser }) {
           {role.name}
         </Badge>
       ))}
-      {user.roles.length > 2 ? (
-        <Badge variant="outline">+{user.roles.length - 2}</Badge>
-      ) : null}
+      {user.roles.length > 2 ? <Badge variant="outline">+{user.roles.length - 2}</Badge> : null}
     </div>
   );
 }
@@ -101,9 +98,7 @@ export function Users() {
     page,
     size: pageSize,
     sort: "createdAt,desc",
-    ...(searchValue.trim()
-      ? { [searchField]: searchValue.trim() }
-      : {}),
+    ...(searchValue.trim() ? { [searchField]: searchValue.trim() } : {}),
     ...(gender === "ALL" ? {} : { gender }),
   });
   const rolesQuery = useAdminRolesQuery({
@@ -124,9 +119,7 @@ export function Users() {
     total: 0,
   };
   const isFormPending =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    updateRolesMutation.isPending;
+    createMutation.isPending || updateMutation.isPending || updateRolesMutation.isPending;
 
   function openCreate() {
     setActiveUser(null);
@@ -167,7 +160,9 @@ export function Users() {
             request: { roles: values.roles },
           });
           toast.success(t("admin.commerce.users.created"), {
-            description: t("admin.commerce.users.createdDescription", { name: createdUser.fullName }),
+            description: t("admin.commerce.users.createdDescription", {
+              name: createdUser.fullName,
+            }),
           });
         } catch (error) {
           toast.warning(t("admin.commerce.users.createdWithoutRoles"), {
@@ -236,9 +231,7 @@ export function Users() {
       cell: (user) => (
         <div className="flex min-w-64 items-center gap-3">
           <Avatar size="lg">
-            {user.avatar ? (
-              <AvatarImage src={resolveAvatarUrl(user.avatar)} alt="" />
-            ) : null}
+            {user.avatar ? <AvatarImage src={resolveAvatarUrl(user.avatar)} alt="" /> : null}
             <AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
@@ -257,9 +250,7 @@ export function Users() {
       key: "gender",
       header: t("admin.commerce.users.column.gender"),
       cell: (user) => (
-        <span className="text-sm">
-          {user.gender ? t(GENDER_MESSAGE_KEYS[user.gender]) : "—"}
-        </span>
+        <span className="text-sm">{user.gender ? t(GENDER_MESSAGE_KEYS[user.gender]) : "—"}</span>
       ),
     },
     {
@@ -277,9 +268,7 @@ export function Users() {
       key: "birthDate",
       header: t("admin.commerce.users.column.birthDate"),
       cell: (user) => (
-        <span className="text-sm">
-          {user.birthDate ? formatDate(user.birthDate, locale) : "—"}
-        </span>
+        <span className="text-sm">{user.birthDate ? formatDate(user.birthDate, locale) : "—"}</span>
       ),
     },
     {
@@ -385,18 +374,21 @@ export function Users() {
         primaryAction={{ label: t("admin.commerce.users.add"), onClick: openCreate, icon: Plus }}
         onRefresh={() => void usersQuery.refetch()}
         onExport={() =>
-          downloadCsv("vela-users.csv", rows.map((user) => ({
-            id: user.id,
-            fullName: user.fullName,
-            email: user.email,
-            gender: user.gender,
-            birthDate: user.birthDate,
-            roles: user.roles.map((role) => role.name).join(" | "),
-            hasPassword: user.hasPassword
-              ? t("admin.commerce.users.csvYes")
-              : t("admin.commerce.users.csvNo"),
-            createdAt: user.createdAt,
-          })))
+          downloadCsv(
+            "vela-users.csv",
+            rows.map((user) => ({
+              id: user.id,
+              fullName: user.fullName,
+              email: user.email,
+              gender: user.gender,
+              birthDate: user.birthDate,
+              roles: user.roles.map((role) => role.name).join(" | "),
+              hasPassword: user.hasPassword
+                ? t("admin.commerce.users.csvYes")
+                : t("admin.commerce.users.csvNo"),
+              createdAt: user.createdAt,
+            })),
+          )
         }
         isLoading={usersQuery.isPending}
         isFetching={usersQuery.isFetching}

@@ -64,8 +64,14 @@ describe("catalog-audit", () => {
 
   it("verifies layout imports according to catalog splitting rules", () => {
     const rootLayout = fs.readFileSync(path.resolve(process.cwd(), "app/layout.tsx"), "utf-8");
-    const shopLayout = fs.readFileSync(path.resolve(process.cwd(), "app/(shop)/layout.tsx"), "utf-8");
-    const adminLayout = fs.readFileSync(path.resolve(process.cwd(), "app/(admin)/layout.tsx"), "utf-8");
+    const shopLayout = fs.readFileSync(
+      path.resolve(process.cwd(), "app/(shop)/layout.tsx"),
+      "utf-8",
+    );
+    const adminLayout = fs.readFileSync(
+      path.resolve(process.cwd(), "app/(admin)/layout.tsx"),
+      "utf-8",
+    );
 
     // Root layout should not import shop or admin catalogs
     expect(rootLayout).not.toMatch(/shopMessages|adminMessages|catalogShop|catalogAdmin/);

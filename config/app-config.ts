@@ -8,7 +8,6 @@ export const APP_CONFIG = {
   copyright: `© ${currentYear}, Vela Wear.`,
   meta: {
     title: "Vela Wear Admin",
-    description:
-      "Administration workspace for Vela Wear commerce operations.",
+    description: "Administration workspace for Vela Wear commerce operations.",
   },
 };

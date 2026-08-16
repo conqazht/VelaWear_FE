@@ -11,7 +11,8 @@ export const customerActivityMessages = defineMessages(
     "coupons.stat.expiring": "Expiring soon",
     "coupons.resource": "coupons",
     "coupons.emptyTitle": "No coupons available",
-    "coupons.emptyDescription": "You do not have any coupons yet. Check back regularly or shop to receive new offers.",
+    "coupons.emptyDescription":
+      "You do not have any coupons yet. Check back regularly or shop to receive new offers.",
     "coupons.explore": "Explore products",
     "coupons.status.available": "Available",
     "coupons.status.inactive": "Inactive",
@@ -40,7 +41,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.count": "Reviews written: {count}",
     "reviews.resource": "your reviews",
     "reviews.emptyTitle": "No reviews yet",
-    "reviews.emptyDescription": "You have not reviewed a product yet. Shop with Vela Wear and share your experience.",
+    "reviews.emptyDescription":
+      "You have not reviewed a product yet. Shop with Vela Wear and share your experience.",
     "reviews.shopNow": "Shop now",
     "reviews.viewProduct": "View product {product}",
     "reviews.order": "Order",
@@ -53,7 +55,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.allTitle": "Reviews for {product}",
     "reviews.allDescription": "Read verified customer experiences and filter the full review list.",
     "reviews.summaryResource": "review summary",
-    "reviews.staleSummary": "The review summary could not be refreshed. Showing the latest saved data.",
+    "reviews.staleSummary":
+      "The review summary could not be refreshed. Showing the latest saved data.",
     "reviews.staleList": "Reviews could not be refreshed. Showing the latest saved data.",
     "reviews.total": "{count} reviews",
     "reviews.distribution": "Rating distribution",
@@ -92,7 +95,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.write.imageCountError": "You can upload no more than 5 images.",
     "reviews.write.imageTypeError": "{file} is not a supported JPG, PNG or WebP image.",
     "reviews.write.imageSizeError": "{file} is larger than 5 MB.",
-    "reviews.write.submitError": "Your review could not be submitted. Your input has been kept; please try again.",
+    "reviews.write.submitError":
+      "Your review could not be submitted. Your input has been kept; please try again.",
     "reviews.write.cancel": "Cancel",
     "reviews.write.submit": "Submit review",
     "reviews.write.submitting": "Submitting…",
@@ -111,7 +115,8 @@ export const customerActivityMessages = defineMessages(
     "coupons.stat.expiring": "Sắp hết hạn",
     "coupons.resource": "mã giảm giá",
     "coupons.emptyTitle": "Không có mã giảm giá",
-    "coupons.emptyDescription": "Hiện tại bạn chưa có mã giảm giá nào. Hãy thường xuyên kiểm tra hoặc mua sắm để nhận thêm ưu đãi.",
+    "coupons.emptyDescription":
+      "Hiện tại bạn chưa có mã giảm giá nào. Hãy thường xuyên kiểm tra hoặc mua sắm để nhận thêm ưu đãi.",
     "coupons.explore": "Khám phá sản phẩm",
     "coupons.status.available": "Khả dụng",
     "coupons.status.inactive": "Không hoạt động",
@@ -140,7 +145,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.count": "Bạn đã viết {count} đánh giá",
     "reviews.resource": "đánh giá của bạn",
     "reviews.emptyTitle": "Chưa có đánh giá nào",
-    "reviews.emptyDescription": "Bạn chưa có bài đánh giá sản phẩm nào. Hãy mua sắm và chia sẻ trải nghiệm của bạn với Vela Wear.",
+    "reviews.emptyDescription":
+      "Bạn chưa có bài đánh giá sản phẩm nào. Hãy mua sắm và chia sẻ trải nghiệm của bạn với Vela Wear.",
     "reviews.shopNow": "Mua sắm ngay",
     "reviews.viewProduct": "Xem sản phẩm {product}",
     "reviews.order": "Đơn hàng",
@@ -153,7 +159,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.allTitle": "Đánh giá về {product}",
     "reviews.allDescription": "Xem trải nghiệm của khách đã mua và lọc toàn bộ danh sách đánh giá.",
     "reviews.summaryResource": "tổng quan đánh giá",
-    "reviews.staleSummary": "Không thể làm mới tổng quan đánh giá. Đang hiển thị dữ liệu đã lưu gần nhất.",
+    "reviews.staleSummary":
+      "Không thể làm mới tổng quan đánh giá. Đang hiển thị dữ liệu đã lưu gần nhất.",
     "reviews.staleList": "Không thể làm mới đánh giá. Đang hiển thị dữ liệu đã lưu gần nhất.",
     "reviews.total": "{count} đánh giá",
     "reviews.distribution": "Phân bố số sao",
@@ -182,7 +189,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.write.ratingValue": "{rating} sao",
     "reviews.write.ratingError": "Vui lòng chọn từ 1 đến 5 sao.",
     "reviews.write.commentLabel": "Nội dung đánh giá",
-    "reviews.write.commentPlaceholder": "Form dáng, chất liệu và trải nghiệm tổng thể của bạn thế nào?",
+    "reviews.write.commentPlaceholder":
+      "Form dáng, chất liệu và trải nghiệm tổng thể của bạn thế nào?",
     "reviews.write.commentError": "Nội dung đánh giá không được vượt quá 1.000 ký tự.",
     "reviews.write.imagesLabel": "Ảnh đính kèm (không bắt buộc)",
     "reviews.write.imagesHelp": "Tối đa 5 ảnh JPG, PNG hoặc WebP; mỗi ảnh không quá 5 MB.",
@@ -192,7 +200,8 @@ export const customerActivityMessages = defineMessages(
     "reviews.write.imageCountError": "Bạn chỉ có thể tải lên tối đa 5 ảnh.",
     "reviews.write.imageTypeError": "{file} không phải ảnh JPG, PNG hoặc WebP được hỗ trợ.",
     "reviews.write.imageSizeError": "{file} có dung lượng lớn hơn 5 MB.",
-    "reviews.write.submitError": "Chưa thể gửi đánh giá. Nội dung đã nhập vẫn được giữ nguyên; vui lòng thử lại.",
+    "reviews.write.submitError":
+      "Chưa thể gửi đánh giá. Nội dung đã nhập vẫn được giữ nguyên; vui lòng thử lại.",
     "reviews.write.cancel": "Hủy",
     "reviews.write.submit": "Gửi đánh giá",
     "reviews.write.submitting": "Đang gửi…",

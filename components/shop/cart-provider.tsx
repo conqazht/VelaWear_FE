@@ -28,9 +28,7 @@ type LocalizedCartCopy = {
 
 function getPersistableCartItems(cart: CartItem[]) {
   return cart.flatMap((item) =>
-    item.variantId === undefined
-      ? []
-      : [{ variantId: item.variantId, quantity: item.quantity }]
+    item.variantId === undefined ? [] : [{ variantId: item.variantId, quantity: item.quantity }],
   );
 }
 
@@ -52,19 +50,14 @@ function mapServerCartItems(serverCart: ApiCart, locale: Locale): CartItem[] {
           : Number(item.listPrice ?? pricing?.listPrice),
       priceSource: pricing?.priceSource ?? item.priceSource,
       campaignId: pricing?.campaignId ?? item.campaignId ?? undefined,
-      campaignItemId:
-        pricing?.campaignItemId ?? item.campaignItemId ?? undefined,
+      campaignItemId: pricing?.campaignItemId ?? item.campaignItemId ?? undefined,
       campaignCode: pricing?.campaignCode ?? item.campaignCode ?? undefined,
       campaignName: pricing?.campaignName ?? item.campaignName ?? undefined,
       campaignEndsAt: pricing?.endsAt ?? item.campaignEndsAt ?? undefined,
-      remainingQuota:
-        pricing?.remainingQuota ?? item.remainingQuota ?? undefined,
-      maxPerCustomer:
-        pricing?.maxPerCustomer ?? item.maxPerCustomer ?? undefined,
-      customerRemaining:
-        pricing?.customerRemaining ?? item.customerRemaining ?? undefined,
-      availableQuantity:
-        pricing?.availableQuantity ?? item.availableQuantity ?? undefined,
+      remainingQuota: pricing?.remainingQuota ?? item.remainingQuota ?? undefined,
+      maxPerCustomer: pricing?.maxPerCustomer ?? item.maxPerCustomer ?? undefined,
+      customerRemaining: pricing?.customerRemaining ?? item.customerRemaining ?? undefined,
+      availableQuantity: pricing?.availableQuantity ?? item.availableQuantity ?? undefined,
       color: item.color ?? defaultLabel,
       size: item.size ?? defaultLabel,
       image: resolveImageUrl(item.image),
@@ -87,14 +80,12 @@ function indexCartByVariant(cart: CartItem[]) {
 function mergeServerCartWithLatestState(
   serverItems: CartItem[],
   cartAtRequestStart: CartItem[],
-  latestCart: CartItem[]
+  latestCart: CartItem[],
 ) {
   const initialItemsByVariant = indexCartByVariant(cartAtRequestStart);
   const latestItemsByVariant = indexCartByVariant(latestCart);
   const serverVariantIds = new Set(
-    serverItems.flatMap((item) =>
-      item.variantId === undefined ? [] : [item.variantId]
-    )
+    serverItems.flatMap((item) => (item.variantId === undefined ? [] : [item.variantId])),
   );
 
   const reconciledServerItems = serverItems.flatMap((serverItem) => {
@@ -104,10 +95,7 @@ function mergeServerCartWithLatestState(
     const latestItem = latestItemsByVariant.get(serverItem.variantId);
 
     if (initialItem && !latestItem) return [];
-    if (
-      latestItem &&
-      (!initialItem || latestItem.quantity !== initialItem.quantity)
-    ) {
+    if (latestItem && (!initialItem || latestItem.quantity !== initialItem.quantity)) {
       return [{ ...serverItem, quantity: latestItem.quantity }];
     }
 
@@ -117,16 +105,12 @@ function mergeServerCartWithLatestState(
   return [
     ...reconciledServerItems,
     ...latestCart.filter(
-      (item) =>
-        item.variantId === undefined || !serverVariantIds.has(item.variantId)
+      (item) => item.variantId === undefined || !serverVariantIds.has(item.variantId),
     ),
   ];
 }
 
-function applyLocalizedCartCopy(
-  currentCart: CartItem[],
-  localizedItems: CartItem[]
-) {
+function applyLocalizedCartCopy(currentCart: CartItem[], localizedItems: CartItem[]) {
   const localizedItemsByVariant = indexCartByVariant(localizedItems);
 
   return currentCart.map((item) => {
@@ -182,22 +166,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
-  const [localizedCartCopy, setLocalizedCartCopy] =
-    useState<LocalizedCartCopy | null>(null);
+  const [localizedCartCopy, setLocalizedCartCopy] = useState<LocalizedCartCopy | null>(null);
   const syncedUserIdRef = useRef<number | null>(null);
   const syncTimeoutRef = useRef<number | null>(null);
   const userId = user?.id;
   const cartSyncSignature = useMemo(
     () => JSON.stringify(getPersistableCartItems(storedCart)),
-    [storedCart]
+    [storedCart],
   );
 
   const cart = useMemo(() => {
     // Prevent showing a mismatched account's cart while auth is still loading/resolving
-    if (
-      storedOwner !== "anonymous" &&
-      (!isAuthenticated || storedOwner !== `user:${userId}`)
-    ) {
+    if (storedOwner !== "anonymous" && (!isAuthenticated || storedOwner !== `user:${userId}`)) {
       return [];
     }
 
@@ -211,14 +191,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     return applyLocalizedCartCopy(storedCart, localizedCartCopy.items);
-  }, [
-    isAuthenticated,
-    locale,
-    localizedCartCopy,
-    storedCart,
-    storedOwner,
-    userId,
-  ]);
+  }, [isAuthenticated, locale, localizedCartCopy, storedCart, storedOwner, userId]);
 
   const refreshCart = useCallback(async () => {
     if (!isAuthenticated || userId === undefined) return;
@@ -263,28 +236,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           items: getPersistableCartItems(cartAtRequestStart),
         })
           .then((canonicalCart) => {
-            if (
-              syncedUserIdRef.current !== targetUserId ||
-              requestedLocale !== getActiveLocale()
-            ) {
+            if (syncedUserIdRef.current !== targetUserId || requestedLocale !== getActiveLocale()) {
               return;
             }
 
-            const canonicalItems = mapServerCartItems(
-              canonicalCart,
-              requestedLocale
-            );
+            const canonicalItems = mapServerCartItems(canonicalCart, requestedLocale);
             setLocalizedCartCopy({
               userId: targetUserId,
               locale: requestedLocale,
               items: canonicalItems,
             });
             useCartStore.setState((state) => ({
-              cart: mergeServerCartWithLatestState(
-                canonicalItems,
-                cartAtRequestStart,
-                state.cart
-              ),
+              cart: mergeServerCartWithLatestState(canonicalItems, cartAtRequestStart, state.cart),
             }));
           })
           .catch(() => {
@@ -292,7 +255,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           });
       }, 250);
     },
-    [clearScheduledCartSync]
+    [clearScheduledCartSync],
   );
 
   const addToCart = useCallback(
@@ -304,19 +267,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (product.variantId !== undefined || product.realId === undefined) return;
 
       const localItemId = `${product.id}-${color}-${size}`;
-      void getProductVariants({ productId: product.realId, size: 100 }).then(
-        (response) => {
-          const variant =
-            response.result.find(
-              (item) =>
-                item.color?.name?.toLowerCase() === color.toLowerCase() &&
-                item.size?.name?.toLowerCase() === size.toLowerCase()
-            ) ?? response.result[0];
-          if (variant) attachVariant(localItemId, variant.id);
-        }
-      );
+      void getProductVariants({ productId: product.realId, size: 100 }).then((response) => {
+        const variant =
+          response.result.find(
+            (item) =>
+              item.color?.name?.toLowerCase() === color.toLowerCase() &&
+              item.size?.name?.toLowerCase() === size.toLowerCase(),
+          ) ?? response.result[0];
+        if (variant) attachVariant(localItemId, variant.id);
+      });
     },
-    [addToLocalCart, attachVariant, isAuthenticated]
+    [addToLocalCart, attachVariant, isAuthenticated],
   );
 
   useEffect(() => {
@@ -336,7 +297,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const mergeAuthenticatedCart = async () => {
       try {
         useCartStore.getState().claimForUser(userId);
-        
+
         while (!cancelled) {
           const requestedLocale = getActiveLocale();
           const serverCart = await getMyCart();
@@ -352,11 +313,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           });
           syncedUserIdRef.current = userId;
           useCartStore.setState((state) => ({
-            cart: mergeServerCartWithLatestState(
-              serverItems,
-              cartAtRequestStart,
-              state.cart
-            ),
+            cart: mergeServerCartWithLatestState(serverItems, cartAtRequestStart, state.cart),
           }));
           scheduleCartSync(userId);
           return;
@@ -375,13 +332,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
       clearScheduledCartSync();
     };
-  }, [
-    clearScheduledCartSync,
-    isAuthLoading,
-    isAuthenticated,
-    scheduleCartSync,
-    userId,
-  ]);
+  }, [clearScheduledCartSync, isAuthLoading, isAuthenticated, scheduleCartSync, userId]);
 
   useEffect(() => {
     if (
@@ -443,10 +394,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<CartContextValue>(() => {
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return {
       cart,

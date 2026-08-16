@@ -7,11 +7,7 @@ type ProfileBootstrapResponses = {
   refreshResponse: Response;
 };
 
-function isProfileBootstrapResponse(
-  response: Response,
-  method: "GET" | "POST",
-  pathname: string,
-) {
+function isProfileBootstrapResponse(response: Response, method: "GET" | "POST", pathname: string) {
   return response.request().method() === method && new URL(response.url()).pathname === pathname;
 }
 
@@ -29,10 +25,10 @@ export class ProfilePage {
   async gotoAndWaitForBootstrap(): Promise<ProfileBootstrapResponses> {
     const [refreshResponse, meResponse] = await Promise.all([
       this.page.waitForResponse((response) =>
-        isProfileBootstrapResponse(response, "POST", "/api/v1/auth/refresh")
+        isProfileBootstrapResponse(response, "POST", "/api/v1/auth/refresh"),
       ),
       this.page.waitForResponse((response) =>
-        isProfileBootstrapResponse(response, "GET", "/api/v1/auth/me")
+        isProfileBootstrapResponse(response, "GET", "/api/v1/auth/me"),
       ),
       this.goto(),
     ]);

@@ -6,9 +6,23 @@ import { ClipboardCheck, Globe, Orbit, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatDate, formatNumber } from "@/lib/i18n/format";
 
 const today = new Date("2024-04-15T12:00:00Z");
@@ -79,7 +93,7 @@ export function ProjectsSection() {
             <CardHeader>
               <CardTitle>
                 <div className="flex items-center gap-2">
-                  <project.icon className="size-4 text-muted-foreground" />
+                  <project.icon className="text-muted-foreground size-4" />
                   <span>{project.title}</span>
                 </div>
               </CardTitle>
@@ -92,12 +106,18 @@ export function ProjectsSection() {
                 <div className="text-sm leading-none">{project.description}</div>
                 <div className="flex items-center gap-3">
                   <Progress value={project.progress} className="h-2" />
-                  <span className="shrink-0 text-sm">{formatNumber(project.progress / 100, locale, { style: "percent" })}</span>
+                  <span className="shrink-0 text-sm">
+                    {formatNumber(project.progress / 100, locale, { style: "percent" })}
+                  </span>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="py-2.5">
-              <span className="text-muted-foreground">{t("admin.productivity.projects.due", { date: formatDate(project.due, locale, { month: "short", day: "numeric" }) })}</span>
+              <span className="text-muted-foreground">
+                {t("admin.productivity.projects.due", {
+                  date: formatDate(project.due, locale, { month: "short", day: "numeric" }),
+                })}
+              </span>
             </CardFooter>
           </Card>
         ))}

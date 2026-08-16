@@ -3,7 +3,13 @@
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { AdminCatalogStatus } from "@/lib/api/admin-commerce";
 
@@ -77,7 +83,9 @@ export function BrandForm({ values, onChange, isEditing }: BrandFormProps) {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="brand-description">{t("admin.commerce.common.description")}</FieldLabel>
+        <FieldLabel htmlFor="brand-description">
+          {t("admin.commerce.common.description")}
+        </FieldLabel>
         <Textarea
           id="brand-description"
           value={values.description}

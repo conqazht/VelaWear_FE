@@ -9,12 +9,7 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { getLocalizedFixtureProducts } from "@/lib/i18n/fixture-catalog";
 import { useProductsQuery } from "@/lib/queries/catalog";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  getCategoryLabel,
-  mapBackendProduct,
-  money,
-  type Product,
-} from "@/lib/vela-data";
+import { getCategoryLabel, mapBackendProduct, money, type Product } from "@/lib/vela-data";
 
 interface RelatedProductsProps {
   categoryId?: number;
@@ -100,9 +95,9 @@ export function RelatedProducts({
   }
 
   return (
-    <section className="w-full mt-16 pt-16 border-t border-[#1c1a18]/10">
+    <section className="mt-16 w-full border-t border-[#1c1a18]/10 pt-16">
       {/* Header Row */}
-      <div className="flex items-center justify-between mb-8 select-none">
+      <div className="mb-8 flex items-center justify-between select-none">
         <h2 className="font-serif text-2xl font-light tracking-wide text-[#1c1a18] md:text-3xl">
           {t("storefront.product.related")}
         </h2>
@@ -110,18 +105,18 @@ export function RelatedProducts({
           <button
             onClick={() => scroll("left")}
             disabled={!canScrollLeft}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-[#efe7dc] text-[#1c1a18] border border-[#e3dccf]/30 hover:bg-[#b5573a] hover:text-white hover:border-[#b5573a] transition-colors duration-200 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-[#e3dccf]/30 bg-[#efe7dc] text-[#1c1a18] transition-colors duration-200 hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white disabled:pointer-events-none disabled:opacity-30"
             aria-label={t("storefront.common.scrollLeft")}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={() => scroll("right")}
             disabled={!canScrollRight}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-[#efe7dc] text-[#1c1a18] border border-[#e3dccf]/30 hover:bg-[#b5573a] hover:text-white hover:border-[#b5573a] transition-colors duration-200 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-[#e3dccf]/30 bg-[#efe7dc] text-[#1c1a18] transition-colors duration-200 hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-white disabled:pointer-events-none disabled:opacity-30"
             aria-label={t("storefront.common.scrollRight")}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -129,7 +124,7 @@ export function RelatedProducts({
       {/* Slider Viewport Container */}
       <div
         ref={sliderRef}
-        className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-4 px-1"
+        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-1 pb-4"
         style={{ scrollbarWidth: "none" }}
       >
         {recommendedProducts.map((product) => {
@@ -138,48 +133,51 @@ export function RelatedProducts({
           return (
             <motion.div
               key={product.id}
-              className="min-w-[240px] sm:min-w-[280px] md:min-w-[320px] max-w-[340px] flex-none snap-start group"
+              className="group max-w-[340px] min-w-[240px] flex-none snap-start sm:min-w-[280px] md:min-w-[320px]"
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
               {/* Image box with no borders/shadows */}
-              <div className="relative aspect-[3/4] w-full bg-[#efe7dc] overflow-hidden">
-                <Link href={`/products/${encodeURIComponent(product.id)}`} className="relative block h-full w-full">
-                    <Image
-                      suppressHydrationWarning
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      sizes="(min-width: 768px) 340px, (min-width: 640px) 280px, 240px"
-                      className="object-cover"
-                      referrerPolicy="no-referrer"
-                    />
+              <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#efe7dc]">
+                <Link
+                  href={`/products/${encodeURIComponent(product.id)}`}
+                  className="relative block h-full w-full"
+                >
+                  <Image
+                    suppressHydrationWarning
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    sizes="(min-width: 768px) 340px, (min-width: 640px) 280px, 240px"
+                    className="object-cover"
+                    referrerPolicy="no-referrer"
+                  />
                 </Link>
               </div>
 
               {/* Text Info */}
-              <div className="pt-4 flex flex-col text-left">
+              <div className="flex flex-col pt-4 text-left">
                 {/* Title */}
                 <Link href={`/products/${encodeURIComponent(product.id)}`} className="block">
-                  <h3 className="font-serif text-[18px] font-medium leading-snug text-[#1c1a18] hover:text-[#b5573a] transition-colors line-clamp-1">
+                  <h3 className="line-clamp-1 font-serif text-[18px] leading-snug font-medium text-[#1c1a18] transition-colors hover:text-[#b5573a]">
                     {product.name}
                   </h3>
                 </Link>
 
                 {/* Subtitle / Category */}
-                <p className="text-[11px] uppercase tracking-[1.5px] text-[#8a857c] font-medium mt-1">
+                <p className="mt-1 text-[11px] font-medium tracking-[1.5px] text-[#8a857c] uppercase">
                   {displayCategory}
                 </p>
 
                 {/* Price */}
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm font-semibold text-[#1c1a18] font-numeric">
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="font-numeric text-sm font-semibold text-[#1c1a18]">
                     {money(product.price, activeLocale)}
                   </span>
                   {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-xs text-[#8a857c] line-through font-numeric">
+                    <span className="font-numeric text-xs text-[#8a857c] line-through">
                       {money(product.originalPrice, activeLocale)}
                     </span>
                   )}
@@ -195,10 +193,7 @@ export function RelatedProducts({
 
 function RelatedProductsLoading({ title }: { title: string }) {
   return (
-    <section
-      className="mt-16 w-full border-t border-[#1c1a18]/10 pt-16"
-      aria-busy="true"
-    >
+    <section className="mt-16 w-full border-t border-[#1c1a18]/10 pt-16" aria-busy="true">
       <div className="mb-8 flex items-center justify-between select-none">
         <h2 className="font-serif text-2xl font-light tracking-wide text-[#1c1a18] md:text-3xl">
           {title}
@@ -209,14 +204,11 @@ function RelatedProductsLoading({ title }: { title: string }) {
         </div>
       </div>
 
-      <div
-        className="flex gap-6 overflow-hidden px-1 pb-4"
-        aria-hidden="true"
-      >
+      <div className="flex gap-6 overflow-hidden px-1 pb-4" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
-            className="min-w-[240px] max-w-[340px] flex-none sm:min-w-[280px] md:min-w-[320px]"
+            className="max-w-[340px] min-w-[240px] flex-none sm:min-w-[280px] md:min-w-[320px]"
           >
             <Skeleton className="aspect-[3/4] w-full rounded-none bg-[#efe7dc]" />
             <div className="flex flex-col pt-4 text-left">

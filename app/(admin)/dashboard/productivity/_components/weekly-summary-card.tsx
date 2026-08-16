@@ -21,7 +21,9 @@ export function WeeklySummaryCard() {
       <CardContent className="flex flex-col gap-4">
         <p className="text-muted-foreground">{t("admin.productivity.weekly.encouragement")}</p>
         <div className="flex flex-col gap-2">
-          <div className="font-medium">{t("admin.productivity.weekly.goals", { completed: 4, total: 6 })}</div>
+          <div className="font-medium">
+            {t("admin.productivity.weekly.goals", { completed: 4, total: 6 })}
+          </div>
           <Progress value={66} className="h-2" />
         </div>
       </CardContent>

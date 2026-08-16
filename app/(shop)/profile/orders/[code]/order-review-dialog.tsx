@@ -16,11 +16,7 @@ import type { OrderItem } from "@/lib/api/types";
 import { useCreateReviewMutation } from "@/lib/queries/commerce";
 import { cn } from "@/lib/utils";
 
-const acceptedImageTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+const acceptedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageBytes = 5 * 1024 * 1024;
 
 type OrderReviewDialogProps = {
@@ -29,11 +25,7 @@ type OrderReviewDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function OrderReviewDialog({
-  item,
-  open,
-  onOpenChange,
-}: OrderReviewDialogProps) {
+export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialogProps) {
   const { t } = useI18n();
   const mutation = useCreateReviewMutation();
   const [rating, setRating] = useState(0);
@@ -111,9 +103,10 @@ export function OrderReviewDialog({
     response?: { data?: { message?: string } };
     message?: string;
   } | null;
-  const submitError = mutationError?.response?.data?.message
-    ?? mutationError?.message
-    ?? (mutation.isError ? t("reviews.write.submitError") : null);
+  const submitError =
+    mutationError?.response?.data?.message ??
+    mutationError?.message ??
+    (mutation.isError ? t("reviews.write.submitError") : null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,10 +124,14 @@ export function OrderReviewDialog({
 
         <form className="space-y-7 px-6 py-6" onSubmit={handleSubmit}>
           <fieldset>
-            <legend className="text-xs font-bold uppercase tracking-[0.14em] text-[#1c1a18]/65">
+            <legend className="text-xs font-bold tracking-[0.14em] text-[#1c1a18]/65 uppercase">
               {t("reviews.write.ratingLabel")}
             </legend>
-            <div className="mt-3 flex gap-2" role="radiogroup" aria-label={t("reviews.write.ratingLabel")}>
+            <div
+              className="mt-3 flex gap-2"
+              role="radiogroup"
+              aria-label={t("reviews.write.ratingLabel")}
+            >
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
@@ -157,7 +154,7 @@ export function OrderReviewDialog({
           </fieldset>
 
           <label className="block">
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#1c1a18]/65">
+            <span className="text-xs font-bold tracking-[0.14em] text-[#1c1a18]/65 uppercase">
               {t("reviews.write.commentLabel")}
             </span>
             <textarea
@@ -166,16 +163,16 @@ export function OrderReviewDialog({
               maxLength={1_000}
               rows={6}
               placeholder={t("reviews.write.commentPlaceholder")}
-              className="mt-3 w-full resize-y rounded-sm border border-[#1c1a18]/15 bg-white px-4 py-3 text-sm leading-6 outline-none transition-colors focus:border-[#b5573a]"
+              className="mt-3 w-full resize-y rounded-sm border border-[#1c1a18]/15 bg-white px-4 py-3 text-sm leading-6 transition-colors outline-none focus:border-[#b5573a]"
             />
-            <span className="mt-1 block text-right text-xs tabular-nums text-[#1c1a18]/45">
+            <span className="mt-1 block text-right text-xs text-[#1c1a18]/45 tabular-nums">
               {comment.length}/1.000
             </span>
           </label>
 
           <div>
             <div className="flex items-center justify-between gap-4">
-              <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#1c1a18]/65">
+              <span className="text-xs font-bold tracking-[0.14em] text-[#1c1a18]/65 uppercase">
                 {t("reviews.write.imagesLabel")}
               </span>
               <span className="text-xs text-[#1c1a18]/45">{images.length}/5</span>
@@ -185,12 +182,26 @@ export function OrderReviewDialog({
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               {imagePreviews.map(({ image, url }, index) => (
-                <div key={`${image.name}-${image.lastModified}-${index}`} className="relative size-24 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-white">
-                  <Image src={url} alt={t("reviews.write.previewAlt", { index: index + 1 })} fill unoptimized sizes="96px" className="object-cover" />
+                <div
+                  key={`${image.name}-${image.lastModified}-${index}`}
+                  className="relative size-24 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-white"
+                >
+                  <Image
+                    src={url}
+                    alt={t("reviews.write.previewAlt", { index: index + 1 })}
+                    fill
+                    unoptimized
+                    sizes="96px"
+                    className="object-cover"
+                  />
                   <button
                     type="button"
-                    onClick={() => setImages((current) => current.filter((_, currentIndex) => currentIndex !== index))}
-                    className="absolute right-1 top-1 inline-flex size-7 items-center justify-center rounded-full bg-black/75 text-white focus-visible:outline-2 focus-visible:outline-offset-2"
+                    onClick={() =>
+                      setImages((current) =>
+                        current.filter((_, currentIndex) => currentIndex !== index),
+                      )
+                    }
+                    className="absolute top-1 right-1 inline-flex size-7 items-center justify-center rounded-full bg-black/75 text-white focus-visible:outline-2 focus-visible:outline-offset-2"
                     aria-label={t("reviews.write.removeImage", { index: index + 1 })}
                   >
                     <Trash2 className="size-3.5" />
@@ -219,7 +230,10 @@ export function OrderReviewDialog({
           </div>
 
           {validationError || submitError ? (
-            <div role="alert" className="rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div
+              role="alert"
+              className="rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
               {validationError ?? submitError}
             </div>
           ) : null}
@@ -229,14 +243,14 @@ export function OrderReviewDialog({
               type="button"
               disabled={mutation.isPending}
               onClick={() => onOpenChange(false)}
-              className="min-h-11 border border-[#1c1a18]/20 px-6 text-xs font-bold uppercase tracking-[0.14em] disabled:opacity-50"
+              className="min-h-11 border border-[#1c1a18]/20 px-6 text-xs font-bold tracking-[0.14em] uppercase disabled:opacity-50"
             >
               {t("reviews.write.cancel")}
             </button>
             <button
               type="submit"
               disabled={mutation.isPending || !item}
-              className="min-h-11 bg-[#1c1a18] px-7 text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#b5573a] disabled:opacity-50"
+              className="min-h-11 bg-[#1c1a18] px-7 text-xs font-bold tracking-[0.14em] text-white uppercase transition-colors hover:bg-[#b5573a] disabled:opacity-50"
             >
               {mutation.isPending ? t("reviews.write.submitting") : t("reviews.write.submit")}
             </button>

@@ -76,27 +76,29 @@ active and remains cached when the user returns.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Install | `pnpm install --frozen-lockfile` | exit 0; lockfile unchanged |
-| Hook tests | `pnpm exec vitest run lib/queries/commerce-profile.test.tsx` | all tests pass |
-| Profile tests | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx'` | all tests pass |
-| Lint | `pnpm exec eslint "app/(shop)/profile/page.tsx" "app/(shop)/profile/page.test.tsx" lib/queries/commerce.ts lib/queries/commerce-profile.test.tsx --max-warnings 0` | exit 0, no warnings |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, no errors |
-| Unit suite | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
+| Purpose       | Command                                                                                                                                                            | Expected on success        |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| Install       | `pnpm install --frozen-lockfile`                                                                                                                                   | exit 0; lockfile unchanged |
+| Hook tests    | `pnpm exec vitest run lib/queries/commerce-profile.test.tsx`                                                                                                       | all tests pass             |
+| Profile tests | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx'`                                                                                                          | all tests pass             |
+| Lint          | `pnpm exec eslint "app/(shop)/profile/page.tsx" "app/(shop)/profile/page.test.tsx" lib/queries/commerce.ts lib/queries/commerce-profile.test.tsx --max-warnings 0` | exit 0, no warnings        |
+| Typecheck     | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                        | exit 0, no errors          |
+| Unit suite    | `pnpm test:unit`                                                                                                                                                   | all tests pass             |
+| Build         | `pnpm build`                                                                                                                                                       | production build succeeds  |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope** (the only files you should modify):
+
 - `app/(shop)/profile/page.tsx`
 - `lib/queries/commerce.ts`
 - `lib/queries/commerce-profile.test.tsx` (create)
 - `app/(shop)/profile/page.test.tsx` (create or extend if FE-004 created it)
 
 **Out of scope** (do NOT touch):
+
 - API response shapes, backend pagination, or page size.
 - Product favorites loading; FE-007 owns wishlist summaries.
 - Account settings consolidation, mock controls, or email hydration; FE-004 owns them.

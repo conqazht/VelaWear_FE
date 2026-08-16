@@ -43,13 +43,11 @@ export async function login(request: LoginRequest): Promise<TokenResponse> {
   });
 }
 
-export async function exchangeOAuth2Code(
-  request: OAuth2ExchangeRequest
-): Promise<TokenResponse> {
+export async function exchangeOAuth2Code(request: OAuth2ExchangeRequest): Promise<TokenResponse> {
   return withAuthSessionLock(async () => {
     const token = await apiPost<TokenResponse, OAuth2ExchangeRequest>(
       "/auth/oauth2/exchange",
-      request
+      request,
     );
     setAccessToken(token.accessToken);
     return token;

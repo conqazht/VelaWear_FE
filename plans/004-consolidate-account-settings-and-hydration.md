@@ -33,20 +33,21 @@ The main profile renders local-only privacy/communication settings, enabled Save
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Target tests | `pnpm exec vitest run 'app/(shop)/profile/settings/page.test.tsx' components/shop/profile-navigation.test.tsx` | all pass |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
-| Smoke | `pnpm test:e2e:smoke` | smoke suite passes |
+| Purpose      | Command                                                                                                        | Expected on success       |
+| ------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Target tests | `pnpm exec vitest run 'app/(shop)/profile/settings/page.test.tsx' components/shop/profile-navigation.test.tsx` | all pass                  |
+| Lint         | `pnpm exec eslint . --max-warnings 25`                                                                         | exit 0                    |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                    | exit 0                    |
+| Unit         | `pnpm test:unit`                                                                                               | all tests pass            |
+| Build        | `pnpm build`                                                                                                   | production build succeeds |
+| Smoke        | `pnpm test:e2e:smoke`                                                                                          | smoke suite passes        |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope**:
+
 - `app/(shop)/profile/page.tsx`
 - `app/(shop)/profile/settings/page.tsx`
 - `components/shop/profile-navigation.tsx`
@@ -55,6 +56,7 @@ The main profile renders local-only privacy/communication settings, enabled Save
 - `components/shop/profile-navigation.test.tsx` (create)
 
 **Out of scope**:
+
 - New backend preference, privacy, location or delete-account APIs.
 - Changing OTP/proof-token contracts or reauthentication cleanup.
 - Broad profile decomposition (FE-009/FE-010).

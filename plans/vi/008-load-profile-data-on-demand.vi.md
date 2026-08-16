@@ -73,27 +73,29 @@ sở hữu nó active, đồng thời vẫn reuse cache khi người dùng quay 
 
 ## Các lệnh cần dùng
 
-| Mục đích | Lệnh | Kết quả thành công |
-|---|---|---|
-| Cài dependency | `pnpm install --frozen-lockfile` | exit 0; lockfile không đổi |
-| Hook test | `pnpm exec vitest run lib/queries/commerce-profile.test.tsx` | mọi test pass |
-| Profile test | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx'` | mọi test pass |
-| Lint | `pnpm exec eslint 'app/(shop)/profile/page.tsx' 'app/(shop)/profile/page.test.tsx' lib/queries/commerce.ts lib/queries/commerce-profile.test.tsx --max-warnings 0` | exit 0, không warning |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, không error |
-| Unit suite | `pnpm test:unit` | mọi test pass |
-| Build | `pnpm build` | production build thành công |
+| Mục đích       | Lệnh                                                                                                                                                               | Kết quả thành công          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
+| Cài dependency | `pnpm install --frozen-lockfile`                                                                                                                                   | exit 0; lockfile không đổi  |
+| Hook test      | `pnpm exec vitest run lib/queries/commerce-profile.test.tsx`                                                                                                       | mọi test pass               |
+| Profile test   | `pnpm exec vitest run 'app/(shop)/profile/page.test.tsx'`                                                                                                          | mọi test pass               |
+| Lint           | `pnpm exec eslint 'app/(shop)/profile/page.tsx' 'app/(shop)/profile/page.test.tsx' lib/queries/commerce.ts lib/queries/commerce-profile.test.tsx --max-warnings 0` | exit 0, không warning       |
+| Typecheck      | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                        | exit 0, không error         |
+| Unit suite     | `pnpm test:unit`                                                                                                                                                   | mọi test pass               |
+| Build          | `pnpm build`                                                                                                                                                       | production build thành công |
 
 ## Phạm vi
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong phạm vi** (chỉ được sửa các file này):
+
 - `app/(shop)/profile/page.tsx`
 - `lib/queries/commerce.ts`
 - `lib/queries/commerce-profile.test.tsx` (tạo mới)
 - `app/(shop)/profile/page.test.tsx` (tạo hoặc mở rộng nếu FE-004 đã tạo)
 
 **Ngoài phạm vi** (KHÔNG sửa):
+
 - API response shape, Backend pagination hoặc page size.
 - Product favorites loading; FE-007 quản lý wishlist summary.
 - Hợp nhất account settings, mock control hoặc email hydration; FE-004 quản lý.

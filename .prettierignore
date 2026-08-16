@@ -1,0 +1,10 @@
+.next
+node_modules
+dist
+build
+out
+.turbo
+playwright-report
+test-results
+coverage
+pnpm-lock.yaml

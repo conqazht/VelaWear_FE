@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   images: {
     dangerouslyAllowLocalIP: process.env.NODE_ENV === "development" && isLoopbackApi,
-    remotePatterns: [
-      productUploadsPattern,
-    ],
+    remotePatterns: [productUploadsPattern],
   },
 };
 

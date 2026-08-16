@@ -17,7 +17,14 @@ import { ChevronDownIcon, ListFilter } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +42,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { getIntlLocale } from "@/lib/i18n";
 
 import { useOpportunitiesColumns } from "./opportunities-table/columns";
@@ -120,7 +134,9 @@ export function OpportunitiesSection() {
     <section>
       <Card>
         <CardHeader>
-          <CardTitle className="leading-none">{t("admin.dashboardsA.crm.recentOpportunities")}</CardTitle>
+          <CardTitle className="leading-none">
+            {t("admin.dashboardsA.crm.recentOpportunities")}
+          </CardTitle>
           <CardDescription>{t("admin.dashboardsA.crm.opportunitiesDescription")}</CardDescription>
           <CardAction>
             <div className="flex items-center gap-2">
@@ -165,7 +181,9 @@ export function OpportunitiesSection() {
                   <DropdownMenuRadioGroup
                     value={healthFilter}
                     onValueChange={(value) => {
-                      table.getColumn("health")?.setFilterValue(value === "all" ? undefined : value);
+                      table
+                        .getColumn("health")
+                        ?.setFilterValue(value === "all" ? undefined : value);
                       table.setPageIndex(0);
                     }}
                   >
@@ -182,13 +200,15 @@ export function OpportunitiesSection() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4 px-0">
           <div className="overflow-hidden">
-            <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4 **:data-[slot='table-cell']:py-4">
-              <TableHeader className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground **:data-[slot='table-head']:text-sm">
+            <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-cell']:py-4 **:data-[slot='table-head']:px-4">
+              <TableHeader className="**:data-[slot='table-head']:text-foreground border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:text-sm **:data-[slot='table-head']:font-medium">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
                       <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -199,13 +219,18 @@ export function OpportunitiesSection() {
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
+                    <TableCell
+                      colSpan={table.getVisibleLeafColumns().length}
+                      className="h-24 text-center"
+                    >
                       {t("admin.dashboardsA.common.noResults")}
                     </TableCell>
                   </TableRow>
@@ -226,7 +251,9 @@ export function OpportunitiesSection() {
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
-                    className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : undefined}
+                    className={
+                      !table.getCanPreviousPage() ? "pointer-events-none opacity-50" : undefined
+                    }
                     onClick={(event) => {
                       preventPaginationNavigation(event);
                       table.previousPage();
@@ -260,7 +287,9 @@ export function OpportunitiesSection() {
                 <PaginationItem>
                   <PaginationNext
                     href="#"
-                    className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : undefined}
+                    className={
+                      !table.getCanNextPage() ? "pointer-events-none opacity-50" : undefined
+                    }
                     onClick={(event) => {
                       preventPaginationNavigation(event);
                       table.nextPage();

@@ -5,6 +5,7 @@ Vela Wear là một trang thương mại điện tử thời trang theo phong c�
 Điểm nhấn thương hiệu là cặp **kem + terracotta (đất nung)** — terracotta (`{colors.primary}` — #b5573a) là màu accent chính, dùng cho CTA, badge "MỚI", giá sale, và các banner khuyến mãi full-bleed. Terracotta ấm, trầm, mang tính "heritage/artisan" — khác với đỏ rực của các sàn TMĐT lớn (Shopee, Lazada) và khác với coral của các brand công nghệ AI.
 
 Hệ thống có ba chế độ nền xen kẽ theo từng section:
+
 1. **Cream canvas** (`{colors.canvas}`) — nền mặc định của toàn trang
 2. **Light cream cards** (`{colors.surface-card}`) — nền cho card sản phẩm, feature block
 3. **Dark warm-brown surfaces** (`{colors.surface-dark}`) — banner lookbook, footer, banner sale lớn
@@ -12,6 +13,7 @@ Hệ thống có ba chế độ nền xen kẽ theo từng section:
 Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (full-bleed photography) — đây là điểm khác biệt lớn nhất so với bản gốc Anthropic (nơi nền tối hiển thị code mockup). Sự đối lập kem-tối là nhịp điệu chính của trang.
 
 **Đặc điểm chính:**
+
 - Canvas kem ấm (`{colors.canvas}` — #f7f4ef) với chữ ink ấm gần đen (`{colors.ink}` — #1c1a18). Lựa chọn màu định danh của thương hiệu.
 - CTA chính màu terracotta (`{colors.primary}` — #b5573a). Dùng hạn chế trên từng nút riêng lẻ, dùng rộng trên các banner sale full-bleed.
 - Tiêu đề slab-serif display qua Tiempos Headline / Cormorant Garamond ở weight 400-500 với letter-spacing âm. Kết hợp với sans-serif body nhân văn cho giọng điệu editorial sang trọng.
@@ -24,6 +26,7 @@ Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (f
 ## Colors
 
 ### Brand & Accent
+
 - **Terracotta / Primary** (`{colors.primary}` — #b5573a): Màu accent chính của Vela Wear, đậm và trầm hơn coral gốc của Anthropic để tránh trùng nhận diện với các thương hiệu AI. Dùng cho nút CTA chính, badge "MỚI"/"SALE", giá khuyến mãi, banner full-bleed.
 - **Terracotta Active** (`{colors.primary-active}` — #8f4329): Trạng thái nhấn/hover-đậm hơn.
 - **Terracotta Disabled** (`{colors.primary-disabled}` — #e6d9cf): Trạng thái disabled nhạt, tông kem.
@@ -31,6 +34,7 @@ Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (f
 - **Accent Gold** (`{colors.accent-gold}` — #d4a85f): Màu phụ ấm dùng cho badge "Bộ sưu tập giới hạn", highlight inline trong nội dung biên tập.
 
 ### Surface
+
 - **Canvas** (`{colors.canvas}` — #f7f4ef): Nền mặc định toàn trang. Kem ấm — không phải trắng tinh.
 - **Surface Soft** (`{colors.surface-soft}` — #f1ebe1): Section dividers, băng nền rất nhạt giữa các khối nội dung.
 - **Surface Card** (`{colors.surface-card}` — #efe7dc): Card sản phẩm, card nội dung. Đậm hơn canvas một bậc.
@@ -42,6 +46,7 @@ Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (f
 - **Hairline Soft** (`{colors.hairline-soft}` — #ece6dc): Đường phân chia gần như vô hình, dùng trong cùng một băng.
 
 ### Text
+
 - **Ink** (`{colors.ink}` — #1c1a18): Toàn bộ tiêu đề và text chính. Đen ấm, không tuyệt đối đen.
 - **Body Strong** (`{colors.body-strong}` — #2a2825): Đoạn văn nhấn mạnh, mô tả sản phẩm chính.
 - **Body** (`{colors.body}` — #3d3a36): Màu text chạy mặc định.
@@ -52,6 +57,7 @@ Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (f
 - **On Dark Soft** (`{colors.on-dark-soft}` — #a89e93): Text body footer, label phụ trên ảnh lookbook.
 
 ### Semantic
+
 - **Success / Còn hàng** (`{colors.success}` — #5d8a6c): Chấm trạng thái "Còn hàng", tag "Bền vững".
 - **Warning / Sắp hết** (`{colors.warning}` — #d4a017): Tag "Sắp hết hàng", "Chỉ còn vài size".
 - **Error / Hết hàng** (`{colors.error}` — #b04a3a): Trạng thái "Hết hàng", lỗi form thanh toán.
@@ -60,44 +66,49 @@ Các nền tối là nơi hiển thị **ảnh sản phẩm/lookbook thật** (f
 ## Typography
 
 ### Font Family
+
 Hệ thống dùng **Tiempos Headline** (hoặc **Cormorant Garamond** weight 500, letter-spacing -0.02em làm thay thế mã nguồn mở) làm font slab-serif display cho tiêu đề, và **Inter** (hoặc **StyreneB** nếu có license) làm font sans nhân văn cho body, navigation, label UI. **JetBrains Mono** không cần thiết cho Vela Wear (không có code block) — thay vào đó dùng **Inter** ở weight 500 + uppercase + letter-spacing rộng cho mọi nhãn dạng "mã sản phẩm"/SKU. Fallback stack: `Cormorant Garamond, Garamond, "Times New Roman", serif` cho display và `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` cho body.
 
 Phân chia display/body mang tính editorial:
+
 - Cormorant Garamond / Tiempos (weight 400-500, tracking âm) → h1, h2, h3, tên bộ sưu tập, tên sản phẩm nổi bật
 - Inter (weight 400-500) → body, navigation, nút, mô tả sản phẩm, label
 - Inter uppercase + tracking rộng → mã SKU, badge, nhãn size/màu
 
 ### Hierarchy
 
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.display-xl}` | 56px | 400 | 1.08 | -1.2px | Hero homepage ("Vela Wear — Bộ sưu tập Thu 2026") — serif |
-| `{typography.display-lg}` | 40px | 400 | 1.12 | -0.8px | Tiêu đề bộ sưu tập, section heads — serif |
-| `{typography.display-md}` | 32px | 400 | 1.18 | -0.4px | Tên sản phẩm trên trang chi tiết — serif |
-| `{typography.display-sm}` | 24px | 500 | 1.25 | -0.2px | Tiêu đề banner sale, tên collection nhỏ — serif |
-| `{typography.title-lg}` | 20px | 500 | 1.3 | 0 | Tên section grid sản phẩm — Inter |
-| `{typography.title-md}` | 16px | 500 | 1.4 | 0 | Tên sản phẩm trên product card |
-| `{typography.title-sm}` | 14px | 500 | 1.4 | 0 | Label filter, breadcrumb |
-| `{typography.body-md}` | 16px | 400 | 1.55 | 0 | Mô tả sản phẩm, nội dung chính — Inter |
-| `{typography.body-sm}` | 14px | 400 | 1.55 | 0 | Footer body, chi tiết vận chuyển/đổi trả |
-| `{typography.price}` | 16px | 500 | 1.3 | 0 | Giá hiện tại trên product card |
-| `{typography.price-strike}` | 14px | 400 | 1.3 | 0 | Giá gốc gạch ngang, màu muted |
-| `{typography.caption}` | 13px | 500 | 1.4 | 0 | Caption ảnh, ghi chú size |
-| `{typography.caption-uppercase}` | 11px | 500 | 1.4 | 1.8px | "MỚI", "SALE", "HẾT HÀNG", mã SKU |
-| `{typography.button}` | 14px | 500 | 1.0 | 0.5px | Nhãn nút (uppercase nhẹ cho cảm giác cao cấp) |
-| `{typography.nav-link}` | 14px | 500 | 1.4 | 0 | Mục menu top-nav |
+| Token                            | Size | Weight | Line Height | Letter Spacing | Use                                                       |
+| -------------------------------- | ---- | ------ | ----------- | -------------- | --------------------------------------------------------- |
+| `{typography.display-xl}`        | 56px | 400    | 1.08        | -1.2px         | Hero homepage ("Vela Wear — Bộ sưu tập Thu 2026") — serif |
+| `{typography.display-lg}`        | 40px | 400    | 1.12        | -0.8px         | Tiêu đề bộ sưu tập, section heads — serif                 |
+| `{typography.display-md}`        | 32px | 400    | 1.18        | -0.4px         | Tên sản phẩm trên trang chi tiết — serif                  |
+| `{typography.display-sm}`        | 24px | 500    | 1.25        | -0.2px         | Tiêu đề banner sale, tên collection nhỏ — serif           |
+| `{typography.title-lg}`          | 20px | 500    | 1.3         | 0              | Tên section grid sản phẩm — Inter                         |
+| `{typography.title-md}`          | 16px | 500    | 1.4         | 0              | Tên sản phẩm trên product card                            |
+| `{typography.title-sm}`          | 14px | 500    | 1.4         | 0              | Label filter, breadcrumb                                  |
+| `{typography.body-md}`           | 16px | 400    | 1.55        | 0              | Mô tả sản phẩm, nội dung chính — Inter                    |
+| `{typography.body-sm}`           | 14px | 400    | 1.55        | 0              | Footer body, chi tiết vận chuyển/đổi trả                  |
+| `{typography.price}`             | 16px | 500    | 1.3         | 0              | Giá hiện tại trên product card                            |
+| `{typography.price-strike}`      | 14px | 400    | 1.3         | 0              | Giá gốc gạch ngang, màu muted                             |
+| `{typography.caption}`           | 13px | 500    | 1.4         | 0              | Caption ảnh, ghi chú size                                 |
+| `{typography.caption-uppercase}` | 11px | 500    | 1.4         | 1.8px          | "MỚI", "SALE", "HẾT HÀNG", mã SKU                         |
+| `{typography.button}`            | 14px | 500    | 1.0         | 0.5px          | Nhãn nút (uppercase nhẹ cho cảm giác cao cấp)             |
+| `{typography.nav-link}`          | 14px | 500    | 1.4         | 0              | Mục menu top-nav                                          |
 
 ### Principles
+
 Display giữ weight 400-500, không bao giờ dùng bold đậm (700+). Letter-spacing âm (-0.2 đến -1.2px) là bắt buộc cho các cỡ display — thiếu nó font serif sẽ mất đi cảm giác cao cấp. Đặc tính serif là giọng nói editorial/thời trang của Vela Wear; chuyển sang sans-serif cho display sẽ khiến trang giống một cửa hàng fast-fashion thông thường.
 
 Body giữ weight 400 cho đoạn văn, weight 500 cho label và cụm từ nhấn mạnh (ví dụ giá, tên sản phẩm). Body sans là nhân văn (Inter) — không dùng font geometric (Helvetica/Arial quá trung tính, phá vỡ cảm giác ấm-editorial).
 
 ### Note on Font Substitutes
+
 Nếu Tiempos Headline không khả dụng, **Cormorant Garamond** weight 500 với letter-spacing -0.02em là lựa chọn mã nguồn mở gần nhất. **EB Garamond** là phương án dự phòng tiếp theo. Cho phần body, **Inter** là lựa chọn chính — nếu cần thay thế, **Söhne** hoặc **General Sans** là các phương án gần.
 
 ## Layout
 
 ### Spacing System
+
 - **Base unit:** 4px.
 - **Tokens:** `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 88px.
 - **Section padding:** `{spacing.section}` (88px) — chặt hơn chuẩn SaaS một chút để grid sản phẩm xuất hiện sớm hơn khi cuộn.
@@ -105,6 +116,7 @@ Nếu Tiempos Headline không khả dụng, **Cormorant Garamond** weight 500 v�
 - **Callout / CTA bands:** `{spacing.xxl}` (48px) trong banner terracotta; 64px trong băng lookbook lớn.
 
 ### Grid & Container
+
 - **Max content width:** ~1280px centered (rộng hơn bản gốc một chút để grid sản phẩm thoáng).
 - **Editorial body:** Single 12-column grid; hero dùng full-bleed ảnh lookbook với overlay text, hoặc 6/6 split (text trái, ảnh phải).
 - **Product grid:** 4-up desktop, 3-up tablet, 2-up mobile (giữ tối thiểu 2 cột trên mobile để duy trì cảm giác "lưới sản phẩm").
@@ -112,21 +124,23 @@ Nếu Tiempos Headline không khả dụng, **Cormorant Garamond** weight 500 v�
 - **Filter/category tile grids:** 6-up desktop, 3-up tablet, 2-up mobile.
 
 ### Whitespace Philosophy
+
 Canvas kem + serif display + ảnh sản phẩm chất lượng cao tạo nhịp điệu editorial — Vela Wear đọc như một catalogue thời trang in chứ không phải một template TMĐT. Khoảng trắng giữa các băng giữ ở 88px; khoảng trắng trong product card gọn (16px) để tối đa hóa không gian ảnh, còn card nội dung/feature giữ rộng (32px).
 
 ## Elevation & Depth
 
-| Level | Treatment | Use |
-|---|---|---|
-| Flat | Không shadow, không border | Body section, top nav, hero band |
-| Soft hairline | Viền 1px `{colors.hairline}` | Input, sub-nav, product card (tùy chọn) |
-| Cream card | Nền `{colors.surface-card}` — không shadow | Feature card, card nội dung biên tập |
-| Dark surface card | Nền `{colors.surface-dark}` — không shadow | Banner lookbook, footer, banner sale lớn |
-| Subtle drop shadow | Shadow rất nhạt | Trạng thái hover của product card: `0 2px 8px rgba(28,26,24,0.06)` |
+| Level              | Treatment                                  | Use                                                                |
+| ------------------ | ------------------------------------------ | ------------------------------------------------------------------ |
+| Flat               | Không shadow, không border                 | Body section, top nav, hero band                                   |
+| Soft hairline      | Viền 1px `{colors.hairline}`               | Input, sub-nav, product card (tùy chọn)                            |
+| Cream card         | Nền `{colors.surface-card}` — không shadow | Feature card, card nội dung biên tập                               |
+| Dark surface card  | Nền `{colors.surface-dark}` — không shadow | Banner lookbook, footer, banner sale lớn                           |
+| Subtle drop shadow | Shadow rất nhạt                            | Trạng thái hover của product card: `0 2px 8px rgba(28,26,24,0.06)` |
 
 Triết lý elevation là **color-block trước, shadow hiếm**. Phần lớn độ sâu đến từ đối lập nền kem-vs-tối và từ chính ảnh sản phẩm (có shadow/depth tự nhiên trong ảnh). Shadow chỉ xuất hiện nhẹ khi hover trên product card để gợi ý có thể click.
 
 ### Decorative Depth
+
 - Logo Vela Wear (xem Shapes) xuất hiện nhỏ trong wordmark và như dấu phân đoạn giữa các section nội dung dài.
 - Banner lookbook mang theo độ sâu nội tại từ ảnh: ánh sáng tự nhiên, vải có texture, overlay gradient tối nhẹ ở dưới để text "On Dark" luôn đọc được.
 - Một số hero dùng ảnh full-bleed với overlay gradient từ trong (đậm) ra ngoài (nhạt) để text headline luôn nổi trên ảnh, không cần card riêng.
@@ -137,17 +151,19 @@ Triết lý elevation là **color-block trước, shadow hiếm**. Phần lớn 
 
 Hệ thống bo tròn theo triết lý **Anthropic & /better-ui: 4 tầng theo ngữ cảnh (Contextual Multi-Tier)**:
 
-| Token | Value | Use |
-|---|---|---|
+| Token            | Value                   | Use                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `{rounded.pill}` | 9999px / `rounded-full` | **Tier 1 (Pill / Capsule):** Nút CTA chính (`button-primary`, Hero CTA, PDP "Thêm vào giỏ" / "Yêu thích", Cart "Tiến hành thanh toán", Voucher "Sao chép mã"), Cụm chuyển đổi tab con (`in/cm`, Sub-section Switcher), Chip bộ lọc (`Active chips`, `Price presets`), Badge ("MỚI", "SALE", "HẾT HÀNG"), Swatch màu. Áp dụng `active:scale-[0.96]`. |
-| `{rounded.2xl}` | 20px–24px | **Tier 2 (Expressive Surface):** Khung bao ngoài của Modal Dialog (Reviews Dialog), Thẻ Voucher Ticket, Card Hướng dẫn đo chuẩn (Size Guide), Card tóm tắt đơn hàng (Order Summary). |
-| `{rounded.xl}` | 16px | **Tier 2.1 (Cards & Inset Containers):** Product Card (`product-card`), Cart Item Card, 4 ô bước đo bên trong Card hướng dẫn đo (chuẩn concentric `outer = inner + padding`), Campaign Banner. |
-| `{rounded.md}` | 8px–12px | **Tier 3 (Structured Controls):** Form Inputs, Ô chọn Sort Dropdown, Ô chọn kích cỡ hình vuông trên PDP, Ô đếm ngược thời gian. |
-| `{rounded.sm}` | 6px | **Tier 4 (Sub-elements):** Bảng số đo chi tiết (Size guide tables), Table cell highlights, Sub-items. |
-| `{rounded.none}` | 0px | Ảnh lookbook full-bleed, `button-add-to-cart-overlay` (khớp cạnh ảnh phẳng). |
+| `{rounded.2xl}`  | 20px–24px               | **Tier 2 (Expressive Surface):** Khung bao ngoài của Modal Dialog (Reviews Dialog), Thẻ Voucher Ticket, Card Hướng dẫn đo chuẩn (Size Guide), Card tóm tắt đơn hàng (Order Summary).                                                                                                                                                                |
+| `{rounded.xl}`   | 16px                    | **Tier 2.1 (Cards & Inset Containers):** Product Card (`product-card`), Cart Item Card, 4 ô bước đo bên trong Card hướng dẫn đo (chuẩn concentric `outer = inner + padding`), Campaign Banner.                                                                                                                                                      |
+| `{rounded.md}`   | 8px–12px                | **Tier 3 (Structured Controls):** Form Inputs, Ô chọn Sort Dropdown, Ô chọn kích cỡ hình vuông trên PDP, Ô đếm ngược thời gian.                                                                                                                                                                                                                     |
+| `{rounded.sm}`   | 6px                     | **Tier 4 (Sub-elements):** Bảng số đo chi tiết (Size guide tables), Table cell highlights, Sub-items.                                                                                                                                                                                                                                               |
+| `{rounded.none}` | 0px                     | Ảnh lookbook full-bleed, `button-add-to-cart-overlay` (khớp cạnh ảnh phẳng).                                                                                                                                                                                                                                                                        |
 
 ### Photography & Illustrations
+
 Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu thật** — đây là khác biệt cốt lõi so với hệ thống gốc:
+
 - Ảnh sản phẩm tỉ lệ 3:4 (chân dung), nền studio sáng hoặc on-location, bo góc nhẹ theo card (`{rounded.xl}`) hoặc không bo góc trong lookbook full-bleed (`{rounded.none}`)
 - Ảnh lookbook full-bleed trên nền `{colors.surface-dark}`, overlay gradient tối nhẹ cho text, không bo góc
 - Ảnh chi tiết vải/texture dùng trong card "Chất liệu" — crop vuông 1:1
@@ -204,7 +220,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 
 **`badge-pill`** — Pill nhỏ cho tag thông tin chung (ví dụ "Cotton hữu cơ"). Nền `{colors.surface-card}`, text `{colors.ink}`, type `{typography.caption}` (13px/500), rounded `{rounded.pill}`, padding 4px × 12px.
 
-**`badge-coral`** *(đổi tên gợi nhớ: badge-terracotta)* — Badge nền terracotta cho "MỚI", "SALE", "-30%". Nền `{colors.primary}`, text `{colors.on-primary}`, type `{typography.caption-uppercase}` (11px/500/tracking 1.8px), rounded `{rounded.pill}`, padding 4px × 12px.
+**`badge-coral`** _(đổi tên gợi nhớ: badge-terracotta)_ — Badge nền terracotta cho "MỚI", "SALE", "-30%". Nền `{colors.primary}`, text `{colors.on-primary}`, type `{typography.caption-uppercase}` (11px/500/tracking 1.8px), rounded `{rounded.pill}`, padding 4px × 12px.
 
 **`badge-stock`** — Badge trạng thái kho. "Còn hàng": chấm `{colors.success}` + text muted. "Sắp hết": nền `{colors.warning}` ở 15% alpha, text ink. "Hết hàng": nền `{colors.surface-soft}`, text `{colors.muted}`, ảnh sản phẩm giảm opacity 60%.
 
@@ -225,6 +241,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 ## Do's and Don'ts
 
 ### Do
+
 - Đặt mọi trang trên nền canvas kem. Trắng tinh khiến trang giống mọi sàn TMĐT khác; tông kem là điểm khác biệt thương hiệu.
 - Dùng serif Cormorant Garamond/Tiempos cho mọi tiêu đề display. Kết hợp với Inter cho body. Letter-spacing âm ở các cỡ display là bắt buộc.
 - Dành `{colors.primary}` (terracotta) cho CTA chính và các banner sale full-bleed (`{component.callout-card-terracotta}`). Không tô terracotta ở các điểm nhấn khác.
@@ -234,6 +251,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 - Áp dụng `{spacing.section}` (88px) giữa các băng chính.
 
 ### Don't
+
 - Không dùng xám lạnh hoặc trắng tinh cho canvas. Kem là thương hiệu.
 - Không in đậm (bold 700+) cho display serif. Giữ ở weight 400-500.
 - Không dùng xanh dương lạnh hoặc cyan bão hòa làm accent. Terracotta là điểm nhấn duy nhất.
@@ -247,14 +265,15 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 
 ### Breakpoints
 
-| Name | Width | Key Changes |
-|---|---|---|
-| Mobile | < 768px | Hamburger nav; hero h1 56→28px; hero full-bleed giữ nguyên tỉ lệ nhưng text co lại; product grid 2-up; category tile 2-up; filter chuyển thành bottom-sheet; footer 4 cột → 1 |
-| Tablet | 768–1024px | Top nav giữ ngang nhưng thu gọn; product grid 3-up; category tile 3-up |
-| Desktop | 1024–1440px | Top nav đầy đủ menu; product grid 4-up; category tile 6-up |
-| Wide | > 1440px | Giống desktop với khoảng thở ngoài lớn hơn; max content width giữ ở 1280px |
+| Name    | Width       | Key Changes                                                                                                                                                                   |
+| ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mobile  | < 768px     | Hamburger nav; hero h1 56→28px; hero full-bleed giữ nguyên tỉ lệ nhưng text co lại; product grid 2-up; category tile 2-up; filter chuyển thành bottom-sheet; footer 4 cột → 1 |
+| Tablet  | 768–1024px  | Top nav giữ ngang nhưng thu gọn; product grid 3-up; category tile 3-up                                                                                                        |
+| Desktop | 1024–1440px | Top nav đầy đủ menu; product grid 4-up; category tile 6-up                                                                                                                    |
+| Wide    | > 1440px    | Giống desktop với khoảng thở ngoài lớn hơn; max content width giữ ở 1280px                                                                                                    |
 
 ### Touch Targets
+
 - `{component.button-primary}` tối thiểu 44 × 44px.
 - `{component.button-icon-circular}` 40 × 40px.
 - `{component.text-input}` height 44px.
@@ -262,6 +281,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 - `{component.size-color-selector}` ô size tối thiểu 40 × 40px để dễ chạm trên mobile.
 
 ### Collapsing Strategy
+
 - Top nav thu về hamburger ở < 768px; menu mở dưới dạng sheet kem toàn màn hình.
 - Hero full-bleed giữ nguyên trên mobile, nhưng headline giảm cỡ và overlay gradient đậm hơn để đảm bảo độ đọc.
 - Product grid giảm cột (4→3→2) thay vì thu nhỏ card — ảnh sản phẩm luôn đủ lớn để thấy chi tiết vải.
@@ -269,6 +289,7 @@ Vela Wear dựa hoàn toàn vào **nhiếp ảnh sản phẩm/người mẫu th�
 - Banner sale/collection giữ tỉ lệ ảnh, chỉ co text overlay.
 
 ### Image Behavior
+
 - Ảnh sản phẩm giữ tỉ lệ 3:4 ở mọi breakpoint, không crop khác tỉ lệ trên mobile.
 - Ảnh lookbook full-bleed scale theo chiều ngang, overlay gradient tăng độ đậm trên mobile để bù cho diện tích text/ảnh nhỏ hơn.
 - Avatar đánh giá khách hàng crop tròn ở mọi breakpoint.

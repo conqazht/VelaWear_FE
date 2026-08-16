@@ -41,7 +41,7 @@ export function FinanceDashboard() {
           </TabsList>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <RotateCw className="size-4" aria-hidden="true" />
               <span>{t("admin.finance.updated", { minutes: 5 })}</span>
             </div>
@@ -58,7 +58,9 @@ export function FinanceDashboard() {
 
         <TabsContent value="30-days" className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            <div className="xl:col-span-6"><OverviewKpis /></div>
+            <div className="xl:col-span-6">
+              <OverviewKpis />
+            </div>
             <div className="flex flex-col gap-4 xl:col-span-6">
               <IncomeBreakdown />
               <FinanceNotification />
@@ -66,25 +68,35 @@ export function FinanceDashboard() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            <div className="xl:col-span-7"><TransactionsOverviewCard /></div>
-            <div className="xl:col-span-5"><BalanceDistributionCard /></div>
+            <div className="xl:col-span-7">
+              <TransactionsOverviewCard />
+            </div>
+            <div className="xl:col-span-5">
+              <BalanceDistributionCard />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            <div className="xl:col-span-4"><Wallet /></div>
-            <div className="xl:col-span-4"><UpcomingTransactions /></div>
-            <div className="xl:col-span-4"><QuickActions /></div>
+            <div className="xl:col-span-4">
+              <Wallet />
+            </div>
+            <div className="xl:col-span-4">
+              <UpcomingTransactions />
+            </div>
+            <div className="xl:col-span-4">
+              <QuickActions />
+            </div>
           </div>
         </TabsContent>
 
         <TabsContent value="12-months">
-          <div className="flex h-64 items-center justify-center rounded-xl border border-border border-dashed text-muted-foreground">
+          <div className="border-border text-muted-foreground flex h-64 items-center justify-center rounded-xl border border-dashed">
             {t("admin.finance.accountsComingSoon")}
           </div>
         </TabsContent>
 
         <TabsContent value="custom">
-          <div className="flex h-64 items-center justify-center rounded-xl border border-border border-dashed text-muted-foreground">
+          <div className="border-border text-muted-foreground flex h-64 items-center justify-center rounded-xl border border-dashed">
             {t("admin.finance.transactionsComingSoon")}
           </div>
         </TabsContent>

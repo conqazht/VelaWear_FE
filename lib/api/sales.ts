@@ -1,10 +1,5 @@
 import { apiGet } from "./client";
-import type {
-  PublicSalesResult,
-  SaleCampaign,
-  SaleCampaignPhase,
-  SaleCampaignType,
-} from "./types";
+import type { PublicSalesResult, SaleCampaign, SaleCampaignPhase, SaleCampaignType } from "./types";
 import type { Locale } from "@/lib/i18n";
 
 export type PublicSaleFilters = {
@@ -20,9 +15,7 @@ function normalizePublicSales(payload: PublicSalesResult): PublicSalesResult {
   };
 }
 
-export async function getPublicSales(
-  filters: PublicSaleFilters,
-): Promise<PublicSalesResult> {
+export async function getPublicSales(filters: PublicSaleFilters): Promise<PublicSalesResult> {
   const searchParams = new URLSearchParams({ type: filters.type });
   if (filters.locale) searchParams.set("locale", filters.locale);
   const phases = Array.isArray(filters.phase)
@@ -33,9 +26,7 @@ export async function getPublicSales(
 
   phases.forEach((phase) => searchParams.append("phase", phase));
 
-  const payload = await apiGet<PublicSalesResult>(
-    `/sales?${searchParams.toString()}`,
-  );
+  const payload = await apiGet<PublicSalesResult>(`/sales?${searchParams.toString()}`);
 
   return normalizePublicSales(payload);
 }

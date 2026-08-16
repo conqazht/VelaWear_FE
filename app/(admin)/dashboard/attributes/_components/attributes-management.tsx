@@ -15,10 +15,10 @@ export function AttributesManagement() {
     <Tabs defaultValue="colors" className="gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-semibold text-2xl tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight">
             {t("admin.commerce.attributes.title")}
           </h1>
-          <p className="mt-1 max-w-2xl text-muted-foreground text-sm">
+          <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
             {t("admin.commerce.attributes.description")}
           </p>
         </div>

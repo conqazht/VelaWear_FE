@@ -113,10 +113,9 @@ describe("admin status optimistic mutation", () => {
       return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
     }
 
-    const translationHook = renderHook(
-      () => useUpdateAdminProductTranslationsMutation(),
-      { wrapper: Wrapper },
-    );
+    const translationHook = renderHook(() => useUpdateAdminProductTranslationsMutation(), {
+      wrapper: Wrapper,
+    });
     await act(async () => {
       await translationHook.result.current.mutateAsync({
         id: 7,
@@ -142,10 +141,9 @@ describe("admin status optimistic mutation", () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["sales"] });
     invalidateSpy.mockClear();
 
-    const variantHook = renderHook(
-      () => useUpdateAdminProductVariantStatusMutation(),
-      { wrapper: Wrapper },
-    );
+    const variantHook = renderHook(() => useUpdateAdminProductVariantStatusMutation(), {
+      wrapper: Wrapper,
+    });
     await act(async () => {
       await variantHook.result.current.mutateAsync({ id: 8, status: "ACTIVE" });
     });
@@ -163,10 +161,9 @@ describe("admin status optimistic mutation", () => {
     function Wrapper({ children }: { children: ReactNode }) {
       return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
     }
-    const { result } = renderHook(
-      () => useUpdateAdminCategoryTranslationsMutation(),
-      { wrapper: Wrapper },
-    );
+    const { result } = renderHook(() => useUpdateAdminCategoryTranslationsMutation(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({

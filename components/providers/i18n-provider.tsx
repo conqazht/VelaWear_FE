@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import { createContext, use, useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 
 import {
   DEFAULT_LOCALE,
@@ -19,10 +12,7 @@ import {
   setActiveLocale,
   subscribeToActiveLocale,
 } from "@/lib/i18n";
-import {
-  interpolateMessage,
-  type MessageVariables,
-} from "@/lib/i18n/define-messages";
+import { interpolateMessage, type MessageVariables } from "@/lib/i18n/define-messages";
 import { coreMessages } from "@/lib/i18n/messages/catalog-core";
 import type { TranslationKey } from "@/lib/i18n/messages/types";
 
@@ -119,7 +109,7 @@ export function I18nProvider({
   const t = useCallback(
     (key: TranslationKey, variables?: MessageVariables) => {
       const message =
-        catalog[locale][key as keyof typeof catalog[typeof locale]] ??
+        catalog[locale][key as keyof (typeof catalog)[typeof locale]] ??
         catalog.en[key as keyof typeof catalog.en] ??
         key;
       return interpolateMessage(message, variables);
@@ -127,10 +117,7 @@ export function I18nProvider({
     [locale, catalog],
   );
 
-  const value = useMemo(
-    () => ({ locale, setLocale, t, catalog }),
-    [locale, setLocale, t, catalog],
-  );
+  const value = useMemo(() => ({ locale, setLocale, t, catalog }), [locale, setLocale, t, catalog]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
@@ -154,7 +141,7 @@ export function I18nCatalogProvider({
   const t = useCallback(
     (key: TranslationKey, variables?: MessageVariables) => {
       const message =
-        mergedCatalog[locale][key as keyof typeof mergedCatalog[typeof locale]] ??
+        mergedCatalog[locale][key as keyof (typeof mergedCatalog)[typeof locale]] ??
         mergedCatalog.en[key as keyof typeof mergedCatalog.en] ??
         key;
       return interpolateMessage(message, variables);

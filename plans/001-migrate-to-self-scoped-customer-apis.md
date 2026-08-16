@@ -48,27 +48,28 @@ Customer screens still construct several requests from a client-known `userId` o
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Fetch | `git fetch origin` | exit 0 |
-| Switch base | `git switch main` | on local `main` |
-| Fast-forward | `git pull --ff-only origin main` | exit 0; no merge commit |
-| Cleanliness | `git status --short` | no output |
-| Base SHA | run `git rev-parse HEAD`, then `git rev-parse origin/main` | both outputs are identical |
-| Branch collision | `git branch --list fix/self-scoped-customer-apis` | no output |
-| Target tests | `pnpm exec vitest run lib/api/commerce-self-service.test.ts lib/queries/commerce-self-service.test.tsx` | all tests pass |
-| Order-detail caller | `pnpm exec vitest run 'app/(shop)/profile/orders/[code]/order-details-client.test.tsx'` | detail and status-history callers use only `/orders/me/**` helpers |
+| Purpose              | Command                                                                                                                         | Expected on success                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Fetch                | `git fetch origin`                                                                                                              | exit 0                                                                                                         |
+| Switch base          | `git switch main`                                                                                                               | on local `main`                                                                                                |
+| Fast-forward         | `git pull --ff-only origin main`                                                                                                | exit 0; no merge commit                                                                                        |
+| Cleanliness          | `git status --short`                                                                                                            | no output                                                                                                      |
+| Base SHA             | run `git rev-parse HEAD`, then `git rev-parse origin/main`                                                                      | both outputs are identical                                                                                     |
+| Branch collision     | `git branch --list fix/self-scoped-customer-apis`                                                                               | no output                                                                                                      |
+| Target tests         | `pnpm exec vitest run lib/api/commerce-self-service.test.ts lib/queries/commerce-self-service.test.tsx`                         | all tests pass                                                                                                 |
+| Order-detail caller  | `pnpm exec vitest run 'app/(shop)/profile/orders/[code]/order-details-client.test.tsx'`                                         | detail and status-history callers use only `/orders/me/**` helpers                                             |
 | Ownership full stack | `pnpm exec playwright test e2e/fullstack/customer-self-scope.spec.ts --grep "two accounts cannot cross self-service ownership"` | the `{ tag: "@fullstack" }` case runs; configured A/B own reads succeed; copied foreign identifiers return 404 |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0, at most 25 warnings |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit suite | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
+| Lint                 | `pnpm exec eslint . --max-warnings 25`                                                                                          | exit 0, at most 25 warnings                                                                                    |
+| Typecheck            | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                     | exit 0                                                                                                         |
+| Unit suite           | `pnpm test:unit`                                                                                                                | all tests pass                                                                                                 |
+| Build                | `pnpm build`                                                                                                                    | production build succeeds                                                                                      |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope**:
+
 - `lib/api/commerce.ts`
 - `lib/queries/commerce.ts`
 - `lib/queries/keys.ts`
@@ -81,6 +82,7 @@ Customer screens still construct several requests from a client-known `userId` o
 - `e2e/fullstack/customer-self-scope.spec.ts` (create)
 
 **Out of scope**:
+
 - Backend source or a different endpoint contract from merged BE-001.
 - Admin API modules and admin routes.
 - Revoking legacy backend permissions; that is BE-002.

@@ -47,11 +47,7 @@ add/remove.
   row rồi tạo product-detail query cho từng ID:
 
   ```tsx
-  const wishlistsQuery = useWishlistsQuery(
-    wishlistUserId,
-    { size: 100 },
-    isAuthenticated
-  );
+  const wishlistsQuery = useWishlistsQuery(wishlistUserId, { size: 100 }, isAuthenticated);
   // ...
   const wishlistProductQueries = useQueries({
     queries: wishlistProductIds.map((productId) => ({
@@ -108,20 +104,21 @@ add/remove.
 
 ## Các lệnh cần dùng
 
-| Mục đích | Lệnh | Kết quả thành công |
-|---|---|---|
-| Cài dependency | `pnpm install --frozen-lockfile` | exit 0; lockfile không đổi |
-| Target test | `pnpm exec vitest run components/shop/favorites-provider.test.tsx` | mọi test pass |
-| Lint | `pnpm exec eslint components/shop/favorites-provider.tsx components/shop/favorites-provider.test.tsx lib/api/types.ts lib/api/commerce.ts lib/queries/commerce.ts lib/queries/keys.ts --max-warnings 0` | exit 0, không warning |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, không error |
-| Unit suite | `pnpm test:unit` | mọi test pass |
-| Build | `pnpm build` | production build thành công |
+| Mục đích       | Lệnh                                                                                                                                                                                                    | Kết quả thành công          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Cài dependency | `pnpm install --frozen-lockfile`                                                                                                                                                                        | exit 0; lockfile không đổi  |
+| Target test    | `pnpm exec vitest run components/shop/favorites-provider.test.tsx`                                                                                                                                      | mọi test pass               |
+| Lint           | `pnpm exec eslint components/shop/favorites-provider.tsx components/shop/favorites-provider.test.tsx lib/api/types.ts lib/api/commerce.ts lib/queries/commerce.ts lib/queries/keys.ts --max-warnings 0` | exit 0, không warning       |
+| Typecheck      | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                                                             | exit 0, không error         |
+| Unit suite     | `pnpm test:unit`                                                                                                                                                                                        | mọi test pass               |
+| Build          | `pnpm build`                                                                                                                                                                                            | production build thành công |
 
 ## Phạm vi
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong phạm vi** (chỉ được sửa các file này):
+
 - `lib/api/types.ts`
 - `lib/api/commerce.ts`
 - `lib/queries/commerce.ts`
@@ -130,6 +127,7 @@ add/remove.
 - `components/shop/favorites-provider.test.tsx` (tạo mới)
 
 **Ngoài phạm vi** (KHÔNG sửa):
+
 - Backend code hoặc BE-009 response contract.
 - Product-detail query dùng bởi product page hay consumer ngoài wishlist.
 - Cart ownership, authentication hoặc logout; FE-003 quản lý phần này.

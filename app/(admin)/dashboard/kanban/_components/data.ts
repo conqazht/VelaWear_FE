@@ -100,7 +100,8 @@ export const initialBoard: BoardState = {
     {
       id: "work-order-allocation-model",
       title: "Work order allocation model",
-      description: "Sketch how awarded work orders connect to employee allocations and salary months.",
+      description:
+        "Sketch how awarded work orders connect to employee allocations and salary months.",
       priority: "Medium",
       dueDate: "Jun 19",
       progress: 5,
@@ -114,7 +115,8 @@ export const initialBoard: BoardState = {
     {
       id: "future-sync-notes",
       title: "Future sync notes",
-      description: "Capture local-first sync assumptions before deciding on cloud PostgreSQL and file storage.",
+      description:
+        "Capture local-first sync assumptions before deciding on cloud PostgreSQL and file storage.",
       priority: "Low",
       dueDate: "Jun 21",
       progress: 0,
@@ -171,7 +173,8 @@ export const initialBoard: BoardState = {
     {
       id: "generated-documents-index",
       title: "Generated documents index",
-      description: "Plan filters for generated PDFs by party, salary month, employee, and import batch.",
+      description:
+        "Plan filters for generated PDFs by party, salary month, employee, and import batch.",
       priority: "Medium",
       dueDate: "Jun 25",
       progress: 10,
@@ -233,7 +236,8 @@ export const initialBoard: BoardState = {
     {
       id: "salary-row-validation",
       title: "Salary row validation",
-      description: "Flag missing employee IDs, invalid amounts, duplicate rows, and unmapped fields.",
+      description:
+        "Flag missing employee IDs, invalid amounts, duplicate rows, and unmapped fields.",
       priority: "High",
       dueDate: "Jul 4",
       progress: 75,

@@ -122,14 +122,10 @@ describe("MemberProfile demand-gated data loading (FE-008)", () => {
     expect(useMyOrdersQueryMock).toHaveBeenCalledWith(
       1,
       { size: 100, sort: "createdAt,desc" },
-      false
+      false,
     );
 
-    expect(useMyAddressesQueryMock).toHaveBeenCalledWith(
-      1,
-      { size: 100 },
-      false
-    );
+    expect(useMyAddressesQueryMock).toHaveBeenCalledWith(1, { size: 100 }, false);
   });
 
   it("khi chuyển sang tab Orders chỉ kích hoạt ordersQuery", () => {
@@ -142,14 +138,10 @@ describe("MemberProfile demand-gated data loading (FE-008)", () => {
     expect(useMyOrdersQueryMock).toHaveBeenCalledWith(
       1,
       { size: 100, sort: "createdAt,desc" },
-      true
+      true,
     );
 
-    expect(useMyAddressesQueryMock).toHaveBeenCalledWith(
-      1,
-      { size: 100 },
-      false
-    );
+    expect(useMyAddressesQueryMock).toHaveBeenCalledWith(1, { size: 100 }, false);
   });
 
   it("khi chuyển sang sidebar panel Delivery chỉ kích hoạt addressesQuery", () => {
@@ -162,16 +154,12 @@ describe("MemberProfile demand-gated data loading (FE-008)", () => {
     const deliveryTabButton = screen.getByRole("button", { name: /account.sidebar.addresses/i });
     fireEvent.click(deliveryTabButton);
 
-    expect(useMyAddressesQueryMock).toHaveBeenLastCalledWith(
-      1,
-      { size: 100 },
-      true
-    );
+    expect(useMyAddressesQueryMock).toHaveBeenLastCalledWith(1, { size: 100 }, true);
 
     expect(useMyOrdersQueryMock).toHaveBeenLastCalledWith(
       1,
       { size: 100, sort: "createdAt,desc" },
-      false
+      false,
     );
   });
 
@@ -187,13 +175,9 @@ describe("MemberProfile demand-gated data loading (FE-008)", () => {
     expect(useMyOrdersQueryMock).toHaveBeenCalledWith(
       undefined,
       { size: 100, sort: "createdAt,desc" },
-      false
+      false,
     );
 
-    expect(useMyAddressesQueryMock).toHaveBeenCalledWith(
-      undefined,
-      { size: 100 },
-      false
-    );
+    expect(useMyAddressesQueryMock).toHaveBeenCalledWith(undefined, { size: 100 }, false);
   });
 });

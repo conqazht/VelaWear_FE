@@ -31,7 +31,7 @@ export function HorizontalSlider({ products }: HorizontalSliderProps) {
     if (slider) {
       slider.addEventListener("scroll", checkScroll);
       checkScroll();
-      
+
       window.addEventListener("resize", checkScroll);
     }
     return () => {
@@ -55,49 +55,53 @@ export function HorizontalSlider({ products }: HorizontalSliderProps) {
   };
 
   return (
-    <div className="relative group/slider w-full">
+    <div className="group/slider relative w-full">
       {/* Sliding Arrow Left */}
-      <div className="absolute top-[35%] -left-4 md:-left-6 z-30 transition-opacity duration-300">
+      <div className="absolute top-[35%] -left-4 z-30 transition-opacity duration-300 md:-left-6">
         <motion.button
           onClick={() => scroll("left")}
           disabled={!canScrollLeft}
-          className={`w-12 h-12 rounded-full flex items-center justify-center bg-[#f7f4ef] text-[#1c1a18] border border-[#e3dccf] shadow-md cursor-pointer transition-opacity duration-300 ${
-            canScrollLeft ? "opacity-100 hover:bg-[#b5573a] hover:text-[#f7f4ef] hover:border-[#b5573a]" : "opacity-0 pointer-events-none"
+          className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-[#e3dccf] bg-[#f7f4ef] text-[#1c1a18] shadow-md transition-opacity duration-300 ${
+            canScrollLeft
+              ? "opacity-100 hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-[#f7f4ef]"
+              : "pointer-events-none opacity-0"
           }`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           aria-label={t("carousel.scrollLeft")}
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="h-5 w-5" />
         </motion.button>
       </div>
 
       {/* Sliding Arrow Right */}
-      <div className="absolute top-[35%] -right-4 md:-right-6 z-30 transition-opacity duration-300">
+      <div className="absolute top-[35%] -right-4 z-30 transition-opacity duration-300 md:-right-6">
         <motion.button
           onClick={() => scroll("right")}
           disabled={!canScrollRight}
-          className={`w-12 h-12 rounded-full flex items-center justify-center bg-[#f7f4ef] text-[#1c1a18] border border-[#e3dccf] shadow-md cursor-pointer transition-opacity duration-300 ${
-            canScrollRight ? "opacity-100 hover:bg-[#b5573a] hover:text-[#f7f4ef] hover:border-[#b5573a]" : "opacity-0 pointer-events-none"
+          className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-[#e3dccf] bg-[#f7f4ef] text-[#1c1a18] shadow-md transition-opacity duration-300 ${
+            canScrollRight
+              ? "opacity-100 hover:border-[#b5573a] hover:bg-[#b5573a] hover:text-[#f7f4ef]"
+              : "pointer-events-none opacity-0"
           }`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           aria-label={t("carousel.scrollRight")}
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="h-5 w-5" />
         </motion.button>
       </div>
 
       {/* Slider Viewport Container */}
       <div
         ref={sliderRef}
-        className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-4 px-1"
+        className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-1 pb-4"
         style={{ scrollbarWidth: "none" }}
       >
         {products.map((product) => (
           <motion.div
             key={product.id}
-            className="min-w-[280px] sm:min-w-[340px] md:min-w-[380px] max-w-[400px] flex-none snap-start"
+            className="max-w-[400px] min-w-[280px] flex-none snap-start sm:min-w-[340px] md:min-w-[380px]"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}

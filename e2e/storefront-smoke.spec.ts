@@ -23,7 +23,7 @@ test("trang chủ render shell và tìm kiếm từ header", { tag: "@smoke" }, 
 
   await expect(page).toHaveURL(
     (url) => url.pathname === "/search" && url.searchParams.get("q") === "linen shirt",
-    { timeout: 15000 }
+    { timeout: 15000 },
   );
 });
 
@@ -65,9 +65,7 @@ test("giỏ hàng cập nhật từ UI và còn nguyên sau reload", { tag: "@sm
 
   await page.reload({ waitUntil: "domcontentloaded" });
 
-  await expect(
-    shoppingBag.getByText("1", { exact: true }),
-  ).toBeVisible();
+  await expect(shoppingBag.getByText("1", { exact: true })).toBeVisible();
 
   await shoppingBag.click();
 
