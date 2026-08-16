@@ -14,10 +14,18 @@ describe("sale-utils", () => {
   const endsAt = "2026-07-15T02:00:00.000Z";
 
   it("tính phase từ status và thời gian thay vì lưu phase dễ bị cũ", () => {
-    expect(deriveSalePhase("PUBLISHED", startsAt, endsAt, Date.parse("2026-07-15T00:00:00Z"))).toBe("UPCOMING");
-    expect(deriveSalePhase("PUBLISHED", startsAt, endsAt, Date.parse("2026-07-15T01:30:00Z"))).toBe("LIVE");
-    expect(deriveSalePhase("PUBLISHED", startsAt, endsAt, Date.parse("2026-07-15T03:00:00Z"))).toBe("ENDED");
-    expect(deriveSalePhase("CANCELLED", startsAt, endsAt, Date.parse("2026-07-15T00:00:00Z"))).toBe("ENDED");
+    expect(deriveSalePhase("PUBLISHED", startsAt, endsAt, Date.parse("2026-07-15T00:00:00Z"))).toBe(
+      "UPCOMING",
+    );
+    expect(deriveSalePhase("PUBLISHED", startsAt, endsAt, Date.parse("2026-07-15T01:30:00Z"))).toBe(
+      "LIVE",
+    );
+    expect(deriveSalePhase("PUBLISHED", startsAt, endsAt, Date.parse("2026-07-15T03:00:00Z"))).toBe(
+      "ENDED",
+    );
+    expect(deriveSalePhase("CANCELLED", startsAt, endsAt, Date.parse("2026-07-15T00:00:00Z"))).toBe(
+      "ENDED",
+    );
   });
 
   it("không trả countdown âm", () => {
@@ -26,7 +34,9 @@ describe("sale-utils", () => {
       minutes: 1,
       seconds: 1,
     });
-    expect(getCountdown("2026-07-14T00:00:00Z", Date.parse("2026-07-15T00:00:00Z")).totalSeconds).toBe(0);
+    expect(
+      getCountdown("2026-07-14T00:00:00Z", Date.parse("2026-07-15T00:00:00Z")).totalSeconds,
+    ).toBe(0);
   });
 
   it("dùng serverTime để bù lệch đồng hồ thiết bị", () => {

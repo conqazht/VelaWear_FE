@@ -1,8 +1,4 @@
-import type {
-  SaleCampaignItem,
-  SaleCampaignPhase,
-  SaleCampaignStatus,
-} from "@/lib/api/types";
+import type { SaleCampaignItem, SaleCampaignPhase, SaleCampaignStatus } from "@/lib/api/types";
 
 export type CountdownParts = {
   totalSeconds: number;
@@ -66,7 +62,9 @@ export function groupSaleItems(items: SaleCampaignItem[]): SaleProductGroup[] {
     const representative = variants.reduce((best, current) =>
       current.promotionalPrice < best.promotionalPrice ? current : best,
     );
-    const quotas = variants.map((item) => item.quota).filter((value): value is number => value != null);
+    const quotas = variants
+      .map((item) => item.quota)
+      .filter((value): value is number => value != null);
     const remaining = variants
       .map((item) => item.remainingQuota)
       .filter((value): value is number => value != null);

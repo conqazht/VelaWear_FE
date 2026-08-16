@@ -20,7 +20,9 @@ export function RecentNotesCard() {
   const recentNotes = [
     { title: t("admin.productivity.notes.design"), date: formatNoteDate(0), icon: FileText },
     {
-      title: t("admin.productivity.notes.content", { month: formatDate(today, locale, { month: "long" }) }),
+      title: t("admin.productivity.notes.content", {
+        month: formatDate(today, locale, { month: "long" }),
+      }),
       date: formatNoteDate(1),
       icon: FileText,
     },
@@ -41,9 +43,9 @@ export function RecentNotesCard() {
       <CardContent className="flex flex-col gap-4">
         {recentNotes.map((note) => (
           <div key={note.title} className="flex items-start gap-4">
-            <note.icon className="size-5 text-muted-foreground" />
+            <note.icon className="text-muted-foreground size-5" />
             <div className="min-w-0">
-              <div className="truncate font-medium text-sm leading-none">{note.title}</div>
+              <div className="truncate text-sm leading-none font-medium">{note.title}</div>
               <div className="text-muted-foreground text-xs">{note.date}</div>
             </div>
           </div>

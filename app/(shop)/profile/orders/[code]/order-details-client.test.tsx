@@ -3,11 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  getMyOrderByCodeMock,
-  getMyOrderStatusHistoriesMock,
-  useAuthMock,
-} = vi.hoisted(() => ({
+const { getMyOrderByCodeMock, getMyOrderStatusHistoriesMock, useAuthMock } = vi.hoisted(() => ({
   getMyOrderByCodeMock: vi.fn(),
   getMyOrderStatusHistoriesMock: vi.fn(),
   useAuthMock: vi.fn(),
@@ -121,15 +117,13 @@ describe("OrderDetailsClient self-service contract", () => {
       expect(getMyOrderStatusHistoriesMock).toHaveBeenCalledWith(110, historyParams);
     });
     expect(queryClient.getQueryState(queryKeys.orders.meByCode(11, "ORDER-11"))).toBeDefined();
-    expect(queryClient.getQueryState(
-      queryKeys.orders.meStatusHistories(11, 110, historyParams),
-    )).toBeDefined();
+    expect(
+      queryClient.getQueryState(queryKeys.orders.meStatusHistories(11, 110, historyParams)),
+    ).toBeDefined();
   });
 
   it("does not reuse one account's detail cache after an account transition", async () => {
-    getMyOrderByCodeMock
-      .mockResolvedValueOnce(orderFor(11))
-      .mockResolvedValueOnce(orderFor(22));
+    getMyOrderByCodeMock.mockResolvedValueOnce(orderFor(11)).mockResolvedValueOnce(orderFor(22));
     const { queryClient, Wrapper } = createHarness();
     const view = render(<OrderDetailsClient code="SHARED-CODE" />, {
       wrapper: Wrapper,
@@ -147,12 +141,8 @@ describe("OrderDetailsClient self-service contract", () => {
     expect(await screen.findByText("order:ORDER-22")).toBeInTheDocument();
     expect(screen.queryByText("order:ORDER-11")).not.toBeInTheDocument();
     expect(getMyOrderByCodeMock).toHaveBeenCalledTimes(2);
-    expect(queryClient.getQueryState(
-      queryKeys.orders.meByCode(11, "SHARED-CODE"),
-    )).toBeDefined();
-    expect(queryClient.getQueryState(
-      queryKeys.orders.meByCode(22, "SHARED-CODE"),
-    )).toBeDefined();
+    expect(queryClient.getQueryState(queryKeys.orders.meByCode(11, "SHARED-CODE"))).toBeDefined();
+    expect(queryClient.getQueryState(queryKeys.orders.meByCode(22, "SHARED-CODE"))).toBeDefined();
   });
 
   it("keeps guest requests disabled", async () => {

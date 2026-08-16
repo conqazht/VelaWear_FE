@@ -13,7 +13,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AnalyticsToolbar() {
   const { t } = useI18n();
@@ -28,7 +35,9 @@ export function AnalyticsToolbar() {
           <SelectGroup>
             <SelectItem value="last-7-days">{t("admin.dashboardsA.common.last7Days")}</SelectItem>
             <SelectItem value="last-4-weeks">{t("admin.dashboardsA.common.last4Weeks")}</SelectItem>
-            <SelectItem value="last-3-months">{t("admin.dashboardsA.common.last3Months")}</SelectItem>
+            <SelectItem value="last-3-months">
+              {t("admin.dashboardsA.common.last3Months")}
+            </SelectItem>
             <SelectItem value="year-to-date">{t("admin.dashboardsA.common.yearToDate")}</SelectItem>
           </SelectGroup>
         </SelectContent>

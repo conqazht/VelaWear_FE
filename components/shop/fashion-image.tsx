@@ -7,11 +7,7 @@ interface FashionImageProps {
   priority?: boolean;
 }
 
-export function FashionImage({
-  src,
-  alt,
-  className,
-}: FashionImageProps) {
+export function FashionImage({ src, alt, className }: FashionImageProps) {
   return (
     <div
       aria-label={alt}

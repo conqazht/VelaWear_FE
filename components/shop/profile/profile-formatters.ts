@@ -18,18 +18,13 @@ export const formatDisplayDate = (value: string | null | undefined, locale: Loca
 export const formatMemberSince = (value: string | null | undefined, locale: Locale) => {
   if (!value) return formatDate("2026-06-01", locale, { month: "long", year: "numeric" });
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return formatDate("2026-06-01", locale, { month: "long", year: "numeric" });
+  if (Number.isNaN(date.getTime()))
+    return formatDate("2026-06-01", locale, { month: "long", year: "numeric" });
   return formatDate(date, locale, { month: "long", year: "numeric" });
 };
 
 export const formatAddress = (address: UserAddress) =>
-  [
-    address.addressDetail,
-    address.ward,
-    address.province,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  [address.addressDetail, address.ward, address.province].filter(Boolean).join(", ");
 
 export const orderStatusMeta: Record<string, { badge: string; dot: string }> = {
   PENDING: {

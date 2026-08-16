@@ -6,8 +6,20 @@ import { Label, Pie, PieChart } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 
 type BalanceKey = "investment" | "main" | "reserve" | "savings";
@@ -125,12 +137,21 @@ export function BalanceDistributionCard() {
                   }
 
                   return (
-                    <text dominantBaseline="middle" textAnchor="middle" x={viewBox.cx} y={viewBox.cy}>
-                      <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy ?? 0) - 8}>
+                    <text
+                      dominantBaseline="middle"
+                      textAnchor="middle"
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                    >
+                      <tspan
+                        className="fill-muted-foreground text-xs"
+                        x={viewBox.cx}
+                        y={(viewBox.cy ?? 0) - 8}
+                      >
                         {t("admin.finance.allocation.total")}
                       </tspan>
                       <tspan
-                        className="fill-foreground font-heading font-medium text-lg tabular-nums"
+                        className="fill-foreground font-heading text-lg font-medium tabular-nums"
                         x={viewBox.cx}
                         y={(viewBox.cy ?? 0) + 14}
                       >
@@ -149,14 +170,23 @@ export function BalanceDistributionCard() {
             <div className="grid grid-cols-[1fr_auto] items-end gap-3" key={item.key}>
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1">
-                  <span aria-hidden="true" className="h-2 w-1 rounded-full" style={{ backgroundColor: item.fill }} />
-                  <p className="truncate text-muted-foreground text-xs">{item.account}</p>
+                  <span
+                    aria-hidden="true"
+                    className="h-2 w-1 rounded-full"
+                    style={{ backgroundColor: item.fill }}
+                  />
+                  <p className="text-muted-foreground truncate text-xs">{item.account}</p>
                 </div>
                 <p className="font-medium tabular-nums">
                   {formatCurrency(item.amount, locale, currency)}
                 </p>
               </div>
-              <div className="font-medium tabular-nums">{formatNumber(item.percentage / 100, locale, { style: "percent", maximumFractionDigits: 1 })}</div>
+              <div className="font-medium tabular-nums">
+                {formatNumber(item.percentage / 100, locale, {
+                  style: "percent",
+                  maximumFractionDigits: 1,
+                })}
+              </div>
             </div>
           ))}
         </div>

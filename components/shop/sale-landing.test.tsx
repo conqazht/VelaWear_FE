@@ -4,11 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SaleLanding } from "@/components/shop/sale-landing";
 import { I18nProvider, I18nCatalogProvider } from "@/components/providers/i18n-provider";
 import { shopMessages } from "@/lib/i18n/messages/catalog-shop";
-import {
-  LOCALE_STORAGE_KEY,
-  setActiveLocale,
-  type Locale,
-} from "@/lib/i18n";
+import { LOCALE_STORAGE_KEY, setActiveLocale, type Locale } from "@/lib/i18n";
 
 const { usePublicSalesQueryMock } = vi.hoisted(() => ({
   usePublicSalesQueryMock: vi.fn(),

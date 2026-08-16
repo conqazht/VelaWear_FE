@@ -29,7 +29,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 import { Marker, MarkerContent } from "@/components/ui/marker";
 import { Message, MessageAvatar, MessageContent, MessageFooter } from "@/components/ui/message";
 import {
@@ -57,7 +62,14 @@ interface ChatThreadProps {
   className?: string;
 }
 
-export function ChatThread({ contact, messages, onOpenContact, onBack, showBackButton, className }: ChatThreadProps) {
+export function ChatThread({
+  contact,
+  messages,
+  onOpenContact,
+  onBack,
+  showBackButton,
+  className,
+}: ChatThreadProps) {
   const { locale, t } = useI18n();
 
   return (
@@ -77,11 +89,13 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
               </Button>
             )}
             <Avatar className="size-8">
-              <AvatarFallback className="bg-background text-foreground">{getInitials(contact.name)}</AvatarFallback>
+              <AvatarFallback className="bg-background text-foreground">
+                {getInitials(contact.name)}
+              </AvatarFallback>
               <AvatarBadge className="bg-green-600 dark:bg-green-800" />
             </Avatar>
             <div>
-              <div className="font-medium text-sm">{contact.name}</div>
+              <div className="text-sm font-medium">{contact.name}</div>
               <div className="text-muted-foreground text-xs leading-3">{contact.role}</div>
             </div>
           </div>
@@ -237,7 +251,7 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
         <Tabs defaultValue="reply" className="gap-0 rounded-md border">
           <TabsList
             variant="line"
-            className="w-full justify-start gap-2 border-b px-3 **:data-[slot=tabs-trigger]:border-x-0 **:data-[slot=tabs-trigger]:px-6 group-data-horizontal/tabs:h-10"
+            className="w-full justify-start gap-2 border-b px-3 group-data-horizontal/tabs:h-10 **:data-[slot=tabs-trigger]:border-x-0 **:data-[slot=tabs-trigger]:px-6"
           >
             <TabsTrigger value="reply" className="flex-none px-1">
               {t("admin.communications.chat.thread.reply")}
@@ -253,9 +267,7 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
             />
           </TabsContent>
           <TabsContent value="note" className="m-0">
-            <MessageComposer
-              placeholder={t("admin.communications.chat.thread.notePlaceholder")}
-            />
+            <MessageComposer placeholder={t("admin.communications.chat.thread.notePlaceholder")} />
           </TabsContent>
         </Tabs>
       </div>
@@ -273,7 +285,7 @@ function MessageComposer({ placeholder }: { placeholder: string }) {
         event.preventDefault();
       }}
     >
-      <InputGroup className="border-0 bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot][aria-invalid=true]]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-transparent dark:has-[[data-slot][aria-invalid=true]]:ring-0">
+      <InputGroup className="border-0 bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:border-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-transparent dark:has-[[data-slot][aria-invalid=true]]:ring-0">
         <InputGroupTextarea
           placeholder={placeholder}
           className="min-h-14 px-3 py-2.5 text-sm ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"

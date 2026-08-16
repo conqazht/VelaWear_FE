@@ -50,7 +50,13 @@ function TitleColumnHeader({ column }: { column: Column<Task, unknown> }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="ghost" size="sm" className="-ml-3 text-muted-foreground data-popup-open:bg-accent" />}
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground data-popup-open:bg-accent -ml-3"
+          />
+        }
       >
         {t("admin.workflows.tasks.title")}
         <SortIcon sortDirection={column.getIsSorted()} />
@@ -95,138 +101,149 @@ export function useTaskColumns(): ColumnDef<Task>[] {
   };
 
   return [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label={t("admin.workflows.tasks.selectAll")}
-        className="translate-y-0.5"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label={t("admin.workflows.tasks.selectRow", { id: row.original.id })}
-        className="translate-y-0.5"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "id",
-    header: t("admin.workflows.tasks.task"),
-    cell: ({ row }) => <div className="w-20 font-mono text-muted-foreground text-sm">{row.getValue("id")}</div>,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "title",
-    header: ({ column }) => <TitleColumnHeader column={column} />,
-    cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.label);
-
-      return (
-        <div className="flex min-w-0 items-center gap-2">
-          {label && (
-            <Badge className="rounded-sm bg-transparent" variant="outline">
-              {labelNames[label.value] ?? label.label}
-            </Badge>
-          )}
-          <span className="max-w-lg truncate font-medium text-sm">{row.getValue("title")}</span>
-        </div>
-      );
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label={t("admin.workflows.tasks.selectAll")}
+          className="translate-y-0.5"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label={t("admin.workflows.tasks.selectRow", { id: row.original.id })}
+          className="translate-y-0.5"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-  },
-  {
-    accessorKey: "status",
-    header: t("admin.workflows.common.status"),
-    cell: ({ row }) => {
-      const status = statuses.find((status) => status.value === row.getValue("status"));
-
-      if (!status) {
-        return null;
-      }
-
-      return (
-        <Badge className={cn("gap-1.5 rounded-sm border font-medium", statusStyles[status.value])} variant="outline">
-          {status.icon && <status.icon className="size-4" />}
-          {statusNames[status.value] ?? status.label}
-        </Badge>
-      );
+    {
+      accessorKey: "id",
+      header: t("admin.workflows.tasks.task"),
+      cell: ({ row }) => (
+        <div className="text-muted-foreground w-20 font-mono text-sm">{row.getValue("id")}</div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: "priority",
-    header: t("admin.workflows.common.priority"),
-    cell: ({ row }) => {
-      const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
+    {
+      accessorKey: "title",
+      header: ({ column }) => <TitleColumnHeader column={column} />,
+      cell: ({ row }) => {
+        const label = labels.find((label) => label.value === row.original.label);
 
-      if (!priority) {
-        return null;
-      }
+        return (
+          <div className="flex min-w-0 items-center gap-2">
+            {label && (
+              <Badge className="rounded-sm bg-transparent" variant="outline">
+                {labelNames[label.value] ?? label.label}
+              </Badge>
+            )}
+            <span className="max-w-lg truncate text-sm font-medium">{row.getValue("title")}</span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: t("admin.workflows.common.status"),
+      cell: ({ row }) => {
+        const status = statuses.find((status) => status.value === row.getValue("status"));
 
-      return (
-        <div className="flex items-center gap-2 text-sm">
-          {priority.icon && <priority.icon className="size-4 text-muted-foreground" />}
-          {priorityNames[priority.value] ?? priority.label}
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const task = row.original as Task;
+        if (!status) {
+          return null;
+        }
 
-      return (
-        <div className="text-right">
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="ghost" size="icon-sm" className="text-muted-foreground data-popup-open:bg-accent" />
-              }
-            >
-              <MoreHorizontal />
-              <span className="sr-only">{t("admin.workflows.tasks.openMenu")}</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem>{t("admin.workflows.tasks.edit")}</DropdownMenuItem>
-              <DropdownMenuItem>{t("admin.workflows.tasks.makeCopy")}</DropdownMenuItem>
-              <DropdownMenuItem>{t("admin.workflows.tasks.favorite")}</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>{t("admin.workflows.tasks.labels")}</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup value={task.label}>
-                    {labels.map((label) => (
-                      <DropdownMenuRadioItem key={label.value} value={label.value}>
-                        {labelNames[label.value] ?? label.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                {t("admin.workflows.tasks.delete")}
-                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+        return (
+          <Badge
+            className={cn("gap-1.5 rounded-sm border font-medium", statusStyles[status.value])}
+            variant="outline"
+          >
+            {status.icon && <status.icon className="size-4" />}
+            {statusNames[status.value] ?? status.label}
+          </Badge>
+        );
+      },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
     },
-  },
+    {
+      accessorKey: "priority",
+      header: t("admin.workflows.common.priority"),
+      cell: ({ row }) => {
+        const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
+
+        if (!priority) {
+          return null;
+        }
+
+        return (
+          <div className="flex items-center gap-2 text-sm">
+            {priority.icon && <priority.icon className="text-muted-foreground size-4" />}
+            {priorityNames[priority.value] ?? priority.label}
+          </div>
+        );
+      },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const task = row.original as Task;
+
+        return (
+          <div className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-muted-foreground data-popup-open:bg-accent"
+                  />
+                }
+              >
+                <MoreHorizontal />
+                <span className="sr-only">{t("admin.workflows.tasks.openMenu")}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem>{t("admin.workflows.tasks.edit")}</DropdownMenuItem>
+                <DropdownMenuItem>{t("admin.workflows.tasks.makeCopy")}</DropdownMenuItem>
+                <DropdownMenuItem>{t("admin.workflows.tasks.favorite")}</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    {t("admin.workflows.tasks.labels")}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup value={task.label}>
+                      {labels.map((label) => (
+                        <DropdownMenuRadioItem key={label.value} value={label.value}>
+                          {labelNames[label.value] ?? label.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  {t("admin.workflows.tasks.delete")}
+                  <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
   ];
 }

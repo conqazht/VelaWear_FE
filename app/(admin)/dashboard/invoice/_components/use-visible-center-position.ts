@@ -28,7 +28,9 @@ export function useVisibleCenterPosition(
       const visibleBottom = Math.min(parentRect.bottom, window.innerHeight);
       const visibleHeight = Math.max(0, visibleBottom - visibleTop);
       const visibleCenter =
-        visibleHeight > 0 ? visibleTop + visibleHeight / 2 - parentRect.top : parent.clientHeight / 2;
+        visibleHeight > 0
+          ? visibleTop + visibleHeight / 2 - parentRect.top
+          : parent.clientHeight / 2;
 
       const availableWidth = Math.max(0, parent.clientWidth - padding * 2);
       const availableHeight = Math.max(0, parent.clientHeight - padding * 2);

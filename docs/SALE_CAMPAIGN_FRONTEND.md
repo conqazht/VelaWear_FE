@@ -199,14 +199,14 @@ Nếu server đã tạo đơn nhưng response bị mất, FE giữ nguyên cả 
 
 `lib/checkout-api.ts` ưu tiên field `code`; không phụ thuộc câu chữ trong `message`.
 
-| HTTP/code | Ý nghĩa trên UI |
-| --- | --- |
-| `409 INSUFFICIENT_STOCK` | Tồn kho không đủ, tải lại giỏ |
-| `409 FLASH_SALE_SOLD_OUT` | Quota vừa hết |
-| `409 FLASH_SALE_ENDED` | Campaign vừa kết thúc |
-| `409 FLASH_SALE_LIMIT_EXCEEDED` | Vượt tổng lượt mua của khách |
-| `409 PRICE_CHANGED` | Giá/fingerprint đã đổi |
-| `409 IDEMPOTENCY_KEY_REUSED` | Cùng key nhưng payload khác |
+| HTTP/code                       | Ý nghĩa trên UI               |
+| ------------------------------- | ----------------------------- |
+| `409 INSUFFICIENT_STOCK`        | Tồn kho không đủ, tải lại giỏ |
+| `409 FLASH_SALE_SOLD_OUT`       | Quota vừa hết                 |
+| `409 FLASH_SALE_ENDED`          | Campaign vừa kết thúc         |
+| `409 FLASH_SALE_LIMIT_EXCEEDED` | Vượt tổng lượt mua của khách  |
+| `409 PRICE_CHANGED`             | Giá/fingerprint đã đổi        |
+| `409 IDEMPOTENCY_KEY_REUSED`    | Cùng key nhưng payload khác   |
 
 Sau các conflict liên quan dữ liệu, FE gọi lại `/carts/me` và `/checkout/preview`. Người dùng thấy lý do cụ thể và tổng mới; hệ thống không tự đặt hàng lại.
 

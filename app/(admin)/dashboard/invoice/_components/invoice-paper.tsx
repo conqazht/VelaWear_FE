@@ -45,7 +45,9 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
   const discountValue = Number.isFinite(invoice.discountValue) ? invoice.discountValue : 0;
   const discountLabel =
     invoice.discountType === "percent"
-      ? t("admin.workflows.invoice.discountPercent", { percent: percentFormatter.format(discountValue / 100) })
+      ? t("admin.workflows.invoice.discountPercent", {
+          percent: percentFormatter.format(discountValue / 100),
+        })
       : t("admin.workflows.invoice.discount");
 
   return (
@@ -62,19 +64,29 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
             <rect y="28" width="20" height="20" rx="3" fill="currentColor" />
             <rect x="28" y="28" width="20" height="20" rx="3" fill="currentColor" />
           </svg>
-          <h2 className="text-4xl uppercase tracking-widest">{t("admin.workflows.invoice.invoice")}</h2>
+          <h2 className="text-4xl tracking-widest uppercase">
+            {t("admin.workflows.invoice.invoice")}
+          </h2>
         </div>
 
         <section className="grid grid-cols-2 gap-14 text-sm leading-relaxed">
           <div>
             <p>{t("admin.workflows.invoice.reference", { reference: invoice.referenceNumber })}</p>
-            <p>{t("admin.workflows.invoice.issued", { date: formatInvoiceDate(invoice.issuedDate) })}</p>
-            <p>{t("admin.workflows.invoice.paymentDue", { date: formatInvoiceDate(invoice.paymentDueDate) })}</p>
+            <p>
+              {t("admin.workflows.invoice.issued", { date: formatInvoiceDate(invoice.issuedDate) })}
+            </p>
+            <p>
+              {t("admin.workflows.invoice.paymentDue", {
+                date: formatInvoiceDate(invoice.paymentDueDate),
+              })}
+            </p>
           </div>
           <div>
             <p>{t("admin.workflows.invoice.paymentAccount")}</p>
             <p>{invoice.from.paymentAccountName}</p>
-            <p>{t("admin.workflows.invoice.routingNumber", { number: invoice.from.routingNumber })}</p>
+            <p>
+              {t("admin.workflows.invoice.routingNumber", { number: invoice.from.routingNumber })}
+            </p>
           </div>
         </section>
 
@@ -109,7 +121,7 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
           {getInvoiceItems(invoice).map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-[1fr_74px_116px_116px] border-[oklch(0.86_0_0)] border-b px-3 py-4"
+              className="grid grid-cols-[1fr_74px_116px_116px] border-b border-[oklch(0.86_0_0)] px-3 py-4"
             >
               <span>{item.description}</span>
               <span className="text-right">{numberFormatter.format(item.quantity)}</span>
@@ -132,22 +144,27 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
               </div>
               <div className="flex justify-between gap-8">
                 <span>
-                  {taxNames[taxOption.id] ?? taxOption.name} {percentFormatter.format(taxOption.rate / 100)}
+                  {taxNames[taxOption.id] ?? taxOption.name}{" "}
+                  {percentFormatter.format(taxOption.rate / 100)}
                 </span>
                 <span>{formatInvoiceCurrency(getInvoiceTax(invoice))}</span>
               </div>
             </div>
-            <div className="border-current border-y-2 py-3">
+            <div className="border-y-2 border-current py-3">
               <div className="flex justify-between gap-8">
-                <span className="font-semibold uppercase">{t("admin.workflows.invoice.balanceDue")}</span>
-                <span className="font-semibold">{formatInvoiceCurrency(getInvoiceTotal(invoice))}</span>
+                <span className="font-semibold uppercase">
+                  {t("admin.workflows.invoice.balanceDue")}
+                </span>
+                <span className="font-semibold">
+                  {formatInvoiceCurrency(getInvoiceTotal(invoice))}
+                </span>
               </div>
             </div>
           </section>
         </div>
       </div>
 
-      <footer className="absolute right-12.25 bottom-11 left-12.25 grid grid-cols-2 gap-14 text-neutral-500 text-sm leading-relaxed">
+      <footer className="absolute right-12.25 bottom-11 left-12.25 grid grid-cols-2 gap-14 text-sm leading-relaxed text-neutral-500">
         <div>
           <p>{invoice.from.email}</p>
           <p>{invoice.from.phone}</p>

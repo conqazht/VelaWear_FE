@@ -80,7 +80,7 @@ function MailLoadingSkeleton() {
           </div>
           <Skeleton className="size-8 rounded-full" />
         </div>
-        <div className="h-px bg-border" />
+        <div className="bg-border h-px" />
         <div className="space-y-3">
           <Skeleton className="h-3 w-full" />
           <Skeleton className="h-3 w-11/12" />
@@ -130,11 +130,21 @@ function MailDesktopLayout({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: 
       }}
       className="h-full"
     >
-      <ResizablePanel id={MAIL_LIST_PANEL_ID} defaultSize={`${defaultLayout[0]}%`} minSize="30%" className="min-h-0">
+      <ResizablePanel
+        id={MAIL_LIST_PANEL_ID}
+        defaultSize={`${defaultLayout[0]}%`}
+        minSize="30%"
+        className="min-h-0"
+      >
         <MailInbox mails={mails} />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel id={MAIL_DETAIL_PANEL_ID} defaultSize={`${defaultLayout[1]}%`} minSize="30%" className="min-h-0">
+      <ResizablePanel
+        id={MAIL_DETAIL_PANEL_ID}
+        defaultSize={`${defaultLayout[1]}%`}
+        minSize="30%"
+        className="min-h-0"
+      >
         <MailView mail={mails.find((item) => item.id === mail.selected) || null} />
       </ResizablePanel>
     </ResizablePanelGroup>

@@ -49,7 +49,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
             table.getColumn("title")?.setFilterValue(event.target.value);
             table.setPageIndex(0);
           }}
-          className="w-full bg-background text-foreground placeholder:text-muted-foreground sm:w-64"
+          className="bg-background text-foreground placeholder:text-muted-foreground w-full sm:w-64"
         />
         <TaskStatusFilter table={table} />
         <TaskPriorityFilter table={table} />
@@ -73,7 +73,10 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
               <Button
                 variant="outline"
                 size="sm"
-                className={cn("ml-auto hidden lg:flex", hiddenColumns.length > 0 && "bg-muted text-foreground")}
+                className={cn(
+                  "ml-auto hidden lg:flex",
+                  hiddenColumns.length > 0 && "bg-muted text-foreground",
+                )}
               />
             }
           >

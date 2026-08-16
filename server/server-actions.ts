@@ -27,7 +27,9 @@ export async function setValueToCookie(
   });
 }
 
-export async function getPreference<K extends PreferenceKey>(key: K): Promise<PreferenceValueMap[K]> {
+export async function getPreference<K extends PreferenceKey>(
+  key: K,
+): Promise<PreferenceValueMap[K]> {
   const definition = PREFERENCE_REGISTRY[key];
   const persistence = getPreferencePersistence(key);
 

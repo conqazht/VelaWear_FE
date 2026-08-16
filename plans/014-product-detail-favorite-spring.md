@@ -12,7 +12,12 @@ The wishlist heart button on the product detail page currently uses a simple `ac
 
 ```tsx
 /* components/shop/product-detail-client.tsx:386 — current */
-<Heart className={cn("size-4 transition-transform active:scale-95 duration-200", favorited && "fill-black stroke-black")} />
+<Heart
+  className={cn(
+    "size-4 transition-transform duration-200 active:scale-95",
+    favorited && "fill-black stroke-black",
+  )}
+/>
 ```
 
 ## Target

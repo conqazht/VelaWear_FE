@@ -31,39 +31,41 @@ Query xem HTTP 429 là retryable nhưng dùng default delay thay vì `Retry-Afte
 
 Sau khi BE-005 merge, khóa code/status matrix sau trong tests; response message không bao giờ là machine identifier:
 
-| HTTP status | Stable code | Machine behavior ở Frontend |
-|---|---|---|
-| 400 | `REQUEST_BODY_INVALID`, `INVALID_REQUEST`, cùng OTP validation code hiện hữu | không auto-retry; OTP kind chỉ đến từ known code |
-| 401 | `AUTHENTICATION_REQUIRED`, `SESSION_REVOKED` | không auto-retry; giữ auth/session-revoked handling hiện tại |
-| 403 | `ACCESS_DENIED` | không auto-retry |
-| 405 | `METHOD_NOT_ALLOWED` | không auto-retry |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` | không auto-retry |
-| 429 | `OTP_RATE_LIMITED`, `AUTH_RATE_LIMITED`, hoặc finite rate-limit code đã document | parse `data.retryAfterSeconds` trước, rồi `Retry-After`; known code có thể chọn OTP copy, còn status quyết định retry eligibility |
-| 500 | `INTERNAL_SERVER_ERROR` | query có thể dùng một fallback retry hiện tại; mutation vẫn zero-retry |
+| HTTP status | Stable code                                                                      | Machine behavior ở Frontend                                                                                                       |
+| ----------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 400         | `REQUEST_BODY_INVALID`, `INVALID_REQUEST`, cùng OTP validation code hiện hữu     | không auto-retry; OTP kind chỉ đến từ known code                                                                                  |
+| 401         | `AUTHENTICATION_REQUIRED`, `SESSION_REVOKED`                                     | không auto-retry; giữ auth/session-revoked handling hiện tại                                                                      |
+| 403         | `ACCESS_DENIED`                                                                  | không auto-retry                                                                                                                  |
+| 405         | `METHOD_NOT_ALLOWED`                                                             | không auto-retry                                                                                                                  |
+| 415         | `UNSUPPORTED_MEDIA_TYPE`                                                         | không auto-retry                                                                                                                  |
+| 429         | `OTP_RATE_LIMITED`, `AUTH_RATE_LIMITED`, hoặc finite rate-limit code đã document | parse `data.retryAfterSeconds` trước, rồi `Retry-After`; known code có thể chọn OTP copy, còn status quyết định retry eligibility |
+| 500         | `INTERNAL_SERVER_ERROR`                                                          | query có thể dùng một fallback retry hiện tại; mutation vẫn zero-retry                                                            |
 
 Mapping `OTP_INVALID_OR_EXPIRED`, `OTP_ATTEMPTS_EXHAUSTED`, `OTP_PROOF_INVALID_OR_EXPIRED`, `OTP_SERVICE_UNAVAILABLE`, `OTP_DELIVERY_UNAVAILABLE` vẫn dựa trên code. Nếu code thiếu/unknown, chỉ suy ra generic behavior từ HTTP/network status; tuyệt đối không đọc message substring.
 
 ## Commands cần dùng
 
-| Mục đích | Command | Kết quả mong đợi |
-|---|---|---|
-| Target tests | `pnpm exec vitest run lib/api/errors.test.ts lib/auth-otp-api.test.ts components/providers/query-provider.test.tsx` | tất cả pass |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | tất cả pass |
-| Build | `pnpm build` | production build thành công |
+| Mục đích     | Command                                                                                                             | Kết quả mong đợi            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Target tests | `pnpm exec vitest run lib/api/errors.test.ts lib/auth-otp-api.test.ts components/providers/query-provider.test.tsx` | tất cả pass                 |
+| Lint         | `pnpm exec eslint . --max-warnings 25`                                                                              | exit 0                      |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                         | exit 0                      |
+| Unit         | `pnpm test:unit`                                                                                                    | tất cả pass                 |
+| Build        | `pnpm build`                                                                                                        | production build thành công |
 
 ## Scope
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong scope**:
+
 - `lib/api/errors.ts`, `lib/api/errors.test.ts`
 - `components/providers/query-provider.tsx`
 - `components/providers/query-provider.test.tsx` (tạo mới)
 - `lib/auth-otp-api.ts`, `lib/auth-otp-api.test.ts`
 
 **Ngoài scope**:
+
 - Tăng retry count hoặc mutation retry.
 - Đổi backend threshold/error code.
 - UI countdown ngoài OTP.

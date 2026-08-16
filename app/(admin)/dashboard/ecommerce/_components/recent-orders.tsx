@@ -18,7 +18,14 @@ import { ArrowUpDown, ArrowUpRight, Download, MoreHorizontal } from "lucide-reac
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Pagination,
   PaginationContent,
@@ -28,7 +35,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getIntlLocale } from "@/lib/i18n";
 
@@ -79,7 +93,8 @@ export function RecentOrders() {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const activeFilter = (table.getColumn("statusSummary")?.getFilterValue() as OrderFilter | undefined) ?? "All";
+  const activeFilter =
+    (table.getColumn("statusSummary")?.getFilterValue() as OrderFilter | undefined) ?? "All";
   const orderCount = table.getFilteredRowModel().rows.length;
   const selectedOrderCount = table.getSelectedRowModel().rows.length;
   const visibleOrderCount = table.getRowModel().rows.length;
@@ -110,20 +125,32 @@ export function RecentOrders() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">
+        <CardTitle className="text-muted-foreground text-sm font-normal">
           {t("admin.dashboardsA.ecommerce.recentOrders")}
         </CardTitle>
-        <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
+        <CardDescription className="text-foreground text-xl leading-none tracking-tight tabular-nums">
           {orderCountDescription}
         </CardDescription>
         <CardAction className="flex items-center gap-1">
-          <Button aria-label={t("admin.dashboardsA.ecommerce.openOrders")} size="icon-sm" variant="outline">
+          <Button
+            aria-label={t("admin.dashboardsA.ecommerce.openOrders")}
+            size="icon-sm"
+            variant="outline"
+          >
             <ArrowUpRight />
           </Button>
-          <Button aria-label={t("admin.dashboardsA.ecommerce.downloadOrders")} size="icon-sm" variant="outline">
+          <Button
+            aria-label={t("admin.dashboardsA.ecommerce.downloadOrders")}
+            size="icon-sm"
+            variant="outline"
+          >
             <Download />
           </Button>
-          <Button aria-label={t("admin.dashboardsA.common.moreActions")} size="icon-sm" variant="outline">
+          <Button
+            aria-label={t("admin.dashboardsA.common.moreActions")}
+            size="icon-sm"
+            variant="outline"
+          >
             <MoreHorizontal />
           </Button>
         </CardAction>
@@ -132,11 +159,13 @@ export function RecentOrders() {
       <CardContent className="flex flex-col gap-4 px-0">
         <div className="flex items-center justify-between px-4">
           <ToggleGroup
-            className="bg-muted p-0.75 text-muted-foreground **:data-[slot=toggle-group-item]:rounded-md **:data-[slot=toggle-group-item]:border **:data-[slot=toggle-group-item]:border-transparent **:data-[slot=toggle-group-item]:text-foreground/60 **:data-[slot=toggle-group-item]:hover:text-foreground [&_[data-slot=toggle-group-item][data-pressed]]:bg-background [&_[data-slot=toggle-group-item][data-pressed]]:text-foreground [&_[data-slot=toggle-group-item][data-pressed]]:shadow-sm dark:[&_[data-slot=toggle-group-item][data-pressed]]:border-input dark:[&_[data-slot=toggle-group-item][data-pressed]]:bg-input/30"
+            className="bg-muted text-muted-foreground **:data-[slot=toggle-group-item]:text-foreground/60 **:data-[slot=toggle-group-item]:hover:text-foreground [&_[data-slot=toggle-group-item][data-pressed]]:bg-background [&_[data-slot=toggle-group-item][data-pressed]]:text-foreground dark:[&_[data-slot=toggle-group-item][data-pressed]]:border-input dark:[&_[data-slot=toggle-group-item][data-pressed]]:bg-input/30 p-0.75 **:data-[slot=toggle-group-item]:rounded-md **:data-[slot=toggle-group-item]:border **:data-[slot=toggle-group-item]:border-transparent [&_[data-slot=toggle-group-item][data-pressed]]:shadow-sm"
             onValueChange={(value) => {
               const filter = value[0] as OrderFilter | undefined;
               if (!filter) return;
-              table.getColumn("statusSummary")?.setFilterValue(filter === "All" ? undefined : filter);
+              table
+                .getColumn("statusSummary")
+                ?.setFilterValue(filter === "All" ? undefined : filter);
               table.setPageIndex(0);
             }}
             size="sm"
@@ -154,7 +183,11 @@ export function RecentOrders() {
             aria-label={t("admin.dashboardsA.ecommerce.sortOrders")}
             size="icon-sm"
             variant="outline"
-            onClick={() => table.getColumn("date")?.toggleSorting(table.getColumn("date")?.getIsSorted() === "asc")}
+            onClick={() =>
+              table
+                .getColumn("date")
+                ?.toggleSorting(table.getColumn("date")?.getIsSorted() === "asc")
+            }
           >
             <ArrowUpDown />
           </Button>
@@ -162,12 +195,14 @@ export function RecentOrders() {
 
         <div className="overflow-hidden">
           <Table className="**:data-[slot='table-cell']:px-4.5 **:data-[slot='table-head']:px-4.5">
-            <TableHeader className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-normal **:data-[slot='table-head']:text-foreground **:data-[slot='table-head']:text-sm">
+            <TableHeader className="**:data-[slot='table-head']:text-foreground border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:text-sm **:data-[slot='table-head']:font-normal">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -178,13 +213,18 @@ export function RecentOrders() {
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell className="h-24 text-center" colSpan={table.getVisibleLeafColumns().length}>
+                  <TableCell
+                    className="h-24 text-center"
+                    colSpan={table.getVisibleLeafColumns().length}
+                  >
                     {t("admin.dashboardsA.ecommerce.noOrders")}
                   </TableCell>
                 </TableRow>
@@ -205,7 +245,9 @@ export function RecentOrders() {
             <PaginationContent className="gap-1.5">
               <PaginationItem>
                 <PaginationPrevious
-                  className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : undefined}
+                  className={
+                    !table.getCanPreviousPage() ? "pointer-events-none opacity-50" : undefined
+                  }
                   href="#"
                   onClick={(event) => {
                     preventPaginationNavigation(event);

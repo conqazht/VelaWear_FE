@@ -297,7 +297,12 @@ export const conversations: Conversation[] = [
         time: "10:49 AM",
         reaction: "👍",
       },
-      { id: 505, align: "start", text: "Perfect. That should cover everything for Thursday.", time: "10:50 AM" },
+      {
+        id: 505,
+        align: "start",
+        text: "Perfect. That should cover everything for Thursday.",
+        time: "10:50 AM",
+      },
     ],
   },
   {
@@ -407,7 +412,8 @@ export const conversations: Conversation[] = [
     group: "Today",
     name: "Drew Cano",
     subject: "Onboarding docs for new hire — where to start?",
-    preview: "Got a new backend dev starting Monday. Need the standard checklist and repo access steps.",
+    preview:
+      "Got a new backend dev starting Monday. Need the standard checklist and repo access steps.",
     time: "9:32 AM",
     isUnread: false,
     isOnline: true,
@@ -660,7 +666,8 @@ export const conversations: Conversation[] = [
     group: "Today",
     name: "Ariana Decker",
     subject: "Bug: date picker off by one in reports",
-    preview: "Selecting June 5 produces June 4 in the CSV export. Screenshot attached for reference.",
+    preview:
+      "Selecting June 5 produces June 4 in the CSV export. Screenshot attached for reference.",
     time: "6:52 AM",
     isUnread: false,
     isOnline: false,
@@ -710,7 +717,8 @@ export const conversations: Conversation[] = [
     group: "Today",
     name: "Steven Tey",
     subject: "Webhook delivery failures for Zapier integration",
-    preview: "Getting intermittent 500s on the webhook endpoint since roughly 2 AM UTC. Logs linked.",
+    preview:
+      "Getting intermittent 500s on the webhook endpoint since roughly 2 AM UTC. Logs linked.",
     time: "6:10 AM",
     isUnread: true,
     isOnline: true,
@@ -861,7 +869,8 @@ export const conversations: Conversation[] = [
     group: "Yesterday",
     name: "Josh Miller",
     subject: "Partnership proposal for Latin American market",
-    preview: "We're expanding into Mexico and Brazil next quarter. Would love to explore a reseller deal.",
+    preview:
+      "We're expanding into Mexico and Brazil next quarter. Would love to explore a reseller deal.",
     time: "Yesterday",
     isUnread: false,
     isOnline: false,
@@ -911,7 +920,8 @@ export const conversations: Conversation[] = [
     group: "Yesterday",
     name: "Mollie Hall",
     subject: "Data export — need all logs from May",
-    preview: "Our compliance audit starts next week. I need a full activity log dump for the auditors.",
+    preview:
+      "Our compliance audit starts next week. I need a full activity log dump for the auditors.",
     time: "Yesterday",
     isUnread: false,
     isOnline: true,
@@ -961,7 +971,8 @@ export const conversations: Conversation[] = [
     group: "Yesterday",
     name: "Rene Wells",
     subject: "White-label options for our reseller program",
-    preview: "We have five partners asking about branded dashboards. Do you offer white-label tiers?",
+    preview:
+      "We have five partners asking about branded dashboards. Do you offer white-label tiers?",
     time: "Yesterday",
     isUnread: true,
     isOnline: true,
@@ -1011,7 +1022,8 @@ export const conversations: Conversation[] = [
     group: "Yesterday",
     name: "Rylee Howard",
     subject: "MFA enforcement rollout — questions",
-    preview: "Our security team wants to know if SMS fallback is still supported after the enforcement date.",
+    preview:
+      "Our security team wants to know if SMS fallback is still supported after the enforcement date.",
     time: "Yesterday",
     isUnread: false,
     isOnline: false,
@@ -1061,7 +1073,8 @@ export const conversations: Conversation[] = [
     group: "Yesterday",
     name: "Sienna Hewitt",
     subject: "Missing line items in CSV export",
-    preview: "The January invoice export is short by three line items. The PDF version is correct though.",
+    preview:
+      "The January invoice export is short by three line items. The PDF version is correct though.",
     time: "Yesterday",
     isUnread: false,
     isOnline: true,
@@ -1211,7 +1224,8 @@ export const conversations: Conversation[] = [
     group: "Yesterday",
     name: "Zahir McClure",
     subject: "Cancellation request — account owner left",
-    preview: "Our ops lead resigned last week. Need to transfer ownership to me before we can cancel.",
+    preview:
+      "Our ops lead resigned last week. Need to transfer ownership to me before we can cancel.",
     time: "Yesterday",
     isUnread: true,
     isOnline: true,
@@ -1281,11 +1295,31 @@ const vietnameseConversationCopies: LocalizedConversationCopy[] = [
       tags: ["Đổi hàng", "Ưu tiên"],
     },
     messages: [
-      { align: "start", text: "Chào bạn, mình vừa nhận áo nhưng cỡ L hơi rộng. Mình có thể đổi sang cỡ M không?", time: "10 phút trước" },
-      { align: "end", text: "Được nhé. Bạn cho mình xin mã đơn hàng để kiểm tra tồn kho cỡ M.", time: "8 phút trước" },
-      { align: "start", text: "Mã đơn của mình là VW-2048. Sản phẩm vẫn còn nguyên tem.", time: "6 phút trước" },
-      { align: "end", text: "Cỡ M vẫn còn hàng. Mình đã tạo yêu cầu đổi và gửi hướng dẫn qua email cho bạn.", time: "3 phút trước" },
-      { align: "start", text: "Mình đã nhận được email rồi, cảm ơn bạn hỗ trợ rất nhanh.", time: "1 phút trước" },
+      {
+        align: "start",
+        text: "Chào bạn, mình vừa nhận áo nhưng cỡ L hơi rộng. Mình có thể đổi sang cỡ M không?",
+        time: "10 phút trước",
+      },
+      {
+        align: "end",
+        text: "Được nhé. Bạn cho mình xin mã đơn hàng để kiểm tra tồn kho cỡ M.",
+        time: "8 phút trước",
+      },
+      {
+        align: "start",
+        text: "Mã đơn của mình là VW-2048. Sản phẩm vẫn còn nguyên tem.",
+        time: "6 phút trước",
+      },
+      {
+        align: "end",
+        text: "Cỡ M vẫn còn hàng. Mình đã tạo yêu cầu đổi và gửi hướng dẫn qua email cho bạn.",
+        time: "3 phút trước",
+      },
+      {
+        align: "start",
+        text: "Mình đã nhận được email rồi, cảm ơn bạn hỗ trợ rất nhanh.",
+        time: "1 phút trước",
+      },
     ],
   },
   {
@@ -1300,11 +1334,31 @@ const vietnameseConversationCopies: LocalizedConversationCopy[] = [
       tags: ["Thanh toán", "Doanh nghiệp"],
     },
     messages: [
-      { align: "start", text: "Mình thấy cùng một đơn hàng bị trừ tiền hai lần trong sáng nay.", time: "12 phút trước" },
-      { align: "end", text: "Cảm ơn bạn đã báo. Mình đang đối chiếu hai mã giao dịch với hóa đơn.", time: "9 phút trước" },
-      { align: "start", text: "Nếu đúng là giao dịch trùng, bạn giúp mình hoàn lại khoản thứ hai nhé.", time: "7 phút trước" },
-      { align: "end", text: "Đã xác nhận giao dịch trùng. Yêu cầu hoàn tiền đã được tạo và biên nhận đã gửi qua email.", time: "4 phút trước" },
-      { align: "start", text: "Tuyệt vời, mình sẽ thông báo lại cho bộ phận kế toán.", time: "2 phút trước" },
+      {
+        align: "start",
+        text: "Mình thấy cùng một đơn hàng bị trừ tiền hai lần trong sáng nay.",
+        time: "12 phút trước",
+      },
+      {
+        align: "end",
+        text: "Cảm ơn bạn đã báo. Mình đang đối chiếu hai mã giao dịch với hóa đơn.",
+        time: "9 phút trước",
+      },
+      {
+        align: "start",
+        text: "Nếu đúng là giao dịch trùng, bạn giúp mình hoàn lại khoản thứ hai nhé.",
+        time: "7 phút trước",
+      },
+      {
+        align: "end",
+        text: "Đã xác nhận giao dịch trùng. Yêu cầu hoàn tiền đã được tạo và biên nhận đã gửi qua email.",
+        time: "4 phút trước",
+      },
+      {
+        align: "start",
+        text: "Tuyệt vời, mình sẽ thông báo lại cho bộ phận kế toán.",
+        time: "2 phút trước",
+      },
     ],
   },
   {
@@ -1319,10 +1373,26 @@ const vietnameseConversationCopies: LocalizedConversationCopy[] = [
       tags: ["Tư vấn", "Sản phẩm"],
     },
     messages: [
-      { align: "start", text: "Áo khoác linen này có form rộng hay ôm vậy bạn?", time: "20 phút trước" },
-      { align: "end", text: "Mẫu này có form thoải mái nhẹ. Nếu bạn thích vừa người, mình khuyên chọn đúng cỡ thường mặc.", time: "17 phút trước" },
-      { align: "start", text: "Mình cao 1m68 và thường mặc cỡ S. Chất liệu có dễ nhăn không?", time: "13 phút trước" },
-      { align: "end", text: "Cỡ S sẽ phù hợp. Vải linen pha giúp giảm nhăn và vẫn giữ độ thoáng.", time: "9 phút trước" },
+      {
+        align: "start",
+        text: "Áo khoác linen này có form rộng hay ôm vậy bạn?",
+        time: "20 phút trước",
+      },
+      {
+        align: "end",
+        text: "Mẫu này có form thoải mái nhẹ. Nếu bạn thích vừa người, mình khuyên chọn đúng cỡ thường mặc.",
+        time: "17 phút trước",
+      },
+      {
+        align: "start",
+        text: "Mình cao 1m68 và thường mặc cỡ S. Chất liệu có dễ nhăn không?",
+        time: "13 phút trước",
+      },
+      {
+        align: "end",
+        text: "Cỡ S sẽ phù hợp. Vải linen pha giúp giảm nhăn và vẫn giữ độ thoáng.",
+        time: "9 phút trước",
+      },
       { align: "start", text: "Cảm ơn bạn, mình sẽ đặt cỡ S.", time: "6 phút trước" },
     ],
   },
@@ -1338,10 +1408,26 @@ const vietnameseConversationCopies: LocalizedConversationCopy[] = [
       tags: ["Vận chuyển", "Theo dõi đơn"],
     },
     messages: [
-      { align: "start", text: "Đơn của mình chưa cập nhật kể từ khi rời kho hôm qua, bạn kiểm tra giúp nhé.", time: "1 giờ trước" },
-      { align: "end", text: "Mình đang kiểm tra trực tiếp với đơn vị vận chuyển và sẽ phản hồi ngay.", time: "55 phút trước" },
-      { align: "start", text: "Mình cần nhận trước chiều mai, liệu có kịp không?", time: "48 phút trước" },
-      { align: "end", text: "Đơn đang ở bưu cục gần bạn và dự kiến giao trong sáng mai.", time: "35 phút trước" },
+      {
+        align: "start",
+        text: "Đơn của mình chưa cập nhật kể từ khi rời kho hôm qua, bạn kiểm tra giúp nhé.",
+        time: "1 giờ trước",
+      },
+      {
+        align: "end",
+        text: "Mình đang kiểm tra trực tiếp với đơn vị vận chuyển và sẽ phản hồi ngay.",
+        time: "55 phút trước",
+      },
+      {
+        align: "start",
+        text: "Mình cần nhận trước chiều mai, liệu có kịp không?",
+        time: "48 phút trước",
+      },
+      {
+        align: "end",
+        text: "Đơn đang ở bưu cục gần bạn và dự kiến giao trong sáng mai.",
+        time: "35 phút trước",
+      },
       { align: "start", text: "Vậy là kịp rồi, cảm ơn bạn.", time: "30 phút trước" },
     ],
   },
@@ -1357,10 +1443,26 @@ const vietnameseConversationCopies: LocalizedConversationCopy[] = [
       tags: ["Tài khoản", "Phân quyền"],
     },
     messages: [
-      { align: "start", text: "Sau khi đổi vai trò hôm qua, mình không còn mở được trang quản lý.", time: "Hôm qua" },
-      { align: "end", text: "Mình sẽ kiểm tra quyền hiệu lực và lịch sử thay đổi của tài khoản.", time: "Hôm qua" },
-      { align: "start", text: "Mình đã thử đăng xuất rồi đăng nhập lại nhưng vẫn gặp lỗi.", time: "Hôm qua" },
-      { align: "end", text: "Đã tìm thấy một quyền bị thiếu. Mình vừa khôi phục và làm mới phiên đăng nhập của bạn.", time: "Hôm qua" },
+      {
+        align: "start",
+        text: "Sau khi đổi vai trò hôm qua, mình không còn mở được trang quản lý.",
+        time: "Hôm qua",
+      },
+      {
+        align: "end",
+        text: "Mình sẽ kiểm tra quyền hiệu lực và lịch sử thay đổi của tài khoản.",
+        time: "Hôm qua",
+      },
+      {
+        align: "start",
+        text: "Mình đã thử đăng xuất rồi đăng nhập lại nhưng vẫn gặp lỗi.",
+        time: "Hôm qua",
+      },
+      {
+        align: "end",
+        text: "Đã tìm thấy một quyền bị thiếu. Mình vừa khôi phục và làm mới phiên đăng nhập của bạn.",
+        time: "Hôm qua",
+      },
       { align: "start", text: "Mình truy cập lại được rồi. Cảm ơn bạn.", time: "Hôm qua" },
     ],
   },
@@ -1376,10 +1478,26 @@ const vietnameseConversationCopies: LocalizedConversationCopy[] = [
       tags: ["Góp ý", "Trải nghiệm"],
     },
     messages: [
-      { align: "start", text: "Mình muốn góp ý là bộ lọc kích cỡ mới trên điện thoại dùng rất thuận tiện.", time: "2 ngày trước" },
-      { align: "end", text: "Cảm ơn bạn. Điều gì trong trải nghiệm mới hữu ích nhất với bạn?", time: "2 ngày trước" },
-      { align: "start", text: "Các lựa chọn rõ ràng và mình không phải tải lại trang khi đổi bộ lọc.", time: "2 ngày trước" },
-      { align: "end", text: "Phản hồi này rất hữu ích. Mình sẽ chuyển lời khen đến nhóm sản phẩm.", time: "2 ngày trước" },
+      {
+        align: "start",
+        text: "Mình muốn góp ý là bộ lọc kích cỡ mới trên điện thoại dùng rất thuận tiện.",
+        time: "2 ngày trước",
+      },
+      {
+        align: "end",
+        text: "Cảm ơn bạn. Điều gì trong trải nghiệm mới hữu ích nhất với bạn?",
+        time: "2 ngày trước",
+      },
+      {
+        align: "start",
+        text: "Các lựa chọn rõ ràng và mình không phải tải lại trang khi đổi bộ lọc.",
+        time: "2 ngày trước",
+      },
+      {
+        align: "end",
+        text: "Phản hồi này rất hữu ích. Mình sẽ chuyển lời khen đến nhóm sản phẩm.",
+        time: "2 ngày trước",
+      },
       { align: "start", text: "Mong đội ngũ tiếp tục phát huy nhé.", time: "2 ngày trước" },
     ],
   },

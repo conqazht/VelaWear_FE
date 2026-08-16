@@ -20,10 +20,12 @@ export function ProductivityDashboard() {
       <section className="lg:col-span-9">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl text-foreground leading-none tracking-tight">
+            <h1 className="text-foreground text-3xl leading-none tracking-tight">
               {t("admin.productivity.greeting", { name: "Arham" })}
             </h1>
-            <p className="text-lg text-muted-foreground leading-none">{t("admin.productivity.intro")}</p>
+            <p className="text-muted-foreground text-lg leading-none">
+              {t("admin.productivity.intro")}
+            </p>
           </div>
           <SummaryCards />
           <TasksSection />

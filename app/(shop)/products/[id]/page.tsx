@@ -16,15 +16,11 @@ export function generateStaticParams() {
     { id: "classic-linen-shirt" },
     { id: "pleated-wool-trousers" },
     { id: "the-heritage-tote" },
-    { id: "merino-wool-coat" }
+    { id: "merino-wool-coat" },
   ];
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id: slug } = await params;
   return (
     <Suspense fallback={null}>

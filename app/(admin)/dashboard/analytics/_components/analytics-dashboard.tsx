@@ -25,7 +25,9 @@ export function AnalyticsDashboard() {
     <div className="flex flex-col gap-4">
       <div className="space-y-1">
         <h1 className="text-3xl tracking-tight">{t("admin.dashboardsA.analytics.greeting")}</h1>
-        <p className="text-muted-foreground text-sm">{t("admin.dashboardsA.analytics.description")}</p>
+        <p className="text-muted-foreground text-sm">
+          {t("admin.dashboardsA.analytics.description")}
+        </p>
       </div>
 
       <Tabs defaultValue="overview" className="flex flex-col gap-4">
@@ -66,7 +68,7 @@ export function AnalyticsDashboard() {
 
         {secondaryViews.map((view) => (
           <TabsContent key={view} value={view}>
-            <div className="flex h-64 items-center justify-center rounded-xl border border-border border-dashed text-muted-foreground">
+            <div className="border-border text-muted-foreground flex h-64 items-center justify-center rounded-xl border border-dashed">
               {t("admin.dashboardsA.analytics.comingSoon", { view: viewLabels[view] })}
             </div>
           </TabsContent>

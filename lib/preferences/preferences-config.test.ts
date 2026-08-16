@@ -4,10 +4,7 @@ vi.mock("@/lib/fonts/registry", () => ({
   fontKeys: ["geist"] as const,
 }));
 
-import {
-  PREFERENCE_DEFAULTS,
-  parsePreference,
-} from "@/lib/preferences/preferences-config";
+import { PREFERENCE_DEFAULTS, parsePreference } from "@/lib/preferences/preferences-config";
 
 describe("theme preference defaults", () => {
   it("defaults missing and invalid theme modes to system", () => {

@@ -10,11 +10,7 @@ type GoogleOAuthButtonProps = {
   redirectTo?: string | null;
 };
 
-export function GoogleOAuthButton({
-  className,
-  label,
-  redirectTo,
-}: GoogleOAuthButtonProps) {
+export function GoogleOAuthButton({ className, label, redirectTo }: GoogleOAuthButtonProps) {
   const { t } = useI18n();
   const resolvedLabel = label ?? t("auth.google.continue");
 
@@ -24,8 +20,8 @@ export function GoogleOAuthButton({
       aria-label={resolvedLabel}
       onClick={() => startGoogleOAuthLogin(redirectTo)}
       className={cn(
-        "flex h-12 w-full items-center justify-center gap-2.5 rounded-[12px] border border-[#1c1a18]/20 bg-transparent text-sm font-medium text-[#1c1a18] transition-colors hover:bg-black/5 cursor-pointer",
-        className
+        "flex h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-[12px] border border-[#1c1a18]/20 bg-transparent text-sm font-medium text-[#1c1a18] transition-colors hover:bg-black/5",
+        className,
       )}
     >
       <GoogleMark />

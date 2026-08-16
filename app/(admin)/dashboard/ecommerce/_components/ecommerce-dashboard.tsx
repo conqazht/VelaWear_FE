@@ -4,7 +4,14 @@ import { Settings2 } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { getIntlLocale } from "@/lib/i18n";
 
@@ -30,7 +37,9 @@ export function EcommerceDashboard() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl leading-none tracking-tight">{t("admin.dashboardsA.ecommerce.storeOverview")}</h1>
+          <h1 className="text-3xl leading-none tracking-tight">
+            {t("admin.dashboardsA.ecommerce.storeOverview")}
+          </h1>
           <p className="text-muted-foreground text-sm">{formattedDate}</p>
         </div>
 
@@ -41,10 +50,18 @@ export function EcommerceDashboard() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="this-month">{t("admin.dashboardsA.common.thisMonth")}</SelectItem>
-                <SelectItem value="last-month">{t("admin.dashboardsA.common.lastMonth")}</SelectItem>
-                <SelectItem value="last-30-days">{t("admin.dashboardsA.ecommerce.last30Days")}</SelectItem>
-                <SelectItem value="year-to-date">{t("admin.dashboardsA.common.yearToDate")}</SelectItem>
+                <SelectItem value="this-month">
+                  {t("admin.dashboardsA.common.thisMonth")}
+                </SelectItem>
+                <SelectItem value="last-month">
+                  {t("admin.dashboardsA.common.lastMonth")}
+                </SelectItem>
+                <SelectItem value="last-30-days">
+                  {t("admin.dashboardsA.ecommerce.last30Days")}
+                </SelectItem>
+                <SelectItem value="year-to-date">
+                  {t("admin.dashboardsA.common.yearToDate")}
+                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -55,9 +72,15 @@ export function EcommerceDashboard() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="all-channels">{t("admin.dashboardsA.ecommerce.allChannels")}</SelectItem>
-                <SelectItem value="online-store">{t("admin.dashboardsA.ecommerce.onlineStore")}</SelectItem>
-                <SelectItem value="marketplace">{t("admin.dashboardsA.ecommerce.marketplace")}</SelectItem>
+                <SelectItem value="all-channels">
+                  {t("admin.dashboardsA.ecommerce.allChannels")}
+                </SelectItem>
+                <SelectItem value="online-store">
+                  {t("admin.dashboardsA.ecommerce.onlineStore")}
+                </SelectItem>
+                <SelectItem value="marketplace">
+                  {t("admin.dashboardsA.ecommerce.marketplace")}
+                </SelectItem>
                 <SelectItem value="social">{t("admin.dashboardsA.ecommerce.social")}</SelectItem>
                 <SelectItem value="retail">{t("admin.dashboardsA.ecommerce.retail")}</SelectItem>
               </SelectGroup>

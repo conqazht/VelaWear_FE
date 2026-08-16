@@ -34,10 +34,10 @@ Trong tab English của Product, Category và Sale Campaign có nút **Tạo n�
 
 Ba lựa chọn model:
 
-| Model gửi cho backend | Nhãn trên giao diện | Trường hợp phù hợp |
-| --- | --- | --- |
-| `gemini-3.1-flash-lite` | Tiết kiệm, mặc định | Nội dung catalog thông thường hoặc nhập số lượng lớn |
-| `gemini-3.5-flash` | Cân bằng | Mô tả cần cân bằng chất lượng, tốc độ và chi phí |
+| Model gửi cho backend    | Nhãn trên giao diện      | Trường hợp phù hợp                                                                   |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------------------------ |
+| `gemini-3.1-flash-lite`  | Tiết kiệm, mặc định      | Nội dung catalog thông thường hoặc nhập số lượng lớn                                 |
+| `gemini-3.5-flash`       | Cân bằng                 | Mô tả cần cân bằng chất lượng, tốc độ và chi phí                                     |
 | `gemini-3.1-pro-preview` | Chất lượng cao · Preview | Nội dung quan trọng hoặc phức tạp; cần lưu ý độ ổn định và chi phí của model Preview |
 
 Frontend không cho nhập model tự do và luôn gửi đúng ID trong danh sách trên. API key Gemini chỉ được cấu hình ở backend, không đặt trong `.env` frontend và không gửi xuống trình duyệt.
@@ -108,12 +108,12 @@ Nếu POST tạo draft thành công nhưng PUT translation lỗi, editor giữ n
 
 Toggle gọi endpoint PATCH status riêng và cập nhật giao diện trước. Nếu request lỗi, cache được khôi phục về trạng thái cũ và hiển thị thông báo lỗi.
 
-| Resource | Toggle ON | Toggle OFF | Trạng thái khóa toggle |
-| --- | --- | --- | --- |
-| Product | `DRAFT/INACTIVE → ACTIVE` | `ACTIVE → INACTIVE` | `OUT_OF_STOCK` |
-| Category | `INACTIVE → ACTIVE` | `ACTIVE → INACTIVE` | Không |
-| Brand | `INACTIVE → ACTIVE` | `ACTIVE → INACTIVE` | Không |
-| Product Variant | `INACTIVE → ACTIVE` | `ACTIVE → INACTIVE` | `OUT_OF_STOCK`, `DISCONTINUED` |
+| Resource        | Toggle ON                 | Toggle OFF          | Trạng thái khóa toggle         |
+| --------------- | ------------------------- | ------------------- | ------------------------------ |
+| Product         | `DRAFT/INACTIVE → ACTIVE` | `ACTIVE → INACTIVE` | `OUT_OF_STOCK`                 |
+| Category        | `INACTIVE → ACTIVE`       | `ACTIVE → INACTIVE` | Không                          |
+| Brand           | `INACTIVE → ACTIVE`       | `ACTIVE → INACTIVE` | Không                          |
+| Product Variant | `INACTIVE → ACTIVE`       | `ACTIVE → INACTIVE` | `OUT_OF_STOCK`, `DISCONTINUED` |
 
 `OUT_OF_STOCK` và `DISCONTINUED` là trạng thái nghiệp vụ, không được ghi đè bằng quick toggle. Muốn thay đổi phải vào form phù hợp.
 

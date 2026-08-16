@@ -62,8 +62,6 @@ describe("Sale English generation interaction lock", () => {
     rerender(details("en"));
     expect(container.querySelector("#sale-name-en")).toBeDisabled();
     expect(container.querySelector("#sale-description-en")).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: /Đang tạo nội dung English/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Đang tạo nội dung English/i })).toBeDisabled();
   });
 });

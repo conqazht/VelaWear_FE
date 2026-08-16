@@ -6,7 +6,13 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type {
   AdminCatalogOption,
@@ -183,7 +189,9 @@ export function ProductForm({
             <Input
               id={`${idPrefix}-slug`}
               value={translation.slug}
-              onChange={(event) => updateTranslation(locale, "slug", event.target.value.toLowerCase())}
+              onChange={(event) =>
+                updateTranslation(locale, "slug", event.target.value.toLowerCase())
+              }
               maxLength={280}
               placeholder="structured-linen-blazer"
               required={locale === "vi"}
@@ -282,17 +290,29 @@ export function ProductForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="product-category">{t("admin.commerce.products.form.category")}</FieldLabel>
+          <FieldLabel htmlFor="product-category">
+            {t("admin.commerce.products.form.category")}
+          </FieldLabel>
           <Select
             value={values.categoryId || null}
             onValueChange={(value) => updateShared("categoryId", value ?? "")}
             disabled={isCatalogLoading}
           >
             <SelectTrigger id="product-category" className="w-full">
-              <SelectValue placeholder={isCatalogLoading ? t("admin.commerce.products.form.loadingCategories") : t("admin.commerce.products.form.selectCategory")} />
+              <SelectValue
+                placeholder={
+                  isCatalogLoading
+                    ? t("admin.commerce.products.form.loadingCategories")
+                    : t("admin.commerce.products.form.selectCategory")
+                }
+              />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
-              {categories.map((category) => <SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>)}
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={String(category.id)}>
+                  {category.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
@@ -305,10 +325,20 @@ export function ProductForm({
             disabled={isCatalogLoading}
           >
             <SelectTrigger id="product-brand" className="w-full">
-              <SelectValue placeholder={isCatalogLoading ? t("admin.commerce.products.form.loadingBrands") : t("admin.commerce.products.form.selectBrand")} />
+              <SelectValue
+                placeholder={
+                  isCatalogLoading
+                    ? t("admin.commerce.products.form.loadingBrands")
+                    : t("admin.commerce.products.form.selectBrand")
+                }
+              />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
-              {brands.map((brand) => <SelectItem key={brand.id} value={String(brand.id)}>{brand.name}</SelectItem>)}
+              {brands.map((brand) => (
+                <SelectItem key={brand.id} value={String(brand.id)}>
+                  {brand.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
@@ -327,10 +357,19 @@ export function ProductForm({
 
       <Field>
         <FieldLabel htmlFor="product-status">{t("admin.commerce.products.form.status")}</FieldLabel>
-        <Select value={values.status} onValueChange={(value) => updateShared("status", value as ProductStatus)}>
-          <SelectTrigger id="product-status" className="w-full"><SelectValue /></SelectTrigger>
+        <Select
+          value={values.status}
+          onValueChange={(value) => updateShared("status", value as ProductStatus)}
+        >
+          <SelectTrigger id="product-status" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent align="start" alignItemWithTrigger={false}>
-            {PRODUCT_STATUSES.map((status) => <SelectItem key={status} value={status}>{t(PRODUCT_STATUS_MESSAGE_KEYS[status])}</SelectItem>)}
+            {PRODUCT_STATUSES.map((status) => (
+              <SelectItem key={status} value={status}>
+                {t(PRODUCT_STATUS_MESSAGE_KEYS[status])}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <FieldDescription>{t("admin.commerce.products.form.statusHelp")}</FieldDescription>

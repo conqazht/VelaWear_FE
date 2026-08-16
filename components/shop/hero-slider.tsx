@@ -64,7 +64,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 
   return (
     <section
-      className="relative w-full h-[700px] md:h-[820px] overflow-hidden group/hero bg-[#efe7dc]"
+      className="group/hero relative h-[700px] w-full overflow-hidden bg-[#efe7dc] md:h-[820px]"
       onMouseEnter={() => setIsAutoplay(false)}
       onMouseLeave={() => setIsAutoplay(true)}
     >
@@ -80,7 +80,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             x: { type: "spring", stiffness: 300, damping: 32 },
             opacity: { duration: 0.5 },
           }}
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 h-full w-full"
         >
           {/* Background Image */}
           <Image
@@ -96,17 +96,17 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-[#1c1a18]/70 via-[#1c1a18]/25 to-transparent" />
 
           {/* Header gradient vignette to guarantee header readability */}
-          <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-black/60 via-black/15 to-transparent pointer-events-none z-10" />
+          <div className="pointer-events-none absolute top-0 right-0 left-0 z-10 h-44 bg-gradient-to-b from-black/60 via-black/15 to-transparent" />
 
           {/* Content area */}
-          <div className="absolute inset-0 flex items-end pb-24 md:pb-32 px-6 md:px-12">
-            <div className="max-w-[1280px] w-full mx-auto flex flex-col items-center text-center">
+          <div className="absolute inset-0 flex items-end px-6 pb-24 md:px-12 md:pb-32">
+            <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center text-center">
               {/* Subtitle */}
               <motion.span
                 initial={{ opacity: 0, transform: "translateY(15px)" }}
                 animate={{ opacity: 1, transform: "translateY(0px)" }}
                 transition={{ delay: 0.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="text-[11px] md:text-xs font-semibold uppercase tracking-[2.5px] text-[#ffb59f] mb-4 block"
+                className="mb-4 block text-[11px] font-semibold tracking-[2.5px] text-[#ffb59f] uppercase md:text-xs"
               >
                 {slides[current].subtitle}
               </motion.span>
@@ -116,7 +116,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                 initial={{ opacity: 0, transform: "translateY(20px)" }}
                 animate={{ opacity: 1, transform: "translateY(0px)" }}
                 transition={{ delay: 0.3, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                className="font-serif text-4xl sm:text-5xl md:text-7xl text-[#f7f4ef] font-light leading-tight tracking-tight max-w-4xl mb-8"
+                className="mb-8 max-w-4xl font-serif text-4xl leading-tight font-light tracking-tight text-[#f7f4ef] sm:text-5xl md:text-7xl"
               >
                 {slides[current].title}
               </motion.h1>
@@ -126,7 +126,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                 initial={{ opacity: 0, transform: "translateY(15px)" }}
                 animate={{ opacity: 1, transform: "translateY(0px)" }}
                 transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-[#b5573a] hover:bg-[#8f4329] text-white font-medium text-sm tracking-[1.5px] uppercase px-10 py-4.5 rounded-full transition-colors duration-300 shadow-lg cursor-pointer flex items-center gap-2"
+                className="flex cursor-pointer items-center gap-2 rounded-full bg-[#b5573a] px-10 py-4.5 text-sm font-medium tracking-[1.5px] text-white uppercase shadow-lg transition-colors duration-300 hover:bg-[#8f4329]"
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => router.push("/collection")}
@@ -139,30 +139,30 @@ export function HeroSlider({ slides }: HeroSliderProps) {
       </AnimatePresence>
 
       {/* Navigation Buttons */}
-      <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 flex justify-between items-center pointer-events-none z-30 opacity-0 group-hover/hero:opacity-100 group-focus-within/hero:opacity-100 transition-opacity duration-300">
+      <div className="pointer-events-none absolute inset-x-6 top-1/2 z-30 flex -translate-y-1/2 items-center justify-between opacity-0 transition-opacity duration-300 group-focus-within/hero:opacity-100 group-hover/hero:opacity-100">
         <motion.button
           onClick={handlePrev}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18]"
+          className="pointer-events-auto flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/15 text-[#f7f4ef] backdrop-blur-sm hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18] focus-visible:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={t("storefront.home.previousSlide")}
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="h-5 w-5" />
         </motion.button>
 
         <motion.button
           onClick={handleNext}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/30 text-[#f7f4ef] backdrop-blur-sm pointer-events-auto cursor-pointer border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18]"
+          className="pointer-events-auto flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/15 text-[#f7f4ef] backdrop-blur-sm hover:bg-white/30 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18] focus-visible:outline-none"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label={t("storefront.home.nextSlide")}
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="h-5 w-5" />
         </motion.button>
       </div>
 
       {/* Pagination dots */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-30">
+      <div className="absolute bottom-10 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1.5">
         {slides.map((_, i) => (
           <button
             key={i}
@@ -171,7 +171,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
               setDirection(i > current ? "right" : "left");
               setCurrent(i);
             }}
-            className="group relative p-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18] cursor-pointer"
+            className="group relative cursor-pointer rounded-full p-1 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1c1a18] focus-visible:outline-none"
             aria-label={t("storefront.home.goToSlide", { number: i + 1 })}
           >
             <div

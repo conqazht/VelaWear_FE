@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { INVOICE_PAPER_HEIGHT, INVOICE_PAPER_SCALE, INVOICE_PAPER_WIDTH, type InvoiceFormValues } from "./data";
+import {
+  INVOICE_PAPER_HEIGHT,
+  INVOICE_PAPER_SCALE,
+  INVOICE_PAPER_WIDTH,
+  type InvoiceFormValues,
+} from "./data";
 import { InvoicePaper } from "./invoice-paper";
 import { PrintInvoice } from "./print-invoice";
 import { useVisibleCenterPosition } from "./use-visible-center-position";
@@ -30,9 +35,9 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
   return (
     <>
       <PrintInvoice invoice={invoice} />
-      <div className="flex flex-col rounded-xl border bg-card">
+      <div className="bg-card flex flex-col rounded-xl border">
         <div className="flex items-center justify-between px-4 py-4">
-          <h2 className="font-medium text-lg">{t("admin.workflows.invoice.preview")}</h2>
+          <h2 className="text-lg font-medium">{t("admin.workflows.invoice.preview")}</h2>
           <ButtonGroup>
             <Button type="button" variant="outline" onClick={handlePrint}>
               <Printer data-icon="inline-start" />
@@ -61,7 +66,9 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
                 : INVOICE_PAPER_HEIGHT * INVOICE_PAPER_SCALE,
               top: paperLayout?.top ?? "50%",
               transform: paperLayout === null ? "translate(-50%, -50%)" : "translateX(-50%)",
-              width: paperLayout ? INVOICE_PAPER_WIDTH * paperLayout.scale : INVOICE_PAPER_WIDTH * INVOICE_PAPER_SCALE,
+              width: paperLayout
+                ? INVOICE_PAPER_WIDTH * paperLayout.scale
+                : INVOICE_PAPER_WIDTH * INVOICE_PAPER_SCALE,
             }}
             className="absolute left-1/2 opacity-0 data-[ready=true]:opacity-100"
             data-ready={paperLayout !== null}
@@ -115,7 +122,10 @@ function InvoicePreviewLoading() {
           <Skeleton className="h-3 w-14 bg-stone-200" />
         </div>
         {Array.from({ length: 5 }, (_, index) => (
-          <div key={index} className="grid grid-cols-[1fr_5rem_6rem] gap-4 border-t border-stone-100 p-3">
+          <div
+            key={index}
+            className="grid grid-cols-[1fr_5rem_6rem] gap-4 border-t border-stone-100 p-3"
+          >
             <Skeleton className="h-3 w-3/4 bg-stone-200" />
             <Skeleton className="h-3 w-8 bg-stone-200" />
             <Skeleton className="h-3 w-16 bg-stone-200" />

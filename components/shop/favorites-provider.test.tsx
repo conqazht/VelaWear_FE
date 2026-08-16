@@ -56,12 +56,7 @@ vi.mock("@/lib/api/catalog", () => ({
 
 import { FavoritesProvider, useFavorites } from "./favorites-provider";
 
-function makeWishlistItem(
-  id: number,
-  productId: number,
-  name: string,
-  slug: string
-): Wishlist {
+function makeWishlistItem(id: number, productId: number, name: string, slug: string): Wishlist {
   return {
     id,
     userId: 1,

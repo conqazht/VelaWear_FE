@@ -28,10 +28,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import type {
-  StorefrontCatalogResult,
-  StorefrontCatalogSort,
-} from "@/lib/api/types";
+import type { StorefrontCatalogResult, StorefrontCatalogSort } from "@/lib/api/types";
 import { classifyApiError, type ApiErrorClassification } from "@/lib/api/errors";
 import { formatCurrency } from "@/lib/i18n/format";
 import { useStorefrontProductsQuery } from "@/lib/queries/catalog";
@@ -86,8 +83,10 @@ function getCatalogCopy(locale: "vi" | "en"): CatalogCopy {
         selected: "Active filters",
         noOptions: "No matching options yet.",
         priceError: "Minimum price cannot exceed maximum price.",
-        staleWarning: "Fresh data could not be loaded. The latest available results remain visible.",
-        invalidRequestWarning: "That filter request is invalid. The latest available results remain visible.",
+        staleWarning:
+          "Fresh data could not be loaded. The latest available results remain visible.",
+        invalidRequestWarning:
+          "That filter request is invalid. The latest available results remain visible.",
         retry: "Retry",
         previous: "Previous page",
         next: "Next page",
@@ -130,7 +129,8 @@ function PriceRangeInputs({
     if (
       (minPrice !== undefined && (!Number.isFinite(minPrice) || minPrice < 0)) ||
       (maxPrice !== undefined && (!Number.isFinite(maxPrice) || maxPrice < 0))
-    ) return;
+    )
+      return;
 
     const next = { ...state, minPrice, maxPrice, page: 1 };
     if (!isValidCatalogPriceRange(next)) {
@@ -168,9 +168,11 @@ function PriceRangeInputs({
           onKeyDown={(event) => {
             if (event.key === "Enter") commit();
           }}
-          className="h-9 flex-1 min-w-0 rounded-sm border-[#1c1a18]/20 bg-transparent px-2 text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:border-[#b5573a] focus-visible:ring-2 focus-visible:ring-[#b5573a]/20"
+          className="h-9 min-w-0 flex-1 [appearance:textfield] rounded-sm border-[#1c1a18]/20 bg-transparent px-2 text-xs focus-visible:border-[#b5573a] focus-visible:ring-2 focus-visible:ring-[#b5573a]/20 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
-        <span aria-hidden className="text-[#1c1a18]/35 shrink-0">—</span>
+        <span aria-hidden className="shrink-0 text-[#1c1a18]/35">
+          —
+        </span>
         <Input
           type="number"
           inputMode="numeric"
@@ -181,12 +183,12 @@ function PriceRangeInputs({
           onKeyDown={(event) => {
             if (event.key === "Enter") commit();
           }}
-          className="h-9 flex-1 min-w-0 rounded-sm border-[#1c1a18]/20 bg-transparent px-2 text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:border-[#b5573a] focus-visible:ring-2 focus-visible:ring-[#b5573a]/20"
+          className="h-9 min-w-0 flex-1 [appearance:textfield] rounded-sm border-[#1c1a18]/20 bg-transparent px-2 text-xs focus-visible:border-[#b5573a] focus-visible:ring-2 focus-visible:ring-[#b5573a]/20 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
         <button
           type="button"
           onClick={commit}
-          className="h-9 rounded-full border border-[#1c1a18] bg-[#1c1a18] px-4 text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-[#b5573a] hover:border-[#b5573a] shrink-0 active:scale-[0.96] cursor-pointer"
+          className="h-9 shrink-0 cursor-pointer rounded-full border border-[#1c1a18] bg-[#1c1a18] px-4 text-xs font-bold tracking-wider text-white uppercase transition-all hover:border-[#b5573a] hover:bg-[#b5573a] active:scale-[0.96]"
         >
           {locale === "vi" ? "Lọc" : "Apply"}
         </button>
@@ -201,10 +203,10 @@ function PriceRangeInputs({
               type="button"
               onClick={() => applyPreset(preset.min, preset.max)}
               className={cn(
-                "rounded-full border px-3 py-1 text-[11px] font-medium transition-all active:scale-[0.96] cursor-pointer",
+                "cursor-pointer rounded-full border px-3 py-1 text-[11px] font-medium transition-all active:scale-[0.96]",
                 isActive
                   ? "border-[#1c1a18] bg-[#efe7dc] font-bold text-[#1c1a18]"
-                  : "border-[#1c1a18]/15 text-[#1c1a18]/70 hover:border-[#1c1a18]/40 hover:text-[#1c1a18]"
+                  : "border-[#1c1a18]/15 text-[#1c1a18]/70 hover:border-[#1c1a18]/40 hover:text-[#1c1a18]",
               )}
             >
               {preset.label}
@@ -251,15 +253,12 @@ function CatalogFilters({
     state.minPrice !== undefined ||
     state.maxPrice !== undefined;
 
-  const sectionButton = (
-    section: keyof typeof expanded,
-    label: string,
-  ) => (
+  const sectionButton = (section: keyof typeof expanded, label: string) => (
     <button
       type="button"
       onClick={() => toggleSection(section)}
       aria-expanded={expanded[section]}
-      className="flex w-full cursor-pointer items-center justify-between text-left text-xs font-semibold uppercase tracking-[0.15em] text-[#1c1a18]"
+      className="flex w-full cursor-pointer items-center justify-between text-left text-xs font-semibold tracking-[0.15em] text-[#1c1a18] uppercase"
     >
       <span>{label}</span>
       {expanded[section] ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
@@ -283,7 +282,9 @@ function CatalogFilters({
                     key={category.id}
                     className={cn(
                       "flex items-center gap-3 text-sm text-[#1c1a18]/70",
-                      disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer hover:text-[#1c1a18]",
+                      disabled
+                        ? "cursor-not-allowed opacity-40"
+                        : "cursor-pointer hover:text-[#1c1a18]",
                     )}
                   >
                     <span className="relative grid size-4 place-items-center">
@@ -303,7 +304,9 @@ function CatalogFilters({
                       <Check className="pointer-events-none absolute size-3 text-white opacity-0 peer-checked:opacity-100" />
                     </span>
                     <span className="min-w-0 flex-1 truncate">{category.name}</span>
-                    <span className="text-[11px] tabular-nums text-[#1c1a18]/40">{category.count}</span>
+                    <span className="text-[11px] text-[#1c1a18]/40 tabular-nums">
+                      {category.count}
+                    </span>
                   </label>
                 );
               })
@@ -337,7 +340,7 @@ function CatalogFilters({
                       })
                     }
                     className={cn(
-                      "min-h-10 rounded-sm border px-1.5 py-1.5 transition-colors flex flex-col items-center justify-center text-center leading-none",
+                      "flex min-h-10 flex-col items-center justify-center rounded-sm border px-1.5 py-1.5 text-center leading-none transition-colors",
                       isLongName ? "col-span-2" : "col-span-1",
                       selected
                         ? "border-[#1c1a18] bg-[#efe7dc] text-[#1c1a18]"
@@ -346,10 +349,10 @@ function CatalogFilters({
                     )}
                     aria-label={`${size.name}, ${size.count}`}
                   >
-                    <span className="text-[10px] font-medium uppercase tracking-tight leading-tight max-w-full truncate">
+                    <span className="max-w-full truncate text-[10px] leading-tight font-medium tracking-tight uppercase">
                       {size.name}
                     </span>
-                    <span className="text-[9px] text-[#1c1a18]/40 font-numeric leading-tight mt-0.5">
+                    <span className="font-numeric mt-0.5 text-[9px] leading-tight text-[#1c1a18]/40">
                       ({size.count})
                     </span>
                   </button>
@@ -400,7 +403,9 @@ function CatalogFilters({
                       />
                     </span>
                     <span className="truncate">{color.name}</span>
-                    <span className="ml-auto text-[10px] tabular-nums text-[#1c1a18]/40">{color.count}</span>
+                    <span className="ml-auto text-[10px] text-[#1c1a18]/40 tabular-nums">
+                      {color.count}
+                    </span>
                   </button>
                 );
               })
@@ -426,11 +431,11 @@ function CatalogFilters({
       </section>
 
       {hasActiveFilters && (
-        <div className="pb-8 pt-4">
+        <div className="pt-4 pb-8">
           <button
             type="button"
             onClick={onClear}
-            className="w-full rounded-full border border-[#b5573a] py-2.5 text-xs font-bold uppercase tracking-wider text-[#b5573a] transition-all hover:bg-[#b5573a] hover:text-white active:scale-[0.96] cursor-pointer shadow-2xs"
+            className="w-full cursor-pointer rounded-full border border-[#b5573a] py-2.5 text-xs font-bold tracking-wider text-[#b5573a] uppercase shadow-2xs transition-all hover:bg-[#b5573a] hover:text-white active:scale-[0.96]"
           >
             {t("storefront.common.clearAllFilters")}
           </button>
@@ -454,21 +459,34 @@ function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
   const sizeNames = new Map(facets.sizes.map((item) => [item.id, item.name]));
   const chips: Array<{ key: string; label: string; remove: () => void }> = [];
 
-  state.categories.forEach((slug) => chips.push({
-    key: `category-${slug}`,
-    label: categoryNames.get(slug) ?? slug,
-    remove: () => onChange({ ...state, categories: state.categories.filter((item) => item !== slug), page: 1 }),
-  }));
-  state.colors.forEach((id) => chips.push({
-    key: `color-${id}`,
-    label: colorNames.get(id) ?? String(id),
-    remove: () => onChange({ ...state, colors: state.colors.filter((item) => item !== id), page: 1 }),
-  }));
-  state.sizes.forEach((id) => chips.push({
-    key: `size-${id}`,
-    label: sizeNames.get(id) ?? String(id),
-    remove: () => onChange({ ...state, sizes: state.sizes.filter((item) => item !== id), page: 1 }),
-  }));
+  state.categories.forEach((slug) =>
+    chips.push({
+      key: `category-${slug}`,
+      label: categoryNames.get(slug) ?? slug,
+      remove: () =>
+        onChange({
+          ...state,
+          categories: state.categories.filter((item) => item !== slug),
+          page: 1,
+        }),
+    }),
+  );
+  state.colors.forEach((id) =>
+    chips.push({
+      key: `color-${id}`,
+      label: colorNames.get(id) ?? String(id),
+      remove: () =>
+        onChange({ ...state, colors: state.colors.filter((item) => item !== id), page: 1 }),
+    }),
+  );
+  state.sizes.forEach((id) =>
+    chips.push({
+      key: `size-${id}`,
+      label: sizeNames.get(id) ?? String(id),
+      remove: () =>
+        onChange({ ...state, sizes: state.sizes.filter((item) => item !== id), page: 1 }),
+    }),
+  );
   if (state.minPrice !== undefined && state.maxPrice !== undefined) {
     chips.push({
       key: "price-range",
@@ -493,7 +511,7 @@ function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
 
   return (
     <div className="mb-5 flex flex-wrap items-center gap-2" aria-label={copy.selected}>
-      <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#1c1a18]/50">
+      <span className="mr-1 text-[10px] font-semibold tracking-[0.15em] text-[#1c1a18]/50 uppercase">
         {copy.selected}
       </span>
       {chips.map((chip) => (
@@ -501,7 +519,7 @@ function ActiveFilters({ state, facets, onChange }: ActiveFiltersProps) {
           key={chip.key}
           type="button"
           onClick={chip.remove}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-white px-3.5 py-1 text-xs font-medium text-[#1c1a18] shadow-2xs transition-all hover:border-[#b5573a] hover:text-[#b5573a] active:scale-[0.96] cursor-pointer"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-white px-3.5 py-1 text-xs font-medium text-[#1c1a18] shadow-2xs transition-all hover:border-[#b5573a] hover:text-[#b5573a] active:scale-[0.96]"
         >
           {chip.label}
           <X className="size-3" aria-hidden />
@@ -525,13 +543,7 @@ function CatalogPagination({
   if (pages <= 1) return null;
 
   const candidates = Array.from(
-    new Set([
-      1,
-      Math.max(1, state.page - 1),
-      state.page,
-      Math.min(pages, state.page + 1),
-      pages,
-    ])
+    new Set([1, Math.max(1, state.page - 1), state.page, Math.min(pages, state.page + 1), pages]),
   ).sort((a, b) => a - b);
 
   return (
@@ -546,7 +558,7 @@ function CatalogPagination({
               }}
               className={cn(
                 "cursor-pointer rounded-sm border border-[#1c1a18]/15 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:bg-[#efe7dc]",
-                state.page <= 1 && "pointer-events-none opacity-40"
+                state.page <= 1 && "pointer-events-none opacity-40",
               )}
               text={copy.previous}
             />
@@ -570,7 +582,7 @@ function CatalogPagination({
                     "size-9 cursor-pointer rounded-sm border text-xs font-medium transition-colors",
                     page === state.page
                       ? "border-[#1c1a18] bg-[#1c1a18] text-white hover:bg-[#1c1a18] hover:text-white"
-                      : "border-[#1c1a18]/15 text-[#1c1a18] hover:border-[#1c1a18] hover:bg-[#efe7dc]"
+                      : "border-[#1c1a18]/15 text-[#1c1a18] hover:border-[#1c1a18] hover:bg-[#efe7dc]",
                   )}
                 >
                   {page}
@@ -587,7 +599,7 @@ function CatalogPagination({
               }}
               className={cn(
                 "cursor-pointer rounded-sm border border-[#1c1a18]/15 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:bg-[#efe7dc]",
-                state.page >= pages && "pointer-events-none opacity-40"
+                state.page >= pages && "pointer-events-none opacity-40",
               )}
               text={copy.next}
             />
@@ -617,24 +629,19 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
   const [mobileDraft, setMobileDraft] = useState<CatalogUrlState>(EMPTY_CATALOG_URL_STATE);
   const [priceError, setPriceError] = useState<string | null>(null);
 
-  const state = useMemo(
-    () => parseCatalogUrlState(searchParams),
-    [searchParams],
-  );
+  const state = useMemo(() => parseCatalogUrlState(searchParams), [searchParams]);
   const serializedState = serializeCatalogUrlState(state);
-  const productsQuery = useStorefrontProductsQuery(
-    catalogStateToApiFilters(state, locale),
-  );
+  const productsQuery = useStorefrontProductsQuery(catalogStateToApiFilters(state, locale));
   const mobilePreviewQuery = useStorefrontProductsQuery(
     catalogStateToApiFilters({ ...mobileDraft, page: 1 }, locale, 1),
     { enabled: mobileFiltersOpen && isValidCatalogPriceRange(mobileDraft) },
   );
 
-  const catalogData = productsQuery.data ?? (
-    productsQuery.isError && lastSuccessfulCatalog?.locale === locale
+  const catalogData =
+    productsQuery.data ??
+    (productsQuery.isError && lastSuccessfulCatalog?.locale === locale
       ? lastSuccessfulCatalog.data
-      : undefined
-  );
+      : undefined);
   const facets = catalogData?.facets ?? {
     categories: [],
     colors: [],
@@ -667,7 +674,14 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
         setRollback(null);
       }
     }
-  }, [locale, productsQuery.data, productsQuery.isPlaceholderData, productsQuery.isSuccess, rollback?.query, serializedState]);
+  }, [
+    locale,
+    productsQuery.data,
+    productsQuery.isPlaceholderData,
+    productsQuery.isSuccess,
+    rollback?.query,
+    serializedState,
+  ]);
 
   useEffect(() => {
     const rollbackQuery = getCatalogRollbackQuery({
@@ -727,9 +741,10 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
 
   const goToPage = (page: number) => {
     navigate({ ...state, page });
-    const headerOffset = Number.parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--header-visible-height"),
-    ) || 0;
+    const headerOffset =
+      Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--header-visible-height"),
+      ) || 0;
     const top = (scrollAnchorRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY;
     window.scrollTo({ top: Math.max(0, top - headerOffset - 24), behavior: "auto" });
   };
@@ -739,7 +754,9 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
       <StorefrontApiStatus
         error={productsQuery.error}
         onRetry={() => productsQuery.refetch()}
-        resourceLabel={mode === "search" ? t("storefront.search.resource") : t("storefront.catalog.resource")}
+        resourceLabel={
+          mode === "search" ? t("storefront.search.resource") : t("storefront.catalog.resource")
+        }
         returnHref="/"
         recoveryAction={{ label: t("storefront.search.viewAll"), href: pathname }}
         variant="route"
@@ -749,25 +766,29 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
 
   if (isInitialLoading) return <CollectionCatalogLoading />;
 
-  const title = mode === "search"
-    ? t("storefront.search.resultsFor", { query: state.q })
-    : t("storefront.catalog.pageTitle");
+  const title =
+    mode === "search"
+      ? t("storefront.search.resultsFor", { query: state.q })
+      : t("storefront.catalog.pageTitle");
   const previewCount = mobilePreviewQuery.data?.meta.total ?? meta?.total ?? 0;
-  const catalogWarningError = rollback?.error ?? (
-    productsQuery.isError ? classifyApiError(productsQuery.error) : null
-  );
-  const showCatalogWarning = catalogWarningError !== null && (
-    (productsQuery.isError && catalogData !== undefined) ||
-    (rollback !== null &&
-      !(productsQuery.isSuccess &&
-        !productsQuery.isPlaceholderData &&
-        serializedState === rollback.query))
-  );
+  const catalogWarningError =
+    rollback?.error ?? (productsQuery.isError ? classifyApiError(productsQuery.error) : null);
+  const showCatalogWarning =
+    catalogWarningError !== null &&
+    ((productsQuery.isError && catalogData !== undefined) ||
+      (rollback !== null &&
+        !(
+          productsQuery.isSuccess &&
+          !productsQuery.isPlaceholderData &&
+          serializedState === rollback.query
+        )));
 
   return (
-    <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]">
-      <div className="mb-4 flex gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
-        <Link href="/" className="hover:text-[#1c1a18]">{t("storefront.common.home")}</Link>
+    <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]">
+      <div className="mb-4 flex gap-2 text-[10px] tracking-[0.15em] text-[#1c1a18]/50 uppercase">
+        <Link href="/" className="hover:text-[#1c1a18]">
+          {t("storefront.common.home")}
+        </Link>
         <span>/</span>
         <span className="font-medium text-[#1c1a18]">
           {mode === "search" ? t("storefront.search.title") : t("storefront.common.collections")}
@@ -775,15 +796,24 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
       </div>
 
       <header className="mb-4">
-        <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">{title}</h1>
+        <h1 className="font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-5xl">
+          {title}
+        </h1>
       </header>
 
       {showCatalogWarning ? (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-l-2 border-[#b5573a] bg-[#efe7dc]/65 px-4 py-3 text-xs text-[#1c1a18]/70" role="status">
+        <div
+          className="mb-4 flex flex-wrap items-center justify-between gap-3 border-l-2 border-[#b5573a] bg-[#efe7dc]/65 px-4 py-3 text-xs text-[#1c1a18]/70"
+          role="status"
+        >
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span>{catalogWarningError.status === 400 ? copy.invalidRequestWarning : copy.staleWarning}</span>
+            <span>
+              {catalogWarningError.status === 400 ? copy.invalidRequestWarning : copy.staleWarning}
+            </span>
             {catalogWarningError.status !== null ? (
-              <span className="font-mono text-[10px] opacity-65">HTTP {catalogWarningError.status}</span>
+              <span className="font-mono text-[10px] opacity-65">
+                HTTP {catalogWarningError.status}
+              </span>
             ) : null}
           </span>
           {catalogWarningError.retryable ? (
@@ -791,12 +821,14 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
               type="button"
               onClick={() => {
                 if (rollback !== null) {
-                  router.replace(rollback.query ? `${pathname}?${rollback.query}` : pathname, { scroll: false });
+                  router.replace(rollback.query ? `${pathname}?${rollback.query}` : pathname, {
+                    scroll: false,
+                  });
                   return;
                 }
                 productsQuery.refetch();
               }}
-              className="font-semibold uppercase tracking-wider text-[#b5573a]"
+              className="font-semibold tracking-wider text-[#b5573a] uppercase"
             >
               {copy.retry}
             </button>
@@ -839,7 +871,7 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
             <button
               type="button"
               onClick={() => clearFilters({ ...state, q: "" })}
-              className="bg-[#1c1a18] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#b5573a]"
+              className="bg-[#1c1a18] px-8 py-3 text-xs font-bold tracking-widest text-white uppercase hover:bg-[#b5573a]"
             >
               {t("storefront.common.clearAllFilters")}
             </button>
@@ -868,14 +900,25 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
       </ProductLayoutMain>
 
       {mode === "collection" && (
-        <section className="relative mb-4 mt-4 h-[300px] w-full overflow-hidden rounded-lg bg-black">
-          <FashionImage src="/images/collection/lookbook-banner.webp" alt={t("storefront.catalog.lookbookAlt")} className="opacity-65" />
+        <section className="relative mt-4 mb-4 h-[300px] w-full overflow-hidden rounded-lg bg-black">
+          <FashionImage
+            src="/images/collection/lookbook-banner.webp"
+            alt={t("storefront.catalog.lookbookAlt")}
+            className="opacity-65"
+          />
           <div className="absolute inset-0 bg-[#1c1a18]/40" />
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-            <span className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/80">{t("storefront.catalog.lookbookLabel")}</span>
-            <h2 className="mb-4 font-serif text-3xl font-light uppercase tracking-[0.1em] text-white">{t("storefront.catalog.comingSoon")}</h2>
+            <span className="mb-2 text-[10px] font-bold tracking-[0.3em] text-white/80 uppercase">
+              {t("storefront.catalog.lookbookLabel")}
+            </span>
+            <h2 className="mb-4 font-serif text-3xl font-light tracking-[0.1em] text-white uppercase">
+              {t("storefront.catalog.comingSoon")}
+            </h2>
             <div className="mb-6 h-px w-10 bg-white/40" />
-            <Link href="/collection" className="rounded-sm bg-white px-6 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-black hover:bg-[#efe7dc]">
+            <Link
+              href="/collection"
+              className="rounded-sm bg-white px-6 py-2.5 text-[10px] font-semibold tracking-widest text-black uppercase hover:bg-[#efe7dc]"
+            >
               {t("storefront.catalog.exploreNow")}
             </Link>
           </div>
@@ -902,11 +945,16 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: shouldReduceMotion ? 0.01 : 0.25 }}
-              className="fixed right-0 top-0 z-50 flex h-dvh w-[88vw] max-w-sm flex-col bg-[#f7f4ef] p-6 shadow-2xl md:hidden"
+              className="fixed top-0 right-0 z-50 flex h-dvh w-[88vw] max-w-sm flex-col bg-[#f7f4ef] p-6 shadow-2xl md:hidden"
             >
               <div className="mb-6 flex items-center justify-between border-b border-[#1c1a18]/10 pb-4">
                 <h2 className="font-serif text-2xl font-light">{t("storefront.common.filters")}</h2>
-                <button type="button" onClick={() => setMobileFiltersOpen(false)} aria-label={t("common.close")} className="p-1">
+                <button
+                  type="button"
+                  onClick={() => setMobileFiltersOpen(false)}
+                  aria-label={t("common.close")}
+                  className="p-1"
+                >
                   <X className="size-6" />
                 </button>
               </div>
@@ -919,8 +967,12 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
                     setPriceError(null);
                     setMobileDraft({
                       ...mobileDraft,
-                      categories: [], colors: [], sizes: [],
-                      minPrice: undefined, maxPrice: undefined, page: 1,
+                      categories: [],
+                      colors: [],
+                      sizes: [],
+                      minPrice: undefined,
+                      maxPrice: undefined,
+                      page: 1,
                     });
                   }}
                   priceError={priceError}
@@ -931,12 +983,18 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
               <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#1c1a18]/10 pt-4">
                 <button
                   type="button"
-                  onClick={() => setMobileDraft({
-                    ...mobileDraft,
-                    categories: [], colors: [], sizes: [],
-                    minPrice: undefined, maxPrice: undefined, page: 1,
-                  })}
-                  className="border border-[#1c1a18] py-3 text-xs font-semibold uppercase tracking-wider"
+                  onClick={() =>
+                    setMobileDraft({
+                      ...mobileDraft,
+                      categories: [],
+                      colors: [],
+                      sizes: [],
+                      minPrice: undefined,
+                      maxPrice: undefined,
+                      page: 1,
+                    })
+                  }
+                  className="border border-[#1c1a18] py-3 text-xs font-semibold tracking-wider uppercase"
                 >
                   {t("storefront.common.clearAll")}
                 </button>
@@ -948,7 +1006,7 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
                     navigate({ ...mobileDraft, page: 1 });
                     setMobileFiltersOpen(false);
                   }}
-                  className="bg-[#1c1a18] px-2 py-3 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-45"
+                  className="bg-[#1c1a18] px-2 py-3 text-xs font-semibold tracking-wider text-white uppercase disabled:opacity-45"
                 >
                   {copy.viewProducts(previewCount)}
                 </button>
@@ -963,12 +1021,24 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
 
 export function CollectionCatalogLoading() {
   return (
-    <div className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pb-24 pt-[104px] md:px-16 md:pt-[120px]" aria-busy="true">
+    <div
+      className="mx-auto min-h-[calc(100vh-200px)] w-full max-w-[1800px] px-6 pt-[104px] pb-24 md:px-16 md:pt-[120px]"
+      aria-busy="true"
+    >
       <div aria-hidden>
-        <div className="mb-4 flex gap-2"><Skeleton className="h-2.5 w-12" /><Skeleton className="h-2.5 w-24" /></div>
+        <div className="mb-4 flex gap-2">
+          <Skeleton className="h-2.5 w-12" />
+          <Skeleton className="h-2.5 w-24" />
+        </div>
         <Skeleton className="mb-7 h-12 w-full max-w-md" />
-        <div className="mb-6 flex justify-between py-3"><Skeleton className="h-4 w-24" /><Skeleton className="h-4 w-44" /></div>
-        <ProductCardSkeletonGrid count={6} gridClassName="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" />
+        <div className="mb-6 flex justify-between py-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-44" />
+        </div>
+        <ProductCardSkeletonGrid
+          count={6}
+          gridClassName="grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
+        />
       </div>
     </div>
   );

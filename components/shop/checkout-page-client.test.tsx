@@ -1,10 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type {
-  CheckoutPreviewResponse,
-  CheckoutResponse,
-} from "@/lib/checkout-api";
+import type { CheckoutPreviewResponse, CheckoutResponse } from "@/lib/checkout-api";
 
 const {
   clearCartMock,
@@ -123,9 +120,7 @@ async function prepareCheckoutForm(container: HTMLElement) {
   fireEvent.change(province, { target: { value: "79" } });
 
   await waitFor(() => expect(getVietnamWardsMock).toHaveBeenCalledWith(79, expect.anything()));
-  await waitFor(() =>
-    expect(container.querySelector('select[name="wardCode"]')).not.toBeNull(),
-  );
+  await waitFor(() => expect(container.querySelector('select[name="wardCode"]')).not.toBeNull());
   const ward = container.querySelector<HTMLSelectElement>('select[name="wardCode"]')!;
   fireEvent.change(ward, { target: { value: "760" } });
 
@@ -223,9 +218,7 @@ describe("CheckoutPageClient rapid submit", () => {
     fireEvent.submit(form);
     await waitFor(() => expect(submitCheckoutMock).toHaveBeenCalledTimes(2));
 
-    expect(submitCheckoutMock.mock.calls[1]?.[1]).toBe(
-      submitCheckoutMock.mock.calls[0]?.[1],
-    );
+    expect(submitCheckoutMock.mock.calls[1]?.[1]).toBe(submitCheckoutMock.mock.calls[0]?.[1]);
     expect(await screen.findByText("checkout.successTitle")).toBeInTheDocument();
   });
 });

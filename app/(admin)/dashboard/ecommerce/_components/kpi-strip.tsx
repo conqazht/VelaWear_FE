@@ -1,11 +1,31 @@
 "use client";
 
-import { ArrowUpRight, DollarSign, PackageCheck, ReceiptText, RotateCcw, ShoppingBag, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  DollarSign,
+  PackageCheck,
+  ReceiptText,
+  RotateCcw,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
 import { Area, Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { getIntlLocale } from "@/lib/i18n";
 
 const revenueBucketRanges = ["01-05", "06-10", "11-15", "16-20", "21-25", "26-31"] as const;
@@ -54,7 +74,9 @@ function formatMonthTick(value: string, locale: string) {
 
   if (range !== "11-15") return "";
 
-  return new Intl.DateTimeFormat(locale, { month: "short", year: "2-digit" }).format(new Date(month));
+  return new Intl.DateTimeFormat(locale, { month: "short", year: "2-digit" }).format(
+    new Date(month),
+  );
 }
 
 function formatTooltipLabel(value: string, locale: string) {
@@ -63,10 +85,18 @@ function formatTooltipLabel(value: string, locale: string) {
   const [start, end] = String(range).split("-");
   const lastDayOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   const startDate = new Date(month.getFullYear(), month.getMonth(), Number(start));
-  const endDate = new Date(month.getFullYear(), month.getMonth(), Math.min(Number(end), lastDayOfMonth));
+  const endDate = new Date(
+    month.getFullYear(),
+    month.getMonth(),
+    Math.min(Number(end), lastDayOfMonth),
+  );
 
   const shortDateFormatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
-  const endDateFormatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" });
+  const endDateFormatter = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
   return `${shortDateFormatter.format(startDate)} – ${endDateFormatter.format(endDate)}`;
 }
@@ -74,7 +104,10 @@ function formatTooltipLabel(value: string, locale: string) {
 export function KpiStrip() {
   const { locale, t } = useI18n();
   const intlLocale = getIntlLocale(locale);
-  const currencyFormatter = new Intl.NumberFormat(intlLocale, { currency: "USD", style: "currency" });
+  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
+    currency: "USD",
+    style: "currency",
+  });
   const numberFormatter = new Intl.NumberFormat(intlLocale);
   const percentFormatter = new Intl.NumberFormat(intlLocale, {
     maximumFractionDigits: 1,
@@ -101,118 +134,154 @@ export function KpiStrip() {
   } satisfies ChartConfig;
 
   return (
-    <div className="h-full overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 xl:col-span-12">
+    <div className="bg-card ring-foreground/10 h-full overflow-hidden rounded-xl ring-1 xl:col-span-12">
       <div>
         <div className="grid grid-cols-1 xl:grid-cols-12">
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 xl:col-span-5 xl:border-r">
-            <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
+            <Card className="border-border h-full rounded-none border-0 border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.ecommerce.totalSales")}</CardTitle>
-                <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
+                <CardTitle className="text-sm font-normal">
+                  {t("admin.dashboardsA.ecommerce.totalSales")}
+                </CardTitle>
+                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
                   {currencyFormatter.format(48_560)}
                 </CardDescription>
-                <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
-                  <DollarSign className="size-3 text-foreground" />
+                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                  <DollarSign className="text-foreground size-3" />
                 </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">{signedPercentFormatter.format(0.158)}</span>
-                  <span className="text-muted-foreground"> {t("admin.dashboardsA.ecommerce.vsLastWeek")}</span>
+                  <span className="text-green-700 dark:text-green-300">
+                    {signedPercentFormatter.format(0.158)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("admin.dashboardsA.ecommerce.vsLastWeek")}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="h-full rounded-none border-0 border-border border-b ring-0">
+            <Card className="border-border h-full rounded-none border-0 border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.ecommerce.totalOrders")}</CardTitle>
-                <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
+                <CardTitle className="text-sm font-normal">
+                  {t("admin.dashboardsA.ecommerce.totalOrders")}
+                </CardTitle>
+                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
                   {numberFormatter.format(379)}
                 </CardDescription>
-                <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
-                  <ShoppingBag className="size-3 text-foreground" />
+                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                  <ShoppingBag className="text-foreground size-3" />
                 </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">{signedPercentFormatter.format(0.083)}</span>
-                  <span className="text-muted-foreground"> {t("admin.dashboardsA.ecommerce.vsLastWeek")}</span>
+                  <span className="text-green-700 dark:text-green-300">
+                    {signedPercentFormatter.format(0.083)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("admin.dashboardsA.ecommerce.vsLastWeek")}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
+            <Card className="border-border h-full rounded-none border-0 border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">
+                <CardTitle className="text-sm font-normal">
                   {t("admin.dashboardsA.ecommerce.customerGrowth")}
                 </CardTitle>
-                <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
+                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
                   {numberFormatter.format(820)}
                 </CardDescription>
-                <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
-                  <Users className="size-3 text-foreground" />
+                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                  <Users className="text-foreground size-3" />
                 </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">{signedPercentFormatter.format(0.125)}</span>
-                  <span className="text-muted-foreground"> {t("admin.dashboardsA.ecommerce.vsLastMonth")}</span>
+                  <span className="text-green-700 dark:text-green-300">
+                    {signedPercentFormatter.format(0.125)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("admin.dashboardsA.ecommerce.vsLastMonth")}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="h-full rounded-none border-0 border-border border-b ring-0">
+            <Card className="border-border h-full rounded-none border-0 border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.ecommerce.averageOrder")}</CardTitle>
-                <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
+                <CardTitle className="text-sm font-normal">
+                  {t("admin.dashboardsA.ecommerce.averageOrder")}
+                </CardTitle>
+                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
                   {currencyFormatter.format(128)}
                 </CardDescription>
-                <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
-                  <ReceiptText className="size-3 text-foreground" />
+                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                  <ReceiptText className="text-foreground size-3" />
                 </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
                   <span className="text-destructive">{currencyFormatter.format(-4.2)}</span>
-                  <span className="text-muted-foreground"> {t("admin.dashboardsA.ecommerce.vsLastWeek")}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("admin.dashboardsA.ecommerce.vsLastWeek")}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r md:border-b-0">
+            <Card className="border-border h-full rounded-none border-0 border-b ring-0 md:border-r md:border-b-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.ecommerce.returnRequests")}</CardTitle>
-                <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
+                <CardTitle className="text-sm font-normal">
+                  {t("admin.dashboardsA.ecommerce.returnRequests")}
+                </CardTitle>
+                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
                   {numberFormatter.format(18)}
                 </CardDescription>
-                <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
-                  <RotateCcw className="size-3 text-foreground" />
+                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                  <RotateCcw className="text-foreground size-3" />
                 </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
                   <span className="text-destructive">{signedPercentFormatter.format(0.006)}</span>
-                  <span className="text-muted-foreground"> {t("admin.dashboardsA.ecommerce.vsLastMonth")}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("admin.dashboardsA.ecommerce.vsLastMonth")}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.ecommerce.stockAccuracy")}</CardTitle>
-                <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
+                <CardTitle className="text-sm font-normal">
+                  {t("admin.dashboardsA.ecommerce.stockAccuracy")}
+                </CardTitle>
+                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
                   {percentFormatter.format(0.97)}
                 </CardDescription>
-                <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
-                  <PackageCheck className="size-3 text-foreground" />
+                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                  <PackageCheck className="text-foreground size-3" />
                 </CardAction>
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
                   <span className="text-green-700 dark:text-green-300">
-                    {t("admin.dashboardsA.ecommerce.points", { value: signedNumberFormatter.format(2.4) })}
+                    {t("admin.dashboardsA.ecommerce.points", {
+                      value: signedNumberFormatter.format(2.4),
+                    })}
                   </span>
-                  <span className="text-muted-foreground"> {t("admin.dashboardsA.ecommerce.vsLastAudit")}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    {t("admin.dashboardsA.ecommerce.vsLastAudit")}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -220,7 +289,9 @@ export function KpiStrip() {
 
           <Card className="h-full rounded-none border-0 ring-0 xl:col-span-7">
             <CardHeader>
-              <CardTitle className="font-normal">{t("admin.dashboardsA.ecommerce.salesOverview")}</CardTitle>
+              <CardTitle className="font-normal">
+                {t("admin.dashboardsA.ecommerce.salesOverview")}
+              </CardTitle>
               <CardAction>
                 <ArrowUpRight className="size-4" />
               </CardAction>
@@ -273,8 +344,10 @@ export function KpiStrip() {
                             />
                             <div className="flex flex-1 items-center justify-between leading-none">
                               <span className="text-muted-foreground">{String(name ?? "")}</span>
-                              <span className="font-medium font-mono text-foreground tabular-nums">
-                                {typeof value === "number" ? currencyFormatter.format(value) : String(value ?? "")}
+                              <span className="text-foreground font-mono font-medium tabular-nums">
+                                {typeof value === "number"
+                                  ? currencyFormatter.format(value)
+                                  : String(value ?? "")}
                               </span>
                             </div>
                           </>

@@ -3,7 +3,13 @@
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { CreateAdminPermissionRequest } from "@/lib/api/admin-rbac";
 
 export type PermissionMethod = CreateAdminPermissionRequest["method"];
@@ -33,14 +39,19 @@ type PermissionFormProps = {
 export function PermissionForm({ values, onChange, moduleOptions }: PermissionFormProps) {
   const { t } = useI18n();
 
-  function update<Key extends keyof PermissionFormValues>(key: Key, value: PermissionFormValues[Key]) {
+  function update<Key extends keyof PermissionFormValues>(
+    key: Key,
+    value: PermissionFormValues[Key],
+  ) {
     onChange({ ...values, [key]: value });
   }
 
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="permission-name">{t("admin.commerce.permissions.form.name")}</FieldLabel>
+        <FieldLabel htmlFor="permission-name">
+          {t("admin.commerce.permissions.form.name")}
+        </FieldLabel>
         <Input
           id="permission-name"
           value={values.name}

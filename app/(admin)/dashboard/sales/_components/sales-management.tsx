@@ -83,18 +83,9 @@ function statusVariant(status: SaleCampaignStatus) {
 }
 
 function campaignTotals(campaign: AdminSaleCampaign) {
-  const totalQuota = campaign.items.reduce(
-    (sum, item) => sum + (item.quota ?? 0),
-    0,
-  );
-  const reservedQuantity = campaign.items.reduce(
-    (sum, item) => sum + item.reservedQuantity,
-    0,
-  );
-  const soldQuantity = campaign.items.reduce(
-    (sum, item) => sum + item.soldQuantity,
-    0,
-  );
+  const totalQuota = campaign.items.reduce((sum, item) => sum + (item.quota ?? 0), 0);
+  const reservedQuantity = campaign.items.reduce((sum, item) => sum + item.reservedQuantity, 0);
+  const soldQuantity = campaign.items.reduce((sum, item) => sum + item.soldQuantity, 0);
   return { totalQuota, reservedQuantity, soldQuantity };
 }
 
@@ -116,16 +107,9 @@ export function SalesManagement() {
     sort: "createdAt,desc",
     locale,
     search: deferredSearch || undefined,
-    type:
-      typeFilter === ALL_FILTER ? undefined : (typeFilter as SaleCampaignType),
-    status:
-      statusFilter === ALL_FILTER
-        ? undefined
-        : (statusFilter as SaleCampaignStatus),
-    phase:
-      phaseFilter === ALL_FILTER
-        ? undefined
-        : (phaseFilter as SaleCampaignPhase),
+    type: typeFilter === ALL_FILTER ? undefined : (typeFilter as SaleCampaignType),
+    status: statusFilter === ALL_FILTER ? undefined : (statusFilter as SaleCampaignStatus),
+    phase: phaseFilter === ALL_FILTER ? undefined : (phaseFilter as SaleCampaignPhase),
   });
   const publishMutation = usePublishAdminSaleCampaignMutation();
   const deleteMutation = useDeleteAdminSaleCampaignMutation();
@@ -144,9 +128,7 @@ export function SalesManagement() {
         toast.success(t("admin.sales.management.toast.published", { name: published.name }));
       } else {
         await deleteMutation.mutateAsync(action.campaign.id);
-        toast.success(
-          t("admin.sales.management.toast.deleted", { name: action.campaign.name }),
-        );
+        toast.success(t("admin.sales.management.toast.deleted", { name: action.campaign.name }));
         setPage(1);
       }
       setAction(null);
@@ -164,7 +146,7 @@ export function SalesManagement() {
       className: "min-w-64",
       cell: (campaign) => (
         <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
             <Tags className="size-4" />
           </div>
           <div className="min-w-0">
@@ -174,14 +156,16 @@ export function SalesManagement() {
             >
               {campaign.name}
             </Link>
-            <p className="truncate font-mono text-muted-foreground text-xs">
-              {campaign.code}
-            </p>
+            <p className="text-muted-foreground truncate font-mono text-xs">{campaign.code}</p>
             <div className="mt-1 flex gap-1">
               {(["vi", "en"] as const).map((translationLocale) => (
                 <Badge
                   key={translationLocale}
-                  variant={campaign.translationLocales?.includes(translationLocale) ? "secondary" : "outline"}
+                  variant={
+                    campaign.translationLocales?.includes(translationLocale)
+                      ? "secondary"
+                      : "outline"
+                  }
                   className="px-1 py-0 text-[9px] uppercase"
                 >
                   {translationLocale}
@@ -197,10 +181,7 @@ export function SalesManagement() {
       header: t("admin.sales.management.column.typeItems"),
       cell: (campaign) => (
         <div className="grid gap-1">
-          <Badge
-            variant={campaign.type === "FLASH" ? "default" : "secondary"}
-            className="w-fit"
-          >
+          <Badge variant={campaign.type === "FLASH" ? "default" : "secondary"} className="w-fit">
             {t(TYPE_LABEL_KEYS[campaign.type])}
           </Badge>
           <span className="text-muted-foreground text-xs tabular-nums">
@@ -233,21 +214,16 @@ export function SalesManagement() {
       cell: (campaign) => {
         if (campaign.type !== "FLASH") {
           return (
-            <span className="text-muted-foreground">
-              {t("admin.sales.management.quota.none")}
-            </span>
+            <span className="text-muted-foreground">{t("admin.sales.management.quota.none")}</span>
           );
         }
-        const { totalQuota, reservedQuantity, soldQuantity } =
-          campaignTotals(campaign);
+        const { totalQuota, reservedQuantity, soldQuantity } = campaignTotals(campaign);
         const used = reservedQuantity + soldQuantity;
         const percentage = totalQuota > 0 ? (used / totalQuota) * 100 : 0;
         return (
           <div className="grid gap-1.5">
             <div className="flex justify-between text-xs tabular-nums">
-              <span>
-                {t("admin.sales.management.quota.allocated", { count: used })}
-              </span>
+              <span>{t("admin.sales.management.quota.allocated", { count: used })}</span>
               <span className="text-muted-foreground">
                 {t("admin.sales.management.quota.total", { count: totalQuota })}
               </span>
@@ -280,11 +256,7 @@ export function SalesManagement() {
     },
     {
       key: "actions",
-      header: (
-        <span className="sr-only">
-          {t("admin.sales.management.column.actions")}
-        </span>
-      ),
+      header: <span className="sr-only">{t("admin.sales.management.column.actions")}</span>,
       headerClassName: "w-32 text-right",
       className: "text-right",
       cell: (campaign) => (
@@ -424,12 +396,9 @@ export function SalesManagement() {
                 startsAt: campaign.startsAt,
                 endsAt: campaign.endsAt,
                 itemCount: campaign.items.length,
-                totalQuota:
-                  campaign.type === "FLASH" ? totals.totalQuota : null,
-                reservedQuantity:
-                  campaign.type === "FLASH" ? totals.reservedQuantity : null,
-                soldQuantity:
-                  campaign.type === "FLASH" ? totals.soldQuantity : null,
+                totalQuota: campaign.type === "FLASH" ? totals.totalQuota : null,
+                reservedQuantity: campaign.type === "FLASH" ? totals.reservedQuantity : null,
+                soldQuantity: campaign.type === "FLASH" ? totals.soldQuantity : null,
               };
             }),
           )
@@ -461,11 +430,7 @@ export function SalesManagement() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setAction(null)}
-              disabled={isActionPending}
-            >
+            <Button variant="outline" onClick={() => setAction(null)} disabled={isActionPending}>
               {t("admin.sales.management.dialog.cancel")}
             </Button>
             <Button

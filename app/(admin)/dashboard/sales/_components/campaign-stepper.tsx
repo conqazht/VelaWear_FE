@@ -32,10 +32,7 @@ export function CampaignStepper({
   ] as const;
 
   return (
-    <ol
-      className="grid gap-2 md:grid-cols-3"
-      aria-label={t("admin.sales.editor.stepper.aria")}
-    >
+    <ol className="grid gap-2 md:grid-cols-3" aria-label={t("admin.sales.editor.stepper.aria")}>
       {steps.map((step) => {
         const isActive = currentStep === step.value;
         const isComplete = currentStep > step.value;
@@ -46,9 +43,7 @@ export function CampaignStepper({
               type="button"
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                isActive
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:bg-muted/50",
+                isActive ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
               )}
               aria-current={isActive ? "step" : undefined}
               disabled={disabled}
@@ -66,7 +61,7 @@ export function CampaignStepper({
               </span>
               <span className="min-w-0">
                 <span className="block truncate font-medium">{step.title}</span>
-                <span className="block truncate text-muted-foreground text-xs">
+                <span className="text-muted-foreground block truncate text-xs">
                   {step.description}
                 </span>
               </span>

@@ -34,13 +34,15 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.saleAccessories": "Accessories on Sale",
     "storefront.nav.flashSale": "Flash Sale",
     "storefront.nav.collectionTitle": "Summer 2026",
-    "storefront.nav.collectionDescription": "Minimal silhouettes in natural linen and organic cotton.",
+    "storefront.nav.collectionDescription":
+      "Minimal silhouettes in natural linen and organic cotton.",
     "storefront.nav.newArrivals": "New Arrivals",
     "storefront.nav.artisanLinen": "Artisan Linen",
     "storefront.nav.minimalistTailoring": "Minimalist Tailoring",
     "storefront.nav.heritageWool": "Heritage Wool",
     "storefront.nav.trousersTitle": "Sustainable Materials",
-    "storefront.nav.trousersDescription": "Refined pleated tailoring and relaxed trousers for every day.",
+    "storefront.nav.trousersDescription":
+      "Refined pleated tailoring and relaxed trousers for every day.",
     "storefront.nav.pleatedTrousers": "Pleated Trousers",
     "storefront.nav.slimTrousers": "Slim-fit Trousers",
     "storefront.nav.relaxedTrousers": "Relaxed Trousers",
@@ -52,7 +54,8 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.tailoredBlazer": "Tailored Blazer",
     "storefront.nav.lightJacket": "Lightweight Jacket",
     "storefront.nav.accessoriesTitle": "Finishing Details",
-    "storefront.nav.accessoriesDescription": "Considered accents, from a sturdy heritage canvas tote to fine leather goods.",
+    "storefront.nav.accessoriesDescription":
+      "Considered accents, from a sturdy heritage canvas tote to fine leather goods.",
     "storefront.nav.canvasTote": "Heritage Canvas Tote",
     "storefront.nav.leatherBelt": "Leather Belt",
     "storefront.nav.clutch": "Clutch",
@@ -87,7 +90,8 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.logoutError": "Failed to log out. Please try again.",
 
     "storefront.footer.tagline": "The Art of Slow Living",
-    "storefront.footer.description": "An independent design and tailoring studio devoted to minimalist fashion. We select natural materials, craft with care, and accompany a quieter, more sustainable way of living.",
+    "storefront.footer.description":
+      "An independent design and tailoring studio devoted to minimalist fashion. We select natural materials, craft with care, and accompany a quieter, more sustainable way of living.",
     "storefront.footer.collection": "Collection",
     "storefront.footer.autumnCollection": "Autumn Collection",
     "storefront.footer.minimalistTailoring": "Minimalist Tailoring",
@@ -124,20 +128,25 @@ export const storefrontMessages = defineMessages(
     "storefront.home.trendingHint": "Swipe to explore more or use the controls",
     "storefront.home.heritageEyebrow": "Heritage values",
     "storefront.home.heritageTitle": "Considered in every thread",
-    "storefront.home.heritageDescription": "We create minimalist fashion around three enduring principles.",
+    "storefront.home.heritageDescription":
+      "We create minimalist fashion around three enduring principles.",
     "storefront.home.materialsTitle": "Exceptional materials",
-    "storefront.home.materialsDescription": "Natural merino wool, internationally certified organic cotton, and handwoven silk offer remarkable softness and breathability.",
+    "storefront.home.materialsDescription":
+      "Natural merino wool, internationally certified organic cotton, and handwoven silk offer remarkable softness and breathability.",
     "storefront.home.sustainableTitle": "Distinctive and sustainable",
-    "storefront.home.sustainableDescription": "Every piece follows an eco-conscious philosophy, reducing harmful dyes and extending its useful life to protect the planet.",
+    "storefront.home.sustainableDescription":
+      "Every piece follows an eco-conscious philosophy, reducing harmful dyes and extending its useful life to protect the planet.",
     "storefront.home.tailoringTitle": "The art of tailoring",
-    "storefront.home.tailoringDescription": "Skilled artisans use refined hidden-seam techniques and fluid silhouettes to celebrate quiet elegance.",
+    "storefront.home.tailoringDescription":
+      "Skilled artisans use refined hidden-seam techniques and fluid silhouettes to celebrate quiet elegance.",
     "storefront.home.previousSlide": "Previous slide",
     "storefront.home.nextSlide": "Next slide",
     "storefront.home.goToSlide": "Go to slide {number}",
 
     "storefront.story.eyebrow": "Design archive",
     "storefront.story.title": "The Vela Archives.",
-    "storefront.story.description": "Explore our studies of natural materials, refined tailoring structures, and enduring artisanal weaving.",
+    "storefront.story.description":
+      "Explore our studies of natural materials, refined tailoring structures, and enduring artisanal weaving.",
     "storefront.story.item1Category": "Merino Study",
     "storefront.story.item1Title": "The Wool & Draping Study",
     "storefront.story.item2Category": "Tailoring Essays",
@@ -151,26 +160,33 @@ export const storefrontMessages = defineMessages(
 
     "storefront.craft.eyebrow": "Our artisanal process",
     "storefront.craft.title": "The Art of Slow Creation",
-    "storefront.craft.description": "Discover each considered stage of Vela Wear craftsmanship. Scroll to unfold every chapter of our design process.",
+    "storefront.craft.description":
+      "Discover each considered stage of Vela Wear craftsmanship. Scroll to unfold every chapter of our design process.",
     "storefront.craft.step1Title": "Sourcing Prime Materials",
     "storefront.craft.step1Subtitle": "Internationally certified organic cotton and raw silk",
-    "storefront.craft.step1Description": "We begin at trusted sources, selecting only the finest long-staple fibres: highland merino, handwoven raw silk, and exceptionally soft organic cotton. Each is harvested through regenerative practices that respect the earth.",
+    "storefront.craft.step1Description":
+      "We begin at trusted sources, selecting only the finest long-staple fibres: highland merino, handwoven raw silk, and exceptionally soft organic cotton. Each is harvested through regenerative practices that respect the earth.",
     "storefront.craft.step2Title": "Slow Artisan Weaving",
     "storefront.craft.step2Subtitle": "Patient hand weaving for an open yet enduring structure",
-    "storefront.craft.step2Description": "Experienced artisans work with traditional shuttle looms. Every textile is woven to drape naturally while retaining a strong, lasting structure and the original character of its fibres.",
+    "storefront.craft.step2Description":
+      "Experienced artisans work with traditional shuttle looms. Every textile is woven to drape naturally while retaining a strong, lasting structure and the original character of its fibres.",
     "storefront.craft.step3Title": "Precision Draping & Tailoring",
     "storefront.craft.step3Subtitle": "Fine hidden seams shaped for an effortless drape",
-    "storefront.craft.step3Description": "Our signature hidden-seam construction feels smooth against the skin. Restrictive padding is removed so every silhouette can move with freedom, ease, and quiet elegance.",
+    "storefront.craft.step3Description":
+      "Our signature hidden-seam construction feels smooth against the skin. Restrictive padding is removed so every silhouette can move with freedom, ease, and quiet elegance.",
     "storefront.craft.step4Title": "Minimalist Fine Packaging",
     "storefront.craft.step4Subtitle": "Pure plant-fibre packaging without plastic lining",
-    "storefront.craft.step4Description": "Every Vela Wear piece is wrapped with care in delicate tissue and placed in a tactile plant-fibre box that biodegrades within 90 days. Every detail expresses thoughtful, understated luxury.",
+    "storefront.craft.step4Description":
+      "Every Vela Wear piece is wrapped with care in delicate tissue and placed in a tactile plant-fibre box that biodegrades within 90 days. Every detail expresses thoughtful, understated luxury.",
 
     "storefront.newsletter.title": "Join the Vela Archive.",
-    "storefront.newsletter.description": "Receive fortnightly essays on minimal living and sustainable craft, plus early access to limited collections—and nothing else.",
+    "storefront.newsletter.description":
+      "Receive fortnightly essays on minimal living and sustainable craft, plus early access to limited collections—and nothing else.",
     "storefront.newsletter.placeholder": "Your email address...",
     "storefront.newsletter.join": "Subscribe",
     "storefront.newsletter.joined": "Subscribed",
-    "storefront.newsletter.success": "Thank you. Your Vela Archive membership confirmation is on its way.",
+    "storefront.newsletter.success":
+      "Thank you. Your Vela Archive membership confirmation is on its way.",
 
     "storefront.catalog.pageTitle": "All products",
     "storefront.catalog.lookbookAlt": "Autumn lookbook preview",
@@ -212,18 +228,22 @@ export const storefrontMessages = defineMessages(
     "storefront.product.resource": "product",
     "storefront.product.missingEyebrow": "VELA WEAR / PRODUCT",
     "storefront.product.missingTitle": "This design is no longer in the collection",
-    "storefront.product.missingDescription": "This product may no longer be available or its address may have changed. Explore the designs currently available at Vela.",
+    "storefront.product.missingDescription":
+      "This product may no longer be available or its address may have changed. Explore the designs currently available at Vela.",
     "storefront.product.missingGeneric": "We could not find the product you were looking for.",
     "storefront.product.viewCollection": "View collection",
     "storefront.product.backHome": "Back to home",
     "storefront.product.craftEyebrow": "Craft & Sustainability",
     "storefront.product.craftTitle": "Woven with Intention.",
-    "storefront.product.craftParagraph1": "We source raw flax seed from organic farms in France. Durable linen is blended with natural cotton to create a light, elegant silhouette.",
-    "storefront.product.craftParagraph2": "A finely hand-stitched silk lining improves breathability and remains gentle against the skin throughout the day.",
+    "storefront.product.craftParagraph1":
+      "We source raw flax seed from organic farms in France. Durable linen is blended with natural cotton to create a light, elegant silhouette.",
+    "storefront.product.craftParagraph2":
+      "A finely hand-stitched silk lining improves breathability and remains gentle against the skin throughout the day.",
     "storefront.product.craftImageAlt": "Close-up of the linen weave",
     "storefront.product.fixtureCollection": "Atelier Collection",
     "storefront.product.fixtureName": "Tailored Linen Blazer",
-    "storefront.product.fixtureDescription": "Natural fibres and considered construction define the Vela Wear approach.",
+    "storefront.product.fixtureDescription":
+      "Natural fibres and considered construction define the Vela Wear approach.",
     "storefront.product.galleryFallback": "Product",
     "storefront.product.galleryLabel": "{color} look {number}",
     "storefront.product.craftsmanship": "Fine tailored craftsmanship",
@@ -240,16 +260,19 @@ export const storefrontMessages = defineMessages(
     "storefront.product.material": "Material:",
     "storefront.product.care": "Care instructions:",
     "storefront.product.deliveryTitle": "Free Delivery and Returns",
-    "storefront.product.deliveryThreshold": "Orders of ₫500,000 or more receive free standard delivery.",
+    "storefront.product.deliveryThreshold":
+      "Orders of ₫500,000 or more receive free standard delivery.",
     "storefront.product.standardDelivery": "Standard delivery in 4–5 business days",
     "storefront.product.expressDelivery": "Express delivery in 2–4 business days",
-    "storefront.product.deliverySchedule": "Orders are processed and delivered Monday through Friday, excluding public holidays.",
+    "storefront.product.deliverySchedule":
+      "Orders are processed and delivered Monday through Friday, excluding public holidays.",
     "storefront.product.memberReturnsPrefix": "Vela Members enjoy",
     "storefront.product.freeReturns": "free returns",
     "storefront.product.reviews": "Reviews ({count})",
     "storefront.product.reviewError": "Reviews cannot be loaded right now. Please try again later.",
     "storefront.product.noReviews": "No reviews yet",
-    "storefront.product.noReviewsDescription": "Be the first to share your experience with {product}.",
+    "storefront.product.noReviewsDescription":
+      "Be the first to share your experience with {product}.",
     "storefront.product.oneReview": "{count} review",
     "storefront.product.manyReviews": "{count} reviews",
     "storefront.product.noComment": "This customer did not leave a comment.",
@@ -289,13 +312,15 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.saleAccessories": "Phụ kiện giảm giá",
     "storefront.nav.flashSale": "Giảm giá nhanh",
     "storefront.nav.collectionTitle": "Mùa Hè 2026",
-    "storefront.nav.collectionDescription": "Tập trung vào phom dáng tối giản và chất liệu tự nhiên như linen, cotton hữu cơ.",
+    "storefront.nav.collectionDescription":
+      "Tập trung vào phom dáng tối giản và chất liệu tự nhiên như linen, cotton hữu cơ.",
     "storefront.nav.newArrivals": "Sản phẩm mới",
     "storefront.nav.artisanLinen": "Linen thủ công",
     "storefront.nav.minimalistTailoring": "May đo tối giản",
     "storefront.nav.heritageWool": "Len di sản",
     "storefront.nav.trousersTitle": "Chất Liệu Bền Vững",
-    "storefront.nav.trousersDescription": "Các thiết kế quần âu xếp ly tinh tế và quần phom rộng thoải mái cho mỗi ngày.",
+    "storefront.nav.trousersDescription":
+      "Các thiết kế quần âu xếp ly tinh tế và quần phom rộng thoải mái cho mỗi ngày.",
     "storefront.nav.pleatedTrousers": "Quần tây xếp ly",
     "storefront.nav.slimTrousers": "Quần âu ôm dáng",
     "storefront.nav.relaxedTrousers": "Quần phom rộng",
@@ -307,7 +332,8 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.tailoredBlazer": "Áo blazer may đo",
     "storefront.nav.lightJacket": "Áo khoác nhẹ",
     "storefront.nav.accessoriesTitle": "Chi Tiết Hoàn Thiện",
-    "storefront.nav.accessoriesDescription": "Điểm nhấn tinh tế từ túi tote canvas di sản đến các phụ kiện da cao cấp.",
+    "storefront.nav.accessoriesDescription":
+      "Điểm nhấn tinh tế từ túi tote canvas di sản đến các phụ kiện da cao cấp.",
     "storefront.nav.canvasTote": "Túi canvas di sản",
     "storefront.nav.leatherBelt": "Thắt lưng da",
     "storefront.nav.clutch": "Ví cầm tay",
@@ -342,7 +368,8 @@ export const storefrontMessages = defineMessages(
     "storefront.nav.logoutError": "Đăng xuất thất bại. Vui lòng thử lại.",
 
     "storefront.footer.tagline": "Nghệ Thuật Sống Chậm",
-    "storefront.footer.description": "Một studio thiết kế và may đo thời trang tối giản độc lập. Chúng tôi chọn lọc chất liệu tự nhiên, chế tác tỉ mỉ và đồng hành cùng phong cách sống tĩnh lặng, bền vững.",
+    "storefront.footer.description":
+      "Một studio thiết kế và may đo thời trang tối giản độc lập. Chúng tôi chọn lọc chất liệu tự nhiên, chế tác tỉ mỉ và đồng hành cùng phong cách sống tĩnh lặng, bền vững.",
     "storefront.footer.collection": "Bộ sưu tập",
     "storefront.footer.autumnCollection": "Bộ sưu tập Thu",
     "storefront.footer.minimalistTailoring": "May đo tối giản",
@@ -379,20 +406,25 @@ export const storefrontMessages = defineMessages(
     "storefront.home.trendingHint": "Lướt ngang để xem thêm hoặc sử dụng nút điều hướng",
     "storefront.home.heritageEyebrow": "Giá trị di sản",
     "storefront.home.heritageTitle": "Sự tinh tuyển trong từng thớ vải",
-    "storefront.home.heritageDescription": "Chúng tôi kiến tạo thời trang tối giản dựa trên ba triết lý trường tồn cùng năm tháng.",
+    "storefront.home.heritageDescription":
+      "Chúng tôi kiến tạo thời trang tối giản dựa trên ba triết lý trường tồn cùng năm tháng.",
     "storefront.home.materialsTitle": "Chất liệu thượng hạng",
-    "storefront.home.materialsDescription": "Len merino tự nhiên, sợi bông hữu cơ đạt chuẩn quốc tế và lụa dệt thủ công mang lại sự mềm mại, thoáng mát vượt bậc.",
+    "storefront.home.materialsDescription":
+      "Len merino tự nhiên, sợi bông hữu cơ đạt chuẩn quốc tế và lụa dệt thủ công mang lại sự mềm mại, thoáng mát vượt bậc.",
     "storefront.home.sustainableTitle": "Độc bản và bền vững",
-    "storefront.home.sustainableDescription": "Mỗi sản phẩm mang triết lý thân thiện môi trường, hạn chế hóa chất tẩy nhuộm và tối ưu vòng đời sử dụng để bảo vệ Trái Đất.",
+    "storefront.home.sustainableDescription":
+      "Mỗi sản phẩm mang triết lý thân thiện môi trường, hạn chế hóa chất tẩy nhuộm và tối ưu vòng đời sử dụng để bảo vệ Trái Đất.",
     "storefront.home.tailoringTitle": "Nghệ thuật may đo",
-    "storefront.home.tailoringDescription": "Các nghệ nhân lành nghề sử dụng kỹ nghệ khâu giấu chỉ tinh tế và phom dáng rủ tự nhiên để tôn vinh vẻ đẹp tĩnh lặng.",
+    "storefront.home.tailoringDescription":
+      "Các nghệ nhân lành nghề sử dụng kỹ nghệ khâu giấu chỉ tinh tế và phom dáng rủ tự nhiên để tôn vinh vẻ đẹp tĩnh lặng.",
     "storefront.home.previousSlide": "Trang trình chiếu trước",
     "storefront.home.nextSlide": "Trang trình chiếu sau",
     "storefront.home.goToSlide": "Đến trang trình chiếu {number}",
 
     "storefront.story.eyebrow": "Tư liệu thiết kế",
     "storefront.story.title": "Kho Lưu Trữ Vela.",
-    "storefront.story.description": "Khám phá các chuyên đề về chất liệu tự nhiên, cấu trúc may đo tinh xảo và nghệ thuật dệt thủ công trường tồn.",
+    "storefront.story.description":
+      "Khám phá các chuyên đề về chất liệu tự nhiên, cấu trúc may đo tinh xảo và nghệ thuật dệt thủ công trường tồn.",
     "storefront.story.item1Category": "Chuyên đề merino",
     "storefront.story.item1Title": "Nghiên Cứu Len Và Phom Rủ",
     "storefront.story.item2Category": "Tiểu luận may đo",
@@ -406,26 +438,33 @@ export const storefrontMessages = defineMessages(
 
     "storefront.craft.eyebrow": "Quy trình thủ công",
     "storefront.craft.title": "Nghệ Thuật Kiến Tạo Chậm",
-    "storefront.craft.description": "Chiêm ngưỡng các công đoạn chế tác tỉ mỉ của Vela Wear. Hãy cuộn xuống để khám phá từng chương trong quy trình thiết kế.",
+    "storefront.craft.description":
+      "Chiêm ngưỡng các công đoạn chế tác tỉ mỉ của Vela Wear. Hãy cuộn xuống để khám phá từng chương trong quy trình thiết kế.",
     "storefront.craft.step1Title": "Tinh Tuyển Nguyên Liệu",
     "storefront.craft.step1Subtitle": "Nguồn bông hữu cơ và tơ mộc đạt chứng chỉ quốc tế",
-    "storefront.craft.step1Description": "Bắt đầu từ vùng nguyên liệu chuẩn mực, chúng tôi chỉ chọn những thớ sợi dài mềm mượt nhất: len merino vùng cao, lụa tơ tằm dệt thủ công và bông hữu cơ xơ dài. Tất cả được thu hoạch theo phương thức tái tạo thân thiện với Trái Đất.",
+    "storefront.craft.step1Description":
+      "Bắt đầu từ vùng nguyên liệu chuẩn mực, chúng tôi chỉ chọn những thớ sợi dài mềm mượt nhất: len merino vùng cao, lụa tơ tằm dệt thủ công và bông hữu cơ xơ dài. Tất cả được thu hoạch theo phương thức tái tạo thân thiện với Trái Đất.",
     "storefront.craft.step2Title": "Dệt Chậm Thủ Công",
     "storefront.craft.step2Subtitle": "Nghệ thuật dệt chậm tạo kết cấu thoáng nhẹ và bền bỉ",
-    "storefront.craft.step2Description": "Các nghệ nhân lâu năm sử dụng khung dệt con thoi truyền thống. Từng thớ vải được dệt để có độ rủ tự nhiên nhưng vẫn bền chắc, lưu giữ nguyên vẹn đặc tính của sợi.",
+    "storefront.craft.step2Description":
+      "Các nghệ nhân lâu năm sử dụng khung dệt con thoi truyền thống. Từng thớ vải được dệt để có độ rủ tự nhiên nhưng vẫn bền chắc, lưu giữ nguyên vẹn đặc tính của sợi.",
     "storefront.craft.step3Title": "Tạo Phom Và May Đo Chính Xác",
     "storefront.craft.step3Subtitle": "Khâu giấu chỉ tinh mỹ cho phom dáng rủ tự nhiên",
-    "storefront.craft.step3Description": "Kỹ nghệ khâu giấu chỉ đặc trưng tạo cảm giác êm dịu trên da. Những cấu trúc đệm cứng được loại bỏ để phom dáng chuyển động tự do, thoải mái và thanh lịch.",
+    "storefront.craft.step3Description":
+      "Kỹ nghệ khâu giấu chỉ đặc trưng tạo cảm giác êm dịu trên da. Những cấu trúc đệm cứng được loại bỏ để phom dáng chuyển động tự do, thoải mái và thanh lịch.",
     "storefront.craft.step4Title": "Bao Bì Tối Giản Tinh Tế",
     "storefront.craft.step4Subtitle": "Bao bì sợi thực vật nguyên chất không màng nhựa",
-    "storefront.craft.step4Description": "Mỗi sản phẩm Vela Wear được gói trong giấy lụa và đặt trong hộp sợi thực vật có thể phân hủy trong 90 ngày. Từng chi tiết thể hiện sự chu đáo và nét sang trọng tối giản.",
+    "storefront.craft.step4Description":
+      "Mỗi sản phẩm Vela Wear được gói trong giấy lụa và đặt trong hộp sợi thực vật có thể phân hủy trong 90 ngày. Từng chi tiết thể hiện sự chu đáo và nét sang trọng tối giản.",
 
     "storefront.newsletter.title": "Gia Nhập Kho Lưu Trữ Vela.",
-    "storefront.newsletter.description": "Nhận các bài viết hai tuần một lần về lối sống tối giản, nghề thủ công bền vững và quyền truy cập sớm vào những bộ sưu tập giới hạn—không có nội dung thừa.",
+    "storefront.newsletter.description":
+      "Nhận các bài viết hai tuần một lần về lối sống tối giản, nghề thủ công bền vững và quyền truy cập sớm vào những bộ sưu tập giới hạn—không có nội dung thừa.",
     "storefront.newsletter.placeholder": "Địa chỉ email của bạn...",
     "storefront.newsletter.join": "Đăng ký",
     "storefront.newsletter.joined": "Đã đăng ký",
-    "storefront.newsletter.success": "Cảm ơn bạn. Thư xác nhận thành viên Kho Lưu Trữ Vela đang được gửi đến.",
+    "storefront.newsletter.success":
+      "Cảm ơn bạn. Thư xác nhận thành viên Kho Lưu Trữ Vela đang được gửi đến.",
 
     "storefront.catalog.pageTitle": "Tất cả sản phẩm",
     "storefront.catalog.lookbookAlt": "Ảnh xem trước lookbook mùa Thu",
@@ -467,18 +506,22 @@ export const storefrontMessages = defineMessages(
     "storefront.product.resource": "sản phẩm",
     "storefront.product.missingEyebrow": "VELA WEAR / SẢN PHẨM",
     "storefront.product.missingTitle": "Thiết kế này không còn trong bộ sưu tập",
-    "storefront.product.missingDescription": "Sản phẩm có thể đã ngừng hiển thị hoặc đường dẫn đã thay đổi. Hãy khám phá những thiết kế đang có tại Vela.",
+    "storefront.product.missingDescription":
+      "Sản phẩm có thể đã ngừng hiển thị hoặc đường dẫn đã thay đổi. Hãy khám phá những thiết kế đang có tại Vela.",
     "storefront.product.missingGeneric": "Không tìm thấy thông tin sản phẩm bạn đang tìm kiếm.",
     "storefront.product.viewCollection": "Xem bộ sưu tập",
     "storefront.product.backHome": "Về trang chủ",
     "storefront.product.craftEyebrow": "Thủ Công Và Bền Vững",
     "storefront.product.craftTitle": "Dệt Nên Từ Chủ Ý.",
-    "storefront.product.craftParagraph1": "Chúng tôi tìm thấy hạt lanh thô mộc từ những nông trại hữu cơ tại Pháp. Sợi lanh được đan cài bền bỉ với cotton tự nhiên để tạo phom thanh thoát.",
-    "storefront.product.craftParagraph2": "Lớp lót tơ được khâu tay tinh tế, tăng độ thoáng khí và giữ cảm giác mềm dịu trên da suốt cả ngày.",
+    "storefront.product.craftParagraph1":
+      "Chúng tôi tìm thấy hạt lanh thô mộc từ những nông trại hữu cơ tại Pháp. Sợi lanh được đan cài bền bỉ với cotton tự nhiên để tạo phom thanh thoát.",
+    "storefront.product.craftParagraph2":
+      "Lớp lót tơ được khâu tay tinh tế, tăng độ thoáng khí và giữ cảm giác mềm dịu trên da suốt cả ngày.",
     "storefront.product.craftImageAlt": "Cận cảnh kết cấu dệt linen",
     "storefront.product.fixtureCollection": "Bộ Sưu Tập Atelier",
     "storefront.product.fixtureName": "Áo Blazer Linen May Đo",
-    "storefront.product.fixtureDescription": "Sợi tự nhiên và kết cấu chỉn chu tạo nên tinh thần Vela Wear.",
+    "storefront.product.fixtureDescription":
+      "Sợi tự nhiên và kết cấu chỉn chu tạo nên tinh thần Vela Wear.",
     "storefront.product.galleryFallback": "Sản phẩm",
     "storefront.product.galleryLabel": "{color}, góc nhìn {number}",
     "storefront.product.craftsmanship": "Kỹ nghệ may đo tinh tế",
@@ -495,16 +538,19 @@ export const storefrontMessages = defineMessages(
     "storefront.product.material": "Chất liệu:",
     "storefront.product.care": "Hướng dẫn bảo quản:",
     "storefront.product.deliveryTitle": "Giao Hàng Và Đổi Trả Miễn Phí",
-    "storefront.product.deliveryThreshold": "Đơn hàng từ 500.000 ₫ được miễn phí giao hàng tiêu chuẩn.",
+    "storefront.product.deliveryThreshold":
+      "Đơn hàng từ 500.000 ₫ được miễn phí giao hàng tiêu chuẩn.",
     "storefront.product.standardDelivery": "Giao hàng tiêu chuẩn trong 4–5 ngày làm việc",
     "storefront.product.expressDelivery": "Giao hàng nhanh trong 2–4 ngày làm việc",
-    "storefront.product.deliverySchedule": "Đơn hàng được xử lý và giao từ thứ Hai đến thứ Sáu, không bao gồm ngày lễ.",
+    "storefront.product.deliverySchedule":
+      "Đơn hàng được xử lý và giao từ thứ Hai đến thứ Sáu, không bao gồm ngày lễ.",
     "storefront.product.memberReturnsPrefix": "Thành viên Vela được",
     "storefront.product.freeReturns": "đổi trả miễn phí",
     "storefront.product.reviews": "Đánh giá ({count})",
     "storefront.product.reviewError": "Không thể tải đánh giá lúc này. Vui lòng thử lại sau.",
     "storefront.product.noReviews": "Chưa có đánh giá",
-    "storefront.product.noReviewsDescription": "Hãy là người đầu tiên chia sẻ trải nghiệm về {product}.",
+    "storefront.product.noReviewsDescription":
+      "Hãy là người đầu tiên chia sẻ trải nghiệm về {product}.",
     "storefront.product.oneReview": "{count} đánh giá",
     "storefront.product.manyReviews": "{count} đánh giá",
     "storefront.product.noComment": "Khách hàng không để lại bình luận.",

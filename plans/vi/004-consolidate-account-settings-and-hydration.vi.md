@@ -32,20 +32,21 @@ Profile chính hiển thị privacy/communication state chỉ nằm local, Save/
 
 ## Commands cần dùng
 
-| Mục đích | Command | Kết quả mong đợi |
-|---|---|---|
-| Target tests | `pnpm exec vitest run 'app/(shop)/profile/settings/page.test.tsx' components/shop/profile-navigation.test.tsx` | tất cả pass |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | tất cả pass |
-| Build | `pnpm build` | production build thành công |
-| Smoke | `pnpm test:e2e:smoke` | smoke pass |
+| Mục đích     | Command                                                                                                        | Kết quả mong đợi            |
+| ------------ | -------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Target tests | `pnpm exec vitest run 'app/(shop)/profile/settings/page.test.tsx' components/shop/profile-navigation.test.tsx` | tất cả pass                 |
+| Lint         | `pnpm exec eslint . --max-warnings 25`                                                                         | exit 0                      |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                    | exit 0                      |
+| Unit         | `pnpm test:unit`                                                                                               | tất cả pass                 |
+| Build        | `pnpm build`                                                                                                   | production build thành công |
+| Smoke        | `pnpm test:e2e:smoke`                                                                                          | smoke pass                  |
 
 ## Scope
 
 > **Workflow-metadata exception**: Ngoài source allowlist bên dưới, cập nhật `docs/PROJECT_STATUS.md` bằng plan ID, branch, outcome thật và exact verification evidence. Canonical EN/VI plan có thể reconcile trước source edit theo `plans/README.md`; reviewer/operator quản lý index status. Không file ngoài scope nào khác được phép.
 
 **Trong scope**:
+
 - `app/(shop)/profile/page.tsx`
 - `app/(shop)/profile/settings/page.tsx`
 - `components/shop/profile-navigation.tsx`
@@ -53,6 +54,7 @@ Profile chính hiển thị privacy/communication state chỉ nằm local, Save/
 - `app/(shop)/profile/settings/page.test.tsx`, `components/shop/profile-navigation.test.tsx` (tạo mới)
 
 **Ngoài scope**:
+
 - Backend preference/privacy/location/delete-account API mới.
 - Đổi OTP/proof-token contract hoặc reauthentication cleanup.
 - Broad profile decomposition (FE-009/FE-010).

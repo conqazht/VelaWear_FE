@@ -100,32 +100,32 @@ Các lớp chính:
 
 ### 3.1 Danh sách route liên quan
 
-| Route | Vai trò |
-| --- | --- |
-| `/collection` | Danh mục chung, filter/facets/sort/pagination |
-| `/search` | Kết quả tìm kiếm; dùng cùng `CollectionClient` với `mode="search"` |
-| `/products/[id]` | PDP, link Size Guide và review preview/modal |
-| `/size-guide` | Bảng cỡ tham khảo theo category/product/size |
-| `/sale` | Standard Sale storefront |
-| `/flash-sale` | Flash Sale storefront |
-| `/favorites` | Danh sách yêu thích |
-| `/coupons` | Coupon của khách |
-| `/reviews` | Lịch sử review của tài khoản hiện tại |
-| `/profile?tab=orders` | Danh sách đơn hàng |
-| `/profile/orders/[code]` | Chi tiết đơn và CTA viết review |
+| Route                    | Vai trò                                                            |
+| ------------------------ | ------------------------------------------------------------------ |
+| `/collection`            | Danh mục chung, filter/facets/sort/pagination                      |
+| `/search`                | Kết quả tìm kiếm; dùng cùng `CollectionClient` với `mode="search"` |
+| `/products/[id]`         | PDP, link Size Guide và review preview/modal                       |
+| `/size-guide`            | Bảng cỡ tham khảo theo category/product/size                       |
+| `/sale`                  | Standard Sale storefront                                           |
+| `/flash-sale`            | Flash Sale storefront                                              |
+| `/favorites`             | Danh sách yêu thích                                                |
+| `/coupons`               | Coupon của khách                                                   |
+| `/reviews`               | Lịch sử review của tài khoản hiện tại                              |
+| `/profile?tab=orders`    | Danh sách đơn hàng                                                 |
+| `/profile/orders/[code]` | Chi tiết đơn và CTA viết review                                    |
 
 ### 3.2 Query param công khai của Collection/Search
 
-| URL param | Kiểu | Mặc định | API param | Quy tắc |
-| --- | --- | --- | --- | --- |
-| `q` | string | rỗng | `q` | trim, tối đa 160 ký tự |
-| `categories` | CSV slug | rỗng | `categorySlugs` | loại trùng, giữ nhiều slug |
-| `colors` | CSV positive integer | rỗng | `colorIds` | bỏ ID lỗi, âm hoặc bằng 0 |
-| `sizes` | CSV positive integer | rỗng | `sizeIds` | bỏ ID lỗi, âm hoặc bằng 0 |
-| `minPrice` | number >= 0 | bỏ trống | `minPrice` | không cho lớn hơn `maxPrice` khi apply |
-| `maxPrice` | number >= 0 | bỏ trống | `maxPrice` | không cho nhỏ hơn `minPrice` khi apply |
-| `sort` | enum | `featured` | `sort` | chỉ nhận bốn giá trị đã khóa |
-| `page` | positive integer | `1` | `page` | 1-based |
+| URL param    | Kiểu                 | Mặc định   | API param       | Quy tắc                                |
+| ------------ | -------------------- | ---------- | --------------- | -------------------------------------- |
+| `q`          | string               | rỗng       | `q`             | trim, tối đa 160 ký tự                 |
+| `categories` | CSV slug             | rỗng       | `categorySlugs` | loại trùng, giữ nhiều slug             |
+| `colors`     | CSV positive integer | rỗng       | `colorIds`      | bỏ ID lỗi, âm hoặc bằng 0              |
+| `sizes`      | CSV positive integer | rỗng       | `sizeIds`       | bỏ ID lỗi, âm hoặc bằng 0              |
+| `minPrice`   | number >= 0          | bỏ trống   | `minPrice`      | không cho lớn hơn `maxPrice` khi apply |
+| `maxPrice`   | number >= 0          | bỏ trống   | `maxPrice`      | không cho nhỏ hơn `minPrice` khi apply |
+| `sort`       | enum                 | `featured` | `sort`          | chỉ nhận bốn giá trị đã khóa           |
+| `page`       | positive integer     | `1`        | `page`          | 1-based                                |
 
 Frontend gửi thêm `size=12` và `locale` hiện tại. `lib/api/catalog.ts` serialize các
 array thành CSV trước khi gọi API. Response được unwrap từ `ApiResponse<T>` và có
@@ -204,12 +204,12 @@ nghĩa tương đương khi parse.
 
 ### 4.4 Sort và pagination
 
-| Giá trị | Nhãn VI | Ý nghĩa contract |
-| --- | --- | --- |
-| `featured` | Nổi bật | Ranking nổi bật do backend tính |
-| `newest` | Mới nhất | Sản phẩm mới trước |
-| `price-asc` | Giá thấp đến cao | Effective price tăng dần |
-| `price-desc` | Giá cao đến thấp | Effective price giảm dần |
+| Giá trị      | Nhãn VI          | Ý nghĩa contract                |
+| ------------ | ---------------- | ------------------------------- |
+| `featured`   | Nổi bật          | Ranking nổi bật do backend tính |
+| `newest`     | Mới nhất         | Sản phẩm mới trước              |
+| `price-asc`  | Giá thấp đến cao | Effective price tăng dần        |
+| `price-desc` | Giá cao đến thấp | Effective price giảm dần        |
 
 Pagination hiển thị trang đầu, trang hiện tại ±1, trang cuối, Previous/Next và dấu
 ellipsis. Sau khi đổi trang, viewport cuộn về anchor catalog có trừ chiều cao header.
@@ -258,12 +258,12 @@ dạng accordion; parent và chevron cũng là hai control riêng.
 /size-guide?category=ao&size=M&product=essential-cotton-tee&available=S%2CM%2CL
 ```
 
-| Param | Nguồn | Tác dụng |
-| --- | --- | --- |
-| `category` | `product.categorySlug` | `giay` mở tab giày, `phu-kien` mở phụ kiện, còn lại mở trang phục |
-| `size` | size đang chọn trên PDP | highlight cột/card tương ứng |
-| `product` | slug/ID dùng trên PDP | tạo link **Quay lại sản phẩm**; giá trị không hợp lệ quay về `/collection` |
-| `available` | danh sách size của variants | làm rõ size đang bán và làm mờ size tham khảo |
+| Param       | Nguồn                       | Tác dụng                                                                   |
+| ----------- | --------------------------- | -------------------------------------------------------------------------- |
+| `category`  | `product.categorySlug`      | `giay` mở tab giày, `phu-kien` mở phụ kiện, còn lại mở trang phục          |
+| `size`      | size đang chọn trên PDP     | highlight cột/card tương ứng                                               |
+| `product`   | slug/ID dùng trên PDP       | tạo link **Quay lại sản phẩm**; giá trị không hợp lệ quay về `/collection` |
+| `available` | danh sách size của variants | làm rõ size đang bán và làm mờ size tham khảo                              |
 
 Ba param đầu là contract công khai đã khóa. `available` là param bổ sung của FE để
 truyền availability mà không cần gọi API lần nữa. Helper duy nhất để tạo URL là
@@ -275,32 +275,32 @@ Dữ liệu nằm trong `app/(shop)/size-guide/_data/size-guide-data.ts`, đơn 
 centimet và được version cùng code.
 
 | Size | Ngực (cm) | Eo (cm) | Mông (cm) |
-| --- | ---: | ---: | ---: |
-| XXS | 70–76 | 54–60 | 78–84 |
-| XS | 76–83 | 60–67 | 84–91 |
-| S | 83–90 | 67–74 | 91–98 |
-| M | 90–97 | 74–81 | 98–105 |
-| L | 97–104 | 81–88 | 105–112 |
-| XL | 104–114 | 88–98 | 112–120 |
-| XXL | 114–124 | 98–108 | 120–128 |
+| ---- | --------: | ------: | --------: |
+| XXS  |     70–76 |   54–60 |     78–84 |
+| XS   |     76–83 |   60–67 |     84–91 |
+| S    |     83–90 |   67–74 |     91–98 |
+| M    |     90–97 |   74–81 |    98–105 |
+| L    |    97–104 |   81–88 |   105–112 |
+| XL   |   104–114 |   88–98 |   112–120 |
+| XXL  |   114–124 |  98–108 |   120–128 |
 
 Bảng plus-size nằm trong `<details>`:
 
-| Size | Ngực (cm) | Eo (cm) | Mông (cm) |
-| --- | ---: | ---: | ---: |
-| 0X | 112–119 | 101.5–108.5 | 122.5–129.5 |
-| 1X | 119–126 | 108.5–115.5 | 129.5–136.5 |
-| 2X | 126–133 | 115.5–124 | 136.5–145 |
-| 3X | 133–140 | 124–134 | 145–155 |
-| 4X | 140–147 | 134–144 | 155–165 |
+| Size | Ngực (cm) |     Eo (cm) |   Mông (cm) |
+| ---- | --------: | ----------: | ----------: |
+| 0X   |   112–119 | 101.5–108.5 | 122.5–129.5 |
+| 1X   |   119–126 | 108.5–115.5 | 129.5–136.5 |
+| 2X   |   126–133 |   115.5–124 |   136.5–145 |
+| 3X   |   133–140 |     124–134 |     145–155 |
+| 4X   |   140–147 |     134–144 |     155–165 |
 
 Quy đổi quốc tế:
 
-| Hệ | XXS | XS | S | M | L | XL | XXL |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| US | 0 | 0–2 | 4–6 | 8–10 | 12–14 | 16–18 | 20–22 |
-| UK | 4 | 6 | 8 | 10 | 12 | 14–16 | 18–20 |
-| EU | 32 | 34 | 36 | 38 | 40 | 42–44 | 46–48 |
+| Hệ  | XXS | XS  | S   | M    | L     | XL    | XXL   |
+| --- | --- | --- | --- | ---- | ----- | ----- | ----- |
+| US  | 0   | 0–2 | 4–6 | 8–10 | 12–14 | 16–18 | 20–22 |
+| UK  | 4   | 6   | 8   | 10   | 12    | 14–16 | 18–20 |
+| EU  | 32  | 34  | 36  | 38   | 40    | 42–44 | 46–48 |
 
 Mọi bảng đều ghi rõ: **Các số đo là số đo cơ thể tham khảo; form từng sản phẩm có
 thể khác.** Size đang chọn dùng nền terracotta nhạt. Nếu có `available`, size không
@@ -331,12 +331,12 @@ Không nhập sẵn inch thành một bảng thứ hai vì sẽ tạo hai nguồ
 
 ### 7.1 API mà frontend sử dụng
 
-| Tác vụ | Method và path | Auth | FE adapter |
-| --- | --- | --- | --- |
-| Preview/danh sách công khai | `GET /api/v1/reviews/product/{productId}` | Không | `getProductReviews()` |
-| Summary | `GET /api/v1/reviews/product/{productId}/summary` | Không | `getProductReviewSummary()` |
-| Review của tôi/đơn | `GET /api/v1/reviews/me?orderId=...` | JWT | `getMyReviews()` |
-| Tạo review | `POST /api/v1/reviews` multipart | JWT | `createReview()` |
+| Tác vụ                      | Method và path                                    | Auth  | FE adapter                  |
+| --------------------------- | ------------------------------------------------- | ----- | --------------------------- |
+| Preview/danh sách công khai | `GET /api/v1/reviews/product/{productId}`         | Không | `getProductReviews()`       |
+| Summary                     | `GET /api/v1/reviews/product/{productId}/summary` | Không | `getProductReviewSummary()` |
+| Review của tôi/đơn          | `GET /api/v1/reviews/me?orderId=...`              | JWT   | `getMyReviews()`            |
+| Tạo review                  | `POST /api/v1/reviews` multipart                  | JWT   | `createReview()`            |
 
 Public list dùng `rating`, `sort`, `page`, `size`; modal gửi `size=10`. FE chỉ render
 `userName`, product/variant display data, rating, comment, images,
@@ -365,12 +365,12 @@ ID từ public response.
 
 Trạng thái modal được deep-link:
 
-| Param/hash | Ý nghĩa |
-| --- | --- |
-| `reviews=1` hoặc `#reviews` | mở modal |
-| `reviewRating=1..5` | filter sao |
-| `reviewSort=...` | sort khác `newest` |
-| `reviewPage=N` | trang khác 1 |
+| Param/hash                  | Ý nghĩa            |
+| --------------------------- | ------------------ |
+| `reviews=1` hoặc `#reviews` | mở modal           |
+| `reviewRating=1..5`         | filter sao         |
+| `reviewSort=...`            | sort khác `newest` |
+| `reviewPage=N`              | trang khác 1       |
 
 Mở modal dùng `history.pushState`; thay filter/sort/page dùng `replaceState`; đóng
 modal vừa mở từ PDP dùng `history.back()`. `popstate` đồng bộ UI, nên Back đóng modal
@@ -388,12 +388,13 @@ trước khi rời PDP.
 - Payload multipart có part `review` kiểu `application/json`:
 
 ```json
-{"orderItemId":41,"rating":5,"comment":"Chất liệu đẹp."}
+{ "orderItemId": 41, "rating": 5, "comment": "Chất liệu đẹp." }
 ```
 
-  và zero-to-five part `images`. Không gửi `userId`, URL ảnh hoặc tên file trong
-  JSON. Không tự đặt header `Content-Type`; Axios/browser phải sinh multipart
-  boundary.
+và zero-to-five part `images`. Không gửi `userId`, URL ảnh hoặc tên file trong
+JSON. Không tự đặt header `Content-Type`; Axios/browser phải sinh multipart
+boundary.
+
 - Submit lỗi giữ nguyên rating/comment/files. Submit thành công reset form, đóng
   dialog và invalidate `reviews`, `orders`, `products`; các preview/summary/list và
   trạng thái CTA sẽ refetch theo query key tương ứng.
@@ -402,15 +403,15 @@ trước khi rời PDP.
 
 ### 8.1 Phân loại lỗi
 
-| Trường hợp | Status UI | Retry query mặc định | Cách hiển thị |
-| --- | ---: | --- | --- |
-| Request bị hủy `ERR_CANCELED`/`ERR_CANCELLED` | không có | Không | Bỏ qua, không render artwork |
-| HTTP 400/401/403/404 | giữ status thật | Không | 401 chuyển sign-in; 403/404/generic 4xx theo context |
-| HTTP 408 hoặc 429 | giữ status thật | Một lần | Artwork hoặc stale warning tùy có cache |
-| HTTP 5xx | giữ status thật | Một lần | Artwork hoặc stale warning |
-| Network/timeout/CORS không có response | 503 | Một lần | Server-unavailable treatment |
-| Lỗi không xác định | 500 | Một lần | Server error treatment |
-| Mutation | giữ lỗi | Không | Form/CTA giữ state và hiện message |
+| Trường hợp                                    |       Status UI | Retry query mặc định | Cách hiển thị                                        |
+| --------------------------------------------- | --------------: | -------------------- | ---------------------------------------------------- |
+| Request bị hủy `ERR_CANCELED`/`ERR_CANCELLED` |        không có | Không                | Bỏ qua, không render artwork                         |
+| HTTP 400/401/403/404                          | giữ status thật | Không                | 401 chuyển sign-in; 403/404/generic 4xx theo context |
+| HTTP 408 hoặc 429                             | giữ status thật | Một lần              | Artwork hoặc stale warning tùy có cache              |
+| HTTP 5xx                                      | giữ status thật | Một lần              | Artwork hoặc stale warning                           |
+| Network/timeout/CORS không có response        |             503 | Một lần              | Server-unavailable treatment                         |
+| Lỗi không xác định                            |             500 | Một lần              | Server error treatment                               |
+| Mutation                                      |         giữ lỗi | Không                | Form/CTA giữ state và hiện message                   |
 
 `shouldRetryApiError(failureCount, error)` chỉ cho retry khi `failureCount < 1`.
 Storefront catalog còn đặt `refetchOnWindowFocus: false`; QueryProvider cũng tắt
@@ -418,15 +419,15 @@ refetch focus mặc định để tránh trang 400/500 nháy khi đổi tab.
 
 ### 8.2 State matrix
 
-| State | Có cache? | UI |
-| --- | --- | --- |
-| Initial loading | Không | Skeleton theo layout, `aria-busy=true` |
-| Initial 4xx/5xx/network sau retry | Không | Artwork `variant="route"`, phủ vùng dưới header |
-| Retry bằng nút trên artwork | Không | Giữ artwork trong lúc retry; không chèn skeleton nháy |
-| Background refetch lỗi | Có | Giữ content/grid, hiện `StorefrontStaleWarning` nhỏ |
-| Filter catalog mới lỗi | Có placeholder/kết quả trước | Replace về URL thành công gần nhất, giữ grid và cho retry filter lỗi |
-| Empty success | Có response rỗng | Empty state; không gọi là lỗi |
-| 401 sau refresh thất bại | Không áp dụng | Redirect `/sign-in` với internal return path đã validate |
+| State                             | Có cache?                    | UI                                                                   |
+| --------------------------------- | ---------------------------- | -------------------------------------------------------------------- |
+| Initial loading                   | Không                        | Skeleton theo layout, `aria-busy=true`                               |
+| Initial 4xx/5xx/network sau retry | Không                        | Artwork `variant="route"`, phủ vùng dưới header                      |
+| Retry bằng nút trên artwork       | Không                        | Giữ artwork trong lúc retry; không chèn skeleton nháy                |
+| Background refetch lỗi            | Có                           | Giữ content/grid, hiện `StorefrontStaleWarning` nhỏ                  |
+| Filter catalog mới lỗi            | Có placeholder/kết quả trước | Replace về URL thành công gần nhất, giữ grid và cho retry filter lỗi |
+| Empty success                     | Có response rỗng             | Empty state; không gọi là lỗi                                        |
+| 401 sau refresh thất bại          | Không áp dụng                | Redirect `/sign-in` với internal return path đã validate             |
 
 `StorefrontStatus` có ba variant:
 

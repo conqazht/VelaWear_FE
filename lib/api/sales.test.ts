@@ -26,9 +26,7 @@ describe("public sales API", () => {
       phase: ["LIVE", "UPCOMING"],
     });
 
-    expect(apiGetMock).toHaveBeenCalledWith(
-      "/sales?type=FLASH&phase=LIVE&phase=UPCOMING",
-    );
+    expect(apiGetMock).toHaveBeenCalledWith("/sales?type=FLASH&phase=LIVE&phase=UPCOMING");
   });
 
   it("gửi locale trong API và tách cache key Sale theo locale", async () => {

@@ -20,8 +20,7 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.details.description.placeholder":
       "Internal and storefront campaign description",
     "admin.sales.editor.details.banner.label": "Banner URL",
-    "admin.sales.editor.details.banner.placeholder":
-      "https://cdn.example.com/summer-sale.jpg",
+    "admin.sales.editor.details.banner.placeholder": "https://cdn.example.com/summer-sale.jpg",
     "admin.sales.editor.details.banner.description":
       "Optional storefront artwork. Use an absolute HTTP or HTTPS URL.",
     "admin.sales.editor.details.startsAt.label": "Starts at",
@@ -38,10 +37,8 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.review.variants": "Variants",
     "admin.sales.editor.review.productCount": "across {count} product(s)",
     "admin.sales.editor.review.rules": "Rules",
-    "admin.sales.editor.review.flashRules":
-      "{count} total quota · coupons excluded",
-    "admin.sales.editor.review.standardRules":
-      "No quota · eligible coupons may apply",
+    "admin.sales.editor.review.flashRules": "{count} total quota · coupons excluded",
+    "admin.sales.editor.review.standardRules": "No quota · eligible coupons may apply",
     "admin.sales.editor.review.column.productVariant": "Product / variant",
     "admin.sales.editor.review.column.reference": "Reference",
     "admin.sales.editor.review.column.salePrice": "Sale price",
@@ -67,15 +64,13 @@ export const salesAdminEditorMessages = defineMessages(
 
     "admin.sales.editor.loading": "Loading sale campaign...",
     "admin.sales.editor.notFound.title": "Sale campaign was not found",
-    "admin.sales.editor.notFound.description":
-      "The campaign identifier in this URL is invalid.",
+    "admin.sales.editor.notFound.description": "The campaign identifier in this URL is invalid.",
     "admin.sales.editor.backToCampaigns": "Back to campaigns",
     "admin.sales.editor.loadError.title": "Unable to load sale campaign",
     "admin.sales.editor.loadError.requestFailed": "Request failed",
     "admin.sales.editor.tryAgain": "Try again",
     "admin.sales.editor.clone.defaultName": "{name} (next)",
-    "admin.sales.editor.toast.displayUpdated":
-      "{name} display details were updated.",
+    "admin.sales.editor.toast.displayUpdated": "{name} display details were updated.",
     "admin.sales.editor.toast.updated": "{name} was updated.",
     "admin.sales.editor.toast.draftSaved": "{name} was saved as a draft.",
     "admin.sales.editor.toast.published": "{name} was published.",
@@ -84,14 +79,11 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.toast.deleted": "{name} was deleted.",
     "admin.sales.editor.toast.cancelled": "{name} was cancelled.",
     "admin.sales.editor.toast.ended": "{name} ended.",
-    "admin.sales.editor.toast.cloned":
-      "Campaign ended and a new draft was created.",
-    "admin.sales.editor.toast.quotaIncreased":
-      "{sku} quota increased by {count}.",
+    "admin.sales.editor.toast.cloned": "Campaign ended and a new draft was created.",
+    "admin.sales.editor.toast.quotaIncreased": "{sku} quota increased by {count}.",
     "admin.sales.editor.validation.cloneCode":
       "Clone code must contain 3–50 uppercase letters, numbers, dashes, or underscores.",
-    "admin.sales.editor.validation.cloneName":
-      "Enter a name for the cloned campaign.",
+    "admin.sales.editor.validation.cloneName": "Enter a name for the cloned campaign.",
     "admin.sales.editor.validation.cloneSchedule":
       "Choose a valid future schedule for the cloned campaign.",
     "admin.sales.editor.validation.quotaIncrease":
@@ -126,8 +118,7 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.liveQuota.description":
       "Quota can only increase while a Flash campaign is live.",
     "admin.sales.editor.liveQuota.quota": "{count} quota",
-    "admin.sales.editor.liveQuota.breakdown":
-      "{reserved} reserved · {sold} sold",
+    "admin.sales.editor.liveQuota.breakdown": "{reserved} reserved · {sold} sold",
     "admin.sales.editor.liveQuota.increase": "Increase",
 
     "admin.sales.editor.lifecycle.delete.title": "Delete draft campaign?",
@@ -185,8 +176,7 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.details.description.placeholder":
       "Mô tả chiến dịch dùng trong nội bộ và cửa hàng",
     "admin.sales.editor.details.banner.label": "URL banner",
-    "admin.sales.editor.details.banner.placeholder":
-      "https://cdn.example.com/summer-sale.jpg",
+    "admin.sales.editor.details.banner.placeholder": "https://cdn.example.com/summer-sale.jpg",
     "admin.sales.editor.details.banner.description":
       "Hình ảnh tùy chọn trên cửa hàng. Dùng URL HTTP hoặc HTTPS tuyệt đối.",
     "admin.sales.editor.details.startsAt.label": "Bắt đầu lúc",
@@ -204,8 +194,7 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.review.variants": "Biến thể",
     "admin.sales.editor.review.productCount": "thuộc {count} sản phẩm",
     "admin.sales.editor.review.rules": "Quy tắc",
-    "admin.sales.editor.review.flashRules":
-      "Tổng hạn ngạch {count} · không áp dụng coupon",
+    "admin.sales.editor.review.flashRules": "Tổng hạn ngạch {count} · không áp dụng coupon",
     "admin.sales.editor.review.standardRules":
       "Không có hạn ngạch · có thể áp dụng coupon đủ điều kiện",
     "admin.sales.editor.review.column.productVariant": "Sản phẩm / biến thể",
@@ -233,15 +222,13 @@ export const salesAdminEditorMessages = defineMessages(
 
     "admin.sales.editor.loading": "Đang tải chiến dịch khuyến mãi...",
     "admin.sales.editor.notFound.title": "Không tìm thấy chiến dịch khuyến mãi",
-    "admin.sales.editor.notFound.description":
-      "Mã chiến dịch trong URL này không hợp lệ.",
+    "admin.sales.editor.notFound.description": "Mã chiến dịch trong URL này không hợp lệ.",
     "admin.sales.editor.backToCampaigns": "Quay lại danh sách chiến dịch",
     "admin.sales.editor.loadError.title": "Không thể tải chiến dịch khuyến mãi",
     "admin.sales.editor.loadError.requestFailed": "Yêu cầu thất bại",
     "admin.sales.editor.tryAgain": "Thử lại",
     "admin.sales.editor.clone.defaultName": "{name} (tiếp theo)",
-    "admin.sales.editor.toast.displayUpdated":
-      "Đã cập nhật thông tin hiển thị của {name}.",
+    "admin.sales.editor.toast.displayUpdated": "Đã cập nhật thông tin hiển thị của {name}.",
     "admin.sales.editor.toast.updated": "Đã cập nhật {name}.",
     "admin.sales.editor.toast.draftSaved": "Đã lưu {name} dưới dạng bản nháp.",
     "admin.sales.editor.toast.published": "Đã xuất bản {name}.",
@@ -250,14 +237,11 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.toast.deleted": "Đã xóa {name}.",
     "admin.sales.editor.toast.cancelled": "Đã hủy {name}.",
     "admin.sales.editor.toast.ended": "Đã kết thúc {name}.",
-    "admin.sales.editor.toast.cloned":
-      "Đã kết thúc chiến dịch và tạo một bản nháp mới.",
-    "admin.sales.editor.toast.quotaIncreased":
-      "Đã tăng hạn ngạch của {sku} thêm {count}.",
+    "admin.sales.editor.toast.cloned": "Đã kết thúc chiến dịch và tạo một bản nháp mới.",
+    "admin.sales.editor.toast.quotaIncreased": "Đã tăng hạn ngạch của {sku} thêm {count}.",
     "admin.sales.editor.validation.cloneCode":
       "Mã bản sao phải có 3–50 chữ in hoa, số, dấu gạch ngang hoặc gạch dưới.",
-    "admin.sales.editor.validation.cloneName":
-      "Nhập tên cho chiến dịch được sao chép.",
+    "admin.sales.editor.validation.cloneName": "Nhập tên cho chiến dịch được sao chép.",
     "admin.sales.editor.validation.cloneSchedule":
       "Chọn lịch chạy trong tương lai hợp lệ cho chiến dịch được sao chép.",
     "admin.sales.editor.validation.quotaIncrease":
@@ -292,8 +276,7 @@ export const salesAdminEditorMessages = defineMessages(
     "admin.sales.editor.liveQuota.description":
       "Chỉ có thể tăng hạn ngạch khi chiến dịch Flash đang chạy.",
     "admin.sales.editor.liveQuota.quota": "Hạn ngạch {count}",
-    "admin.sales.editor.liveQuota.breakdown":
-      "Đã giữ {reserved} · đã bán {sold}",
+    "admin.sales.editor.liveQuota.breakdown": "Đã giữ {reserved} · đã bán {sold}",
     "admin.sales.editor.liveQuota.increase": "Tăng",
 
     "admin.sales.editor.lifecycle.delete.title": "Xóa chiến dịch nháp?",

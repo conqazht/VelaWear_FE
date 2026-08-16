@@ -63,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link href="/dashboard/default" />}>
               <Command />
-              <span className="font-semibold text-base">{t("admin.shell.brand")}</span>
+              <span className="text-base font-semibold">{t("admin.shell.brand")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

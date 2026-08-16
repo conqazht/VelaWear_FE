@@ -7,10 +7,22 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
-import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
+import type {
+  ContentLayout,
+  NavbarStyle,
+  SidebarCollapsible,
+  SidebarVariant,
+} from "@/lib/preferences/layout";
 import { THEME_PRESET_OPTIONS, type ThemeMode, type ThemePreset } from "@/lib/preferences/theme";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
@@ -49,7 +61,10 @@ export function LayoutControls() {
         <span
           className="size-2.5 rounded-full"
           style={{
-            backgroundColor: (resolvedThemeMode ?? "light") === "dark" ? preset.primary.dark : preset.primary.light,
+            backgroundColor:
+              (resolvedThemeMode ?? "light") === "dark"
+                ? preset.primary.dark
+                : preset.primary.light,
           }}
         />
         {t(THEME_PRESET_LABEL_KEYS[preset.value])}
@@ -72,18 +87,26 @@ export function LayoutControls() {
 
   return (
     <Popover>
-      <PopoverTrigger render={<Button size="icon" aria-label={t("admin.shell.preferences.open")} />}>
+      <PopoverTrigger
+        render={<Button size="icon" aria-label={t("admin.shell.preferences.open")} />}
+      >
         <Settings />
       </PopoverTrigger>
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="font-medium text-sm leading-none">{t("admin.shell.preferences.title")}</h4>
-            <p className="text-muted-foreground text-xs">{t("admin.shell.preferences.description")}</p>
+            <h4 className="text-sm leading-none font-medium">
+              {t("admin.shell.preferences.title")}
+            </h4>
+            <p className="text-muted-foreground text-xs">
+              {t("admin.shell.preferences.description")}
+            </p>
           </div>
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.themePreset")}</Label>
+              <Label className="text-xs font-medium">
+                {t("admin.shell.preferences.themePreset")}
+              </Label>
               <Select
                 items={themePresetItems}
                 value={themePreset}
@@ -93,7 +116,10 @@ export function LayoutControls() {
                 }}
               >
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue className="items-center" placeholder={t("admin.shell.preferences.preset")} />
+                  <SelectValue
+                    className="items-center"
+                    placeholder={t("admin.shell.preferences.preset")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -104,7 +130,9 @@ export function LayoutControls() {
                             className="size-2.5 rounded-full"
                             style={{
                               backgroundColor:
-                                resolvedThemeMode === "dark" ? preset.primary.dark : preset.primary.light,
+                                resolvedThemeMode === "dark"
+                                  ? preset.primary.dark
+                                  : preset.primary.light,
                             }}
                           />
                           {t(THEME_PRESET_LABEL_KEYS[preset.value])}
@@ -117,7 +145,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.fonts")}</Label>
+              <Label className="text-xs font-medium">{t("admin.shell.preferences.fonts")}</Label>
               <Select
                 items={fontItems}
                 value={font}
@@ -142,7 +170,9 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.themeMode")}</Label>
+              <Label className="text-xs font-medium">
+                {t("admin.shell.preferences.themeMode")}
+              </Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -181,7 +211,9 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.pageLayout")}</Label>
+              <Label className="text-xs font-medium">
+                {t("admin.shell.preferences.pageLayout")}
+              </Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -212,7 +244,9 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.navbarBehavior")}</Label>
+              <Label className="text-xs font-medium">
+                {t("admin.shell.preferences.navbarBehavior")}
+              </Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -243,7 +277,9 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.sidebarStyle")}</Label>
+              <Label className="text-xs font-medium">
+                {t("admin.shell.preferences.sidebarStyle")}
+              </Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -282,7 +318,9 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t("admin.shell.preferences.sidebarCollapseMode")}</Label>
+              <Label className="text-xs font-medium">
+                {t("admin.shell.preferences.sidebarCollapseMode")}
+              </Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -312,7 +350,13 @@ export function LayoutControls() {
               </ToggleGroup>
             </div>
 
-            <Button type="button" size="sm" variant="outline" className="w-full text-xs" onClick={resetPreferences}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="w-full text-xs"
+              onClick={resetPreferences}
+            >
               {t("admin.shell.preferences.restoreDefaults")}
             </Button>
           </div>

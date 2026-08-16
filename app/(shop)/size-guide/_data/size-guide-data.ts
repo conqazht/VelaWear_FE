@@ -70,13 +70,12 @@ export const ACCESSORY_SIZE_NOTES = [
   },
 ] as const;
 
-export function formatMeasurement(
-  value: number | MeasurementRange,
-  unit: MeasurementUnit,
-): string {
+export function formatMeasurement(value: number | MeasurementRange, unit: MeasurementUnit): string {
   const convert = (centimeters: number) =>
     unit === "cm"
-      ? Number.isInteger(centimeters) ? String(centimeters) : String(centimeters)
+      ? Number.isInteger(centimeters)
+        ? String(centimeters)
+        : String(centimeters)
       : (centimeters / 2.54).toFixed(1);
 
   return Array.isArray(value)

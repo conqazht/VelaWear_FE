@@ -67,8 +67,13 @@ export function ResourceFormSheet({
               {children}
             </fieldset>
           </div>
-          <SheetFooter className="border-t bg-muted/30 sm:flex-row sm:justify-end">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+          <SheetFooter className="bg-muted/30 border-t sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isPending}
+            >
               {t("admin.shell.form.cancel")}
             </Button>
             <Button type="submit" disabled={isPending || submitDisabled}>

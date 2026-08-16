@@ -8,11 +8,7 @@ export function formatNumber(
   return new Intl.NumberFormat(getIntlLocale(locale), options).format(value);
 }
 
-export function formatCurrency(
-  value: number,
-  locale: Locale,
-  currency = "VND",
-): string {
+export function formatCurrency(value: number, locale: Locale, currency = "VND"): string {
   return formatNumber(value, locale, {
     style: "currency",
     currency,
@@ -45,9 +41,7 @@ function parseDateValue(value: string | number): Date {
   const day = Number(dateOnlyMatch[3]);
   const date = new Date(year, month - 1, day);
 
-  return date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
     ? date
     : new Date(Number.NaN);
 }

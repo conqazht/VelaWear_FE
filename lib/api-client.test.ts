@@ -1,9 +1,4 @@
-import type {
-  AxiosAdapter,
-  AxiosInstance,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
+import type { AxiosAdapter, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type Deferred<T> = {
@@ -92,10 +87,7 @@ describe("apiClient concurrent 401 refresh", () => {
     });
     apiClient.defaults.adapter = adapter;
 
-    const requests = Promise.all([
-      apiClient.get("/race/first"),
-      apiClient.get("/race/second"),
-    ]);
+    const requests = Promise.all([apiClient.get("/race/first"), apiClient.get("/race/second")]);
 
     await vi.waitFor(() => expect(refreshPost).toHaveBeenCalledTimes(1));
     expect(refreshPost).toHaveBeenCalledWith(
@@ -176,7 +168,8 @@ describe("apiClient concurrent 401 refresh", () => {
 
   it("logout retry không Bearer khi access token hết hạn (initial 401 -> cookie 200)", async () => {
     const axiosModule = await import("axios");
-    const logoutPost = vi.spyOn(axiosModule.default, "post")
+    const logoutPost = vi
+      .spyOn(axiosModule.default, "post")
       .mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } })
       .mockResolvedValueOnce({} as AxiosResponse);
     const apiClientModule = await import("@/lib/api-client");
@@ -239,7 +232,7 @@ describe("apiClient concurrent 401 refresh", () => {
 
     await expect(apiClientModule.logoutAuthSession()).rejects.toMatchObject({
       isAxiosError: true,
-      response: { status: 500 }
+      response: { status: 500 },
     });
     // Local auth is kept so the user can retry
     expect(apiClientModule.getAccessToken()).toBe("valid-access-token");

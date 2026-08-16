@@ -64,7 +64,8 @@ export const adminDashboardsBMessages = defineMessages(
     "admin.finance.quick.water": "Water",
     "admin.finance.quick.more": "More",
     "admin.infrastructure.title": "Infrastructure Overview",
-    "admin.infrastructure.description": "Monitor environments, server health, uptime, and resource usage across every project.",
+    "admin.infrastructure.description":
+      "Monitor environments, server health, uptime, and resource usage across every project.",
     "admin.infrastructure.updated": "Last updated: {seconds}s ago",
     "admin.infrastructure.refresh": "Refresh infrastructure status",
     "admin.infrastructure.settings": "Open infrastructure settings",
@@ -235,7 +236,8 @@ export const adminDashboardsBMessages = defineMessages(
     "admin.finance.quick.water": "Nước",
     "admin.finance.quick.more": "Thêm",
     "admin.infrastructure.title": "Tổng quan hạ tầng",
-    "admin.infrastructure.description": "Theo dõi môi trường, tình trạng máy chủ, thời gian hoạt động và mức sử dụng tài nguyên trên mọi dự án.",
+    "admin.infrastructure.description":
+      "Theo dõi môi trường, tình trạng máy chủ, thời gian hoạt động và mức sử dụng tài nguyên trên mọi dự án.",
     "admin.infrastructure.updated": "Cập nhật lần cuối: {seconds} giây trước",
     "admin.infrastructure.refresh": "Làm mới trạng thái hạ tầng",
     "admin.infrastructure.settings": "Mở cài đặt hạ tầng",
@@ -340,7 +342,8 @@ export const adminDashboardsBMessages = defineMessages(
     "admin.productivity.notes.lessons": "Bài học trong tuần",
     "admin.productivity.notes.books": "Những cuốn sách tôi đang đọc",
     "admin.productivity.weekly.title": "Tuần này",
-    "admin.productivity.weekly.encouragement": "Bạn đang làm rất tốt. Hãy tiếp tục giữ vững nhịp độ.",
+    "admin.productivity.weekly.encouragement":
+      "Bạn đang làm rất tốt. Hãy tiếp tục giữ vững nhịp độ.",
     "admin.productivity.weekly.goals": "Đã hoàn thành {completed}/{total} mục tiêu",
   },
 );

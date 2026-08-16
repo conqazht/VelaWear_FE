@@ -40,8 +40,8 @@ export function AnimatedAuthShell({
   const { t } = useI18n();
 
   return (
-    <AuthShell className="h-[100dvh] w-[100vw] overflow-hidden p-4 bg-[#f7f4ef]">
-      <div className="grid h-full w-full gap-4 lg:grid-cols-[1fr_minmax(0,560px)] justify-center">
+    <AuthShell className="h-[100dvh] w-[100vw] overflow-hidden bg-[#f7f4ef] p-4">
+      <div className="grid h-full w-full justify-center gap-4 lg:grid-cols-[1fr_minmax(0,560px)]">
         <AuthMotionScene
           focus={focus}
           passwordVisible={passwordVisible}
@@ -49,7 +49,7 @@ export function AnimatedAuthShell({
           mode={mode}
         />
 
-        <section className="relative flex h-full w-full max-w-[560px] mx-auto items-center justify-center overflow-y-auto rounded-[24px] border border-[#e4dacf] bg-[#f7f4ef] px-4 py-8 shadow-[0_24px_80px_rgba(69,43,28,0.08)] md:px-8 isolate">
+        <section className="relative isolate mx-auto flex h-full w-full max-w-[560px] items-center justify-center overflow-y-auto rounded-[24px] border border-[#e4dacf] bg-[#f7f4ef] px-4 py-8 shadow-[0_24px_80px_rgba(69,43,28,0.08)] md:px-8">
           {/* Inner background image container with clean clipping */}
           <div
             className="absolute inset-0 z-0 overflow-hidden rounded-[23px]"
@@ -63,10 +63,7 @@ export function AnimatedAuthShell({
           </div>
 
           <motion.div
-            className={cn(
-              "w-full max-w-[360px] z-10 relative",
-              panelClassName
-            )}
+            className={cn("relative z-10 w-full max-w-[360px]", panelClassName)}
             initial={false}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
@@ -79,7 +76,7 @@ export function AnimatedAuthShell({
               >
                 <BrandMark className="mx-auto" />
               </Link>
-              <h1 className="mt-4 font-serif text-[32px] font-normal leading-[1.16] text-[#1c1a18] md:text-[36px]">
+              <h1 className="mt-4 font-serif text-[32px] leading-[1.16] font-normal text-[#1c1a18] md:text-[36px]">
                 {title}
               </h1>
               <p className="mx-auto mt-3 max-w-[320px] text-sm leading-[1.55] text-[#55423d]">

@@ -29,7 +29,9 @@ export function SizeForm({ values, onChange }: SizeFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="size-name">{t("admin.commerce.attributes.sizes.form.name")}</FieldLabel>
+        <FieldLabel htmlFor="size-name">
+          {t("admin.commerce.attributes.sizes.form.name")}
+        </FieldLabel>
         <Input
           id="size-name"
           value={values.name}
@@ -42,7 +44,9 @@ export function SizeForm({ values, onChange }: SizeFormProps) {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="size-sort-order">{t("admin.commerce.attributes.sortOrder")}</FieldLabel>
+        <FieldLabel htmlFor="size-sort-order">
+          {t("admin.commerce.attributes.sortOrder")}
+        </FieldLabel>
         <Input
           id="size-sort-order"
           type="number"

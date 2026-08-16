@@ -6,16 +6,16 @@ checkout cả hai repository trong cùng một runner.
 
 ## 1. Chọn đúng loại test
 
-| Rủi ro cần bảo vệ | Công cụ chính | Chạy ở đâu |
-| --- | --- | --- |
-| Hàm mapping, validation, hook và state React | Vitest + Testing Library | FE PR |
-| Nhiều request `401` dùng chung một lần refresh | Vitest với Axios interceptor thật | FE PR |
-| Search cũ trả về sau search mới | Vitest với deferred promise | FE PR |
-| Hai lần submit trong cùng browser tick | Vitest + Playwright | FE PR và full-stack |
-| Hard reload chỉ refresh một lần, logout chặn token cũ | Playwright full-stack | FE `main`, nightly, manual |
-| Hai tab cùng bootstrap không refresh chồng nhau | Web Locks + Playwright full-stack | FE `main`, nightly, manual |
-| Oversell, quota, coupon, idempotency transaction | JUnit + PostgreSQL/Redis Testcontainers | BE PR |
-| FE, cookie, Spring Boot và database hoạt động cùng nhau | Playwright full-stack | FE `main`, nightly, manual |
+| Rủi ro cần bảo vệ                                       | Công cụ chính                           | Chạy ở đâu                 |
+| ------------------------------------------------------- | --------------------------------------- | -------------------------- |
+| Hàm mapping, validation, hook và state React            | Vitest + Testing Library                | FE PR                      |
+| Nhiều request `401` dùng chung một lần refresh          | Vitest với Axios interceptor thật       | FE PR                      |
+| Search cũ trả về sau search mới                         | Vitest với deferred promise             | FE PR                      |
+| Hai lần submit trong cùng browser tick                  | Vitest + Playwright                     | FE PR và full-stack        |
+| Hard reload chỉ refresh một lần, logout chặn token cũ   | Playwright full-stack                   | FE `main`, nightly, manual |
+| Hai tab cùng bootstrap không refresh chồng nhau         | Web Locks + Playwright full-stack       | FE `main`, nightly, manual |
+| Oversell, quota, coupon, idempotency transaction        | JUnit + PostgreSQL/Redis Testcontainers | BE PR                      |
+| FE, cookie, Spring Boot và database hoạt động cùng nhau | Playwright full-stack                   | FE `main`, nightly, manual |
 
 Playwright không thay thế test transaction ở backend. Trình duyệt chỉ chứng minh
 hành vi người dùng và contract FE–BE; tính đúng đắn của row lock, atomic update hoặc
@@ -294,15 +294,15 @@ và truyền rõ hai ref.
 
 ## 7. Đọc lỗi CI
 
-| Triệu chứng | Nơi kiểm tra đầu tiên |
-| --- | --- |
-| Backend không lên `UP` | `backend.log`, datasource/Redis/JWT environment |
-| Login được nhưng refresh thất bại | FE/API có cùng hostname `localhost`, cookie trong trace |
-| Login trả `500`, signer không hỗ trợ HS512 | JWT secret phải dài tối thiểu 64 byte; dùng đúng key local trong mục 3 |
-| Không checkout được BE | Secret `CROSS_REPO_READ_TOKEN` và quyền `Contents: read` |
-| Test checkout không thấy cart | API fixture, SKU seed và access token |
-| Test tỉnh/phường gọi internet | Playwright route fixture cho `provinces.open-api.vn` |
-| Smoke chỉ pass sau retry | Tìm nguồn flaky; full-stack race suite cố ý không retry và chạy `workers=1` |
+| Triệu chứng                                | Nơi kiểm tra đầu tiên                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| Backend không lên `UP`                     | `backend.log`, datasource/Redis/JWT environment                             |
+| Login được nhưng refresh thất bại          | FE/API có cùng hostname `localhost`, cookie trong trace                     |
+| Login trả `500`, signer không hỗ trợ HS512 | JWT secret phải dài tối thiểu 64 byte; dùng đúng key local trong mục 3      |
+| Không checkout được BE                     | Secret `CROSS_REPO_READ_TOKEN` và quyền `Contents: read`                    |
+| Test checkout không thấy cart              | API fixture, SKU seed và access token                                       |
+| Test tỉnh/phường gọi internet              | Playwright route fixture cho `provinces.open-api.vn`                        |
+| Smoke chỉ pass sau retry                   | Tìm nguồn flaky; full-stack race suite cố ý không retry và chạy `workers=1` |
 
 Không sửa test bằng cách tăng timeout hoặc thêm `sleep` trước khi xác định nguyên
 nhân. Race test phải dùng barrier/deferred promise và assert trạng thái cuối cùng.

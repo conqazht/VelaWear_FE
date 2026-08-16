@@ -20,9 +20,7 @@ describe("getPreference", () => {
   });
 
   it("reads the persisted theme_mode cookie", async () => {
-    const get = vi.fn((key: string) =>
-      key === "theme_mode" ? { value: "dark" } : undefined
-    );
+    const get = vi.fn((key: string) => (key === "theme_mode" ? { value: "dark" } : undefined));
     cookiesMock.mockResolvedValue({ get });
 
     await expect(getPreference("theme_mode")).resolves.toBe("dark");

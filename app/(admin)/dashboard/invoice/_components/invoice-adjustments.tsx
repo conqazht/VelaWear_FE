@@ -3,7 +3,14 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getIntlLocale } from "@/lib/i18n";
 
 import { type InvoiceFormValues, invoiceTaxOptions } from "./data";
@@ -42,7 +49,8 @@ export function InvoiceAdjustments() {
                   <SelectGroup>
                     {invoiceTaxOptions.map((taxOption) => (
                       <SelectItem key={taxOption.id} value={taxOption.id}>
-                        {taxNames[taxOption.id] ?? taxOption.name} ({percentFormatter.format(taxOption.rate / 100)})
+                        {taxNames[taxOption.id] ?? taxOption.name} (
+                        {percentFormatter.format(taxOption.rate / 100)})
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -65,8 +73,12 @@ export function InvoiceAdjustments() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="fixed">{t("admin.workflows.invoice.fixedAmount")}</SelectItem>
-                      <SelectItem value="percent">{t("admin.workflows.invoice.percent")}</SelectItem>
+                      <SelectItem value="fixed">
+                        {t("admin.workflows.invoice.fixedAmount")}
+                      </SelectItem>
+                      <SelectItem value="percent">
+                        {t("admin.workflows.invoice.percent")}
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -74,7 +86,9 @@ export function InvoiceAdjustments() {
             )}
           />
           <Field className="gap-1">
-            <FieldLabel className="text-xs opacity-0">{t("admin.workflows.invoice.value")}</FieldLabel>
+            <FieldLabel className="text-xs opacity-0">
+              {t("admin.workflows.invoice.value")}
+            </FieldLabel>
             <InputGroup>
               <InputGroupInput
                 type="number"
@@ -82,7 +96,9 @@ export function InvoiceAdjustments() {
                 aria-label={t("admin.workflows.invoice.discountValue")}
                 {...register("discountValue", { valueAsNumber: true })}
               />
-              <InputGroupAddon align="inline-end">{discountType === "fixed" ? currencySymbol : "%"}</InputGroupAddon>
+              <InputGroupAddon align="inline-end">
+                {discountType === "fixed" ? currencySymbol : "%"}
+              </InputGroupAddon>
             </InputGroup>
           </Field>
         </div>

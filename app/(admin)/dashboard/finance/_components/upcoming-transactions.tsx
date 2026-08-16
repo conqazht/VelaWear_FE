@@ -7,7 +7,15 @@ import { siClaude, siLinear, siResend } from "simple-icons";
 import { SimpleIcon } from "@/components/simple-icon";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { formatCurrency, formatDate } from "@/lib/i18n/format";
 
 const transactions = [
@@ -49,8 +57,8 @@ export function UpcomingTransactions() {
               {t("admin.finance.bills.due", { count: transactions.length })}
             </p>
           </div>
-          <div className="flex w-max items-center gap-2 rounded-md border border-border bg-muted/70 px-2 py-1.5 text-sm">
-            <Zap className="size-4 fill-primary text-primary" aria-hidden="true" />
+          <div className="border-border bg-muted/70 flex w-max items-center gap-2 rounded-md border px-2 py-1.5 text-sm">
+            <Zap className="fill-primary text-primary size-4" aria-hidden="true" />
             <span className="text-muted-foreground">
               {t("admin.finance.bills.autopay", { amount: formatCurrency(145, locale, "USD") })}
             </span>
@@ -61,16 +69,18 @@ export function UpcomingTransactions() {
           {transactions.map((transaction) => (
             <Item key={transaction.id} variant="outline" size="xs">
               <ItemMedia>
-                <div className="grid size-9 place-items-center rounded-md border bg-background">
+                <div className="bg-background grid size-9 place-items-center rounded-md border">
                   <SimpleIcon icon={transaction.icon} />
                 </div>
               </ItemMedia>
               <ItemContent>
                 <ItemTitle>{t(transaction.titleKey)}</ItemTitle>
-                <ItemDescription>{formatDate(transaction.date, locale, { dateStyle: "long", timeStyle: "short" })}</ItemDescription>
+                <ItemDescription>
+                  {formatDate(transaction.date, locale, { dateStyle: "long", timeStyle: "short" })}
+                </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <ChevronRight className="size-5 text-muted-foreground" />
+                <ChevronRight className="text-muted-foreground size-5" />
               </ItemActions>
             </Item>
           ))}

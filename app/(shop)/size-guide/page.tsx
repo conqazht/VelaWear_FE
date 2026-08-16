@@ -10,7 +10,11 @@ export const metadata: Metadata = {
 
 export default function SizeGuidePage() {
   return (
-    <Suspense fallback={<div className="min-h-[calc(100vh-160px)] pt-[104px] md:pt-[120px]" aria-busy="true" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-[calc(100vh-160px)] pt-[104px] md:pt-[120px]" aria-busy="true" />
+      }
+    >
       <SizeGuideClient />
     </Suspense>
   );

@@ -56,94 +56,105 @@ export function useOpportunitiesColumns(): ColumnDef<OpportunityRow>[] {
   };
 
   return [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label={t("admin.dashboardsA.crm.selectAllOpportunities")}
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label={t("admin.dashboardsA.crm.selectOpportunity", { account: row.original.account })}
-      />
-    ),
-    enableHiding: false,
-  },
-  {
-    accessorKey: "id",
-    header: t("admin.dashboardsA.crm.id"),
-    cell: ({ row }) => <div className="text-sm tracking-tight">{row.original.id}</div>,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "account",
-    header: t("admin.dashboardsA.crm.account"),
-    cell: ({ row }) => <div className="font-medium text-sm">{row.original.account}</div>,
-  },
-  {
-    accessorKey: "stage",
-    header: t("admin.dashboardsA.crm.stage"),
-    cell: ({ row }) => (
-      <Badge variant="outline" className="rounded-full px-2.5">
-        {stageLabels[row.original.stage] ?? row.original.stage}
-      </Badge>
-    ),
-    filterFn: "equalsString",
-  },
-  {
-    accessorKey: "priority",
-    header: t("admin.dashboardsA.crm.priority"),
-    cell: ({ row }) => <div className="text-sm">{numberFormatter.format(row.original.priority)}</div>,
-  },
-  {
-    accessorKey: "health",
-    header: t("admin.dashboardsA.crm.health"),
-    cell: ({ row }) => (
-      <div className="flex items-end gap-0.5" title={healthLabels[row.original.health] ?? row.original.health}>
-        <span className="sr-only">{healthLabels[row.original.health] ?? row.original.health}</span>
-        {healthStripSlots.map((slot) => (
-          <div
-            key={`${row.original.id}-${slot.id}`}
-            className={cn(
-              "h-5 w-1 rounded-full",
-              slot.threshold <= getHealthScore(row.original.health) ? "bg-green-500/85" : "bg-green-500/15",
-            )}
-          />
-        ))}
-      </div>
-    ),
-    filterFn: "equalsString",
-  },
-  {
-    accessorKey: "value",
-    header: t("admin.dashboardsA.crm.value"),
-    cell: ({ row }) => (
-      <div className="font-medium text-sm tabular-nums">
-        {currencyFormatter.format(Number(row.original.value.replace(/[^0-9.-]/g, "")))}
-      </div>
-    ),
-  },
-  {
-    id: "actions",
-    header: () => <div className="text-right">{t("admin.dashboardsA.crm.edit")}</div>,
-    cell: () => (
-      <div className="text-right">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 rounded-full text-muted-foreground hover:bg-transparent focus-visible:bg-transparent"
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label={t("admin.dashboardsA.crm.selectAllOpportunities")}
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label={t("admin.dashboardsA.crm.selectOpportunity", {
+            account: row.original.account,
+          })}
+        />
+      ),
+      enableHiding: false,
+    },
+    {
+      accessorKey: "id",
+      header: t("admin.dashboardsA.crm.id"),
+      cell: ({ row }) => <div className="text-sm tracking-tight">{row.original.id}</div>,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "account",
+      header: t("admin.dashboardsA.crm.account"),
+      cell: ({ row }) => <div className="text-sm font-medium">{row.original.account}</div>,
+    },
+    {
+      accessorKey: "stage",
+      header: t("admin.dashboardsA.crm.stage"),
+      cell: ({ row }) => (
+        <Badge variant="outline" className="rounded-full px-2.5">
+          {stageLabels[row.original.stage] ?? row.original.stage}
+        </Badge>
+      ),
+      filterFn: "equalsString",
+    },
+    {
+      accessorKey: "priority",
+      header: t("admin.dashboardsA.crm.priority"),
+      cell: ({ row }) => (
+        <div className="text-sm">{numberFormatter.format(row.original.priority)}</div>
+      ),
+    },
+    {
+      accessorKey: "health",
+      header: t("admin.dashboardsA.crm.health"),
+      cell: ({ row }) => (
+        <div
+          className="flex items-end gap-0.5"
+          title={healthLabels[row.original.health] ?? row.original.health}
         >
-          <Pencil />
-          <span className="sr-only">{t("admin.dashboardsA.crm.editOpportunity")}</span>
-        </Button>
-      </div>
-    ),
-    enableHiding: false,
-  },
+          <span className="sr-only">
+            {healthLabels[row.original.health] ?? row.original.health}
+          </span>
+          {healthStripSlots.map((slot) => (
+            <div
+              key={`${row.original.id}-${slot.id}`}
+              className={cn(
+                "h-5 w-1 rounded-full",
+                slot.threshold <= getHealthScore(row.original.health)
+                  ? "bg-green-500/85"
+                  : "bg-green-500/15",
+              )}
+            />
+          ))}
+        </div>
+      ),
+      filterFn: "equalsString",
+    },
+    {
+      accessorKey: "value",
+      header: t("admin.dashboardsA.crm.value"),
+      cell: ({ row }) => (
+        <div className="text-sm font-medium tabular-nums">
+          {currencyFormatter.format(Number(row.original.value.replace(/[^0-9.-]/g, "")))}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">{t("admin.dashboardsA.crm.edit")}</div>,
+      cell: () => (
+        <div className="text-right">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground size-8 rounded-full hover:bg-transparent focus-visible:bg-transparent"
+          >
+            <Pencil />
+            <span className="sr-only">{t("admin.dashboardsA.crm.editOpportunity")}</span>
+          </Button>
+        </div>
+      ),
+      enableHiding: false,
+    },
   ];
 }

@@ -44,41 +44,43 @@ export function TaskReminders() {
         </CardHeader>
         <CardContent>
           <div className="space-y-1">
-            <div className="flex items-center justify-between text-muted-foreground text-xs tabular-nums">
+            <div className="text-muted-foreground flex items-center justify-between text-xs tabular-nums">
               <div className="flex flex-col items-center gap-1">
                 <span>{formatTime("08:45")}</span>
-                <span className="h-2 w-px bg-border" />
+                <span className="bg-border h-2 w-px" />
               </div>
               <div className="flex flex-col items-center gap-1">
                 <span>{formatTime("09:00")}</span>
-                <span className="h-2 w-px bg-border" />
+                <span className="bg-border h-2 w-px" />
               </div>
               <div className="flex flex-col items-center gap-1">
                 <span>{formatTime("10:00")}</span>
-                <span className="h-2 w-px bg-border" />
+                <span className="bg-border h-2 w-px" />
               </div>
               <div className="flex flex-col items-center gap-1">
                 <span>{formatTime("10:20")}</span>
-                <span className="h-2 w-px bg-border" />
+                <span className="bg-border h-2 w-px" />
               </div>
             </div>
 
             <div className="relative h-14">
-              <div className="absolute inset-x-3 top-1/2 h-px -translate-y-1/2 bg-border/80" />
-              <div className="absolute top-2 bottom-2 left-[22%] flex w-[44%] items-center rounded-lg bg-primary px-2 text-primary-foreground shadow-sm">
+              <div className="bg-border/80 absolute inset-x-3 top-1/2 h-px -translate-y-1/2" />
+              <div className="bg-primary text-primary-foreground absolute top-2 bottom-2 left-[22%] flex w-[44%] items-center rounded-lg px-2 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-7 items-center justify-center rounded-full bg-background text-primary">
+                  <div className="bg-background text-primary flex size-7 items-center justify-center rounded-full">
                     <CalendarRange className="size-3.5" />
                   </div>
                   <div className="min-w-0">
-                    <div className="truncate font-medium text-primary-foreground text-xs leading-none">
+                    <div className="text-primary-foreground truncate text-xs leading-none font-medium">
                       {t("admin.dashboardsA.crm.productDemo", { name: "Tim" })}
                     </div>
-                    <div className="truncate text-[10px] text-primary-foreground/75">Weblabs Studio</div>
+                    <div className="text-primary-foreground/75 truncate text-[10px]">
+                      Weblabs Studio
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="absolute top-4 bottom-4 left-[64%] w-1 rounded-full bg-background/90" />
+              <div className="bg-background/90 absolute top-4 bottom-4 left-[64%] w-1 rounded-full" />
             </div>
           </div>
         </CardContent>
@@ -90,9 +92,11 @@ export function TaskReminders() {
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex items-end justify-between gap-3">
-            <div className="font-medium text-2xl tabular-nums leading-none">
+            <div className="text-2xl leading-none font-medium tabular-nums">
               {numberFormatter.format(proposalSent)}{" "}
-              <span className="font-normal text-base text-muted-foreground">{t("admin.dashboardsA.crm.sent")}</span>
+              <span className="text-muted-foreground text-base font-normal">
+                {t("admin.dashboardsA.crm.sent")}
+              </span>
             </div>
             <div className="text-muted-foreground text-sm tabular-nums">
               {t("admin.dashboardsA.crm.target", { count: numberFormatter.format(proposalGoal) })}

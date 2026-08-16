@@ -5,7 +5,14 @@ import { Area, CartesianGrid, ComposedChart, Line, XAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -251,9 +258,11 @@ export function PerformanceOverview() {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle className="leading-none">{t("admin.dashboardsA.default.customerActivity")}</CardTitle>
+        <CardTitle className="leading-none">
+          {t("admin.dashboardsA.default.customerActivity")}
+        </CardTitle>
         <CardDescription>
-          <span className="@[540px]/card:block hidden">
+          <span className="hidden @[540px]/card:block">
             {t("admin.dashboardsA.default.customerActivityDescription")}
           </span>
           <span className="@[540px]/card:hidden">{t("admin.dashboardsA.common.last3Months")}</span>
@@ -323,11 +332,14 @@ export function PerformanceOverview() {
                 <ChartTooltipContent
                   className="w-50"
                   indicator="line"
-                  labelFormatter={(value) => tooltipDateFormatter.format(parseISO(value))}
+                  labelFormatter={(value) => tooltipDateFormatter.format(parseISO(String(value)))}
                 />
               }
             />
-            <ChartLegend verticalAlign="top" content={<ChartLegendContent className="mb-5 justify-end" />} />
+            <ChartLegend
+              verticalAlign="top"
+              content={<ChartLegendContent className="mb-5 justify-end" />}
+            />
 
             <Area
               dataKey="newCustomers"

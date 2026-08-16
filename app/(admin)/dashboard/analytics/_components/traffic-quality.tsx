@@ -5,7 +5,12 @@ import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { getIntlLocale } from "@/lib/i18n";
 
 const qualitySeries = [
@@ -126,7 +131,9 @@ export function TrafficQuality() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">{t("admin.dashboardsA.analytics.trafficQuality")}</CardTitle>
+        <CardTitle className="font-normal">
+          {t("admin.dashboardsA.analytics.trafficQuality")}
+        </CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>

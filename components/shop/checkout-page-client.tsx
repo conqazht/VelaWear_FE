@@ -297,13 +297,7 @@ export function CheckoutPageClient() {
         if (requestId === previewRequestIdRef.current) setIsPreviewLoading(false);
       }
     },
-    [
-      appliedCouponCode,
-      buildPreviewRequest,
-      cart.length,
-      getCheckoutErrorMessage,
-      isAuthenticated,
-    ],
+    [appliedCouponCode, buildPreviewRequest, cart.length, getCheckoutErrorMessage, isAuthenticated],
   );
 
   useEffect(() => {
@@ -319,10 +313,7 @@ export function CheckoutPageClient() {
   }, [cartSnapshotKey, isAuthenticated, loadPreview, paymentMethod]);
 
   // Client-side estimates for display only — server is authoritative
-  const subtotal = activeItemsList.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = activeItemsList.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const localShippingEstimate = subtotal === 0 ? 0 : 30000;
   const displayedSubtotal = preview?.subtotal ?? subtotal;
   const displayedShippingFee = preview?.shippingFee ?? localShippingEstimate;
@@ -335,7 +326,7 @@ export function CheckoutPageClient() {
     setAddressApiError(null);
 
     const selectedProvince = provinces.find(
-      (province) => String(province.code) === data.provinceCode
+      (province) => String(province.code) === data.provinceCode,
     );
     const selectedWard = wards.find((ward) => String(ward.code) === data.wardCode);
 
@@ -361,9 +352,7 @@ export function CheckoutPageClient() {
         // nhất từ DB. Nếu phản hồi checkout bị thất lạc, lần thử lại phải gửi
         // nguyên request + Idempotency-Key cũ (không preview lại trên cart đã
         // được server xóa sau khi tạo đơn thành công).
-        const latestPreview = await previewCheckout(
-          buildPreviewRequest(appliedCouponCode),
-        );
+        const latestPreview = await previewCheckout(buildPreviewRequest(appliedCouponCode));
         setPreview(latestPreview);
         attempt = {
           key: createCheckoutIdempotencyKey(),
@@ -383,10 +372,7 @@ export function CheckoutPageClient() {
       setOrderCompleted(true);
       if (user) {
         try {
-          window.localStorage.setItem(
-            checkoutDetailsStorageKey(user.id),
-            JSON.stringify(data)
-          );
+          window.localStorage.setItem(checkoutDetailsStorageKey(user.id), JSON.stringify(data));
         } catch {
           // Checkout remains successful when browser storage is unavailable.
         }
@@ -438,7 +424,7 @@ export function CheckoutPageClient() {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 py-24">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b5573a]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
@@ -449,7 +435,7 @@ export function CheckoutPageClient() {
           </p>
           <Link
             href="/sign-in"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-white uppercase transition-colors hover:bg-[#b5573a]"
           >
             {t("checkout.signIn")}
           </Link>
@@ -460,7 +446,7 @@ export function CheckoutPageClient() {
 
   if (orderCompleted && completedOrder) {
     return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px] min-h-[80vh] flex flex-col justify-center items-center">
+      <div className="mx-auto flex min-h-[80vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
         <OrderSuccessCard completedOrder={completedOrder} locale={locale} t={t} />
       </div>
     );
@@ -479,7 +465,7 @@ export function CheckoutPageClient() {
           </p>
           <Link
             href="/collection"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-white uppercase transition-colors hover:bg-[#b5573a]"
           >
             {t("cart.continueShopping")}
           </Link>
@@ -496,7 +482,7 @@ export function CheckoutPageClient() {
         </h1>
         <Link
           href="/cart"
-          className="text-xs font-semibold uppercase tracking-wider text-[#b5573a] hover:underline"
+          className="text-xs font-semibold tracking-wider text-[#b5573a] uppercase hover:underline"
         >
           ← {t("checkout.viewCart")}
         </Link>
@@ -592,7 +578,7 @@ export function CheckoutPageClient() {
                           setWards([]);
                         },
                       })}
-                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <option value="">{t("checkout.selectProvince")}</option>
                       {provinces.map((province) => (
@@ -603,7 +589,9 @@ export function CheckoutPageClient() {
                     </select>
                   )}
                   {errors.provinceCode?.message && (
-                    <p id="provinceCode-error" className="text-xs text-error">{errors.provinceCode.message}</p>
+                    <p id="provinceCode-error" className="text-error text-xs">
+                      {errors.provinceCode.message}
+                    </p>
                   )}
                 </div>
 
@@ -619,7 +607,7 @@ export function CheckoutPageClient() {
                       aria-invalid={!!errors.wardCode}
                       aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
                       {...register("wardCode")}
-                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] outline-none transition-colors focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <option value="">{t("checkout.selectWard")}</option>
                       {wards.map((ward) => (
@@ -630,12 +618,14 @@ export function CheckoutPageClient() {
                     </select>
                   )}
                   {errors.wardCode?.message && (
-                    <p id="wardCode-error" className="text-xs text-error">{errors.wardCode.message}</p>
+                    <p id="wardCode-error" className="text-error text-xs">
+                      {errors.wardCode.message}
+                    </p>
                   )}
                 </div>
               </div>
               {addressApiError && (
-                <div className="flex items-start gap-2 rounded-sm border border-error/20 bg-error/10 p-3 text-xs text-error">
+                <div className="border-error/20 bg-error/10 text-error flex items-start gap-2 rounded-sm border p-3 text-xs">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                   <span>{addressApiError}</span>
                 </div>
@@ -666,9 +656,7 @@ export function CheckoutPageClient() {
                       className="size-4 accent-[#b5573a]"
                     />
                     <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
-                      {method.value === "COD" && (
-                        <Truck className="size-4 text-[#1c1a18]/50" />
-                      )}
+                      {method.value === "COD" && <Truck className="size-4 text-[#1c1a18]/50" />}
                       {method.value === "COD"
                         ? t("checkout.cod")
                         : t("sale.checkout.payment.sepay")}
@@ -682,7 +670,7 @@ export function CheckoutPageClient() {
           <Button
             type="submit"
             disabled={isSubmitting || isPreviewLoading}
-            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-md hover:bg-[#b5573a] disabled:opacity-50"
+            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold tracking-[0.2em] text-white uppercase shadow-md hover:bg-[#b5573a] disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
@@ -709,14 +697,13 @@ export function CheckoutPageClient() {
                   <FashionImage src={item.image} alt={item.name} />
                 </div>
                 <div className="min-w-0 flex-grow text-xs">
-                  <h4 className="truncate font-serif font-semibold text-[#1c1a18]">
-                    {item.name}
-                  </h4>
-                  <p className="mt-1 truncate text-[9px] uppercase tracking-widest text-[#1c1a18]/50">
-                    {t("checkout.quantityShort", { count: item.quantity })} / {item.size || "—"} / {item.color || "—"}
+                  <h4 className="truncate font-serif font-semibold text-[#1c1a18]">{item.name}</h4>
+                  <p className="mt-1 truncate text-[9px] tracking-widest text-[#1c1a18]/50 uppercase">
+                    {t("checkout.quantityShort", { count: item.quantity })} / {item.size || "—"} /{" "}
+                    {item.color || "—"}
                   </p>
                   {item.priceSource && item.priceSource !== "BASE" ? (
-                    <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#8f4329]">
+                    <p className="mt-1 text-[9px] font-semibold tracking-wider text-[#8f4329] uppercase">
                       {item.priceSource === "FLASH_SALE"
                         ? t("storefront.sale.type.flash")
                         : t("storefront.sale.type.standard")}
@@ -729,7 +716,7 @@ export function CheckoutPageClient() {
                       {money(item.listPrice * item.quantity, locale)}
                     </span>
                   ) : null}
-                  <span className="font-serif text-xs font-semibold text-[#1c1a18] font-numeric">
+                  <span className="font-numeric font-serif text-xs font-semibold text-[#1c1a18]">
                     {money(item.price * item.quantity, locale)}
                   </span>
                 </div>
@@ -747,7 +734,7 @@ export function CheckoutPageClient() {
                 }}
                 autoComplete="off"
                 placeholder={t("checkout.couponPlaceholder")}
-                className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold uppercase tracking-wider focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
+                className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold tracking-wider uppercase focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
               />
               <Button
                 type="button"
@@ -762,7 +749,7 @@ export function CheckoutPageClient() {
                     setAppliedCouponCode(normalizedCoupon);
                   }
                 }}
-                className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#b5573a]"
+                className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold tracking-widest text-white uppercase hover:bg-[#b5573a]"
               >
                 {isPreviewLoading
                   ? t("sale.checkout.preview.checkingCoupon")
@@ -771,9 +758,7 @@ export function CheckoutPageClient() {
                     : t("checkout.apply")}
               </Button>
             </div>
-            {couponError && (
-              <p className="mt-2 text-xs text-red-600">{couponError}</p>
-            )}
+            {couponError && <p className="mt-2 text-xs text-red-600">{couponError}</p>}
             {appliedCouponCode && !couponError && (
               <p className="mt-2 text-xs text-[#1c1a18]/50">
                 {t("sale.checkout.preview.couponVerified", {
@@ -792,7 +777,11 @@ export function CheckoutPageClient() {
             <LedgerRow label={t("cart.subtotal")} value={money(displayedSubtotal, locale)} />
             <LedgerRow
               label={t("checkout.shipping")}
-              value={displayedShippingFee === 0 ? t("common.complimentary") : money(displayedShippingFee, locale)}
+              value={
+                displayedShippingFee === 0
+                  ? t("common.complimentary")
+                  : money(displayedShippingFee, locale)
+              }
             />
             {appliedCouponCode && (
               <LedgerRow
@@ -810,7 +799,7 @@ export function CheckoutPageClient() {
             <Separator className="my-4 bg-[#1c1a18]/10" />
             <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
               <span>{t("checkout.estimatedTotal")}</span>
-              <span className="font-serif text-lg tracking-wider text-[#b5573a] font-numeric">
+              <span className="font-numeric font-serif text-lg tracking-wider text-[#b5573a]">
                 {money(displayedTotal, locale)}
               </span>
             </div>
@@ -834,9 +823,7 @@ function SectionTitle({ number, title }: { number: string; title: string }) {
       <span className="flex size-5 items-center justify-center rounded-full bg-[#1c1a18] text-[11px] font-semibold text-white">
         {number}
       </span>
-      <h2 className="font-serif text-lg font-medium tracking-wide text-[#1c1a18]">
-        {title}
-      </h2>
+      <h2 className="font-serif text-lg font-medium tracking-wide text-[#1c1a18]">{title}</h2>
     </div>
   );
 }
@@ -865,7 +852,11 @@ function CheckoutInput({
         {...props}
         className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-4 text-sm focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
       />
-      {error && <p id={errorId} className="mt-1 text-xs text-error">{error}</p>}
+      {error && (
+        <p id={errorId} className="text-error mt-1 text-xs">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -882,9 +873,7 @@ function LedgerRow({
   return (
     <div
       className={
-        highlight
-          ? "flex justify-between text-[#b5573a]"
-          : "flex justify-between text-[#1c1a18]/65"
+        highlight ? "flex justify-between text-[#b5573a]" : "flex justify-between text-[#1c1a18]/65"
       }
     >
       <span>{label}</span>
@@ -912,9 +901,7 @@ function PaymentDeadline({
   const [clockOrigin] = useState(() => {
     const clientTime = Date.now();
     const parsedServerTime = serverTime ? Date.parse(serverTime) : Number.NaN;
-    const serverOffset = Number.isFinite(parsedServerTime)
-      ? parsedServerTime - clientTime
-      : 0;
+    const serverOffset = Number.isFinite(parsedServerTime) ? parsedServerTime - clientTime : 0;
 
     return {
       serverOffset,
@@ -932,9 +919,7 @@ function PaymentDeadline({
   }, [clockOrigin.serverOffset]);
 
   const dueTimestamp = Date.parse(paymentDueAt);
-  const releaseTimestamp = reservationExpiresAt
-    ? Date.parse(reservationExpiresAt)
-    : dueTimestamp;
+  const releaseTimestamp = reservationExpiresAt ? Date.parse(reservationExpiresAt) : dueTimestamp;
   const remainingPaymentMs = Math.max(0, dueTimestamp - now);
   const remainingGraceMs = Math.max(0, releaseTimestamp - now);
   const isPastPaymentDue = now >= dueTimestamp;
@@ -949,7 +934,7 @@ function PaymentDeadline({
             : "border-amber-200 bg-amber-50 text-amber-900"
         }`}
       >
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
           <AlarmClock className="size-4" />
           {isReleased
             ? t("sale.checkout.payment.expiredTitle")
@@ -969,9 +954,7 @@ function PaymentDeadline({
               })}
         </p>
       </div>
-      {!isReleased ? (
-        <PaymentContinuationForm paymentInitiation={paymentInitiation} />
-      ) : null}
+      {!isReleased ? <PaymentContinuationForm paymentInitiation={paymentInitiation} /> : null}
     </>
   );
 }
@@ -995,7 +978,7 @@ function PaymentContinuationForm({
       ))}
       <Button
         type="submit"
-        className="w-full rounded-sm bg-[#8f2f20] py-3 text-xs font-bold uppercase tracking-[0.15em] text-white hover:bg-[#6f2318]"
+        className="w-full rounded-sm bg-[#8f2f20] py-3 text-xs font-bold tracking-[0.15em] text-white uppercase hover:bg-[#6f2318]"
       >
         {t("sale.checkout.payment.continue")}
       </Button>
@@ -1071,10 +1054,10 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
             {completedOrder.orderCode}
           </span>
         </p>
-        <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] uppercase tracking-widest text-[#1c1a18]/45">
+        <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] tracking-widest text-[#1c1a18]/45 uppercase">
           <span>
             {t("checkout.total")}:{" "}
-            <strong className="text-[#1c1a18] font-numeric">
+            <strong className="font-numeric text-[#1c1a18]">
               {money(completedOrder.finalAmount, locale)}
             </strong>
           </span>
@@ -1110,17 +1093,15 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
             paymentInitiation={completedOrder.paymentInitiation}
           />
         ) : (
-          <PaymentContinuationForm
-            paymentInitiation={completedOrder.paymentInitiation}
-          />
+          <PaymentContinuationForm paymentInitiation={completedOrder.paymentInitiation} />
         )}
         <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
-        <p className="mb-10 max-w-sm text-xs font-light leading-relaxed text-[#1c1a18]/60">
+        <p className="mb-10 max-w-sm text-xs leading-relaxed font-light text-[#1c1a18]/60">
           {t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}
         </p>
         <Link
           href="/"
-          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-md transition-colors hover:bg-[#b5573a]"
+          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-white uppercase shadow-md transition-colors hover:bg-[#b5573a]"
         >
           {t("checkout.backHome")}
         </Link>

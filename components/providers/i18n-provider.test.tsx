@@ -33,7 +33,7 @@ describe("I18nProvider and I18nCatalogProvider", () => {
     render(
       <I18nProvider initialLocale="vi">
         <TestConsumer translationKey="errors.api.forbiddenTitle" />
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     expect(screen.getByTestId("locale").textContent).toBe("vi");
@@ -46,7 +46,7 @@ describe("I18nProvider and I18nCatalogProvider", () => {
         <I18nCatalogProvider messages={shopMessages}>
           <TestConsumer translationKey="account.tabs.profile" />
         </I18nCatalogProvider>
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     expect(screen.getByTestId("translated").textContent).toBe("Hồ sơ");
@@ -60,7 +60,7 @@ describe("I18nProvider and I18nCatalogProvider", () => {
         <I18nCatalogProvider messages={adminMessages}>
           <TestConsumer translationKey="admin.shell.brand" />
         </I18nCatalogProvider>
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     expect(screen.getByTestId("translated").textContent).toBe("Vela Wear Admin");
@@ -72,7 +72,7 @@ describe("I18nProvider and I18nCatalogProvider", () => {
         <I18nCatalogProvider messages={shopMessages}>
           <TestConsumer translationKey="account.tabs.profile" />
         </I18nCatalogProvider>
-      </I18nProvider>
+      </I18nProvider>,
     );
 
     expect(screen.getByTestId("translated").textContent).toBe("Hồ sơ");

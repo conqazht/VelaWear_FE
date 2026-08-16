@@ -16,26 +16,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/i18n/format";
-import {
-  useProductReviewSummaryQuery,
-  useProductReviewsQuery,
-} from "@/lib/queries/catalog";
+import { useProductReviewSummaryQuery, useProductReviewsQuery } from "@/lib/queries/catalog";
 import { cn } from "@/lib/utils";
 import { resolveImageUrl } from "@/lib/vela-data";
 
-export type ProductReviewSort =
-  | "newest"
-  | "oldest"
-  | "rating-high"
-  | "rating-low";
+export type ProductReviewSort = "newest" | "oldest" | "rating-high" | "rating-low";
 
 export type ProductReviewViewState = {
   rating?: number;
@@ -62,13 +50,16 @@ export function ProductReviewsDialog({
 }: ProductReviewsDialogProps) {
   const { locale, t } = useI18n();
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-  const reviewsQuery = useProductReviewsQuery({
-    productId,
-    rating: state.rating,
-    sort: state.sort,
-    page: state.page,
-    size: 10,
-  }, { enabled: open });
+  const reviewsQuery = useProductReviewsQuery(
+    {
+      productId,
+      rating: state.rating,
+      sort: state.sort,
+      page: state.page,
+      size: 10,
+    },
+    { enabled: open },
+  );
   const summaryQuery = useProductReviewSummaryQuery(productId);
   const reviews = reviewsQuery.data?.result ?? [];
   const meta = reviewsQuery.data?.meta;
@@ -96,13 +87,13 @@ export function ProductReviewsDialog({
           onOpenChange(nextOpen);
         }}
       >
-        <DialogContent className="h-[92dvh] max-h-[920px] w-[calc(100%-1rem)] max-w-[1180px] overflow-hidden rounded-lg bg-canvas p-0 sm:max-w-[1180px] shadow-2xl">
+        <DialogContent className="bg-canvas h-[92dvh] max-h-[920px] w-[calc(100%-1rem)] max-w-[1180px] overflow-hidden rounded-lg p-0 shadow-2xl sm:max-w-[1180px]">
           <div className="grid h-full min-h-0 grid-rows-[auto_1fr]">
-            <DialogHeader className="border-b border-[#1c1a18]/10 bg-white px-5 py-5 pr-14 md:px-10 md:py-6 text-left">
-              <DialogTitle className="font-serif text-2xl font-light md:text-3xl text-ink tracking-tight">
+            <DialogHeader className="border-b border-[#1c1a18]/10 bg-white px-5 py-5 pr-14 text-left md:px-10 md:py-6">
+              <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight md:text-3xl">
                 {t("reviews.allTitle", { product: productName })}
               </DialogTitle>
-              <DialogDescription className="text-xs text-[#55423d]/70 mt-1">
+              <DialogDescription className="mt-1 text-xs text-[#55423d]/70">
                 {t("reviews.allDescription")}
               </DialogDescription>
             </DialogHeader>
@@ -130,7 +121,7 @@ export function ProductReviewsDialog({
                       />
                     ) : null}
                     <div className="flex items-baseline gap-3">
-                      <strong className="font-serif text-5xl md:text-6xl font-light tabular-nums text-ink">
+                      <strong className="text-ink font-serif text-5xl font-light tabular-nums md:text-6xl">
                         {Number(summary.averageRating ?? 0).toFixed(1)}
                       </strong>
                       <span className="text-sm font-medium text-[#55423d]/60">/ 5.0</span>
@@ -141,7 +132,7 @@ export function ProductReviewsDialog({
                       sizeClassName="size-4"
                       activeClassName="text-[#b5573a]"
                     />
-                    <p className="mt-2 text-xs uppercase tracking-[0.14em] font-medium text-[#55423d]/65">
+                    <p className="mt-2 text-xs font-medium tracking-[0.14em] text-[#55423d]/65 uppercase">
                       {t("reviews.total", { count: summary.total })}
                     </p>
 
@@ -151,20 +142,21 @@ export function ProductReviewsDialog({
                         type="button"
                         onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
                         className={cn(
-                          "flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-xs transition-all cursor-pointer border",
+                          "flex w-full cursor-pointer items-center justify-between rounded-sm border px-3 py-2 text-left text-xs transition-all",
                           state.rating === undefined
-                            ? "bg-white border-[#1c1a18]/30 shadow-xs text-ink font-semibold ring-1 ring-[#1c1a18]/20"
-                            : "bg-transparent border-transparent hover:bg-white/60 text-[#55423d]/80"
+                            ? "text-ink border-[#1c1a18]/30 bg-white font-semibold shadow-xs ring-1 ring-[#1c1a18]/20"
+                            : "border-transparent bg-transparent text-[#55423d]/80 hover:bg-white/60",
                         )}
                         aria-pressed={state.rating === undefined}
                       >
                         <span className="font-medium">{t("reviews.filterAll")}</span>
-                        <span className="tabular-nums text-[#55423d]/65">{summary.total}</span>
+                        <span className="text-[#55423d]/65 tabular-nums">{summary.total}</span>
                       </button>
 
                       {/* 5 to 1 Star Breakdown Filter Rows */}
                       {[5, 4, 3, 2, 1].map((rating) => {
-                        const count = summary.ratingCounts[String(rating) as "1" | "2" | "3" | "4" | "5"] ?? 0;
+                        const count =
+                          summary.ratingCounts[String(rating) as "1" | "2" | "3" | "4" | "5"] ?? 0;
                         const percentage = summary.total > 0 ? (count / summary.total) * 100 : 0;
                         const selected = state.rating === rating;
                         return (
@@ -172,21 +164,32 @@ export function ProductReviewsDialog({
                             key={rating}
                             type="button"
                             className={cn(
-                              "grid w-full grid-cols-[40px_1fr_28px] items-center gap-2.5 rounded-sm px-3 py-2 text-left text-xs transition-all cursor-pointer border",
+                              "grid w-full cursor-pointer grid-cols-[40px_1fr_28px] items-center gap-2.5 rounded-sm border px-3 py-2 text-left text-xs transition-all",
                               selected
-                                ? "bg-white border-[#b5573a] shadow-xs text-ink font-semibold ring-1.5 ring-[#b5573a]"
-                                : "bg-transparent border-transparent hover:bg-white/60 text-[#55423d]/80",
+                                ? "text-ink ring-1.5 border-[#b5573a] bg-white font-semibold shadow-xs ring-[#b5573a]"
+                                : "border-transparent bg-transparent text-[#55423d]/80 hover:bg-white/60",
                             )}
                             aria-pressed={selected}
-                            onClick={() => onStateChange({ ...state, rating: selected ? undefined : rating, page: 1 })}
+                            onClick={() =>
+                              onStateChange({
+                                ...state,
+                                rating: selected ? undefined : rating,
+                                page: 1,
+                              })
+                            }
                           >
                             <span className="inline-flex items-center gap-1 font-medium">
                               {rating} <Star className="size-3 fill-[#b5573a] text-[#b5573a]" />
                             </span>
                             <span className="h-1.5 overflow-hidden rounded-full bg-[#1c1a18]/10">
-                              <span className="block h-full rounded-full bg-[#b5573a] transition-all duration-300" style={{ width: `${percentage}%` }} />
+                              <span
+                                className="block h-full rounded-full bg-[#b5573a] transition-all duration-300"
+                                style={{ width: `${percentage}%` }}
+                              />
                             </span>
-                            <span className="text-right tabular-nums text-[#55423d]/65">{count}</span>
+                            <span className="text-right text-[#55423d]/65 tabular-nums">
+                              {count}
+                            </span>
                           </button>
                         );
                       })}
@@ -206,24 +209,26 @@ export function ProductReviewsDialog({
                           {t("reviews.filterActive", { rating: state.rating })}
                         </span>
                         <button
-                        type="button"
-                        onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-white px-3.5 py-1 text-xs font-semibold text-[#1c1a18] shadow-2xs hover:bg-[#efe7dc] cursor-pointer transition-colors active:scale-[0.96]"
-                      >
-                        <X className="size-3" />
-                        <span>{t("reviews.clearFilter")}</span>
-                      </button>
+                          type="button"
+                          onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
+                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#1c1a18]/15 bg-white px-3.5 py-1 text-xs font-semibold text-[#1c1a18] shadow-2xs transition-colors hover:bg-[#efe7dc] active:scale-[0.96]"
+                        >
+                          <X className="size-3" />
+                          <span>{t("reviews.clearFilter")}</span>
+                        </button>
                       </div>
                     ) : (
-                      <span className="text-xs font-medium uppercase tracking-[0.1em] text-[#55423d]/65">
-                        {t("reviews.total", { count: summary?.total ?? meta?.total ?? reviews.length })}
+                      <span className="text-xs font-medium tracking-[0.1em] text-[#55423d]/65 uppercase">
+                        {t("reviews.total", {
+                          count: summary?.total ?? meta?.total ?? reviews.length,
+                        })}
                       </span>
                     )}
                   </div>
 
                   {/* Right: Shadcn Sort Select */}
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xs font-medium uppercase tracking-[0.1em] text-[#55423d]/60 shrink-0">
+                    <span className="shrink-0 text-xs font-medium tracking-[0.1em] text-[#55423d]/60 uppercase">
                       {t("reviews.sortLabel")}
                     </span>
                     <Select
@@ -238,7 +243,7 @@ export function ProductReviewsDialog({
                     >
                       <SelectTrigger
                         size="sm"
-                        className="h-8.5 w-40 sm:w-44 rounded-sm border border-[#1c1a18]/20 bg-white px-3 text-xs font-medium text-[#1c1a18] shadow-xs hover:border-[#1c1a18]/40 cursor-pointer transition-colors"
+                        className="h-8.5 w-40 cursor-pointer rounded-sm border border-[#1c1a18]/20 bg-white px-3 text-xs font-medium text-[#1c1a18] shadow-xs transition-colors hover:border-[#1c1a18]/40 sm:w-44"
                       >
                         <span className="truncate">
                           {{
@@ -252,29 +257,29 @@ export function ProductReviewsDialog({
                       <SelectContent
                         align="end"
                         alignItemWithTrigger={false}
-                        className="w-(--anchor-width) min-w-(--anchor-width) rounded-sm border border-[#1c1a18]/20 bg-white p-0 shadow-lg overflow-hidden"
+                        className="w-(--anchor-width) min-w-(--anchor-width) overflow-hidden rounded-sm border border-[#1c1a18]/20 bg-white p-0 shadow-lg"
                       >
                         <SelectItem
                           value="newest"
-                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors"
+                          className="focus:text-ink cursor-pointer rounded-none py-2 pr-7 pl-3.5 text-xs transition-colors hover:bg-[#efe7dc] focus:bg-[#efe7dc]"
                         >
                           {t("reviews.sortNewest")}
                         </SelectItem>
                         <SelectItem
                           value="oldest"
-                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors border-t border-[#1c1a18]/8"
+                          className="focus:text-ink cursor-pointer rounded-none border-t border-[#1c1a18]/8 py-2 pr-7 pl-3.5 text-xs transition-colors hover:bg-[#efe7dc] focus:bg-[#efe7dc]"
                         >
                           {t("reviews.sortOldest")}
                         </SelectItem>
                         <SelectItem
                           value="rating-high"
-                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors border-t border-[#1c1a18]/8"
+                          className="focus:text-ink cursor-pointer rounded-none border-t border-[#1c1a18]/8 py-2 pr-7 pl-3.5 text-xs transition-colors hover:bg-[#efe7dc] focus:bg-[#efe7dc]"
                         >
                           {t("reviews.sortHigh")}
                         </SelectItem>
                         <SelectItem
                           value="rating-low"
-                          className="rounded-none py-2 pl-3.5 pr-7 text-xs cursor-pointer focus:bg-[#efe7dc] focus:text-ink hover:bg-[#efe7dc] transition-colors border-t border-[#1c1a18]/8"
+                          className="focus:text-ink cursor-pointer rounded-none border-t border-[#1c1a18]/8 py-2 pr-7 pl-3.5 text-xs transition-colors hover:bg-[#efe7dc] focus:bg-[#efe7dc]"
                         >
                           {t("reviews.sortLow")}
                         </SelectItem>
@@ -306,7 +311,7 @@ export function ProductReviewsDialog({
                         <button
                           type="button"
                           onClick={() => onStateChange({ ...state, rating: undefined, page: 1 })}
-                          className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#b5573a] hover:underline cursor-pointer"
+                          className="mt-4 inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-[#b5573a] hover:underline"
                         >
                           {t("reviews.clearFilter")}
                         </button>
@@ -337,7 +342,9 @@ export function ProductReviewsDialog({
                               <RatingStars rating={review.rating ?? 0} sizeClassName="size-4" />
                             </div>
                             {review.variantName ? (
-                              <p className="mt-2.5 text-xs uppercase tracking-[0.12em] text-[#1c1a18]/45 font-medium">{review.variantName}</p>
+                              <p className="mt-2.5 text-xs font-medium tracking-[0.12em] text-[#1c1a18]/45 uppercase">
+                                {review.variantName}
+                              </p>
                             ) : null}
                             <ReviewComment comment={review.comment} className="mt-3" />
                             {review.images?.length ? (
@@ -348,11 +355,18 @@ export function ProductReviewsDialog({
                                     <button
                                       type="button"
                                       key={`${image}-${index}`}
-                                      className="relative size-20 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-[#f7f4ef] focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer"
+                                      className="relative size-20 cursor-pointer overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-[#f7f4ef] focus-visible:outline-2 focus-visible:outline-offset-2"
                                       onClick={() => setLightboxImage(resolvedImage)}
                                       aria-label={t("reviews.openImage", { index: index + 1 })}
                                     >
-                                      <Image src={resolvedImage} alt="" fill unoptimized sizes="80px" className="object-cover transition-transform hover:scale-105" />
+                                      <Image
+                                        src={resolvedImage}
+                                        alt=""
+                                        fill
+                                        unoptimized
+                                        sizes="80px"
+                                        className="object-cover transition-transform hover:scale-105"
+                                      />
                                     </button>
                                   );
                                 })}
@@ -370,12 +384,15 @@ export function ProductReviewsDialog({
                   <span className="text-xs text-[#1c1a18]/50">
                     {t("reviews.page", { page: state.page, pages })}
                   </span>
-                  <nav className="flex items-center gap-1" aria-label={t("reviews.paginationLabel")}>
+                  <nav
+                    className="flex items-center gap-1"
+                    aria-label={t("reviews.paginationLabel")}
+                  >
                     <button
                       type="button"
                       disabled={state.page <= 1 || reviewsQuery.isFetching}
                       onClick={() => onStateChange({ ...state, page: state.page - 1 })}
-                      className="inline-flex size-9 items-center justify-center rounded-sm border border-[#1c1a18]/10 hover:bg-[#f7f4ef] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed transition-colors"
+                      className="inline-flex size-9 cursor-pointer items-center justify-center rounded-sm border border-[#1c1a18]/10 transition-colors hover:bg-[#f7f4ef] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
                       aria-label={t("reviews.previous")}
                     >
                       <ChevronLeft className="size-4" />
@@ -387,9 +404,9 @@ export function ProductReviewsDialog({
                         onClick={() => onStateChange({ ...state, page })}
                         aria-current={page === state.page ? "page" : undefined}
                         className={cn(
-                          "size-9 rounded-sm border text-xs tabular-nums cursor-pointer transition-colors",
+                          "size-9 cursor-pointer rounded-sm border text-xs tabular-nums transition-colors",
                           page === state.page
-                            ? "border-[#1c1a18] bg-[#1c1a18] text-white font-medium"
+                            ? "border-[#1c1a18] bg-[#1c1a18] font-medium text-white"
                             : "border-[#1c1a18]/10 hover:bg-[#f7f4ef]",
                         )}
                       >
@@ -400,7 +417,7 @@ export function ProductReviewsDialog({
                       type="button"
                       disabled={state.page >= pages || reviewsQuery.isFetching}
                       onClick={() => onStateChange({ ...state, page: state.page + 1 })}
-                      className="inline-flex size-9 items-center justify-center rounded-sm border border-[#1c1a18]/10 hover:bg-[#f7f4ef] disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed transition-colors"
+                      className="inline-flex size-9 cursor-pointer items-center justify-center rounded-sm border border-[#1c1a18]/10 transition-colors hover:bg-[#f7f4ef] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
                       aria-label={t("reviews.next")}
                     >
                       <ChevronRight className="size-4" />
@@ -413,13 +430,26 @@ export function ProductReviewsDialog({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(lightboxImage)} onOpenChange={(nextOpen) => !nextOpen && setLightboxImage(null)}>
-        <DialogContent className="h-[90dvh] max-w-[min(96vw,1100px)] overflow-hidden bg-black p-4 sm:max-w-[min(96vw,1100px)]" showCloseButton>
+      <Dialog
+        open={Boolean(lightboxImage)}
+        onOpenChange={(nextOpen) => !nextOpen && setLightboxImage(null)}
+      >
+        <DialogContent
+          className="h-[90dvh] max-w-[min(96vw,1100px)] overflow-hidden bg-black p-4 sm:max-w-[min(96vw,1100px)]"
+          showCloseButton
+        >
           <DialogTitle className="sr-only">{t("reviews.imageTitle")}</DialogTitle>
           <DialogDescription className="sr-only">{t("reviews.imageDescription")}</DialogDescription>
           {lightboxImage ? (
             <div className="relative h-full w-full">
-              <Image src={lightboxImage} alt={t("reviews.imageAlt")} fill unoptimized sizes="96vw" className="object-contain" />
+              <Image
+                src={lightboxImage}
+                alt={t("reviews.imageAlt")}
+                fill
+                unoptimized
+                sizes="96vw"
+                className="object-contain"
+              />
             </div>
           ) : (
             <ImageIcon className="m-auto size-12 text-white/50" />
@@ -437,7 +467,9 @@ function ReviewSummarySkeleton() {
       <Skeleton className="h-4 w-32 bg-[#efe7dc]" />
       <Skeleton className="h-3 w-20 bg-[#efe7dc]" />
       <div className="space-y-2.5 pt-5">
-        {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-9 w-full bg-[#efe7dc]" />)}
+        {Array.from({ length: 6 }, (_, index) => (
+          <Skeleton key={index} className="h-9 w-full bg-[#efe7dc]" />
+        ))}
       </div>
     </div>
   );
@@ -448,7 +480,10 @@ function ReviewsListSkeleton() {
     <div className="divide-y divide-[#1c1a18]/10" aria-hidden="true">
       {Array.from({ length: 3 }, (_, index) => (
         <div key={index} className="space-y-3 py-6">
-          <div className="flex justify-between"><Skeleton className="h-4 w-28 bg-[#efe7dc]" /><Skeleton className="h-4 w-24 bg-[#efe7dc]" /></div>
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-28 bg-[#efe7dc]" />
+            <Skeleton className="h-4 w-24 bg-[#efe7dc]" />
+          </div>
           <Skeleton className="h-3 w-20 bg-[#efe7dc]" />
           <Skeleton className="h-4 w-full bg-[#efe7dc]" />
           <Skeleton className="h-4 w-3/4 bg-[#efe7dc]" />

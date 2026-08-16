@@ -53,100 +53,104 @@ export function StorySection() {
   const { t } = useI18n();
 
   return (
-    <section className="bg-[#efe7dc]/40 text-[#1c1a18] py-24 md:py-32 overflow-hidden relative border-y border-[#e3dccf]/50">
+    <section className="relative overflow-hidden border-y border-[#e3dccf]/50 bg-[#efe7dc]/40 py-24 text-[#1c1a18] md:py-32">
       {/* Decorative typo watermark */}
-      <div className="absolute right-0 top-1/4 text-[22vw] font-bold text-[#b5573a]/[0.015] tracking-widest uppercase select-none pointer-events-none font-serif leading-none">
+      <div className="pointer-events-none absolute top-1/4 right-0 font-serif text-[22vw] leading-none font-bold tracking-widest text-[#b5573a]/[0.015] uppercase select-none">
         VELA
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 md:px-16 relative z-10">
-        
+      <div className="relative z-10 mx-auto max-w-[1800px] px-6 md:px-16">
         {/* Header Section */}
-        <div className="max-w-2xl mb-16 md:mb-20">
+        <div className="mb-16 max-w-2xl md:mb-20">
           <ScrollReveal direction="right">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#b5573a]" />
-              <span className="text-[11px] font-semibold uppercase tracking-[2.5px] text-[#b5573a]">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#b5573a]" />
+              <span className="text-[11px] font-semibold tracking-[2.5px] text-[#b5573a] uppercase">
                 {t("storefront.story.eyebrow")}
               </span>
             </div>
-            <h2 className="font-serif text-4xl md:text-6xl font-light leading-tight tracking-tight mb-6 text-[#1c1a18]">
+            <h2 className="mb-6 font-serif text-4xl leading-tight font-light tracking-tight text-[#1c1a18] md:text-6xl">
               {t("storefront.story.title")}
             </h2>
-            <p className="text-sm md:text-base leading-relaxed text-[#8a857c] font-light max-w-xl">
+            <p className="max-w-xl text-sm leading-relaxed font-light text-[#8a857c] md:text-base">
               {t("storefront.story.description")}
             </p>
           </ScrollReveal>
         </div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
           {ARCHIVE_ITEMS.map((item, index) => {
             const title = t(item.titleKey);
 
             return (
-            <ScrollReveal
-              key={item.id}
-              direction="up"
-              delay={index * 0.1}
-              className={item.gridClass}
-            >
-              <Link href={item.link} className="w-full h-full block overflow-hidden rounded-[24px] shadow-lg cursor-pointer border border-[#e3dccf]/50">
-                <motion.div
-                  className="group relative w-full h-full block bg-[#efe7dc]"
-                  whileHover="hover"
+              <ScrollReveal
+                key={item.id}
+                direction="up"
+                delay={index * 0.1}
+                className={item.gridClass}
+              >
+                <Link
+                  href={item.link}
+                  className="block h-full w-full cursor-pointer overflow-hidden rounded-[24px] border border-[#e3dccf]/50 shadow-lg"
                 >
-                  {/* Background Image */}
-                  <motion.img
-                    suppressHydrationWarning
-                    src={item.image}
-                    alt={title}
-                    className="w-full h-full object-cover select-none filter brightness-[0.85] contrast-[1.05]"
-                    referrerPolicy="no-referrer"
-                    variants={{
-                      hover: { scale: 1.05 },
-                    }}
-                    transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] as [number, number, number, number] }}
-                  />
+                  <motion.div
+                    className="group relative block h-full w-full bg-[#efe7dc]"
+                    whileHover="hover"
+                  >
+                    {/* Background Image */}
+                    <motion.img
+                      suppressHydrationWarning
+                      src={item.image}
+                      alt={title}
+                      className="h-full w-full object-cover brightness-[0.85] contrast-[1.05] filter select-none"
+                      referrerPolicy="no-referrer"
+                      variants={{
+                        hover: { scale: 1.05 },
+                      }}
+                      transition={{
+                        duration: 1.2,
+                        ease: [0.25, 1, 0.5, 1] as [number, number, number, number],
+                      }}
+                    />
 
-                  {/* Overlay Gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-500 group-hover:from-black/95" />
+                    {/* Overlay Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-500 group-hover:from-black/95" />
 
-                  {/* Card Content */}
-                  <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <span className="text-[9px] font-mono uppercase tracking-widest text-[#ffb59f] bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
-                        {item.id}
-                      </span>
-                      <span className="text-[10px] uppercase tracking-[1.5px] text-[#ffb59f] font-medium">
-                        {t(item.categoryKey)}
-                      </span>
+                    {/* Card Content */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+                      <div className="mb-2 flex items-center gap-2.5">
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[9px] tracking-widest text-[#ffb59f] uppercase">
+                          {item.id}
+                        </span>
+                        <span className="text-[10px] font-medium tracking-[1.5px] text-[#ffb59f] uppercase">
+                          {t(item.categoryKey)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-end justify-between gap-4">
+                        <h3 className="font-serif text-xl font-light tracking-tight text-white transition-colors duration-300 group-hover:text-[#ffb59f] md:text-2xl">
+                          {title}
+                        </h3>
+
+                        {/* Floating Arrow Icon */}
+                        <motion.div
+                          className="flex h-8 w-8 flex-none items-center justify-center rounded-full border border-white/10 bg-white/10 text-white backdrop-blur-sm transition-all duration-300 group-hover:border-[#b5573a] group-hover:bg-[#b5573a]"
+                          variants={{
+                            hover: { rotate: 45, scale: 1.1 },
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ArrowUpRight className="h-4 w-4" />
+                        </motion.div>
+                      </div>
                     </div>
-
-                    <div className="flex items-end justify-between gap-4">
-                      <h3 className="font-serif text-xl md:text-2xl text-white font-light tracking-tight group-hover:text-[#ffb59f] transition-colors duration-300">
-                        {title}
-                      </h3>
-
-                      {/* Floating Arrow Icon */}
-                      <motion.div
-                        className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white backdrop-blur-sm group-hover:bg-[#b5573a] group-hover:border-[#b5573a] transition-all duration-300 flex-none"
-                        variants={{
-                          hover: { rotate: 45, scale: 1.1 },
-                        }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <ArrowUpRight className="w-4 h-4" />
-                      </motion.div>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-            </ScrollReveal>
+                  </motion.div>
+                </Link>
+              </ScrollReveal>
             );
           })}
         </div>
-
       </div>
     </section>
   );

@@ -20,9 +20,10 @@ export function StorefrontStaleWarning({
 }: StorefrontStaleWarningProps) {
   const { t } = useI18n();
   const classification = error === undefined ? null : classifyApiError(error);
-  const description = classification?.status === 400
-    ? t("errors.api.badRequestDescription", { resource: resourceLabel })
-    : t("errors.api.serverDescription", { resource: resourceLabel });
+  const description =
+    classification?.status === 400
+      ? t("errors.api.badRequestDescription", { resource: resourceLabel })
+      : t("errors.api.serverDescription", { resource: resourceLabel });
 
   return (
     <div
@@ -41,7 +42,7 @@ export function StorefrontStaleWarning({
       {classification === null || classification.retryable ? (
         <button
           type="button"
-          className="shrink-0 self-start text-xs font-semibold uppercase tracking-[0.16em] text-[#b5573a] underline underline-offset-4 sm:self-auto"
+          className="shrink-0 self-start text-xs font-semibold tracking-[0.16em] text-[#b5573a] uppercase underline underline-offset-4 sm:self-auto"
           onClick={onRetry}
         >
           {t("errors.common.retry")}

@@ -75,7 +75,7 @@ interface NavCollapsibleItemProps {
 
 function CollapsedIconFallback({ title }: { title: string }) {
   return (
-    <span className="flex size-4 shrink-0 items-center justify-center rounded-xs font-medium text-[10px] outline">
+    <span className="flex size-4 shrink-0 items-center justify-center rounded-xs text-[10px] font-medium outline">
       {title.slice(0, 1)}
     </span>
   );
@@ -113,7 +113,7 @@ export function NavMain({ items }: NavMainProps) {
             <SidebarMenuItem className="flex items-center gap-2">
               <SidebarMenuButton
                 tooltip={t("admin.shell.navigation.quickCreate")}
-                className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
               >
                 <PlusCircleIcon />
                 <span>{t("admin.shell.navigation.quickCreate")}</span>
@@ -161,11 +161,23 @@ function NavItem({ item, isItemActive, isSubItemActive, isSubmenuOpen }: NavItem
   const isCollapsedDesktop = state === "collapsed" && !isMobile;
 
   if (!hasSubItems(item)) {
-    return <NavLinkItem item={item} isActive={isItemActive(item)} showIconFallback={isCollapsedDesktop} />;
+    return (
+      <NavLinkItem
+        item={item}
+        isActive={isItemActive(item)}
+        showIconFallback={isCollapsedDesktop}
+      />
+    );
   }
 
   if (isCollapsedDesktop) {
-    return <NavDropdownItem item={item} isActive={isItemActive(item)} isSubItemActive={isSubItemActive} />;
+    return (
+      <NavDropdownItem
+        item={item}
+        isActive={isItemActive(item)}
+        isSubItemActive={isSubItemActive}
+      />
+    );
   }
 
   const defaultOpen = isSubmenuOpen(item);
@@ -231,7 +243,9 @@ function NavDropdownItem({ item, isActive, isSubItemActive }: NavDropdownItemPro
     <SidebarMenuItem>
       <DropdownMenu>
         <DropdownMenuTrigger
-          render={<SidebarMenuButton tooltip={title} isActive={isActive} disabled={item.disabled} />}
+          render={
+            <SidebarMenuButton tooltip={title} isActive={isActive} disabled={item.disabled} />
+          }
         >
           {Icon ? <Icon /> : <CollapsedIconFallback title={title} />}
           <span>{title}</span>
@@ -269,7 +283,12 @@ function NavDropdownItem({ item, isActive, isSubItemActive }: NavDropdownItemPro
   );
 }
 
-function NavCollapsibleItem({ item, isActive, defaultOpen, isSubItemActive }: NavCollapsibleItemProps) {
+function NavCollapsibleItem({
+  item,
+  isActive,
+  defaultOpen,
+  isSubItemActive,
+}: NavCollapsibleItemProps) {
   const Icon = item.icon;
   const [open, setOpen] = useState(defaultOpen);
   const { t } = useI18n();
@@ -277,7 +296,13 @@ function NavCollapsibleItem({ item, isActive, defaultOpen, isSubItemActive }: Na
 
   return (
     <Collapsible
-      render={<li data-slot="sidebar-menu-item" data-sidebar="menu-item" className="group/menu-item relative" />}
+      render={
+        <li
+          data-slot="sidebar-menu-item"
+          data-sidebar="menu-item"
+          className="group/menu-item relative"
+        />
+      }
       open={open}
       onOpenChange={setOpen}
       className="group/collapsible"

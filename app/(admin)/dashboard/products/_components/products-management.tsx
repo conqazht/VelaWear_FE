@@ -109,9 +109,7 @@ function getStatusVariant(status: ProductStatus) {
   return "outline" as const;
 }
 
-function toTranslationFormValue(
-  translation?: ProductTranslation,
-): ProductTranslationFormValue {
+function toTranslationFormValue(translation?: ProductTranslation): ProductTranslationFormValue {
   return translation
     ? {
         name: translation.name,
@@ -130,7 +128,9 @@ function toFormValues(
   product: AdminProduct,
   translations: ProductTranslation[],
 ): ProductFormValues {
-  const byLocale = new Map(translations.map((translation) => [translation.localeCode, translation]));
+  const byLocale = new Map(
+    translations.map((translation) => [translation.localeCode, translation]),
+  );
   const vi = toTranslationFormValue(byLocale.get("vi"));
   if (!byLocale.has("vi")) {
     vi.name = product.name;
@@ -168,7 +168,7 @@ function toVariantFormValue(variant: AdminProductVariant): ProductVariantFormVal
 
 function toVariantRequest(
   productId: number,
-  variant: ProductVariantFormValue
+  variant: ProductVariantFormValue,
 ): CreateAdminProductVariantRequest {
   return {
     productId,
@@ -183,7 +183,7 @@ function toVariantRequest(
 
 function getVariantValidationError(
   variants: ProductVariantFormValue[],
-  t: ReturnType<typeof useI18n>["t"]
+  t: ReturnType<typeof useI18n>["t"],
 ) {
   if (variants.length === 0) return t("admin.commerce.products.validation.addVariant");
 
@@ -227,7 +227,7 @@ function getVariantValidationError(
 
 function variantRequestsEqual(
   left: CreateAdminProductVariantRequest,
-  right: CreateAdminProductVariantRequest
+  right: CreateAdminProductVariantRequest,
 ) {
   return (
     left.productId === right.productId &&
@@ -254,7 +254,7 @@ function mergeVariantRequest(
   productId: number,
   desired: ProductVariantFormValue,
   baseline: ProductVariantFormValue,
-  current: AdminProductVariant
+  current: AdminProductVariant,
 ): UpdateAdminProductVariantRequest {
   const desiredRequest = toVariantRequest(productId, desired);
   const baselineRequest = toVariantRequest(productId, baseline);
@@ -263,7 +263,8 @@ function mergeVariantRequest(
   return {
     productId,
     sku: desiredRequest.sku !== baselineRequest.sku ? desiredRequest.sku : currentRequest.sku,
-    price: desiredRequest.price !== baselineRequest.price ? desiredRequest.price : currentRequest.price,
+    price:
+      desiredRequest.price !== baselineRequest.price ? desiredRequest.price : currentRequest.price,
     stockQuantity:
       desiredRequest.stockQuantity !== baselineRequest.stockQuantity
         ? desiredRequest.stockQuantity
@@ -276,10 +277,7 @@ function mergeVariantRequest(
       desiredRequest.sizeId !== baselineRequest.sizeId
         ? desiredRequest.sizeId
         : currentRequest.sizeId,
-    status:
-      desiredRequest.status !== baselineRequest.status
-        ? desired.status
-        : current.status,
+    status: desiredRequest.status !== baselineRequest.status ? desired.status : current.status,
   };
 }
 
@@ -348,10 +346,7 @@ export function ProductsManagement() {
         t("admin.commerce.products.archivedCategory", { id: editingProduct.categoryId }),
     });
   }
-  if (
-    editingProduct &&
-    !productBrandOptions.some((brand) => brand.id === editingProduct.brandId)
-  ) {
+  if (editingProduct && !productBrandOptions.some((brand) => brand.id === editingProduct.brandId)) {
     productBrandOptions.push({
       id: editingProduct.brandId,
       name: t("admin.commerce.products.archivedBrand", { id: editingProduct.brandId }),
@@ -400,16 +395,14 @@ export function ProductsManagement() {
       setVariantValues(
         loadedVariants.length > 0
           ? loadedVariants
-          : [createEmptyProductVariant(`new-${Date.now()}`)]
+          : [createEmptyProductVariant(`new-${Date.now()}`)],
       );
       setKnownVariantIds(variantsPage.result.map((variant) => variant.id));
       setBaselineVariantValues(loadedVariants);
       setFormTab("details");
       setFormOpen(true);
     } catch (error) {
-      toast.error(
-        `${t("admin.commerce.translation.loadFailed")} ${getApiErrorMessage(error)}`
-      );
+      toast.error(`${t("admin.commerce.translation.loadFailed")} ${getApiErrorMessage(error)}`);
     } finally {
       setLoadingVariantProductId(null);
     }
@@ -427,13 +420,8 @@ export function ProductsManagement() {
       let savedVariant: AdminProductVariant;
 
       if (variant.id !== undefined) {
-        const baseline = checkpoint.persistedBaselines.find(
-          (item) => item.id === variant.id,
-        );
-        if (
-          baseline &&
-          variantRequestsEqual(request, toVariantRequest(productId, baseline))
-        ) {
+        const baseline = checkpoint.persistedBaselines.find((item) => item.id === variant.id);
+        if (baseline && variantRequestsEqual(request, toVariantRequest(productId, baseline))) {
           continue;
         }
 
@@ -446,15 +434,11 @@ export function ProductsManagement() {
         savedVariant = await createAdminProductVariant(request);
       }
 
-      checkpoint = recordPersistedVariant(
-        checkpoint,
-        index,
-        toVariantFormValue(savedVariant),
-      );
+      checkpoint = recordPersistedVariant(checkpoint, index, toVariantFormValue(savedVariant));
       variantWorkflowCheckpointRef.current = checkpoint;
     }
 
-    for (const variantId of [...checkpoint.staleVariantIds]) {
+    for (const variantId of checkpoint.staleVariantIds) {
       await deleteAdminProductVariant(variantId);
       checkpoint = recordDeletedVariant(checkpoint, variantId);
       variantWorkflowCheckpointRef.current = checkpoint;
@@ -486,11 +470,7 @@ export function ProductsManagement() {
         ...currentRequest,
         status: desiredStatus,
       });
-      checkpoint = recordPersistedVariant(
-        checkpoint,
-        index,
-        toVariantFormValue(savedVariant),
-      );
+      checkpoint = recordPersistedVariant(checkpoint, index, toVariantFormValue(savedVariant));
       variantWorkflowCheckpointRef.current = checkpoint;
     }
 
@@ -538,14 +518,11 @@ export function ProductsManagement() {
       setContentLocale("en");
       toast.success(t("admin.contentGeneration.success"));
     } catch (error) {
-      toast.error(
-        `${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`,
-      );
+      toast.error(`${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`);
     }
   }
 
   async function saveProduct() {
-
     const categoryId = Number(formValues.categoryId);
     const brandId = Number(formValues.brandId);
     const viTranslation = formValues.translations.vi;
@@ -639,13 +616,13 @@ export function ProductsManagement() {
         setEditingProduct(product);
       }
 
-      const translations: ProductTranslation[] = [
-        serializeProductTranslation("vi", viTranslation),
-      ];
+      const translations: ProductTranslation[] = [serializeProductTranslation("vi", viTranslation)];
       if (!isProductTranslationEmpty(enTranslation)) {
         translations.push(serializeProductTranslation("en", enTranslation));
       }
-      const translationResponse = await updateAdminProductTranslations(product.id, { translations });
+      const translationResponse = await updateAdminProductTranslations(product.id, {
+        translations,
+      });
       const savedTranslations = translationResponse.translations;
       if (
         isProductTranslationEmpty(enTranslation) &&
@@ -653,8 +630,7 @@ export function ProductsManagement() {
       ) {
         await deleteAdminProductTranslation(product.id, "en");
       }
-      const needsActivationStage =
-        formValues.status === "ACTIVE" && product.status !== "ACTIVE";
+      const needsActivationStage = formValues.status === "ACTIVE" && product.status !== "ACTIVE";
       let workflowCheckpoint = variantWorkflowCheckpointRef.current;
       if (!workflowCheckpoint || workflowCheckpoint.productId !== product.id) {
         workflowCheckpoint = createProductVariantWorkflowCheckpoint({
@@ -672,10 +648,7 @@ export function ProductsManagement() {
       }
       productStatusSaved = true;
       if (workflowCheckpoint.needsActivationStage) {
-        workflowCheckpoint = await applyDesiredVariantStatuses(
-          product.id,
-          workflowCheckpoint,
-        );
+        workflowCheckpoint = await applyDesiredVariantStatuses(product.id, workflowCheckpoint);
       }
 
       setVariantValues(workflowCheckpoint.workingVariants);
@@ -691,7 +664,7 @@ export function ProductsManagement() {
                 name,
                 count: variantValues.length,
               })
-          : t("admin.commerce.products.updated", { name })
+          : t("admin.commerce.products.updated", { name }),
       );
       setPage(1);
       setFormOpen(false);
@@ -749,9 +722,7 @@ export function ProductsManagement() {
       setArchiveProduct(null);
       setPage(1);
     } catch (error) {
-      toast.error(
-        `${t("admin.commerce.products.archivePartial")} ${getApiErrorMessage(error)}`
-      );
+      toast.error(`${t("admin.commerce.products.archivePartial")} ${getApiErrorMessage(error)}`);
     } finally {
       await Promise.allSettled([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.productVariants.root }),
@@ -783,15 +754,10 @@ export function ProductsManagement() {
     );
   }
 
-  async function toggleVariantStatus(
-    variantId: number,
-    status: "ACTIVE" | "INACTIVE",
-  ) {
+  async function toggleVariantStatus(variantId: number, status: "ACTIVE" | "INACTIVE") {
     try {
       await variantStatusMutation.mutateAsync({ id: variantId, status });
-      toast.success(
-        t("admin.commerce.translation.statusUpdated", { name: `SKU #${variantId}` }),
-      );
+      toast.success(t("admin.commerce.translation.statusUpdated", { name: `SKU #${variantId}` }));
     } catch (error) {
       toast.error(
         `${t("admin.commerce.translation.statusFailed", { name: `SKU #${variantId}` })} ${getApiErrorMessage(error)}`,
@@ -808,19 +774,27 @@ export function ProductsManagement() {
       cell: (product) => (
         <div className="flex items-center gap-3">
           <Avatar size="lg" className="rounded-lg">
-            <AvatarImage className="rounded-lg" src={resolveAdminAssetUrl(product.thumbnail)} alt="" />
+            <AvatarImage
+              className="rounded-lg"
+              src={resolveAdminAssetUrl(product.thumbnail)}
+              alt=""
+            />
             <AvatarFallback className="rounded-lg">
               <Package className="size-4" />
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <p className="truncate font-medium">{product.name}</p>
-            <p className="max-w-64 truncate text-muted-foreground text-xs">/{product.slug}</p>
+            <p className="text-muted-foreground max-w-64 truncate text-xs">/{product.slug}</p>
             <div className="mt-1 flex gap-1">
               {(["vi", "en"] as const).map((translationLocale) => (
                 <Badge
                   key={translationLocale}
-                  variant={product.translationLocales?.includes(translationLocale) ? "secondary" : "outline"}
+                  variant={
+                    product.translationLocales?.includes(translationLocale)
+                      ? "secondary"
+                      : "outline"
+                  }
                   className="px-1 py-0 text-[9px] uppercase"
                 >
                   {translationLocale}
@@ -899,7 +873,11 @@ export function ProductsManagement() {
             disabled={loadingVariantProductId !== null}
             onClick={() => void openEditForm(product)}
           >
-            {loadingVariantProductId === product.id ? <Loader2 className="animate-spin" /> : <Pencil />}
+            {loadingVariantProductId === product.id ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Pencil />
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -958,7 +936,10 @@ export function ProductsManagement() {
             value: categoryFilter,
             options: [
               { label: t("admin.commerce.products.filter.allCategories"), value: ALL_FILTER },
-              ...categories.map((category) => ({ label: category.name, value: String(category.id) })),
+              ...categories.map((category) => ({
+                label: category.name,
+                value: String(category.id),
+              })),
             ],
             onValueChange: (value) => {
               setCategoryFilter(value ?? ALL_FILTER);
@@ -996,7 +977,7 @@ export function ProductsManagement() {
               price: product.price,
               status: t(PRODUCT_STATUS_MESSAGE_KEYS[product.status]),
               updatedAt: product.updatedAt,
-            }))
+            })),
           )
         }
         isLoading={productsQuery.isPending}
@@ -1012,9 +993,7 @@ export function ProductsManagement() {
           if (!isSaving) setFormOpen(open);
         }}
         title={
-          editingProduct
-            ? t("admin.commerce.products.edit")
-            : t("admin.commerce.products.add")
+          editingProduct ? t("admin.commerce.products.edit") : t("admin.commerce.products.add")
         }
         description={t("admin.commerce.products.formDescription")}
         onSubmit={handleSubmit}
@@ -1028,17 +1007,13 @@ export function ProductsManagement() {
           brands.length === 0
         }
         submitLabel={
-          editingProduct
-            ? t("admin.commerce.products.save")
-            : t("admin.commerce.products.create")
+          editingProduct ? t("admin.commerce.products.save") : t("admin.commerce.products.create")
         }
         contentClassName="sm:max-w-4xl"
       >
         <Tabs value={formTab} onValueChange={setFormTab} className="gap-5">
           <TabsList variant="line" className="w-full justify-start">
-            <TabsTrigger value="details">
-              {t("admin.commerce.products.tab.details")}
-            </TabsTrigger>
+            <TabsTrigger value="details">{t("admin.commerce.products.tab.details")}</TabsTrigger>
             <TabsTrigger value="variants">
               {t("admin.commerce.products.tab.variants", { count: variantValues.length })}
             </TabsTrigger>
@@ -1089,7 +1064,8 @@ export function ProductsManagement() {
       <DeleteResourceDialog
         open={Boolean(archiveProduct)}
         onOpenChange={(open) => {
-          if (!open && !isArchiveWorkflowPending && !deleteMutation.isPending) setArchiveProduct(null);
+          if (!open && !isArchiveWorkflowPending && !deleteMutation.isPending)
+            setArchiveProduct(null);
         }}
         resourceName={archiveProduct?.name ?? t("admin.commerce.products.resource")}
         actionLabel={t("admin.commerce.products.archive")}

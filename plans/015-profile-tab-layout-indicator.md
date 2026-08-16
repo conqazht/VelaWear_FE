@@ -24,13 +24,15 @@ Introduce a shared `motion.div` active tab underline indicator using `layoutId="
 
 ```tsx
 /* target */
-{activeTab === tab.id && (
-  <motion.div
-    layoutId="profile-tab-indicator"
-    className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#b5573a]"
-    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-  />
-)}
+{
+  activeTab === tab.id && (
+    <motion.div
+      layoutId="profile-tab-indicator"
+      className="absolute right-0 bottom-0 left-0 h-[2px] bg-[#b5573a]"
+      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+    />
+  );
+}
 ```
 
 ## Repo conventions to follow

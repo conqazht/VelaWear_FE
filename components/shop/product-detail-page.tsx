@@ -29,7 +29,9 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
     async function loadProduct() {
       try {
-        const response = await apiClient.get(`/products/slug/${encodeURIComponent(slug)}?locale=${activeLocale}`);
+        const response = await apiClient.get(
+          `/products/slug/${encodeURIComponent(slug)}?locale=${activeLocale}`,
+        );
         if (!isMounted) return;
 
         if (response.data?.data) {
@@ -110,9 +112,11 @@ export function ProductDetailPage({ slug }: { slug: string }) {
         status={404}
         eyebrow={t("storefront.product.missingEyebrow")}
         title={t("storefront.product.missingTitle")}
-        description={isMissing
-          ? t("storefront.product.missingDescription")
-          : t("storefront.product.missingGeneric")}
+        description={
+          isMissing
+            ? t("storefront.product.missingDescription")
+            : t("storefront.product.missingGeneric")
+        }
         primaryAction={{ label: t("storefront.product.viewCollection"), href: "/collection" }}
         secondaryAction={{ label: t("storefront.product.backHome"), href: "/" }}
         variant="route"
@@ -121,7 +125,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-6 pb-12 pt-[104px] md:px-16 md:pt-[120px]">
+    <div className="mx-auto w-full max-w-[1800px] px-6 pt-[104px] pb-12 md:px-16 md:pt-[120px]">
       {loadError ? (
         <StorefrontStaleWarning
           className="mb-6"
@@ -149,10 +153,7 @@ function ProductDetailLoadingFallback() {
         <div className="flex justify-start gap-4 select-none xl:w-[631px]">
           <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
             {Array.from({ length: 5 }).map((_, index) => (
-              <Skeleton
-                key={index}
-                className="aspect-[4/5] rounded-none bg-[#efe7dc]"
-              />
+              <Skeleton key={index} className="aspect-[4/5] rounded-none bg-[#efe7dc]" />
             ))}
           </div>
 
@@ -172,10 +173,7 @@ function ProductDetailLoadingFallback() {
             <Skeleton className="mb-4 h-3 w-28 rounded-none bg-[#efe7dc]" />
             <div className="flex gap-4">
               {Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton
-                  key={index}
-                  className="size-8 rounded-full bg-[#efe7dc]"
-                />
+                <Skeleton key={index} className="size-8 rounded-full bg-[#efe7dc]" />
               ))}
             </div>
           </div>
@@ -187,10 +185,7 @@ function ProductDetailLoadingFallback() {
             </div>
             <div className="grid grid-cols-4 gap-3">
               {Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton
-                  key={index}
-                  className="h-[50px] rounded-sm bg-[#efe7dc]"
-                />
+                <Skeleton key={index} className="h-[50px] rounded-sm bg-[#efe7dc]" />
               ))}
             </div>
           </div>
@@ -211,7 +206,7 @@ function ProductDetailLoadingFallback() {
           </div>
         </div>
 
-        <div className="flex gap-6 overflow-hidden pb-4 px-1">
+        <div className="flex gap-6 overflow-hidden px-1 pb-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
@@ -251,7 +246,7 @@ function ProductDetailContent({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="mb-10 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[#1c1a18]/50">
+      <div className="mb-10 flex flex-wrap items-center gap-2 text-[10px] tracking-[0.15em] text-[#1c1a18]/50 uppercase">
         <Link href="/" className="hover:text-[#1c1a18]">
           {t("storefront.common.home")}
         </Link>
@@ -263,9 +258,7 @@ function ProductDetailContent({ product }: { product: Product }) {
           {t("storefront.common.collections")}
         </Link>
         <span>/</span>
-        <span className="max-w-[200px] truncate text-[#1c1a18]/40">
-          {product.name}
-        </span>
+        <span className="max-w-[200px] truncate text-[#1c1a18]/40">{product.name}</span>
       </div>
 
       <div className="mx-auto w-full xl:max-w-[1180px] 2xl:max-w-[1220px]">
@@ -278,18 +271,18 @@ function ProductDetailContent({ product }: { product: Product }) {
         currentProductSlug={product.id}
       />
 
-      <section className="grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2 mt-16">
-        <div className="md:pr-6 text-left">
-          <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b5573a]">
+      <section className="mt-16 grid grid-cols-1 items-center gap-12 border-t border-[#1c1a18]/10 pt-16 md:grid-cols-2">
+        <div className="text-left md:pr-6">
+          <span className="mb-3 block text-[10px] font-bold tracking-[0.25em] text-[#b5573a] uppercase">
             {t("storefront.product.craftEyebrow")}
           </span>
-          <h2 className="mb-6 font-serif text-2xl font-light leading-tight tracking-[0.05em] text-[#1c1a18] md:text-4xl">
+          <h2 className="mb-6 font-serif text-2xl leading-tight font-light tracking-[0.05em] text-[#1c1a18] md:text-4xl">
             {t("storefront.product.craftTitle")}
           </h2>
-          <p className="mb-4 text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
+          <p className="mb-4 text-xs leading-relaxed font-light tracking-wide text-[#1c1a18]/70 md:text-sm">
             {t("storefront.product.craftParagraph1")}
           </p>
-          <p className="text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
+          <p className="text-xs leading-relaxed font-light tracking-wide text-[#1c1a18]/70 md:text-sm">
             {t("storefront.product.craftParagraph2")}
           </p>
         </div>

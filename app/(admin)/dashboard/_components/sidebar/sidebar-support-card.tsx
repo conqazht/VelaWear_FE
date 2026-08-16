@@ -16,13 +16,13 @@ export function SidebarSupportCard() {
       <CardHeader className="min-w-0 px-4">
         <CardTitle className="truncate text-sm">{t("admin.shell.support.title")}</CardTitle>
         <CardDescription className="line-clamp-2">
-          {t("admin.shell.support.description")} {" "}
+          {t("admin.shell.support.description")}{" "}
           <Link
             href="https://x.com/arhamkhnz"
             target="_blank"
             rel="noreferrer"
             aria-label={t("admin.shell.support.reachOut")}
-            className="inline-flex items-center text-foreground"
+            className="text-foreground inline-flex items-center"
           >
             <SimpleIcon icon={siX} aria-hidden className="size-3 fill-current" />
           </Link>

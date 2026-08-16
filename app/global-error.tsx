@@ -75,10 +75,8 @@ export default function GlobalError({
                     })}
                     title={languageName}
                     onClick={() => persistStandaloneLocale(option)}
-                    className={`flex h-6 min-w-8 cursor-pointer items-center justify-center rounded-full px-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] ${
-                      locale === option
-                        ? "bg-[#1c1a18] text-[#f7f4ef]"
-                        : "hover:bg-[#1c1a18]/10"
+                    className={`flex h-6 min-w-8 cursor-pointer items-center justify-center rounded-full px-2 transition-colors focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:outline-none ${
+                      locale === option ? "bg-[#1c1a18] text-[#f7f4ef]" : "hover:bg-[#1c1a18]/10"
                     }`}
                   >
                     {option.toUpperCase()}

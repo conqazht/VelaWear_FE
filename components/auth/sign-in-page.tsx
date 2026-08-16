@@ -13,10 +13,7 @@ import { FloatingInput } from "@/components/auth/floating-input";
 import { useAuth } from "@/components/auth/auth-provider";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 import { useI18n } from "@/components/providers/i18n-provider";
-import type {
-  AuthSceneFocus,
-  AuthSceneStatus,
-} from "@/components/auth/auth-motion-scene";
+import type { AuthSceneFocus, AuthSceneStatus } from "@/components/auth/auth-motion-scene";
 import { getSafeInternalRedirect } from "@/lib/auth/post-auth-redirect";
 import { getPostSignInPath, getRoleSessionLabel } from "@/lib/auth/roles";
 import { getAuthRoleMessageKey } from "@/lib/i18n/messages/auth-errors";
@@ -108,7 +105,7 @@ export function SignInPage() {
       description={t("auth.signIn.description")}
       footer={
         <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d]">
-          {t("auth.signIn.newMember")} {" "}
+          {t("auth.signIn.newMember")}{" "}
           <Link
             href="/register"
             className="font-medium text-[#b5573a] underline decoration-[#b5573a]/30 underline-offset-2 transition-colors hover:text-[#8f4329]"
@@ -120,7 +117,7 @@ export function SignInPage() {
     >
       <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-6">
         {apiError && (
-          <div className="rounded-[12px] border border-error/20 bg-error/10 p-3 text-sm text-error">
+          <div className="border-error/20 bg-error/10 text-error rounded-[12px] border p-3 text-sm">
             {apiError}
           </div>
         )}
@@ -142,9 +139,7 @@ export function SignInPage() {
             }}
           />
           {errors.email && (
-            <p className="mt-1 text-xs font-medium text-destructive">
-              {errors.email.message}
-            </p>
+            <p className="text-destructive mt-1 text-xs font-medium">{errors.email.message}</p>
           )}
         </div>
 
@@ -173,21 +168,21 @@ export function SignInPage() {
                   setSceneFocus("password");
                   setTimeout(() => setFocus("password"), 0);
                 }}
-                aria-label={t(showPassword ? "auth.common.hidePassword" : "auth.common.showPassword")}
+                aria-label={t(
+                  showPassword ? "auth.common.hidePassword" : "auth.common.showPassword",
+                )}
                 className="cursor-pointer p-1 transition-opacity hover:opacity-85"
               >
                 {showPassword ? (
-                  <EyeOff className="size-[22px] text-ink" />
+                  <EyeOff className="text-ink size-[22px]" />
                 ) : (
-                  <Eye className="size-[22px] text-ink" />
+                  <Eye className="text-ink size-[22px]" />
                 )}
               </button>
             }
           />
           {errors.password && (
-            <p className="mt-1 text-xs font-medium text-destructive">
-              {errors.password.message}
-            </p>
+            <p className="text-destructive mt-1 text-xs font-medium">{errors.password.message}</p>
           )}
           <div className="mt-2 flex justify-end">
             <Link
@@ -201,7 +196,7 @@ export function SignInPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium uppercase tracking-wider text-white transition-colors hover:bg-[#8f4329] disabled:opacity-50 cursor-pointer shadow-sm"
+          className="flex h-12 w-full cursor-pointer items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#8f4329] disabled:opacity-50"
         >
           {isSubmitting
             ? sessionRoleLabel
@@ -212,9 +207,9 @@ export function SignInPage() {
             : t("auth.common.signIn")}
         </button>
 
-        <div className="relative flex items-center mt-2">
+        <div className="relative mt-2 flex items-center">
           <div className="flex-grow border-t border-[#1c1a18]/10"></div>
-          <span className="flex-shrink-0 mx-4 text-xs uppercase tracking-wider text-[#1c1a18]/50">
+          <span className="mx-4 flex-shrink-0 text-xs tracking-wider text-[#1c1a18]/50 uppercase">
             {t("auth.common.or")}
           </span>
           <div className="flex-grow border-t border-[#1c1a18]/10"></div>

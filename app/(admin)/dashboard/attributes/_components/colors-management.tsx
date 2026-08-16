@@ -122,7 +122,7 @@ export function ColorsManagement() {
             setFormOpen(false);
           },
           onError: (error) => toast.error(getApiErrorMessage(error)),
-        }
+        },
       );
       return;
     }
@@ -168,7 +168,7 @@ export function ColorsManagement() {
             />
             <div className="min-w-0">
               <p className="truncate font-medium">{color.name}</p>
-              <p className="font-mono text-muted-foreground text-xs">
+              <p className="text-muted-foreground font-mono text-xs">
                 {safeHexCode ?? t("admin.commerce.attributes.colors.noValidHex")}
               </p>
             </div>
@@ -252,7 +252,7 @@ export function ColorsManagement() {
               name: color.name,
               hexCode: color.hexCode,
               sortOrder: color.sortOrder,
-            }))
+            })),
           )
         }
         isLoading={colorsQuery.isPending}

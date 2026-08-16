@@ -18,11 +18,7 @@ import {
 
 import type { SaleCampaignFormValues } from "../_data/sale-campaign-form";
 
-export function CampaignReviewStep({
-  values,
-}: {
-  values: SaleCampaignFormValues;
-}) {
+export function CampaignReviewStep({ values }: { values: SaleCampaignFormValues }) {
   const { locale, t } = useI18n();
   const totalQuota =
     values.type === "FLASH"
@@ -35,15 +31,13 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Tag className="size-4 text-muted-foreground" />
+              <Tag className="text-muted-foreground size-4" />
               {t("admin.sales.editor.review.campaign")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium">
-              {values.name || t("admin.sales.editor.review.unnamed")}
-            </p>
-            <p className="mt-1 font-mono text-muted-foreground text-xs">
+            <p className="font-medium">{values.name || t("admin.sales.editor.review.unnamed")}</p>
+            <p className="text-muted-foreground mt-1 font-mono text-xs">
               {values.code || t("admin.sales.editor.review.noCode")}
             </p>
           </CardContent>
@@ -52,13 +46,13 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CalendarClock className="size-4 text-muted-foreground" />
+              <CalendarClock className="text-muted-foreground size-4" />
               {t("admin.sales.editor.review.schedule")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p>{formatAdminDateTime(values.startsAt, locale)}</p>
-            <p className="mt-1 text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-1 text-xs">
               {t("admin.sales.editor.review.scheduleTo", {
                 date: formatAdminDateTime(values.endsAt, locale),
               })}
@@ -69,13 +63,13 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Package className="size-4 text-muted-foreground" />
+              <Package className="text-muted-foreground size-4" />
               {t("admin.sales.editor.review.variants")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="font-medium tabular-nums">{values.items.length}</p>
-            <p className="mt-1 text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-1 text-xs">
               {t("admin.sales.editor.review.productCount", {
                 count: new Set(values.items.map((item) => item.productId)).size,
               })}
@@ -86,7 +80,7 @@ export function CampaignReviewStep({
         <Card size="sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TicketPercent className="size-4 text-muted-foreground" />
+              <TicketPercent className="text-muted-foreground size-4" />
               {t("admin.sales.editor.review.rules")}
             </CardTitle>
           </CardHeader>
@@ -96,7 +90,7 @@ export function CampaignReviewStep({
                 ? t("admin.sales.editor.type.flash")
                 : t("admin.sales.editor.type.standard")}
             </Badge>
-            <p className="mt-2 text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-2 text-xs">
               {values.type === "FLASH"
                 ? t("admin.sales.editor.review.flashRules", {
                     count: totalQuota ?? 0,
@@ -161,9 +155,7 @@ export function CampaignReviewStep({
                   <TableCell className="text-right tabular-nums">{percentage}%</TableCell>
                   {values.type === "FLASH" ? (
                     <>
-                      <TableCell className="text-right tabular-nums">
-                        {item.quota || "—"}
-                      </TableCell>
+                      <TableCell className="text-right tabular-nums">{item.quota || "—"}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {item.maxPerCustomer || t("admin.sales.editor.review.noLimit")}
                       </TableCell>
@@ -176,9 +168,9 @@ export function CampaignReviewStep({
         </Table>
       </div>
 
-      <div className="rounded-xl border bg-muted/30 p-4 text-sm">
+      <div className="bg-muted/30 rounded-xl border p-4 text-sm">
         <p className="font-medium">{t("admin.sales.editor.review.beforePublishing")}</p>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+        <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5">
           <li>{t("admin.sales.editor.review.checkOverlap")}</li>
           <li>{t("admin.sales.editor.review.checkReferencePrice")}</li>
           <li>{t("admin.sales.editor.review.checkFlashEnforcement")}</li>

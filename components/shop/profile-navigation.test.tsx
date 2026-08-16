@@ -24,5 +24,4 @@ describe("ProfileNavigation", () => {
     render(<ProfileNavigation />);
     expect(screen.getByRole("navigation")).toBeInTheDocument();
   });
-
 });

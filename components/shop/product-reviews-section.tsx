@@ -14,22 +14,14 @@ import { RatingStars } from "@/components/shop/rating-stars";
 import { ReviewComment } from "@/components/shop/review-comment";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/i18n/format";
-import {
-  useProductReviewSummaryQuery,
-  useProductReviewsQuery,
-} from "@/lib/queries/catalog";
+import { useProductReviewSummaryQuery, useProductReviewsQuery } from "@/lib/queries/catalog";
 
 type ProductReviewsSectionProps = {
   productId?: number;
   productName: string;
 };
 
-const reviewSorts = new Set<ProductReviewSort>([
-  "newest",
-  "oldest",
-  "rating-high",
-  "rating-low",
-]);
+const reviewSorts = new Set<ProductReviewSort>(["newest", "oldest", "rating-high", "rating-low"]);
 
 function readReviewUrlState(): { open: boolean; view: ProductReviewViewState } {
   if (typeof window === "undefined") {
@@ -42,7 +34,10 @@ function readReviewUrlState(): { open: boolean; view: ProductReviewViewState } {
   return {
     open: params.get("reviews") === "1" || window.location.hash === "#reviews",
     view: {
-      rating: Number.isInteger(parsedRating) && parsedRating >= 1 && parsedRating <= 5 ? parsedRating : undefined,
+      rating:
+        Number.isInteger(parsedRating) && parsedRating >= 1 && parsedRating <= 5
+          ? parsedRating
+          : undefined,
       sort: parsedSort && reviewSorts.has(parsedSort) ? parsedSort : "newest",
       page: Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1,
     },
@@ -74,10 +69,7 @@ function updateReviewUrl(open: boolean, view: ProductReviewViewState, mode: "pus
   );
 }
 
-export function ProductReviewsSection({
-  productId,
-  productName,
-}: ProductReviewsSectionProps) {
+export function ProductReviewsSection({ productId, productName }: ProductReviewsSectionProps) {
   const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<ProductReviewViewState>({ sort: "newest", page: 1 });
@@ -105,22 +97,25 @@ export function ProductReviewsSection({
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
 
-  const handleOpenChange = useCallback((nextOpen: boolean) => {
-    if (nextOpen === open) return;
-    if (nextOpen) {
-      pushedOpenRef.current = true;
-      updateReviewUrl(true, view, "push");
-      setOpen(true);
-      return;
-    }
-    if (pushedOpenRef.current) {
-      pushedOpenRef.current = false;
-      window.history.back();
-    } else {
-      updateReviewUrl(false, view, "replace");
-      setOpen(false);
-    }
-  }, [open, view]);
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen === open) return;
+      if (nextOpen) {
+        pushedOpenRef.current = true;
+        updateReviewUrl(true, view, "push");
+        setOpen(true);
+        return;
+      }
+      if (pushedOpenRef.current) {
+        pushedOpenRef.current = false;
+        window.history.back();
+      } else {
+        updateReviewUrl(false, view, "replace");
+        setOpen(false);
+      }
+    },
+    [open, view],
+  );
 
   const handleStateChange = useCallback((nextView: ProductReviewViewState) => {
     setView(nextView);
@@ -130,7 +125,7 @@ export function ProductReviewsSection({
   if (!productId) return null;
 
   return (
-    <section id="reviews" className="scroll-mt-32 border-b border-hairline/40 py-7">
+    <section id="reviews" className="border-hairline/40 scroll-mt-32 border-b py-7">
       <button
         type="button"
         onClick={() => handleOpenChange(true)}
@@ -143,15 +138,20 @@ export function ProductReviewsSection({
           </h2>
           {count > 0 ? (
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <RatingStars rating={average} sizeClassName="size-4" activeClassName="text-[#b5573a]" />
+              <RatingStars
+                rating={average}
+                sizeClassName="size-4"
+                activeClassName="text-[#b5573a]"
+              />
               <span className="text-xs text-[#1c1a18]/55">
                 {average.toFixed(1)} · {t("reviews.total", { count })}
               </span>
             </div>
           ) : null}
         </div>
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#b5573a]">
-          {t("reviews.viewAll", { count })}<ChevronRight className="size-4" />
+        <span className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-[#b5573a] uppercase">
+          {t("reviews.viewAll", { count })}
+          <ChevronRight className="size-4" />
         </span>
       </button>
 
@@ -159,15 +159,23 @@ export function ProductReviewsSection({
         <div className="mt-6 space-y-6" aria-hidden="true">
           {Array.from({ length: 3 }, (_, index) => (
             <div key={index} className="space-y-3 border-t border-[#1c1a18]/10 pt-5">
-              <div className="flex justify-between"><Skeleton className="h-4 w-28" /><Skeleton className="h-4 w-24" /></div>
-              <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-3/4" />
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
             </div>
           ))}
         </div>
       ) : previewQuery.isError && reviews.length === 0 ? (
         <div className="mt-5 rounded-sm border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {t("storefront.product.reviewError")}
-          <button type="button" onClick={() => void previewQuery.refetch()} className="ml-2 font-semibold underline underline-offset-4">
+          <button
+            type="button"
+            onClick={() => void previewQuery.refetch()}
+            className="ml-2 font-semibold underline underline-offset-4"
+          >
             {t("errors.common.retry")}
           </button>
         </div>

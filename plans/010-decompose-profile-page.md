@@ -59,6 +59,7 @@ panels under the protection of FE-009's characterization tests.
 
   Dependency plans will rename/gate some hooks; preserve the merged orchestrator
   ownership rather than restoring this legacy signature.
+
 - The profile tab contains sidebar panels for account, delivery, visibility,
   communication and privacy. FE-004 must already have removed or disabled mock
   actions and made `/profile/settings` canonical.
@@ -75,21 +76,22 @@ panels under the protection of FE-009's characterization tests.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Install | `pnpm install --frozen-lockfile` | exit 0; lockfile unchanged |
-| Characterization | `pnpm exec vitest run "app/(shop)/profile/page.test.tsx" components/shop/profile/profile-formatters.test.ts` | all FE-009 tests pass unchanged |
-| Scoped lint | `pnpm exec eslint "app/(shop)/profile/page.tsx" "app/(shop)/profile/page.test.tsx" components/shop/profile --max-warnings 0` | exit 0, no warnings |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, no errors |
-| Unit suite | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
-| Smoke | `pnpm test:e2e:smoke` | all `@smoke` tests pass |
+| Purpose          | Command                                                                                                                      | Expected on success             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Install          | `pnpm install --frozen-lockfile`                                                                                             | exit 0; lockfile unchanged      |
+| Characterization | `pnpm exec vitest run "app/(shop)/profile/page.test.tsx" components/shop/profile/profile-formatters.test.ts`                 | all FE-009 tests pass unchanged |
+| Scoped lint      | `pnpm exec eslint "app/(shop)/profile/page.tsx" "app/(shop)/profile/page.test.tsx" components/shop/profile --max-warnings 0` | exit 0, no warnings             |
+| Typecheck        | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                  | exit 0, no errors               |
+| Unit suite       | `pnpm test:unit`                                                                                                             | all tests pass                  |
+| Build            | `pnpm build`                                                                                                                 | production build succeeds       |
+| Smoke            | `pnpm test:e2e:smoke`                                                                                                        | all `@smoke` tests pass         |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope** (the only files you should modify):
+
 - `app/(shop)/profile/page.tsx`
 - `app/(shop)/profile/page.test.tsx`
 - `components/shop/profile/profile-formatters.ts`
@@ -102,6 +104,7 @@ panels under the protection of FE-009's characterization tests.
 - `components/shop/profile/profile-favorites-tab.tsx` (create)
 
 **Out of scope** (do NOT touch):
+
 - Backend/API contracts, query hooks, query keys or request enabling.
 - Auth, cart, favorites-provider, notification-provider or global state behavior.
 - Route/query-parameter names, translations, CSS tokens, visual design or DOM semantics.

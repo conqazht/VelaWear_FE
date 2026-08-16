@@ -16,15 +16,10 @@ type SaleProductCardProps = {
   isUpcoming: boolean;
 };
 
-export function SaleProductCard({
-  product,
-  isFlash,
-  isUpcoming,
-}: SaleProductCardProps) {
+export function SaleProductCard({ product, isFlash, isUpcoming }: SaleProductCardProps) {
   const { locale, t } = useI18n();
   const href = `/products/${encodeURIComponent(product.productSlug)}`;
-  const quotaSoldOut =
-    isFlash && product.remainingQuota !== null && product.remainingQuota <= 0;
+  const quotaSoldOut = isFlash && product.remainingQuota !== null && product.remainingQuota <= 0;
   const soldOut = quotaSoldOut || product.availableQuantity <= 0;
   const soldOutLabel = quotaSoldOut
     ? t("storefront.sale.flashSoldOut")
@@ -33,9 +28,7 @@ export function SaleProductCard({
     product.quota !== null && product.remainingQuota !== null
       ? Math.max(0, product.quota - product.remainingQuota)
       : 0;
-  const progress = product.quota
-    ? Math.min(100, (used / product.quota) * 100)
-    : 0;
+  const progress = product.quota ? Math.min(100, (used / product.quota) * 100) : 0;
 
   return (
     <ProductCardShell
@@ -45,16 +38,12 @@ export function SaleProductCard({
       imageClassName={soldOut ? "grayscale" : undefined}
       imageOverlay={
         soldOut ? (
-          <span className="grid h-full w-full place-items-center bg-[#1c1a18]/45 px-4 text-center text-xs font-bold uppercase tracking-[0.2em] text-white">
+          <span className="grid h-full w-full place-items-center bg-[#1c1a18]/45 px-4 text-center text-xs font-bold tracking-[0.2em] text-white uppercase">
             {soldOutLabel}
           </span>
         ) : undefined
       }
-      badge={
-        isFlash
-          ? t("storefront.sale.type.flash")
-          : t("storefront.sale.type.standard")
-      }
+      badge={isFlash ? t("storefront.sale.type.flash") : t("storefront.sale.type.standard")}
       eyebrow={t("storefront.sale.variantOptions", {
         count: product.variants.length,
       })}

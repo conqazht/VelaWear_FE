@@ -22,12 +22,7 @@ type SceneStyle = React.CSSProperties & {
   "--my": string;
 };
 
-export function AuthMotionScene({
-  focus,
-  passwordVisible,
-  status,
-  mode,
-}: AuthMotionSceneProps) {
+export function AuthMotionScene({ focus, passwordVisible, status, mode }: AuthMotionSceneProps) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -80,7 +75,10 @@ export function AuthMotionScene({
       current.current.y += (targetY - current.current.y) * 0.08;
 
       // Only write to DOM if coordinates changed significantly to avoid style recalculations when stationary
-      if (Math.abs(current.current.x - prevX) > 0.0005 || Math.abs(current.current.y - prevY) > 0.0005) {
+      if (
+        Math.abs(current.current.x - prevX) > 0.0005 ||
+        Math.abs(current.current.y - prevY) > 0.0005
+      ) {
         node.style.setProperty("--mx", current.current.x.toFixed(4));
         node.style.setProperty("--my", current.current.y.toFixed(4));
       }
@@ -102,7 +100,7 @@ export function AuthMotionScene({
     focus === "email" && "focus-email",
     focus === "password" && (passwordVisible ? "focus-password-visible" : "focus-password-hidden"),
     status === "success" && "login-success",
-    status === "error" && "login-fail"
+    status === "error" && "login-fail",
   );
 
   return (
@@ -327,7 +325,7 @@ export function AuthMotionScene({
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(21,18,15,0.34),rgba(246,240,231,0.12)_42%,rgba(246,240,231,0.38)),radial-gradient(circle_at_26%_18%,rgba(255,255,255,0.58),transparent_28%),radial-gradient(circle_at_76%_72%,rgba(151,64,37,0.2),transparent_33%)]" />
 
       {/* Decorative text */}
-      <div className="absolute left-[8%] top-[8%] max-w-[240px] text-white/88">
+      <div className="absolute top-[8%] left-[8%] max-w-[240px] text-white/88">
         <p className="font-serif text-[42px] leading-[0.98]">
           Vela
           <br />
@@ -337,15 +335,15 @@ export function AuthMotionScene({
           {mode === "register"
             ? t("auth.scene.register")
             : mode === "forgot-password"
-            ? t("auth.scene.forgotPassword")
-            : t("auth.scene.signIn")}
+              ? t("auth.scene.forgotPassword")
+              : t("auth.scene.signIn")}
         </p>
       </div>
 
       {/* Active Characters Layer */}
-      <div className="absolute inset-x-0 bottom-[18%] top-[8%] flex items-end justify-center">
+      <div className="absolute inset-x-0 top-[8%] bottom-[18%] flex items-end justify-center">
         <svg
-          className="h-full w-full max-h-[450px] max-w-[500px]"
+          className="h-full max-h-[450px] w-full max-w-[500px]"
           viewBox="0 0 450 400"
           preserveAspectRatio="xMidYMax meet"
           xmlns="http://www.w3.org/2000/svg"
@@ -378,10 +376,22 @@ export function AuthMotionScene({
 
             {/* Soft shadows for three-dimensional cutout effect */}
             <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#2c1f18" floodOpacity="0.14" />
+              <feDropShadow
+                dx="0"
+                dy="12"
+                stdDeviation="16"
+                floodColor="#2c1f18"
+                floodOpacity="0.14"
+              />
             </filter>
             <filter id="soft-shadow-dark" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#120c08" floodOpacity="0.25" />
+              <feDropShadow
+                dx="0"
+                dy="12"
+                stdDeviation="16"
+                floodColor="#120c08"
+                floodOpacity="0.25"
+              />
             </filter>
           </defs>
 
@@ -406,14 +416,38 @@ export function AuthMotionScene({
                           <circle cx="250" cy="200" r="4.5" fill="#221e1a" className="pupil" />
                         </g>
                       </g>
-                      <path d="M 222 228 Q 232 238 242 228" fill="none" stroke="#faf8f5" strokeWidth="2.5" strokeLinecap="round" />
+                      <path
+                        d="M 222 228 Q 232 238 242 228"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
                     </g>
 
                     {/* face-hidden */}
                     <g className="face face-hidden">
-                      <path d="M 204 200 L 224 200" fill="none" stroke="#faf8f5" strokeWidth="3.5" strokeLinecap="round" />
-                      <path d="M 240 200 L 260 200" fill="none" stroke="#faf8f5" strokeWidth="3.5" strokeLinecap="round" />
-                      <path d="M 222 228 Q 228 226 232 228 Q 236 230 242 228" fill="none" stroke="#faf8f5" strokeWidth="2.5" strokeLinecap="round" />
+                      <path
+                        d="M 204 200 L 224 200"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 240 200 L 260 200"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 222 228 Q 228 226 232 228 Q 236 230 242 228"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
                     </g>
 
                     {/* face-visible */}
@@ -430,14 +464,39 @@ export function AuthMotionScene({
                           <circle cx="250" cy="198" r="5" fill="#221e1a" className="pupil" />
                         </g>
                       </g>
-                      <circle cx="232" cy="232" r="5" fill="none" stroke="#faf8f5" strokeWidth="2.5" />
+                      <circle
+                        cx="232"
+                        cy="232"
+                        r="5"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="2.5"
+                      />
                     </g>
 
                     {/* face-happy */}
                     <g className="face face-happy">
-                      <path d="M 207 196 Q 214 190 221 196" fill="none" stroke="#faf8f5" strokeWidth="3" strokeLinecap="round" />
-                      <path d="M 243 196 Q 250 190 257 196" fill="none" stroke="#faf8f5" strokeWidth="3" strokeLinecap="round" />
-                      <path d="M 218 230 Q 232 244 246 230" fill="none" stroke="#faf8f5" strokeWidth="3" strokeLinecap="round" />
+                      <path
+                        d="M 207 196 Q 214 190 221 196"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 243 196 Q 250 190 257 196"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 218 230 Q 232 244 246 230"
+                        fill="none"
+                        stroke="#faf8f5"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                      />
                     </g>
                   </g>
                 </g>
@@ -465,14 +524,38 @@ export function AuthMotionScene({
                         <circle cx="135" cy="120" r="5" fill="#221e1a" className="pupil" />
                       </g>
                     </g>
-                    <path d="M 97 155 Q 110 165 123 155" fill="none" stroke="#3a332d" strokeWidth="3" strokeLinecap="round" />
+                    <path
+                      d="M 97 155 Q 110 165 123 155"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
                   </g>
 
                   {/* face-hidden */}
                   <g className="face face-hidden">
-                    <path d="M 75 120 L 95 120" fill="none" stroke="#3a332d" strokeWidth="4" strokeLinecap="round" />
-                    <path d="M 125 120 L 145 120" fill="none" stroke="#3a332d" strokeWidth="4" strokeLinecap="round" />
-                    <path d="M 97 155 Q 104 152 110 155 Q 116 158 123 155" fill="none" stroke="#3a332d" strokeWidth="3" strokeLinecap="round" />
+                    <path
+                      d="M 75 120 L 95 120"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 125 120 L 145 120"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 97 155 Q 104 152 110 155 Q 116 158 123 155"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
                   </g>
 
                   {/* face-visible */}
@@ -494,9 +577,27 @@ export function AuthMotionScene({
 
                   {/* face-happy */}
                   <g className="face face-happy">
-                    <path d="M 78 116 Q 85 110 92 116" fill="none" stroke="#3a332d" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M 128 116 Q 135 110 142 116" fill="none" stroke="#3a332d" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M 93 150 Q 110 168 127 150" fill="none" stroke="#3a332d" strokeWidth="3.5" strokeLinecap="round" />
+                    <path
+                      d="M 78 116 Q 85 110 92 116"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 128 116 Q 135 110 142 116"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 93 150 Q 110 168 127 150"
+                      fill="none"
+                      stroke="#3a332d"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
                   </g>
                 </g>
               </g>
@@ -512,17 +613,55 @@ export function AuthMotionScene({
                   {/* face-default */}
                   <g className="face face-default">
                     <g className="eye-tracker">
-                      <circle cx="320" cy="300" r="6" fill="#221e1a" className="pupil eye-blink" style={{ animationDelay: "0.8s" }} />
-                      <circle cx="370" cy="300" r="6" fill="#221e1a" className="pupil eye-blink" style={{ animationDelay: "0.8s" }} />
+                      <circle
+                        cx="320"
+                        cy="300"
+                        r="6"
+                        fill="#221e1a"
+                        className="pupil eye-blink"
+                        style={{ animationDelay: "0.8s" }}
+                      />
+                      <circle
+                        cx="370"
+                        cy="300"
+                        r="6"
+                        fill="#221e1a"
+                        className="pupil eye-blink"
+                        style={{ animationDelay: "0.8s" }}
+                      />
                     </g>
-                    <path d="M 333 328 Q 345 338 357 328" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
+                    <path
+                      d="M 333 328 Q 345 338 357 328"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
                   </g>
 
                   {/* face-hidden */}
                   <g className="face face-hidden">
-                    <path d="M 314 300 L 326 300" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M 364 300 L 376 300" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M 333 328 Q 339 326 345 328 Q 351 330 357 328" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
+                    <path
+                      d="M 314 300 L 326 300"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 364 300 L 376 300"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 333 328 Q 339 326 345 328 Q 351 330 357 328"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
                   </g>
 
                   {/* face-visible */}
@@ -531,14 +670,39 @@ export function AuthMotionScene({
                       <circle cx="320" cy="297" r="7" fill="#221e1a" className="pupil" />
                       <circle cx="370" cy="297" r="7" fill="#221e1a" className="pupil" />
                     </g>
-                    <circle cx="345" cy="330" r="6" fill="none" stroke="#221e1a" strokeWidth="2.5" />
+                    <circle
+                      cx="345"
+                      cy="330"
+                      r="6"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="2.5"
+                    />
                   </g>
 
                   {/* face-happy */}
                   <g className="face face-happy">
-                    <path d="M 317 296 Q 320 290 326 296" fill="none" stroke="#221e1a" strokeWidth="2.5" strokeLinecap="round" />
-                    <path d="M 367 296 Q 370 290 376 296" fill="none" stroke="#221e1a" strokeWidth="2.5" strokeLinecap="round" />
-                    <path d="M 333 325 Q 345 340 357 325" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
+                    <path
+                      d="M 317 296 Q 320 290 326 296"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 367 296 Q 370 290 376 296"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 333 325 Q 345 340 357 325"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
                   </g>
                 </g>
               </g>
@@ -554,17 +718,55 @@ export function AuthMotionScene({
                   {/* face-default */}
                   <g className="face face-default">
                     <g className="eye-tracker">
-                      <circle cx="130" cy="310" r="6" fill="#221e1a" className="pupil eye-blink" style={{ animationDelay: "3s" }} />
-                      <circle cx="200" cy="310" r="6" fill="#221e1a" className="pupil eye-blink" style={{ animationDelay: "3s" }} />
+                      <circle
+                        cx="130"
+                        cy="310"
+                        r="6"
+                        fill="#221e1a"
+                        className="pupil eye-blink"
+                        style={{ animationDelay: "3s" }}
+                      />
+                      <circle
+                        cx="200"
+                        cy="310"
+                        r="6"
+                        fill="#221e1a"
+                        className="pupil eye-blink"
+                        style={{ animationDelay: "3s" }}
+                      />
                     </g>
-                    <path d="M 150 345 Q 165 360 180 345" fill="none" stroke="#221e1a" strokeWidth="3.5" strokeLinecap="round" />
+                    <path
+                      d="M 150 345 Q 165 360 180 345"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
                   </g>
 
                   {/* face-hidden */}
                   <g className="face face-hidden">
-                    <path d="M 120 315 L 140 315" fill="none" stroke="#221e1a" strokeWidth="3.5" strokeLinecap="round" />
-                    <path d="M 190 315 L 210 315" fill="none" stroke="#221e1a" strokeWidth="3.5" strokeLinecap="round" />
-                    <path d="M 150 350 Q 158 347 165 350 Q 172 353 180 350" fill="none" stroke="#221e1a" strokeWidth="3.5" strokeLinecap="round" />
+                    <path
+                      d="M 120 315 L 140 315"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 190 315 L 210 315"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 150 350 Q 158 347 165 350 Q 172 353 180 350"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
                   </g>
 
                   {/* face-visible */}
@@ -573,14 +775,39 @@ export function AuthMotionScene({
                       <circle cx="130" cy="305" r="7" fill="#221e1a" className="pupil" />
                       <circle cx="200" cy="305" r="7" fill="#221e1a" className="pupil" />
                     </g>
-                    <circle cx="165" cy="348" r="8" fill="none" stroke="#221e1a" strokeWidth="3.5" />
+                    <circle
+                      cx="165"
+                      cy="348"
+                      r="8"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3.5"
+                    />
                   </g>
 
                   {/* face-happy */}
                   <g className="face face-happy">
-                    <path d="M 122 306 Q 130 300 138 306" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M 192 306 Q 200 300 208 306" fill="none" stroke="#221e1a" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M 145 342 Q 165 362 185 342" fill="none" stroke="#221e1a" strokeWidth="3.5" strokeLinecap="round" />
+                    <path
+                      d="M 122 306 Q 130 300 138 306"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 192 306 Q 200 300 208 306"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 145 342 Q 165 362 185 342"
+                      fill="none"
+                      stroke="#221e1a"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
                   </g>
                 </g>
               </g>

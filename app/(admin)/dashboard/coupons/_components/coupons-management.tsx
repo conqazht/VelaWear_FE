@@ -144,7 +144,12 @@ export function CouponsManagement() {
       toast.error(t("admin.commerce.coupons.validation.code"));
       return;
     }
-    if (!Number.isFinite(value) || value < 0 || !Number.isFinite(minOrderAmount) || minOrderAmount < 0) {
+    if (
+      !Number.isFinite(value) ||
+      value < 0 ||
+      !Number.isFinite(minOrderAmount) ||
+      minOrderAmount < 0
+    ) {
       toast.error(t("admin.commerce.coupons.validation.amounts"));
       return;
     }
@@ -160,7 +165,11 @@ export function CouponsManagement() {
       toast.error(t("admin.commerce.coupons.validation.usageLimit"));
       return;
     }
-    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || endDate <= startDate) {
+    if (
+      Number.isNaN(startDate.getTime()) ||
+      Number.isNaN(endDate.getTime()) ||
+      endDate <= startDate
+    ) {
       toast.error(t("admin.commerce.coupons.validation.dates"));
       return;
     }
@@ -186,7 +195,7 @@ export function CouponsManagement() {
             setEditingCoupon(null);
           },
           onError: (error) => toast.error(getApiErrorMessage(error)),
-        }
+        },
       );
       return;
     }
@@ -227,7 +236,7 @@ export function CouponsManagement() {
       className: "min-w-44",
       cell: (coupon) => (
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <div className="bg-muted text-muted-foreground flex size-9 items-center justify-center rounded-lg">
             <Tag className="size-4" />
           </div>
           <div>
@@ -405,7 +414,7 @@ export function CouponsManagement() {
               startDate: coupon.startDate,
               endDate: coupon.endDate,
               status: t(COUPON_STATUS_MESSAGE_KEYS[coupon.status]),
-            }))
+            })),
           )
         }
         isLoading={couponsQuery.isPending}
@@ -420,21 +429,19 @@ export function CouponsManagement() {
         onOpenChange={(open) => {
           if (!isSaving) setFormOpen(open);
         }}
-        title={
-          editingCoupon
-            ? t("admin.commerce.coupons.edit")
-            : t("admin.commerce.coupons.add")
-        }
+        title={editingCoupon ? t("admin.commerce.coupons.edit") : t("admin.commerce.coupons.add")}
         description={t("admin.commerce.coupons.formDescription")}
         onSubmit={handleSubmit}
         isPending={isSaving}
         submitLabel={
-          editingCoupon
-            ? t("admin.commerce.coupons.save")
-            : t("admin.commerce.coupons.create")
+          editingCoupon ? t("admin.commerce.coupons.save") : t("admin.commerce.coupons.create")
         }
       >
-        <CouponForm values={formValues} onChange={setFormValues} isEditing={Boolean(editingCoupon)} />
+        <CouponForm
+          values={formValues}
+          onChange={setFormValues}
+          isEditing={Boolean(editingCoupon)}
+        />
       </ResourceFormSheet>
 
       <DeleteResourceDialog

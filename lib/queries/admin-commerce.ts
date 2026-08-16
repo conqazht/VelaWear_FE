@@ -91,7 +91,8 @@ export const adminCommerceQueryKeys = {
   products: {
     root: ["admin-commerce", "products"] as const,
     lists: ["admin-commerce", "products", "list"] as const,
-    list: (params: AdminProductListParams) => ["admin-commerce", "products", "list", params] as const,
+    list: (params: AdminProductListParams) =>
+      ["admin-commerce", "products", "list", params] as const,
     translations: (id: number) => ["admin-commerce", "products", id, "translations"] as const,
   },
   productVariants: {
@@ -99,8 +100,7 @@ export const adminCommerceQueryKeys = {
     lists: ["admin-commerce", "product-variants", "list"] as const,
     list: (params: AdminProductVariantListParams) =>
       ["admin-commerce", "product-variants", "list", params] as const,
-    detail: (id: number) =>
-      ["admin-commerce", "product-variants", "detail", id] as const,
+    detail: (id: number) => ["admin-commerce", "product-variants", "detail", id] as const,
   },
   coupons: {
     root: ["admin-commerce", "coupons"] as const,
@@ -118,20 +118,17 @@ export const adminCommerceQueryKeys = {
   brands: {
     root: ["admin-commerce", "brands"] as const,
     lists: ["admin-commerce", "brands", "list"] as const,
-    list: (params: AdminBrandListParams) =>
-      ["admin-commerce", "brands", "list", params] as const,
+    list: (params: AdminBrandListParams) => ["admin-commerce", "brands", "list", params] as const,
     detail: (id: number) => ["admin-commerce", "brands", "detail", id] as const,
   },
   colors: {
     root: ["admin-commerce", "colors"] as const,
-    list: (params: AdminColorListParams) =>
-      ["admin-commerce", "colors", "list", params] as const,
+    list: (params: AdminColorListParams) => ["admin-commerce", "colors", "list", params] as const,
     detail: (id: number) => ["admin-commerce", "colors", "detail", id] as const,
   },
   sizes: {
     root: ["admin-commerce", "sizes"] as const,
-    list: (params: AdminSizeListParams) =>
-      ["admin-commerce", "sizes", "list", params] as const,
+    list: (params: AdminSizeListParams) => ["admin-commerce", "sizes", "list", params] as const,
     detail: (id: number) => ["admin-commerce", "sizes", "detail", id] as const,
   },
 };
@@ -143,11 +140,7 @@ const defaultCatalogOptionParams = {
 } as const;
 
 const PRODUCT_PUBLIC_AREAS = ["productLists", "productDetails", "sales"] as const;
-const CATEGORY_PUBLIC_AREAS = [
-  "categories",
-  "productLists",
-  "productDetails",
-] as const;
+const CATEGORY_PUBLIC_AREAS = ["categories", "productLists", "productDetails"] as const;
 const BRAND_PUBLIC_AREAS = ["brands", "productLists", "productDetails"] as const;
 const VARIANT_PUBLIC_AREAS = ["productLists", "productDetails", "sales"] as const;
 
@@ -164,9 +157,7 @@ function optimisticallySetStatus<T extends StatusRecord>(
     page
       ? {
           ...page,
-          result: page.result.map((item) =>
-            item.id === id ? { ...item, status } : item,
-          ),
+          result: page.result.map((item) => (item.id === id ? { ...item, status } : item)),
         }
       : page,
   );
@@ -185,8 +176,7 @@ export function useAdminProductsQuery(params: AdminProductListParams) {
     queryKey: adminCommerceQueryKeys.products.list(params),
     queryFn: () => getAdminProducts(params),
     placeholderData: (previousData, previousQuery) =>
-      (previousQuery?.queryKey[3] as AdminProductListParams | undefined)?.locale ===
-      params.locale
+      (previousQuery?.queryKey[3] as AdminProductListParams | undefined)?.locale === params.locale
         ? previousData
         : undefined,
   });
@@ -604,9 +594,7 @@ export function useDeleteAdminProductMutation() {
   });
 }
 
-export function useAdminProductVariantsQuery(
-  params: AdminProductVariantListParams = {}
-) {
+export function useAdminProductVariantsQuery(params: AdminProductVariantListParams = {}) {
   return useQuery({
     queryKey: adminCommerceQueryKeys.productVariants.list(params),
     queryFn: () => getAdminProductVariants(params),
@@ -626,8 +614,7 @@ export function useCreateAdminProductVariantMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateAdminProductVariantRequest) =>
-      createAdminProductVariant(request),
+    mutationFn: (request: CreateAdminProductVariantRequest) => createAdminProductVariant(request),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({
@@ -646,13 +633,8 @@ export function useUpdateAdminProductVariantMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      request,
-    }: {
-      id: number;
-      request: UpdateAdminProductVariantRequest;
-    }) => updateAdminProductVariant(id, request),
+    mutationFn: ({ id, request }: { id: number; request: UpdateAdminProductVariantRequest }) =>
+      updateAdminProductVariant(id, request),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({
@@ -744,8 +726,7 @@ export function useUpdateAdminProductStatusMutation() {
         ),
       };
     },
-    onError: (_error, _variables, context) =>
-      restoreAdminPages(queryClient, context?.previous),
+    onError: (_error, _variables, context) => restoreAdminPages(queryClient, context?.previous),
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
@@ -771,8 +752,7 @@ export function useUpdateAdminCategoryStatusMutation() {
         ),
       };
     },
-    onError: (_error, _variables, context) =>
-      restoreAdminPages(queryClient, context?.previous),
+    onError: (_error, _variables, context) => restoreAdminPages(queryClient, context?.previous),
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.categories.root }),
@@ -798,8 +778,7 @@ export function useUpdateAdminBrandStatusMutation() {
         ),
       };
     },
-    onError: (_error, _variables, context) =>
-      restoreAdminPages(queryClient, context?.previous),
+    onError: (_error, _variables, context) => restoreAdminPages(queryClient, context?.previous),
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.brands.root }),
@@ -825,8 +804,7 @@ export function useUpdateAdminProductVariantStatusMutation() {
         ),
       };
     },
-    onError: (_error, _variables, context) =>
-      restoreAdminPages(queryClient, context?.previous),
+    onError: (_error, _variables, context) => restoreAdminPages(queryClient, context?.previous),
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.productVariants.root }),

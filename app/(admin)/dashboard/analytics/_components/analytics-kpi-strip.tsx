@@ -10,32 +10,39 @@ import { getIntlLocale } from "@/lib/i18n";
 export function AnalyticsKpiStrip() {
   const { locale, t } = useI18n();
   const intlLocale = getIntlLocale(locale);
-  const compactFormatter = new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 1, notation: "compact" });
+  const compactFormatter = new Intl.NumberFormat(intlLocale, {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  });
   const percentFormatter = new Intl.NumberFormat(intlLocale, {
     maximumFractionDigits: 1,
     style: "percent",
   });
 
   return (
-    <div className="overflow-hidden rounded-xl bg-card shadow-xs ring-1 ring-foreground/10">
+    <div className="bg-card ring-foreground/10 overflow-hidden rounded-xl shadow-xs ring-1">
       <div className="grid divide-y *:data-[slot=card]:rounded-none *:data-[slot=card]:ring-0 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-5">
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.analytics.uniqueVisitors")}</CardTitle>
+            <CardTitle className="text-sm font-normal">
+              {t("admin.dashboardsA.analytics.uniqueVisitors")}
+            </CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">{compactFormatter.format(213_100)}</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {compactFormatter.format(213_100)}
+              </div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 {percentFormatter.format(0.028)}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <span>
                 {t("admin.dashboardsA.analytics.fromValue", {
                   value: compactFormatter.format(207_300),
@@ -49,21 +56,25 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.analytics.sessions")}</CardTitle>
+            <CardTitle className="text-sm font-normal">
+              {t("admin.dashboardsA.analytics.sessions")}
+            </CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">{compactFormatter.format(248_600)}</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {compactFormatter.format(248_600)}
+              </div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 {percentFormatter.format(0.021)}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <span>
                 {t("admin.dashboardsA.analytics.fromValue", {
                   value: compactFormatter.format(243_500),
@@ -77,21 +88,25 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.analytics.pageviews")}</CardTitle>
+            <CardTitle className="text-sm font-normal">
+              {t("admin.dashboardsA.analytics.pageviews")}
+            </CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">{compactFormatter.format(547_900)}</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {compactFormatter.format(547_900)}
+              </div>
               <Badge className="bg-destructive/10 text-destructive">
                 <ArrowDownRight />
                 {percentFormatter.format(0.033)}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <span>
                 {t("admin.dashboardsA.analytics.fromValue", {
                   value: compactFormatter.format(566_800),
@@ -105,21 +120,25 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.analytics.engagementRate")}</CardTitle>
+            <CardTitle className="text-sm font-normal">
+              {t("admin.dashboardsA.analytics.engagementRate")}
+            </CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">{percentFormatter.format(0.614)}</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {percentFormatter.format(0.614)}
+              </div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 {percentFormatter.format(0.042)}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <span>
                 {t("admin.dashboardsA.analytics.fromValue", {
                   value: percentFormatter.format(0.589),
@@ -133,21 +152,25 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">{t("admin.dashboardsA.analytics.conversionRate")}</CardTitle>
+            <CardTitle className="text-sm font-normal">
+              {t("admin.dashboardsA.analytics.conversionRate")}
+            </CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">{percentFormatter.format(0.084)}</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {percentFormatter.format(0.084)}
+              </div>
               <Badge className="bg-destructive/10 text-destructive">
                 <ArrowDownRight />
                 {percentFormatter.format(0.056)}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <span>
                 {t("admin.dashboardsA.analytics.fromValue", {
                   value: percentFormatter.format(0.089),

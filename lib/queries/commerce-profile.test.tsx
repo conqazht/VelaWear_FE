@@ -32,21 +32,17 @@ describe("Profile data queries demand gating (FE-008)", () => {
   });
 
   function wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   }
 
   describe("useMyOrdersQuery", () => {
     it("không phát sinh API call khi enabled = false", async () => {
-      mockGetMyOrders.mockResolvedValue({ result: [], meta: { page: 1, pageSize: 100, pages: 1, total: 0 } });
+      mockGetMyOrders.mockResolvedValue({
+        result: [],
+        meta: { page: 1, pageSize: 100, pages: 1, total: 0 },
+      });
 
-      const { result } = renderHook(
-        () => useMyOrdersQuery(1, { size: 100 }, false),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useMyOrdersQuery(1, { size: 100 }, false), { wrapper });
 
       expect(result.current.fetchStatus).toBe("idle");
       expect(result.current.isFetching).toBe(false);
@@ -54,12 +50,12 @@ describe("Profile data queries demand gating (FE-008)", () => {
     });
 
     it("phát sinh API call khi enabled = true", async () => {
-      mockGetMyOrders.mockResolvedValue({ result: [], meta: { page: 1, pageSize: 100, pages: 1, total: 0 } });
+      mockGetMyOrders.mockResolvedValue({
+        result: [],
+        meta: { page: 1, pageSize: 100, pages: 1, total: 0 },
+      });
 
-      const { result } = renderHook(
-        () => useMyOrdersQuery(1, { size: 100 }, true),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useMyOrdersQuery(1, { size: 100 }, true), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -69,10 +65,9 @@ describe("Profile data queries demand gating (FE-008)", () => {
     });
 
     it("không phát sinh API call khi không có accountId dù enabled = true", () => {
-      const { result } = renderHook(
-        () => useMyOrdersQuery(undefined, { size: 100 }, true),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useMyOrdersQuery(undefined, { size: 100 }, true), {
+        wrapper,
+      });
 
       expect(result.current.fetchStatus).toBe("idle");
       expect(mockGetMyOrders).not.toHaveBeenCalled();
@@ -81,12 +76,14 @@ describe("Profile data queries demand gating (FE-008)", () => {
 
   describe("useMyAddressesQuery", () => {
     it("không phát sinh API call khi enabled = false", () => {
-      mockGetMyAddresses.mockResolvedValue({ result: [], meta: { page: 1, pageSize: 100, pages: 1, total: 0 } });
+      mockGetMyAddresses.mockResolvedValue({
+        result: [],
+        meta: { page: 1, pageSize: 100, pages: 1, total: 0 },
+      });
 
-      const { result } = renderHook(
-        () => useMyAddressesQuery(1, { size: 100 }, false),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useMyAddressesQuery(1, { size: 100 }, false), {
+        wrapper,
+      });
 
       expect(result.current.fetchStatus).toBe("idle");
       expect(result.current.isFetching).toBe(false);
@@ -94,12 +91,12 @@ describe("Profile data queries demand gating (FE-008)", () => {
     });
 
     it("phát sinh API call khi enabled = true", async () => {
-      mockGetMyAddresses.mockResolvedValue({ result: [], meta: { page: 1, pageSize: 100, pages: 1, total: 0 } });
+      mockGetMyAddresses.mockResolvedValue({
+        result: [],
+        meta: { page: 1, pageSize: 100, pages: 1, total: 0 },
+      });
 
-      const { result } = renderHook(
-        () => useMyAddressesQuery(1, { size: 100 }, true),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useMyAddressesQuery(1, { size: 100 }, true), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -109,10 +106,9 @@ describe("Profile data queries demand gating (FE-008)", () => {
     });
 
     it("không phát sinh API call khi không có accountId dù enabled = true", () => {
-      const { result } = renderHook(
-        () => useMyAddressesQuery(undefined, { size: 100 }, true),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useMyAddressesQuery(undefined, { size: 100 }, true), {
+        wrapper,
+      });
 
       expect(result.current.fetchStatus).toBe("idle");
       expect(mockGetMyAddresses).not.toHaveBeenCalled();

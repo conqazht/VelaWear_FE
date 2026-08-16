@@ -10,7 +10,11 @@ import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from "@/compone
 import type { Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-const OPTIONS: Array<{ locale: Locale; shortLabel: string; nameKey: "language.english" | "language.vietnamese" }> = [
+const OPTIONS: Array<{
+  locale: Locale;
+  shortLabel: string;
+  nameKey: "language.english" | "language.vietnamese";
+}> = [
   { locale: "en", shortLabel: "EN", nameKey: "language.english" },
   { locale: "vi", shortLabel: "VI", nameKey: "language.vietnamese" },
 ];
@@ -55,7 +59,9 @@ export function LanguageSwitcher({
           <Languages aria-hidden="true" />
         </PopoverTrigger>
         <PopoverContent align="end" className="w-52 gap-1 p-2">
-          <PopoverTitle className="px-2 py-1 font-medium text-sm">{t("language.label")}</PopoverTitle>
+          <PopoverTitle className="px-2 py-1 text-sm font-medium">
+            {t("language.label")}
+          </PopoverTitle>
           <div role="group" aria-label={t("language.label")} className="grid gap-1">
             {OPTIONS.map((option) => {
               const languageName = t(option.nameKey);
@@ -74,7 +80,7 @@ export function LanguageSwitcher({
                   }}
                   className="w-full justify-start px-2"
                 >
-                  <span className="flex size-6 items-center justify-center rounded-md border bg-background text-[10px] font-semibold tracking-[0.12em]">
+                  <span className="bg-background flex size-6 items-center justify-center rounded-md border text-[10px] font-semibold tracking-[0.12em]">
                     {option.shortLabel}
                   </span>
                   <span>{languageName}</span>
@@ -96,7 +102,7 @@ export function LanguageSwitcher({
         "inline-flex h-8 shrink-0 items-center gap-0.5 rounded-full border p-0.5 text-[10px] font-semibold tracking-[0.12em] transition-colors",
         inverted
           ? "border-white/35 bg-black/10 text-white backdrop-blur-sm"
-          : "border-current/15 bg-background/75 text-foreground",
+          : "bg-background/75 text-foreground border-current/15",
         className,
       )}
     >
@@ -114,7 +120,7 @@ export function LanguageSwitcher({
             title={languageName}
             onClick={() => setLocale(option.locale)}
             className={cn(
-              "flex h-6 min-w-8 cursor-pointer items-center justify-center rounded-full px-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "focus-visible:ring-ring flex h-6 min-w-8 cursor-pointer items-center justify-center rounded-full px-2 transition-colors focus-visible:ring-2 focus-visible:outline-none",
               isActive && (inverted ? "bg-white text-[#1c1a18]" : "bg-foreground text-background"),
               !isActive && (inverted ? "hover:bg-white/15" : "hover:bg-foreground/10"),
             )}

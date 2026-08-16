@@ -1,11 +1,5 @@
 import apiClient from "@/lib/api-client";
-import {
-  apiDelete,
-  apiGet,
-  apiPost,
-  apiPut,
-  unwrapApiResponse,
-} from "@/lib/api/client";
+import { apiDelete, apiGet, apiPost, apiPut, unwrapApiResponse } from "@/lib/api/client";
 import type { ApiResponse } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n";
 
@@ -111,10 +105,9 @@ export type CreateAdminSaleCampaignRequest = {
   items: AdminSaleCampaignItemRequest[];
 };
 
-export type UpdateAdminSaleCampaignRequest =
-  CreateAdminSaleCampaignRequest & {
-    version: number;
-  };
+export type UpdateAdminSaleCampaignRequest = CreateAdminSaleCampaignRequest & {
+  version: number;
+};
 
 export type UpdateAdminSaleDisplayRequest = {
   name: string;
@@ -143,17 +136,12 @@ async function apiPatch<T, TBody>(path: string, body: TBody): Promise<T> {
   return unwrapApiResponse(response);
 }
 
-async function apiPostWithParams<T>(
-  path: string,
-  params: Record<string, unknown>,
-): Promise<T> {
+async function apiPostWithParams<T>(path: string, params: Record<string, unknown>): Promise<T> {
   const response = await apiClient.post<ApiResponse<T>>(path, undefined, { params });
   return unwrapApiResponse(response);
 }
 
-export function getAdminSaleCampaigns(
-  params: AdminSaleCampaignListParams = {},
-) {
+export function getAdminSaleCampaigns(params: AdminSaleCampaignListParams = {}) {
   return apiGet<AdminSalePage<AdminSaleCampaign>>("/sale-campaigns", {
     ...params,
   });
@@ -163,19 +151,11 @@ export function getAdminSaleCampaign(id: number) {
   return apiGet<AdminSaleCampaign>(`/sale-campaigns/${id}`);
 }
 
-export function createAdminSaleCampaign(
-  request: CreateAdminSaleCampaignRequest,
-) {
-  return apiPost<AdminSaleCampaign, CreateAdminSaleCampaignRequest>(
-    "/sale-campaigns",
-    request,
-  );
+export function createAdminSaleCampaign(request: CreateAdminSaleCampaignRequest) {
+  return apiPost<AdminSaleCampaign, CreateAdminSaleCampaignRequest>("/sale-campaigns", request);
 }
 
-export function updateAdminSaleCampaign(
-  id: number,
-  request: UpdateAdminSaleCampaignRequest,
-) {
+export function updateAdminSaleCampaign(id: number, request: UpdateAdminSaleCampaignRequest) {
   return apiPut<AdminSaleCampaign, UpdateAdminSaleCampaignRequest>(
     `/sale-campaigns/${id}`,
     request,
@@ -183,9 +163,7 @@ export function updateAdminSaleCampaign(
 }
 
 export function getAdminSaleCampaignTranslations(id: number) {
-  return apiGet<SaleCampaignTranslationBatchResponse>(
-    `/sale-campaigns/${id}/translations`,
-  );
+  return apiGet<SaleCampaignTranslationBatchResponse>(`/sale-campaigns/${id}/translations`);
 }
 
 export function updateAdminSaleCampaignTranslations(
@@ -198,11 +176,7 @@ export function updateAdminSaleCampaignTranslations(
   );
 }
 
-export function deleteAdminSaleCampaignTranslation(
-  id: number,
-  locale: Locale,
-  version: number,
-) {
+export function deleteAdminSaleCampaignTranslation(id: number, locale: Locale, version: number) {
   const searchParams = new URLSearchParams({ version: String(version) });
   return apiDelete<SaleCampaignTranslationBatchResponse>(
     `/sale-campaigns/${id}/translations/${encodeURIComponent(locale)}?${searchParams.toString()}`,
@@ -213,30 +187,15 @@ export function deleteAdminSaleCampaign(id: number) {
   return apiDelete<void>(`/sale-campaigns/${id}`);
 }
 
-export function publishAdminSaleCampaign(
-  id: number,
-  version: number,
-) {
-  return apiPostWithParams<AdminSaleCampaign>(
-    `/sale-campaigns/${id}/publish`,
-    { version },
-  );
+export function publishAdminSaleCampaign(id: number, version: number) {
+  return apiPostWithParams<AdminSaleCampaign>(`/sale-campaigns/${id}/publish`, { version });
 }
 
-export function cancelAdminSaleCampaign(
-  id: number,
-  version: number,
-) {
-  return apiPostWithParams<AdminSaleCampaign>(
-    `/sale-campaigns/${id}/cancel`,
-    { version },
-  );
+export function cancelAdminSaleCampaign(id: number, version: number) {
+  return apiPostWithParams<AdminSaleCampaign>(`/sale-campaigns/${id}/cancel`, { version });
 }
 
-export function updateAdminSaleDisplay(
-  id: number,
-  request: UpdateAdminSaleDisplayRequest,
-) {
+export function updateAdminSaleDisplay(id: number, request: UpdateAdminSaleDisplayRequest) {
   return apiPatch<AdminSaleCampaign, UpdateAdminSaleDisplayRequest>(
     `/sale-campaigns/${id}/display`,
     request,
@@ -254,20 +213,11 @@ export function increaseAdminSaleQuota(
   );
 }
 
-export function endAdminSaleCampaign(
-  id: number,
-  version: number,
-) {
-  return apiPostWithParams<AdminSaleCampaign>(
-    `/sale-campaigns/${id}/end`,
-    { version },
-  );
+export function endAdminSaleCampaign(id: number, version: number) {
+  return apiPostWithParams<AdminSaleCampaign>(`/sale-campaigns/${id}/end`, { version });
 }
 
-export function endAndCloneAdminSaleCampaign(
-  id: number,
-  request: EndAndCloneSaleCampaignRequest,
-) {
+export function endAndCloneAdminSaleCampaign(id: number, request: EndAndCloneSaleCampaignRequest) {
   return apiPost<AdminSaleCampaign, EndAndCloneSaleCampaignRequest>(
     `/sale-campaigns/${id}/end-and-clone`,
     request,

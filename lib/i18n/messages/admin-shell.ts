@@ -140,7 +140,8 @@ export const adminShellMessages = defineMessages(
     "admin.shell.form.cancel": "Cancel",
     "admin.shell.delete.action": "Delete",
     "admin.shell.delete.title": "{action} {resource}?",
-    "admin.shell.delete.description": "This action cannot be undone and may affect related records.",
+    "admin.shell.delete.description":
+      "This action cannot be undone and may affect related records.",
   },
   {
     "admin.shell.brand": "Quản trị Vela Wear",
@@ -281,7 +282,8 @@ export const adminShellMessages = defineMessages(
     "admin.shell.form.cancel": "Hủy",
     "admin.shell.delete.action": "Xóa",
     "admin.shell.delete.title": "{action} {resource}?",
-    "admin.shell.delete.description": "Hành động này không thể hoàn tác và có thể ảnh hưởng đến dữ liệu liên quan.",
+    "admin.shell.delete.description":
+      "Hành động này không thể hoàn tác và có thể ảnh hưởng đến dữ liệu liên quan.",
   },
 );
 

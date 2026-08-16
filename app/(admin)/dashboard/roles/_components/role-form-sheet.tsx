@@ -97,21 +97,19 @@ export function RoleFormSheet({
           <Input
             id="role-name"
             value={values.name}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, name: event.target.value }))
-            }
+            onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))}
             maxLength={50}
             placeholder="MERCHANDISER"
             autoComplete="off"
             required
           />
-          <FieldDescription>
-            {t("admin.commerce.roles.form.nameHelp")}
-          </FieldDescription>
+          <FieldDescription>{t("admin.commerce.roles.form.nameHelp")}</FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="role-description">{t("admin.commerce.common.description")}</FieldLabel>
+          <FieldLabel htmlFor="role-description">
+            {t("admin.commerce.common.description")}
+          </FieldLabel>
           <Textarea
             id="role-description"
             value={values.description}
@@ -131,12 +129,12 @@ export function RoleFormSheet({
       </FieldGroup>
 
       <FieldSet>
-        <FieldLegend variant="label">{t("admin.commerce.roles.form.assignedPermissions")}</FieldLegend>
+        <FieldLegend variant="label">
+          {t("admin.commerce.roles.form.assignedPermissions")}
+        </FieldLegend>
         <Alert>
           <AlertTitle>{t("admin.commerce.roles.form.readOnlyMap")}</AlertTitle>
-          <AlertDescription>
-            {t("admin.commerce.roles.form.readOnlyDescription")}
-          </AlertDescription>
+          <AlertDescription>{t("admin.commerce.roles.form.readOnlyDescription")}</AlertDescription>
         </Alert>
 
         {mode === "create" ? (

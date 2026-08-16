@@ -97,13 +97,13 @@ export function TaskCard({
   return (
     <article
       className={cn(
-        "flex flex-col gap-3 rounded-xl border bg-card p-4 text-card-foreground shadow-xs",
+        "bg-card text-card-foreground flex flex-col gap-3 rounded-xl border p-4 shadow-xs",
         isOverlay && "w-68 rotate-1 shadow-lg",
       )}
     >
       <div className="min-w-0 space-y-1.5">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="min-w-0 truncate font-medium text-sm leading-none">{task.title}</h3>
+          <h3 className="min-w-0 truncate text-sm leading-none font-medium">{task.title}</h3>
           <Badge
             variant={priorityBadgeConfig[task.priority].variant}
             className={cn(
@@ -115,20 +115,22 @@ export function TaskCard({
             {priorityNames[task.priority]}
           </Badge>
         </div>
-        <p className="line-clamp-2 text-muted-foreground text-sm leading-5">{task.description}</p>
+        <p className="text-muted-foreground line-clamp-2 text-sm leading-5">{task.description}</p>
       </div>
 
       {!showBuildingDetails ? (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Avatar className={cn("size-5 after:rounded-sm", owner.tone)}>
-              <AvatarFallback className="rounded-sm text-[10px]">{getInitials(owner.name)}</AvatarFallback>
+              <AvatarFallback className="rounded-sm text-[10px]">
+                {getInitials(owner.name)}
+              </AvatarFallback>
             </Avatar>
 
             <span className="text-muted-foreground text-sm">{owner.name}</span>
           </div>
 
-          <div className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+          <div className="text-muted-foreground flex min-w-0 items-center gap-1.5">
             <span className="truncate text-sm">{formattedDueDate}</span>
             <CalendarDays className="size-3" />
           </div>
@@ -138,36 +140,49 @@ export function TaskCard({
       {showBuildingDetails ? (
         <div className="flex flex-col gap-3">
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center justify-between text-xs">
               <span className="leading-none">{t("admin.workflows.kanban.progress")}</span>
-              <span className="tabular-nums leading-none">{percentFormatter.format(task.progress / 100)}</span>
+              <span className="leading-none tabular-nums">
+                {percentFormatter.format(task.progress / 100)}
+              </span>
             </div>
             <Progress value={task.progress} />
           </div>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground text-sm">{t("admin.workflows.kanban.owner")}</span>
+              <span className="text-muted-foreground text-sm">
+                {t("admin.workflows.kanban.owner")}
+              </span>
               <div className="flex items-center gap-1.5">
-                <span className="truncate text-muted-foreground text-sm">{owner.name}</span>
+                <span className="text-muted-foreground truncate text-sm">{owner.name}</span>
                 <Avatar className={cn("size-5 after:rounded-sm", owner.tone)}>
-                  <AvatarFallback className="rounded-sm text-[10px]">{getInitials(owner.name)}</AvatarFallback>
+                  <AvatarFallback className="rounded-sm text-[10px]">
+                    {getInitials(owner.name)}
+                  </AvatarFallback>
                 </Avatar>
               </div>
             </div>
 
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground text-sm">{t("admin.workflows.kanban.dueDate")}</span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
+                {t("admin.workflows.kanban.dueDate")}
+              </span>
+              <span className="text-muted-foreground flex items-center gap-1.5">
                 <span className="truncate text-sm">{formattedDueDate}</span>
                 <CalendarDays className="size-3" />
               </span>
             </div>
 
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground text-sm">{t("admin.workflows.kanban.team")}</span>
+              <span className="text-muted-foreground text-sm">
+                {t("admin.workflows.kanban.team")}
+              </span>
               <Badge
                 variant="secondary"
-                className={cn("rounded-md border-transparent px-2 font-medium", tagTones[task.team])}
+                className={cn(
+                  "rounded-md border-transparent px-2 font-medium",
+                  tagTones[task.team],
+                )}
               >
                 {teamNames[task.team]}
               </Badge>
@@ -180,14 +195,14 @@ export function TaskCard({
 
       <div>
         {isDone ? (
-          <div className="flex items-center gap-1 font-medium text-green-700 text-sm dark:text-green-600">
+          <div className="flex items-center gap-1 text-sm font-medium text-green-700 dark:text-green-600">
             <BadgeCheck className="size-4" />
             {t("admin.workflows.kanban.done")}
           </div>
         ) : null}
 
         {!isDone ? (
-          <div className="flex items-center gap-3 text-muted-foreground text-sm">
+          <div className="text-muted-foreground flex items-center gap-3 text-sm">
             {task.insights.map((insight) => {
               const Icon = taskInsightIcons[insight.label];
 

@@ -9,10 +9,7 @@ import { createSignInHref } from "@/lib/auth/post-auth-redirect";
 import type { TranslationKey } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
-import {
-  StorefrontStatus,
-  type StorefrontStatusAction,
-} from "./storefront-status";
+import { StorefrontStatus, type StorefrontStatusAction } from "./storefront-status";
 
 type StorefrontApiStatusProps = {
   error: unknown;
@@ -85,14 +82,14 @@ function BadRequestNotice({
       aria-labelledby={titleId}
       role="alert"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(181,87,58,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(181,87,58,0.045)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(181,87,58,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(181,87,58,0.045)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,black,transparent_85%)] bg-[size:56px_56px]" />
       <div className="relative z-10 mx-auto w-full max-w-3xl border-l-2 border-[#b5573a]/55 pl-5 sm:pl-8">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[#b5573a]">
+        <p className="font-mono text-[10px] font-semibold tracking-[0.24em] text-[#b5573a] uppercase">
           Vela Wear / HTTP 400
         </p>
         <h1
           id={titleId}
-          className="mt-4 font-serif text-3xl font-medium leading-tight tracking-[-0.025em] sm:text-4xl"
+          className="mt-4 font-serif text-3xl leading-tight font-medium tracking-[-0.025em] sm:text-4xl"
         >
           {title}
         </h1>
@@ -156,9 +153,10 @@ export function StorefrontApiStatus({
     label: localizedReturnLabel,
     href: returnHref,
   };
-  const retryAction: StorefrontStatusAction | undefined = classification.retryable && onRetry
-    ? { label: t("errors.common.retry"), onClick: onRetry }
-    : undefined;
+  const retryAction: StorefrontStatusAction | undefined =
+    classification.retryable && onRetry
+      ? { label: t("errors.common.retry"), onClick: onRetry }
+      : undefined;
 
   if (status === 400) {
     return (

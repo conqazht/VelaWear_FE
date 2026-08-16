@@ -44,24 +44,24 @@ treat dependency drift as automatically safe.
 
 ## Execution order and status
 
-| ID | Plan | Branch | Priority | Effort | Depends on | Wave | Status |
-|---|---|---|---:|---:|---|---:|---|
-| FE-001 | [Migrate to self-scoped customer APIs](001-migrate-to-self-scoped-customer-apis.md) | `fix/self-scoped-customer-apis` | P1 | L | external BE-001 | 1 | DONE |
-| FE-002 | [Preserve review multipart requests](002-preserve-review-multipart-requests.md) | `fix/review-multipart-transport` | P1 | M | FE-001 | 2 | DONE |
-| FE-003 | [Isolate cart state by account and harden logout](003-isolate-cart-by-account-and-harden-logout.md) | `fix/cart-session-isolation` | P1 | L | FE-002 | 2 | DONE |
-| FE-004 | [Consolidate account settings and hydration](004-consolidate-account-settings-and-hydration.md) | `fix/account-settings-integrity` | P1 | L | FE-001 | 2 | DONE |
-| FE-005 | [Honor rate-limit Retry-After](005-honor-rate-limit-retry-after.md) | `fix/rate-limit-retry-after` | P2 | M | FE-003 and external BE-005 | 2 | DONE |
-| FE-006 | [Scope shop providers to shop routes](006-scope-shop-providers-to-shop-routes.md) | `perf/shop-provider-scope` | P2 | M | FE-003 | 3 | DONE |
-| FE-007 | [Consume wishlist product summaries](007-consume-wishlist-product-summaries.md) | `perf/wishlist-summary-client` | P2 | M | FE-006 and external BE-009 | 3 | DONE |
-| FE-008 | [Load profile data on demand](008-load-profile-data-on-demand.md) | `perf/profile-demand-loading` | P2 | M | FE-001, FE-004 | 3 | DONE |
-| FE-009 | [Characterize profile-page behavior](009-characterize-profile-page-behavior.md) | `test/profile-characterization` | P2 | M | FE-004, FE-008 | 4 | DONE |
-| FE-010 | [Decompose the profile page](010-decompose-profile-page.md) | `refactor/profile-page` | P3 | L | FE-009 | 4 | DONE |
-| FE-011 | [Split i18n message namespaces](011-split-i18n-message-namespaces.md) | `perf/i18n-message-splitting` | P3 | L | FE-001–FE-010 | 5 | DONE |
-| FE-012 | [Clean frontend dependencies and documentation](012-clean-frontend-dependencies-and-docs.md) | `chore/frontend-maintenance-docs` | P3 | M | FE-001–FE-011 and external BE-015 | 5 | DONE |
-| FE-013 | [Consolidate shared CSS animation tokens](013-consolidate-animation-tokens.md) | `feat/storefront-animations` | P2 | S | FE-012 | 6 | DONE |
-| FE-014 | [Add spring pop feedback to product detail wishlist heart](014-product-detail-favorite-spring.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | DONE |
-| FE-015 | [Add sliding layout indicator to profile page tab navigation](015-profile-tab-layout-indicator.md) | `feat/storefront-animations` | P3 | S | FE-013 | 6 | DONE |
-| FE-016 | [Add reduced motion fallback to editorial craft scroll gallery](016-editorial-craft-reduced-motion.md) | `feat/storefront-animations` | P2 | S | FE-013 | 6 | DONE |
+| ID     | Plan                                                                                                   | Branch                            | Priority | Effort | Depends on                        | Wave | Status |
+| ------ | ------------------------------------------------------------------------------------------------------ | --------------------------------- | -------: | -----: | --------------------------------- | ---: | ------ |
+| FE-001 | [Migrate to self-scoped customer APIs](001-migrate-to-self-scoped-customer-apis.md)                    | `fix/self-scoped-customer-apis`   |       P1 |      L | external BE-001                   |    1 | DONE   |
+| FE-002 | [Preserve review multipart requests](002-preserve-review-multipart-requests.md)                        | `fix/review-multipart-transport`  |       P1 |      M | FE-001                            |    2 | DONE   |
+| FE-003 | [Isolate cart state by account and harden logout](003-isolate-cart-by-account-and-harden-logout.md)    | `fix/cart-session-isolation`      |       P1 |      L | FE-002                            |    2 | DONE   |
+| FE-004 | [Consolidate account settings and hydration](004-consolidate-account-settings-and-hydration.md)        | `fix/account-settings-integrity`  |       P1 |      L | FE-001                            |    2 | DONE   |
+| FE-005 | [Honor rate-limit Retry-After](005-honor-rate-limit-retry-after.md)                                    | `fix/rate-limit-retry-after`      |       P2 |      M | FE-003 and external BE-005        |    2 | DONE   |
+| FE-006 | [Scope shop providers to shop routes](006-scope-shop-providers-to-shop-routes.md)                      | `perf/shop-provider-scope`        |       P2 |      M | FE-003                            |    3 | DONE   |
+| FE-007 | [Consume wishlist product summaries](007-consume-wishlist-product-summaries.md)                        | `perf/wishlist-summary-client`    |       P2 |      M | FE-006 and external BE-009        |    3 | DONE   |
+| FE-008 | [Load profile data on demand](008-load-profile-data-on-demand.md)                                      | `perf/profile-demand-loading`     |       P2 |      M | FE-001, FE-004                    |    3 | DONE   |
+| FE-009 | [Characterize profile-page behavior](009-characterize-profile-page-behavior.md)                        | `test/profile-characterization`   |       P2 |      M | FE-004, FE-008                    |    4 | DONE   |
+| FE-010 | [Decompose the profile page](010-decompose-profile-page.md)                                            | `refactor/profile-page`           |       P3 |      L | FE-009                            |    4 | DONE   |
+| FE-011 | [Split i18n message namespaces](011-split-i18n-message-namespaces.md)                                  | `perf/i18n-message-splitting`     |       P3 |      L | FE-001–FE-010                     |    5 | DONE   |
+| FE-012 | [Clean frontend dependencies and documentation](012-clean-frontend-dependencies-and-docs.md)           | `chore/frontend-maintenance-docs` |       P3 |      M | FE-001–FE-011 and external BE-015 |    5 | DONE   |
+| FE-013 | [Consolidate shared CSS animation tokens](013-consolidate-animation-tokens.md)                         | `feat/storefront-animations`      |       P2 |      S | FE-012                            |    6 | DONE   |
+| FE-014 | [Add spring pop feedback to product detail wishlist heart](014-product-detail-favorite-spring.md)      | `feat/storefront-animations`      |       P3 |      S | FE-013                            |    6 | DONE   |
+| FE-015 | [Add sliding layout indicator to profile page tab navigation](015-profile-tab-layout-indicator.md)     | `feat/storefront-animations`      |       P3 |      S | FE-013                            |    6 | DONE   |
+| FE-016 | [Add reduced motion fallback to editorial craft scroll gallery](016-editorial-craft-reduced-motion.md) | `feat/storefront-animations`      |       P2 |      S | FE-013                            |    6 | DONE   |
 
 Status values: `TODO`, `IN PROGRESS`, `DONE`, `BLOCKED (<reason>)`, or
 `REJECTED (<reason>)`.
@@ -79,14 +79,14 @@ Changing this order can either break the frontend or leave an IDOR window.
 
 ## Merge waves
 
-| Wave | Ordered work | Required checkpoint |
-|---:|---|---|
-| 0 | Backend planning PR, frontend planning PR | Both plans are merged; both mains are clean and synced |
-| 1 | BE-001 → FE-001 → BE-002 | Backend verify, frontend CI suite, full-stack ownership smoke |
-| 2 | FE-002 → BE-003 → FE-003 → BE-004 → BE-005 → FE-004 → FE-005 | Backend verify, frontend CI suite, full-stack security/correctness smoke |
-| 3 | BE-006 → BE-007 → BE-008 → BE-009 → FE-006 → FE-007 → FE-008 | Full tests, full-stack smoke, query-count assertions |
-| 4 | BE-010 → BE-011 → BE-012 → BE-013 → BE-014 → FE-009 → FE-010 | Full regression and full-stack smoke |
-| 5 | FE-011 → BE-015 → FE-012 | Final backend verify, frontend CI suite, full-stack smoke |
+| Wave | Ordered work                                                 | Required checkpoint                                                      |
+| ---: | ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+|    0 | Backend planning PR, frontend planning PR                    | Both plans are merged; both mains are clean and synced                   |
+|    1 | BE-001 → FE-001 → BE-002                                     | Backend verify, frontend CI suite, full-stack ownership smoke            |
+|    2 | FE-002 → BE-003 → FE-003 → BE-004 → BE-005 → FE-004 → FE-005 | Backend verify, frontend CI suite, full-stack security/correctness smoke |
+|    3 | BE-006 → BE-007 → BE-008 → BE-009 → FE-006 → FE-007 → FE-008 | Full tests, full-stack smoke, query-count assertions                     |
+|    4 | BE-010 → BE-011 → BE-012 → BE-013 → BE-014 → FE-009 → FE-010 | Full regression and full-stack smoke                                     |
+|    5 | FE-011 → BE-015 → FE-012                                     | Final backend verify, frontend CI suite, full-stack smoke                |
 
 The BE IDs refer to the canonical plans in the VelaWear backend repository.
 

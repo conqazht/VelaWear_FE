@@ -3,7 +3,13 @@
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { CouponStatus, CouponType } from "@/lib/api/admin-commerce";
 
 export type CouponFormValues = {
@@ -93,7 +99,10 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="coupon-type">{t("admin.commerce.coupons.form.type")}</FieldLabel>
-          <Select value={values.type} onValueChange={(value) => update("type", value as CouponType)}>
+          <Select
+            value={values.type}
+            onValueChange={(value) => update("type", value as CouponType)}
+          >
             <SelectTrigger id="coupon-type" className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -207,7 +216,10 @@ export function CouponForm({ values, onChange, isEditing }: CouponFormProps) {
 
       <Field>
         <FieldLabel htmlFor="coupon-status">{t("admin.commerce.coupons.form.status")}</FieldLabel>
-        <Select value={values.status} onValueChange={(value) => update("status", value as CouponStatus)}>
+        <Select
+          value={values.status}
+          onValueChange={(value) => update("status", value as CouponStatus)}
+        >
           <SelectTrigger id="coupon-status" className="w-full">
             <SelectValue />
           </SelectTrigger>

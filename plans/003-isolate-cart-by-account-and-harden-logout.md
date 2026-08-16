@@ -34,22 +34,23 @@ One browser-wide cart key has no owner. After expiry/revocation, persisted items
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Store/provider/auth tests | `pnpm exec vitest run store/cart-store.test.ts components/shop/cart-provider.test.tsx components/auth/auth-provider.test.tsx lib/api-client.test.ts` | all pass |
-| Logout caller tests | `pnpm exec vitest run components/shop/site-header.test.tsx 'app/(admin)/dashboard/_components/sidebar/app-sidebar.test.tsx'` | desktop/mobile/admin callers await, disable duplicates, and do not navigate on failure |
-| A-to-B full-stack case | `pnpm exec playwright test e2e/fullstack/auth-session.spec.ts --grep "cart ownership survives account transitions"` | named flow passes against disposable BE/DB/Redis |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
-| Full stack | `pnpm test:e2e:fullstack` | auth/session cases pass with disposable BE/DB/Redis |
+| Purpose                   | Command                                                                                                                                              | Expected on success                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Store/provider/auth tests | `pnpm exec vitest run store/cart-store.test.ts components/shop/cart-provider.test.tsx components/auth/auth-provider.test.tsx lib/api-client.test.ts` | all pass                                                                               |
+| Logout caller tests       | `pnpm exec vitest run components/shop/site-header.test.tsx 'app/(admin)/dashboard/_components/sidebar/app-sidebar.test.tsx'`                         | desktop/mobile/admin callers await, disable duplicates, and do not navigate on failure |
+| A-to-B full-stack case    | `pnpm exec playwright test e2e/fullstack/auth-session.spec.ts --grep "cart ownership survives account transitions"`                                  | named flow passes against disposable BE/DB/Redis                                       |
+| Lint                      | `pnpm exec eslint . --max-warnings 25`                                                                                                               | exit 0                                                                                 |
+| Typecheck                 | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                          | exit 0                                                                                 |
+| Unit                      | `pnpm test:unit`                                                                                                                                     | all tests pass                                                                         |
+| Build                     | `pnpm build`                                                                                                                                         | production build succeeds                                                              |
+| Full stack                | `pnpm test:e2e:fullstack`                                                                                                                            | auth/session cases pass with disposable BE/DB/Redis                                    |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope**:
+
 - `store/cart-store.ts`
 - `components/shop/cart-provider.tsx`
 - `components/auth/auth-provider.tsx`
@@ -68,6 +69,7 @@ One browser-wide cart key has no owner. After expiry/revocation, persisted items
 - `e2e/fullstack/auth-session.spec.ts`
 
 **Out of scope**:
+
 - Reading or deleting the `HttpOnly` refresh cookie in JavaScript.
 - Backend logout/session changes.
 - Moving providers between layouts (FE-006).
@@ -110,12 +112,12 @@ While auth is loading, do not expose an account-owned cart as anonymous. Merge a
 Implement the API/session portion of this explicit logout settlement matrix
 inside the existing Web Lock, then preserve the current layer boundaries:
 
-| Server outcome | Settlement |
-|---|---|
-| Initial bearer request returns 401 | retry exactly once without Bearer, using the refresh cookie |
-| Either request returns 2xx | `lib/api-client.ts` clears only the in-memory access token inside the lock and resolves; `useLogoutMutation.onSuccess` then clears auth query cache, and `AuthProvider.signOut` clears the owned cart before the caller navigates |
-| Final response is 401 with stable `SESSION_REVOKED` or `AUTHENTICATION_REQUIRED` | treat the server session as already gone; perform the same token-clear-and-resolve path, then let the existing success chain clear query/cart and navigate to sign-in |
-| Network/timeout, 5xx, or any other final 4xx/code | API client rejects without clearing the token; success callbacks do not run, so query/cart/local auth remain and the caller exposes a retryable error without navigation |
+| Server outcome                                                                   | Settlement                                                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial bearer request returns 401                                               | retry exactly once without Bearer, using the refresh cookie                                                                                                                                                                       |
+| Either request returns 2xx                                                       | `lib/api-client.ts` clears only the in-memory access token inside the lock and resolves; `useLogoutMutation.onSuccess` then clears auth query cache, and `AuthProvider.signOut` clears the owned cart before the caller navigates |
+| Final response is 401 with stable `SESSION_REVOKED` or `AUTHENTICATION_REQUIRED` | treat the server session as already gone; perform the same token-clear-and-resolve path, then let the existing success chain clear query/cart and navigate to sign-in                                                             |
+| Network/timeout, 5xx, or any other final 4xx/code                                | API client rejects without clearing the token; success callbacks do not run, so query/cart/local auth remain and the caller exposes a retryable error without navigation                                                          |
 
 Move local token clearing out of the unconditional `finally`. Do not import
 React Query or cart state into `lib/api-client.ts`, and do not classify the final

@@ -73,8 +73,7 @@ describe("sale campaign admin form", () => {
 
     expect(
       validateSaleCampaignForm(values, {
-        t: (key, variables) =>
-          interpolateMessage(salesAdminManagementMessages.vi[key], variables),
+        t: (key, variables) => interpolateMessage(salesAdminManagementMessages.vi[key], variables),
       }),
     ).toMatchObject({
       valid: false,
@@ -189,8 +188,6 @@ describe("sale campaign admin form", () => {
 
     expect(createCampaign).toHaveBeenCalledOnce();
     expect(updateCampaign).toHaveBeenCalledOnce();
-    expect(updateCampaign).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 91 }),
-    );
+    expect(updateCampaign).toHaveBeenCalledWith(expect.objectContaining({ id: 91 }));
   });
 });

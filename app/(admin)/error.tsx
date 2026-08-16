@@ -15,11 +15,7 @@ export default function AdminError({
 
   return (
     <div className="relative">
-      <LanguageSwitcher
-        inverted
-        presentation="popover"
-        className="absolute right-4 top-4 z-30"
-      />
+      <LanguageSwitcher inverted presentation="popover" className="absolute top-4 right-4 z-30" />
       <AnimatedStatus
         code="500"
         title={t("admin.shell.error.title")}

@@ -6,9 +6,7 @@ import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { I18nProvider } from "@/components/providers/i18n-provider";
 
 vi.mock("@/components/errors/status-code-rain", () => ({
-  StatusCodeRain: ({ code }: { code: string }) => (
-    <div data-testid="status-code-rain">{code}</div>
-  ),
+  StatusCodeRain: ({ code }: { code: string }) => <div data-testid="status-code-rain">{code}</div>,
 }));
 
 function renderStatus(ui: React.ReactNode) {

@@ -5,7 +5,14 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getInitials } from "@/lib/utils";
 
 import { type InvoiceFormValues, invoiceClients } from "./data";
@@ -47,7 +54,7 @@ export function ClientSelector() {
                   <SelectValue placeholder={t("admin.workflows.invoice.selectClient")}>
                     <div className="flex items-center gap-1.5">
                       <Avatar className="after:rounded-md">
-                        <AvatarFallback className="rounded-md bg-card text-foreground">
+                        <AvatarFallback className="bg-card text-foreground rounded-md">
                           {getInitials(selectedClient.name).slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>

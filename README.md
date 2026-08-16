@@ -5,23 +5,28 @@ Storefront và admin dashboard cho ứng dụng thương mại điện tử th�
 ## Tech Stack
 
 Dự án sử dụng các công nghệ hiện đại nhất:
-- **Framework**: Next.js 16.2.9 (App Router, Partial Prerender)
-- **UI Library**: React 19.2.4 (React Server Components)
-- **Language**: TypeScript ^5
-- **Styling**: Tailwind CSS ^4 (sử dụng `@tailwindcss/postcss`)
+
+- **Framework**: Next.js 16.3.1 (App Router, Turbopack, Cache Components, Instant Navigations)
+- **UI Library**: React 19.2.8 (React Server Components, Actions)
+- **Language**: TypeScript ^5 (5.9.3) / Strict Mode Type Safety
+- **Styling**: Tailwind CSS ^4 (sử dụng `@tailwindcss/postcss` 4.3.3)
 - **Components**: shadcn CLI ^4.11.0 / `@shadcn/react` 0.2.1 với style `base-nova`
-- **Headless UI**: Base UI (`@base-ui/react` ^1.5.0)
-- **Icons**: lucide-react ^1.18.0
+- **Headless UI**: Base UI (`@base-ui/react` ^1.7.0)
+- **Icons**: lucide-react ^1.31.0
 - **Animation**: motion ^12.40.0 (animation qua `motion/react`)
 - **State Management**:
-  - Server state: TanStack Query 5.101.2
-  - Client state: Zustand 5.0.14 (cart, auth, theme, locale)
-- **HTTP Client**: Axios ^1.18.1 (tích hợp interceptors)
-- **Forms**: React Hook Form ^7 + `@hookform/resolvers` ^5.4.0
-- **Utilities**: `@dnd-kit` (kéo thả), `@fullcalendar/react` ^7.0.0 (lịch), recharts ^3 (biểu đồ)
+  - Server state: TanStack Query 5.101.4
+  - Client state: Zustand 5.0.15 (cart, auth, theme, locale)
+- **HTTP Client**: Axios ^1.19.0 (tích hợp interceptors)
+- **Forms**: React Hook Form ^7.85.0 + `@hookform/resolvers` ^5.8.0
+- **Utilities**: `@dnd-kit` (kéo thả), `@fullcalendar/react` ^7.0.0 (lịch), recharts ^3.10.1 (biểu đồ), sonner ^2.0.8 (toasts)
+- **Code Quality & Tooling**:
+  - Formatter chuẩn: `prettier` ^3.9.6 + `prettier-plugin-tailwindcss` ^0.8.1 (tự động sắp xếp class Tailwind)
+  - Fast Tooling: `oxfmt` ^0.63.0 (format 600+ files trong 1.2s) & `oxlint` ^1.78.0 (linter Rust 20ms)
+  - Framework Linter: `eslint` ^9 + `eslint-config-next` 16.3.1
 - **Testing**:
-  - Unit test: Vitest ^4.1.10
-  - E2E test: Playwright ^1.61.1 (smoke và fullstack)
+  - Unit test: Vitest ^4.1.10 (53 test files, 205 tests passed)
+  - E2E test: Playwright ^1.62.1 (16 smoke cases và fullstack)
 - **Môi trường**: Package manager: pnpm 11.5.2, Node.js: 24
 
 ## Application Routes
@@ -73,6 +78,7 @@ plans/                # Implementation roadmap (12 plans, 5 waves)
 ## Auth Architecture
 
 Hệ thống bảo mật và authentication được thiết kế chặt chẽ:
+
 - **Access token**: Lưu trữ in-memory (biến module JavaScript), tuyệt đối KHÔNG lưu trong `localStorage`.
 - **Refresh token**: Lưu dưới dạng HttpOnly cookie (trình duyệt không thể đọc qua JavaScript).
 - **Single-flight token refresh**: Đảm bảo chỉ có một request refresh token diễn ra tại một thời điểm, các request khác sẽ đợi.
@@ -84,6 +90,7 @@ Hệ thống bảo mật và authentication được thiết kế chặt chẽ:
 ## i18n
 
 Hệ thống đa ngôn ngữ được tối ưu:
+
 - Hỗ trợ song ngữ Tiếng Anh (EN) và Tiếng Việt (VI).
 - Tối ưu hóa tải trang với **Route-scoped catalog splitting**: `catalog-core.ts`, `catalog-shop.ts`, `catalog-admin.ts`.
 - Cấu trúc: `I18nProvider` ở root, `I18nCatalogProvider` ở các layout route group.
@@ -92,6 +99,7 @@ Hệ thống đa ngôn ngữ được tối ưu:
 ## Backend Integration
 
 Dự án giao tiếp với Backend (`conqazht/VelaWear_BE`) thông qua các quy chuẩn nghiêm ngặt:
+
 - **Base URL**: Cấu hình qua biến môi trường `NEXT_PUBLIC_API_URL` (bao gồm prefix `/api/v1`).
 - **Response Format**: Tất cả phản hồi từ API đều được bọc trong `ApiResponse<T>` với các trường `statusCode`, `data`, `message`, `code`, `timestamp`.
 - **Pagination**: Đánh chỉ mục từ 1 (`page=1`), bao gồm `size`, `sort=field,direction`.
@@ -177,42 +185,52 @@ Các bước cài đặt để chạy dự án ở môi trường phát triển:
 
 Dưới đây là các lệnh (scripts) khả dụng trong `package.json`:
 
-| Script | Lệnh thực thi | Mục đích |
-|---|---|---|
-| `pnpm dev` | `next dev` | Chạy dev server với Turbopack |
-| `pnpm build` | `next build` | Build dự án cho production |
-| `pnpm start` | `next start` | Khởi chạy server production |
-| `pnpm lint` | `eslint` | Kiểm tra lỗi cú pháp (Lint) toàn bộ codebase |
-| `pnpm test` | `pnpm test:unit` | Chạy bộ unit tests |
-| `pnpm test:unit` | `vitest run` | Chạy unit tests một lần |
-| `pnpm test:unit:watch` | `vitest` | Chạy unit tests ở chế độ watch |
-| `pnpm test:coverage` | `vitest run --coverage` | Chạy tests và xuất báo cáo coverage |
-| `pnpm test:e2e` | `playwright test --grep @smoke` | Chạy E2E smoke tests |
-| `pnpm test:e2e:smoke` | `playwright test --grep @smoke` | Chạy smoke tests (không yêu cầu backend) |
+| Script                    | Lệnh thực thi                                   | Mục đích                                                 |
+| ------------------------- | ----------------------------------------------- | -------------------------------------------------------- |
+| `pnpm dev`                | `next dev`                                      | Chạy dev server với Turbopack                            |
+| `pnpm build`              | `next build`                                    | Build dự án cho production                               |
+| `pnpm start`              | `next start`                                    | Khởi chạy server production                              |
+| `pnpm format`             | `prettier --write .`                            | Định dạng toàn bộ codebase & sắp xếp class Tailwind      |
+| `pnpm format:check`       | `prettier --check .`                            | Kiểm tra định dạng Prettier & Tailwind (trên CI)         |
+| `pnpm fmt`                | `oxfmt .`                                       | Tự động format toàn bộ codebase bằng oxfmt (Rust)        |
+| `pnpm fmt:check`          | `oxfmt --check .`                               | Kiểm tra định dạng code oxfmt                            |
+| `pnpm lint:fast`          | `oxlint --deny-warnings`                        | Kiểm tra lỗi cú pháp & logic siêu nhanh (20ms)           |
+| `pnpm lint`               | `eslint`                                        | Kiểm tra quy tắc ESLint 9 & Next.js Core Web Vitals      |
+| `pnpm test`               | `pnpm test:unit`                                | Chạy bộ unit tests                                       |
+| `pnpm test:unit`          | `vitest run`                                    | Chạy unit tests một lần                                  |
+| `pnpm test:unit:watch`    | `vitest`                                        | Chạy unit tests ở chế độ watch                           |
+| `pnpm test:coverage`      | `vitest run --coverage`                         | Chạy tests và xuất báo cáo coverage                      |
+| `pnpm test:e2e`           | `playwright test --grep @smoke`                 | Chạy E2E smoke tests                                     |
+| `pnpm test:e2e:smoke`     | `playwright test --grep @smoke`                 | Chạy smoke tests (không yêu cầu backend)                 |
 | `pnpm test:e2e:fullstack` | `playwright test --grep @fullstack --workers=1` | Chạy Full-stack E2E tests (yêu cầu backend, DB và Redis) |
 
 ## CI Pipeline (GitHub Actions)
 
 Dự án thiết lập CI workflow tự động chạy trên mọi Pull Request và khi push vào nhánh `main`:
+
 - Môi trường: pnpm 11.5.2, Node 24
 - Cài đặt dependency: `pnpm install --frozen-lockfile`
-- Linter: `pnpm exec eslint . --max-warnings 25`
+- Format check (Fast): `pnpm fmt:check` (oxfmt Rust, kiểm tra 600+ files trong 1.2s)
+- Fast Lint (Fast): `pnpm lint:fast` (oxlint Rust, quét 520+ files trong 20ms)
+- Framework Linter: `pnpm exec eslint . --max-warnings 25`
 - Type checking: `pnpm exec tsc --noEmit`
-- Unit Test: `pnpm test:unit` (Chạy 50 files, 196 tests)
+- Unit Test: `pnpm test:unit` (Chạy 53 files, 205 tests)
 - Build: `pnpm build` (Build 68 static routes)
-- E2E Smoke Test: Playwright smoke suite (Chạy 13 cases, Next.js được tự động start)
+- E2E Smoke Test: Playwright smoke suite (Chạy 16 cases, Next.js được tự động start)
 
 ## Testing Stats
 
 Hệ thống test đảm bảo chất lượng codebase:
-- **Unit Testing**: 50 unit test files, 196 tests sử dụng Vitest và Testing Library.
-- **Smoke Testing**: 13 Playwright smoke cases có thể chạy độc lập mà không cần backend.
+
+- **Unit Testing**: 53 unit test files, 205 tests sử dụng Vitest và Testing Library (100% passed).
+- **Smoke Testing**: 16 Playwright smoke cases có thể chạy độc lập mà không cần backend (100% passed).
 - **Full-stack Testing**: Yêu cầu môi trường hoàn chỉnh bao gồm backend, PostgreSQL và Redis.
 - Chi tiết xem tại: [Hướng dẫn Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
 
 ## Documentation References
 
 Các tài liệu quan trọng của dự án:
+
 - [Hệ thống thiết kế UI/UX (Design System)](docs/DESIGN.md): Bảng màu thương hiệu (Cream/Terracotta), typography (Slab-serif/Sans-serif), spacing, radius và quy chuẩn phong cách editorial.
 - [Tiến độ dự án](docs/PROJECT_STATUS.md)
 - [Quy ước tích hợp FE-BE](docs/convention.md): Hướng dẫn quy chuẩn tích hợp giữa Frontend và Backend (Base URL `/api/v1`, định dạng phản hồi `ApiResponse<T>`, xử lý lỗi, token authentication và customer self-scoped endpoints).
@@ -229,4 +247,4 @@ Các kế hoạch trong thư mục `plans/` được tạo ra từ đợt audit 
 - [Lộ trình cải tiến Frontend (tiếng Việt)](plans/README.vi.md)
 - [Improvement Plans Index (English)](plans/README.md)
 
-*Lưu ý: Thư mục `plans/` tập trung vào lộ trình refactoring và tối ưu hóa giao diện/state management, các tài liệu đặc tả nghiệp vụ chính nằm trong thư mục `docs/`.*
+_Lưu ý: Thư mục `plans/` tập trung vào lộ trình refactoring và tối ưu hóa giao diện/state management, các tài liệu đặc tả nghiệp vụ chính nằm trong thư mục `docs/`._

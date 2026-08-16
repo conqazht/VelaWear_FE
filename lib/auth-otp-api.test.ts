@@ -44,27 +44,26 @@ describe("auth OTP API contract", () => {
         },
       });
 
-    await expect(
-      requestOtp({ email: "member@example.com", purpose: "REGISTER" }),
-    ).resolves.toEqual({
-      challengeId: "challenge-1",
+    await expect(requestOtp({ email: "member@example.com", purpose: "REGISTER" })).resolves.toEqual(
+      {
+        challengeId: "challenge-1",
+        expiresInSeconds: 300,
+        cooldownSeconds: 60,
+      },
+    );
+    await expect(verifyOtp({ challengeId: "challenge-1", code: "123456" })).resolves.toEqual({
+      proofToken: "proof-1",
       expiresInSeconds: 300,
-      cooldownSeconds: 60,
     });
-    await expect(
-      verifyOtp({ challengeId: "challenge-1", code: "123456" }),
-    ).resolves.toEqual({ proofToken: "proof-1", expiresInSeconds: 300 });
 
-    expect(apiClientMocks.post).toHaveBeenNthCalledWith(
-      1,
-      "/auth/otp/request",
-      { email: "member@example.com", purpose: "REGISTER" },
-    );
-    expect(apiClientMocks.post).toHaveBeenNthCalledWith(
-      2,
-      "/auth/otp/verify",
-      { challengeId: "challenge-1", code: "123456" },
-    );
+    expect(apiClientMocks.post).toHaveBeenNthCalledWith(1, "/auth/otp/request", {
+      email: "member@example.com",
+      purpose: "REGISTER",
+    });
+    expect(apiClientMocks.post).toHaveBeenNthCalledWith(2, "/auth/otp/verify", {
+      challengeId: "challenge-1",
+      code: "123456",
+    });
   });
 
   it("gửi proof token trong các final action", async () => {
@@ -89,14 +88,11 @@ describe("auth OTP API contract", () => {
       }),
     ).resolves.toEqual(result);
 
-    expect(apiClientMocks.post).toHaveBeenCalledWith(
-      "/auth/forgot-password/reset",
-      {
-        email: "member@example.com",
-        newPassword: "NewPassword1",
-        otpProofToken: "reset-proof",
-      },
-    );
+    expect(apiClientMocks.post).toHaveBeenCalledWith("/auth/forgot-password/reset", {
+      email: "member@example.com",
+      newPassword: "NewPassword1",
+      otpProofToken: "reset-proof",
+    });
     expect(apiClientMocks.put).toHaveBeenCalledWith("/auth/me/email", {
       newEmail: "new@example.com",
       otpProofToken: "email-proof",
@@ -160,19 +156,19 @@ describe("auth OTP API contract", () => {
         response: { status: 400, data: { code: "SOME_UNKNOWN_CODE", message: "expired OTP" } },
       }).kind,
     ).toBe("unknown");
-    
+
     expect(
       normalizeOtpError({
         response: { status: 429, data: { message: "random text" } },
       }).kind,
     ).toBe("rate_limited");
-    
+
     expect(
       normalizeOtpError({
         response: { status: 401, data: { message: "random text" } },
       }).kind,
     ).toBe("session_revoked");
-    
+
     expect(
       normalizeOtpError({
         response: { status: 503, data: { message: "random text" } },
@@ -185,11 +181,11 @@ describe("auth OTP API contract", () => {
       .mockResolvedValueOnce({ data: { data: { expiresInSeconds: 300, cooldownSeconds: 60 } } })
       .mockResolvedValueOnce({ data: { data: { expiresInSeconds: 300 } } });
 
-    await expect(
-      requestOtp({ email: "member@example.com", purpose: "REGISTER" }),
-    ).rejects.toThrow("missing challengeId");
-    await expect(
-      verifyOtp({ challengeId: "challenge", code: "123456" }),
-    ).rejects.toThrow("missing proofToken");
+    await expect(requestOtp({ email: "member@example.com", purpose: "REGISTER" })).rejects.toThrow(
+      "missing challengeId",
+    );
+    await expect(verifyOtp({ challengeId: "challenge", code: "123456" })).rejects.toThrow(
+      "missing proofToken",
+    );
   });
 });

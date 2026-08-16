@@ -14,6 +14,7 @@ The backend OTP/email phase adds verification requirements for registration, for
 ## Capabilities
 
 ### New Capabilities
+
 - `auth-otp-email-ui`: Frontend OTP user experience and API consumption for register, forgot-password, and change-email flows.
 
 ### Modified Capabilities

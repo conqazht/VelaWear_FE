@@ -38,7 +38,11 @@ export function ContentLocaleTabs({
               variant={complete[locale] ? "secondary" : "outline"}
               className="gap-1 px-1.5 py-0 text-[10px]"
             >
-              {complete[locale] ? <CircleCheck className="size-3" /> : <CircleAlert className="size-3" />}
+              {complete[locale] ? (
+                <CircleCheck className="size-3" />
+              ) : (
+                <CircleAlert className="size-3" />
+              )}
               {complete[locale]
                 ? t("admin.commerce.translation.complete")
                 : t("admin.commerce.translation.missing")}

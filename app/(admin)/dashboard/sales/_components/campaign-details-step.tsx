@@ -66,15 +66,10 @@ export function CampaignDetailsStep({
   }
 
   return (
-    <fieldset
-      disabled={interactionDisabled}
-      className="grid min-w-0 gap-6 border-0 p-0"
-    >
+    <fieldset disabled={interactionDisabled} className="grid min-w-0 gap-6 border-0 p-0">
       <div className="grid gap-5 lg:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="sale-code">
-            {t("admin.sales.editor.details.code.label")}
-          </FieldLabel>
+          <FieldLabel htmlFor="sale-code">{t("admin.sales.editor.details.code.label")}</FieldLabel>
           <Input
             id="sale-code"
             value={values.code}
@@ -84,15 +79,11 @@ export function CampaignDetailsStep({
             disabled={codeDisabled}
             required
           />
-          <FieldDescription>
-            {t("admin.sales.editor.details.code.description")}
-          </FieldDescription>
+          <FieldDescription>{t("admin.sales.editor.details.code.description")}</FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="sale-type">
-            {t("admin.sales.editor.details.type.label")}
-          </FieldLabel>
+          <FieldLabel htmlFor="sale-type">{t("admin.sales.editor.details.type.label")}</FieldLabel>
           <Select
             value={values.type}
             onValueChange={(value) => updateType(value as SaleCampaignType)}
@@ -102,12 +93,8 @@ export function CampaignDetailsStep({
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
-              <SelectItem value="STANDARD">
-                {t("admin.sales.editor.type.standard")}
-              </SelectItem>
-              <SelectItem value="FLASH">
-                {t("admin.sales.editor.type.flash")}
-              </SelectItem>
+              <SelectItem value="STANDARD">{t("admin.sales.editor.type.standard")}</SelectItem>
+              <SelectItem value="FLASH">{t("admin.sales.editor.type.flash")}</SelectItem>
             </SelectContent>
           </Select>
           <FieldDescription>
@@ -127,12 +114,32 @@ export function CampaignDetailsStep({
           vi: (
             <>
               <Field>
-                <FieldLabel htmlFor="sale-name-vi">{t("admin.sales.editor.details.name.label")}</FieldLabel>
-                <Input id="sale-name-vi" value={values.name} onChange={(event) => update("name", event.target.value)} placeholder={t("admin.sales.editor.details.name.placeholder")} maxLength={150} disabled={displayDisabled} required />
+                <FieldLabel htmlFor="sale-name-vi">
+                  {t("admin.sales.editor.details.name.label")}
+                </FieldLabel>
+                <Input
+                  id="sale-name-vi"
+                  value={values.name}
+                  onChange={(event) => update("name", event.target.value)}
+                  placeholder={t("admin.sales.editor.details.name.placeholder")}
+                  maxLength={150}
+                  disabled={displayDisabled}
+                  required
+                />
               </Field>
               <Field>
-                <FieldLabel htmlFor="sale-description-vi">{t("admin.sales.editor.details.description.label")}</FieldLabel>
-                <Textarea id="sale-description-vi" value={values.description} onChange={(event) => update("description", event.target.value)} placeholder={t("admin.sales.editor.details.description.placeholder")} maxLength={2_000} disabled={displayDisabled} rows={4} />
+                <FieldLabel htmlFor="sale-description-vi">
+                  {t("admin.sales.editor.details.description.label")}
+                </FieldLabel>
+                <Textarea
+                  id="sale-description-vi"
+                  value={values.description}
+                  onChange={(event) => update("description", event.target.value)}
+                  placeholder={t("admin.sales.editor.details.description.placeholder")}
+                  maxLength={2_000}
+                  disabled={displayDisabled}
+                  rows={4}
+                />
               </Field>
             </>
           ),
@@ -148,12 +155,31 @@ export function CampaignDetailsStep({
                 onGenerate={onGenerateEnglish}
               />
               <Field>
-                <FieldLabel htmlFor="sale-name-en">{t("admin.sales.editor.details.name.label")}</FieldLabel>
-                <Input id="sale-name-en" value={values.englishName} onChange={(event) => update("englishName", event.target.value)} placeholder={t("admin.sales.editor.details.name.placeholder")} maxLength={150} disabled={displayDisabled} />
+                <FieldLabel htmlFor="sale-name-en">
+                  {t("admin.sales.editor.details.name.label")}
+                </FieldLabel>
+                <Input
+                  id="sale-name-en"
+                  value={values.englishName}
+                  onChange={(event) => update("englishName", event.target.value)}
+                  placeholder={t("admin.sales.editor.details.name.placeholder")}
+                  maxLength={150}
+                  disabled={displayDisabled}
+                />
               </Field>
               <Field>
-                <FieldLabel htmlFor="sale-description-en">{t("admin.sales.editor.details.description.label")}</FieldLabel>
-                <Textarea id="sale-description-en" value={values.englishDescription} onChange={(event) => update("englishDescription", event.target.value)} placeholder={t("admin.sales.editor.details.description.placeholder")} maxLength={2_000} disabled={displayDisabled} rows={4} />
+                <FieldLabel htmlFor="sale-description-en">
+                  {t("admin.sales.editor.details.description.label")}
+                </FieldLabel>
+                <Textarea
+                  id="sale-description-en"
+                  value={values.englishDescription}
+                  onChange={(event) => update("englishDescription", event.target.value)}
+                  placeholder={t("admin.sales.editor.details.description.placeholder")}
+                  maxLength={2_000}
+                  disabled={displayDisabled}
+                  rows={4}
+                />
               </Field>
             </>
           ),
@@ -172,9 +198,7 @@ export function CampaignDetailsStep({
           placeholder={t("admin.sales.editor.details.banner.placeholder")}
           disabled={displayDisabled}
         />
-        <FieldDescription>
-          {t("admin.sales.editor.details.banner.description")}
-        </FieldDescription>
+        <FieldDescription>{t("admin.sales.editor.details.banner.description")}</FieldDescription>
       </Field>
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -207,9 +231,7 @@ export function CampaignDetailsStep({
             disabled={typeAndScheduleDisabled}
             required
           />
-          <FieldDescription>
-            {t("admin.sales.editor.details.endsAt.description")}
-          </FieldDescription>
+          <FieldDescription>{t("admin.sales.editor.details.endsAt.description")}</FieldDescription>
         </Field>
       </div>
     </fieldset>

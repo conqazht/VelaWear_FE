@@ -46,11 +46,7 @@ preserving account-scoped caching and optimistic add/remove behavior.
   rows and then creates a product-detail query per ID:
 
   ```tsx
-  const wishlistsQuery = useWishlistsQuery(
-    wishlistUserId,
-    { size: 100 },
-    isAuthenticated
-  );
+  const wishlistsQuery = useWishlistsQuery(wishlistUserId, { size: 100 }, isAuthenticated);
   // ...
   const wishlistProductQueries = useQueries({
     queries: wishlistProductIds.map((productId) => ({
@@ -87,7 +83,7 @@ preserving account-scoped caching and optimistic add/remove behavior.
   ```
 
 - Storefront conversion must continue to use `mapBackendProduct(product,
-  activeLocale)` from `lib/vela-data.ts`; do not invent a second mapper.
+activeLocale)` from `lib/vela-data.ts`; do not invent a second mapper.
 - The backend contract is external to this repository. The expected BE-009
   invariant is: each `/wishlists/me` row carries a localized, product-card-ready
   `product` summary for its `productId`, with exactly `id`, localized `slug`,
@@ -107,20 +103,21 @@ preserving account-scoped caching and optimistic add/remove behavior.
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Install | `pnpm install --frozen-lockfile` | exit 0; lockfile unchanged |
-| Target tests | `pnpm exec vitest run components/shop/favorites-provider.test.tsx` | all tests pass |
-| Lint | `pnpm exec eslint components/shop/favorites-provider.tsx components/shop/favorites-provider.test.tsx lib/api/types.ts lib/api/commerce.ts lib/queries/commerce.ts lib/queries/keys.ts --max-warnings 0` | exit 0, no warnings |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0, no errors |
-| Unit suite | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
+| Purpose      | Command                                                                                                                                                                                                 | Expected on success        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Install      | `pnpm install --frozen-lockfile`                                                                                                                                                                        | exit 0; lockfile unchanged |
+| Target tests | `pnpm exec vitest run components/shop/favorites-provider.test.tsx`                                                                                                                                      | all tests pass             |
+| Lint         | `pnpm exec eslint components/shop/favorites-provider.tsx components/shop/favorites-provider.test.tsx lib/api/types.ts lib/api/commerce.ts lib/queries/commerce.ts lib/queries/keys.ts --max-warnings 0` | exit 0, no warnings        |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                                                                                                                                             | exit 0, no errors          |
+| Unit suite   | `pnpm test:unit`                                                                                                                                                                                        | all tests pass             |
+| Build        | `pnpm build`                                                                                                                                                                                            | production build succeeds  |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope** (the only files you should modify):
+
 - `lib/api/types.ts`
 - `lib/api/commerce.ts`
 - `lib/queries/commerce.ts`
@@ -129,6 +126,7 @@ preserving account-scoped caching and optimistic add/remove behavior.
 - `components/shop/favorites-provider.test.tsx` (create)
 
 **Out of scope** (do NOT touch):
+
 - Backend code or the BE-009 response contract.
 - Product-detail queries used by product pages or any non-wishlist consumer.
 - Cart ownership, authentication or logout behavior; those belong to FE-003.

@@ -32,24 +32,26 @@ The shared Axios instance forces JSON for every request. Axios can therefore tra
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---|---|---|
-| Target tests | `pnpm exec vitest run lib/api/commerce-review.test.ts lib/api-client.test.ts` | all pass |
-| Lint | `pnpm exec eslint . --max-warnings 25` | exit 0 |
-| Typecheck | `pnpm exec tsc --noEmit --pretty false --incremental false` | exit 0 |
-| Unit | `pnpm test:unit` | all tests pass |
-| Build | `pnpm build` | production build succeeds |
+| Purpose      | Command                                                                       | Expected on success       |
+| ------------ | ----------------------------------------------------------------------------- | ------------------------- |
+| Target tests | `pnpm exec vitest run lib/api/commerce-review.test.ts lib/api-client.test.ts` | all pass                  |
+| Lint         | `pnpm exec eslint . --max-warnings 25`                                        | exit 0                    |
+| Typecheck    | `pnpm exec tsc --noEmit --pretty false --incremental false`                   | exit 0                    |
+| Unit         | `pnpm test:unit`                                                              | all tests pass            |
+| Build        | `pnpm build`                                                                  | production build succeeds |
 
 ## Scope
 
 > **Workflow-metadata exception**: In addition to the source allowlist below, update `docs/PROJECT_STATUS.md` with this plan ID, branch, actual outcome, and exact verification evidence. Canonical EN/VI plan files may be reconciled before source edits under `plans/README.md`; the reviewer/operator owns index status. No other out-of-scope file is allowed.
 
 **In scope**:
+
 - `lib/api-client.ts`
 - `lib/api/commerce-review.test.ts`
 - `lib/api-client.test.ts` if shared transport assertions fit there
 
 **Out of scope**:
+
 - Changing review part names, payload fields, validation or backend storage.
 - Upload quotas or generic file upload.
 - Adding a second Axios client only for reviews.

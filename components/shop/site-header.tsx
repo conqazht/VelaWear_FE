@@ -3,7 +3,17 @@
 import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { EASE_VELA } from "@/lib/motion-tokens";
-import { ArrowUpRight, ChevronDown, Search, Heart, ShoppingBag, Menu, X, User, Shield } from "lucide-react";
+import {
+  ArrowUpRight,
+  ChevronDown,
+  Search,
+  Heart,
+  ShoppingBag,
+  Menu,
+  X,
+  User,
+  Shield,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -53,7 +63,6 @@ const POPULAR_SEARCH_TERMS = {
   ],
 };
 
-
 function readSearchHistory(): string[] {
   if (typeof window === "undefined") return [];
 
@@ -78,7 +87,7 @@ export function SiteHeader() {
   const hasMounted = useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
   const pathname = usePathname();
   const router = useRouter();
@@ -211,9 +220,7 @@ export function SiteHeader() {
   const safeIsAuthenticated = hasMounted ? isAuthenticated : false;
   const safeUser = hasMounted ? user : null;
 
-  const textClass = shouldBeTransparent
-    ? "text-[#efe7dc]"
-    : "text-[#1c1a18] hover:text-[#b5573a]";
+  const textClass = shouldBeTransparent ? "text-[#efe7dc]" : "text-[#1c1a18] hover:text-[#b5573a]";
 
   const logoStyle = shouldBeTransparent
     ? { filter: "brightness(0) invert(1)" }
@@ -234,7 +241,7 @@ export function SiteHeader() {
     ? isScrolled
       ? "w-full max-w-[1800px] flex items-center justify-between rounded-full bg-white/20 border border-white/30 shadow-[0_12px_40px_rgba(28,26,24,0.06)] px-6 py-3 transition-all duration-500"
       : "w-full max-w-[1800px] flex items-center justify-between rounded-none bg-transparent border-b border-transparent px-4 md:px-8 py-2 transition-all duration-500"
-      : "w-full max-w-[1800px] h-full flex items-center justify-between px-6 md:px-16 mx-auto";
+    : "w-full max-w-[1800px] h-full flex items-center justify-between px-6 md:px-16 mx-auto";
 
   const burgerClass = shouldBeTransparent
     ? "text-[#efe7dc] hover:text-[#ffb59f]"
@@ -251,10 +258,10 @@ export function SiteHeader() {
     if (!normalized) return;
 
     setSearchHistory((prev) => {
-      const next = [normalized, ...prev.filter((item) => item.toLowerCase() !== normalized.toLowerCase())].slice(
-        0,
-        MAX_SEARCH_HISTORY_ITEMS
-      );
+      const next = [
+        normalized,
+        ...prev.filter((item) => item.toLowerCase() !== normalized.toLowerCase()),
+      ].slice(0, MAX_SEARCH_HISTORY_ITEMS);
       return next;
     });
   };
@@ -288,7 +295,7 @@ export function SiteHeader() {
     <>
       <motion.header
         initial={{ y: 0 }}
-        animate={{ y: showHeader ? 0 : (isHome ? -120 : -72) }}
+        animate={{ y: showHeader ? 0 : isHome ? -120 : -72 }}
         transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
         className={headerClass}
       >
@@ -306,7 +313,7 @@ export function SiteHeader() {
         >
           {/* Logo pinned to left */}
           <div className="flex-none">
-            <Link href="/" className="flex items-center gap-2 group relative overflow-hidden">
+            <Link href="/" className="group relative flex items-center gap-2 overflow-hidden">
               <motion.div
                 className="relative flex items-center overflow-hidden rounded-md"
                 style={{ perspective: 1000 }}
@@ -337,12 +344,12 @@ export function SiteHeader() {
                   width={512}
                   height={512}
                   style={logoStyle}
-                  className="h-8 md:h-9 w-auto object-contain"
+                  className="h-8 w-auto object-contain md:h-9"
                 />
-                
+
                 {/* Shine effect on hover */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/45 to-transparent pointer-events-none"
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/45 to-transparent"
                   initial={{ opacity: 0, x: "-150%", skewX: -20 }}
                   variants={{
                     hover: { opacity: 1, x: "150%" },
@@ -362,10 +369,7 @@ export function SiteHeader() {
             <NavigationMenuList className="gap-1 pl-3">
               {navigationItems.map((item) =>
                 item.groups ? (
-                  <NavigationMenuItem
-                    key={item.label}
-                    className="flex items-center"
-                  >
+                  <NavigationMenuItem key={item.label} className="flex items-center">
                     <NavigationMenuTrigger
                       nativeButton={false}
                       render={
@@ -380,8 +384,8 @@ export function SiteHeader() {
                       }
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2.5 py-0 hover:bg-transparent focus:bg-transparent data-open:bg-transparent data-popup-open:bg-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
-                        textClass
+                        "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2.5 py-0 hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-open:bg-transparent data-popup-open:bg-transparent",
+                        textClass,
                       )}
                     >
                       <span
@@ -391,34 +395,34 @@ export function SiteHeader() {
                         {item.label}
                         <span
                           className={cn(
-                            "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/nav:scale-x-100 group-data-open/navigation-menu-trigger:scale-x-100"
+                            "absolute bottom-[-1px] left-0 h-[1.5px] w-full origin-left scale-x-0 bg-[#b5573a] transition-transform duration-300 ease-out group-hover/nav:scale-x-100 group-data-open/navigation-menu-trigger:scale-x-100",
                           )}
                         />
                       </span>
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="p-0 w-max">
+                    <NavigationMenuContent className="w-max p-0">
                       <div
                         data-slot="storefront-mega-menu-panel"
                         className={cn(
-                          "flex gap-2.5 rounded-lg bg-white p-2.5 shadow-xl border border-[#1c1a18]/10",
+                          "flex gap-2.5 rounded-lg border border-[#1c1a18]/10 bg-white p-2.5 shadow-xl",
                           item.groups.length >= 3
                             ? "w-[min(880px,calc(100vw-48px))]"
                             : item.groups.length === 2
                               ? "w-[min(660px,calc(100vw-48px))]"
-                              : "w-[min(480px,calc(100vw-48px))]"
+                              : "w-[min(480px,calc(100vw-48px))]",
                         )}
                       >
                         <div className="relative flex min-h-[248px] w-60 shrink-0 flex-col justify-between overflow-hidden rounded-md bg-[#f2ebe1] p-5 ring-1 ring-[#b5573a]/10">
-                          <div className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full border border-[#b5573a]/15" />
+                          <div className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full border border-[#b5573a]/15" />
                           <div className="pointer-events-none absolute -bottom-16 left-0 size-36 rounded-full bg-white/35" />
                           <div className="relative z-10">
-                            <div className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6f554c]/80">
+                            <div className="flex items-center justify-between gap-4 text-[10px] font-semibold tracking-[0.2em] text-[#6f554c]/80 uppercase">
                               <span className="flex items-center gap-2">
                                 <span className="size-1.5 rounded-full bg-[#b5573a]" />
                                 Vela Wear
                               </span>
                             </div>
-                            <p className="mt-6 font-serif text-[34px] font-light leading-none tracking-[-0.035em] text-[#1c1a18]">
+                            <p className="mt-6 font-serif text-[34px] leading-none font-light tracking-[-0.035em] text-[#1c1a18]">
                               {item.label}
                             </p>
                             <p className="mt-3 max-w-[12rem] text-[13px] leading-5 text-[#55423d]/85">
@@ -436,7 +440,7 @@ export function SiteHeader() {
                                 }}
                               />
                             }
-                            className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold uppercase tracking-[0.13em] text-[#b5573a] transition-colors hover:text-[#8f4329] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2"
+                            className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold tracking-[0.13em] text-[#b5573a] uppercase transition-colors hover:text-[#8f4329] focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2 focus-visible:outline-none"
                           >
                             <span className="max-w-[10rem] leading-4">{item.ctaLabel}</span>
                             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1c1a18] text-[#f7f4ef] transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-0.5">
@@ -446,19 +450,19 @@ export function SiteHeader() {
                         </div>
                         <div
                           className={cn(
-                            "grid min-w-0 flex-1 content-start gap-x-6 md:gap-x-8 gap-y-5 px-5 py-5",
+                            "grid min-w-0 flex-1 content-start gap-x-6 gap-y-5 px-5 py-5 md:gap-x-8",
                             item.groups.length >= 3
                               ? "grid-cols-3"
                               : item.groups.length === 2
                                 ? "grid-cols-2"
-                                : "grid-cols-1"
+                                : "grid-cols-1",
                           )}
                         >
                           {item.groups.map((group) => (
                             <section key={group.title}>
                               <div className="mb-2 flex items-center gap-2.5">
                                 <span className="h-px w-5 bg-[#b5573a]/60" aria-hidden="true" />
-                                <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]">
+                                <h3 className="text-[11px] font-semibold tracking-[0.16em] text-[#1c1a18] uppercase">
                                   {group.title}
                                 </h3>
                               </div>
@@ -514,7 +518,7 @@ export function SiteHeader() {
                       </span>
                     </span>
                   </NavigationMenuLink>
-                )
+                ),
               )}
             </NavigationMenuList>
           </NavigationMenu>
@@ -522,13 +526,22 @@ export function SiteHeader() {
           {/* Right side items */}
           <div className="flex items-center gap-4 md:gap-6">
             {/* Desktop Search bar */}
-            <div ref={searchBoxRef} className="relative hidden lg:block w-52 focus-within:w-68 transition-all duration-300">
+            <div
+              ref={searchBoxRef}
+              className="relative hidden w-52 transition-all duration-300 focus-within:w-68 lg:block"
+            >
               <form
                 onSubmit={handleSearchSubmit}
-                className={`flex items-center ${searchBgClass} rounded-full px-4 py-2 gap-2.5 w-full border border-transparent focus-within:border-[#b5573a]/20`}
+                className={`flex items-center ${searchBgClass} w-full gap-2.5 rounded-full border border-transparent px-4 py-2 focus-within:border-[#b5573a]/20`}
               >
-                <button type="submit" aria-label={t("storefront.nav.search")} className="cursor-pointer focus:outline-none border-none p-0 bg-transparent flex items-center justify-center">
-                  <Search className={`w-4 h-4 ${shouldBeTransparent ? "text-[#efe7dc]/80" : "text-[#8a857c]"}`} />
+                <button
+                  type="submit"
+                  aria-label={t("storefront.nav.search")}
+                  className="flex cursor-pointer items-center justify-center border-none bg-transparent p-0 focus:outline-none"
+                >
+                  <Search
+                    className={`h-4 w-4 ${shouldBeTransparent ? "text-[#efe7dc]/80" : "text-[#8a857c]"}`}
+                  />
                 </button>
                 <input
                   type="text"
@@ -549,7 +562,7 @@ export function SiteHeader() {
                       handleSearchSubmit(e);
                     }
                   }}
-                  className={`bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-xs w-full ${searchInputClass}`}
+                  className={`w-full border-none bg-transparent p-0 text-xs focus:ring-0 focus:outline-none ${searchInputClass}`}
                 />
               </form>
 
@@ -560,12 +573,12 @@ export function SiteHeader() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-0 right-0 mt-3 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-md z-50"
+                    className="absolute right-0 left-0 z-50 mt-3 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-md"
                   >
                     {searchQuery.trim() ? (
                       <>
-                        <div className="px-4 py-3 border-b border-[#1c1a18]/10">
-                          <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
+                        <div className="border-b border-[#1c1a18]/10 px-4 py-3">
+                          <p className="text-[10px] tracking-[0.18em] text-[#1c1a18]/50 uppercase">
                             {t("storefront.nav.searchSuggestions")}
                           </p>
                         </div>
@@ -575,7 +588,7 @@ export function SiteHeader() {
                               <Link
                                 key={product.id}
                                 href={`/products/${product.id}`}
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-[#efe7dc] transition-colors border-b border-[#1c1a18]/5 last:border-b-0"
+                                className="flex items-center gap-3 border-b border-[#1c1a18]/5 px-4 py-3 transition-colors last:border-b-0 hover:bg-[#efe7dc]"
                                 onClick={() => {
                                   persistSearchHistory(searchQuery);
                                   setIsSearchSuggestionsOpen(false);
@@ -586,7 +599,7 @@ export function SiteHeader() {
                                   alt={product.name}
                                   width={56}
                                   height={56}
-                                  className="h-14 w-14 rounded-sm object-cover bg-white"
+                                  className="h-14 w-14 rounded-sm bg-white object-cover"
                                 />
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-medium text-[#1c1a18]">
@@ -595,7 +608,7 @@ export function SiteHeader() {
                                   <p className="truncate text-xs text-[#1c1a18]/55">
                                     {product.category}
                                   </p>
-                                  <p className="mt-1 text-xs font-semibold text-[#b5573a] font-numeric">
+                                  <p className="font-numeric mt-1 text-xs font-semibold text-[#b5573a]">
                                     {money(product.price, activeLocale)}
                                   </p>
                                 </div>
@@ -611,7 +624,7 @@ export function SiteHeader() {
                           <button
                             type="button"
                             onClick={() => runSearch(searchQuery)}
-                            className="w-full rounded-full border border-[#1c1a18]/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#1c1a18] hover:bg-[#1c1a18] hover:text-white transition-colors"
+                            className="w-full rounded-full border border-[#1c1a18]/10 bg-white px-4 py-2 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-[#1c1a18] hover:text-white"
                           >
                             {t("storefront.nav.moreResults")}
                           </button>
@@ -619,15 +632,15 @@ export function SiteHeader() {
                       </>
                     ) : (
                       <>
-                        <div className="px-4 py-3 border-b border-[#1c1a18]/10 flex items-center justify-between gap-3">
-                          <p className="text-[10px] uppercase tracking-[0.18em] text-[#1c1a18]/50">
+                        <div className="flex items-center justify-between gap-3 border-b border-[#1c1a18]/10 px-4 py-3">
+                          <p className="text-[10px] tracking-[0.18em] text-[#1c1a18]/50 uppercase">
                             {t("storefront.nav.recentSearches")}
                           </p>
                           {searchHistory.length > 0 && (
                             <button
                               type="button"
                               onClick={() => setSearchHistory([])}
-                              className="text-[10px] uppercase tracking-[0.16em] text-[#1c1a18]/40 hover:text-[#1c1a18]"
+                              className="text-[10px] tracking-[0.16em] text-[#1c1a18]/40 uppercase hover:text-[#1c1a18]"
                             >
                               {t("storefront.nav.clearSearches")}
                             </button>
@@ -638,7 +651,7 @@ export function SiteHeader() {
                             {searchHistory.map((term) => (
                               <div
                                 key={term}
-                                className="inline-flex items-center gap-1 rounded-full border border-[#1c1a18]/10 bg-white px-3 py-2 text-xs text-[#1c1a18] hover:bg-[#efe7dc] transition-colors"
+                                className="inline-flex items-center gap-1 rounded-full border border-[#1c1a18]/10 bg-white px-3 py-2 text-xs text-[#1c1a18] transition-colors hover:bg-[#efe7dc]"
                               >
                                 <button
                                   type="button"
@@ -673,10 +686,7 @@ export function SiteHeader() {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
-              <LanguageSwitcher
-                className="hidden md:inline-flex"
-                inverted={shouldBeTransparent}
-              />
+              <LanguageSwitcher className="hidden md:inline-flex" inverted={shouldBeTransparent} />
 
               {/* Mobile Search Button */}
               <motion.button
@@ -687,50 +697,56 @@ export function SiteHeader() {
                     mobileSearchInputRef.current?.focus();
                   }, 120);
                 }}
-                className={`${iconClass} p-2 rounded-full cursor-pointer lg:hidden relative`}
+                className={`${iconClass} relative cursor-pointer rounded-full p-2 lg:hidden`}
                 whileHover={{
                   scale: 1.04,
-                  backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                  backgroundColor: shouldBeTransparent
+                    ? "rgba(255,255,255,0.06)"
+                    : "rgba(0,0,0,0.04)",
                 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={t("storefront.nav.search")}
               >
-                <Search className="w-4.5 h-4.5" />
+                <Search className="h-4.5 w-4.5" />
               </motion.button>
 
               {/* Mobile Account Profile / Login Button */}
               <Link href={safeIsAuthenticated ? "/profile" : "/sign-in"} className="lg:hidden">
                 <motion.button
                   type="button"
-                  className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
+                  className={`${iconClass} relative cursor-pointer rounded-full p-2`}
                   whileHover={{
                     scale: 1.04,
-                    backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                    backgroundColor: shouldBeTransparent
+                      ? "rgba(255,255,255,0.06)"
+                      : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   aria-label={t("storefront.nav.account")}
                 >
-                  <User className="w-4.5 h-4.5" />
+                  <User className="h-4.5 w-4.5" />
                 </motion.button>
               </Link>
 
               {/* Wishlist Link */}
               <Link href="/favorites" className="hidden sm:inline-flex">
                 <motion.button
-                  className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
+                  className={`${iconClass} relative cursor-pointer rounded-full p-2`}
                   whileHover={{
                     scale: 1.04,
-                    backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                    backgroundColor: shouldBeTransparent
+                      ? "rgba(255,255,255,0.06)"
+                      : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   aria-label={t("storefront.nav.wishlist")}
                 >
-                  <Heart className="w-4.5 h-4.5" />
+                  <Heart className="h-4.5 w-4.5" />
                   {safeFavoritesCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute top-0 right-0 w-4.5 h-4.5 rounded-full bg-[#b5573a] text-white text-[9px] font-bold flex items-center justify-center border border-[#f7f4ef]"
+                      className="absolute top-0 right-0 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-[#f7f4ef] bg-[#b5573a] text-[9px] font-bold text-white"
                     >
                       {safeFavoritesCount}
                     </motion.span>
@@ -741,20 +757,22 @@ export function SiteHeader() {
               {/* Shopping Bag Button (Redirects to /cart) */}
               <Link href="/cart">
                 <motion.button
-                  className={`${iconClass} p-2 rounded-full cursor-pointer relative`}
+                  className={`${iconClass} relative cursor-pointer rounded-full p-2`}
                   whileHover={{
                     scale: 1.04,
-                    backgroundColor: shouldBeTransparent ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                    backgroundColor: shouldBeTransparent
+                      ? "rgba(255,255,255,0.06)"
+                      : "rgba(0,0,0,0.04)",
                   }}
                   whileTap={{ scale: 0.95 }}
                   aria-label={t("storefront.nav.shoppingBag")}
                 >
-                  <ShoppingBag className="w-4.5 h-4.5" />
+                  <ShoppingBag className="h-4.5 w-4.5" />
                   {safeItemCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute top-0 right-0 w-4.5 h-4.5 rounded-full bg-[#b5573a] text-white text-[9px] font-bold flex items-center justify-center border border-[#f7f4ef]"
+                      className="absolute top-0 right-0 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-[#f7f4ef] bg-[#b5573a] text-[9px] font-bold text-white"
                     >
                       {safeItemCount}
                     </motion.span>
@@ -766,27 +784,31 @@ export function SiteHeader() {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`${burgerClass} p-2 rounded-full transition-colors cursor-pointer lg:hidden flex items-center justify-center`}
+                className={`${burgerClass} flex cursor-pointer items-center justify-center rounded-full p-2 transition-colors lg:hidden`}
                 aria-label={isMobileMenuOpen ? "Đóng menu" : "Mở menu"}
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
 
               {/* Account Profile / Login */}
-              <div className="hidden md:flex items-center gap-3">
+              <div className="hidden items-center gap-3 md:flex">
                 {safeIsAuthenticated && safeUser ? (
                   <>
                     {canAccessManagement(safeUser) && (
-                      <Link href="/dashboard" title={t("common.adminDashboard")} aria-label={t("common.adminDashboard")}>
+                      <Link
+                        href="/dashboard"
+                        title={t("common.adminDashboard")}
+                        aria-label={t("common.adminDashboard")}
+                      >
                         <motion.button
                           type="button"
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.96 }}
                           transition={{ duration: 0.16, ease: "easeOut" }}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider transition-all duration-200 cursor-pointer shadow-xs ${
+                          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider shadow-xs transition-all duration-200 ${
                             shouldBeTransparent
-                              ? "bg-white/15 text-white border border-white/25 hover:bg-white/30 backdrop-blur-md"
-                              : "border border-[#1c1a18]/15 bg-[#efe7dc]/60 text-[#1c1a18] hover:bg-[#efe7dc] hover:border-[#1c1a18]/30"
+                              ? "border border-white/25 bg-white/15 text-white backdrop-blur-md hover:bg-white/30"
+                              : "border border-[#1c1a18]/15 bg-[#efe7dc]/60 text-[#1c1a18] hover:border-[#1c1a18]/30 hover:bg-[#efe7dc]"
                           }`}
                         >
                           <Shield className="size-3.5 text-[#b5573a]" />
@@ -794,11 +816,11 @@ export function SiteHeader() {
                         </motion.button>
                       </Link>
                     )}
-                    <div className="relative group">
+                    <div className="group relative">
                       <Link
                         href="/profile"
                         aria-label={t("storefront.nav.viewProfile")}
-                        className={`flex size-8 items-center justify-center rounded-full border border-hairline bg-[#efe7dc] text-[#1c1a18] text-xs font-semibold group-hover:bg-[#b5573a] group-hover:text-white group-hover:border-[#b5573a] transition-all duration-300 flex-shrink-0 cursor-pointer`}
+                        className={`border-hairline flex size-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border bg-[#efe7dc] text-xs font-semibold text-[#1c1a18] transition-all duration-300 group-hover:border-[#b5573a] group-hover:bg-[#b5573a] group-hover:text-white`}
                       >
                         {safeUser.fullName
                           ? safeUser.fullName
@@ -812,29 +834,61 @@ export function SiteHeader() {
 
                       {/* Invisible bridge to keep hover state active - scoped strictly to avatar circle */}
                       <div className="absolute inset-x-0 top-8 h-4 bg-transparent" />
-                      
+
                       {/* Dropdown Menu */}
-                      <div className="absolute right-0 top-11 w-48 opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-50 bg-white rounded-md border border-[#1c1a18]/10 shadow-lg overflow-hidden">
-                        <div className="px-4 py-3 border-b border-[#1c1a18]/10 flex items-center justify-between bg-canvas/40">
-                          <span className="font-sans text-xs font-bold uppercase tracking-wider text-[#1c1a18]">{t("storefront.nav.account")}</span>
+                      <div className="pointer-events-none invisible absolute top-11 right-0 z-50 w-48 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white opacity-0 shadow-lg transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
+                        <div className="bg-canvas/40 flex items-center justify-between border-b border-[#1c1a18]/10 px-4 py-3">
+                          <span className="font-sans text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
+                            {t("storefront.nav.account")}
+                          </span>
                         </div>
                         <div className="flex flex-col py-0">
                           {canAccessManagement(safeUser) && (
                             <Link
                               href="/dashboard"
-                              className="px-4 py-2.5 text-[13px] font-semibold text-[#1c1a18] hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors flex items-center gap-2 border-b border-[#1c1a18]/10"
+                              className="flex items-center gap-2 border-b border-[#1c1a18]/10 px-4 py-2.5 text-[13px] font-semibold text-[#1c1a18] transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                             >
                               <Shield className="size-3.5 text-[#b5573a]" />
                               <span>{t("common.adminDashboard")}</span>
                             </Link>
                           )}
-                          <Link href="/profile" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.profile")}</Link>
-                          <Link href="/profile?tab=orders" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.orders")}</Link>
-                          <Link href="/profile?tab=favourites" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.favourites")}</Link>
-                          <Link href="/coupons" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.coupons")}</Link>
-                          <Link href="/reviews" className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors">{t("storefront.nav.reviews")}</Link>
+                          <Link
+                            href="/profile"
+                            className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("storefront.nav.profile")}
+                          </Link>
+                          <Link
+                            href="/profile?tab=orders"
+                            className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("storefront.nav.orders")}
+                          </Link>
+                          <Link
+                            href="/profile?tab=favourites"
+                            className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("storefront.nav.favourites")}
+                          </Link>
+                          <Link
+                            href="/coupons"
+                            className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("storefront.nav.coupons")}
+                          </Link>
+                          <Link
+                            href="/reviews"
+                            className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("storefront.nav.reviews")}
+                          </Link>
                           <div className="border-t border-[#1c1a18]/8" />
-                          <button onClick={handleLogout} className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 hover:text-[#b5573a] hover:bg-[#efe7dc] transition-colors text-left w-full cursor-pointer">{t("storefront.nav.logOut")}</button>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full cursor-pointer px-4 py-2 text-left text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("storefront.nav.logOut")}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -842,7 +896,7 @@ export function SiteHeader() {
                 ) : (
                   <Link
                     href="/sign-in"
-                    className={`text-[11px] font-semibold uppercase tracking-[1px] ${textClass} transition-colors ml-1`}
+                    className={`text-[11px] font-semibold tracking-[1px] uppercase ${textClass} ml-1 transition-colors`}
                   >
                     {t("storefront.nav.logIn")}
                   </Link>
@@ -868,13 +922,13 @@ export function SiteHeader() {
             />
 
             {/* Right Side Drawer Wrapper */}
-            <div className="fixed inset-y-0 right-0 z-50 w-[320px] max-w-[85vw] overflow-hidden pointer-events-none lg:hidden">
+            <div className="pointer-events-none fixed inset-y-0 right-0 z-50 w-[320px] max-w-[85vw] overflow-hidden lg:hidden">
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-                className="flex h-full w-full flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl pointer-events-auto"
+                className="pointer-events-auto flex h-full w-full flex-col bg-[#f7f4ef] text-[#1c1a18] shadow-2xl"
               >
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between border-b border-[#e3dccf] px-6 py-5">
@@ -884,7 +938,7 @@ export function SiteHeader() {
                   <button
                     type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="grid size-9 place-items-center rounded-full text-[#1c1a18] hover:bg-[#1c1a18]/5 transition-colors cursor-pointer"
+                    className="grid size-9 cursor-pointer place-items-center rounded-full text-[#1c1a18] transition-colors hover:bg-[#1c1a18]/5"
                     aria-label={t("common.close")}
                   >
                     <X className="size-5" />
@@ -892,13 +946,16 @@ export function SiteHeader() {
                 </div>
 
                 {/* Drawer Body */}
-                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
                   {/* Navigation Items (Accordion) */}
                   <div className="space-y-4">
                     {navigationItems.map((item) => {
                       const expanded = mobileExpandedItem === item.label;
                       return (
-                        <div key={item.label} className="border-b border-[#1c1a18]/8 pb-3 last:border-0">
+                        <div
+                          key={item.label}
+                          className="border-b border-[#1c1a18]/8 pb-3 last:border-0"
+                        >
                           <div className="flex items-center justify-between gap-3">
                             <Link
                               href={item.href}
@@ -915,7 +972,12 @@ export function SiteHeader() {
                                 onClick={() => setMobileExpandedItem(expanded ? null : item.label)}
                                 className="grid size-8 place-items-center text-[#1c1a18]"
                               >
-                                <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+                                <ChevronDown
+                                  className={cn(
+                                    "size-4 transition-transform",
+                                    expanded && "rotate-180",
+                                  )}
+                                />
                               </button>
                             )}
                           </div>
@@ -929,10 +991,12 @@ export function SiteHeader() {
                                 transition={{ duration: 0.22, ease: EASE_VELA }}
                                 className="overflow-hidden"
                               >
-                                <div className="mt-3 border-l-2 border-[#b5573a] pl-3 space-y-4">
+                                <div className="mt-3 space-y-4 border-l-2 border-[#b5573a] pl-3">
                                   {item.groups.map((group) => (
                                     <section key={group.title}>
-                                      <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1c1a18]/45">{group.title}</h3>
+                                      <h3 className="mb-1.5 text-[10px] font-semibold tracking-[0.16em] text-[#1c1a18]/45 uppercase">
+                                        {group.title}
+                                      </h3>
                                       <div className="flex flex-col gap-2">
                                         {group.items.map((sub) => (
                                           <Link
@@ -950,7 +1014,7 @@ export function SiteHeader() {
                                   <Link
                                     href={item.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="mt-3 inline-flex text-xs font-semibold uppercase tracking-wider text-[#b5573a]"
+                                    className="mt-3 inline-flex text-xs font-semibold tracking-wider text-[#b5573a] uppercase"
                                   >
                                     {item.ctaLabel} &rarr;
                                   </Link>
@@ -965,9 +1029,11 @@ export function SiteHeader() {
                 </div>
 
                 {/* Drawer Footer */}
-                <div className="border-t border-[#e3dccf] p-6 space-y-4 bg-[#efe7dc]/40">
+                <div className="space-y-4 border-t border-[#e3dccf] bg-[#efe7dc]/40 p-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-[#1c1a18]/60">{activeLocale === "vi" ? "Ngôn ngữ" : "Language"}</span>
+                    <span className="text-xs font-medium text-[#1c1a18]/60">
+                      {activeLocale === "vi" ? "Ngôn ngữ" : "Language"}
+                    </span>
                     <LanguageSwitcher />
                   </div>
                   {safeIsAuthenticated && safeUser ? (
@@ -976,7 +1042,7 @@ export function SiteHeader() {
                         <Link
                           href="/dashboard"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex h-10 w-full items-center justify-center gap-2 rounded-sm bg-[#1c1a18] text-xs font-bold uppercase tracking-wider text-white hover:bg-[#8f2f20] transition-colors"
+                          className="flex h-10 w-full items-center justify-center gap-2 rounded-sm bg-[#1c1a18] text-xs font-bold tracking-wider text-white uppercase transition-colors hover:bg-[#8f2f20]"
                         >
                           <Shield className="size-4 text-[#e2a898]" />
                           <span>{t("common.adminDashboard")}</span>
@@ -996,7 +1062,7 @@ export function SiteHeader() {
                             setIsMobileMenuOpen(false);
                             handleLogout();
                           }}
-                          className="text-xs text-red-600 font-medium cursor-pointer"
+                          className="cursor-pointer text-xs font-medium text-red-600"
                         >
                           {t("storefront.nav.logOut")}
                         </button>
@@ -1006,7 +1072,7 @@ export function SiteHeader() {
                     <Link
                       href="/sign-in"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex h-10 w-full items-center justify-center rounded-sm bg-[#1c1a18] text-xs font-semibold uppercase tracking-wider text-[#f7f4ef] hover:bg-[#b5573a] transition-colors"
+                      className="flex h-10 w-full items-center justify-center rounded-sm bg-[#1c1a18] text-xs font-semibold tracking-wider text-[#f7f4ef] uppercase transition-colors hover:bg-[#b5573a]"
                     >
                       {t("storefront.nav.logIn")}
                     </Link>
@@ -1026,12 +1092,12 @@ export function SiteHeader() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed inset-0 z-50 flex flex-col bg-[#f7f4ef] text-[#1c1a18] p-5 sm:p-6 lg:hidden"
+            className="fixed inset-0 z-50 flex flex-col bg-[#f7f4ef] p-5 text-[#1c1a18] sm:p-6 lg:hidden"
           >
             {/* Header: Input Pill + Cancel Button */}
             <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
-              <div className="relative flex items-center bg-[#efe7dc] rounded-full px-4 py-2.5 gap-2.5 flex-1 border border-transparent focus-within:border-[#b5573a]/30 transition-all">
-                <Search className="w-4 h-4 text-[#8a857c] flex-none" />
+              <div className="relative flex flex-1 items-center gap-2.5 rounded-full border border-transparent bg-[#efe7dc] px-4 py-2.5 transition-all focus-within:border-[#b5573a]/30">
+                <Search className="h-4 w-4 flex-none text-[#8a857c]" />
                 <input
                   ref={mobileSearchInputRef}
                   type="text"
@@ -1039,13 +1105,13 @@ export function SiteHeader() {
                   value={searchQuery}
                   autoComplete="off"
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-sm w-full text-[#1c1a18] placeholder-[#1c1a18]/50"
+                  className="w-full border-none bg-transparent p-0 text-sm text-[#1c1a18] placeholder-[#1c1a18]/50 focus:ring-0 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="text-xs text-[#1c1a18]/40 hover:text-[#1c1a18] p-1 flex-none"
+                    className="flex-none p-1 text-xs text-[#1c1a18]/40 hover:text-[#1c1a18]"
                   >
                     ✕
                   </button>
@@ -1054,18 +1120,18 @@ export function SiteHeader() {
               <button
                 type="button"
                 onClick={() => setIsMobileSearchOpen(false)}
-                className="text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a] px-1 py-1 cursor-pointer flex-none"
+                className="flex-none cursor-pointer px-1 py-1 text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a]"
               >
                 {activeLocale === "vi" ? "Hủy" : "Cancel"}
               </button>
             </form>
 
             {/* Modal Body */}
-            <div className="mt-6 flex-1 overflow-y-auto space-y-6 pr-1">
+            <div className="mt-6 flex-1 space-y-6 overflow-y-auto pr-1">
               {searchQuery.trim() ? (
                 /* Live Suggestions */
                 <div className="space-y-3">
-                  <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[#707072]">
+                  <div className="text-xs font-semibold tracking-[0.08em] text-[#707072] uppercase">
                     {t("storefront.nav.searchSuggestions")}
                   </div>
                   {searchSuggestions.length > 0 ? (
@@ -1077,23 +1143,27 @@ export function SiteHeader() {
                           persistSearchHistory(searchQuery);
                           setIsMobileSearchOpen(false);
                         }}
-                        className="flex items-center gap-3 py-2.5 border-b border-[#1c1a18]/8 text-sm text-[#1c1a18] hover:text-[#b5573a] transition-colors"
+                        className="flex items-center gap-3 border-b border-[#1c1a18]/8 py-2.5 text-sm text-[#1c1a18] transition-colors hover:text-[#b5573a]"
                       >
                         <Image
                           src={product.image}
                           alt={product.name}
                           width={44}
                           height={44}
-                          className="h-11 w-11 rounded-sm object-cover bg-white flex-none"
+                          className="h-11 w-11 flex-none rounded-sm bg-white object-cover"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-[#1c1a18]">{product.name}</p>
-                          <p className="text-xs text-[#b5573a] font-numeric font-medium">{money(product.price, activeLocale)}</p>
+                          <p className="truncate text-sm font-medium text-[#1c1a18]">
+                            {product.name}
+                          </p>
+                          <p className="font-numeric text-xs font-medium text-[#b5573a]">
+                            {money(product.price, activeLocale)}
+                          </p>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <p className="text-sm text-[#1c1a18]/60 py-4">
+                    <p className="py-4 text-sm text-[#1c1a18]/60">
                       {t("storefront.nav.noMatchingProducts")}
                     </p>
                   )}
@@ -1103,7 +1173,7 @@ export function SiteHeader() {
                 <>
                   {/* Popular Search Terms */}
                   <div>
-                    <h3 className="text-xs font-semibold text-[#707072] uppercase tracking-[0.08em] mb-3">
+                    <h3 className="mb-3 text-xs font-semibold tracking-[0.08em] text-[#707072] uppercase">
                       {activeLocale === "vi" ? "Từ khóa tìm kiếm phổ biến" : "Popular Search Terms"}
                     </h3>
                     <div className="flex flex-wrap gap-2.5">
@@ -1112,7 +1182,7 @@ export function SiteHeader() {
                           key={term}
                           type="button"
                           onClick={() => runSearch(term)}
-                          className="rounded-full bg-[#efe7dc] px-4 py-2 text-xs font-medium text-[#1c1a18] hover:bg-[#b5573a] hover:text-white transition-colors cursor-pointer"
+                          className="cursor-pointer rounded-full bg-[#efe7dc] px-4 py-2 text-xs font-medium text-[#1c1a18] transition-colors hover:bg-[#b5573a] hover:text-white"
                         >
                           {term}
                         </button>
@@ -1123,35 +1193,32 @@ export function SiteHeader() {
                   {/* Recent Searches */}
                   {searchHistory.length > 0 && (
                     <div className="pt-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xs font-semibold text-[#707072] uppercase tracking-[0.08em]">
+                      <div className="mb-2 flex items-center justify-between">
+                        <h3 className="text-xs font-semibold tracking-[0.08em] text-[#707072] uppercase">
                           {activeLocale === "vi" ? "Tìm kiếm gần đây" : "Recent searches"}
                         </h3>
                         <button
                           type="button"
                           onClick={() => setSearchHistory([])}
-                          className="text-xs text-[#1c1a18]/50 hover:text-[#b5573a] font-medium"
+                          className="text-xs font-medium text-[#1c1a18]/50 hover:text-[#b5573a]"
                         >
                           {activeLocale === "vi" ? "Xóa tất cả" : "Clear all"}
                         </button>
                       </div>
                       <div className="divide-y divide-[#1c1a18]/8">
                         {searchHistory.map((term) => (
-                          <div
-                            key={term}
-                            className="flex items-center justify-between py-3 group"
-                          >
+                          <div key={term} className="group flex items-center justify-between py-3">
                             <button
                               type="button"
                               onClick={() => runSearch(term)}
-                              className="text-sm font-semibold text-[#1c1a18] hover:text-[#b5573a] text-left flex-1 truncate transition-colors cursor-pointer"
+                              className="flex-1 cursor-pointer truncate text-left text-sm font-semibold text-[#1c1a18] transition-colors hover:text-[#b5573a]"
                             >
                               {term}
                             </button>
                             <button
                               type="button"
                               onClick={() => removeSearchHistoryItem(term)}
-                              className="p-1 text-[#1c1a18]/40 hover:text-[#1c1a18] transition-colors cursor-pointer flex-none"
+                              className="flex-none cursor-pointer p-1 text-[#1c1a18]/40 transition-colors hover:text-[#1c1a18]"
                               aria-label={t("storefront.nav.deleteSearch", { term })}
                             >
                               <X className="size-4" />

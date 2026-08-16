@@ -81,7 +81,9 @@ export function PreferencesStoreProvider({
     };
   }, [store]);
 
-  return <PreferencesStoreContext.Provider value={store}>{children}</PreferencesStoreContext.Provider>;
+  return (
+    <PreferencesStoreContext.Provider value={store}>{children}</PreferencesStoreContext.Provider>
+  );
 }
 
 export function usePreferencesStore<T>(selector: (state: PreferencesState) => T): T {

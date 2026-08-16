@@ -56,7 +56,8 @@ export const authErrorMessages = defineMessages(
     "auth.register.dayAria": "Day of birth",
     "auth.register.monthAria": "Month of birth",
     "auth.register.yearAria": "Year of birth",
-    "auth.register.emailConsent": "Sign up for emails about Vela products, offers, and Member benefits.",
+    "auth.register.emailConsent":
+      "Sign up for emails about Vela products, offers, and Member benefits.",
     "auth.register.termsPrefix": "I agree to Vela's",
     "auth.register.privacyPolicy": "Privacy Policy",
     "auth.register.termsJoin": "and",
@@ -90,10 +91,12 @@ export const authErrorMessages = defineMessages(
     "auth.otp.invalid": "The verification code is invalid or has expired.",
     "auth.otp.actionFailed": "We couldn't complete this request. Please try again.",
     "auth.otp.cooldownError": "Please wait before requesting another verification code.",
-    "auth.otp.expiredError": "Your verification code has expired. Request a new code and try again.",
+    "auth.otp.expiredError":
+      "Your verification code has expired. Request a new code and try again.",
     "auth.otp.attemptsError": "Too many incorrect attempts. Request a new verification code.",
     "auth.otp.validationError": "The verification code is invalid. Check the code and try again.",
-    "auth.otp.serviceError": "The verification email service is unavailable. Please try again later.",
+    "auth.otp.serviceError":
+      "The verification email service is unavailable. Please try again later.",
     "auth.otp.sessionRevokedError": "Your session is no longer valid. Please sign in again.",
     "auth.otp.duplicateError": "This email address is already in use.",
     "auth.otp.genericError": "Something went wrong. Please try again.",
@@ -127,28 +130,39 @@ export const authErrorMessages = defineMessages(
     "errors.resource.product": "the product",
 
     "errors.api.forbiddenTitle": "This content isn't available to you",
-    "errors.api.forbiddenDescription": "Your current account cannot access {resource}. Return to the store or sign in with an eligible account.",
+    "errors.api.forbiddenDescription":
+      "Your current account cannot access {resource}. Return to the store or sign in with an eligible account.",
     "errors.api.notFoundTitle": "Content not found",
-    "errors.api.notFoundDescription": "We couldn't find {resource}. It may have moved, been renamed, or no longer be available.",
+    "errors.api.notFoundDescription":
+      "We couldn't find {resource}. It may have moved, been renamed, or no longer be available.",
     "errors.api.badRequestTitle": "Check the request details",
-    "errors.api.badRequestDescription": "Some information requested for {resource} is invalid or unsupported. Reset it and continue with the available content.",
+    "errors.api.badRequestDescription":
+      "Some information requested for {resource} is invalid or unsupported. Reset it and continue with the available content.",
     "errors.api.serverTitle": "A brief interruption",
-    "errors.api.serverDescription": "The connection to {resource} is interrupted. Vela Wear has recorded the issue; please try again in a few minutes.",
+    "errors.api.serverDescription":
+      "The connection to {resource} is interrupted. Vela Wear has recorded the issue; please try again in a few minutes.",
     "errors.api.genericTitle": "The request couldn't be completed",
-    "errors.api.genericDescription": "We couldn't load {resource} right now. Check the information and try once more.",
+    "errors.api.genericDescription":
+      "We couldn't load {resource} right now. Check the information and try once more.",
 
     "errors.rootNotFound.title": "This page has left the collection",
-    "errors.rootNotFound.description": "The address may have changed, the content may have moved, or the page may never have existed.",
+    "errors.rootNotFound.description":
+      "The address may have changed, the content may have moved, or the page may never have existed.",
     "errors.rootError.title": "The experience needs a moment",
-    "errors.rootError.description": "An unexpected error interrupted this page. Try again or return to the store while we restore the connection.",
+    "errors.rootError.description":
+      "An unexpected error interrupted this page. Try again or return to the store while we restore the connection.",
     "errors.global.title": "Vela Wear needs a moment",
-    "errors.global.description": "A critical error interrupted the application. Try reopening the experience or return to the store.",
+    "errors.global.description":
+      "A critical error interrupted the application. Try reopening the experience or return to the store.",
     "errors.unauthorized.title": "This area isn't available to you",
-    "errors.unauthorized.description": "Your account is signed in but doesn't have access to this content. Return to the store or choose another collection.",
+    "errors.unauthorized.description":
+      "Your account is signed in but doesn't have access to this content. Return to the store or choose another collection.",
     "errors.shopNotFound.title": "This design is no longer here",
-    "errors.shopNotFound.description": "The content may have moved to a new address or temporarily left the current collection.",
+    "errors.shopNotFound.description":
+      "The content may have moved to a new address or temporarily left the current collection.",
     "errors.shopError.title": "The store needs a moment",
-    "errors.shopError.description": "An unexpected error interrupted this content. Try again or continue exploring other designs.",
+    "errors.shopError.description":
+      "An unexpected error interrupted this content. Try again or continue exploring other designs.",
   },
   {
     "auth.common.homeAria": "Về trang chủ Vela Wear",
@@ -205,7 +219,8 @@ export const authErrorMessages = defineMessages(
     "auth.register.dayAria": "Ngày sinh",
     "auth.register.monthAria": "Tháng sinh",
     "auth.register.yearAria": "Năm sinh",
-    "auth.register.emailConsent": "Đăng ký email để nhận tin về sản phẩm, ưu đãi và quyền lợi Thành viên Vela.",
+    "auth.register.emailConsent":
+      "Đăng ký email để nhận tin về sản phẩm, ưu đãi và quyền lợi Thành viên Vela.",
     "auth.register.termsPrefix": "Tôi đồng ý với",
     "auth.register.privacyPolicy": "Chính sách quyền riêng tư",
     "auth.register.termsJoin": "và",
@@ -276,28 +291,39 @@ export const authErrorMessages = defineMessages(
     "errors.resource.product": "sản phẩm",
 
     "errors.api.forbiddenTitle": "Nội dung này chưa dành cho bạn",
-    "errors.api.forbiddenDescription": "Tài khoản hiện tại không có quyền xem {resource}. Bạn có thể quay lại cửa hàng hoặc đăng nhập bằng tài khoản phù hợp.",
+    "errors.api.forbiddenDescription":
+      "Tài khoản hiện tại không có quyền xem {resource}. Bạn có thể quay lại cửa hàng hoặc đăng nhập bằng tài khoản phù hợp.",
     "errors.api.notFoundTitle": "Không tìm thấy nội dung",
-    "errors.api.notFoundDescription": "Chúng tôi không tìm thấy {resource}. Nội dung có thể đã được chuyển, đổi tên hoặc không còn hiển thị.",
+    "errors.api.notFoundDescription":
+      "Chúng tôi không tìm thấy {resource}. Nội dung có thể đã được chuyển, đổi tên hoặc không còn hiển thị.",
     "errors.api.badRequestTitle": "Kiểm tra lại thông tin",
-    "errors.api.badRequestDescription": "Một số thông tin dùng để tải {resource} không hợp lệ hoặc chưa được hỗ trợ. Hãy đặt lại và tiếp tục với nội dung hiện có.",
+    "errors.api.badRequestDescription":
+      "Một số thông tin dùng để tải {resource} không hợp lệ hoặc chưa được hỗ trợ. Hãy đặt lại và tiếp tục với nội dung hiện có.",
     "errors.api.serverTitle": "Có một nhịp ngắt quãng",
-    "errors.api.serverDescription": "Kết nối đến {resource} đang bị gián đoạn. Vela Wear đã ghi nhận và bạn có thể thử lại sau ít phút.",
+    "errors.api.serverDescription":
+      "Kết nối đến {resource} đang bị gián đoạn. Vela Wear đã ghi nhận và bạn có thể thử lại sau ít phút.",
     "errors.api.genericTitle": "Yêu cầu chưa thể hoàn tất",
-    "errors.api.genericDescription": "Chúng tôi chưa thể tải {resource} ở thời điểm này. Vui lòng kiểm tra lại thông tin và thử thêm một lần nữa.",
+    "errors.api.genericDescription":
+      "Chúng tôi chưa thể tải {resource} ở thời điểm này. Vui lòng kiểm tra lại thông tin và thử thêm một lần nữa.",
 
     "errors.rootNotFound.title": "Trang này đã rời khỏi bộ sưu tập",
-    "errors.rootNotFound.description": "Đường dẫn có thể đã được thay đổi, nội dung đã chuyển sang một địa chỉ mới hoặc chưa từng tồn tại.",
+    "errors.rootNotFound.description":
+      "Đường dẫn có thể đã được thay đổi, nội dung đã chuyển sang một địa chỉ mới hoặc chưa từng tồn tại.",
     "errors.rootError.title": "Trải nghiệm cần một nhịp nghỉ",
-    "errors.rootError.description": "Một lỗi ngoài dự kiến đã làm gián đoạn trang này. Hãy thử tải lại hoặc quay về cửa hàng trong lúc chúng tôi khôi phục kết nối.",
+    "errors.rootError.description":
+      "Một lỗi ngoài dự kiến đã làm gián đoạn trang này. Hãy thử tải lại hoặc quay về cửa hàng trong lúc chúng tôi khôi phục kết nối.",
     "errors.global.title": "Vela Wear cần một chút thời gian",
-    "errors.global.description": "Một lỗi nghiêm trọng đã làm gián đoạn ứng dụng. Hãy thử mở lại trải nghiệm hoặc quay về cửa hàng.",
+    "errors.global.description":
+      "Một lỗi nghiêm trọng đã làm gián đoạn ứng dụng. Hãy thử mở lại trải nghiệm hoặc quay về cửa hàng.",
     "errors.unauthorized.title": "Khu vực này chưa dành cho bạn",
-    "errors.unauthorized.description": "Tài khoản hiện tại đã đăng nhập nhưng chưa có quyền mở nội dung này. Hãy quay lại cửa hàng hoặc chọn một bộ sưu tập khác.",
+    "errors.unauthorized.description":
+      "Tài khoản hiện tại đã đăng nhập nhưng chưa có quyền mở nội dung này. Hãy quay lại cửa hàng hoặc chọn một bộ sưu tập khác.",
     "errors.shopNotFound.title": "Thiết kế này không còn ở đây",
-    "errors.shopNotFound.description": "Nội dung có thể đã được chuyển sang một địa chỉ mới hoặc tạm rời khỏi bộ sưu tập hiện tại.",
+    "errors.shopNotFound.description":
+      "Nội dung có thể đã được chuyển sang một địa chỉ mới hoặc tạm rời khỏi bộ sưu tập hiện tại.",
     "errors.shopError.title": "Gian hàng cần một nhịp nghỉ",
-    "errors.shopError.description": "Một lỗi ngoài dự kiến đã làm gián đoạn nội dung này. Hãy thử tải lại, hoặc tiếp tục khám phá các thiết kế khác.",
+    "errors.shopError.description":
+      "Một lỗi ngoài dự kiến đã làm gián đoạn nội dung này. Hãy thử tải lại, hoặc tiếp tục khám phá các thiết kế khác.",
   },
 );
 

@@ -13,8 +13,8 @@ export function FieldLabel({
     <label
       htmlFor={htmlFor}
       className={cn(
-        "mb-1 block w-full text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60 cursor-pointer",
-        className
+        "mb-1 block w-full cursor-pointer text-[10px] font-semibold tracking-widest text-[#1c1a18]/60 uppercase",
+        className,
       )}
     >
       {children}

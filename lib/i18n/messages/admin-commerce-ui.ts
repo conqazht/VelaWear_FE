@@ -64,7 +64,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.users.searchName": "Search name...",
     "admin.commerce.users.add": "Add user",
     "admin.commerce.users.emptyTitle": "No users found",
-    "admin.commerce.users.emptyDescription": "Try another filter or create the first managed account.",
+    "admin.commerce.users.emptyDescription":
+      "Try another filter or create the first managed account.",
     "admin.commerce.users.csvYes": "Yes",
     "admin.commerce.users.csvNo": "No",
     "admin.commerce.users.resource": "user",
@@ -73,13 +74,16 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.users.form.rolesRequired": "Select at least one role.",
     "admin.commerce.users.form.addTitle": "Add user",
     "admin.commerce.users.form.editTitle": "Edit {name}",
-    "admin.commerce.users.form.createDescription": "Create an account and assign its initial access roles.",
-    "admin.commerce.users.form.editDescription": "Update profile details and replace the user's assigned roles.",
+    "admin.commerce.users.form.createDescription":
+      "Create an account and assign its initial access roles.",
+    "admin.commerce.users.form.editDescription":
+      "Update profile details and replace the user's assigned roles.",
     "admin.commerce.users.form.create": "Create user",
     "admin.commerce.users.form.unableSave": "Unable to save user",
     "admin.commerce.users.form.fullName": "Full name",
     "admin.commerce.users.form.email": "Email address",
-    "admin.commerce.users.form.emailImmutable": "Email changes are not supported by the admin user endpoint.",
+    "admin.commerce.users.form.emailImmutable":
+      "Email changes are not supported by the admin user endpoint.",
     "admin.commerce.users.form.temporaryPassword": "Temporary password",
     "admin.commerce.users.form.passwordHelp": "Use between 8 and 100 characters.",
     "admin.commerce.users.form.birthDate": "Birth date",
@@ -117,16 +121,20 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.roles.searchNames": "Search role names...",
     "admin.commerce.roles.create": "Create role",
     "admin.commerce.roles.emptyTitle": "No roles found",
-    "admin.commerce.roles.emptyDescription": "Try another search or create a role for your access model.",
+    "admin.commerce.roles.emptyDescription":
+      "Try another search or create a role for your access model.",
     "admin.commerce.roles.resource": "role",
     "admin.commerce.roles.deleteDescription":
       "This hard-deletes the role and cascades every user-role and role-permission link. The backend does not protect system roles or the last administrator.",
     "admin.commerce.roles.form.editTitle": "Edit {name}",
-    "admin.commerce.roles.form.createDescription": "Create a named access role for user assignment.",
-    "admin.commerce.roles.form.editDescription": "Update the role name and its operational description.",
+    "admin.commerce.roles.form.createDescription":
+      "Create a named access role for user assignment.",
+    "admin.commerce.roles.form.editDescription":
+      "Update the role name and its operational description.",
     "admin.commerce.roles.form.unableSave": "Unable to save role",
     "admin.commerce.roles.form.name": "Role name",
-    "admin.commerce.roles.form.nameHelp": "Users are assigned by this exact name, including capitalization.",
+    "admin.commerce.roles.form.nameHelp":
+      "Users are assigned by this exact name, including capitalization.",
     "admin.commerce.roles.form.descriptionPlaceholder": "Describe what this role is used for.",
     "admin.commerce.roles.form.characters": "{count}/255 characters",
     "admin.commerce.roles.form.assignedPermissions": "Assigned permissions",
@@ -142,7 +150,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.permissions.title": "Permissions",
     "admin.commerce.permissions.description":
       "Manage method-and-path rules used by backend role-based access control. Changes can affect access immediately.",
-    "admin.commerce.permissions.validation.complete": "Complete every permission field before saving.",
+    "admin.commerce.permissions.validation.complete":
+      "Complete every permission field before saving.",
     "admin.commerce.permissions.validation.path": "API path must start with a forward slash.",
     "admin.commerce.permissions.updated": "{name} was updated.",
     "admin.commerce.permissions.created": "{name} was created.",
@@ -181,13 +190,15 @@ export const adminCommerceUiMessages = defineMessages(
       "Manage the catalog hierarchy, storefront visibility, and display order.",
     "admin.commerce.categories.validation.complete":
       "Complete the category name and sort order before saving.",
-    "admin.commerce.categories.validation.sortOrder": "Sort order must be a non-negative whole number.",
+    "admin.commerce.categories.validation.sortOrder":
+      "Sort order must be a non-negative whole number.",
     "admin.commerce.categories.validation.parent": "Choose a valid parent category.",
     "admin.commerce.categories.validation.parentUnavailable":
       "The selected parent category is no longer available.",
     "admin.commerce.categories.validation.cycle":
       "Choose a parent outside this category's own hierarchy.",
-    "admin.commerce.categories.validation.slugRequired": "Enter a slug before creating the category.",
+    "admin.commerce.categories.validation.slugRequired":
+      "Enter a slug before creating the category.",
     "admin.commerce.categories.validation.slugFormat":
       "Use a lowercase URL-safe slug with words separated by hyphens.",
     "admin.commerce.categories.updated": "{name} was updated.",
@@ -268,7 +279,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.brands.archiveDescription":
       "This archives the brand from active catalog lists. Existing product references are retained.",
     "admin.commerce.brands.form.name": "Brand name",
-    "admin.commerce.brands.form.nameHelp": "Use the public-facing brand name, up to 150 characters.",
+    "admin.commerce.brands.form.nameHelp":
+      "Use the public-facing brand name, up to 150 characters.",
     "admin.commerce.brands.form.slugImmutable": "Brand slugs are immutable after creation.",
     "admin.commerce.brands.form.slugHelp":
       "Use lowercase letters, numbers, and hyphens for a unique URL-safe slug.",
@@ -306,7 +318,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.attributes.colors.save": "Save color",
     "admin.commerce.attributes.colors.create": "Create color",
     "admin.commerce.attributes.colors.emptyTitle": "No colors found",
-    "admin.commerce.attributes.colors.emptyDescription": "Add a color or adjust the current search.",
+    "admin.commerce.attributes.colors.emptyDescription":
+      "Add a color or adjust the current search.",
     "admin.commerce.attributes.colors.formDescription":
       "Set the customer-facing name, exact hex value, and display order.",
     "admin.commerce.attributes.colors.resource": "color",
@@ -346,8 +359,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.validation.addVariant":
       "Add at least one product variant before saving.",
     "admin.commerce.products.validation.skuRequired": "Variant {number} requires a SKU.",
-    "admin.commerce.products.validation.duplicateSku":
-      "SKU {sku} is duplicated in this product.",
+    "admin.commerce.products.validation.duplicateSku": "SKU {sku} is duplicated in this product.",
     "admin.commerce.products.validation.price":
       "Variant {number} price must be a non-negative number.",
     "admin.commerce.products.validation.stock":
@@ -423,8 +435,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.form.slug": "Slug",
     "admin.commerce.products.form.slugImmutable":
       "Translation slugs are editable and unique within each language.",
-    "admin.commerce.products.form.slugHelp":
-      "Use a unique, URL-safe slug for this language.",
+    "admin.commerce.products.form.slugHelp": "Use a unique, URL-safe slug for this language.",
     "admin.commerce.products.form.description": "Description",
     "admin.commerce.products.form.descriptionPlaceholder":
       "Describe materials, fit, and product details.",
@@ -532,8 +543,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.orders.history.unavailable": "Status history unavailable",
     "admin.commerce.orders.history.createdAs": "Created as",
     "admin.commerce.orders.history.changedBy": "Changed by user #{id}",
-    "admin.commerce.orders.history.empty":
-      "No recorded transitions. Current status: {status}.",
+    "admin.commerce.orders.history.empty": "No recorded transitions. Current status: {status}.",
 
     "admin.commerce.coupons.status.active": "Active",
     "admin.commerce.coupons.status.inactive": "Inactive",
@@ -563,8 +573,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.coupons.notUsed": "Not used yet",
     "admin.commerce.coupons.validTo": "to {date}",
     "admin.commerce.coupons.editNamed": "Edit {code}",
-    "admin.commerce.coupons.usedDeleteAria":
-      "{code} cannot be deleted because it has been used",
+    "admin.commerce.coupons.usedDeleteAria": "{code} cannot be deleted because it has been used",
     "admin.commerce.coupons.usedDeleteTitle": "Used coupons cannot be deleted",
     "admin.commerce.coupons.deleteNamed": "Delete {code}",
     "admin.commerce.coupons.title": "Coupons",
@@ -595,8 +604,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.coupons.form.minimumHelp": "Enter 0 when there is no minimum order value.",
     "admin.commerce.coupons.form.maximum": "Maximum discount (VND)",
     "admin.commerce.coupons.form.noCap": "No cap",
-    "admin.commerce.coupons.form.maximumHelp":
-      "Optional; leave blank for no discount cap.",
+    "admin.commerce.coupons.form.maximumHelp": "Optional; leave blank for no discount cap.",
     "admin.commerce.coupons.form.usageLimit": "Usage limit",
     "admin.commerce.coupons.form.unlimited": "Unlimited",
     "admin.commerce.coupons.form.usageLimitHelp": "Optional; leave blank for unlimited uses.",
@@ -639,12 +647,15 @@ export const adminCommerceUiMessages = defineMessages(
       "Quản lý tài khoản khách hàng và nhân viên, thông tin hồ sơ cùng quyền truy cập theo vai trò.",
     "admin.commerce.users.noRoles": "Chưa có vai trò",
     "admin.commerce.users.created": "Đã tạo người dùng",
-    "admin.commerce.users.createdDescription": "{name} hiện có thể đăng nhập với quyền đã được gán.",
+    "admin.commerce.users.createdDescription":
+      "{name} hiện có thể đăng nhập với quyền đã được gán.",
     "admin.commerce.users.createdWithoutRoles": "Đã tạo người dùng nhưng chưa gán vai trò",
     "admin.commerce.users.updated": "Đã cập nhật người dùng",
-    "admin.commerce.users.updatedDescription": "Hồ sơ và quyền truy cập của {name} đã được cập nhật.",
+    "admin.commerce.users.updatedDescription":
+      "Hồ sơ và quyền truy cập của {name} đã được cập nhật.",
     "admin.commerce.users.deleted": "Đã xóa người dùng",
-    "admin.commerce.users.deletedDescription": "{name} đã được xóa khỏi danh sách quản lý người dùng hoạt động.",
+    "admin.commerce.users.deletedDescription":
+      "{name} đã được xóa khỏi danh sách quản lý người dùng hoạt động.",
     "admin.commerce.users.unableDelete": "Không thể xóa người dùng",
     "admin.commerce.users.column.user": "Người dùng",
     "admin.commerce.users.column.roles": "Vai trò",
@@ -676,13 +687,16 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.users.form.rolesRequired": "Chọn ít nhất một vai trò.",
     "admin.commerce.users.form.addTitle": "Thêm người dùng",
     "admin.commerce.users.form.editTitle": "Sửa {name}",
-    "admin.commerce.users.form.createDescription": "Tạo tài khoản và gán các vai trò truy cập ban đầu.",
-    "admin.commerce.users.form.editDescription": "Cập nhật hồ sơ và thay thế danh sách vai trò được gán.",
+    "admin.commerce.users.form.createDescription":
+      "Tạo tài khoản và gán các vai trò truy cập ban đầu.",
+    "admin.commerce.users.form.editDescription":
+      "Cập nhật hồ sơ và thay thế danh sách vai trò được gán.",
     "admin.commerce.users.form.create": "Tạo người dùng",
     "admin.commerce.users.form.unableSave": "Không thể lưu người dùng",
     "admin.commerce.users.form.fullName": "Họ và tên",
     "admin.commerce.users.form.email": "Địa chỉ email",
-    "admin.commerce.users.form.emailImmutable": "Endpoint quản trị người dùng không hỗ trợ đổi email.",
+    "admin.commerce.users.form.emailImmutable":
+      "Endpoint quản trị người dùng không hỗ trợ đổi email.",
     "admin.commerce.users.form.temporaryPassword": "Mật khẩu tạm thời",
     "admin.commerce.users.form.passwordHelp": "Sử dụng từ 8 đến 100 ký tự.",
     "admin.commerce.users.form.birthDate": "Ngày sinh",
@@ -705,7 +719,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.roles.updated": "Đã cập nhật vai trò",
     "admin.commerce.roles.updatedDescription": "{name} đã được cập nhật thành công.",
     "admin.commerce.roles.deleted": "Đã xóa vai trò",
-    "admin.commerce.roles.deletedDescription": "{name} cùng các liên kết người dùng/quyền đã được xóa.",
+    "admin.commerce.roles.deletedDescription":
+      "{name} cùng các liên kết người dùng/quyền đã được xóa.",
     "admin.commerce.roles.unableDelete": "Không thể xóa vai trò",
     "admin.commerce.roles.column.role": "Vai trò",
     "admin.commerce.roles.column.accessMap": "Sơ đồ quyền",
@@ -720,7 +735,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.roles.searchNames": "Tìm tên vai trò...",
     "admin.commerce.roles.create": "Tạo vai trò",
     "admin.commerce.roles.emptyTitle": "Không tìm thấy vai trò",
-    "admin.commerce.roles.emptyDescription": "Thử tìm kiếm khác hoặc tạo vai trò cho mô hình phân quyền.",
+    "admin.commerce.roles.emptyDescription":
+      "Thử tìm kiếm khác hoặc tạo vai trò cho mô hình phân quyền.",
     "admin.commerce.roles.resource": "vai trò",
     "admin.commerce.roles.deleteDescription":
       "Thao tác này xóa vĩnh viễn vai trò và mọi liên kết người dùng–vai trò, vai trò–quyền. Backend không bảo vệ vai trò hệ thống hoặc quản trị viên cuối cùng.",
@@ -729,7 +745,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.roles.form.editDescription": "Cập nhật tên vai trò và mô tả hoạt động.",
     "admin.commerce.roles.form.unableSave": "Không thể lưu vai trò",
     "admin.commerce.roles.form.name": "Tên vai trò",
-    "admin.commerce.roles.form.nameHelp": "Người dùng được gán theo chính xác tên này, bao gồm chữ hoa và chữ thường.",
+    "admin.commerce.roles.form.nameHelp":
+      "Người dùng được gán theo chính xác tên này, bao gồm chữ hoa và chữ thường.",
     "admin.commerce.roles.form.descriptionPlaceholder": "Mô tả mục đích sử dụng của vai trò này.",
     "admin.commerce.roles.form.characters": "{count}/255 ký tự",
     "admin.commerce.roles.form.assignedPermissions": "Quyền đã gán",
@@ -832,8 +849,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.categories.form.slugHelp":
       "Dùng slug URL duy nhất, viết thường cho ngôn ngữ này.",
     "admin.commerce.categories.form.description": "Mô tả",
-    "admin.commerce.categories.form.descriptionPlaceholder":
-      "Mô tả danh mục này cho khách hàng.",
+    "admin.commerce.categories.form.descriptionPlaceholder": "Mô tả danh mục này cho khách hàng.",
     "admin.commerce.categories.form.seoTitle": "Tiêu đề SEO",
     "admin.commerce.categories.form.seoDescription": "Mô tả SEO",
     "admin.commerce.categories.form.sortOrder": "Thứ tự sắp xếp",
@@ -848,7 +864,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.brands.validation.nameRequired": "Nhập tên thương hiệu trước khi lưu.",
     "admin.commerce.brands.validation.nameLength": "Tên thương hiệu không được vượt quá 150 ký tự.",
     "admin.commerce.brands.validation.slugRequired": "Nhập slug thương hiệu trước khi lưu.",
-    "admin.commerce.brands.validation.slugLength": "Slug thương hiệu không được vượt quá 180 ký tự.",
+    "admin.commerce.brands.validation.slugLength":
+      "Slug thương hiệu không được vượt quá 180 ký tự.",
     "admin.commerce.brands.validation.slugFormat":
       "Dùng slug URL viết thường, các từ phân cách bằng dấu gạch nối.",
     "admin.commerce.brands.updated": "Đã cập nhật {name}.",
@@ -871,7 +888,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.brands.archiveDescription":
       "Thao tác này lưu trữ thương hiệu khỏi danh sách catalog hoạt động. Các tham chiếu sản phẩm hiện có vẫn được giữ lại.",
     "admin.commerce.brands.form.name": "Tên thương hiệu",
-    "admin.commerce.brands.form.nameHelp": "Dùng tên thương hiệu hiển thị công khai, tối đa 150 ký tự.",
+    "admin.commerce.brands.form.nameHelp":
+      "Dùng tên thương hiệu hiển thị công khai, tối đa 150 ký tự.",
     "admin.commerce.brands.form.slugImmutable": "Slug thương hiệu không thể thay đổi sau khi tạo.",
     "admin.commerce.brands.form.slugHelp":
       "Dùng chữ thường, số và dấu gạch nối để tạo slug URL duy nhất.",
@@ -894,8 +912,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.attributes.sortOrder": "Thứ tự sắp xếp",
     "admin.commerce.attributes.sortOrderHelp":
       "Giá trị nhỏ hơn xuất hiện trước trong danh sách lựa chọn thuộc tính.",
-    "admin.commerce.attributes.validation.sortOrder":
-      "Thứ tự sắp xếp phải là số nguyên không âm.",
+    "admin.commerce.attributes.validation.sortOrder": "Thứ tự sắp xếp phải là số nguyên không âm.",
     "admin.commerce.attributes.colors.validation.name": "Nhập tên màu trước khi lưu.",
     "admin.commerce.attributes.colors.validation.hex": "Mã hex phải theo định dạng #RRGGBB.",
     "admin.commerce.attributes.colors.column.color": "Màu",
@@ -909,7 +926,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.attributes.colors.save": "Lưu màu",
     "admin.commerce.attributes.colors.create": "Tạo màu",
     "admin.commerce.attributes.colors.emptyTitle": "Không tìm thấy màu",
-    "admin.commerce.attributes.colors.emptyDescription": "Thêm màu hoặc điều chỉnh tìm kiếm hiện tại.",
+    "admin.commerce.attributes.colors.emptyDescription":
+      "Thêm màu hoặc điều chỉnh tìm kiếm hiện tại.",
     "admin.commerce.attributes.colors.formDescription":
       "Thiết lập tên hiển thị cho khách hàng, mã hex chính xác và thứ tự hiển thị.",
     "admin.commerce.attributes.colors.resource": "màu",
@@ -950,10 +968,8 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.validation.addVariant":
       "Thêm ít nhất một biến thể sản phẩm trước khi lưu.",
     "admin.commerce.products.validation.skuRequired": "Biến thể {number} cần có SKU.",
-    "admin.commerce.products.validation.duplicateSku":
-      "SKU {sku} bị trùng trong sản phẩm này.",
-    "admin.commerce.products.validation.price":
-      "Giá của biến thể {number} phải là số không âm.",
+    "admin.commerce.products.validation.duplicateSku": "SKU {sku} bị trùng trong sản phẩm này.",
+    "admin.commerce.products.validation.price": "Giá của biến thể {number} phải là số không âm.",
     "admin.commerce.products.validation.stock":
       "Tồn kho của biến thể {number} phải là số nguyên không âm.",
     "admin.commerce.products.validation.zeroStockActive":
@@ -1027,8 +1043,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.products.form.slug": "Slug",
     "admin.commerce.products.form.slugImmutable":
       "Slug bản dịch có thể chỉnh sửa và là duy nhất trong từng ngôn ngữ.",
-    "admin.commerce.products.form.slugHelp":
-      "Dùng slug URL duy nhất và an toàn cho ngôn ngữ này.",
+    "admin.commerce.products.form.slugHelp": "Dùng slug URL duy nhất và an toàn cho ngôn ngữ này.",
     "admin.commerce.products.form.description": "Mô tả",
     "admin.commerce.products.form.descriptionPlaceholder":
       "Mô tả chất liệu, kiểu dáng và thông tin sản phẩm.",
@@ -1149,8 +1164,7 @@ export const adminCommerceUiMessages = defineMessages(
       "Giá trị giảm giá và đơn hàng tối thiểu phải là các số không âm hợp lệ.",
     "admin.commerce.coupons.validation.percentage":
       "Mức giảm theo phần trăm không được vượt quá 100%.",
-    "admin.commerce.coupons.validation.maxDiscount":
-      "Mức giảm tối đa phải là số không âm.",
+    "admin.commerce.coupons.validation.maxDiscount": "Mức giảm tối đa phải là số không âm.",
     "admin.commerce.coupons.validation.usageLimit":
       "Giới hạn lượt dùng phải là số nguyên không âm.",
     "admin.commerce.coupons.validation.dates": "Ngày kết thúc phải sau ngày bắt đầu.",
@@ -1168,8 +1182,7 @@ export const adminCommerceUiMessages = defineMessages(
     "admin.commerce.coupons.notUsed": "Chưa được sử dụng",
     "admin.commerce.coupons.validTo": "đến {date}",
     "admin.commerce.coupons.editNamed": "Sửa {code}",
-    "admin.commerce.coupons.usedDeleteAria":
-      "Không thể xóa {code} vì mã này đã được sử dụng",
+    "admin.commerce.coupons.usedDeleteAria": "Không thể xóa {code} vì mã này đã được sử dụng",
     "admin.commerce.coupons.usedDeleteTitle": "Không thể xóa mã giảm giá đã sử dụng",
     "admin.commerce.coupons.deleteNamed": "Xóa {code}",
     "admin.commerce.coupons.title": "Mã giảm giá",

@@ -8,10 +8,7 @@ import type {
   UpdateAdminSaleCampaignRequest,
 } from "@/lib/api/admin-sales";
 import type { AdminProductVariant } from "@/lib/api/admin-commerce";
-import {
-  interpolateMessage,
-  type MessageVariables,
-} from "@/lib/i18n/define-messages";
+import { interpolateMessage, type MessageVariables } from "@/lib/i18n/define-messages";
 import {
   salesAdminManagementMessages,
   type SalesAdminManagementTranslationKey,
@@ -47,8 +44,7 @@ export type SaleCampaignFormValues = {
 };
 
 export type SaleCampaignValidationResult =
-  | { valid: true }
-  | { valid: false; step: 1 | 2; message: string };
+  { valid: true } | { valid: false; step: 1 | 2; message: string };
 
 export type SaleCampaignFormTranslator = (
   key: SalesAdminManagementTranslationKey,
@@ -89,9 +85,7 @@ export function createEmptySaleCampaignForm(): SaleCampaignFormValues {
   };
 }
 
-function campaignItemToFormItem(
-  item: AdminSaleCampaignItem,
-): SaleCampaignFormItem {
+function campaignItemToFormItem(item: AdminSaleCampaignItem): SaleCampaignFormItem {
   return {
     id: item.id,
     variantId: item.variantId,
@@ -105,8 +99,7 @@ function campaignItemToFormItem(
     quota: item.quota === null ? "" : String(item.quota),
     reservedQuantity: item.reservedQuantity,
     soldQuantity: item.soldQuantity,
-    maxPerCustomer:
-      item.maxPerCustomer === null ? "" : String(item.maxPerCustomer),
+    maxPerCustomer: item.maxPerCustomer === null ? "" : String(item.maxPerCustomer),
   };
 }
 
@@ -114,7 +107,9 @@ export function saleCampaignToFormValues(
   campaign: AdminSaleCampaign,
   translations: SaleCampaignTranslation[] = [],
 ): SaleCampaignFormValues {
-  const byLocale = new Map(translations.map((translation) => [translation.localeCode, translation]));
+  const byLocale = new Map(
+    translations.map((translation) => [translation.localeCode, translation]),
+  );
   const vi = byLocale.get("vi");
   const en = byLocale.get("en");
   return {
@@ -158,10 +153,7 @@ export function productVariantToFormItem(
   variant: AdminProductVariant,
   type: SaleCampaignType,
 ): SaleCampaignFormItem {
-  const defaultSalePrice = Math.max(
-    1,
-    Math.floor((variant.price * 0.9) / 1_000) * 1_000,
-  );
+  const defaultSalePrice = Math.max(1, Math.floor((variant.price * 0.9) / 1_000) * 1_000);
 
   return {
     variantId: variant.id,
@@ -311,11 +303,7 @@ export function validateSaleCampaignForm(
 
       if (item.maxPerCustomer.trim()) {
         const maxPerCustomer = Number(item.maxPerCustomer);
-        if (
-          !Number.isInteger(maxPerCustomer) ||
-          maxPerCustomer <= 0 ||
-          maxPerCustomer > quota
-        ) {
+        if (!Number.isInteger(maxPerCustomer) || maxPerCustomer <= 0 || maxPerCustomer > quota) {
           return {
             valid: false,
             step: 2,
@@ -347,9 +335,7 @@ export function toCreateSaleCampaignRequest(
       promotionalPrice: Number(item.promotionalPrice),
       quota: values.type === "FLASH" ? Number(item.quota) : null,
       maxPerCustomer:
-        values.type === "FLASH" && item.maxPerCustomer.trim()
-          ? Number(item.maxPerCustomer)
-          : null,
+        values.type === "FLASH" && item.maxPerCustomer.trim() ? Number(item.maxPerCustomer) : null,
     })),
   };
 }
@@ -367,9 +353,7 @@ export function toUpdateSaleCampaignRequest(
 type SaveSaleCampaignWithTranslationsOptions = {
   campaign?: AdminSaleCampaign;
   values: SaleCampaignFormValues;
-  createCampaign: (
-    request: CreateAdminSaleCampaignRequest,
-  ) => Promise<AdminSaleCampaign>;
+  createCampaign: (request: CreateAdminSaleCampaignRequest) => Promise<AdminSaleCampaign>;
   updateCampaign: (input: {
     id: number;
     request: UpdateAdminSaleCampaignRequest;

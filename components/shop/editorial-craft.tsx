@@ -58,19 +58,19 @@ export function EditorialCraft() {
 
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
-      
+
       // On mobile/tablet screens, disable sticky scroll mechanics to prevent content clipping
       if (window.innerWidth < 1024) return;
 
       const rect = scrollContainerRef.current.getBoundingClientRect();
       const scrollTop = -rect.top;
       const scrollHeight = rect.height - window.innerHeight;
-      
+
       if (scrollHeight <= 0) return;
-      
+
       const progress = Math.max(0, Math.min(0.999, scrollTop / scrollHeight));
       setScrollProgress(progress);
-      
+
       // Divide overall progress into segments for each of the 4 steps
       const stepIndex = Math.floor(progress * STEPS.length);
       setActiveStep(stepIndex);
@@ -84,11 +84,11 @@ export function EditorialCraft() {
   // Autoplay step switching on mobile screens for fluid interaction
   useEffect(() => {
     if (reduceMotion || window.innerWidth >= 1024) return;
-    
+
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % STEPS.length);
     }, 5000);
-    
+
     return () => clearInterval(interval);
   }, [reduceMotion]);
 
@@ -102,11 +102,11 @@ export function EditorialCraft() {
     const rect = scrollContainerRef.current.getBoundingClientRect();
     const absoluteTop = window.scrollY + rect.top;
     const scrollHeight = rect.height - window.innerHeight;
-    
+
     // Smoothly scroll window to target step's progress region
     const targetProgress = index / STEPS.length + 0.02;
     const targetScrollY = absoluteTop + targetProgress * scrollHeight;
-    
+
     window.scrollTo({
       top: targetScrollY,
       behavior: "smooth",
@@ -117,94 +117,103 @@ export function EditorialCraft() {
     if (scrollProgress === 0) {
       return index === activeStep ? "100%" : "0%";
     }
-    
+
     const stepRange = 1 / STEPS.length;
     const stepStart = index * stepRange;
     const stepEnd = (index + 1) * stepRange;
-    
+
     if (scrollProgress <= stepStart) return "0%";
     if (scrollProgress >= stepEnd) return "100%";
-    
+
     const progressInStep = (scrollProgress - stepStart) / stepRange;
     return `${progressInStep * 100}%`;
   };
 
   return (
-    <div ref={scrollContainerRef} className="relative lg:h-[320vh] bg-[#f7f4ef] border-t border-[#e3dccf]/60">
-      <div className="lg:sticky lg:top-0 lg:h-screen lg:flex lg:flex-col lg:justify-center py-16 lg:py-0 overflow-hidden">
-        <section id="editorial-craft" className="max-w-[1800px] w-full mx-auto px-6 md:px-16">
-          
+    <div
+      ref={scrollContainerRef}
+      className="relative border-t border-[#e3dccf]/60 bg-[#f7f4ef] lg:h-[320vh]"
+    >
+      <div className="overflow-hidden py-16 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-center lg:py-0">
+        <section id="editorial-craft" className="mx-auto w-full max-w-[1800px] px-6 md:px-16">
           {/* Title portion */}
-          <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
+          <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
             <ScrollReveal direction="up">
-              <span className="text-[10px] font-semibold uppercase tracking-[2.5px] text-[#b5573a] block mb-2">
+              <span className="mb-2 block text-[10px] font-semibold tracking-[2.5px] text-[#b5573a] uppercase">
                 {t("storefront.craft.eyebrow")}
               </span>
-              <h2 className="font-serif text-3.5xl md:text-5xl font-light tracking-tight text-[#1c1a18]">
+              <h2 className="text-3.5xl font-serif font-light tracking-tight text-[#1c1a18] md:text-5xl">
                 {t("storefront.craft.title")}
               </h2>
-              <p className="text-[#8a857c] text-xs md:text-sm mt-3 font-light leading-relaxed">
+              <p className="mt-3 text-xs leading-relaxed font-light text-[#8a857c] md:text-sm">
                 {t("storefront.craft.description")}
               </p>
             </ScrollReveal>
           </div>
-  
+
           {/* Content columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
-            
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-14">
             {/* Left Column: Interactive Steps Accordion */}
-            <ScrollReveal direction="up" delay={0.1} className="lg:col-span-7 flex flex-col gap-3.5">
+            <ScrollReveal
+              direction="up"
+              delay={0.1}
+              className="flex flex-col gap-3.5 lg:col-span-7"
+            >
               {STEPS.map((step, index) => {
                 const StepIcon = step.icon;
                 const isActive = index === activeStep;
-  
+
                 return (
                   <div
                     key={step.id}
                     onClick={() => handleStepClick(index)}
-                    className={`p-4 md:p-5 rounded-[12px] border transition-all duration-500 cursor-pointer text-left relative overflow-hidden ${
+                    className={`relative cursor-pointer overflow-hidden rounded-[12px] border p-4 text-left transition-all duration-500 md:p-5 ${
                       isActive
-                        ? "bg-[#efe7dc] border-[#b5573a]/40 shadow-md translate-x-1.5"
-                        : "bg-transparent border-[#e3dccf]/40 hover:border-[#b5573a]/20 hover:bg-[#efe7dc]/20"
+                        ? "translate-x-1.5 border-[#b5573a]/40 bg-[#efe7dc] shadow-md"
+                        : "border-[#e3dccf]/40 bg-transparent hover:border-[#b5573a]/20 hover:bg-[#efe7dc]/20"
                     }`}
                   >
                     {/* Progress Bar */}
-                    <div 
+                    <div
                       className="absolute bottom-0 left-0 h-[3px] bg-[#b5573a] transition-all duration-150 ease-out"
                       style={{ width: getStepProgressWidth(index) }}
                     />
-  
+
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         {/* Number */}
-                        <span className={`font-serif text-lg md:text-xl font-light leading-none ${
-                          isActive ? "text-[#b5573a]" : "text-[#8a857c]"
-                        }`}>
+                        <span
+                          className={`font-serif text-lg leading-none font-light md:text-xl ${
+                            isActive ? "text-[#b5573a]" : "text-[#8a857c]"
+                          }`}
+                        >
                           {step.num}
                         </span>
-                        
+
                         <div>
-                          <p className="text-[9px] font-semibold uppercase tracking-[1px] text-[#8a857c]">
+                          <p className="text-[9px] font-semibold tracking-[1px] text-[#8a857c] uppercase">
                             {t(step.titleKey)}
                           </p>
-                          <h3 className="font-serif text-sm md:text-base font-medium text-[#1c1a18] mt-0.5">
+                          <h3 className="mt-0.5 font-serif text-sm font-medium text-[#1c1a18] md:text-base">
                             {t(step.subtitleKey)}
                           </h3>
                         </div>
                       </div>
-  
+
                       {/* Rotating Icon */}
                       <motion.div
-                        className={`w-8.5 h-8.5 rounded-full flex items-center justify-center border transition-colors ${
-                          isActive ? "bg-[#b5573a] text-white border-transparent" : "bg-[#efe7dc]/50 text-[#1c1a18] border-[#e3dccf]"
+                        className={`flex h-8.5 w-8.5 items-center justify-center rounded-full border transition-colors ${
+                          isActive
+                            ? "border-transparent bg-[#b5573a] text-white"
+                            : "border-[#e3dccf] bg-[#efe7dc]/50 text-[#1c1a18]"
                         }`}
                         animate={{ rotate: isActive ? 360 : 0 }}
                         transition={{ duration: 0.6, ease: "easeInOut" }}
                       >
-                        <StepIcon className="w-3.5 h-3.5" />
+                        <StepIcon className="h-3.5 w-3.5" />
                       </motion.div>
                     </div>
-  
+
                     {/* Description Accordion Body */}
                     <AnimatePresence initial={false}>
                       {isActive && (
@@ -215,7 +224,7 @@ export function EditorialCraft() {
                           transition={{ duration: 0.35, ease: "easeInOut" }}
                           className="overflow-hidden"
                         >
-                          <p className="text-xs leading-relaxed text-[#3d3a36] font-light max-w-2xl pr-2 border-l border-[#b5573a] pl-4">
+                          <p className="max-w-2xl border-l border-[#b5573a] pr-2 pl-4 text-xs leading-relaxed font-light text-[#3d3a36]">
                             {t(step.descriptionKey)}
                           </p>
                         </motion.div>
@@ -225,14 +234,17 @@ export function EditorialCraft() {
                 );
               })}
             </ScrollReveal>
-  
+
             {/* Right Column: Image Showcase */}
-            <ScrollReveal direction="up" delay={0.25} className="lg:col-span-5 flex justify-center items-center">
-              <div className="relative aspect-[3/4] w-full max-w-[340px] bg-[#efe7dc] overflow-hidden rounded-[20px] shadow-2xl border border-[#e3dccf]/80">
-                
+            <ScrollReveal
+              direction="up"
+              delay={0.25}
+              className="flex items-center justify-center lg:col-span-5"
+            >
+              <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-[20px] border border-[#e3dccf]/80 bg-[#efe7dc] shadow-2xl">
                 {/* Image Transition */}
                 <AnimatePresence mode="wait">
-                   <motion.img
+                  <motion.img
                     suppressHydrationWarning
                     key={activeStep}
                     src={STEPS[activeStep].image}
@@ -240,22 +252,24 @@ export function EditorialCraft() {
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] as [number, number, number, number] }}
-                    className="absolute inset-0 w-full h-full object-cover select-none"
+                    transition={{
+                      duration: 0.55,
+                      ease: [0.25, 1, 0.5, 1] as [number, number, number, number],
+                    }}
+                    className="absolute inset-0 h-full w-full object-cover select-none"
                     referrerPolicy="no-referrer"
                   />
                 </AnimatePresence>
-  
+
                 {/* Bottom Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-  
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+
                 {/* Progress Count Badge */}
-                <div className="absolute bottom-6 right-6 bg-[#1c1a18] text-[#f7f4ef] text-[10px] font-mono px-3 py-1.5 rounded-full tracking-[1px] z-10 shadow-lg border border-white/5">
+                <div className="absolute right-6 bottom-6 z-10 rounded-full border border-white/5 bg-[#1c1a18] px-3 py-1.5 font-mono text-[10px] tracking-[1px] text-[#f7f4ef] shadow-lg">
                   {activeStep + 1} / {STEPS.length}
                 </div>
               </div>
             </ScrollReveal>
-  
           </div>
         </section>
       </div>

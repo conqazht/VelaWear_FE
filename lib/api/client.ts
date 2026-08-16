@@ -5,26 +5,17 @@ export function unwrapApiResponse<T>(response: { data: ApiResponse<T> }): T {
   return response.data.data;
 }
 
-export async function apiGet<T>(
-  path: string,
-  params?: Record<string, unknown>
-): Promise<T> {
+export async function apiGet<T>(path: string, params?: Record<string, unknown>): Promise<T> {
   const response = await apiClient.get<ApiResponse<T>>(path, { params });
   return unwrapApiResponse(response);
 }
 
-export async function apiPost<T, TBody = unknown>(
-  path: string,
-  body?: TBody
-): Promise<T> {
+export async function apiPost<T, TBody = unknown>(path: string, body?: TBody): Promise<T> {
   const response = await apiClient.post<ApiResponse<T>>(path, body);
   return unwrapApiResponse(response);
 }
 
-export async function apiPut<T, TBody = unknown>(
-  path: string,
-  body: TBody
-): Promise<T> {
+export async function apiPut<T, TBody = unknown>(path: string, body: TBody): Promise<T> {
   const response = await apiClient.put<ApiResponse<T>>(path, body);
   return unwrapApiResponse(response);
 }

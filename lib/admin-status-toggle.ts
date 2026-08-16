@@ -28,9 +28,7 @@ export function getCatalogStatusToggleTarget(checked: boolean): AdminCatalogStat
   return checked ? "ACTIVE" : "INACTIVE";
 }
 
-export function getVariantStatusToggleState(
-  status: ProductVariantStatus,
-): StatusToggleState {
+export function getVariantStatusToggleState(status: ProductVariantStatus): StatusToggleState {
   return {
     checked: status === "ACTIVE",
     disabled: status === "OUT_OF_STOCK" || status === "DISCONTINUED",

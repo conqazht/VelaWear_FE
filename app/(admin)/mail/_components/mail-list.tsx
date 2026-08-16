@@ -30,13 +30,13 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
     <ScrollArea className="**:data-[slot=scroll-area-viewport]:scroll-fade min-h-0 flex-1">
       <div className="flex flex-col gap-1.5 pt-0">
         {isEmpty ? (
-          <p className="px-4 py-8 text-center text-muted-foreground text-sm">
+          <p className="text-muted-foreground px-4 py-8 text-center text-sm">
             {t("admin.communications.mail.inbox.empty")}
           </p>
         ) : null}
         {groups.map((group) => (
           <section key={group.id} className="flex flex-col gap-1.5">
-            <div className="mx-3 text-muted-foreground text-xs">
+            <div className="text-muted-foreground mx-3 text-xs">
               {group.title} ({group.items.length})
             </div>
 
@@ -46,10 +46,10 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                   type="button"
                   key={item.id}
                   className={cn(
-                    "group relative w-full border-transparent border-y p-3 text-left transition-colors",
+                    "group relative w-full border-y border-transparent p-3 text-left transition-colors",
                     "hover:bg-muted/60",
                     mail.selected === item.id &&
-                      "border-border bg-muted/70 before:absolute before:-inset-y-px before:left-0 before:w-0.5 before:bg-primary",
+                      "border-border bg-muted/70 before:bg-primary before:absolute before:-inset-y-px before:left-0 before:w-0.5",
                   )}
                   onClick={(event) => {
                     event.currentTarget.blur();
@@ -63,7 +63,9 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                 >
                   <div className="flex items-start gap-3">
                     <Avatar className="size-9 after:rounded-sm">
-                      <AvatarFallback className="rounded-sm bg-background">{item.from.name[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-background rounded-sm">
+                        {item.from.name[0]}
+                      </AvatarFallback>
                     </Avatar>
 
                     <div className="space-y-2">
@@ -71,16 +73,17 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                         <div>
                           <div
                             className={cn(
-                              "flex items-center gap-2 truncate font-normal text-sm",
+                              "flex items-center gap-2 truncate text-sm font-normal",
                               !item.isRead && "font-medium",
                             )}
                           >
-                            {item.from.name} {!item.isRead && <span className="size-2 rounded-full bg-blue-600" />}
+                            {item.from.name}{" "}
+                            {!item.isRead && <span className="size-2 rounded-full bg-blue-600" />}
                           </div>
                           <div
                             className={cn(
-                              "truncate font-medium text-foreground text-xs",
-                              item.isRead && "font-normal text-muted-foreground",
+                              "text-foreground truncate text-xs font-medium",
+                              item.isRead && "text-muted-foreground font-normal",
                             )}
                           >
                             {item.subject}
@@ -89,7 +92,7 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
 
                         <div
                           className={cn(
-                            "shrink-0 text-muted-foreground text-xs",
+                            "text-muted-foreground shrink-0 text-xs",
                             mail.selected === item.id && "text-foreground",
                           )}
                         >
@@ -97,7 +100,9 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                         </div>
                       </div>
 
-                      <p className="mt-2 line-clamp-2 text-muted-foreground text-xs leading-5">{item.body}</p>
+                      <p className="text-muted-foreground mt-2 line-clamp-2 text-xs leading-5">
+                        {item.body}
+                      </p>
                     </div>
                   </div>
                 </button>

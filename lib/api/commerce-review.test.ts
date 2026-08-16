@@ -1,8 +1,4 @@
-import type {
-  AxiosAdapter,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
+import type { AxiosAdapter, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { postMock } = vi.hoisted(() => ({ postMock: vi.fn() }));
@@ -13,8 +9,8 @@ vi.mock("@/lib/api-client", async (importOriginal) => {
 
   // Override post to spy while preserving the real Axios instance (transforms run)
   const originalPost = client.post.bind(client);
-  client.post = postMock.mockImplementation(
-    (...args: Parameters<typeof originalPost>) => originalPost(...args),
+  client.post = postMock.mockImplementation((...args: Parameters<typeof originalPost>) =>
+    originalPost(...args),
   );
 
   return { ...original, default: client };

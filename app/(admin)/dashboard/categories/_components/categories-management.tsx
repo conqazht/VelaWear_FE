@@ -71,9 +71,7 @@ function getStatusVariant(status: AdminCatalogStatus) {
   return status === "ACTIVE" ? ("default" as const) : ("secondary" as const);
 }
 
-function toTranslationFormValue(
-  translation?: CategoryTranslation,
-): CategoryTranslationFormValue {
+function toTranslationFormValue(translation?: CategoryTranslation): CategoryTranslationFormValue {
   return translation
     ? {
         name: translation.name,
@@ -89,7 +87,9 @@ function toFormValues(
   category: AdminCategory,
   translations: CategoryTranslation[],
 ): CategoryFormValues {
-  const byLocale = new Map(translations.map((translation) => [translation.localeCode, translation]));
+  const byLocale = new Map(
+    translations.map((translation) => [translation.localeCode, translation]),
+  );
   const vi = toTranslationFormValue(byLocale.get("vi"));
   if (!byLocale.has("vi")) {
     vi.name = category.name;
@@ -109,7 +109,7 @@ function toFormValues(
 function createsCategoryCycle(
   categories: AdminCategory[],
   categoryId: number,
-  parentId: number | null
+  parentId: number | null,
 ) {
   const parents = new Map(categories.map((category) => [category.id, category.parentId]));
   const visited = new Set<number>();
@@ -233,9 +233,7 @@ export function CategoriesManagement() {
       setContentLocale("en");
       toast.success(t("admin.contentGeneration.success"));
     } catch (error) {
-      toast.error(
-        `${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`,
-      );
+      toast.error(`${t("admin.contentGeneration.failed")} ${getApiErrorMessage(error)}`);
     }
   }
 
@@ -281,10 +279,7 @@ export function CategoriesManagement() {
       toast.error(t("admin.commerce.categories.validation.parentUnavailable"));
       return;
     }
-    if (
-      editingCategory &&
-      createsCategoryCycle(parentCategories, editingCategory.id, parentId)
-    ) {
+    if (editingCategory && createsCategoryCycle(parentCategories, editingCategory.id, parentId)) {
       toast.error(t("admin.commerce.categories.validation.cycle"));
       return;
     }
@@ -300,15 +295,22 @@ export function CategoriesManagement() {
     try {
       const category = editingCategory
         ? await updateMutation.mutateAsync({ id: editingCategory.id, request: commonRequest })
-        : await createMutation.mutateAsync({ ...commonRequest, slug } satisfies CreateAdminCategoryRequest);
+        : await createMutation.mutateAsync({
+            ...commonRequest,
+            slug,
+          } satisfies CreateAdminCategoryRequest);
       if (!editingCategory) {
         setEditingCategory(category);
       }
-      const translations: CategoryTranslation[] = [serializeCategoryTranslation("vi", viTranslation)];
+      const translations: CategoryTranslation[] = [
+        serializeCategoryTranslation("vi", viTranslation),
+      ];
       if (!isCategoryTranslationEmpty(enTranslation)) {
         translations.push(serializeCategoryTranslation("en", enTranslation));
       }
-      const translationResponse = await updateAdminCategoryTranslations(category.id, { translations });
+      const translationResponse = await updateAdminCategoryTranslations(category.id, {
+        translations,
+      });
       const savedTranslations = translationResponse.translations;
       if (
         isCategoryTranslationEmpty(enTranslation) &&
@@ -318,17 +320,18 @@ export function CategoriesManagement() {
       }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.categories.root }),
-        invalidatePublicQueries(queryClient, [
-          "categories",
-          "productLists",
-          "productDetails",
-        ]),
+        invalidatePublicQueries(queryClient, ["categories", "productLists", "productDetails"]),
         queryClient.invalidateQueries({
           queryKey: adminCommerceQueryKeys.categories.translations(category.id),
         }),
       ]);
       toast.success(
-        t(editingCategory ? "admin.commerce.categories.updated" : "admin.commerce.categories.created", { name }),
+        t(
+          editingCategory
+            ? "admin.commerce.categories.updated"
+            : "admin.commerce.categories.created",
+          { name },
+        ),
       );
       setEditingCategory(null);
       setPage(1);
@@ -363,8 +366,10 @@ export function CategoriesManagement() {
     statusMutation.mutate(
       { id: category.id, status: getCatalogStatusToggleTarget(checked) },
       {
-        onSuccess: () => toast.success(t("admin.commerce.translation.statusUpdated", { name: category.name })),
-        onError: () => toast.error(t("admin.commerce.translation.statusFailed", { name: category.name })),
+        onSuccess: () =>
+          toast.success(t("admin.commerce.translation.statusUpdated", { name: category.name })),
+        onError: () =>
+          toast.error(t("admin.commerce.translation.statusFailed", { name: category.name })),
       },
     );
   }
@@ -376,19 +381,23 @@ export function CategoriesManagement() {
       className: "min-w-64",
       cell: (category) => (
         <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
             <FolderTree className="size-4" />
           </div>
           <div className="min-w-0">
             <p className="truncate font-medium">{category.name}</p>
-            <p className="max-w-60 truncate text-muted-foreground text-xs">
+            <p className="text-muted-foreground max-w-60 truncate text-xs">
               /{category.originalSlug || category.slug}
             </p>
             <div className="mt-1 flex gap-1">
               {(["vi", "en"] as const).map((translationLocale) => (
                 <Badge
                   key={translationLocale}
-                  variant={category.translationLocales?.includes(translationLocale) ? "secondary" : "outline"}
+                  variant={
+                    category.translationLocales?.includes(translationLocale)
+                      ? "secondary"
+                      : "outline"
+                  }
                   className="px-1 py-0 text-[9px] uppercase"
                 >
                   {translationLocale}
@@ -531,7 +540,7 @@ export function CategoriesManagement() {
               status: t(CATEGORY_STATUS_MESSAGE_KEYS[category.status]),
               createdAt: category.createdAt,
               updatedAt: category.updatedAt,
-            }))
+            })),
           )
         }
         isLoading={categoriesQuery.isPending}
@@ -547,9 +556,7 @@ export function CategoriesManagement() {
           if (!isSaving) setFormOpen(open);
         }}
         title={
-          editingCategory
-            ? t("admin.commerce.categories.edit")
-            : t("admin.commerce.categories.add")
+          editingCategory ? t("admin.commerce.categories.edit") : t("admin.commerce.categories.add")
         }
         description={t("admin.commerce.categories.formDescription")}
         onSubmit={handleSubmit}
@@ -570,9 +577,7 @@ export function CategoriesManagement() {
           editingCategoryId={editingCategory?.id ?? null}
           isCatalogLoading={parentCategoriesQuery.isPending}
           catalogError={
-            parentCategoriesQuery.isError
-              ? getApiErrorMessage(parentCategoriesQuery.error)
-              : null
+            parentCategoriesQuery.isError ? getApiErrorMessage(parentCategoriesQuery.error) : null
           }
           isGeneratingEnglish={englishSuggestionMutation.isPending}
           onGenerateEnglish={generateEnglishContent}

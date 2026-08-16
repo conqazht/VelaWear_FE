@@ -3,7 +3,8 @@ import { setDate, setHours, setMinutes, startOfMonth } from "date-fns";
 const monthStart = startOfMonth(new Date("2024-04-15T12:00:00Z"));
 const currentYear = new Date("2024-04-15T12:00:00Z").getFullYear();
 const d = (day: number) => setDate(monthStart, day);
-const dt = (day: number, hour: number, min = 0) => setMinutes(setHours(setDate(monthStart, day), hour), min);
+const dt = (day: number, hour: number, min = 0) =>
+  setMinutes(setHours(setDate(monthStart, day), hour), min);
 
 export const demoEvents = [
   { title: "Monthly planning", start: dt(1, 9, 30), end: dt(1, 10, 30) },

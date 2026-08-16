@@ -95,11 +95,7 @@ export type Product = {
   categorySlug?: string | null;
 };
 
-export type StorefrontCatalogSort =
-  | "featured"
-  | "newest"
-  | "price-asc"
-  | "price-desc";
+export type StorefrontCatalogSort = "featured" | "newest" | "price-asc" | "price-desc";
 
 export type StorefrontCatalogFilters = {
   q?: string;

@@ -95,16 +95,8 @@ describe("admin translation and status API contracts", () => {
     await updateAdminProductTranslations(12, productRequest);
     await updateAdminCategoryTranslations(4, categoryRequest);
 
-    expect(apiPutMock).toHaveBeenNthCalledWith(
-      1,
-      "/products/12/translations",
-      productRequest,
-    );
-    expect(apiPutMock).toHaveBeenNthCalledWith(
-      2,
-      "/categories/4/translations",
-      categoryRequest,
-    );
+    expect(apiPutMock).toHaveBeenNthCalledWith(1, "/products/12/translations", productRequest);
+    expect(apiPutMock).toHaveBeenNthCalledWith(2, "/categories/4/translations", categoryRequest);
   });
 
   it("deletes Product/Category locale with a path segment", async () => {
@@ -126,9 +118,7 @@ describe("admin translation and status API contracts", () => {
     await deleteAdminSaleCampaignTranslation(9, "en", 8);
 
     expect(apiPutMock).toHaveBeenCalledWith("/sale-campaigns/9/translations", request);
-    expect(apiDeleteMock).toHaveBeenCalledWith(
-      "/sale-campaigns/9/translations/en?version=8",
-    );
+    expect(apiDeleteMock).toHaveBeenCalledWith("/sale-campaigns/9/translations/en?version=8");
   });
 
   it("PATCHes the dedicated status endpoints", async () => {

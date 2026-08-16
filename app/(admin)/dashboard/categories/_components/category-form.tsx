@@ -6,7 +6,13 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type {
   AdminCatalogStatus,
@@ -116,7 +122,11 @@ export function CategoryForm({
     while (foundDescendant) {
       foundDescendant = false;
       for (const category of categories) {
-        if (category.parentId !== null && excludedParentIds.has(category.parentId) && !excludedParentIds.has(category.id)) {
+        if (
+          category.parentId !== null &&
+          excludedParentIds.has(category.parentId) &&
+          !excludedParentIds.has(category.id)
+        ) {
           excludedParentIds.add(category.id);
           foundDescendant = true;
         }
@@ -170,7 +180,9 @@ export function CategoryForm({
         ) : null}
         <div className="grid gap-5 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor={`${prefix}-name`}>{t("admin.commerce.categories.form.name")}</FieldLabel>
+            <FieldLabel htmlFor={`${prefix}-name`}>
+              {t("admin.commerce.categories.form.name")}
+            </FieldLabel>
             <Input
               id={`${prefix}-name`}
               value={translation.name}
@@ -181,11 +193,15 @@ export function CategoryForm({
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor={`${prefix}-slug`}>{t("admin.commerce.categories.form.slug")}</FieldLabel>
+            <FieldLabel htmlFor={`${prefix}-slug`}>
+              {t("admin.commerce.categories.form.slug")}
+            </FieldLabel>
             <Input
               id={`${prefix}-slug`}
               value={translation.slug}
-              onChange={(event) => updateTranslation(locale, "slug", event.target.value.toLowerCase())}
+              onChange={(event) =>
+                updateTranslation(locale, "slug", event.target.value.toLowerCase())
+              }
               maxLength={180}
               placeholder="tailoring"
               spellCheck={false}
@@ -195,7 +211,9 @@ export function CategoryForm({
           </Field>
         </div>
         <Field>
-          <FieldLabel htmlFor={`${prefix}-description`}>{t("admin.commerce.categories.form.description")}</FieldLabel>
+          <FieldLabel htmlFor={`${prefix}-description`}>
+            {t("admin.commerce.categories.form.description")}
+          </FieldLabel>
           <Textarea
             id={`${prefix}-description`}
             value={translation.description}
@@ -206,12 +224,25 @@ export function CategoryForm({
         </Field>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor={`${prefix}-seo-title`}>{t("admin.commerce.categories.form.seoTitle")}</FieldLabel>
-            <Input id={`${prefix}-seo-title`} value={translation.seoTitle} onChange={(event) => updateTranslation(locale, "seoTitle", event.target.value)} />
+            <FieldLabel htmlFor={`${prefix}-seo-title`}>
+              {t("admin.commerce.categories.form.seoTitle")}
+            </FieldLabel>
+            <Input
+              id={`${prefix}-seo-title`}
+              value={translation.seoTitle}
+              onChange={(event) => updateTranslation(locale, "seoTitle", event.target.value)}
+            />
           </Field>
           <Field>
-            <FieldLabel htmlFor={`${prefix}-seo-description`}>{t("admin.commerce.categories.form.seoDescription")}</FieldLabel>
-            <Textarea id={`${prefix}-seo-description`} value={translation.seoDescription} onChange={(event) => updateTranslation(locale, "seoDescription", event.target.value)} rows={3} />
+            <FieldLabel htmlFor={`${prefix}-seo-description`}>
+              {t("admin.commerce.categories.form.seoDescription")}
+            </FieldLabel>
+            <Textarea
+              id={`${prefix}-seo-description`}
+              value={translation.seoDescription}
+              onChange={(event) => updateTranslation(locale, "seoDescription", event.target.value)}
+              rows={3}
+            />
           </Field>
         </div>
       </>
@@ -228,17 +259,29 @@ export function CategoryForm({
       ) : null}
 
       <Field>
-        <FieldLabel htmlFor="category-parent">{t("admin.commerce.categories.form.parent")}</FieldLabel>
+        <FieldLabel htmlFor="category-parent">
+          {t("admin.commerce.categories.form.parent")}
+        </FieldLabel>
         <Select
           value={values.parentId || ROOT_CATEGORY_VALUE}
-          onValueChange={(value) => updateShared("parentId", value === ROOT_CATEGORY_VALUE ? "" : (value ?? ""))}
+          onValueChange={(value) =>
+            updateShared("parentId", value === ROOT_CATEGORY_VALUE ? "" : (value ?? ""))
+          }
           disabled={isCatalogLoading}
         >
           <SelectTrigger id="category-parent" className="w-full">
-            <SelectValue placeholder={isCatalogLoading ? t("admin.commerce.categories.form.loading") : t("admin.commerce.categories.topLevel")} />
+            <SelectValue
+              placeholder={
+                isCatalogLoading
+                  ? t("admin.commerce.categories.form.loading")
+                  : t("admin.commerce.categories.topLevel")
+              }
+            />
           </SelectTrigger>
           <SelectContent align="start" alignItemWithTrigger={false}>
-            <SelectItem value={ROOT_CATEGORY_VALUE}>{t("admin.commerce.categories.form.noParent")}</SelectItem>
+            <SelectItem value={ROOT_CATEGORY_VALUE}>
+              {t("admin.commerce.categories.form.noParent")}
+            </SelectItem>
             {parentOptions.map((category) => (
               <SelectItem key={category.id} value={String(category.id)}>
                 {category.name} (/{category.originalSlug || category.slug})
@@ -246,7 +289,11 @@ export function CategoryForm({
             ))}
           </SelectContent>
         </Select>
-        <FieldDescription>{isEditing ? t("admin.commerce.categories.form.editParentHelp") : t("admin.commerce.categories.form.createParentHelp")}</FieldDescription>
+        <FieldDescription>
+          {isEditing
+            ? t("admin.commerce.categories.form.editParentHelp")
+            : t("admin.commerce.categories.form.createParentHelp")}
+        </FieldDescription>
       </Field>
 
       <ContentLocaleTabs
@@ -262,16 +309,36 @@ export function CategoryForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="category-sort-order">{t("admin.commerce.categories.form.sortOrder")}</FieldLabel>
-          <Input id="category-sort-order" type="number" min={0} step={1} inputMode="numeric" value={values.sortOrder} onChange={(event) => updateShared("sortOrder", event.target.value)} required />
+          <FieldLabel htmlFor="category-sort-order">
+            {t("admin.commerce.categories.form.sortOrder")}
+          </FieldLabel>
+          <Input
+            id="category-sort-order"
+            type="number"
+            min={0}
+            step={1}
+            inputMode="numeric"
+            value={values.sortOrder}
+            onChange={(event) => updateShared("sortOrder", event.target.value)}
+            required
+          />
           <FieldDescription>{t("admin.commerce.categories.form.sortOrderHelp")}</FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="category-status">{t("admin.commerce.common.status")}</FieldLabel>
-          <Select value={values.status} onValueChange={(value) => updateShared("status", value as AdminCatalogStatus)}>
-            <SelectTrigger id="category-status" className="w-full"><SelectValue /></SelectTrigger>
+          <Select
+            value={values.status}
+            onValueChange={(value) => updateShared("status", value as AdminCatalogStatus)}
+          >
+            <SelectTrigger id="category-status" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
-              {CATEGORY_STATUSES.map((status) => <SelectItem key={status} value={status}>{t(CATEGORY_STATUS_MESSAGE_KEYS[status])}</SelectItem>)}
+              {CATEGORY_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(CATEGORY_STATUS_MESSAGE_KEYS[status])}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <FieldDescription>{t("admin.commerce.categories.form.statusHelp")}</FieldDescription>

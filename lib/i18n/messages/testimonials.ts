@@ -4,7 +4,8 @@ export const testimonialMessages = defineMessages(
   {
     "testimonials.eyebrow": "Customer stories",
     "testimonials.title": "Inspiration & shared experiences",
-    "testimonials.description": "Honest reflections on natural drape, considered silhouettes, and refined textiles from the Vela Wear community.",
+    "testimonials.description":
+      "Honest reflections on natural drape, considered silhouettes, and refined textiles from the Vela Wear community.",
     "testimonials.write": "Write a review",
     "testimonials.filter.all": "All",
     "testimonials.filter.essentials": "Essentials",
@@ -30,7 +31,8 @@ export const testimonialMessages = defineMessages(
   {
     "testimonials.eyebrow": "Ý kiến khách hàng",
     "testimonials.title": "Cảm hứng và sẻ chia",
-    "testimonials.description": "Những chia sẻ chân thực về phom dáng tự nhiên, đường nét tinh tuyển và kết cấu vải tinh tế từ cộng đồng Vela Wear.",
+    "testimonials.description":
+      "Những chia sẻ chân thực về phom dáng tự nhiên, đường nét tinh tuyển và kết cấu vải tinh tế từ cộng đồng Vela Wear.",
     "testimonials.write": "Viết đánh giá",
     "testimonials.filter.all": "Tất cả",
     "testimonials.filter.essentials": "Thiết kế thiết yếu",

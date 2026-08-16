@@ -78,12 +78,7 @@ export function RegisterPage() {
       const birthDate = `${dobYear}-${formattedMonth}-${formattedDay}`;
 
       // Map preference to gender ENUM (MALE, FEMALE, OTHER)
-      const gender =
-        preference === "womens"
-          ? "FEMALE"
-          : preference === "mens"
-          ? "MALE"
-          : "OTHER";
+      const gender = preference === "womens" ? "FEMALE" : preference === "mens" ? "MALE" : "OTHER";
 
       await register({
         email,
@@ -131,11 +126,7 @@ export function RegisterPage() {
       if (password.length < 8) {
         newErrors.passwordMin = true;
       }
-      if (
-        !/[A-Z]/.test(password) ||
-        !/[a-z]/.test(password) ||
-        !/[0-9]/.test(password)
-      ) {
+      if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
         newErrors.passwordRules = true;
       }
     }
@@ -154,9 +145,15 @@ export function RegisterPage() {
     if (!dobDay || !dobMonth || !dobYear) {
       newErrors.dob = "auth.validation.required";
     } else if (
-      isNaN(day) || day < 1 || day > 31 ||
-      isNaN(month) || month < 1 || month > 12 ||
-      isNaN(year) || year < 1900 || year > currentYear
+      isNaN(day) ||
+      day < 1 ||
+      day > 31 ||
+      isNaN(month) ||
+      month < 1 ||
+      month > 12 ||
+      isNaN(year) ||
+      year < 1900 ||
+      year > currentYear
     ) {
       newErrors.dob = "auth.validation.invalidDate";
     }
@@ -194,11 +191,11 @@ export function RegisterPage() {
       }
       footer={
         !showOtpStep && (
-          <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d] border-none">
-            {t("auth.register.alreadyMember")} {" "}
+          <p className="mt-8 border-none text-center text-sm leading-[1.55] text-[#55423d]">
+            {t("auth.register.alreadyMember")}{" "}
             <Link
               href="/sign-in"
-              className="font-medium text-[#b5573a] underline decoration-[#b5573a]/30 underline-offset-2 transition-colors hover:text-[#8f4329] border-none"
+              className="border-none font-medium text-[#b5573a] underline decoration-[#b5573a]/30 underline-offset-2 transition-colors hover:text-[#8f4329]"
             >
               {t("auth.common.signIn")}
             </Link>
@@ -224,7 +221,7 @@ export function RegisterPage() {
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 border-none">
           {otpError && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-700 text-sm rounded-[12px] border-solid">
+            <div className="rounded-[12px] border border-solid border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
               {otpError}
             </div>
           )}
@@ -250,7 +247,7 @@ export function RegisterPage() {
               onBlur={() => setSceneFocus("none")}
             />
             {errors.email && (
-              <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+              <p className="text-destructive mt-1 text-xs font-semibold tracking-wider uppercase">
                 {t(errors.email)}
               </p>
             )}
@@ -278,7 +275,7 @@ export function RegisterPage() {
                 onBlur={() => setSceneFocus("none")}
               />
               {errors.firstName && (
-                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                <p className="text-destructive mt-1 text-xs font-semibold tracking-wider uppercase">
                   {t(errors.firstName)}
                 </p>
               )}
@@ -304,7 +301,7 @@ export function RegisterPage() {
                 onBlur={() => setSceneFocus("none")}
               />
               {errors.lastName && (
-                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                <p className="text-destructive mt-1 text-xs font-semibold tracking-wider uppercase">
                   {t(errors.lastName)}
                 </p>
               )}
@@ -351,10 +348,16 @@ export function RegisterPage() {
                       passwordRef.current?.focus();
                     }, 0);
                   }}
-                  aria-label={t(showPassword ? "auth.common.hidePassword" : "auth.common.showPassword")}
-                  className="p-1 hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent"
+                  aria-label={t(
+                    showPassword ? "auth.common.hidePassword" : "auth.common.showPassword",
+                  )}
+                  className="cursor-pointer border-none bg-transparent p-1 transition-opacity hover:opacity-85"
                 >
-                  {showPassword ? <EyeOff className="size-[22px] text-ink" /> : <Eye className="size-[22px] text-ink" />}
+                  {showPassword ? (
+                    <EyeOff className="text-ink size-[22px]" />
+                  ) : (
+                    <Eye className="text-ink size-[22px]" />
+                  )}
                 </button>
               }
             />
@@ -362,7 +365,7 @@ export function RegisterPage() {
               <PasswordRequirements
                 password={password}
                 showTitle={false}
-                className="mt-2.5 px-1 border-none"
+                className="mt-2.5 border-none px-1"
               />
             )}
           </div>
@@ -370,10 +373,10 @@ export function RegisterPage() {
           {/* Gender & Date of Birth */}
           <div className="grid grid-cols-2 gap-4 border-none">
             {/* Gender */}
-            <div className="w-full flex flex-col gap-2 border-none">
+            <div className="flex w-full flex-col gap-2 border-none">
               <label
                 htmlFor="gender"
-                className="block text-[14px] font-semibold text-[#1c1a18] select-none border-none"
+                className="block border-none text-[14px] font-semibold text-[#1c1a18] select-none"
               >
                 {t("auth.register.gender")}
               </label>
@@ -382,7 +385,7 @@ export function RegisterPage() {
                   name="shoppingPreference"
                   value={preference}
                   onValueChange={(val) => {
-                    setPreference(val || "")
+                    setPreference(val || "");
                     if (val && errors.gender) {
                       setErrors((prev) => {
                         const copy = { ...prev };
@@ -397,12 +400,12 @@ export function RegisterPage() {
                     onFocus={() => setIsSelectFocused(true)}
                     onBlur={() => setIsSelectFocused(false)}
                     className={cn(
-                      "w-full px-4 py-3 rounded-[12px] border border-solid transition-all bg-white/60 text-[15px] text-[#1c1a18] outline-none flex items-center justify-between cursor-pointer focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 !h-12",
+                      "flex !h-12 w-full cursor-pointer items-center justify-between rounded-[12px] border border-solid bg-white/60 px-4 py-3 text-[15px] text-[#1c1a18] transition-all outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0",
                       errors.gender
                         ? "border-red-500 bg-white/60 focus:border-red-500"
                         : isSelectFocused
-                        ? "border-[#b5573a] bg-white/85 ring-2 ring-black/5"
-                        : "border-black/20"
+                          ? "border-[#b5573a] bg-white/85 ring-2 ring-black/5"
+                          : "border-black/20",
                     )}
                   >
                     <SelectValue placeholder={t("auth.register.selectGender")}>
@@ -417,30 +420,36 @@ export function RegisterPage() {
                     alignItemWithTrigger={false}
                     side="bottom"
                     sideOffset={4}
-                    className="bg-[#efe7dc] border border-black/20 rounded-[12px] shadow-none text-ink w-[var(--anchor-width)]"
+                    className="text-ink w-[var(--anchor-width)] rounded-[12px] border border-black/20 bg-[#efe7dc] shadow-none"
                   >
-                    <SelectItem value="mens" className="hover:bg-[#b5573a]/10 focus:bg-[#b5573a]/10 rounded-sm cursor-pointer py-3 px-4">
+                    <SelectItem
+                      value="mens"
+                      className="cursor-pointer rounded-sm px-4 py-3 hover:bg-[#b5573a]/10 focus:bg-[#b5573a]/10"
+                    >
                       {t("auth.register.male")}
                     </SelectItem>
-                    <SelectItem value="womens" className="hover:bg-[#b5573a]/10 focus:bg-[#b5573a]/10 rounded-sm cursor-pointer py-3 px-4">
+                    <SelectItem
+                      value="womens"
+                      className="cursor-pointer rounded-sm px-4 py-3 hover:bg-[#b5573a]/10 focus:bg-[#b5573a]/10"
+                    >
                       {t("auth.register.female")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {errors.gender && (
-                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                <p className="text-destructive mt-1 text-xs font-semibold tracking-wider uppercase">
                   {t(errors.gender)}
                 </p>
               )}
             </div>
 
             {/* Date of Birth */}
-            <div className="w-full flex flex-col gap-2 border-none">
-              <label className="block text-[14px] font-semibold text-[#1c1a18] select-none border-none">
+            <div className="flex w-full flex-col gap-2 border-none">
+              <label className="block border-none text-[14px] font-semibold text-[#1c1a18] select-none">
                 {t("auth.register.dateOfBirth")}
               </label>
-              <div className="grid grid-cols-4 gap-2 w-full border-none">
+              <div className="grid w-full grid-cols-4 gap-2 border-none">
                 <input
                   id="dobDay"
                   aria-label={t("auth.register.dayAria")}
@@ -466,10 +475,10 @@ export function RegisterPage() {
                   onFocus={() => setSceneFocus("email")}
                   onBlur={() => setSceneFocus("none")}
                   className={cn(
-                    "col-span-1 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
+                    "col-span-1 h-12 w-full rounded-[12px] border border-solid px-1 py-3 text-center text-[15px] text-[#1c1a18] transition-all outline-none focus:ring-2 focus:ring-black/5",
                     errors.dob
                       ? "border-red-500 bg-white/60 focus:border-red-500"
-                      : "border-black/20 focus:border-[#b5573a] bg-white/60 focus:bg-white/85"
+                      : "border-black/20 bg-white/60 focus:border-[#b5573a] focus:bg-white/85",
                   )}
                 />
                 <input
@@ -498,10 +507,10 @@ export function RegisterPage() {
                   onFocus={() => setSceneFocus("email")}
                   onBlur={() => setSceneFocus("none")}
                   className={cn(
-                    "col-span-1 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
+                    "col-span-1 h-12 w-full rounded-[12px] border border-solid px-1 py-3 text-center text-[15px] text-[#1c1a18] transition-all outline-none focus:ring-2 focus:ring-black/5",
                     errors.dob
                       ? "border-red-500 bg-white/60 focus:border-red-500"
-                      : "border-black/20 focus:border-[#b5573a] bg-white/60 focus:bg-white/85"
+                      : "border-black/20 bg-white/60 focus:border-[#b5573a] focus:bg-white/85",
                   )}
                 />
                 <input
@@ -527,15 +536,15 @@ export function RegisterPage() {
                   onFocus={() => setSceneFocus("email")}
                   onBlur={() => setSceneFocus("none")}
                   className={cn(
-                    "col-span-2 w-full text-center px-1 py-3 rounded-[12px] border border-solid transition-all text-[15px] text-[#1c1a18] outline-none focus:ring-2 focus:ring-black/5 h-12",
+                    "col-span-2 h-12 w-full rounded-[12px] border border-solid px-1 py-3 text-center text-[15px] text-[#1c1a18] transition-all outline-none focus:ring-2 focus:ring-black/5",
                     errors.dob
                       ? "border-red-500 bg-white/60 focus:border-red-500"
-                      : "border-black/20 focus:border-[#b5573a] bg-white/60 focus:bg-white/85"
+                      : "border-black/20 bg-white/60 focus:border-[#b5573a] focus:bg-white/85",
                   )}
                 />
               </div>
               {errors.dob && (
-                <p className="mt-1 text-xs text-destructive font-semibold uppercase tracking-wider">
+                <p className="text-destructive mt-1 text-xs font-semibold tracking-wider uppercase">
                   {t(errors.dob)}
                 </p>
               )}
@@ -543,19 +552,22 @@ export function RegisterPage() {
           </div>
 
           {/* Agreements */}
-          <div className="space-y-4 mt-4 border-none">
-            <div className="flex items-start gap-3 cursor-pointer group border-none">
+          <div className="mt-4 space-y-4 border-none">
+            <div className="group flex cursor-pointer items-start gap-3 border-none">
               <Checkbox
                 id="emailConsent"
                 checked={emailConsent}
                 onCheckedChange={(checked) => setEmailConsent(!!checked)}
-                className="mt-1 size-5 rounded-[4px] border-[#1c1a18]/30 data-checked:bg-[#b5573a] data-checked:border-[#b5573a] cursor-pointer shrink-0"
+                className="mt-1 size-5 shrink-0 cursor-pointer rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
               />
-              <label htmlFor="emailConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
+              <label
+                htmlFor="emailConsent"
+                className="cursor-pointer border-none text-sm leading-relaxed text-[#55423d] transition-colors select-none group-hover:text-[#1c1a18]"
+              >
                 {t("auth.register.emailConsent")}
               </label>
             </div>
-            <div className="flex items-start gap-3 cursor-pointer group border-none">
+            <div className="group flex cursor-pointer items-start gap-3 border-none">
               <Checkbox
                 id="termsConsent"
                 checked={termsConsent}
@@ -570,19 +582,22 @@ export function RegisterPage() {
                   }
                 }}
                 className={cn(
-                  "mt-1 size-5 rounded-[4px] cursor-pointer shrink-0 transition-all duration-200",
+                  "mt-1 size-5 shrink-0 cursor-pointer rounded-[4px] transition-all duration-200",
                   errors.terms
                     ? "border-red-500 bg-red-500/10 shadow-[0_0_0_2px_rgba(239,68,68,0.2)]"
-                    : "border-[#1c1a18]/30 data-checked:bg-[#b5573a] data-checked:border-[#b5573a]"
+                    : "border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]",
                 )}
               />
-              <label htmlFor="termsConsent" className="text-sm text-[#55423d] group-hover:text-[#1c1a18] transition-colors leading-relaxed cursor-pointer select-none border-none">
-                {t("auth.register.termsPrefix")} {" "}
-                <Link href="#" className="underline hover:text-[#b5573a] border-none">
+              <label
+                htmlFor="termsConsent"
+                className="cursor-pointer border-none text-sm leading-relaxed text-[#55423d] transition-colors select-none group-hover:text-[#1c1a18]"
+              >
+                {t("auth.register.termsPrefix")}{" "}
+                <Link href="#" className="border-none underline hover:text-[#b5573a]">
                   {t("auth.register.privacyPolicy")}
                 </Link>{" "}
-                {t("auth.register.termsJoin")} {" "}
-                <Link href="#" className="underline hover:text-[#b5573a] border-none">
+                {t("auth.register.termsJoin")}{" "}
+                <Link href="#" className="border-none underline hover:text-[#b5573a]">
                   {t("auth.register.termsOfUse")}
                 </Link>
                 .
@@ -591,18 +606,18 @@ export function RegisterPage() {
           </div>
 
           {/* Submit Action */}
-          <div className="pt-4 border-none">
+          <div className="border-none pt-4">
             <button
               type="submit"
               disabled={isOtpSubmitting}
-              className="w-full h-12 bg-[#b5573a] text-white rounded-[12px] font-medium hover:bg-[#8f4329] transition-colors flex items-center justify-center cursor-pointer text-sm uppercase tracking-wider disabled:opacity-50 border-none shadow-sm"
+              className="flex h-12 w-full cursor-pointer items-center justify-center rounded-[12px] border-none bg-[#b5573a] text-sm font-medium tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#8f4329] disabled:opacity-50"
             >
               {isOtpSubmitting ? t("auth.register.creating") : t("auth.register.create")}
             </button>
 
-            <div className="relative flex items-center mt-4">
+            <div className="relative mt-4 flex items-center">
               <div className="flex-grow border-t border-[#1c1a18]/10"></div>
-              <span className="flex-shrink-0 mx-4 text-xs uppercase tracking-wider text-[#1c1a18]/50">
+              <span className="mx-4 flex-shrink-0 text-xs tracking-wider text-[#1c1a18]/50 uppercase">
                 {t("auth.common.or")}
               </span>
               <div className="flex-grow border-t border-[#1c1a18]/10"></div>

@@ -124,14 +124,8 @@ export function updateAdminUser(id: number, request: UpdateAdminUserRequest) {
   return apiPut<AdminUser, UpdateAdminUserRequest>(`/users/${id}`, request);
 }
 
-export function updateAdminUserRoles(
-  id: number,
-  request: UpdateAdminUserRolesRequest
-) {
-  return apiPut<AdminUser, UpdateAdminUserRolesRequest>(
-    `/users/${id}/roles`,
-    request
-  );
+export function updateAdminUserRoles(id: number, request: UpdateAdminUserRolesRequest) {
+  return apiPut<AdminUser, UpdateAdminUserRolesRequest>(`/users/${id}/roles`, request);
 }
 
 export function deleteAdminUser(id: number) {
@@ -159,10 +153,7 @@ export function deleteAdminRole(id: number) {
 }
 
 export function getAdminPermissions(filters: AdminPermissionFilters = {}) {
-  return apiGet<ResultPaginationDTO<AdminPermission>>(
-    "/permissions",
-    filters
-  );
+  return apiGet<ResultPaginationDTO<AdminPermission>>("/permissions", filters);
 }
 
 export function getAdminPermission(id: number) {
@@ -170,20 +161,11 @@ export function getAdminPermission(id: number) {
 }
 
 export function createAdminPermission(request: CreateAdminPermissionRequest) {
-  return apiPost<AdminPermission, CreateAdminPermissionRequest>(
-    "/permissions",
-    request
-  );
+  return apiPost<AdminPermission, CreateAdminPermissionRequest>("/permissions", request);
 }
 
-export function updateAdminPermission(
-  id: number,
-  request: UpdateAdminPermissionRequest
-) {
-  return apiPut<AdminPermission, UpdateAdminPermissionRequest>(
-    `/permissions/${id}`,
-    request
-  );
+export function updateAdminPermission(id: number, request: UpdateAdminPermissionRequest) {
+  return apiPut<AdminPermission, UpdateAdminPermissionRequest>(`/permissions/${id}`, request);
 }
 
 export function deleteAdminPermission(id: number) {

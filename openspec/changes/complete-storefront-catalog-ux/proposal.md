@@ -14,6 +14,7 @@ The storefront currently exposes incomplete filters, decorative mega-menu links,
 ## Capabilities
 
 ### New Capabilities
+
 - `storefront-catalog-ux`: URL-driven product discovery, menu navigation, size guidance, review browsing/submission, and resilient storefront status behavior.
 
 ## Impact

@@ -33,7 +33,9 @@ export function ColorForm({ values, onChange }: ColorFormProps) {
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="color-name">{t("admin.commerce.attributes.colors.form.name")}</FieldLabel>
+        <FieldLabel htmlFor="color-name">
+          {t("admin.commerce.attributes.colors.form.name")}
+        </FieldLabel>
         <Input
           id="color-name"
           value={values.name}
@@ -45,7 +47,9 @@ export function ColorForm({ values, onChange }: ColorFormProps) {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="color-hex-code">{t("admin.commerce.attributes.colors.form.hex")}</FieldLabel>
+        <FieldLabel htmlFor="color-hex-code">
+          {t("admin.commerce.attributes.colors.form.hex")}
+        </FieldLabel>
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
@@ -67,7 +71,9 @@ export function ColorForm({ values, onChange }: ColorFormProps) {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="color-sort-order">{t("admin.commerce.attributes.sortOrder")}</FieldLabel>
+        <FieldLabel htmlFor="color-sort-order">
+          {t("admin.commerce.attributes.sortOrder")}
+        </FieldLabel>
         <Input
           id="color-sort-order"
           type="number"

@@ -117,37 +117,40 @@ export function StatusCodeRain({
   const [animationRun, setAnimationRun] = useState(0);
   const [showHint, setShowHint] = useState(true);
 
-  const addDrop = useCallback((clientX: number, clientY: number, button: number) => {
-    if (button !== 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
+  const addDrop = useCallback(
+    (clientX: number, clientY: number, button: number) => {
+      if (button !== 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+      }
 
-    const container = containerRef.current;
-    if (!container) return;
+      const container = containerRef.current;
+      if (!container) return;
 
-    const glyphs = Array.from(code).filter((character) => character.trim().length > 0);
-    if (glyphs.length === 0) return;
+      const glyphs = Array.from(code).filter((character) => character.trim().length > 0);
+      if (glyphs.length === 0) return;
 
-    const rect = container.getBoundingClientRect();
-    const newDrop: StatusDrop = {
-      id: nextDropId.current,
-      glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-      velocityX: (Math.random() - 0.5) * 6,
-      velocityY: -1,
-      rotation: 0,
-      restFrames: 0,
-      settled: false,
-    };
-    nextDropId.current += 1;
+      const rect = container.getBoundingClientRect();
+      const newDrop: StatusDrop = {
+        id: nextDropId.current,
+        glyph: glyphs[Math.floor(Math.random() * glyphs.length)],
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+        velocityX: (Math.random() - 0.5) * 6,
+        velocityY: -1,
+        rotation: 0,
+        restFrames: 0,
+        settled: false,
+      };
+      nextDropId.current += 1;
 
-    const nextDrops = [...dropsRef.current.slice(-(MAX_DROPS - 1)), newDrop];
-    dropsRef.current = nextDrops;
-    setDrops(nextDrops);
-    setShowHint(false);
-    setAnimationRun((value) => value + 1);
-  }, [code]);
+      const nextDrops = [...dropsRef.current.slice(-(MAX_DROPS - 1)), newDrop];
+      dropsRef.current = nextDrops;
+      setDrops(nextDrops);
+      setShowHint(false);
+      setAnimationRun((value) => value + 1);
+    },
+    [code],
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -228,7 +231,11 @@ export function StatusCodeRain({
     };
 
     const resumeWhenVisible = () => {
-      if (!document.hidden && animationFrame === null && dropsRef.current.some((drop) => !drop.settled)) {
+      if (
+        !document.hidden &&
+        animationFrame === null &&
+        dropsRef.current.some((drop) => !drop.settled)
+      ) {
         animationFrame = requestAnimationFrame(tick);
       }
     };
@@ -246,13 +253,17 @@ export function StatusCodeRain({
   return (
     <div
       ref={containerRef}
-      className="pointer-events-none absolute inset-0 select-none overflow-hidden"
+      className="pointer-events-none absolute inset-0 overflow-hidden select-none"
       aria-hidden="true"
     >
       {drops.map((drop) => (
         <span
           key={drop.id}
-          className={compact ? "absolute font-numeric text-2xl font-bold" : "absolute font-numeric text-4xl font-bold"}
+          className={
+            compact
+              ? "font-numeric absolute text-2xl font-bold"
+              : "font-numeric absolute text-4xl font-bold"
+          }
           style={{
             color,
             left: drop.x,
@@ -271,10 +282,10 @@ export function StatusCodeRain({
         <span
           className={
             compact
-              ? `absolute inset-x-0 bottom-4 text-center text-[11px] uppercase tracking-[0.24em] motion-safe:animate-pulse motion-reduce:hidden ${
+              ? `absolute inset-x-0 bottom-4 text-center text-[11px] tracking-[0.24em] uppercase motion-safe:animate-pulse motion-reduce:hidden ${
                   hintTone === "dark" ? "text-[#1c1a18]/42" : "text-white/38"
                 }`
-              : `absolute inset-x-4 bottom-20 text-center text-[10px] uppercase tracking-[0.2em] motion-safe:animate-pulse motion-reduce:hidden sm:inset-x-0 sm:text-xs sm:tracking-[0.28em] ${
+              : `absolute inset-x-4 bottom-20 text-center text-[10px] tracking-[0.2em] uppercase motion-safe:animate-pulse motion-reduce:hidden sm:inset-x-0 sm:text-xs sm:tracking-[0.28em] ${
                   hintTone === "dark" ? "text-[#1c1a18]/46" : "text-white/42"
                 }`
           }

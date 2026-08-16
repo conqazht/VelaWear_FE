@@ -4,12 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { EASE_VELA } from "@/lib/motion-tokens";
-import {
-  BadgePercent,
-  Clock3,
-  Heart,
-  ChevronDown,
-} from "lucide-react";
+import { BadgePercent, Clock3, Heart, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,11 +14,7 @@ import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
-import {
-  getCategoryLabel,
-  money,
-  Product,
-} from "@/lib/vela-data";
+import { getCategoryLabel, money, Product } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/i18n/format";
 import { useProductVariantsQuery } from "@/lib/queries/catalog";
@@ -46,11 +37,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const { locale: activeLocale, t } = useI18n();
   const reduceMotion = useReducedMotion();
   const favorited =
-    product.realId !== undefined
-      ? isFavorite(String(product.realId))
-      : isFavorite(product.id);
+    product.realId !== undefined ? isFavorite(String(product.realId)) : isFavorite(product.id);
   const [selectedColor, setSelectedColor] = useState(
-    product.colorImages?.[0]?.colorName || product.color
+    product.colorImages?.[0]?.colorName || product.color,
   );
   const [selectedSize, setSelectedSize] = useState(product.size);
   const [activeImage, setActiveImage] = useState(product.image);
@@ -68,7 +57,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   });
   const variants: ApiProductVariant[] = useMemo(
     () => variantsQuery.data?.result ?? [],
-    [variantsQuery.data?.result]
+    [variantsQuery.data?.result],
   );
   // Compute available colors and keep the backend gallery order when possible.
   const colorsList = useMemo(() => {
@@ -95,7 +84,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       .filter(
         (v) =>
           !resolvedSelectedColor ||
-          v.color?.name?.toLowerCase() === resolvedSelectedColor.toLowerCase()
+          v.color?.name?.toLowerCase() === resolvedSelectedColor.toLowerCase(),
       )
       .forEach((v) => {
         if (v.size?.name) unique.add(v.size.name);
@@ -119,24 +108,25 @@ export function ProductDetailClient({ product }: { product: Product }) {
     return variants.find(
       (v) =>
         v.color?.name?.toLowerCase() === resolvedSelectedColor?.toLowerCase() &&
-        v.size?.name?.toLowerCase() === resolvedSelectedSize?.toLowerCase()
+        v.size?.name?.toLowerCase() === resolvedSelectedSize?.toLowerCase(),
     );
   }, [resolvedSelectedColor, resolvedSelectedSize, variants]);
 
   const gallery = useMemo(() => {
     const selectedGroup = product.colorImages?.find(
-      (group) => group.colorName.toLowerCase() === resolvedSelectedColor?.toLowerCase()
+      (group) => group.colorName.toLowerCase() === resolvedSelectedColor?.toLowerCase(),
     );
     const colorImages = selectedGroup
-      ? [selectedGroup.thumbnail, ...selectedGroup.images].filter(
-          (image): image is string => Boolean(image)
+      ? [selectedGroup.thumbnail, ...selectedGroup.images].filter((image): image is string =>
+          Boolean(image),
         )
       : [];
-    const rawImages = colorImages.length > 0
-      ? colorImages
-      : product.images && product.images.length > 0
-        ? product.images
-        : [product.image];
+    const rawImages =
+      colorImages.length > 0
+        ? colorImages
+        : product.images && product.images.length > 0
+          ? product.images
+          : [product.image];
 
     return Array.from(new Set(rawImages)).map((src, idx) => ({
       src,
@@ -154,7 +144,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
   // nghĩa là variant đang ở giá gốc, không được fallback sang campaign rẻ nhất
   // ở cấp product (campaign đó có thể thuộc một màu/size khác).
   const activePricing = activeVariant ? activeVariant.pricing : product.pricing;
-  const mainPrice = activePricing?.effectivePrice ?? (activeVariant ? Number(activeVariant.price) : product.price);
+  const mainPrice =
+    activePricing?.effectivePrice ?? (activeVariant ? Number(activeVariant.price) : product.price);
   const originalPrice =
     activePricing && activePricing.listPrice > activePricing.effectivePrice
       ? activePricing.listPrice
@@ -186,7 +177,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   return (
     <div className="mb-24 grid grid-cols-1 items-start gap-10 xl:grid-cols-[631px_360px] xl:justify-center xl:gap-x-6 2xl:grid-cols-[631px_380px] 2xl:gap-x-8">
       {/* LEFT COLUMN: Vertical Gallery & Main Image */}
-      <div className="flex gap-4 select-none justify-start xl:w-[631px]">
+      <div className="flex justify-start gap-4 select-none xl:w-[631px]">
         {/* Vertical Thumbnail List */}
         <div className="flex w-16 flex-none flex-col gap-2 sm:w-20">
           {gallery.map((detail) => (
@@ -195,17 +186,17 @@ export function ProductDetailClient({ product }: { product: Product }) {
               type="button"
               onClick={() => setActiveImage(detail.src)}
               className={cn(
-                "relative aspect-[4/5] overflow-hidden rounded-none border bg-[#efe7dc] transition-all cursor-pointer",
+                "relative aspect-[4/5] cursor-pointer overflow-hidden rounded-none border bg-[#efe7dc] transition-all",
                 displayedImage === detail.src
                   ? "border-[#1c1a18] opacity-100"
-                  : "border-transparent opacity-60 hover:opacity-100"
+                  : "border-transparent opacity-60 hover:opacity-100",
               )}
               aria-label={detail.label}
             >
               <FashionImage
                 src={detail.src}
                 alt={detail.label}
-                className="object-cover w-full h-full"
+                className="h-full w-full object-cover"
               />
             </button>
           ))}
@@ -217,25 +208,26 @@ export function ProductDetailClient({ product }: { product: Product }) {
             src={displayedImage}
             alt={product.name}
             priority
-            className="object-cover w-full h-full"
+            className="h-full w-full object-cover"
           />
         </div>
       </div>
 
       {/* RIGHT COLUMN: Product Info & Actions */}
       <div className="flex h-full flex-col justify-start text-left xl:w-[360px] xl:pt-1 2xl:w-[380px]">
-        <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.25em] text-[#b5573a]">
-          {getCategoryLabel(product.category, activeLocale)} / {t("storefront.product.craftsmanship")}
+        <span className="mb-2 block text-[10px] font-bold tracking-[0.25em] text-[#b5573a] uppercase">
+          {getCategoryLabel(product.category, activeLocale)} /{" "}
+          {t("storefront.product.craftsmanship")}
         </span>
-        <h1 className="mb-4 font-serif text-3xl font-light tracking-wide text-[#1c1a18] md:text-display-lg leading-tight">
+        <h1 className="md:text-display-lg mb-4 font-serif text-3xl leading-tight font-light tracking-wide text-[#1c1a18]">
           {product.name}
         </h1>
         <div className="mb-6 flex items-baseline gap-3">
-          <span className="font-serif text-2xl font-light tracking-wider text-[#1c1a18] font-numeric">
+          <span className="font-numeric font-serif text-2xl font-light tracking-wider text-[#1c1a18]">
             {money(mainPrice, activeLocale)}
           </span>
           {originalPrice && originalPrice > mainPrice && (
-            <span className="text-sm tracking-wider text-[#1c1a18]/40 line-through font-numeric">
+            <span className="font-numeric text-sm tracking-wider text-[#1c1a18]/40 line-through">
               {money(originalPrice, activeLocale)}
             </span>
           )}
@@ -243,7 +235,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
         {activePricing && activePricing.priceSource !== "BASE" ? (
           <div className="mb-6 rounded-lg border border-[#b5573a]/20 bg-[#fff8f3] p-4 text-xs text-[#1c1a18]/70">
-            <div className="flex items-center gap-2 font-semibold uppercase tracking-[0.14em] text-[#8f2f20]">
+            <div className="flex items-center gap-2 font-semibold tracking-[0.14em] text-[#8f2f20] uppercase">
               <BadgePercent className="size-4" />
               {activePricing?.priceSource === "FLASH_SALE"
                 ? t("storefront.sale.type.flash")
@@ -259,7 +251,8 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   })}
                 </span>
               ) : null}
-              {activePricing?.priceSource === "FLASH_SALE" && activePricing.remainingQuota != null ? (
+              {activePricing?.priceSource === "FLASH_SALE" &&
+              activePricing.remainingQuota != null ? (
                 <span>
                   {t("storefront.sale.product.quotaRemaining", {
                     count: Math.max(0, activePricing.remainingQuota),
@@ -291,13 +284,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
         {/* Color Selection */}
         <div className="mb-8">
-          <span className="block text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60 mb-4">
+          <span className="mb-4 block text-[10px] font-semibold tracking-widest text-[#1c1a18]/60 uppercase">
             {t("storefront.product.color")} — {resolvedSelectedColor}
           </span>
           <div className="flex gap-4">
             {colorsList.map((color) => {
               const hexCode = product.colorImages?.find(
-                (group) => group.colorName.toLowerCase() === color.toLowerCase()
+                (group) => group.colorName.toLowerCase() === color.toLowerCase(),
               )?.hexCode;
 
               return (
@@ -309,11 +302,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   aria-pressed={resolvedSelectedColor === color}
                   style={hexCode ? { backgroundColor: hexCode } : undefined}
                   className={cn(
-                    "w-8 h-8 rounded-full border transition-all cursor-pointer ring-2 ring-offset-2",
+                    "h-8 w-8 cursor-pointer rounded-full border ring-2 ring-offset-2 transition-all",
                     !hexCode && (colorSwatches[color] || "bg-[#d32f2f]"),
                     resolvedSelectedColor === color
-                      ? "border-[#1c1a18] ring-[#1c1a18]/30 scale-105"
-                      : "border-[#1c1a18]/15 ring-transparent hover:ring-hairline hover:scale-105"
+                      ? "scale-105 border-[#1c1a18] ring-[#1c1a18]/30"
+                      : "hover:ring-hairline border-[#1c1a18]/15 ring-transparent hover:scale-105",
                   )}
                 />
               );
@@ -323,9 +316,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
         {/* Size Selection */}
         <div className="mb-10">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#1c1a18]/60">{t("storefront.product.size")}</span>
-            <Link className="text-[10px] font-semibold uppercase tracking-widest underline hover:text-[#b5573a] transition-colors" href={sizeGuideHref}>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[10px] font-semibold tracking-widest text-[#1c1a18]/60 uppercase">
+              {t("storefront.product.size")}
+            </span>
+            <Link
+              className="text-[10px] font-semibold tracking-widest uppercase underline transition-colors hover:text-[#b5573a]"
+              href={sizeGuideHref}
+            >
               {t("storefront.product.sizeGuide")}
             </Link>
           </div>
@@ -337,10 +335,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 onClick={() => setSelectedSize(size)}
                 aria-pressed={resolvedSelectedSize === size}
                 className={cn(
-                  "py-3 border font-semibold text-xs tracking-wider transition-colors cursor-pointer rounded-sm",
+                  "cursor-pointer rounded-sm border py-3 text-xs font-semibold tracking-wider transition-colors",
                   resolvedSelectedSize === size
-                    ? "border-[#1c1a18] bg-[#efe7dc] text-ink"
-                    : "border-hairline hover:border-ink text-ink/75"
+                    ? "text-ink border-[#1c1a18] bg-[#efe7dc]"
+                    : "border-hairline hover:border-ink text-ink/75",
                 )}
               >
                 {size}
@@ -365,7 +363,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               addToCart(cartProduct, resolvedSelectedColor, resolvedSelectedSize);
               showAddedToBag(cartProduct, resolvedSelectedSize, resolvedSelectedColor);
             }}
-            className="w-full h-14 bg-[#1c1a18] hover:bg-[#b5573a] active:scale-[0.96] text-white font-semibold text-xs tracking-widest uppercase rounded-full transition-all cursor-pointer border-none shadow-md flex items-center justify-center overflow-hidden"
+            className="flex h-14 w-full cursor-pointer items-center justify-center overflow-hidden rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-all hover:bg-[#b5573a] active:scale-[0.96]"
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -398,21 +396,21 @@ export function ProductDetailClient({ product }: { product: Product }) {
             type="button"
             onClick={() => toggleFavorite(product, resolvedSelectedSize)}
             className={cn(
-              "w-full h-14 border font-semibold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer rounded-full active:scale-[0.96]",
+              "flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-full border text-xs font-semibold tracking-wider uppercase transition-all active:scale-[0.96]",
               favorited
-                ? "bg-[#efe7dc] border-[#e3dccf] text-[#1c1a18] hover:bg-[#e6dccb]"
-                : "border-[#e3dccf] bg-white text-[#1c1a18] hover:border-[#1c1a18] hover:bg-[#efe7dc]/50"
+                ? "border-[#e3dccf] bg-[#efe7dc] text-[#1c1a18] hover:bg-[#e6dccb]"
+                : "border-[#e3dccf] bg-white text-[#1c1a18] hover:border-[#1c1a18] hover:bg-[#efe7dc]/50",
             )}
           >
-            <span>{favorited ? t("storefront.product.favourited") : t("storefront.product.favourite")}</span>
+            <span>
+              {favorited ? t("storefront.product.favourited") : t("storefront.product.favourite")}
+            </span>
             <motion.div
               key={favorited ? "favorited" : "unfavorited"}
               initial={{ scale: reduceMotion ? 1 : 0.8 }}
               animate={{ scale: 1 }}
               transition={
-                reduceMotion
-                  ? { duration: 0.15 }
-                  : { type: "spring", stiffness: 400, damping: 18 }
+                reduceMotion ? { duration: 0.15 } : { type: "spring", stiffness: 400, damping: 18 }
               }
             >
               <Heart className={cn("size-4", favorited && "fill-black stroke-black")} />
@@ -421,21 +419,21 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* Product Description */}
-        <p className="mt-10 mb-6 text-xs font-light leading-relaxed tracking-wide text-[#1c1a18]/70 md:text-sm">
+        <p className="mt-10 mb-6 text-xs leading-relaxed font-light tracking-wide text-[#1c1a18]/70 md:text-sm">
           {product.description}
         </p>
 
         {/* DETAILS ACCORDION SECTIONS */}
-        <div className="mt-12 flex flex-col gap-6 text-left border-t border-hairline/40">
+        <div className="border-hairline/40 mt-12 flex flex-col gap-6 border-t text-left">
           {/* Size & Fit */}
-          <div className="border-b border-hairline/40 py-5">
+          <div className="border-hairline/40 border-b py-5">
             <button
               type="button"
               onClick={() => toggleSection("sizeAndFit")}
               aria-expanded={openSections.sizeAndFit}
-              className="flex justify-between items-center w-full group text-left cursor-pointer"
+              className="group flex w-full cursor-pointer items-center justify-between text-left"
             >
-              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b5573a] transition-colors">
+              <h3 className="text-ink font-serif text-lg font-light tracking-wide transition-colors group-hover:text-[#b5573a]">
                 {t("storefront.product.sizeAndFit")}
               </h3>
               <motion.span
@@ -457,11 +455,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   className="overflow-hidden"
                 >
                   <div className="mt-4">
-                    <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
+                    <ul className="text-on-surface-variant/80 list-disc space-y-2 pl-5 text-xs font-light tracking-wide">
                       <li>{t("storefront.product.modelSize")}</li>
                       <li>{t("storefront.product.looseFit")}</li>
                       <li>
-                        <Link className="underline hover:text-[#b5573a] transition-colors" href={sizeGuideHref}>
+                        <Link
+                          className="underline transition-colors hover:text-[#b5573a]"
+                          href={sizeGuideHref}
+                        >
                           {t("storefront.product.sizeGuide")}
                         </Link>
                       </li>
@@ -474,14 +475,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           {/* Material & Care */}
           {(product.material || product.care) && (
-            <div className="border-b border-hairline/40 py-5">
+            <div className="border-hairline/40 border-b py-5">
               <button
                 type="button"
                 onClick={() => toggleSection("materialAndCare")}
                 aria-expanded={openSections.materialAndCare}
-                className="flex justify-between items-center w-full group text-left cursor-pointer"
+                className="group flex w-full cursor-pointer items-center justify-between text-left"
               >
-                <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b5573a] transition-colors">
+                <h3 className="text-ink font-serif text-lg font-light tracking-wide transition-colors group-hover:text-[#b5573a]">
                   {t("storefront.product.materialCare")}
                 </h3>
                 <motion.span
@@ -503,15 +504,21 @@ export function ProductDetailClient({ product }: { product: Product }) {
                     className="overflow-hidden"
                   >
                     <div className="mt-4">
-                      <div className="space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                      <div className="text-on-surface-variant/80 space-y-2 text-xs leading-relaxed font-light tracking-wide">
                         {product.material && (
                           <p>
-                            <span className="font-medium text-ink">{t("storefront.product.material")}</span> {product.material}
+                            <span className="text-ink font-medium">
+                              {t("storefront.product.material")}
+                            </span>{" "}
+                            {product.material}
                           </p>
                         )}
                         {product.care && (
                           <p>
-                            <span className="font-medium text-ink">{t("storefront.product.care")}</span> {product.care}
+                            <span className="text-ink font-medium">
+                              {t("storefront.product.care")}
+                            </span>{" "}
+                            {product.care}
                           </p>
                         )}
                       </div>
@@ -523,13 +530,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
           )}
 
           {/* Free Delivery and Returns */}
-          <div className="border-b border-hairline/40 py-5">
+          <div className="border-hairline/40 border-b py-5">
             <button
               type="button"
               onClick={() => toggleSection("delivery")}
-              className="flex justify-between items-center w-full group text-left cursor-pointer"
+              className="group flex w-full cursor-pointer items-center justify-between text-left"
             >
-              <h3 className="font-serif text-lg font-light tracking-wide text-ink group-hover:text-[#b5573a] transition-colors">
+              <h3 className="text-ink font-serif text-lg font-light tracking-wide transition-colors group-hover:text-[#b5573a]">
                 {t("storefront.product.deliveryTitle")}
               </h3>
               <motion.span
@@ -551,19 +558,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   className="overflow-hidden"
                 >
                   <div className="mt-4">
-                    <p className="text-xs font-light tracking-wide text-on-surface-variant/80 mb-3 leading-relaxed">
+                    <p className="text-on-surface-variant/80 mb-3 text-xs leading-relaxed font-light tracking-wide">
                       {t("storefront.product.deliveryThreshold")}
                     </p>
-                    <ul className="list-disc pl-5 space-y-2 text-xs font-light tracking-wide text-on-surface-variant/80">
+                    <ul className="text-on-surface-variant/80 list-disc space-y-2 pl-5 text-xs font-light tracking-wide">
                       <li>{t("storefront.product.standardDelivery")}</li>
                       <li>{t("storefront.product.expressDelivery")}</li>
                     </ul>
-                    <p className="mt-3 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                    <p className="text-on-surface-variant/80 mt-3 text-xs leading-relaxed font-light tracking-wide">
                       {t("storefront.product.deliverySchedule")}
                     </p>
-                    <p className="mt-2 text-xs font-light tracking-wide text-on-surface-variant/80 leading-relaxed">
+                    <p className="text-on-surface-variant/80 mt-2 text-xs leading-relaxed font-light tracking-wide">
                       {t("storefront.product.memberReturnsPrefix")}{" "}
-                      <a className="underline hover:text-[#b5573a] transition-colors" href="#">
+                      <a className="underline transition-colors hover:text-[#b5573a]" href="#">
                         {t("storefront.product.freeReturns")}
                       </a>
                       .
@@ -576,7 +583,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           <ProductReviewsSection productId={product.realId} productName={product.name} />
         </div>
-
       </div>
     </div>
   );

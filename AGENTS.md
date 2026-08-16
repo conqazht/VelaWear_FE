@@ -2,7 +2,9 @@
 
 # This is NOT the Next.js you know
 
-This project uses Next.js 16, which has breaking changes compared with older versions. Before changing framework-specific code, read the relevant local guide in `node_modules/next/dist/docs/` and follow any deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
 
@@ -27,25 +29,27 @@ Keep the experience refined, editorial, and purchase-focused. The storefront sho
 
 Source of truth: `package.json` and `components.json`.
 
-| Technology | Version / Config | Notes |
-| :--- | :--- | :--- |
-| Next.js | `16.2.9` | App Router |
-| React | `19.2.4` | React Server Components capable |
-| React DOM | `19.2.4` | DOM renderer |
-| TypeScript | `^5` | Strict typed TS/TSX preferred |
-| Tailwind CSS | `^4` | Uses `@tailwindcss/postcss` |
-| shadcn CLI | `^4.11.0` | Build tooling in `devDependencies` |
-| shadcn style | `base-nova` | Keep generated components consistent with this style |
-| `@shadcn/react` | `0.2.1` | Runtime component library in `dependencies` |
-| Base UI | `@base-ui/react ^1.5.0` | Headless primitives when needed |
-| Icons | `lucide-react ^1.18.0` | Import only the icons used |
-| Animation | `motion ^12.40.0` | Existing app uses `motion/react` |
-| TanStack Query | `5.101.2` | Server state, cache, retry, `Retry-After` |
-| Zustand | `5.0.14` | Client-side state (cart, auth, theme, locale) |
-| Axios | `^1.18.1` | HTTP client with interceptors |
-| Vitest | `^4.1.10` | Unit testing |
-| Playwright | `^1.61.1` | E2E smoke and full-stack tests |
-| Package manager | `pnpm` | Lockfile is `pnpm-lock.yaml` |
+| Technology      | Version / Config        | Notes                                                |
+| :-------------- | :---------------------- | :--------------------------------------------------- |
+| Next.js         | `16.3.1`                | App Router with Turbopack & Cache Components         |
+| React           | `19.2.8`                | React Server Components capable                      |
+| React DOM       | `19.2.8`                | DOM renderer                                         |
+| TypeScript      | `^5`                    | Strict typed TS/TSX preferred (TypeScript 5.9.3)     |
+| Tailwind CSS    | `^4`                    | Uses `@tailwindcss/postcss 4.3.3`                    |
+| shadcn CLI      | `^4.11.0`               | Build tooling in `devDependencies`                   |
+| shadcn style    | `base-nova`             | Keep generated components consistent with this style |
+| `@shadcn/react` | `0.2.1`                 | Runtime component library in `dependencies`          |
+| Base UI         | `@base-ui/react ^1.7.0` | Headless primitives when needed                      |
+| Icons           | `lucide-react ^1.31.0`  | Import only the icons used                           |
+| Animation       | `motion ^12.40.0`       | Existing app uses `motion/react`                     |
+| TanStack Query  | `5.101.4`               | Server state, cache, retry, `Retry-After`            |
+| Zustand         | `5.0.15`                | Client-side state (cart, auth, theme, locale)        |
+| Axios           | `^1.19.0`               | HTTP client with interceptors                        |
+| Vitest          | `^4.1.10`               | Unit testing                                         |
+| Playwright      | `^1.62.1`               | E2E smoke and full-stack tests                       |
+| Formatter       | `prettier ^3.9.6`       | With `prettier-plugin-tailwindcss ^0.8.1` & `oxfmt`  |
+| Linter          | `oxlint ^1.78.0`        | Fast Rust linter + `eslint ^9` for Next.js rules     |
+| Package manager | `pnpm`                  | Lockfile is `pnpm-lock.yaml`                         |
 
 ## Repository Shape
 

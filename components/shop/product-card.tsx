@@ -12,11 +12,7 @@ interface ProductCardProps {
   footerAction?: ReactNode;
 }
 
-export function ProductCard({
-  product,
-  imageAction,
-  footerAction,
-}: ProductCardProps) {
+export function ProductCard({ product, imageAction, footerAction }: ProductCardProps) {
   const { locale } = useI18n();
 
   return (
@@ -29,9 +25,7 @@ export function ProductCard({
       eyebrow={getCategoryLabel(product.category, locale)}
       title={product.name}
       price={money(product.price, locale)}
-      originalPrice={
-        product.originalPrice ? money(product.originalPrice, locale) : undefined
-      }
+      originalPrice={product.originalPrice ? money(product.originalPrice, locale) : undefined}
       footerAction={footerAction}
     />
   );

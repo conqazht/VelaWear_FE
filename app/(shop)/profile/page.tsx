@@ -12,10 +12,7 @@ import { useNotification } from "@/components/shop/notification-provider";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Card } from "@/components/ui/card";
-import {
-  useMyAddressesQuery,
-  useMyOrdersQuery,
-} from "@/lib/queries/commerce";
+import { useMyAddressesQuery, useMyOrdersQuery } from "@/lib/queries/commerce";
 import { getProfileTabId } from "@/components/shop/profile/profile-formatters";
 import { ProfileTabLoading } from "@/components/shop/profile/profile-loading";
 import { ProfileShell } from "@/components/shop/profile/profile-shell";
@@ -51,13 +48,9 @@ export default function MemberProfile() {
       size: 100,
       sort: "createdAt,desc",
     },
-    isOrdersEnabled
+    isOrdersEnabled,
   );
-  const addressesQuery = useMyAddressesQuery(
-    userId,
-    { size: 100 },
-    isAddressesEnabled
-  );
+  const addressesQuery = useMyAddressesQuery(userId, { size: 100 }, isAddressesEnabled);
 
   if (isAuthLoading) {
     return <ProfileTabLoading tab={activeSubTab} />;
@@ -65,7 +58,7 @@ export default function MemberProfile() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="mx-auto w-full max-w-[1800px] px-6 py-24 min-h-[70vh] flex flex-col justify-center items-center">
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] flex-col items-center justify-center px-6 py-24">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-sm border-[#1c1a18]/5 bg-[#efe7dc] p-8 py-10 text-center shadow-lg">
           <LockKeyhole className="mb-6 size-12 text-[#b5573a]" />
           <h2 className="mb-4 font-serif text-2xl font-light text-[#1c1a18]">
@@ -76,7 +69,7 @@ export default function MemberProfile() {
           </p>
           <Link
             href="/sign-in"
-            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#b5573a]"
+            className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-white uppercase transition-colors hover:bg-[#b5573a]"
           >
             {t("account.signIn.action")}
           </Link>
@@ -109,9 +102,7 @@ export default function MemberProfile() {
         />
       )}
 
-      {activeSubTab === "orders" && (
-        <ProfileOrdersTab ordersQuery={ordersQuery} />
-      )}
+      {activeSubTab === "orders" && <ProfileOrdersTab ordersQuery={ordersQuery} />}
 
       {activeSubTab === "favourites" && (
         <ProfileFavoritesTab

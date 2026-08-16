@@ -33,32 +33,20 @@ export function ProductCardSkeletonGrid({
       aria-hidden="true"
     >
       {Array.from({ length: count }).map((_, index) => (
-        <ProductCardSkeleton
-          key={index}
-          imageAspect={imageAspect}
-          className={className}
-        />
+        <ProductCardSkeleton key={index} imageAspect={imageAspect} className={className} />
       ))}
     </div>
   );
 }
 
-function ProductCardSkeleton({
-  imageAspect = "square",
-  className,
-}: ProductCardSkeletonProps) {
+function ProductCardSkeleton({ imageAspect = "square", className }: ProductCardSkeletonProps) {
   return (
     <div className={cn("overflow-hidden rounded-md bg-white", className)}>
       <div className="relative">
-        <Skeleton
-          className={cn(
-            imageAspectClass[imageAspect],
-            "rounded-none bg-[#efe7dc]",
-          )}
-        />
-        <Skeleton className="absolute right-4 top-4 size-8 rounded-full bg-[#e5dccf]" />
+        <Skeleton className={cn(imageAspectClass[imageAspect], "rounded-none bg-[#efe7dc]")} />
+        <Skeleton className="absolute top-4 right-4 size-8 rounded-full bg-[#e5dccf]" />
       </div>
-      <div className="px-4 pb-6 pt-5">
+      <div className="px-4 pt-5 pb-6">
         <Skeleton className="h-3 w-24 rounded-none bg-[#e5dccf]" />
         <Skeleton className="mt-3 h-5 w-3/4 rounded-none bg-[#e5dccf]" />
         <div className="mt-4 flex items-center gap-3">

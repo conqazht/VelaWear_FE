@@ -71,8 +71,7 @@ describe("useSearchSuggestions", () => {
       .mockReturnValueOnce(newRequest.promise);
 
     const { result, rerender } = renderHook(
-      ({ query, locale }: { query: string; locale: Locale }) =>
-        useSearchSuggestions(query, locale),
+      ({ query, locale }: { query: string; locale: Locale }) => useSearchSuggestions(query, locale),
       { initialProps: { query: "old", locale: "vi" as Locale } },
     );
 
@@ -103,8 +102,7 @@ describe("useSearchSuggestions", () => {
       .mockReturnValueOnce(slowRequest.promise);
 
     const { result, rerender } = renderHook(
-      ({ query, locale }: { query: string; locale: Locale }) =>
-        useSearchSuggestions(query, locale),
+      ({ query, locale }: { query: string; locale: Locale }) => useSearchSuggestions(query, locale),
       { initialProps: { query: "ready", locale: "vi" as Locale } },
     );
 

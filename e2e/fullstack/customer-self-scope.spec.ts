@@ -55,41 +55,44 @@ test(
   "two accounts cannot cross self-service ownership",
   { tag: "@fullstack" },
   async ({ ownershipAccounts }) => {
-    const primaryResources = await test.step("primary account discovers its own resources", async () => {
-      const [ordersBody, addressesBody] = await Promise.all([
-        getSuccessfulJson<ApiEnvelope<PaginatedResult<OwnedOrder>>>(
-          ownershipAccounts.primary,
-          "/orders/me?size=100",
-          "Primary order list",
-        ),
-        getSuccessfulJson<ApiEnvelope<PaginatedResult<OwnedAddress>>>(
-          ownershipAccounts.primary,
-          "/user-addresses/me?size=100",
-          "Primary address list",
-        ),
-      ]);
+    const primaryResources =
+      await test.step("primary account discovers its own resources", async () => {
+        const [ordersBody, addressesBody] = await Promise.all([
+          getSuccessfulJson<ApiEnvelope<PaginatedResult<OwnedOrder>>>(
+            ownershipAccounts.primary,
+            "/orders/me?size=100",
+            "Primary order list",
+          ),
+          getSuccessfulJson<ApiEnvelope<PaginatedResult<OwnedAddress>>>(
+            ownershipAccounts.primary,
+            "/user-addresses/me?size=100",
+            "Primary address list",
+          ),
+        ]);
 
-      const order = ordersBody.data.result[0];
-      const address = addressesBody.data.result[0];
-      if (!order) {
-        throw new Error(
-          "Seed prerequisite missing: the primary E2E account must own at least one order",
-        );
-      }
-      if (!address) {
-        throw new Error(
-          "Seed prerequisite missing: the primary E2E account must own at least one address",
-        );
-      }
-      if (!Number.isInteger(order.id) || !order.orderCode) {
-        throw new Error("Seed prerequisite invalid: the primary order must expose an ID and order code");
-      }
-      if (!Number.isInteger(address.id)) {
-        throw new Error("Seed prerequisite invalid: the primary address must expose an ID");
-      }
+        const order = ordersBody.data.result[0];
+        const address = addressesBody.data.result[0];
+        if (!order) {
+          throw new Error(
+            "Seed prerequisite missing: the primary E2E account must own at least one order",
+          );
+        }
+        if (!address) {
+          throw new Error(
+            "Seed prerequisite missing: the primary E2E account must own at least one address",
+          );
+        }
+        if (!Number.isInteger(order.id) || !order.orderCode) {
+          throw new Error(
+            "Seed prerequisite invalid: the primary order must expose an ID and order code",
+          );
+        }
+        if (!Number.isInteger(address.id)) {
+          throw new Error("Seed prerequisite invalid: the primary address must expose an ID");
+        }
 
-      return { addressId: address.id, orderCode: order.orderCode, orderId: order.id };
-    });
+        return { addressId: address.id, orderCode: order.orderCode, orderId: order.id };
+      });
 
     const encodedOrderCode = encodeURIComponent(primaryResources.orderCode);
     const ownershipPaths = [
@@ -120,10 +123,10 @@ test(
       expectStatus(secondaryOwnResponses[0], 200, "Secondary order list");
       expectStatus(secondaryOwnResponses[1], 200, "Secondary address list");
 
-      const secondaryOrdersBody = await secondaryOwnResponses[0].json() as ApiEnvelope<
+      const secondaryOrdersBody = (await secondaryOwnResponses[0].json()) as ApiEnvelope<
         PaginatedResult<OwnedOrder>
       >;
-      const secondaryAddressesBody = await secondaryOwnResponses[1].json() as ApiEnvelope<
+      const secondaryAddressesBody = (await secondaryOwnResponses[1].json()) as ApiEnvelope<
         PaginatedResult<OwnedAddress>
       >;
       expect(
