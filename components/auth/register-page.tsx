@@ -219,9 +219,9 @@ export function RegisterPage() {
           plain={true}
         />
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 border-none">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 border-none sm:gap-3.5">
           {otpError && (
-            <div className="rounded-[12px] border border-solid border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+            <div className="rounded-[12px] border border-solid border-red-500/20 bg-red-500/10 p-2.5 text-xs text-red-700 sm:text-sm">
               {otpError}
             </div>
           )}
@@ -253,7 +253,7 @@ export function RegisterPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4 border-none">
+          <div className="grid grid-cols-2 gap-3 border-none sm:gap-4">
             <div>
               <FloatingInput
                 id="firstName"
@@ -361,11 +361,11 @@ export function RegisterPage() {
                 </button>
               }
             />
-            {(password.length > 0 || isSubmitted || sceneFocus === "password") && (
+            {(password.length > 0 || isSubmitted) && (
               <PasswordRequirements
                 password={password}
                 showTitle={false}
-                className="mt-2.5 border-none px-1"
+                className="mt-2 border-none px-1"
               />
             )}
           </div>
@@ -552,22 +552,22 @@ export function RegisterPage() {
           </div>
 
           {/* Agreements */}
-          <div className="mt-4 space-y-4 border-none">
-            <div className="group flex cursor-pointer items-start gap-3 border-none">
+          <div className="mt-2 space-y-2.5 border-none">
+            <div className="group flex cursor-pointer items-start gap-2.5 border-none">
               <Checkbox
                 id="emailConsent"
                 checked={emailConsent}
                 onCheckedChange={(checked) => setEmailConsent(!!checked)}
-                className="mt-1 size-5 shrink-0 cursor-pointer rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
+                className="mt-0.5 size-4.5 shrink-0 cursor-pointer rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
               />
               <label
                 htmlFor="emailConsent"
-                className="cursor-pointer border-none text-sm leading-relaxed text-[#55423d] transition-colors select-none group-hover:text-[#1c1a18]"
+                className="cursor-pointer border-none text-xs leading-relaxed text-[#55423d] transition-colors select-none group-hover:text-[#1c1a18] sm:text-sm"
               >
                 {t("auth.register.emailConsent")}
               </label>
             </div>
-            <div className="group flex cursor-pointer items-start gap-3 border-none">
+            <div className="group flex cursor-pointer items-start gap-2.5 border-none">
               <Checkbox
                 id="termsConsent"
                 checked={termsConsent}
@@ -582,7 +582,7 @@ export function RegisterPage() {
                   }
                 }}
                 className={cn(
-                  "mt-1 size-5 shrink-0 cursor-pointer rounded-[4px] transition-all duration-200",
+                  "mt-0.5 size-4.5 shrink-0 cursor-pointer rounded-[4px] transition-all duration-200",
                   errors.terms
                     ? "border-red-500 bg-red-500/10 shadow-[0_0_0_2px_rgba(239,68,68,0.2)]"
                     : "border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]",
@@ -590,7 +590,7 @@ export function RegisterPage() {
               />
               <label
                 htmlFor="termsConsent"
-                className="cursor-pointer border-none text-sm leading-relaxed text-[#55423d] transition-colors select-none group-hover:text-[#1c1a18]"
+                className="cursor-pointer border-none text-xs leading-relaxed text-[#55423d] transition-colors select-none group-hover:text-[#1c1a18] sm:text-sm"
               >
                 {t("auth.register.termsPrefix")}{" "}
                 <Link href="#" className="border-none underline hover:text-[#b5573a]">
@@ -606,16 +606,16 @@ export function RegisterPage() {
           </div>
 
           {/* Submit Action */}
-          <div className="border-none pt-4">
+          <div className="border-none pt-2 sm:pt-3">
             <button
               type="submit"
               disabled={isOtpSubmitting}
-              className="flex h-12 w-full cursor-pointer items-center justify-center rounded-[12px] border-none bg-[#b5573a] text-sm font-medium tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#8f4329] disabled:opacity-50"
+              className="flex h-11 w-full cursor-pointer items-center justify-center rounded-[12px] border-none bg-[#b5573a] text-sm font-medium tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#8f4329] disabled:opacity-50 sm:h-12"
             >
               {isOtpSubmitting ? t("auth.register.creating") : t("auth.register.create")}
             </button>
 
-            <div className="relative mt-4 flex items-center">
+            <div className="relative mt-2.5 flex items-center sm:mt-3">
               <div className="flex-grow border-t border-[#1c1a18]/10"></div>
               <span className="mx-4 flex-shrink-0 text-xs tracking-wider text-[#1c1a18]/50 uppercase">
                 {t("auth.common.or")}
@@ -623,7 +623,7 @@ export function RegisterPage() {
               <div className="flex-grow border-t border-[#1c1a18]/10"></div>
             </div>
 
-            <GoogleOAuthButton className="mt-4" />
+            <GoogleOAuthButton className="mt-2.5 sm:mt-3" />
           </div>
         </form>
       )}

@@ -37,12 +37,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useUpdateProfileMutation } from "@/lib/queries/commerce";
 import type { Gender, User, UserAddress } from "@/lib/api/types";
-import { formatMemberSince, formatAddress } from "./profile-formatters";
-import { ProfileAddressesLoadingFallback } from "./profile-loading";
+import { formatMemberSince } from "./profile-formatters";
+import { ProfileAddressesPanel } from "./profile-addresses-panel";
 
 interface ProfileAccountPanelProps {
   user: User;
@@ -67,7 +66,6 @@ export function ProfileAccountPanel({
 }: ProfileAccountPanelProps) {
   const { locale, t } = useI18n();
   const updateProfileMutation = useUpdateProfileMutation();
-  const addresses = addressesQuery.data?.result ?? [];
 
   const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
   const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
@@ -191,7 +189,7 @@ export function ProfileAccountPanel({
             </div>
             <div className="space-y-0.5 text-left">
               <p className="text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
-                {t("admin.shell.auth.currentRole", { roles: getUserRoleNames(user).join(", ") }) ||
+                {t("account.adminRole", { roles: getUserRoleNames(user).join(", ") }) ||
                   "Quyền Quản Trị Hệ Thống"}
               </p>
               <p className="text-xs text-[#1c1a18]/70">
@@ -588,61 +586,7 @@ export function ProfileAccountPanel({
           )}
 
           {activeSidebarTab === "delivery" && (
-            <div>
-              <h2 className="text-ink mb-8 font-serif text-2xl font-light tracking-tight">
-                {t("account.addresses.title")}
-              </h2>
-              {addressesQuery.isLoading ? (
-                <ProfileAddressesLoadingFallback />
-              ) : addressesQuery.isError ? (
-                <StorefrontApiStatus
-                  error={addressesQuery.error}
-                  onRetry={() => void addressesQuery.refetch()}
-                  resourceLabel={t("account.addresses.resource")}
-                  returnHref="/collection"
-                  variant="panel"
-                />
-              ) : addresses.length === 0 ? (
-                <div className="bg-surface-card/30 flex flex-col items-center gap-6 rounded-md border border-[#1c1a18]/15 py-16 text-center">
-                  <p className="text-ink/70 max-w-md text-sm font-light">
-                    {t("account.addresses.empty")}
-                  </p>
-                  <button className="inline-flex cursor-pointer rounded-sm border border-[#1c1a18] px-10 py-3.5 text-xs font-semibold tracking-widest text-[#1c1a18] uppercase transition-colors hover:bg-[#1c1a18] hover:text-white">
-                    {t("account.addresses.add")}
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {addresses.map((address) => (
-                    <div
-                      key={address.id}
-                      className="bg-surface-card/30 rounded-md border border-[#1c1a18]/15 p-5"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-ink text-sm font-semibold">
-                              {address.receiverName}
-                            </h3>
-                            {address.isDefault && (
-                              <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white uppercase">
-                                {t("account.addresses.default")}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-ink/65 mt-1 text-sm">
-                            {address.phone ?? t("account.addresses.noPhone")}
-                          </p>
-                          <p className="text-ink/70 mt-2 text-sm leading-relaxed">
-                            {formatAddress(address) || t("account.addresses.noAddress")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProfileAddressesPanel addressesQuery={addressesQuery} />
           )}
 
           {activeSidebarTab === "visibility" && (

@@ -49,7 +49,7 @@ export function AnimatedAuthShell({
           mode={mode}
         />
 
-        <section className="relative isolate mx-auto flex h-full w-full max-w-[560px] items-center justify-center overflow-y-auto rounded-[24px] border border-[#e4dacf] bg-[#f7f4ef] px-4 py-8 shadow-[0_24px_80px_rgba(69,43,28,0.08)] md:px-8">
+        <section className="relative isolate mx-auto flex h-full w-full max-w-[560px] [scrollbar-width:none] items-center justify-center overflow-y-auto rounded-[24px] border border-[#e4dacf] bg-[#f7f4ef] px-4 py-2 shadow-[0_24px_80px_rgba(69,43,28,0.08)] sm:py-4 md:px-8 [&::-webkit-scrollbar]:hidden">
           {/* Inner background image container with clean clipping */}
           <div
             className="absolute inset-0 z-0 overflow-hidden rounded-[23px]"
@@ -63,12 +63,12 @@ export function AnimatedAuthShell({
           </div>
 
           <motion.div
-            className={cn("relative z-10 w-full max-w-[360px]", panelClassName)}
+            className={cn("relative z-10 my-auto w-full max-w-[360px]", panelClassName)}
             initial={false}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="mb-7 text-center">
+            <div className="mb-3 text-center sm:mb-4">
               <Link
                 href="/"
                 aria-label={t("auth.common.homeAria")}
@@ -76,10 +76,10 @@ export function AnimatedAuthShell({
               >
                 <BrandMark className="mx-auto" />
               </Link>
-              <h1 className="mt-4 font-serif text-[32px] leading-[1.16] font-normal text-[#1c1a18] md:text-[36px]">
+              <h1 className="mt-3 font-serif text-[28px] leading-[1.16] font-normal text-[#1c1a18] sm:text-[32px]">
                 {title}
               </h1>
-              <p className="mx-auto mt-3 max-w-[320px] text-sm leading-[1.55] text-[#55423d]">
+              <p className="mx-auto mt-2 max-w-[320px] text-xs leading-[1.5] text-[#55423d] sm:text-sm">
                 {description}
               </p>
             </div>

@@ -123,8 +123,7 @@ export function CheckoutPageClient() {
     defaultValues: {
       email: "",
       phone: "",
-      firstName: "",
-      lastName: "",
+      receiverName: "",
       address: "",
       provinceCode: "",
       wardCode: "",
@@ -141,12 +140,15 @@ export function CheckoutPageClient() {
     try {
       const storedValue = window.localStorage.getItem(checkoutDetailsStorageKey(user.id));
       if (storedValue) {
-        const parsedDetails = localizedCheckoutSchema.safeParse(JSON.parse(storedValue));
+        const raw = JSON.parse(storedValue);
+        if (!raw.receiverName && (raw.firstName || raw.lastName)) {
+          raw.receiverName = `${raw.firstName || ""} ${raw.lastName || ""}`.trim();
+        }
+        const parsedDetails = localizedCheckoutSchema.safeParse(raw);
         if (parsedDetails.success) {
           setValue("email", parsedDetails.data.email);
           setValue("phone", parsedDetails.data.phone);
-          setValue("firstName", parsedDetails.data.firstName);
-          setValue("lastName", parsedDetails.data.lastName);
+          setValue("receiverName", parsedDetails.data.receiverName);
           setValue("address", parsedDetails.data.address);
           setValue("provinceCode", parsedDetails.data.provinceCode);
           setValue("wardCode", parsedDetails.data.wardCode);
@@ -158,9 +160,7 @@ export function CheckoutPageClient() {
     }
 
     setValue("email", user.email);
-    const names = user.fullName.split(" ");
-    setValue("firstName", names[0] || "");
-    setValue("lastName", names.slice(1).join(" ") || "");
+    setValue("receiverName", user.fullName || "");
   }, [localizedCheckoutSchema, user, setValue]);
 
   useEffect(() => {
@@ -337,7 +337,7 @@ export function CheckoutPageClient() {
 
     try {
       const baseRequest: CheckoutRequest = {
-        receiverName: `${data.firstName} ${data.lastName}`.trim(),
+        receiverName: data.receiverName.trim(),
         receiverPhone: data.phone,
         receiverAddress: [data.address, selectedWard.name, selectedProvince.name].join(", "),
         paymentMethod,
@@ -538,22 +538,13 @@ export function CheckoutPageClient() {
 
             <div className="space-y-3">
               <SectionTitle number="2" title={t("checkout.shippingAddress")} />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <CheckoutInput
-                  label={t("checkout.firstName")}
-                  autoComplete="given-name"
-                  placeholder={t("checkout.firstNamePlaceholder")}
-                  {...register("firstName")}
-                  error={errors.firstName?.message}
-                />
-                <CheckoutInput
-                  label={t("checkout.lastName")}
-                  autoComplete="family-name"
-                  placeholder={t("checkout.lastNamePlaceholder")}
-                  {...register("lastName")}
-                  error={errors.lastName?.message}
-                />
-              </div>
+              <CheckoutInput
+                label={t("checkout.receiverName")}
+                autoComplete="name"
+                placeholder={t("checkout.receiverNamePlaceholder")}
+                {...register("receiverName")}
+                error={errors.receiverName?.message}
+              />
               <CheckoutInput
                 label={t("checkout.street")}
                 autoComplete="street-address"

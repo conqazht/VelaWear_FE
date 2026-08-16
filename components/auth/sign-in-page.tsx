@@ -104,7 +104,7 @@ export function SignInPage() {
       title={t("auth.signIn.title")}
       description={t("auth.signIn.description")}
       footer={
-        <p className="mt-8 text-center text-sm leading-[1.55] text-[#55423d]">
+        <p className="mt-5 text-center text-sm leading-[1.55] text-[#55423d] sm:mt-6">
           {t("auth.signIn.newMember")}{" "}
           <Link
             href="/register"
@@ -115,7 +115,11 @@ export function SignInPage() {
         </p>
       }
     >
-      <form noValidate onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-6">
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit, onInvalid)}
+        className="flex flex-col gap-4 sm:gap-5"
+      >
         {apiError && (
           <div className="border-error/20 bg-error/10 text-error rounded-[12px] border p-3 text-sm">
             {apiError}

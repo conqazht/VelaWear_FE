@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { connection } from "next/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
@@ -11,7 +11,19 @@ import { AdminThemeEnforcer } from "./_components/admin-theme-enforcer";
 import { AdminAuthGate } from "./_components/admin-auth-gate";
 import { AdminToaster } from "./_components/admin-toaster";
 
-export default async function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    <I18nCatalogProvider messages={adminMessages}>
+      <TooltipProvider>
+        <Suspense fallback={null}>
+          <AdminPreferencesProviders>{children}</AdminPreferencesProviders>
+        </Suspense>
+      </TooltipProvider>
+    </I18nCatalogProvider>
+  );
+}
+
+async function AdminPreferencesProviders({ children }: { children: ReactNode }) {
   await connection();
   const themeMode = await getPreference("theme_mode");
   const initialPreferences = {
@@ -20,14 +32,12 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   };
 
   return (
-    <I18nCatalogProvider messages={adminMessages}>
-      <TooltipProvider>
-        <AdminThemeEnforcer themeMode={themeMode} />
-        <PreferencesStoreProvider initialValues={initialPreferences}>
-          <AdminAuthGate>{children}</AdminAuthGate>
-          <AdminToaster />
-        </PreferencesStoreProvider>
-      </TooltipProvider>
-    </I18nCatalogProvider>
+    <>
+      <AdminThemeEnforcer themeMode={themeMode} />
+      <PreferencesStoreProvider initialValues={initialPreferences}>
+        <AdminAuthGate>{children}</AdminAuthGate>
+        <AdminToaster />
+      </PreferencesStoreProvider>
+    </>
   );
 }

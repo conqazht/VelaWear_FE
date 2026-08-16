@@ -24,17 +24,17 @@ export function PasswordRequirements({
   const requirements = [
     {
       id: "min-length",
-      label: t("account.password.reqMinChars"),
+      label: t("auth.password.reqMinChars") || t("account.password.reqMinChars"),
       met: hasMinLength,
     },
     {
       id: "case",
-      label: t("account.password.reqCase"),
+      label: t("auth.password.reqCase") || t("account.password.reqCase"),
       met: hasUpperAndLower,
     },
     {
       id: "number",
-      label: t("account.password.reqNumber"),
+      label: t("auth.password.reqNumber") || t("account.password.reqNumber"),
       met: hasNumber,
     },
   ];
@@ -43,7 +43,7 @@ export function PasswordRequirements({
     <div className={cn("space-y-2 text-left select-none", className)}>
       {showTitle && (
         <p className="text-ink/70 mb-2 text-xs font-semibold tracking-wider uppercase">
-          {t("account.password.requirements")}
+          {t("auth.password.requirements") || t("account.password.requirements")}
         </p>
       )}
       <div className="flex flex-col gap-1.5 text-xs">

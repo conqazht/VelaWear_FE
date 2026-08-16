@@ -1,3 +1,43 @@
+## 2026-08-16 (Address Management CRUD, Admin Layout Prerender Fix, and Auth UI Polish)
+
+- **Admin Layouts Next.js 16 Instant Segment Prerender Fix:**
+  - Resolved dynamic prerendering warnings (`instant-unrendered-segment`) across App Router admin segments (`app/(admin)/layout.tsx`, `app/(admin)/dashboard/layout.tsx`, `app/(admin)/chat/layout.tsx`, `app/(admin)/mail/layout.tsx`).
+  - Wrapped dynamic preference & cookie resolution within `<Suspense fallback={null}>` boundaries and converted layout exports to synchronous functions per Next.js 16 Cache Components architecture.
+- **Address Management & Modal Redesign (`components/shop/profile/address-modal.tsx`, `profile-addresses-panel.tsx`):**
+  - Implemented full CRUD with `useCreateMyAddressMutation`, `useUpdateMyAddressMutation`, and `useDeleteMyAddressMutation`.
+  - Cleaned up redundant "+ THÊM ĐỊA CHỈ" black header button when address list is empty; only renders empty state "+ THÊM ĐỊA CHỈ MỚI" or top-right action when addresses exist.
+  - Redesigned `AddressModal` with enlarged `sm:max-w-2xl` width, Vietnam Provinces & Wards API dropdown integration (`getVietnamProvinces`, `getVietnamWards`), refined typography, placeholder helpers, full Vietnamese/English translations (`account.addresses.cancel`, `account.addresses.save`), and fixed single-line button rendering.
+- **Harmonized Receiver Name Across Checkout & Address Management:**
+  - Unified the checkout form (`components/shop/checkout-page-client.tsx`, `lib/validations.ts`) to use a single `receiverName` ("Họ và tên người nhận*" / "Full name *") field matching `UserAddress` and backend DB schemas (`user_addresses`, `orders`).
+  - Added backward-compatible migration for browser storage (`checkoutDetailsStorageKey`) and updated fullstack/unit tests.
+- **Auth Shell & Registration Flow Polish:**
+  - Shortened register header copy and adjusted vertical padding/margins (`[scrollbar-width:none]`) to eliminate scrollbars on Chrome desktop viewports.
+  - Updated sign-in registration link copy to explicit "Register an account" / "Đăng ký tài khoản".
+  - Refined password checklist in `register-page.tsx` and `password-requirements.tsx` to only display after typing or submitting (`password.length > 0 || isSubmitted`), with properly namespaced i18n keys (`auth.password.*`).
+- **Verification:**
+  - `pnpm lint:fast` (`oxlint`): 0 warnings, 0 errors in 70ms.
+  - `pnpm exec tsc --noEmit`: 0 errors.
+  - `pnpm test:unit` (Vitest): 53/53 test files passed (205/205 tests).
+  - `pnpm test:e2e:smoke` (Playwright): 16/16 smoke tests passed in 34.9s.
+  - `pnpm build`: 68/68 routes compiled successfully in Turbopack.
+  - Visual verification with Chrome DevTools across Profile delivery tab, Address Modal, and Admin Dashboard.
+
+## 2026-08-16 (Auth Mascot Pedestal Alignment & Grounding Fix)
+
+- **Auth Motion Scene Mascot Alignment (`components/auth/auth-motion-scene.tsx`):**
+  - Aligned the background artwork with `object-cover object-bottom` to anchor the concrete pedestal consistently across viewport aspect ratios.
+  - Adjusted the active character layer SVG container baseline from `bottom-[18%]` to `bottom-[28.5%]`.
+  - The mascots (tall cream pill, black pill, terracotta dome, sand dome) now sit naturally and securely on the flat top plane of the concrete pedestal rather than overlapping the vertical front face.
+- **Verification:**
+  - `pnpm prettier --check components/auth/auth-motion-scene.tsx`: Passed.
+  - `pnpm lint:fast`: 0 warnings, 0 errors in 52ms.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+  - `pnpm test:e2e:smoke`: 16/16 smoke tests passed in 39.4s.
+  - `pnpm build`: 68/68 routes compiled successfully in 5.5s (Turbopack).
+  - Browser visual validation: Verified responsive rendering and focus/hover/status animations across 1920x1080, 1440x900, 1280x800 on `/sign-in`, `/register`, and `/forgot-password`.
+
 ## 2026-08-16 (Oxlint & Oxfmt Rust Tooling Integration & CI Pipeline Acceleration)
 
 - **High-Performance Rust Tooling (`oxlint` & `oxfmt`):**
