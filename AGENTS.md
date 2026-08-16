@@ -127,13 +127,20 @@ Source of truth: `package.json` and `components.json`.
 - Preserve existing behavior unless the task explicitly asks to change it.
 - Do not remove code broadly just to simplify a change.
 - Use `apply_patch` for manual file edits.
-- Follow the existing formatting style and Tailwind conventions.
+### Code Formatting & Tooling
+
+- Use `pnpm format` (Prettier + `prettier-plugin-tailwindcss`) to ensure clean code formatting and standard Tailwind CSS class order.
+- Use `pnpm lint:fast` (`oxlint`) for instant (20ms) syntax, React, and logic verification during active development.
+- Use `pnpm fmt` (`oxfmt`) for rapid project-wide formatting when needed.
 
 ### Verification
 
 Run the relevant checks before finishing:
 
-- `pnpm lint` for syntax and linting.
+- `pnpm format:check` to ensure code formatting and Tailwind class ordering adhere to project standards.
+- `pnpm lint:fast` for fast-fail lint checks, followed by `pnpm lint` for Next.js 16 framework rules.
+- `pnpm exec tsc --noEmit` to ensure 100% strict TypeScript type safety without errors.
+- `pnpm test:unit` when editing application logic, state stores, queries, or components.
 - `pnpm build` when changing app structure, Next.js behavior, or anything likely to affect production build output.
 - For visual/frontend changes, run the dev server and verify the affected screens in a browser. Capture or update artifacts when useful.
 
