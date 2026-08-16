@@ -1,3 +1,10 @@
+## 2026-08-16 (E2E Smoke Test Synchronization with Size Guide Redesign)
+
+- **E2E Smoke Test Alignment (`e2e/storefront-catalog-ux.spec.ts`):**
+  - Updated the size guide test case to interact with the new tabbed sub-section pills (`Cỡ mở rộng (0X – 4X)`) and assert the rendered heading `Bảng kích cỡ mở rộng 0X – 4X`.
+  - All 16/16 Playwright smoke tests pass 100% locally.
+  - Pushed commit `09ccc3a` to PR #42.
+
 ## 2026-08-16 (Fix SiteFooter Content Hidden on Route Transitions)
 
 - **SiteFooter Always-Visible Rendering (`components/shop/site-footer.tsx`):**
