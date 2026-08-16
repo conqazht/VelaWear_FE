@@ -135,13 +135,14 @@ Source of truth: `package.json` and `components.json`.
 
 ### Verification
 
-Run the relevant checks before finishing:
+Run all mandatory checks to ensure 100% pass rate before requesting review or finishing:
 
 - `pnpm format:check` to ensure code formatting and Tailwind class ordering adhere to project standards.
-- `pnpm lint:fast` for fast-fail lint checks, followed by `pnpm lint` for Next.js 16 framework rules.
-- `pnpm exec tsc --noEmit` to ensure 100% strict TypeScript type safety without errors.
-- `pnpm test:unit` when editing application logic, state stores, queries, or components.
-- `pnpm build` when changing app structure, Next.js behavior, or anything likely to affect production build output.
+- `pnpm lint:fast` for instant fast-fail lint checks, followed by `pnpm lint` for Next.js 16 framework rules.
+- `pnpm exec tsc --noEmit` to ensure 100% strict TypeScript type safety with 0 errors.
+- `pnpm test:unit` to verify all Vitest unit test suites pass (205+ tests).
+- `pnpm test:e2e:smoke` when editing storefront UI, routes, navigation, auth, catalog, cart, or checkout to guarantee 100% Playwright smoke pass (16/16 smoke cases).
+- `pnpm build` to verify Next.js Turbopack compiles all 68+ routes without errors.
 - For visual/frontend changes, run the dev server and verify the affected screens in a browser. Capture or update artifacts when useful.
 
 If a required check cannot run because the repo lacks a script or dependency, state that clearly in the final note.
@@ -159,10 +160,11 @@ If a required check cannot run because the repo lacks a script or dependency, st
   - known follow-ups.
 - Keep entries concise and newest-first so future agents can quickly recover context.
 
-### Git
+### Git & Commit Gate
 
+- **STRICT PRE-COMMIT / PRE-PUSH GATE**: NEVER commit or push code unless ALL verification checks (`pnpm format:check`, `pnpm lint:fast`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test:unit`, `pnpm test:e2e:smoke`, `pnpm build`) have passed 100% with 0 errors and 0 failures. If any test fails, diagnose and fix the root cause first, re-run all checks, and only proceed when all tests are green.
 - Do NOT automatically commit completed work. The user will review the changes first and explicitly instruct you to commit when ready.
-- Use a clear commit message when instructed to commit, for example `docs: align agent instructions with vela wear app`.
+- Use a clear conventional commit message when instructed to commit, for example `feat(storefront): ...` or `fix(cart): ...`.
 - Do not include unrelated user changes in the commit.
 - If only documentation instructions are changed, a documentation commit is appropriate after checks pass.
 
