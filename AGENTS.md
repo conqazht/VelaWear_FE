@@ -127,6 +127,7 @@ Source of truth: `package.json` and `components.json`.
 - Preserve existing behavior unless the task explicitly asks to change it.
 - Do not remove code broadly just to simplify a change.
 - Use `apply_patch` for manual file edits.
+
 ### Code Formatting & Tooling
 
 - Use `pnpm format` (Prettier + `prettier-plugin-tailwindcss`) to ensure clean code formatting and standard Tailwind CSS class order.
