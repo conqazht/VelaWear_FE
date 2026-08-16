@@ -1,3 +1,15 @@
+## 2026-08-16 (Fix SiteFooter Content Hidden on Route Transitions)
+
+- **SiteFooter Always-Visible Rendering (`components/shop/site-footer.tsx`):**
+  - Removed fragile Framer Motion `initial="hidden"` and `whileInView="show"` viewport animation triggers from the static footer layout.
+  - Previously, `containerVariants.hidden` set `opacity: 0` on all children columns; when navigating via client-side routing (such as after login redirect), the intersection observer often failed to trigger `"show"`, leaving the footer as a solid black empty box until a hard browser refresh.
+  - Converted the footer content and background watermark into stable, accessible, always-rendered static elements.
+- **Verification:**
+  - `pnpm tsc --noEmit`: 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm test:unit`: 53/53 test files passed (205/205 tests).
+  - Pushed commit `b31c63e` to PR #42.
+
 ## 2026-08-16 (Standardized Border Radius on Auth Buttons & Form Controls)
 
 - **Auth Controls Radius Alignment (`sign-in-page.tsx`, `register-page.tsx`, `forgot-password-page.tsx`, `otp-entry.tsx`, `auth-field.tsx`):**
