@@ -8,7 +8,6 @@ import type { UserAddress } from "@/lib/api/types";
 import { useDeleteMyAddressMutation, useUpdateMyAddressMutation } from "@/lib/queries/commerce";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { formatAddress } from "./profile-formatters";
 import { ProfileAddressesLoadingFallback } from "./profile-loading";
 import { AddressModal } from "./address-modal";
 
@@ -146,7 +145,7 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/30",
                   )}
                 >
-                  {/* Row 1: Radio + Name + Phone + Badge <---> Actions */}
+                  {/* Line 1: Radio + Name + Badge <---> Actions */}
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
                       {/* Radio Selection for Default Address */}
@@ -174,14 +173,10 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                         {isDefault && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
                       </button>
 
-                      {/* Name + Phone + Badge */}
-                      <div className="flex flex-wrap items-center gap-2">
+                      {/* Name + Badge */}
+                      <div className="flex items-center gap-2">
                         <span className="text-ink text-sm leading-none font-semibold">
                           {address.receiverName}
-                        </span>
-                        <span className="text-ink/30 text-xs">•</span>
-                        <span className="text-ink/70 text-sm leading-none">
-                          {address.phone ?? t("account.addresses.noPhone")}
                         </span>
                         {isDefault && (
                           <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
@@ -219,13 +214,30 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                     </div>
                   </div>
 
-                  {/* Row 2: Full Address (indented to align with text) */}
-                  <div className="mt-2.5 pl-[30px] text-left">
+                  {/* Line 2: Phone (separate line) */}
+                  <div className="mt-1.5 pl-[30px] text-left">
+                    <p className="text-ink/70 text-sm leading-tight">
+                      {address.phone ?? t("account.addresses.noPhone")}
+                    </p>
+                  </div>
+
+                  {/* Line 3: Detailed Address (separate line) */}
+                  <div className="mt-1.5 pl-[30px] text-left">
                     <p
-                      className="text-ink/70 truncate text-sm leading-normal"
-                      title={formatAddress(address) || ""}
+                      className="text-ink/80 truncate text-sm leading-tight"
+                      title={address.addressDetail || ""}
                     >
-                      {formatAddress(address) || t("account.addresses.noAddress")}
+                      {address.addressDetail || t("account.addresses.noAddress")}
+                    </p>
+                  </div>
+
+                  {/* Line 4: Ward + Province (combined line) */}
+                  <div className="mt-1 pl-[30px] text-left">
+                    <p
+                      className="text-ink/60 truncate text-xs leading-tight"
+                      title={[address.ward, address.province].filter(Boolean).join(", ")}
+                    >
+                      {[address.ward, address.province].filter(Boolean).join(", ")}
                     </p>
                   </div>
                 </div>

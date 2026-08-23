@@ -36,7 +36,6 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useMyAddressesQuery } from "@/lib/queries/commerce";
 import type { UserAddress } from "@/lib/api/types";
 import { AddressModal } from "@/components/shop/profile/address-modal";
-import { formatAddress } from "@/components/shop/profile/profile-formatters";
 import { cn } from "@/lib/utils";
 import {
   submitCheckout,
@@ -682,17 +681,18 @@ export function CheckoutPageClient() {
                           <span className="text-sm font-semibold text-[#1c1a18]">
                             {selectedAddress.receiverName}
                           </span>
-                          <span className="text-xs text-[#1c1a18]/70">
-                            ({selectedAddress.phone})
-                          </span>
                           {selectedAddress.isDefault && (
-                            <span className="rounded bg-[#1c1a18] px-1.5 py-0.5 text-[9px] font-semibold tracking-wider text-white uppercase">
+                            <span className="rounded bg-[#1c1a18] px-1.5 py-0.5 text-[9px] leading-none font-semibold tracking-wider text-white uppercase">
                               {t("account.addresses.default")}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs leading-relaxed text-[#1c1a18]/80">
-                          {formatAddress(selectedAddress)}
+                        <p className="text-xs text-[#1c1a18]/70">{selectedAddress.phone}</p>
+                        <p className="text-xs text-[#1c1a18]/85">{selectedAddress.addressDetail}</p>
+                        <p className="text-xs text-[#1c1a18]/60">
+                          {[selectedAddress.ward, selectedAddress.province]
+                            .filter(Boolean)
+                            .join(", ")}
                         </p>
                       </div>
                     </div>
@@ -1018,7 +1018,7 @@ export function CheckoutPageClient() {
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/40",
                   )}
                 >
-                  {/* Row 1: Radio + Name + Phone + Badge <---> Edit */}
+                  {/* Line 1: Radio + Name + Badge <---> Edit */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <div
@@ -1030,12 +1030,10 @@ export function CheckoutPageClient() {
                         {isSelected && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <span className="text-ink max-w-[180px] truncate text-sm leading-none font-semibold">
                           {addr.receiverName}
                         </span>
-                        <span className="text-ink/30 text-xs">•</span>
-                        <span className="text-ink/70 text-xs leading-none">{addr.phone}</span>
                         {addr.isDefault && (
                           <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
                             {t("account.addresses.default")}
@@ -1058,13 +1056,28 @@ export function CheckoutPageClient() {
                     </button>
                   </div>
 
-                  {/* Row 2: Full Address */}
-                  <div className="mt-2 pl-[30px] text-left">
+                  {/* Line 2: Phone */}
+                  <div className="mt-1 pl-[30px] text-left">
+                    <p className="text-ink/70 text-xs leading-tight">{addr.phone}</p>
+                  </div>
+
+                  {/* Line 3: Detailed Address */}
+                  <div className="mt-1 pl-[30px] text-left">
                     <p
-                      className="text-ink/80 truncate text-xs leading-normal"
-                      title={formatAddress(addr)}
+                      className="text-ink/85 truncate text-xs leading-tight"
+                      title={addr.addressDetail}
                     >
-                      {formatAddress(addr)}
+                      {addr.addressDetail}
+                    </p>
+                  </div>
+
+                  {/* Line 4: Ward + Province */}
+                  <div className="mt-0.5 pl-[30px] text-left">
+                    <p
+                      className="text-ink/60 truncate text-[11px] leading-tight"
+                      title={[addr.ward, addr.province].filter(Boolean).join(", ")}
+                    >
+                      {[addr.ward, addr.province].filter(Boolean).join(", ")}
                     </p>
                   </div>
                 </div>

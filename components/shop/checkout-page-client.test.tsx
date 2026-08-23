@@ -217,8 +217,9 @@ describe("CheckoutPageClient rapid submit", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Nguyen Van A")).toBeInTheDocument();
-      expect(screen.getByText("(0987654321)")).toBeInTheDocument();
-      expect(screen.getByText("456 Dong Khoi, Ben Nghe, Ho Chi Minh")).toBeInTheDocument();
+      expect(screen.getByText("0987654321")).toBeInTheDocument();
+      expect(screen.getByText("456 Dong Khoi")).toBeInTheDocument();
+      expect(screen.getByText("Ben Nghe, Ho Chi Minh")).toBeInTheDocument();
     });
   });
 
