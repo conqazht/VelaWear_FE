@@ -31,7 +31,14 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
   const [editingAddress, setEditingAddress] = useState<UserAddress | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const addresses = addressesQuery.data?.result ?? [];
+  const addresses = React.useMemo(() => {
+    const list = [...(addressesQuery.data?.result ?? [])];
+    return list.sort((a, b) => {
+      if (a.isDefault && !b.isDefault) return -1;
+      if (!a.isDefault && b.isDefault) return 1;
+      return a.id - b.id;
+    });
+  }, [addressesQuery.data?.result]);
 
   const handleOpenCreate = () => {
     setEditingAddress(null);
@@ -135,7 +142,7 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                   className={cn(
                     "rounded-md border p-5 transition-all duration-200",
                     isDefault
-                      ? "bg-surface-card/60 border-[#1c1a18] shadow-xs ring-1 ring-[#1c1a18]/15"
+                      ? "bg-surface-card/60 border-[#1c1a18]"
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/30 hover:shadow-xs",
                   )}
                 >
@@ -147,9 +154,9 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                         onClick={() => handleSetDefault(address)}
                         disabled={isDefault}
                         className={cn(
-                          "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-all",
+                          "mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-all",
                           isDefault
-                            ? "cursor-default border-[#1c1a18] bg-[#1c1a18] text-white"
+                            ? "cursor-default border-[#1c1a18] bg-transparent"
                             : "cursor-pointer border-[#1c1a18]/30 hover:border-[#1c1a18] hover:bg-black/5",
                         )}
                         aria-label={
@@ -163,19 +170,15 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                             : t("account.addresses.setDefault")
                         }
                       >
-                        {isDefault ? (
-                          <div className="size-2 rounded-full bg-white" />
-                        ) : (
-                          <div className="size-2 rounded-full bg-transparent" />
-                        )}
+                        {isDefault && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
                       </button>
 
                       {/* Address Info */}
                       <div className="text-left">
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex min-h-[22px] flex-wrap items-center gap-2">
                           <h4 className="text-ink text-sm font-semibold">{address.receiverName}</h4>
                           {isDefault && (
-                            <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white uppercase">
+                            <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
                               {t("account.addresses.default")}
                             </span>
                           )}
