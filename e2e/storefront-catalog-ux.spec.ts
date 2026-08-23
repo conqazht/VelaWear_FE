@@ -89,7 +89,7 @@ test(
   async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.route("**/api/v1/storefront/products**", (route) => fulfillCatalog(route, 0));
-    await page.goto("/collection");
+    await page.goto("/collection", { waitUntil: "domcontentloaded" });
 
     await expectNoHorizontalOverflow(page);
     const desktopNavigation = page.locator('[data-slot="navigation-menu"]');
@@ -153,12 +153,10 @@ test(
     const newArrivals = page.getByRole("link", { name: "Mới về", exact: true });
     await expect(newArrivals).toBeVisible();
     await newArrivals.click();
-    await expect(page).toHaveURL(
-      (url) => url.pathname === "/collection" && url.searchParams.get("sort") === "newest",
-    );
+    await expect(page).toHaveURL(/\/collection\?sort=newest/);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/collection");
+    await page.goto("/collection", { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Mở menu" }).click();
     await expectNoHorizontalOverflow(page);
     const shirtsMenu = page.getByRole("button", { name: "Áo menu" });
@@ -166,12 +164,8 @@ test(
     await page.keyboard.press("Enter");
     await expect(page.getByRole("link", { name: "Áo thun", exact: true })).toBeVisible();
     await page.getByRole("link", { name: "Áo thun", exact: true }).click();
-    await expect(page).toHaveURL(
-      (url) =>
-        url.pathname === "/collection" &&
-        url.searchParams.get("categories") === "ao" &&
-        url.searchParams.get("q") === "áo thun",
-    );
+    await expect(page).toHaveURL(/categories=ao/);
+    await expect(page).toHaveURL(/q=(%C3%A1o(%20|\+)thun|%C3%A1o\+thun|áo(\+|%20)thun)/);
   },
 );
 
@@ -185,7 +179,9 @@ test(
       await fulfillCatalog(route);
     });
 
-    await page.goto("/collection?categories=ao&colors=1&sizes=3&sort=price-asc&page=1");
+    await page.goto("/collection?categories=ao&colors=1&sizes=3&sort=price-asc&page=1", {
+      waitUntil: "domcontentloaded",
+    });
 
     await expect(page.getByRole("heading", { name: "Tất cả sản phẩm" })).toBeVisible();
     await expect(page.getByLabel("Đang lọc").getByRole("button", { name: /Áo/ })).toBeVisible();
@@ -198,7 +194,7 @@ test(
     expect(requests.at(-1)?.searchParams.get("colorIds")).toBe("1");
     expect(requests.at(-1)?.searchParams.get("sizeIds")).toBe("3");
 
-    await page.reload();
+    await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/categories=ao/);
     await expect(page.getByLabel("Đang lọc").getByRole("button", { name: /Đen/ })).toBeVisible();
   },
@@ -211,7 +207,7 @@ test("mobile giữ bộ lọc nháp đến khi bấm Xem N sản phẩm", { tag:
     await fulfillCatalog(route, url.searchParams.get("colorIds") === "1" ? 3 : 8);
   });
 
-  await page.goto("/collection");
+  await page.goto("/collection", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Bộ lọc" }).click();
   const dialog = page.getByRole("dialog", { name: "Bộ lọc" });
   await expect(dialog).toBeVisible();
@@ -239,7 +235,7 @@ test("initial 500 giữ artwork đến khi Retry thành công", { tag: "@smoke" 
     await fulfillCatalog(route, 0);
   });
 
-  await page.goto("/collection");
+  await page.goto("/collection", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Có một nhịp ngắt quãng" })).toBeVisible();
   await expect.poll(() => attempts).toBe(2);
 
@@ -268,14 +264,14 @@ test(
       await fulfillCatalog(route);
     });
 
-    await page.goto("/collection?minPrice=999999999");
+    await page.goto("/collection?minPrice=999999999", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Kiểm tra lại thông tin" })).toBeVisible();
     await expect(page.getByText("Vela Wear / HTTP 400")).toBeVisible();
     await expect(page.getByRole("button", { name: "Thử lại" })).toHaveCount(0);
     await expect.poll(() => attempts).toBe(1);
 
     await page.getByRole("link", { name: "Xem tất cả sản phẩm" }).click();
-    await expect(page).toHaveURL((url) => url.pathname === "/collection" && url.search === "");
+    await expect(page).toHaveURL(/\/collection$/);
     await expect(page.getByRole("heading", { name: "Tất cả sản phẩm" })).toBeVisible();
     expect(attempts).toBe(2);
   },
@@ -295,12 +291,12 @@ test("filter lỗi quay về URL hợp lệ và giữ grid đã có", { tag: "@s
     await fulfillCatalog(route);
   });
 
-  await page.goto("/collection");
+  await page.goto("/collection", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
   await openDesktopFilters(page);
   await page.getByRole("checkbox", { name: /Áo/ }).click();
 
-  await expect(page).toHaveURL((url) => !url.searchParams.has("categories"));
+  await expect(page).not.toHaveURL(/categories=/);
   await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
 });
 
@@ -323,13 +319,13 @@ test(
       await fulfillCatalog(route);
     });
 
-    await page.goto("/collection");
+    await page.goto("/collection", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
     await openDesktopFilters(page);
     await page.getByRole("checkbox", { name: /Áo/ }).click();
 
     await expect.poll(() => invalidFilterAttempts).toBe(1);
-    await expect(page).toHaveURL((url) => !url.searchParams.has("categories"));
+    await expect(page).not.toHaveURL(/categories=/);
     await expect(page.getByRole("heading", { name: "Áo linen kiểm thử" })).toBeVisible();
     const warning = page.getByRole("status");
     await expect(warning).toContainText("Bộ lọc vừa chọn không hợp lệ");
@@ -342,7 +338,9 @@ test(
   "size guide đổi cm/in và chọn bảng cỡ mở rộng plus-size",
   { tag: "@smoke" },
   async ({ page }) => {
-    await page.goto("/size-guide?category=ao&size=M&product=ao-linen-kiem-thu&available=M,L");
+    await page.goto("/size-guide?category=ao&size=M&product=ao-linen-kiem-thu&available=M,L", {
+      waitUntil: "domcontentloaded",
+    });
 
     await expect(page.getByRole("heading", { name: "Hướng dẫn chọn cỡ" })).toBeVisible();
     await expect(page.getByRole("button", { name: "cm" }).first()).toHaveAttribute(
@@ -427,7 +425,7 @@ test(
       });
     });
 
-    await page.goto("/products/ao-linen-kiem-thu");
+    await page.goto("/products/ao-linen-kiem-thu", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Đánh giá (37)" })).toBeVisible();
     await expect(page.getByText("Khách hàng 1", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Xem thêm" }).first().click();

@@ -83,7 +83,12 @@ export function ProductReviewsDialog({
       <Dialog
         open={open}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) setLightboxImage(null);
+          if (!nextOpen) {
+            if (lightboxImage) {
+              setLightboxImage(null);
+              return;
+            }
+          }
           onOpenChange(nextOpen);
         }}
       >

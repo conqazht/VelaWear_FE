@@ -22,20 +22,42 @@ export interface AddressModalProps {
 }
 
 export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-canvas text-ink w-full max-w-[calc(100%-2rem)] rounded-md border border-[#e4dacf] p-6 shadow-xl sm:max-w-2xl sm:p-8">
+        {isOpen ? (
+          <AddressModalForm
+            key={addressToEdit?.id ?? "new"}
+            addressToEdit={addressToEdit}
+            onClose={onClose}
+          />
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddressModalForm({
+  addressToEdit,
+  onClose,
+}: {
+  addressToEdit?: UserAddress | null;
+  onClose: () => void;
+}) {
   const { t } = useI18n();
   const createMutation = useCreateMyAddressMutation();
   const updateMutation = useUpdateMyAddressMutation();
 
-  const [receiverName, setReceiverName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [receiverName, setReceiverName] = useState(addressToEdit?.receiverName ?? "");
+  const [phone, setPhone] = useState(addressToEdit?.phone ?? "");
   const [provinces, setProvinces] = useState<VietnamProvince[]>([]);
   const [wards, setWards] = useState<VietnamWard[]>([]);
   const [selectedProvinceCode, setSelectedProvinceCode] = useState<string>("");
   const [selectedWardCode, setSelectedWardCode] = useState<string>("");
-  const [isLoadingProvinces, setIsLoadingProvinces] = useState(false);
+  const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   const [isLoadingWards, setIsLoadingWards] = useState(false);
-  const [addressDetail, setAddressDetail] = useState("");
-  const [isDefault, setIsDefault] = useState(false);
+  const [addressDetail, setAddressDetail] = useState(addressToEdit?.addressDetail ?? "");
+  const [isDefault, setIsDefault] = useState(Boolean(addressToEdit?.isDefault));
 
   const [errors, setErrors] = useState<{
     receiverName?: string;
@@ -47,99 +69,79 @@ export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalPro
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  // Load provinces on modal open
+  // Load provinces on mount
   useEffect(() => {
-    if (!isOpen) return;
-
     const controller = new AbortController();
-    setIsLoadingProvinces(true);
+    let active = true;
 
     getVietnamProvinces(controller.signal)
       .then((data) => {
+        if (!active) return;
         setProvinces(data);
-      })
-      .catch((err: unknown) => {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-        // Keep empty list if error
-      })
-      .finally(() => {
         setIsLoadingProvinces(false);
-      });
 
-    return () => controller.abort();
-  }, [isOpen]);
-
-  // Load wards when province changes
-  useEffect(() => {
-    if (!selectedProvinceCode) {
-      setWards([]);
-      setSelectedWardCode("");
-      return;
-    }
-
-    const controller = new AbortController();
-    setIsLoadingWards(true);
-
-    getVietnamWards(Number(selectedProvinceCode), controller.signal)
-      .then((data) => {
-        setWards(data);
-      })
-      .catch((err: unknown) => {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-        setWards([]);
-      })
-      .finally(() => {
-        setIsLoadingWards(false);
-      });
-
-    return () => controller.abort();
-  }, [selectedProvinceCode]);
-
-  // Synchronize state when addressToEdit changes or modal opens
-  useEffect(() => {
-    if (isOpen) {
-      if (addressToEdit) {
-        setReceiverName(addressToEdit.receiverName ?? "");
-        setPhone(addressToEdit.phone ?? "");
-        setAddressDetail(addressToEdit.addressDetail ?? "");
-        setIsDefault(!!addressToEdit.isDefault);
-
-        // Try to match province by name if provinces already loaded
-        if (provinces.length > 0 && addressToEdit.province) {
-          const matchedProvince = provinces.find(
+        if (addressToEdit?.province) {
+          const matchedProvince = data.find(
             (p) =>
               p.name.toLowerCase() === addressToEdit.province.toLowerCase() ||
               p.codename.toLowerCase() === addressToEdit.province.toLowerCase(),
           );
           if (matchedProvince) {
             setSelectedProvinceCode(String(matchedProvince.code));
+            setIsLoadingWards(true);
           }
         }
-      } else {
-        setReceiverName("");
-        setPhone("");
-        setSelectedProvinceCode("");
-        setSelectedWardCode("");
-        setAddressDetail("");
-        setIsDefault(false);
-      }
-      setErrors({});
-    }
-  }, [isOpen, addressToEdit, provinces]);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setIsLoadingProvinces(false);
+      });
 
-  // When wards finish loading and we are editing an address, match ward by name
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [addressToEdit?.province]);
+
+  // Load wards when province changes
   useEffect(() => {
-    if (isOpen && addressToEdit && wards.length > 0 && addressToEdit.ward && !selectedWardCode) {
-      const matchedWard = wards.find(
-        (w) =>
-          w.name.toLowerCase() === addressToEdit.ward.toLowerCase() ||
-          w.codename.toLowerCase() === addressToEdit.ward.toLowerCase(),
-      );
-      if (matchedWard) {
-        setSelectedWardCode(String(matchedWard.code));
-      }
+    if (!selectedProvinceCode) {
+      return;
     }
-  }, [isOpen, addressToEdit, wards, selectedWardCode]);
+
+    const controller = new AbortController();
+    let active = true;
+
+    getVietnamWards(Number(selectedProvinceCode), controller.signal)
+      .then((data) => {
+        if (!active) return;
+        setWards(data);
+        setIsLoadingWards(false);
+
+        if (addressToEdit?.ward) {
+          const matchedWard = data.find(
+            (w) =>
+              w.name.toLowerCase() === addressToEdit.ward.toLowerCase() ||
+              w.codename.toLowerCase() === addressToEdit.ward.toLowerCase(),
+          );
+          if (matchedWard) {
+            setSelectedWardCode(String(matchedWard.code));
+          }
+        }
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setWards([]);
+        setIsLoadingWards(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [selectedProvinceCode, addressToEdit?.ward]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,13 +201,12 @@ export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalPro
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-canvas text-ink w-full max-w-[calc(100%-2rem)] rounded-md border border-[#e4dacf] p-6 shadow-xl sm:max-w-2xl sm:p-8">
-        <DialogHeader className="mb-3 text-left">
-          <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight">
-            {addressToEdit ? t("account.addresses.editTitle") : t("account.addresses.createTitle")}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader className="mb-3 text-left">
+        <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight">
+          {addressToEdit ? t("account.addresses.editTitle") : t("account.addresses.createTitle")}
+        </DialogTitle>
+      </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
           {/* Receiver Full Name */}
@@ -424,7 +425,6 @@ export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalPro
             </button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </>
   );
 }

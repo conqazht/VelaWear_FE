@@ -14,14 +14,14 @@ async function expectEnglishFlashSale(page: Page) {
 }
 
 test("trang Standard Sale có nghiệp vụ coupon", { tag: "@smoke" }, async ({ page }) => {
-  await page.goto("/sale");
+  await page.goto("/sale", { waitUntil: "domcontentloaded" });
 
   await expect(page.getByRole("heading", { name: "Sale", exact: true })).toBeVisible();
   await expect(page.getByText(/Standard Sale vẫn có thể dùng coupon/i)).toBeVisible();
 });
 
 test("trang Flash Sale nói rõ giỏ hàng không giữ suất", { tag: "@smoke" }, async ({ page }) => {
-  await page.goto("/flash-sale");
+  await page.goto("/flash-sale", { waitUntil: "domcontentloaded" });
 
   await expect(page.getByRole("heading", { name: "Flash Sale", exact: true })).toBeVisible();
   await expect(page.getByText(/Thêm vào giỏ không đồng nghĩa với giữ suất/i)).toBeVisible();
@@ -37,7 +37,7 @@ test(
       if (msg.type() === "error") errors.push(msg.text());
     });
 
-    await page.goto("/flash-sale");
+    await page.goto("/flash-sale", { waitUntil: "domcontentloaded" });
 
     await page.getByRole("button", { name: "Ngôn ngữ: Tiếng Việt" }).click();
     await page
@@ -47,9 +47,10 @@ test(
 
     await expectEnglishFlashSale(page);
 
-    await page.reload();
+    await page.reload({ waitUntil: "domcontentloaded" });
 
     await expectEnglishFlashSale(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.getByRole("button", { name: "Language: English" }).click();
     await expect(
       page.getByRole("group", { name: "Language" }).getByRole("button", { name: /English$/ }),
