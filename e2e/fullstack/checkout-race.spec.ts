@@ -18,6 +18,14 @@ test(
 
     const checkoutForm = page.locator('form:has(input[name="email"])');
     await expect(checkoutForm.locator('input[name="email"]')).toBeVisible();
+
+    const manualAddressBtn = checkoutForm.getByRole("button", {
+      name: /Nhập địa chỉ khác thủ công|Enter a different address manually/i,
+    });
+    if (await manualAddressBtn.isVisible()) {
+      await manualAddressBtn.click();
+    }
+
     await checkoutForm.locator('input[name="email"]').fill("user@velawear.local");
     await checkoutForm.locator('input[name="phone"]').fill("0900000000");
     await checkoutForm.locator('input[name="receiverName"]').fill("Demo Customer");
