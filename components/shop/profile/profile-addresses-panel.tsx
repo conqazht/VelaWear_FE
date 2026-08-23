@@ -140,10 +140,10 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                 <div
                   key={address.id}
                   className={cn(
-                    "rounded-md border p-5 transition-all duration-200",
+                    "rounded-md border p-5 transition-colors duration-150",
                     isDefault
                       ? "bg-surface-card/60 border-[#1c1a18]"
-                      : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/30 hover:shadow-xs",
+                      : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/30",
                   )}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -154,7 +154,7 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                         onClick={() => handleSetDefault(address)}
                         disabled={isDefault}
                         className={cn(
-                          "mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-all",
+                          "mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
                           isDefault
                             ? "cursor-default border-[#1c1a18] bg-transparent"
                             : "cursor-pointer border-[#1c1a18]/30 hover:border-[#1c1a18] hover:bg-black/5",
@@ -175,15 +175,17 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
 
                       {/* Address Info */}
                       <div className="text-left">
-                        <div className="flex min-h-[22px] flex-wrap items-center gap-2">
-                          <h4 className="text-ink text-sm font-semibold">{address.receiverName}</h4>
+                        <div className="flex h-6 items-center gap-2">
+                          <h4 className="text-ink text-sm leading-none font-semibold">
+                            {address.receiverName}
+                          </h4>
                           {isDefault && (
-                            <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
+                            <span className="inline-flex h-4.5 items-center rounded bg-[#1c1a18] px-2 text-[10px] font-semibold tracking-wider text-white uppercase">
                               {t("account.addresses.default")}
                             </span>
                           )}
                         </div>
-                        <p className="text-ink/65 mt-1 text-sm">
+                        <p className="text-ink/65 mt-1 text-sm leading-tight">
                           {address.phone ?? t("account.addresses.noPhone")}
                         </p>
                         <p className="text-ink/70 mt-2 text-sm leading-relaxed">
