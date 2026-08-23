@@ -146,15 +146,16 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/30",
                   )}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3.5">
+                  {/* Row 1: Radio + Name + Phone + Badge <---> Actions */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
                       {/* Radio Selection for Default Address */}
                       <button
                         type="button"
                         onClick={() => handleSetDefault(address)}
                         disabled={isDefault}
                         className={cn(
-                          "mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
+                          "flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
                           isDefault
                             ? "cursor-default border-[#1c1a18] bg-transparent"
                             : "cursor-pointer border-[#1c1a18]/30 hover:border-[#1c1a18] hover:bg-black/5",
@@ -173,27 +174,20 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                         {isDefault && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
                       </button>
 
-                      {/* Address Info */}
-                      <div className="min-w-0 flex-1 text-left">
-                        <div className="flex h-6 items-center gap-2">
-                          <h4 className="text-ink max-w-[220px] truncate text-sm leading-none font-semibold">
-                            {address.receiverName}
-                          </h4>
-                          {isDefault && (
-                            <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] font-semibold tracking-wider text-white uppercase">
-                              {t("account.addresses.default")}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-ink/65 mt-1 text-sm leading-tight">
+                      {/* Name + Phone + Badge */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-ink text-sm leading-none font-semibold">
+                          {address.receiverName}
+                        </span>
+                        <span className="text-ink/30 text-xs">•</span>
+                        <span className="text-ink/70 text-sm leading-none">
                           {address.phone ?? t("account.addresses.noPhone")}
-                        </p>
-                        <p
-                          className="text-ink/70 mt-1.5 truncate text-sm leading-tight"
-                          title={formatAddress(address) || ""}
-                        >
-                          {formatAddress(address) || t("account.addresses.noAddress")}
-                        </p>
+                        </span>
+                        {isDefault && (
+                          <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
+                            {t("account.addresses.default")}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -202,20 +196,20 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                       <button
                         type="button"
                         onClick={() => handleOpenEdit(address)}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 px-3 py-1.5 text-xs font-medium text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-black/5"
+                        className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-[#1c1a18]/20 px-2.5 py-1 text-xs font-medium text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-black/5"
                         title={t("account.addresses.edit")}
                       >
-                        <Edit2 className="size-3.5" />
+                        <Edit2 className="size-3" />
                         <span>{t("account.addresses.edit")}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(address)}
                         disabled={deletingId === address.id}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                        className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
                         title={t("account.addresses.delete")}
                       >
-                        <Trash2 className="size-3.5" />
+                        <Trash2 className="size-3" />
                         <span>
                           {deletingId === address.id
                             ? t("account.addresses.deleting")
@@ -223,6 +217,16 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                         </span>
                       </button>
                     </div>
+                  </div>
+
+                  {/* Row 2: Full Address (indented to align with text) */}
+                  <div className="mt-2.5 pl-[30px] text-left">
+                    <p
+                      className="text-ink/70 truncate text-sm leading-normal"
+                      title={formatAddress(address) || ""}
+                    >
+                      {formatAddress(address) || t("account.addresses.noAddress")}
+                    </p>
                   </div>
                 </div>
               );

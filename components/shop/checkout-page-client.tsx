@@ -1012,40 +1012,35 @@ export function CheckoutPageClient() {
                   key={addr.id}
                   onClick={() => setPendingAddressId(addr.id)}
                   className={cn(
-                    "cursor-pointer rounded-md border p-4 text-left transition-all duration-150",
+                    "cursor-pointer rounded-md border p-4 text-left transition-colors duration-150",
                     isSelected
-                      ? "bg-surface-card/60 border-[#1c1a18] ring-1 ring-[#1c1a18]/20"
+                      ? "bg-surface-card/60 border-[#1c1a18]"
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/40",
                   )}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                  {/* Row 1: Radio + Name + Phone + Badge <---> Edit */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <div
                         className={cn(
-                          "mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-all",
+                          "flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
                           isSelected ? "border-[#1c1a18] bg-transparent" : "border-[#1c1a18]/30",
                         )}
                       >
                         {isSelected && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex h-6 items-center gap-2">
-                          <span className="text-ink max-w-[200px] truncate text-sm leading-none font-semibold">
-                            {addr.receiverName}
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-ink max-w-[180px] truncate text-sm leading-none font-semibold">
+                          {addr.receiverName}
+                        </span>
+                        <span className="text-ink/30 text-xs">•</span>
+                        <span className="text-ink/70 text-xs leading-none">{addr.phone}</span>
+                        {addr.isDefault && (
+                          <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
+                            {t("account.addresses.default")}
                           </span>
-                          {addr.isDefault && (
-                            <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
-                              {t("account.addresses.default")}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-ink/70 mt-1 text-xs leading-tight">{addr.phone}</p>
-                        <p
-                          className="text-ink/80 mt-1 truncate text-xs leading-tight"
-                          title={formatAddress(addr)}
-                        >
-                          {formatAddress(addr)}
-                        </p>
+                        )}
                       </div>
                     </div>
 
@@ -1061,6 +1056,16 @@ export function CheckoutPageClient() {
                       <Edit2 className="size-3" />
                       <span>{t("account.addresses.edit")}</span>
                     </button>
+                  </div>
+
+                  {/* Row 2: Full Address */}
+                  <div className="mt-2 pl-[30px] text-left">
+                    <p
+                      className="text-ink/80 truncate text-xs leading-normal"
+                      title={formatAddress(addr)}
+                    >
+                      {formatAddress(addr)}
+                    </p>
                   </div>
                 </div>
               );
