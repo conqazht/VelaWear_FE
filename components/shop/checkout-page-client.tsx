@@ -14,6 +14,9 @@ import {
   ShoppingBag,
   AlarmClock,
   RefreshCw,
+  MapPin,
+  Plus,
+  Edit2,
 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +24,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +35,9 @@ import { money } from "@/lib/vela-data";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useMyAddressesQuery } from "@/lib/queries/commerce";
 import type { UserAddress } from "@/lib/api/types";
+import { AddressModal } from "@/components/shop/profile/address-modal";
+import { formatAddress } from "@/components/shop/profile/profile-formatters";
+import { cn } from "@/lib/utils";
 import {
   submitCheckout,
   previewCheckout,
@@ -135,10 +142,27 @@ export function CheckoutPageClient() {
   const selectedProvinceCode = useWatch({ control, name: "provinceCode" });
   const isLoadingWards = Boolean(selectedProvinceCode) && wards.length === 0 && !addressApiError;
 
+  const [isAddressSelectModalOpen, setIsAddressSelectModalOpen] = useState(false);
+  const [isCreateAddressModalOpen, setIsCreateAddressModalOpen] = useState(false);
+  const [addressToEdit, setAddressToEdit] = useState<UserAddress | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [pendingAddressId, setPendingAddressId] = useState<number | null>(null);
+  const [isManualAddressMode, setIsManualAddressMode] = useState(false);
+
   const addressesQuery = useMyAddressesQuery(user?.id, { size: 50 }, Boolean(user?.id));
   const userAddresses = useMemo(
     () => addressesQuery.data?.result ?? [],
     [addressesQuery.data?.result],
+  );
+
+  const defaultAddress = useMemo(
+    () => userAddresses.find((a) => a.isDefault) ?? userAddresses[0] ?? null,
+    [userAddresses],
+  );
+
+  const selectedAddress = useMemo(
+    () => userAddresses.find((a) => a.id === selectedAddressId) ?? defaultAddress,
+    [userAddresses, selectedAddressId, defaultAddress],
   );
 
   const fillFromAddress = useCallback(
@@ -178,6 +202,16 @@ export function CheckoutPageClient() {
     [setValue, user?.fullName],
   );
 
+  const handleConfirmAddressSelection = () => {
+    const chosen = userAddresses.find((a) => a.id === pendingAddressId);
+    if (chosen) {
+      setSelectedAddressId(chosen.id);
+      void fillFromAddress(chosen, provinces);
+      setIsManualAddressMode(false);
+    }
+    setIsAddressSelectModalOpen(false);
+  };
+
   const hasAutoFilledRef = useRef(false);
 
   // Restore the last successful checkout details or default address for this account.
@@ -186,9 +220,10 @@ export function CheckoutPageClient() {
 
     if (userAddresses.length > 0) {
       if (provinces.length > 0 && !hasAutoFilledRef.current) {
-        const defaultAddress = userAddresses.find((a) => a.isDefault) ?? userAddresses[0];
+        const addrToFill = userAddresses.find((a) => a.isDefault) ?? userAddresses[0];
         setValue("email", user.email);
-        void fillFromAddress(defaultAddress, provinces);
+        setSelectedAddressId(addrToFill.id);
+        void fillFromAddress(addrToFill, provinces);
         hasAutoFilledRef.current = true;
       }
       return;
@@ -605,119 +640,160 @@ export function CheckoutPageClient() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <SectionTitle number="2" title={t("checkout.shippingAddress")} />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <SectionTitle number="2" title={t("checkout.shippingAddress")} />
+                {userAddresses.length > 0 && !isManualAddressMode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingAddressId(selectedAddress?.id ?? userAddresses[0]?.id ?? null);
+                      setIsAddressSelectModalOpen(true);
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase underline underline-offset-4 transition-colors hover:text-[#b5573a]"
+                  >
+                    <MapPin className="size-3.5" />
+                    <span>{t("checkout.changeAddress")}</span>
+                  </button>
+                )}
+                {userAddresses.length > 0 && isManualAddressMode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsManualAddressMode(false);
+                      if (selectedAddress) {
+                        void fillFromAddress(selectedAddress, provinces);
+                      }
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase underline underline-offset-4 transition-colors hover:text-[#b5573a]"
+                  >
+                    <MapPin className="size-3.5" />
+                    <span>{t("checkout.useSavedAddress")}</span>
+                  </button>
+                )}
+              </div>
 
-              {userAddresses.length > 0 && (
-                <div className="space-y-2 pb-1">
-                  <p className="text-xs font-medium text-[#1c1a18]/70">
-                    {t("checkout.savedAddresses")}:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {userAddresses.map((addr) => (
-                      <button
-                        key={addr.id}
-                        type="button"
-                        onClick={() => void fillFromAddress(addr, provinces)}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 bg-[#f7f4ef]/40 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-[#1c1a18]/5"
-                      >
-                        <span className="font-semibold">{addr.receiverName}</span>
-                        {addr.isDefault && (
-                          <span className="rounded bg-[#1c1a18] px-1.5 py-0.5 text-[9px] font-semibold text-white uppercase">
-                            {t("account.addresses.default")}
+              {userAddresses.length > 0 && !isManualAddressMode ? (
+                <div className="space-y-3">
+                  {selectedAddress ? (
+                    <div className="rounded-md border border-[#1c1a18]/20 bg-[#f7f4ef]/40 p-4 transition-all">
+                      <div className="space-y-1 text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-[#1c1a18]">
+                            {selectedAddress.receiverName}
                           </span>
-                        )}
-                        <span className="max-w-[200px] truncate text-[#1c1a18]/60">
-                          - {addr.addressDetail}, {addr.province}
-                        </span>
-                      </button>
-                    ))}
+                          <span className="text-xs text-[#1c1a18]/70">
+                            ({selectedAddress.phone})
+                          </span>
+                          {selectedAddress.isDefault && (
+                            <span className="rounded bg-[#1c1a18] px-1.5 py-0.5 text-[9px] font-semibold tracking-wider text-white uppercase">
+                              {t("account.addresses.default")}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs leading-relaxed text-[#1c1a18]/80">
+                          {formatAddress(selectedAddress)}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setIsManualAddressMode(true)}
+                      className="cursor-pointer text-xs text-[#1c1a18]/60 underline transition-colors hover:text-[#1c1a18]"
+                    >
+                      {t("checkout.manualAddress")}
+                    </button>
                   </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  <CheckoutInput
+                    label={t("checkout.receiverName")}
+                    autoComplete="name"
+                    placeholder={t("checkout.receiverNamePlaceholder")}
+                    {...register("receiverName")}
+                    error={errors.receiverName?.message}
+                  />
+                  <CheckoutInput
+                    label={t("checkout.street")}
+                    autoComplete="street-address"
+                    placeholder={t("checkout.streetPlaceholder")}
+                    {...register("address")}
+                    error={errors.address?.message}
+                  />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <FieldLabel htmlFor="provinceCode">{t("checkout.province")}</FieldLabel>
+                      {isLoadingProvinces ? (
+                        <AddressSelectLoading />
+                      ) : (
+                        <select
+                          id="provinceCode"
+                          autoComplete="address-level1"
+                          aria-invalid={!!errors.provinceCode}
+                          aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
+                          {...register("provinceCode", {
+                            onChange: () => {
+                              setValue("wardCode", "");
+                              setWards([]);
+                            },
+                          })}
+                          className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <option value="">{t("checkout.selectProvince")}</option>
+                          {provinces.map((province) => (
+                            <option key={province.code} value={province.code}>
+                              {province.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {errors.provinceCode?.message && (
+                        <p id="provinceCode-error" className="text-error text-xs">
+                          {errors.provinceCode.message}
+                        </p>
+                      )}
+                    </div>
 
-              <CheckoutInput
-                label={t("checkout.receiverName")}
-                autoComplete="name"
-                placeholder={t("checkout.receiverNamePlaceholder")}
-                {...register("receiverName")}
-                error={errors.receiverName?.message}
-              />
-              <CheckoutInput
-                label={t("checkout.street")}
-                autoComplete="street-address"
-                placeholder={t("checkout.streetPlaceholder")}
-                {...register("address")}
-                error={errors.address?.message}
-              />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <FieldLabel htmlFor="provinceCode">{t("checkout.province")}</FieldLabel>
-                  {isLoadingProvinces ? (
-                    <AddressSelectLoading />
-                  ) : (
-                    <select
-                      id="provinceCode"
-                      autoComplete="address-level1"
-                      aria-invalid={!!errors.provinceCode}
-                      aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
-                      {...register("provinceCode", {
-                        onChange: () => {
-                          setValue("wardCode", "");
-                          setWards([]);
-                        },
-                      })}
-                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <option value="">{t("checkout.selectProvince")}</option>
-                      {provinces.map((province) => (
-                        <option key={province.code} value={province.code}>
-                          {province.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="space-y-2">
+                      <FieldLabel htmlFor="wardCode">{t("checkout.ward")}</FieldLabel>
+                      {isLoadingWards ? (
+                        <AddressSelectLoading />
+                      ) : (
+                        <select
+                          id="wardCode"
+                          autoComplete="address-level2"
+                          disabled={!selectedProvinceCode}
+                          aria-invalid={!!errors.wardCode}
+                          aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
+                          {...register("wardCode")}
+                          className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <option value="">{t("checkout.selectWard")}</option>
+                          {wards.map((ward) => (
+                            <option key={ward.code} value={ward.code}>
+                              {ward.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {errors.wardCode?.message && (
+                        <p id="wardCode-error" className="text-error text-xs">
+                          {errors.wardCode.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {addressApiError && (
+                    <div className="border-error/20 bg-error/10 text-error flex items-start gap-2 rounded-sm border p-3 text-xs">
+                      <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                      <span>{addressApiError}</span>
+                    </div>
                   )}
-                  {errors.provinceCode?.message && (
-                    <p id="provinceCode-error" className="text-error text-xs">
-                      {errors.provinceCode.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <FieldLabel htmlFor="wardCode">{t("checkout.ward")}</FieldLabel>
-                  {isLoadingWards ? (
-                    <AddressSelectLoading />
-                  ) : (
-                    <select
-                      id="wardCode"
-                      autoComplete="address-level2"
-                      disabled={!selectedProvinceCode}
-                      aria-invalid={!!errors.wardCode}
-                      aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
-                      {...register("wardCode")}
-                      className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <option value="">{t("checkout.selectWard")}</option>
-                      {wards.map((ward) => (
-                        <option key={ward.code} value={ward.code}>
-                          {ward.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  {errors.wardCode?.message && (
-                    <p id="wardCode-error" className="text-error text-xs">
-                      {errors.wardCode.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              {addressApiError && (
-                <div className="border-error/20 bg-error/10 text-error flex items-start gap-2 rounded-sm border p-3 text-xs">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                  <span>{addressApiError}</span>
-                </div>
+                </>
               )}
             </div>
 
@@ -902,6 +978,124 @@ export function CheckoutPageClient() {
           </div>
         </Card>
       </div>
+
+      {/* Address Selection Modal */}
+      <Dialog
+        open={isAddressSelectModalOpen}
+        onOpenChange={(open) => {
+          if (!open) setIsAddressSelectModalOpen(false);
+        }}
+      >
+        <DialogContent className="bg-canvas text-ink w-full max-w-[calc(100%-2rem)] rounded-md border border-[#e4dacf] p-6 shadow-xl sm:max-w-xl sm:p-8">
+          <DialogHeader className="mb-2 flex flex-row items-center justify-between text-left">
+            <DialogTitle className="text-ink font-serif text-xl font-light tracking-tight">
+              {t("checkout.myAddresses")}
+            </DialogTitle>
+            <button
+              type="button"
+              onClick={() => {
+                setAddressToEdit(null);
+                setIsCreateAddressModalOpen(true);
+              }}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18] px-3 py-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-[#1c1a18] hover:text-white"
+            >
+              <Plus className="size-3.5" />
+              <span>{t("checkout.addNewAddress")}</span>
+            </button>
+          </DialogHeader>
+
+          <div className="my-3 flex max-h-[60vh] flex-col gap-3 overflow-y-auto pr-1">
+            {userAddresses.map((addr) => {
+              const isSelected = (pendingAddressId ?? selectedAddress?.id) === addr.id;
+              return (
+                <div
+                  key={addr.id}
+                  onClick={() => setPendingAddressId(addr.id)}
+                  className={cn(
+                    "cursor-pointer rounded-md border p-4 text-left transition-all duration-150",
+                    isSelected
+                      ? "bg-surface-card/60 border-[#1c1a18] ring-1 ring-[#1c1a18]/20"
+                      : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/40",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                      <div
+                        className={cn(
+                          "mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-all",
+                          isSelected ? "border-[#1c1a18] bg-transparent" : "border-[#1c1a18]/30",
+                        )}
+                      >
+                        {isSelected && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex h-6 items-center gap-2">
+                          <span className="text-ink max-w-[200px] truncate text-sm leading-none font-semibold">
+                            {addr.receiverName}
+                          </span>
+                          {addr.isDefault && (
+                            <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
+                              {t("account.addresses.default")}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-ink/70 mt-1 text-xs leading-tight">{addr.phone}</p>
+                        <p
+                          className="text-ink/80 mt-1 truncate text-xs leading-tight"
+                          title={formatAddress(addr)}
+                        >
+                          {formatAddress(addr)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAddressToEdit(addr);
+                        setIsCreateAddressModalOpen(true);
+                      }}
+                      className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-sm border border-[#1c1a18]/20 px-2.5 py-1 text-xs font-medium text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-black/5"
+                    >
+                      <Edit2 className="size-3" />
+                      <span>{t("account.addresses.edit")}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 border-t border-[#1c1a18]/10 pt-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsAddressSelectModalOpen(false)}
+              className="rounded-sm border-[#1c1a18]/20 text-xs tracking-wider uppercase"
+            >
+              {t("checkout.cancel")}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmAddressSelection}
+              className="rounded-sm bg-[#1c1a18] text-xs tracking-wider text-white uppercase hover:bg-[#1c1a18]/90"
+            >
+              {t("checkout.confirmAddress")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create / Edit Address Modal inside Checkout */}
+      <AddressModal
+        isOpen={isCreateAddressModalOpen}
+        onClose={() => {
+          setIsCreateAddressModalOpen(false);
+          setAddressToEdit(null);
+        }}
+        addressToEdit={addressToEdit}
+      />
     </div>
   );
 }

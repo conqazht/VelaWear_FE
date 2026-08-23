@@ -193,7 +193,7 @@ describe("CheckoutPageClient rapid submit", () => {
     previewCheckoutMock.mockResolvedValue(preview);
   });
 
-  it("tự động điền thông tin từ địa chỉ mặc định của người dùng", async () => {
+  it("tự động hiển thị thẻ tóm tắt và điền thông tin từ địa chỉ mặc định của người dùng", async () => {
     useMyAddressesQueryMock.mockReturnValue({
       data: {
         result: [
@@ -213,15 +213,12 @@ describe("CheckoutPageClient rapid submit", () => {
       isError: false,
     });
 
-    const { container } = render(<CheckoutPageClient />);
+    render(<CheckoutPageClient />);
 
     await waitFor(() => {
-      const receiverInput = container.querySelector<HTMLInputElement>('input[name="receiverName"]');
-      const phoneInput = container.querySelector<HTMLInputElement>('input[name="phone"]');
-      const addressInput = container.querySelector<HTMLInputElement>('input[name="address"]');
-      expect(receiverInput?.value).toBe("Nguyen Van A");
-      expect(phoneInput?.value).toBe("0987654321");
-      expect(addressInput?.value).toBe("456 Dong Khoi");
+      expect(screen.getByText("Nguyen Van A")).toBeInTheDocument();
+      expect(screen.getByText("(0987654321)")).toBeInTheDocument();
+      expect(screen.getByText("456 Dong Khoi, Ben Nghe, Ho Chi Minh")).toBeInTheDocument();
     });
   });
 

@@ -174,13 +174,13 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                       </button>
 
                       {/* Address Info */}
-                      <div className="text-left">
+                      <div className="min-w-0 flex-1 text-left">
                         <div className="flex h-6 items-center gap-2">
-                          <h4 className="text-ink text-sm leading-none font-semibold">
+                          <h4 className="text-ink max-w-[220px] truncate text-sm leading-none font-semibold">
                             {address.receiverName}
                           </h4>
                           {isDefault && (
-                            <span className="inline-flex h-4.5 items-center rounded bg-[#1c1a18] px-2 text-[10px] font-semibold tracking-wider text-white uppercase">
+                            <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] font-semibold tracking-wider text-white uppercase">
                               {t("account.addresses.default")}
                             </span>
                           )}
@@ -188,7 +188,10 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
                         <p className="text-ink/65 mt-1 text-sm leading-tight">
                           {address.phone ?? t("account.addresses.noPhone")}
                         </p>
-                        <p className="text-ink/70 mt-2 text-sm leading-relaxed">
+                        <p
+                          className="text-ink/70 mt-1.5 truncate text-sm leading-tight"
+                          title={formatAddress(address) || ""}
+                        >
                           {formatAddress(address) || t("account.addresses.noAddress")}
                         </p>
                       </div>
