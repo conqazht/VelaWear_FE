@@ -138,7 +138,11 @@ export function CheckoutPageClient() {
   });
 
   const selectedProvinceCode = useWatch({ control, name: "provinceCode" });
-  const [isLoadingWards, setIsLoadingWards] = useState(false);
+  const isWardsLoaded =
+    Boolean(selectedProvinceCode) &&
+    wards.length > 0 &&
+    String(wards[0]?.province_code) === String(selectedProvinceCode);
+  const isLoadingWards = Boolean(selectedProvinceCode) && !isWardsLoaded && !addressApiError;
 
   const [isAddressSelectModalOpen, setIsAddressSelectModalOpen] = useState(false);
   const [isCreateAddressModalOpen, setIsCreateAddressModalOpen] = useState(false);
@@ -295,6 +299,10 @@ export function CheckoutPageClient() {
       return;
     }
 
+    if (wards.length > 0 && String(wards[0]?.province_code) === String(selectedProvinceCode)) {
+      return;
+    }
+
     const controller = new AbortController();
     let active = true;
 
@@ -302,14 +310,12 @@ export function CheckoutPageClient() {
       .then((data) => {
         if (!active) return;
         setWards(data);
-        setIsLoadingWards(false);
         setAddressApiError(null);
       })
       .catch((error: unknown) => {
         if (!active) return;
         if (error instanceof DOMException && error.name === "AbortError") return;
         setWards([]);
-        setIsLoadingWards(false);
         setAddressApiError(t("checkout.wardLoadError"));
       });
 
@@ -317,7 +323,7 @@ export function CheckoutPageClient() {
       active = false;
       controller.abort();
     };
-  }, [selectedProvinceCode, t]);
+  }, [selectedProvinceCode, wards, t]);
 
   const activeItemsList = cart;
 
@@ -735,14 +741,8 @@ export function CheckoutPageClient() {
                         aria-invalid={!!errors.provinceCode}
                         aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
                         {...register("provinceCode", {
-                          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => {
+                          onChange: () => {
                             setValue("wardCode", "");
-                            if (e.target.value) {
-                              setIsLoadingWards(true);
-                            } else {
-                              setWards([]);
-                              setIsLoadingWards(false);
-                            }
                           },
                         })}
                         className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
