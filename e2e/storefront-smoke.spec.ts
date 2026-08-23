@@ -21,10 +21,7 @@ test("trang chủ render shell và tìm kiếm từ header", { tag: "@smoke" }, 
   await searchInput.fill("linen shirt");
   await searchInput.press("Enter");
 
-  await expect(page).toHaveURL(
-    (url) => url.pathname === "/search" && url.searchParams.get("q") === "linen shirt",
-    { timeout: 15000 },
-  );
+  await expect(page).toHaveURL(/\/search\?q=linen(%20|\+)shirt/);
 });
 
 test("form đăng nhập chặn dữ liệu rỗng trước khi gọi API", { tag: "@smoke" }, async ({ page }) => {

@@ -319,7 +319,7 @@ export function AuthMotionScene({ focus, passwordVisible, status, mode }: AuthMo
         fill
         sizes="(min-width: 1024px) 58vw, 100vw"
         priority
-        className="absolute inset-0 scale-[1.04] object-cover opacity-88"
+        className="absolute inset-0 object-cover object-bottom opacity-88"
         suppressHydrationWarning
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(21,18,15,0.34),rgba(246,240,231,0.12)_42%,rgba(246,240,231,0.38)),radial-gradient(circle_at_26%_18%,rgba(255,255,255,0.58),transparent_28%),radial-gradient(circle_at_76%_72%,rgba(151,64,37,0.2),transparent_33%)]" />
@@ -341,7 +341,7 @@ export function AuthMotionScene({ focus, passwordVisible, status, mode }: AuthMo
       </div>
 
       {/* Active Characters Layer */}
-      <div className="absolute inset-x-0 top-[8%] bottom-[18%] flex items-end justify-center">
+      <div className="absolute inset-x-0 top-[8%] bottom-[28.5%] flex items-end justify-center">
         <svg
           className="h-full max-h-[450px] w-full max-w-[500px]"
           viewBox="0 0 450 400"

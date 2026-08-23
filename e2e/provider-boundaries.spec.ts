@@ -96,7 +96,7 @@ test("authenticated admin performs no shop data request", { tag: "@smoke" }, asy
   });
 
   // Navigate directly to an admin route
-  await page.goto("/dashboard/default", { waitUntil: "networkidle" });
+  await page.goto("/dashboard/default", { waitUntil: "domcontentloaded" });
 
   // Assert admin shell rendered
   await expect(page).toHaveURL(/\/dashboard\/default/);

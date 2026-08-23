@@ -167,8 +167,7 @@ export function createCheckoutSchema(locale: Locale) {
   return z.object({
     email: createEmailSchema(locale),
     phone: createPhoneSchema(locale),
-    firstName: requiredStringSchema(copy.firstNameRequired),
-    lastName: requiredStringSchema(copy.lastNameRequired),
+    receiverName: createFullNameSchema(locale),
     address: requiredStringSchema(copy.addressRequired),
     provinceCode: requiredStringSchema(copy.provinceRequired),
     wardCode: requiredStringSchema(copy.wardRequired),
