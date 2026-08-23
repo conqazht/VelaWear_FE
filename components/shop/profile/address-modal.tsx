@@ -208,223 +208,223 @@ function AddressModalForm({
         </DialogTitle>
       </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
-          {/* Receiver Full Name */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
+        {/* Receiver Full Name */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="modalReceiverName"
+            className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+          >
+            {t("account.addresses.receiverName")}
+          </label>
+          <input
+            id="modalReceiverName"
+            type="text"
+            value={receiverName}
+            onChange={(e) => {
+              setReceiverName(e.target.value);
+              if (errors.receiverName) {
+                setErrors((prev) => ({ ...prev, receiverName: undefined }));
+              }
+            }}
+            placeholder={t("account.addresses.receiverNamePlaceholder")}
+            className={cn(
+              "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
+              errors.receiverName
+                ? "border-red-500 focus:border-red-500"
+                : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+            )}
+          />
+          {errors.receiverName && (
+            <p className="text-xs font-medium text-red-500">{errors.receiverName}</p>
+          )}
+        </div>
+
+        {/* Phone */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="modalPhone"
+            className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+          >
+            {t("account.addresses.phone")}
+          </label>
+          <input
+            id="modalPhone"
+            type="tel"
+            value={phone}
+            onChange={(e) => {
+              setPhone(e.target.value);
+              if (errors.phone) {
+                setErrors((prev) => ({ ...prev, phone: undefined }));
+              }
+            }}
+            placeholder={t("account.addresses.phonePlaceholder")}
+            className={cn(
+              "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
+              errors.phone
+                ? "border-red-500 focus:border-red-500"
+                : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+            )}
+          />
+          {errors.phone && <p className="text-xs font-medium text-red-500">{errors.phone}</p>}
+        </div>
+
+        {/* Province & Ward API Selects */}
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          {/* Province / City Select */}
           <div className="flex flex-col gap-1.5">
             <label
-              htmlFor="modalReceiverName"
+              htmlFor="modalProvince"
               className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
             >
-              {t("account.addresses.receiverName")}
+              {t("account.addresses.province")}
             </label>
-            <input
-              id="modalReceiverName"
-              type="text"
-              value={receiverName}
+            <select
+              id="modalProvince"
+              value={selectedProvinceCode}
               onChange={(e) => {
-                setReceiverName(e.target.value);
-                if (errors.receiverName) {
-                  setErrors((prev) => ({ ...prev, receiverName: undefined }));
+                setSelectedProvinceCode(e.target.value);
+                setSelectedWardCode("");
+                if (errors.province) {
+                  setErrors((prev) => ({ ...prev, province: undefined }));
                 }
               }}
-              placeholder={t("account.addresses.receiverNamePlaceholder")}
+              disabled={isLoadingProvinces}
               className={cn(
-                "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
-                errors.receiverName
+                "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:opacity-60",
+                errors.province
                   ? "border-red-500 focus:border-red-500"
                   : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+                !selectedProvinceCode && "text-[#1c1a18]/40",
               )}
-            />
-            {errors.receiverName && (
-              <p className="text-xs font-medium text-red-500">{errors.receiverName}</p>
+            >
+              <option value="" className="text-[#1c1a18]/40">
+                {isLoadingProvinces
+                  ? t("account.addresses.loadingProvinces")
+                  : t("account.addresses.selectProvince")}
+              </option>
+              {provinces.map((province) => (
+                <option key={province.code} value={province.code} className="text-[#1c1a18]">
+                  {province.name}
+                </option>
+              ))}
+            </select>
+            {errors.province && (
+              <p className="text-xs font-medium text-red-500">{errors.province}</p>
             )}
           </div>
 
-          {/* Phone */}
+          {/* Ward / District Select */}
           <div className="flex flex-col gap-1.5">
             <label
-              htmlFor="modalPhone"
+              htmlFor="modalWard"
               className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
             >
-              {t("account.addresses.phone")}
+              {t("account.addresses.ward")}
             </label>
-            <input
-              id="modalPhone"
-              type="tel"
-              value={phone}
+            <select
+              id="modalWard"
+              value={selectedWardCode}
               onChange={(e) => {
-                setPhone(e.target.value);
-                if (errors.phone) {
-                  setErrors((prev) => ({ ...prev, phone: undefined }));
+                setSelectedWardCode(e.target.value);
+                if (errors.ward) {
+                  setErrors((prev) => ({ ...prev, ward: undefined }));
                 }
               }}
-              placeholder={t("account.addresses.phonePlaceholder")}
+              disabled={!selectedProvinceCode || isLoadingWards}
               className={cn(
-                "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
-                errors.phone
+                "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+                errors.ward
                   ? "border-red-500 focus:border-red-500"
                   : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+                !selectedWardCode && "text-[#1c1a18]/40",
               )}
-            />
-            {errors.phone && <p className="text-xs font-medium text-red-500">{errors.phone}</p>}
-          </div>
-
-          {/* Province & Ward API Selects */}
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-            {/* Province / City Select */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="modalProvince"
-                className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-              >
-                {t("account.addresses.province")}
-              </label>
-              <select
-                id="modalProvince"
-                value={selectedProvinceCode}
-                onChange={(e) => {
-                  setSelectedProvinceCode(e.target.value);
-                  setSelectedWardCode("");
-                  if (errors.province) {
-                    setErrors((prev) => ({ ...prev, province: undefined }));
-                  }
-                }}
-                disabled={isLoadingProvinces}
-                className={cn(
-                  "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:opacity-60",
-                  errors.province
-                    ? "border-red-500 focus:border-red-500"
-                    : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-                  !selectedProvinceCode && "text-[#1c1a18]/40",
-                )}
-              >
-                <option value="" className="text-[#1c1a18]/40">
-                  {isLoadingProvinces
-                    ? t("account.addresses.loadingProvinces")
-                    : t("account.addresses.selectProvince")}
-                </option>
-                {provinces.map((province) => (
-                  <option key={province.code} value={province.code} className="text-[#1c1a18]">
-                    {province.name}
-                  </option>
-                ))}
-              </select>
-              {errors.province && (
-                <p className="text-xs font-medium text-red-500">{errors.province}</p>
-              )}
-            </div>
-
-            {/* Ward / District Select */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="modalWard"
-                className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-              >
-                {t("account.addresses.ward")}
-              </label>
-              <select
-                id="modalWard"
-                value={selectedWardCode}
-                onChange={(e) => {
-                  setSelectedWardCode(e.target.value);
-                  if (errors.ward) {
-                    setErrors((prev) => ({ ...prev, ward: undefined }));
-                  }
-                }}
-                disabled={!selectedProvinceCode || isLoadingWards}
-                className={cn(
-                  "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60",
-                  errors.ward
-                    ? "border-red-500 focus:border-red-500"
-                    : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-                  !selectedWardCode && "text-[#1c1a18]/40",
-                )}
-              >
-                <option value="" className="text-[#1c1a18]/40">
-                  {isLoadingWards
-                    ? t("account.addresses.loadingWards")
-                    : t("account.addresses.selectWard")}
-                </option>
-                {wards.map((ward) => (
-                  <option key={ward.code} value={ward.code} className="text-[#1c1a18]">
-                    {ward.name}
-                  </option>
-                ))}
-              </select>
-              {errors.ward && <p className="text-xs font-medium text-red-500">{errors.ward}</p>}
-            </div>
-          </div>
-
-          {/* Detailed Street Address */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="modalAddressDetail"
-              className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
             >
-              {t("account.addresses.addressDetail")}
-            </label>
-            <textarea
-              id="modalAddressDetail"
-              rows={2}
-              value={addressDetail}
-              onChange={(e) => {
-                setAddressDetail(e.target.value);
-                if (errors.addressDetail) {
-                  setErrors((prev) => ({ ...prev, addressDetail: undefined }));
-                }
-              }}
-              placeholder={t("account.addresses.addressDetailPlaceholder")}
-              className={cn(
-                "w-full resize-none rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
-                errors.addressDetail
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-              )}
-            />
-            {errors.addressDetail && (
-              <p className="text-xs font-medium text-red-500">{errors.addressDetail}</p>
+              <option value="" className="text-[#1c1a18]/40">
+                {isLoadingWards
+                  ? t("account.addresses.loadingWards")
+                  : t("account.addresses.selectWard")}
+              </option>
+              {wards.map((ward) => (
+                <option key={ward.code} value={ward.code} className="text-[#1c1a18]">
+                  {ward.name}
+                </option>
+              ))}
+            </select>
+            {errors.ward && <p className="text-xs font-medium text-red-500">{errors.ward}</p>}
+          </div>
+        </div>
+
+        {/* Detailed Street Address */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="modalAddressDetail"
+            className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+          >
+            {t("account.addresses.addressDetail")}
+          </label>
+          <textarea
+            id="modalAddressDetail"
+            rows={2}
+            value={addressDetail}
+            onChange={(e) => {
+              setAddressDetail(e.target.value);
+              if (errors.addressDetail) {
+                setErrors((prev) => ({ ...prev, addressDetail: undefined }));
+              }
+            }}
+            placeholder={t("account.addresses.addressDetailPlaceholder")}
+            className={cn(
+              "w-full resize-none rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
+              errors.addressDetail
+                ? "border-red-500 focus:border-red-500"
+                : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
             )}
-          </div>
+          />
+          {errors.addressDetail && (
+            <p className="text-xs font-medium text-red-500">{errors.addressDetail}</p>
+          )}
+        </div>
 
-          {/* Default Switch */}
-          <div className="mt-1 flex items-center gap-3">
-            <Checkbox
-              id="modalIsDefault"
-              checked={isDefault}
-              onCheckedChange={(checked) => setIsDefault(!!checked)}
-              className="size-4.5 rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
-            />
-            <label
-              htmlFor="modalIsDefault"
-              className="cursor-pointer text-xs font-medium text-[#55423d] select-none sm:text-sm"
-            >
-              {t("account.addresses.setDefault")}
-            </label>
-          </div>
+        {/* Default Switch */}
+        <div className="mt-1 flex items-center gap-3">
+          <Checkbox
+            id="modalIsDefault"
+            checked={isDefault}
+            onCheckedChange={(checked) => setIsDefault(!!checked)}
+            className="size-4.5 rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
+          />
+          <label
+            htmlFor="modalIsDefault"
+            className="cursor-pointer text-xs font-medium text-[#55423d] select-none sm:text-sm"
+          >
+            {t("account.addresses.setDefault")}
+          </label>
+        </div>
 
-          {/* Actions */}
-          <div className="mt-4 flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="cursor-pointer rounded-sm border border-[#1c1a18]/20 bg-transparent px-5 py-2.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-black/5 disabled:opacity-50"
-            >
-              {t("account.addresses.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex min-w-[130px] cursor-pointer items-center justify-center rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-6 py-2.5 text-xs font-semibold tracking-wider whitespace-nowrap text-white uppercase shadow-sm transition-colors hover:border-[#b5573a] hover:bg-[#b5573a] disabled:opacity-50"
-            >
-              {isSubmitting
-                ? t("account.addresses.saving")
-                : addressToEdit
-                  ? t("account.addresses.save")
-                  : t("account.addresses.addNew")}
-            </button>
-          </div>
-        </form>
-      </>
+        {/* Actions */}
+        <div className="mt-4 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="cursor-pointer rounded-sm border border-[#1c1a18]/20 bg-transparent px-5 py-2.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-black/5 disabled:opacity-50"
+          >
+            {t("account.addresses.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex min-w-[130px] cursor-pointer items-center justify-center rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-6 py-2.5 text-xs font-semibold tracking-wider whitespace-nowrap text-white uppercase shadow-sm transition-colors hover:border-[#b5573a] hover:bg-[#b5573a] disabled:opacity-50"
+          >
+            {isSubmitting
+              ? t("account.addresses.saving")
+              : addressToEdit
+                ? t("account.addresses.save")
+                : t("account.addresses.addNew")}
+          </button>
+        </div>
+      </form>
+    </>
   );
 }
