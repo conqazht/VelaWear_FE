@@ -27,7 +27,6 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { FieldLabel } from "@/components/shop/field-label";
 import { useCart } from "@/components/shop/cart-provider";
@@ -139,7 +138,7 @@ export function CheckoutPageClient() {
   });
 
   const selectedProvinceCode = useWatch({ control, name: "provinceCode" });
-  const isLoadingWards = Boolean(selectedProvinceCode) && wards.length === 0 && !addressApiError;
+  const [isLoadingWards, setIsLoadingWards] = useState(false);
 
   const [isAddressSelectModalOpen, setIsAddressSelectModalOpen] = useState(false);
   const [isCreateAddressModalOpen, setIsCreateAddressModalOpen] = useState(false);
@@ -303,12 +302,14 @@ export function CheckoutPageClient() {
       .then((data) => {
         if (!active) return;
         setWards(data);
+        setIsLoadingWards(false);
         setAddressApiError(null);
       })
       .catch((error: unknown) => {
         if (!active) return;
         if (error instanceof DOMException && error.name === "AbortError") return;
         setWards([]);
+        setIsLoadingWards(false);
         setAddressApiError(t("checkout.wardLoadError"));
       });
 
@@ -727,30 +728,36 @@ export function CheckoutPageClient() {
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <FieldLabel htmlFor="provinceCode">{t("checkout.province")}</FieldLabel>
-                      {isLoadingProvinces ? (
-                        <AddressSelectLoading />
-                      ) : (
-                        <select
-                          id="provinceCode"
-                          autoComplete="address-level1"
-                          aria-invalid={!!errors.provinceCode}
-                          aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
-                          {...register("provinceCode", {
-                            onChange: () => {
-                              setValue("wardCode", "");
+                      <select
+                        id="provinceCode"
+                        autoComplete="address-level1"
+                        disabled={isLoadingProvinces}
+                        aria-invalid={!!errors.provinceCode}
+                        aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
+                        {...register("provinceCode", {
+                          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => {
+                            setValue("wardCode", "");
+                            if (e.target.value) {
+                              setIsLoadingWards(true);
+                            } else {
                               setWards([]);
-                            },
-                          })}
-                          className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          <option value="">{t("checkout.selectProvince")}</option>
-                          {provinces.map((province) => (
-                            <option key={province.code} value={province.code}>
-                              {province.name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                              setIsLoadingWards(false);
+                            }
+                          },
+                        })}
+                        className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <option value="">
+                          {isLoadingProvinces
+                            ? t("checkout.loadingProvinces")
+                            : t("checkout.selectProvince")}
+                        </option>
+                        {provinces.map((province) => (
+                          <option key={province.code} value={province.code}>
+                            {province.name}
+                          </option>
+                        ))}
+                      </select>
                       {errors.provinceCode?.message && (
                         <p id="provinceCode-error" className="text-error text-xs">
                           {errors.provinceCode.message}
@@ -760,26 +767,24 @@ export function CheckoutPageClient() {
 
                     <div className="space-y-2">
                       <FieldLabel htmlFor="wardCode">{t("checkout.ward")}</FieldLabel>
-                      {isLoadingWards ? (
-                        <AddressSelectLoading />
-                      ) : (
-                        <select
-                          id="wardCode"
-                          autoComplete="address-level2"
-                          disabled={!selectedProvinceCode}
-                          aria-invalid={!!errors.wardCode}
-                          aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
-                          {...register("wardCode")}
-                          className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          <option value="">{t("checkout.selectWard")}</option>
-                          {wards.map((ward) => (
-                            <option key={ward.code} value={ward.code}>
-                              {ward.name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                      <select
+                        id="wardCode"
+                        autoComplete="address-level2"
+                        disabled={!selectedProvinceCode || isLoadingWards}
+                        aria-invalid={!!errors.wardCode}
+                        aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
+                        {...register("wardCode")}
+                        className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <option value="">
+                          {isLoadingWards ? t("checkout.loadingWards") : t("checkout.selectWard")}
+                        </option>
+                        {wards.map((ward) => (
+                          <option key={ward.code} value={ward.code}>
+                            {ward.name}
+                          </option>
+                        ))}
+                      </select>
                       {errors.wardCode?.message && (
                         <p id="wardCode-error" className="text-error text-xs">
                           {errors.wardCode.message}
@@ -1181,10 +1186,6 @@ function LedgerRow({
       <span className="font-semibold text-[#1c1a18]">{value}</span>
     </div>
   );
-}
-
-function AddressSelectLoading() {
-  return <Skeleton className="h-11 w-full rounded-sm bg-[#f7f4ef]" aria-hidden="true" />;
 }
 
 function PaymentDeadline({

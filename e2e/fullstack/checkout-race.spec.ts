@@ -31,6 +31,9 @@ test(
     await checkoutForm.locator('input[name="receiverName"]').fill("Demo Customer");
     await checkoutForm.locator('input[name="address"]').fill("123 Le Loi");
     await checkoutForm.locator('select[name="provinceCode"]').selectOption("79");
+    await expect(
+      checkoutForm.locator('select[name="wardCode"] option[value="760"]'),
+    ).toBeAttached();
     await checkoutForm.locator('select[name="wardCode"]').selectOption("760");
 
     const submitButton = checkoutForm.getByRole("button", {
