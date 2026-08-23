@@ -4,30 +4,12 @@ Storefront và admin dashboard cho ứng dụng thương mại điện tử th�
 
 ## Tech Stack
 
-Dự án sử dụng các công nghệ hiện đại nhất:
-
-- **Framework**: Next.js 16.3.1 (App Router, Turbopack, Cache Components, Instant Navigations)
-- **UI Library**: React 19.2.8 (React Server Components, Actions)
-- **Language**: TypeScript ^5 (5.9.3) / Strict Mode Type Safety
-- **Styling**: Tailwind CSS ^4 (sử dụng `@tailwindcss/postcss` 4.3.3)
-- **Components**: shadcn CLI ^4.11.0 / `@shadcn/react` 0.2.1 với style `base-nova`
-- **Headless UI**: Base UI (`@base-ui/react` ^1.7.0)
-- **Icons**: lucide-react ^1.31.0
-- **Animation**: motion ^12.40.0 (animation qua `motion/react`)
-- **State Management**:
-  - Server state: TanStack Query 5.101.4
-  - Client state: Zustand 5.0.15 (cart, auth, theme, locale)
-- **HTTP Client**: Axios ^1.19.0 (tích hợp interceptors)
-- **Forms**: React Hook Form ^7.85.0 + `@hookform/resolvers` ^5.8.0
-- **Utilities**: `@dnd-kit` (kéo thả), `@fullcalendar/react` ^7.0.0 (lịch), recharts ^3.10.1 (biểu đồ), sonner ^2.0.8 (toasts)
-- **Code Quality & Tooling**:
-  - Formatter chuẩn: `prettier` ^3.9.6 + `prettier-plugin-tailwindcss` ^0.8.1 (tự động sắp xếp class Tailwind)
-  - Fast Tooling: `oxfmt` ^0.63.0 (format 600+ files trong 1.2s) & `oxlint` ^1.78.0 (linter Rust 20ms)
-  - Framework Linter: `eslint` ^9 + `eslint-config-next` 16.3.1
-- **Testing**:
-  - Unit test: Vitest ^4.1.10 (53 test files, 205 tests passed)
-  - E2E test: Playwright ^1.62.1 (16 smoke cases và fullstack)
-- **Môi trường**: Package manager: pnpm 11.5.2, Node.js: 24
+- **Core**: Next.js 16 (App Router, Turbopack), React 19, TypeScript
+- **UI & Styling**: Tailwind CSS v4, shadcn/ui, Base UI, Lucide Icons, Motion
+- **State & Data**: TanStack Query v5 (Server State), Zustand (Client State), Axios (Interceptors & Web Lock)
+- **Forms & Validation**: React Hook Form, Zod
+- **Testing**: Vitest (Unit Tests), Playwright (E2E Smoke & Fullstack)
+- **Tooling**: Oxlint & Oxfmt (Rust-based), ESLint, Prettier
 
 ## Application Routes
 
