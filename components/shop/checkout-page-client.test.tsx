@@ -13,6 +13,7 @@ const {
   useAuthMock,
   useCartMock,
   useI18nMock,
+  useMyAddressesQueryMock,
 } = vi.hoisted(() => ({
   clearCartMock: vi.fn(),
   getVietnamProvincesMock: vi.fn(),
@@ -23,6 +24,7 @@ const {
   useAuthMock: vi.fn(),
   useCartMock: vi.fn(),
   useI18nMock: vi.fn(),
+  useMyAddressesQueryMock: vi.fn(),
 }));
 
 vi.mock("@/components/auth/auth-provider", () => ({
@@ -39,6 +41,10 @@ vi.mock("@/components/shop/cart-provider", () => ({
 
 vi.mock("@/components/shop/fashion-image", () => ({
   FashionImage: ({ alt }: { alt: string }) => <span>{alt}</span>,
+}));
+
+vi.mock("@/lib/queries/commerce", () => ({
+  useMyAddressesQuery: useMyAddressesQueryMock,
 }));
 
 vi.mock("@/lib/vietnam-address-api", () => ({
@@ -162,6 +168,11 @@ describe("CheckoutPageClient rapid submit", () => {
       clearCart: clearCartMock,
       refreshCart: refreshCartMock,
     });
+    useMyAddressesQueryMock.mockReturnValue({
+      data: { result: [] },
+      isLoading: false,
+      isError: false,
+    });
     getVietnamProvincesMock.mockResolvedValue([
       {
         code: 79,
@@ -180,6 +191,38 @@ describe("CheckoutPageClient rapid submit", () => {
       },
     ]);
     previewCheckoutMock.mockResolvedValue(preview);
+  });
+
+  it("tự động điền thông tin từ địa chỉ mặc định của người dùng", async () => {
+    useMyAddressesQueryMock.mockReturnValue({
+      data: {
+        result: [
+          {
+            id: 1,
+            userId: 7,
+            receiverName: "Nguyen Van A",
+            phone: "0987654321",
+            province: "Ho Chi Minh",
+            ward: "Ben Nghe",
+            addressDetail: "456 Dong Khoi",
+            isDefault: true,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    const { container } = render(<CheckoutPageClient />);
+
+    await waitFor(() => {
+      const receiverInput = container.querySelector<HTMLInputElement>('input[name="receiverName"]');
+      const phoneInput = container.querySelector<HTMLInputElement>('input[name="phone"]');
+      const addressInput = container.querySelector<HTMLInputElement>('input[name="address"]');
+      expect(receiverInput?.value).toBe("Nguyen Van A");
+      expect(phoneInput?.value).toBe("0987654321");
+      expect(addressInput?.value).toBe("456 Dong Khoi");
+    });
   });
 
   it("gộp hai submit cùng tick thành đúng một checkout operation", async () => {

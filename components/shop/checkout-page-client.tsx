@@ -29,6 +29,8 @@ import { FieldLabel } from "@/components/shop/field-label";
 import { useCart } from "@/components/shop/cart-provider";
 import { money } from "@/lib/vela-data";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useMyAddressesQuery } from "@/lib/queries/commerce";
+import type { UserAddress } from "@/lib/api/types";
 import {
   submitCheckout,
   previewCheckout,
@@ -133,35 +135,102 @@ export function CheckoutPageClient() {
   const selectedProvinceCode = useWatch({ control, name: "provinceCode" });
   const isLoadingWards = Boolean(selectedProvinceCode) && wards.length === 0 && !addressApiError;
 
-  // Restore the last successful checkout details for this account.
+  const addressesQuery = useMyAddressesQuery(user?.id, { size: 50 }, Boolean(user?.id));
+  const userAddresses = useMemo(
+    () => addressesQuery.data?.result ?? [],
+    [addressesQuery.data?.result],
+  );
+
+  const fillFromAddress = useCallback(
+    async (addr: UserAddress, provinceList: VietnamProvince[]) => {
+      setValue("receiverName", addr.receiverName || user?.fullName || "");
+      setValue("phone", addr.phone || "");
+      setValue("address", addr.addressDetail || "");
+
+      const matchedProvince = provinceList.find(
+        (p) =>
+          p.name.toLowerCase() === addr.province.toLowerCase() ||
+          p.codename.toLowerCase() === addr.province.toLowerCase() ||
+          String(p.code) === addr.province,
+      );
+
+      if (matchedProvince) {
+        const pCode = String(matchedProvince.code);
+        setValue("provinceCode", pCode, { shouldValidate: true });
+
+        try {
+          const wardList = await getVietnamWards(Number(pCode));
+          setWards(wardList);
+          const matchedWard = wardList.find(
+            (w) =>
+              w.name.toLowerCase() === addr.ward.toLowerCase() ||
+              w.codename.toLowerCase() === addr.ward.toLowerCase() ||
+              String(w.code) === addr.ward,
+          );
+          if (matchedWard) {
+            setValue("wardCode", String(matchedWard.code), { shouldValidate: true });
+          }
+        } catch {
+          // Handled gracefully
+        }
+      }
+    },
+    [setValue, user?.fullName],
+  );
+
+  const hasAutoFilledRef = useRef(false);
+
+  // Restore the last successful checkout details or default address for this account.
   useEffect(() => {
     if (!user) return;
 
-    try {
-      const storedValue = window.localStorage.getItem(checkoutDetailsStorageKey(user.id));
-      if (storedValue) {
-        const raw = JSON.parse(storedValue);
-        if (!raw.receiverName && (raw.firstName || raw.lastName)) {
-          raw.receiverName = `${raw.firstName || ""} ${raw.lastName || ""}`.trim();
-        }
-        const parsedDetails = localizedCheckoutSchema.safeParse(raw);
-        if (parsedDetails.success) {
-          setValue("email", parsedDetails.data.email);
-          setValue("phone", parsedDetails.data.phone);
-          setValue("receiverName", parsedDetails.data.receiverName);
-          setValue("address", parsedDetails.data.address);
-          setValue("provinceCode", parsedDetails.data.provinceCode);
-          setValue("wardCode", parsedDetails.data.wardCode);
-          return;
-        }
+    if (userAddresses.length > 0) {
+      if (provinces.length > 0 && !hasAutoFilledRef.current) {
+        const defaultAddress = userAddresses.find((a) => a.isDefault) ?? userAddresses[0];
+        setValue("email", user.email);
+        void fillFromAddress(defaultAddress, provinces);
+        hasAutoFilledRef.current = true;
       }
-    } catch {
-      // Ignore unavailable or malformed browser storage and use account defaults.
+      return;
     }
 
-    setValue("email", user.email);
-    setValue("receiverName", user.fullName || "");
-  }, [localizedCheckoutSchema, user, setValue]);
+    if (!addressesQuery.isLoading && !hasAutoFilledRef.current) {
+      try {
+        const storedValue = window.localStorage.getItem(checkoutDetailsStorageKey(user.id));
+        if (storedValue) {
+          const raw = JSON.parse(storedValue);
+          if (!raw.receiverName && (raw.firstName || raw.lastName)) {
+            raw.receiverName = `${raw.firstName || ""} ${raw.lastName || ""}`.trim();
+          }
+          const parsedDetails = localizedCheckoutSchema.safeParse(raw);
+          if (parsedDetails.success) {
+            setValue("email", parsedDetails.data.email);
+            setValue("phone", parsedDetails.data.phone);
+            setValue("receiverName", parsedDetails.data.receiverName);
+            setValue("address", parsedDetails.data.address);
+            setValue("provinceCode", parsedDetails.data.provinceCode);
+            setValue("wardCode", parsedDetails.data.wardCode);
+            hasAutoFilledRef.current = true;
+            return;
+          }
+        }
+      } catch {
+        // Ignore unavailable or malformed browser storage and use account defaults.
+      }
+
+      setValue("email", user.email);
+      setValue("receiverName", user.fullName || "");
+      hasAutoFilledRef.current = true;
+    }
+  }, [
+    user,
+    userAddresses,
+    provinces,
+    addressesQuery.isLoading,
+    fillFromAddress,
+    localizedCheckoutSchema,
+    setValue,
+  ]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -538,6 +607,35 @@ export function CheckoutPageClient() {
 
             <div className="space-y-3">
               <SectionTitle number="2" title={t("checkout.shippingAddress")} />
+
+              {userAddresses.length > 0 && (
+                <div className="space-y-2 pb-1">
+                  <p className="text-xs font-medium text-[#1c1a18]/70">
+                    {t("checkout.savedAddresses")}:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {userAddresses.map((addr) => (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => void fillFromAddress(addr, provinces)}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 bg-[#f7f4ef]/40 px-3 py-1.5 text-xs text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-[#1c1a18]/5"
+                      >
+                        <span className="font-semibold">{addr.receiverName}</span>
+                        {addr.isDefault && (
+                          <span className="rounded bg-[#1c1a18] px-1.5 py-0.5 text-[9px] font-semibold text-white uppercase">
+                            {t("account.addresses.default")}
+                          </span>
+                        )}
+                        <span className="max-w-[200px] truncate text-[#1c1a18]/60">
+                          - {addr.addressDetail}, {addr.province}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <CheckoutInput
                 label={t("checkout.receiverName")}
                 autoComplete="name"

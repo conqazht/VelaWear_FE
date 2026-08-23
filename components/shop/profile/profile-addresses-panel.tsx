@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Edit2, Trash2, CheckCircle2 } from "lucide-react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { useI18n } from "@/components/providers/i18n-provider";
 import type { UserAddress } from "@/lib/api/types";
 import { useDeleteMyAddressMutation, useUpdateMyAddressMutation } from "@/lib/queries/commerce";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { formatAddress } from "./profile-formatters";
 import { ProfileAddressesLoadingFallback } from "./profile-loading";
 import { AddressModal } from "./address-modal";
@@ -126,68 +127,98 @@ export function ProfileAddressesPanel({ addressesQuery }: ProfileAddressesPanelP
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {addresses.map((address) => (
-              <div
-                key={address.id}
-                className="bg-surface-card/30 rounded-md border border-[#1c1a18]/15 p-5 transition-shadow hover:shadow-xs"
-              >
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-ink text-sm font-semibold">{address.receiverName}</h4>
-                      {address.isDefault && (
-                        <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white uppercase">
-                          {t("account.addresses.default")}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-ink/65 mt-1 text-sm">
-                      {address.phone ?? t("account.addresses.noPhone")}
-                    </p>
-                    <p className="text-ink/70 mt-2 text-sm leading-relaxed">
-                      {formatAddress(address) || t("account.addresses.noAddress")}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 sm:self-start">
-                    {!address.isDefault && (
+            {addresses.map((address) => {
+              const isDefault = Boolean(address.isDefault);
+              return (
+                <div
+                  key={address.id}
+                  className={cn(
+                    "rounded-md border p-5 transition-all duration-200",
+                    isDefault
+                      ? "bg-surface-card/60 border-[#1c1a18] shadow-xs ring-1 ring-[#1c1a18]/15"
+                      : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/30 hover:shadow-xs",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3.5">
+                      {/* Radio Selection for Default Address */}
                       <button
                         type="button"
                         onClick={() => handleSetDefault(address)}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 px-3 py-1.5 text-xs font-medium text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-black/5"
-                        title={t("account.addresses.setDefault")}
+                        disabled={isDefault}
+                        className={cn(
+                          "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-all",
+                          isDefault
+                            ? "cursor-default border-[#1c1a18] bg-[#1c1a18] text-white"
+                            : "cursor-pointer border-[#1c1a18]/30 hover:border-[#1c1a18] hover:bg-black/5",
+                        )}
+                        aria-label={
+                          isDefault
+                            ? t("account.addresses.default")
+                            : t("account.addresses.setDefault")
+                        }
+                        title={
+                          isDefault
+                            ? t("account.addresses.default")
+                            : t("account.addresses.setDefault")
+                        }
                       >
-                        <CheckCircle2 className="size-3.5 text-[#55423d]" />
-                        <span>{t("account.addresses.default")}</span>
+                        {isDefault ? (
+                          <div className="size-2 rounded-full bg-white" />
+                        ) : (
+                          <div className="size-2 rounded-full bg-transparent" />
+                        )}
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEdit(address)}
-                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 px-3 py-1.5 text-xs font-medium text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-black/5"
-                      title={t("account.addresses.edit")}
-                    >
-                      <Edit2 className="size-3.5" />
-                      <span>{t("account.addresses.edit")}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(address)}
-                      disabled={deletingId === address.id}
-                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
-                      title={t("account.addresses.delete")}
-                    >
-                      <Trash2 className="size-3.5" />
-                      <span>
-                        {deletingId === address.id
-                          ? t("account.addresses.deleting")
-                          : t("account.addresses.delete")}
-                      </span>
-                    </button>
+
+                      {/* Address Info */}
+                      <div className="text-left">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-ink text-sm font-semibold">{address.receiverName}</h4>
+                          {isDefault && (
+                            <span className="rounded bg-[#1c1a18] px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white uppercase">
+                              {t("account.addresses.default")}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-ink/65 mt-1 text-sm">
+                          {address.phone ?? t("account.addresses.noPhone")}
+                        </p>
+                        <p className="text-ink/70 mt-2 text-sm leading-relaxed">
+                          {formatAddress(address) || t("account.addresses.noAddress")}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action buttons: Edit and Delete only */}
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(address)}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 px-3 py-1.5 text-xs font-medium text-[#1c1a18] transition-colors hover:border-[#1c1a18] hover:bg-black/5"
+                        title={t("account.addresses.edit")}
+                      >
+                        <Edit2 className="size-3.5" />
+                        <span>{t("account.addresses.edit")}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(address)}
+                        disabled={deletingId === address.id}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                        title={t("account.addresses.delete")}
+                      >
+                        <Trash2 className="size-3.5" />
+                        <span>
+                          {deletingId === address.id
+                            ? t("account.addresses.deleting")
+                            : t("account.addresses.delete")}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
