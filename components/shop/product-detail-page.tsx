@@ -185,7 +185,7 @@ function ProductDetailLoadingFallback() {
             </div>
             <div className="grid grid-cols-4 gap-3">
               {Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton key={index} className="h-[50px] rounded-sm bg-[#efe7dc]" />
+                <Skeleton key={index} className="h-[50px] rounded-xl bg-[#efe7dc]" />
               ))}
             </div>
           </div>
