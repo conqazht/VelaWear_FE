@@ -25,54 +25,6 @@ Vela Wear is a premium fashion ecommerce application. The storefront presents a 
 
 Keep the experience refined, editorial, and purchase-focused. The storefront should feel like a premium fashion store, not a generic SaaS dashboard or QR food ordering app.
 
-## Current Stack
-
-Source of truth: `package.json` and `components.json`.
-
-| Technology      | Version / Config        | Notes                                                |
-| :-------------- | :---------------------- | :--------------------------------------------------- |
-| Next.js         | `16.3.1`                | App Router with Turbopack & Cache Components         |
-| React           | `19.2.8`                | React Server Components capable                      |
-| React DOM       | `19.2.8`                | DOM renderer                                         |
-| TypeScript      | `^5`                    | Strict typed TS/TSX preferred (TypeScript 5.9.3)     |
-| Tailwind CSS    | `^4`                    | Uses `@tailwindcss/postcss 4.3.3`                    |
-| shadcn CLI      | `^4.11.0`               | Build tooling in `devDependencies`                   |
-| shadcn style    | `base-nova`             | Keep generated components consistent with this style |
-| `@shadcn/react` | `0.2.1`                 | Runtime component library in `dependencies`          |
-| Base UI         | `@base-ui/react ^1.7.0` | Headless primitives when needed                      |
-| Icons           | `lucide-react ^1.31.0`  | Import only the icons used                           |
-| Animation       | `motion ^12.40.0`       | Existing app uses `motion/react`                     |
-| TanStack Query  | `5.101.4`               | Server state, cache, retry, `Retry-After`            |
-| Zustand         | `5.0.15`                | Client-side state (cart, auth, theme, locale)        |
-| Axios           | `^1.19.0`               | HTTP client with interceptors                        |
-| Vitest          | `^4.1.10`               | Unit testing                                         |
-| Playwright      | `^1.62.1`               | E2E smoke and full-stack tests                       |
-| Formatter       | `prettier ^3.9.6`       | With `prettier-plugin-tailwindcss ^0.8.1` & `oxfmt`  |
-| Linter          | `oxlint ^1.78.0`        | Fast Rust linter + `eslint ^9` for Next.js rules     |
-| Package manager | `pnpm`                  | Lockfile is `pnpm-lock.yaml`                         |
-
-## Repository Shape
-
-- `app/(shop)/page.tsx`: storefront homepage.
-- `app/(shop)/`: storefront routes — collection, product detail, cart, checkout, sale, profile, favourites, coupons, reviews.
-- `app/(admin)/dashboard/`: admin management dashboard routes.
-- `app/(auth)/`: authentication routes — sign-in, sign-up, OAuth callback.
-- `components/shop/`: storefront-scoped components (product card, collection client, home page, profile panels, sale cards, etc.).
-- `components/ui/`: shadcn UI primitives.
-- `components/providers/`: context providers (query, i18n, notification, cart, favourites).
-- `lib/api/`: API client, types, helpers, and transport layer.
-- `lib/api-client.ts`: Axios client with in-memory access token, Web Lock refresh, and session generation guard.
-- `lib/queries/`: TanStack Query hooks and cache keys.
-- `lib/i18n/`: EN/VI locale system with route-scoped catalog splitting.
-- `lib/auth/`: post-auth redirect, OTP challenge/proof flow.
-- `hooks/`: shared React hooks.
-- `lib/utils.ts`: shared utilities such as `cn`.
-- `app/globals.css`: global Tailwind theme and CSS.
-- `styles/presets/`: theme presets.
-- `scripts/`: development tooling (link checker, etc.).
-- `docs/`: project documentation.
-- `plans/`: shadcn/improve roadmap and plan files.
-
 ## Code Conventions
 
 ### Component Structure

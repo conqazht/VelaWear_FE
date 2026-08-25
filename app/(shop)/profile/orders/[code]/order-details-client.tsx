@@ -148,12 +148,13 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     ? getErrorMessage(cancelMutation.error, t("account.order.cancelError"))
     : null;
 
+  const orderCode = order?.orderCode;
   const handleCopyOrderCode = useCallback(() => {
-    if (!order?.orderCode) return;
-    void navigator.clipboard?.writeText(order.orderCode);
+    if (!orderCode) return;
+    void navigator.clipboard?.writeText(orderCode);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
-  }, [order?.orderCode]);
+  }, [orderCode]);
 
   const getStatusLabel = (status?: string | null) => {
     if (!status) return t("account.order.initialStatus");
@@ -255,7 +256,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         <div className="mb-6">
           <Link
             href="/profile?tab=orders"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18]/60 uppercase hover:text-[#b5573a] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18]/60 uppercase transition-colors hover:text-[#b5573a]"
           >
             <ArrowLeft className="size-3.5" />
             <span>{t("account.order.back")}</span>
@@ -271,7 +272,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           />
         ) : null}
 
-        <header className="mb-8 flex flex-col justify-between gap-4 rounded-xl border border-[#1c1a18]/8 bg-white p-6 sm:p-8 shadow-sm md:flex-row md:items-center">
+        <header className="mb-8 flex flex-col justify-between gap-4 rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm sm:p-8 md:flex-row md:items-center">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-serif text-2xl font-light text-[#1c1a18] sm:text-3xl">
@@ -283,18 +284,18 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 {getStatusLabel(order.status)}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-[#1c1a18]/65">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#1c1a18]/65 sm:text-sm">
               <span>{t("account.order.code", { code: order.orderCode })}</span>
               <button
                 type="button"
                 onClick={handleCopyOrderCode}
                 title={t("checkout.copyOrderCode")}
-                className="inline-flex items-center gap-1 rounded bg-[#1c1a18]/5 px-2 py-0.5 text-xs font-medium text-[#1c1a18]/70 hover:bg-[#1c1a18]/10 hover:text-[#1c1a18] transition-colors"
+                className="inline-flex items-center gap-1 rounded bg-[#1c1a18]/5 px-2 py-0.5 text-xs font-medium text-[#1c1a18]/70 transition-colors hover:bg-[#1c1a18]/10 hover:text-[#1c1a18]"
               >
                 {isCopied ? (
                   <>
                     <Check className="size-3 text-emerald-600" />
-                    <span className="text-emerald-600 font-medium">{t("checkout.copied")}</span>
+                    <span className="font-medium text-emerald-600">{t("checkout.copied")}</span>
                   </>
                 ) : (
                   <>
@@ -332,7 +333,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               {order.items?.length ? (
                 <div className="divide-y divide-[#1c1a18]/8">
                   {order.items.map((item) => (
-                    <div key={item.id} className="flex gap-4 sm:gap-5 py-5 first:pt-0 last:pb-0">
+                    <div key={item.id} className="flex gap-4 py-5 first:pt-0 last:pb-0 sm:gap-5">
                       <div className="relative flex aspect-[3/4] w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#1c1a18]/8 bg-[#f7f4ef] md:w-24">
                         {item.image ? (
                           <Image
@@ -353,22 +354,22 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                             {item.productSlug ? (
                               <Link
                                 href={`/product/${item.productSlug}`}
-                                className="font-medium text-[#1c1a18] hover:text-[#b5573a] transition-colors line-clamp-2"
+                                className="line-clamp-2 font-medium text-[#1c1a18] transition-colors hover:text-[#b5573a]"
                               >
                                 {item.productName}
                               </Link>
                             ) : (
-                              <h3 className="font-medium text-[#1c1a18] line-clamp-2">
+                              <h3 className="line-clamp-2 font-medium text-[#1c1a18]">
                                 {item.productName}
                               </h3>
                             )}
-                            <div className="text-right shrink-0">
+                            <div className="shrink-0 text-right">
                               {item.listPrice && item.listPrice > item.price ? (
                                 <span className="block text-xs text-[#1c1a18]/40 line-through">
                                   {money(item.listPrice * item.quantity, locale)}
                                 </span>
                               ) : null}
-                              <span className="font-numeric text-sm sm:text-base font-semibold text-[#1c1a18] whitespace-nowrap">
+                              <span className="font-numeric text-sm font-semibold whitespace-nowrap text-[#1c1a18] sm:text-base">
                                 {money(item.subtotal, locale)}
                               </span>
                             </div>
@@ -444,15 +445,15 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                   className="mb-5"
                 />
               ) : null}
-              <div className="space-y-1 relative pl-1">
-                <div className="flex gap-4 relative">
+              <div className="relative space-y-1 pl-1">
+                <div className="relative flex gap-4">
                   <div className="relative flex flex-col items-center">
-                    <div className="flex size-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 shrink-0">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600">
                       <CheckCircle2 className="size-4" />
                     </div>
-                    {histories.length > 0 && <div className="w-0.5 flex-1 bg-[#1c1a18]/10 my-1" />}
+                    {histories.length > 0 && <div className="my-1 w-0.5 flex-1 bg-[#1c1a18]/10" />}
                   </div>
-                  <div className="pb-5 pt-0.5">
+                  <div className="pt-0.5 pb-5">
                     <p className="text-sm font-semibold text-[#1c1a18]">
                       {t("account.order.created")}
                     </p>
@@ -464,14 +465,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 {histories.map((history, idx) => {
                   const isLast = idx === histories.length - 1;
                   return (
-                    <div key={history.id} className="flex gap-4 relative">
+                    <div key={history.id} className="relative flex gap-4">
                       <div className="relative flex flex-col items-center">
-                        <div className="flex size-7 items-center justify-center rounded-full bg-[#b5573a]/10 text-[#b5573a] border border-[#b5573a]/20 shrink-0">
+                        <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-[#b5573a]/20 bg-[#b5573a]/10 text-[#b5573a]">
                           <Clock3 className="size-3.5" />
                         </div>
-                        {!isLast && <div className="w-0.5 flex-1 bg-[#1c1a18]/10 my-1" />}
+                        {!isLast && <div className="my-1 w-0.5 flex-1 bg-[#1c1a18]/10" />}
                       </div>
-                      <div className="pb-5 pt-0.5">
+                      <div className="pt-0.5 pb-5">
                         <p className="text-sm font-semibold text-[#1c1a18]">
                           {t("account.order.statusChange", {
                             from: getStatusLabel(history.fromStatus),
@@ -543,14 +544,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               <h2 className="mb-5 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
                 {t("account.order.summary")}
               </h2>
-              <div className="mb-5 flex flex-col gap-3.5 border-b border-[#1c1a18]/8 pb-5 text-xs sm:text-sm text-[#1c1a18]/70">
-                <div className="flex justify-between items-center">
+              <div className="mb-5 flex flex-col gap-3.5 border-b border-[#1c1a18]/8 pb-5 text-xs text-[#1c1a18]/70 sm:text-sm">
+                <div className="flex items-center justify-between">
                   <span>{t("account.order.subtotal")}</span>
                   <span className="font-numeric font-medium text-[#1c1a18]">
                     {money(Number(order.subtotal ?? 0), locale)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span>{t("account.order.shippingFee")}</span>
                   <span className="font-numeric font-medium text-[#1c1a18]">
                     {Number(order.shippingFee) > 0
@@ -559,7 +560,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                   </span>
                 </div>
                 {Number(order.discountAmount) > 0 && (
-                  <div className="flex justify-between items-center text-[#b5573a]">
+                  <div className="flex items-center justify-between text-[#b5573a]">
                     <span>{t("account.order.discount")}</span>
                     <span className="font-numeric font-medium">
                       -{money(Number(order.discountAmount ?? 0), locale)}
@@ -568,7 +569,9 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 )}
               </div>
               <div className="flex items-baseline justify-between pt-1">
-                <span className="text-sm font-semibold text-[#1c1a18]">{t("account.order.total")}</span>
+                <span className="text-sm font-semibold text-[#1c1a18]">
+                  {t("account.order.total")}
+                </span>
                 <span className="font-serif text-2xl font-semibold text-[#b5573a]">
                   {money(Number(order.finalAmount ?? 0), locale)}
                 </span>
@@ -581,14 +584,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                 <Truck className="size-4 text-[#b5573a]" aria-hidden="true" />
                 {t("account.order.shipping")}
               </h2>
-              <div className="space-y-2 text-xs sm:text-sm text-[#1c1a18]/70">
-                <p className="font-semibold text-sm text-[#1c1a18]">{order.receiverName}</p>
+              <div className="space-y-2 text-xs text-[#1c1a18]/70 sm:text-sm">
+                <p className="text-sm font-semibold text-[#1c1a18]">{order.receiverName}</p>
                 <p className="flex items-center gap-1.5 text-xs text-[#1c1a18]/80">
-                  <Phone className="size-3.5 text-[#1c1a18]/40 shrink-0" />
+                  <Phone className="size-3.5 shrink-0 text-[#1c1a18]/40" />
                   <span>{order.receiverPhone}</span>
                 </p>
-                <p className="flex items-start gap-1.5 text-xs text-[#1c1a18]/70 leading-relaxed pt-2 border-t border-[#1c1a18]/6 mt-2">
-                  <MapPin className="size-3.5 text-[#1c1a18]/40 shrink-0 mt-0.5" />
+                <p className="mt-2 flex items-start gap-1.5 border-t border-[#1c1a18]/6 pt-2 text-xs leading-relaxed text-[#1c1a18]/70">
+                  <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#1c1a18]/40" />
                   <span>{order.receiverAddress}</span>
                 </p>
               </div>

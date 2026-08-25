@@ -1255,7 +1255,7 @@ function PaymentDeadline({
             </span>
           </div>
           {!isReleased && (
-            <span className="font-mono text-base sm:text-lg font-bold tracking-wider text-[#b5573a] tabular-nums">
+            <span className="font-mono text-base font-bold tracking-wider text-[#b5573a] tabular-nums sm:text-lg">
               {formatRemainingTime(isPastPaymentDue ? remainingGraceMs : remainingPaymentMs)}
             </span>
           )}
@@ -1326,19 +1326,16 @@ type OrderSuccessCardProps = {
 function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) {
   const reduce = useReducedMotion();
   const [isCopied, setIsCopied] = useState(false);
+  const orderCode = completedOrder.orderCode;
 
   const handleCopyOrderCode = useCallback(() => {
-    if (!completedOrder?.orderCode) return;
-    void navigator.clipboard?.writeText(completedOrder.orderCode);
+    if (!orderCode) return;
+    void navigator.clipboard?.writeText(orderCode);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
-  }, [completedOrder?.orderCode]);
+  }, [orderCode]);
 
-  const hasPaymentGateway = Boolean(
-    completedOrder.paymentInitiation?.actionUrl &&
-      (!completedOrder.reservationExpiresAt ||
-        Date.now() < Date.parse(completedOrder.reservationExpiresAt)),
-  );
+  const hasPaymentGateway = Boolean(completedOrder.paymentInitiation?.actionUrl);
 
   return (
     <motion.div
@@ -1356,7 +1353,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
       }}
       className="mx-auto w-full max-w-[480px]"
     >
-      <Card className="flex flex-col items-center rounded-xl border-[#1c1a18]/8 bg-white p-6 sm:p-8 text-center shadow-lg shadow-black/[0.03]">
+      <Card className="flex flex-col items-center rounded-xl border-[#1c1a18]/8 bg-white p-6 text-center shadow-lg shadow-black/[0.03] sm:p-8">
         {/* Check icon badge */}
         <motion.div
           initial={{ opacity: 0, transform: reduce ? "none" : "scale(0.3)" }}
@@ -1388,8 +1385,8 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
           {/* Structured Receipt Summary Box */}
           <div className="w-full rounded-lg border border-[#1c1a18]/8 bg-[#fdfbf7] p-4 text-left text-xs">
             {/* Order Code Row with Copy */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#1c1a18]/6">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-[#1c1a18]/55">
+            <div className="flex items-center justify-between border-b border-[#1c1a18]/6 pb-3">
+              <span className="text-[11px] font-medium tracking-wider text-[#1c1a18]/55 uppercase">
                 {t("checkout.orderCode")}
               </span>
               <div className="flex items-center gap-1.5">
@@ -1400,12 +1397,12 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
                   type="button"
                   onClick={handleCopyOrderCode}
                   title={t("checkout.copyOrderCode")}
-                  className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-[#1c1a18]/60 hover:bg-[#1c1a18]/10 hover:text-[#1c1a18] transition-colors"
+                  className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-[#1c1a18]/60 transition-colors hover:bg-[#1c1a18]/10 hover:text-[#1c1a18]"
                 >
                   {isCopied ? (
                     <>
                       <Check className="size-3 text-emerald-600" />
-                      <span className="text-emerald-600 font-medium">{t("checkout.copied")}</span>
+                      <span className="font-medium text-emerald-600">{t("checkout.copied")}</span>
                     </>
                   ) : (
                     <>
@@ -1417,7 +1414,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
             </div>
 
             {/* Key-Value Details */}
-            <div className="space-y-2.5 py-3 border-b border-[#1c1a18]/6 text-xs">
+            <div className="space-y-2.5 border-b border-[#1c1a18]/6 py-3 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-[#1c1a18]/60">{t("checkout.payment")}</span>
                 <span className="font-medium text-[#1c1a18]">
@@ -1430,7 +1427,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#1c1a18]/60">{t("checkout.status")}</span>
-                <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-800 border border-amber-500/20">
+                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
                   {{
                     PENDING: t("order.status.pending"),
                     CONFIRMED: t("order.status.confirmed"),
@@ -1476,8 +1473,8 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
               href={`/profile/orders/${completedOrder.orderCode}`}
               className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg px-6 text-xs font-bold tracking-[0.12em] uppercase transition-colors ${
                 hasPaymentGateway
-                  ? "border border-[#1c1a18]/15 bg-white text-[#1c1a18] hover:bg-[#1c1a18]/5 shadow-2xs"
-                  : "bg-[#1c1a18] text-white hover:bg-[#b5573a] shadow-sm"
+                  ? "border border-[#1c1a18]/15 bg-white text-[#1c1a18] shadow-2xs hover:bg-[#1c1a18]/5"
+                  : "bg-[#1c1a18] text-white shadow-sm hover:bg-[#b5573a]"
               }`}
             >
               <FileText className="size-4" />
@@ -1486,7 +1483,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
 
             <Link
               href="/"
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg px-6 text-xs font-semibold tracking-wider text-[#1c1a18]/60 hover:text-[#1c1a18] uppercase transition-colors"
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg px-6 text-xs font-semibold tracking-wider text-[#1c1a18]/60 uppercase transition-colors hover:text-[#1c1a18]"
             >
               <span>{t("checkout.continueShopping")}</span>
             </Link>
@@ -1494,7 +1491,7 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
         </div>
 
         {/* Footer delivery notification */}
-        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] font-light text-[#1c1a18]/55 border-t border-[#1c1a18]/6 pt-4 w-full">
+        <div className="mt-6 flex w-full items-center justify-center gap-1.5 border-t border-[#1c1a18]/6 pt-4 text-[11px] font-light text-[#1c1a18]/55">
           <Mail className="size-3.5 shrink-0 opacity-70" />
           <span>{t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}</span>
         </div>

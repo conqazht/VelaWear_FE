@@ -146,7 +146,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                       {getCategoryLabel(notification.product.category, locale)}
                     </p>
                     <p className="mt-0.5 text-xs text-[#1c1a18]/60">
-                      {notification.color ? `${notification.color} · ` : ""}{t("common.size")} {notification.size}
+                      {notification.color ? `${notification.color} · ` : ""}
+                      {t("common.size")} {notification.size}
                     </p>
                     <p className="font-numeric mt-1 font-sans text-sm font-bold text-[#1c1a18]">
                       {money(notification.product.price, locale)}
@@ -214,7 +215,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     {notification.product.name}
                   </h3>
                   <p className="mb-1.5 text-xs text-[#1c1a18]/60">
-                    {notification.color ? `${notification.color} · ` : ""}{t("common.size")}: {notification.size}
+                    {notification.color ? `${notification.color} · ` : ""}
+                    {t("common.size")}: {notification.size}
                   </p>
                   <p className="font-numeric font-sans text-sm font-bold text-[#1c1a18]">
                     {money(notification.product.price, locale)}
