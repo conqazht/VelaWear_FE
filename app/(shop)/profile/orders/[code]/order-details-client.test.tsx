@@ -8,14 +8,14 @@ const {
   getMyOrderByCodeMock,
   getMyOrderStatusHistoriesMock,
   pushMock,
-  toastSuccessMock,
+  showAddedToBagMock,
   useAuthMock,
 } = vi.hoisted(() => ({
   addToCartMock: vi.fn(),
   getMyOrderByCodeMock: vi.fn(),
   getMyOrderStatusHistoriesMock: vi.fn(),
   pushMock: vi.fn(),
-  toastSuccessMock: vi.fn(),
+  showAddedToBagMock: vi.fn(),
   useAuthMock: vi.fn(),
 }));
 
@@ -33,10 +33,10 @@ vi.mock("@/components/shop/cart-provider", () => ({
   }),
 }));
 
-vi.mock("sonner", () => ({
-  toast: {
-    success: toastSuccessMock,
-  },
+vi.mock("@/components/shop/notification-provider", () => ({
+  useNotification: () => ({
+    showAddedToBag: showAddedToBagMock,
+  }),
 }));
 
 vi.mock("@/components/providers/i18n-provider", () => ({
@@ -236,9 +236,13 @@ describe("OrderDetailsClient self-service contract", () => {
       "White",
       "L",
     );
-    expect(toastSuccessMock).toHaveBeenCalledWith(
-      "account.order.reorderSuccess",
-      expect.anything(),
+    expect(showAddedToBagMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "linen-shirt",
+        name: "Linen Shirt",
+      }),
+      "L",
+      "White",
     );
 
     // Buy again button on individual item
@@ -246,6 +250,7 @@ describe("OrderDetailsClient self-service contract", () => {
     fireEvent.click(buyAgainBtn);
 
     expect(addToCartMock).toHaveBeenCalledTimes(2);
+    expect(showAddedToBagMock).toHaveBeenCalledTimes(2);
   });
 
   it("does not show reorder buttons for in-progress orders like PENDING or SHIPPING", async () => {

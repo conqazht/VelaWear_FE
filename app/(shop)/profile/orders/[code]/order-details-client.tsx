@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -22,10 +21,9 @@ import {
   ShoppingBag,
   Truck,
 } from "lucide-react";
-import { toast } from "sonner";
-
 import { useAuth } from "@/components/auth/auth-provider";
 import { useCart } from "@/components/shop/cart-provider";
+import { useNotification } from "@/components/shop/notification-provider";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -114,8 +112,8 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { locale, t } = useI18n();
   const queryClient = useQueryClient();
-  const router = useRouter();
   const { addToCart } = useCart();
+  const { showAddedToBag } = useNotification();
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -168,7 +166,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         name: item.productName,
         price: item.price,
         originalPrice: item.listPrice,
-        image: item.image || "/images/products/product-placeholder.webp",
+        image: item.image ? resolveImageUrl(item.image) : "/images/products/product-placeholder.webp",
         category: "",
         color: color || "Default",
         size: size || "Default",
@@ -176,18 +174,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         variantId: item.variantId ?? undefined,
       };
       addToCart(product, color || "Default", size || "Default");
-      toast.success(t("account.order.reorderSuccess"), {
-        action: {
-          label: t("account.order.viewCart"),
-          onClick: () => router.push("/cart"),
-        },
-      });
+      showAddedToBag(product, size || "Default", color || "Default");
     },
-    [addToCart, router, t],
+    [addToCart, showAddedToBag],
   );
 
   const handleReorderAll = useCallback(() => {
     if (!order?.items?.length) return;
+    let lastItemProduct: { product: Product; size: string; color: string } | null = null;
     for (const item of order.items) {
       const [color, size] = item.variantName ? item.variantName.split(" / ") : ["Default", "M"];
       const product: Product = {
@@ -195,7 +189,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         name: item.productName,
         price: item.price,
         originalPrice: item.listPrice,
-        image: item.image || "/images/products/product-placeholder.webp",
+        image: item.image ? resolveImageUrl(item.image) : "/images/products/product-placeholder.webp",
         category: "",
         color: color || "Default",
         size: size || "Default",
@@ -203,14 +197,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         variantId: item.variantId ?? undefined,
       };
       addToCart(product, color || "Default", size || "Default");
+      lastItemProduct = { product, size: size || "Default", color: color || "Default" };
     }
-    toast.success(t("account.order.reorderSuccess"), {
-      action: {
-        label: t("account.order.viewCart"),
-        onClick: () => router.push("/cart"),
-      },
-    });
-  }, [addToCart, order?.items, router, t]);
+    if (lastItemProduct) {
+      showAddedToBag(lastItemProduct.product, lastItemProduct.size, lastItemProduct.color);
+    }
+  }, [addToCart, order?.items, showAddedToBag]);
 
   const orderCode = order?.orderCode;
   const handleCopyOrderCode = useCallback(() => {
