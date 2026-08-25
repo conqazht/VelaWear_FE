@@ -262,4 +262,33 @@ describe("CheckoutPageClient rapid submit", () => {
     expect(submitCheckoutMock.mock.calls[1]?.[1]).toBe(submitCheckoutMock.mock.calls[0]?.[1]);
     expect(await screen.findByText("checkout.successTitle")).toBeInTheDocument();
   });
+
+  it("hiển thị thẻ xác nhận thanh toán thành công với mã đơn, nút sao chép và điều hướng", async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, {
+      clipboard: { writeText: writeTextMock },
+    });
+
+    const submitRequest = deferred<CheckoutResponse>();
+    submitCheckoutMock.mockReturnValue(submitRequest.promise);
+
+    const { container } = render(<CheckoutPageClient />);
+    const form = await prepareCheckoutForm(container);
+    fireEvent.submit(form);
+
+    await act(async () => {
+      submitRequest.resolve(completedOrder);
+      await submitRequest.promise;
+    });
+
+    expect(await screen.findByText("checkout.successTitle")).toBeInTheDocument();
+    expect(screen.getByText("E2E-101")).toBeInTheDocument();
+    expect(screen.getByText("checkout.viewOrder")).toBeInTheDocument();
+    expect(screen.getByText("checkout.continueShopping")).toBeInTheDocument();
+
+    const copyBtn = screen.getByTitle("checkout.copyOrderCode");
+    fireEvent.click(copyBtn);
+    expect(writeTextMock).toHaveBeenCalledWith("E2E-101");
+    expect(await screen.findByText("checkout.copied")).toBeInTheDocument();
+  });
 });

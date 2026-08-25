@@ -1,10 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Clock3, CreditCard, LockKeyhole, Package, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Check,
+  CheckCircle2,
+  Clock3,
+  Copy,
+  CreditCard,
+  HelpCircle,
+  LockKeyhole,
+  MapPin,
+  Package,
+  Phone,
+  ShoppingBag,
+  Truck,
+} from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
@@ -27,7 +42,7 @@ import {
 import { getMyOrderByCode, getMyOrderStatusHistories } from "@/lib/api/commerce";
 import { cancelOrder } from "@/lib/checkout-api";
 import { formatDateTime } from "@/lib/i18n/format";
-import { money } from "@/lib/vela-data";
+import { money, resolveImageUrl } from "@/lib/vela-data";
 import type { OrderItem } from "@/lib/api/types";
 import { useMyReviewsQuery } from "@/lib/queries/commerce";
 import { queryKeys } from "@/lib/queries/keys";
@@ -65,12 +80,22 @@ const paymentStatusKeys = {
 } as const;
 
 const statusClasses: Record<string, string> = {
-  PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-700",
-  CONFIRMED: "border-blue-500/30 bg-blue-500/10 text-blue-700",
-  PROCESSING: "border-purple-500/30 bg-purple-500/10 text-purple-700",
-  SHIPPED: "border-sky-500/30 bg-sky-500/10 text-sky-700",
-  DELIVERED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700",
-  CANCELLED: "border-error/30 bg-error/10 text-error",
+  PENDING: "border-amber-400/40 bg-amber-50 text-amber-800",
+  CONFIRMED: "border-blue-400/40 bg-blue-50 text-blue-800",
+  PROCESSING: "border-purple-400/40 bg-purple-50 text-purple-800",
+  SHIPPED: "border-sky-400/40 bg-sky-50 text-sky-800",
+  DELIVERED: "border-emerald-400/40 bg-emerald-50 text-emerald-800",
+  COMPLETED: "border-emerald-400/40 bg-emerald-50 text-emerald-800",
+  CANCELLED: "border-red-400/40 bg-red-50 text-red-800",
+};
+
+const paymentStatusClasses: Record<string, string> = {
+  UNPAID: "border-amber-400/30 bg-amber-50 text-amber-800",
+  PENDING: "border-amber-400/30 bg-amber-50 text-amber-800",
+  PAID: "border-emerald-400/30 bg-emerald-50 text-emerald-800",
+  FAILED: "border-red-400/30 bg-red-50 text-red-800",
+  REFUNDED: "border-purple-400/30 bg-purple-50 text-purple-800",
+  REFUND_PENDING: "border-orange-400/30 bg-orange-50 text-orange-800",
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
@@ -86,6 +111,8 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const { locale, t } = useI18n();
   const queryClient = useQueryClient();
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
+
   const orderQuery = useQuery({
     queryKey: queryKeys.orders.meByCode(user?.id, code),
     queryFn: () => getMyOrderByCode(code),
@@ -120,6 +147,15 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const error = cancelMutation.error
     ? getErrorMessage(cancelMutation.error, t("account.order.cancelError"))
     : null;
+
+  const orderCode = order?.orderCode;
+  const handleCopyOrderCode = useCallback(() => {
+    if (!orderCode) return;
+    void navigator.clipboard?.writeText(orderCode);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  }, [orderCode]);
+
   const getStatusLabel = (status?: string | null) => {
     if (!status) return t("account.order.initialStatus");
     const normalizedStatus = status.toUpperCase();
@@ -216,13 +252,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
 
   return (
     <div className="bg-canvas text-ink min-h-screen">
-      <main className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
-        <div className="mb-8">
+      <main className="mx-auto w-full max-w-[1280px] px-6 py-12 md:px-16 md:py-16">
+        <div className="mb-6">
           <Link
             href="/profile?tab=orders"
-            className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#1c1a18]/60 uppercase hover:text-[#1c1a18]"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18]/60 uppercase transition-colors hover:text-[#b5573a]"
           >
-            ← {t("account.order.back")}
+            <ArrowLeft className="size-3.5" />
+            <span>{t("account.order.back")}</span>
           </Link>
         </div>
 
@@ -235,44 +272,72 @@ export default function OrderDetailsClient({ code }: { code: string }) {
           />
         ) : null}
 
-        <header className="mb-10 flex flex-col justify-between gap-6 border-b border-[#1c1a18]/10 pb-8 md:flex-row md:items-end">
-          <div>
-            <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18] md:text-5xl">
-              {t("account.order.title")}
-            </h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-[#1c1a18]/70">
+        <header className="mb-8 flex flex-col justify-between gap-4 rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm sm:p-8 md:flex-row md:items-center">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-serif text-2xl font-light text-[#1c1a18] sm:text-3xl">
+                {t("account.order.title")}
+              </h1>
+              <span
+                className={`inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-semibold tracking-wider uppercase shadow-2xs ${statusClasses[order.status] ?? statusClasses.PENDING}`}
+              >
+                {getStatusLabel(order.status)}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#1c1a18]/65 sm:text-sm">
               <span>{t("account.order.code", { code: order.orderCode })}</span>
+              <button
+                type="button"
+                onClick={handleCopyOrderCode}
+                title={t("checkout.copyOrderCode")}
+                className="inline-flex items-center gap-1 rounded bg-[#1c1a18]/5 px-2 py-0.5 text-xs font-medium text-[#1c1a18]/70 transition-colors hover:bg-[#1c1a18]/10 hover:text-[#1c1a18]"
+              >
+                {isCopied ? (
+                  <>
+                    <Check className="size-3 text-emerald-600" />
+                    <span className="font-medium text-emerald-600">{t("checkout.copied")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-3" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
               <span>•</span>
-              <span>{displayDateTime(order.createdAt)}</span>
+              <span className="flex items-center gap-1 text-[#1c1a18]/55">
+                <Calendar className="size-3.5 opacity-60" />
+                {displayDateTime(order.createdAt)}
+              </span>
             </div>
           </div>
-          <span
-            className={`w-fit rounded-sm border px-4 py-1.5 text-[11px] font-bold tracking-widest uppercase ${statusClasses[order.status] ?? statusClasses.PENDING}`}
-          >
-            {getStatusLabel(order.status)}
-          </span>
         </header>
 
         {error && (
-          <div className="border-error/20 bg-error/10 text-error mb-6 rounded-sm border px-4 py-3 text-sm">
+          <div className="border-error/20 bg-error/10 text-error mb-6 rounded-md border px-4 py-3 text-sm">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
-          <div className="flex flex-col gap-8 lg:col-span-8">
-            <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
-                {t("account.order.items", { count: order.items?.length ?? 0 })}
-              </h2>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          {/* Main Content (Left) */}
+          <div className="flex flex-col gap-6 lg:col-span-8">
+            {/* Products Card */}
+            <Card className="rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm md:p-8">
+              <div className="mb-6 flex items-center justify-between border-b border-[#1c1a18]/8 pb-4">
+                <h2 className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
+                  <ShoppingBag className="size-4 text-[#b5573a]" />
+                  {t("account.order.items", { count: order.items?.length ?? 0 })}
+                </h2>
+              </div>
               {order.items?.length ? (
                 <div className="divide-y divide-[#1c1a18]/8">
                   {order.items.map((item) => (
-                    <div key={item.id} className="flex gap-5 py-5 first:pt-0 last:pb-0">
-                      <div className="relative flex aspect-[3/4] w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-sm bg-[#f7f4ef] md:w-24">
+                    <div key={item.id} className="flex gap-4 py-5 first:pt-0 last:pb-0 sm:gap-5">
+                      <div className="relative flex aspect-[3/4] w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#1c1a18]/8 bg-[#f7f4ef] md:w-24">
                         {item.image ? (
                           <Image
-                            src={item.image}
+                            src={resolveImageUrl(item.image)}
                             alt={item.productName}
                             fill
                             sizes="(min-width: 768px) 96px, 80px"
@@ -283,30 +348,45 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                           <Package className="size-7 text-[#1c1a18]/25" />
                         )}
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-center">
-                        <div className="flex justify-between gap-4">
-                          <h3 className="font-medium text-[#1c1a18]">{item.productName}</h3>
-                          <div className="text-right">
-                            {item.listPrice && item.listPrice > item.price ? (
-                              <span className="block text-xs text-[#1c1a18]/35 line-through">
-                                {money(item.listPrice * item.quantity, locale)}
+                      <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
+                        <div>
+                          <div className="flex justify-between gap-4">
+                            {item.productSlug ? (
+                              <Link
+                                href={`/product/${item.productSlug}`}
+                                className="line-clamp-2 font-medium text-[#1c1a18] transition-colors hover:text-[#b5573a]"
+                              >
+                                {item.productName}
+                              </Link>
+                            ) : (
+                              <h3 className="line-clamp-2 font-medium text-[#1c1a18]">
+                                {item.productName}
+                              </h3>
+                            )}
+                            <div className="shrink-0 text-right">
+                              {item.listPrice && item.listPrice > item.price ? (
+                                <span className="block text-xs text-[#1c1a18]/40 line-through">
+                                  {money(item.listPrice * item.quantity, locale)}
+                                </span>
+                              ) : null}
+                              <span className="font-numeric text-sm font-semibold whitespace-nowrap text-[#1c1a18] sm:text-base">
+                                {money(item.subtotal, locale)}
                               </span>
-                            ) : null}
-                            <span className="font-medium whitespace-nowrap">
-                              {money(item.subtotal, locale)}
-                            </span>
+                            </div>
                           </div>
+                          {item.variantName && (
+                            <p className="mt-1 inline-block rounded bg-[#1c1a18]/5 px-2 py-0.5 text-[11px] font-medium text-[#1c1a18]/70">
+                              {item.variantName}
+                            </p>
+                          )}
+                          <p className="mt-1.5 text-xs text-[#1c1a18]/50">
+                            {t("account.order.itemDetails", {
+                              sku: item.sku,
+                              price: money(item.price, locale),
+                              quantity: item.quantity,
+                            })}
+                          </p>
                         </div>
-                        {item.variantName && (
-                          <p className="mt-1 text-xs text-[#1c1a18]/60">{item.variantName}</p>
-                        )}
-                        <p className="mt-1 text-xs text-[#1c1a18]/45">
-                          {t("account.order.itemDetails", {
-                            sku: item.sku,
-                            price: money(item.price, locale),
-                            quantity: item.quantity,
-                          })}
-                        </p>
                         {completedOrder ? (
                           <div className="mt-4">
                             {reviewsQuery.isLoading && !reviewsQuery.data ? (
@@ -350,10 +430,14 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               )}
             </Card>
 
-            <Card className="rounded-md border-none bg-white p-6 shadow-sm md:p-8">
-              <h2 className="mb-6 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
-                {t("account.order.statusHistory")}
-              </h2>
+            {/* Status History Card */}
+            <Card className="rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm md:p-8">
+              <div className="mb-6 flex items-center justify-between border-b border-[#1c1a18]/8 pb-4">
+                <h2 className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
+                  <Clock3 className="size-4 text-[#b5573a]" />
+                  {t("account.order.statusHistory")}
+                </h2>
+              </div>
               {historiesQuery.isError ? (
                 <StorefrontStaleWarning
                   onRetry={() => void historiesQuery.refetch()}
@@ -361,47 +445,63 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                   className="mb-5"
                 />
               ) : null}
-              <div className="space-y-5">
-                <div className="flex gap-4">
-                  <CheckCircle2 className="mt-0.5 size-5 text-emerald-600" />
-                  <div>
-                    <p className="text-sm font-medium">{t("account.order.created")}</p>
-                    <p className="mt-1 text-xs text-[#1c1a18]/50">
+              <div className="relative space-y-1 pl-1">
+                <div className="relative flex gap-4">
+                  <div className="relative flex flex-col items-center">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600">
+                      <CheckCircle2 className="size-4" />
+                    </div>
+                    {histories.length > 0 && <div className="my-1 w-0.5 flex-1 bg-[#1c1a18]/10" />}
+                  </div>
+                  <div className="pt-0.5 pb-5">
+                    <p className="text-sm font-semibold text-[#1c1a18]">
+                      {t("account.order.created")}
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#1c1a18]/50">
                       {displayDateTime(order.createdAt)}
                     </p>
                   </div>
                 </div>
-                {histories.map((history) => (
-                  <div key={history.id} className="flex gap-4">
-                    <Clock3 className="mt-0.5 size-5 text-[#b5573a]" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {t("account.order.statusChange", {
-                          from: getStatusLabel(history.fromStatus),
-                          to: getStatusLabel(history.toStatus),
-                        })}
-                      </p>
-                      {history.reason && (
-                        <p className="mt-1 text-xs text-[#1c1a18]/65">{history.reason}</p>
-                      )}
-                      <p className="mt-1 text-xs text-[#1c1a18]/50">
-                        {displayDateTime(history.createdAt)}
-                      </p>
+                {histories.map((history, idx) => {
+                  const isLast = idx === histories.length - 1;
+                  return (
+                    <div key={history.id} className="relative flex gap-4">
+                      <div className="relative flex flex-col items-center">
+                        <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-[#b5573a]/20 bg-[#b5573a]/10 text-[#b5573a]">
+                          <Clock3 className="size-3.5" />
+                        </div>
+                        {!isLast && <div className="my-1 w-0.5 flex-1 bg-[#1c1a18]/10" />}
+                      </div>
+                      <div className="pt-0.5 pb-5">
+                        <p className="text-sm font-semibold text-[#1c1a18]">
+                          {t("account.order.statusChange", {
+                            from: getStatusLabel(history.fromStatus),
+                            to: getStatusLabel(history.toStatus),
+                          })}
+                        </p>
+                        {history.reason && (
+                          <p className="mt-0.5 text-xs text-[#1c1a18]/65">{history.reason}</p>
+                        )}
+                        <p className="mt-0.5 text-xs text-[#1c1a18]/50">
+                          {displayDateTime(history.createdAt)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
 
-            <div className="flex flex-wrap gap-3">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 pt-1">
               {canCancel && (
                 <AlertDialog>
-                  <AlertDialogTrigger className="border-error/30 text-error hover:bg-error/10 cursor-pointer rounded-sm border px-6 py-3 text-xs font-bold tracking-widest uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-50">
+                  <AlertDialogTrigger className="border-error/30 text-error hover:bg-error/10 cursor-pointer rounded-md border px-5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-50">
                     {cancelMutation.isPending
                       ? t("account.order.cancelling")
                       : t("account.order.cancel")}
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-canvas max-w-md rounded-md border-[#1c1a18]/10">
+                  <AlertDialogContent className="bg-canvas max-w-md rounded-xl border-[#1c1a18]/10">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-ink font-serif text-xl font-light">
                         {t("account.order.cancelTitle")}
@@ -411,13 +511,13 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-6">
-                      <AlertDialogCancel className="text-ink rounded-sm border-[#1c1a18]/20 hover:bg-[#1c1a18]/5">
+                      <AlertDialogCancel className="text-ink rounded-md border-[#1c1a18]/20 hover:bg-[#1c1a18]/5">
                         {t("account.order.cancelDismiss")}
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleCancel}
                         disabled={cancelMutation.isPending}
-                        className="bg-error hover:bg-error/90 rounded-sm border-0 text-white"
+                        className="bg-error hover:bg-error/90 rounded-md border-0 text-white"
                       >
                         {cancelMutation.isPending
                           ? t("account.order.cancelling")
@@ -429,98 +529,140 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               )}
               <Link
                 href="/help"
-                className="rounded-sm border border-[#1c1a18]/20 px-6 py-3 text-xs font-bold tracking-widest text-[#1c1a18] uppercase transition-colors hover:bg-[#f7f4ef]"
+                className="inline-flex items-center gap-1.5 rounded-md border border-[#1c1a18]/20 px-5 py-2.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-[#1c1a18]/5"
               >
-                {t("account.order.support")}
+                <HelpCircle className="size-3.5" />
+                <span>{t("account.order.support")}</span>
               </Link>
             </div>
           </div>
 
+          {/* Sidebar (Right) */}
           <div className="flex flex-col gap-6 lg:col-span-4">
-            <Card className="rounded-md border-none bg-white p-6 shadow-sm">
-              <h2 className="mb-6 text-xs font-bold tracking-widest uppercase">
+            {/* Total Summary Card */}
+            <Card className="rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm">
+              <h2 className="mb-5 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
                 {t("account.order.summary")}
               </h2>
-              <div className="mb-6 flex flex-col gap-4 border-b border-[#1c1a18]/10 pb-6 text-sm text-[#1c1a18]/70">
-                <div className="flex justify-between">
+              <div className="mb-5 flex flex-col gap-3.5 border-b border-[#1c1a18]/8 pb-5 text-xs text-[#1c1a18]/70 sm:text-sm">
+                <div className="flex items-center justify-between">
                   <span>{t("account.order.subtotal")}</span>
-                  <span>{money(Number(order.subtotal ?? 0), locale)}</span>
+                  <span className="font-numeric font-medium text-[#1c1a18]">
+                    {money(Number(order.subtotal ?? 0), locale)}
+                  </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <span>{t("account.order.shippingFee")}</span>
-                  <span>
+                  <span className="font-numeric font-medium text-[#1c1a18]">
                     {Number(order.shippingFee) > 0
                       ? money(Number(order.shippingFee), locale)
                       : t("account.order.free")}
                   </span>
                 </div>
-                <div className="flex justify-between text-[#b5573a]">
-                  <span>{t("account.order.discount")}</span>
-                  <span>-{money(Number(order.discountAmount ?? 0), locale)}</span>
-                </div>
+                {Number(order.discountAmount) > 0 && (
+                  <div className="flex items-center justify-between text-[#b5573a]">
+                    <span>{t("account.order.discount")}</span>
+                    <span className="font-numeric font-medium">
+                      -{money(Number(order.discountAmount ?? 0), locale)}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-end justify-between">
-                <span className="text-sm font-semibold">{t("account.order.total")}</span>
-                <span className="font-serif text-2xl">
+              <div className="flex items-baseline justify-between pt-1">
+                <span className="text-sm font-semibold text-[#1c1a18]">
+                  {t("account.order.total")}
+                </span>
+                <span className="font-serif text-2xl font-semibold text-[#b5573a]">
                   {money(Number(order.finalAmount ?? 0), locale)}
                 </span>
               </div>
             </Card>
 
-            <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
-              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase">
-                <Truck className="size-4 text-[#1c1a18]/40" aria-hidden="true" />
+            {/* Shipping Info Card */}
+            <Card className="rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
+                <Truck className="size-4 text-[#b5573a]" aria-hidden="true" />
                 {t("account.order.shipping")}
               </h2>
-              <div className="space-y-1.5 text-[13px] text-[#1c1a18]/70">
-                <p className="font-semibold text-[#1c1a18]">{order.receiverName}</p>
-                <p>{order.receiverPhone}</p>
-                <p className="pt-2 leading-relaxed">{order.receiverAddress}</p>
+              <div className="space-y-2 text-xs text-[#1c1a18]/70 sm:text-sm">
+                <p className="text-sm font-semibold text-[#1c1a18]">{order.receiverName}</p>
+                <p className="flex items-center gap-1.5 text-xs text-[#1c1a18]/80">
+                  <Phone className="size-3.5 shrink-0 text-[#1c1a18]/40" />
+                  <span>{order.receiverPhone}</span>
+                </p>
+                <p className="mt-2 flex items-start gap-1.5 border-t border-[#1c1a18]/6 pt-2 text-xs leading-relaxed text-[#1c1a18]/70">
+                  <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#1c1a18]/40" />
+                  <span>{order.receiverAddress}</span>
+                </p>
               </div>
             </Card>
 
-            <Card className="rounded-md border-none bg-[#f7f4ef]/50 p-6 shadow-sm">
-              <h2 className="mb-5 flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase">
-                <CreditCard className="size-4 text-[#1c1a18]/40" aria-hidden="true" />
+            {/* Payment Details Card */}
+            <Card className="rounded-xl border border-[#1c1a18]/8 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 flex items-center gap-2 text-xs font-bold tracking-widest text-[#1c1a18] uppercase">
+                <CreditCard className="size-4 text-[#b5573a]" aria-hidden="true" />
                 {t("account.order.payment")}
               </h2>
-              <p className="text-sm font-medium">{getPaymentMethodLabel(order.paymentMethod)}</p>
-              <p className="mt-1 text-xs text-[#1c1a18]/55">
-                {getPaymentStatusLabel(order.paymentStatus)}
-              </p>
-              {order.paymentDueAt ? (
-                <div className="mt-4 space-y-2 border-t border-[#1c1a18]/8 pt-4 text-xs text-[#1c1a18]/65">
-                  <p className="flex items-center justify-between gap-3">
-                    <span>{t("sale.order.paymentDue")}</span>
-                    <strong className="text-right font-medium text-[#1c1a18]">
-                      {displayDateTime(order.paymentDueAt)}
-                    </strong>
-                  </p>
-                  {order.reservationExpiresAt ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-[#1c1a18]/60">{t("checkout.payment")}</span>
+                  <span className="text-xs font-semibold text-[#1c1a18]">
+                    {getPaymentMethodLabel(order.paymentMethod)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-[#1c1a18]/60">{t("checkout.status")}</span>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                      paymentStatusClasses[order.paymentStatus?.toUpperCase() ?? ""] ??
+                      "border-[#1c1a18]/15 bg-[#1c1a18]/5 text-[#1c1a18]/75"
+                    }`}
+                  >
+                    {getPaymentStatusLabel(order.paymentStatus)}
+                  </span>
+                </div>
+
+                {order.paymentDueAt ? (
+                  <div className="mt-4 space-y-2 border-t border-[#1c1a18]/8 pt-3 text-xs text-[#1c1a18]/65">
                     <p className="flex items-center justify-between gap-3">
-                      <span>{t("sale.order.reservationExpires")}</span>
-                      <strong className="text-right font-medium text-[#1c1a18]">
-                        {displayDateTime(order.reservationExpiresAt)}
+                      <span>{t("sale.order.paymentDue")}</span>
+                      <strong className="text-right font-mono font-medium text-[#1c1a18]">
+                        {displayDateTime(order.paymentDueAt)}
                       </strong>
                     </p>
-                  ) : null}
-                </div>
-              ) : null}
-              {order.resourcesReleasedAt ? (
-                <div className="mt-4 rounded-sm border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
-                  <p className="flex items-start gap-2 font-semibold">
-                    <Clock3 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    {t("sale.order.resourcesReleasedAt", {
-                      time: displayDateTime(order.resourcesReleasedAt),
-                    })}
-                  </p>
-                  <p className="mt-1 pl-6">{t("sale.order.latePaymentNotice")}</p>
-                </div>
-              ) : order.reservationExpiresAt && order.paymentStatus !== "PAID" ? (
-                <p className="mt-4 rounded-sm border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-                  {t("sale.order.reservationNotice")}
-                </p>
-              ) : null}
+                    {order.reservationExpiresAt ? (
+                      <p className="flex items-center justify-between gap-3">
+                        <span>{t("sale.order.reservationExpires")}</span>
+                        <strong className="text-right font-mono font-medium text-[#1c1a18]">
+                          {displayDateTime(order.reservationExpiresAt)}
+                        </strong>
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {order.resourcesReleasedAt ? (
+                  <div className="mt-3 rounded-lg border border-red-200 bg-red-50/80 p-3 text-xs leading-relaxed text-red-800">
+                    <p className="flex items-start gap-1.5 font-semibold">
+                      <Clock3 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                      <span>
+                        {t("sale.order.resourcesReleasedAt", {
+                          time: displayDateTime(order.resourcesReleasedAt),
+                        })}
+                      </span>
+                    </p>
+                    <p className="mt-1 pl-5 text-[11px] text-red-700/80">
+                      {t("sale.order.latePaymentNotice")}
+                    </p>
+                  </div>
+                ) : order.reservationExpiresAt && order.paymentStatus !== "PAID" ? (
+                  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs leading-relaxed text-amber-900">
+                    <p className="text-[11px] text-amber-800">
+                      {t("sale.order.reservationNotice")}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
             </Card>
           </div>
         </div>

@@ -17,6 +17,11 @@ import {
   MapPin,
   Plus,
   Edit2,
+  Copy,
+  Check,
+  ArrowRight,
+  FileText,
+  Mail,
 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -1228,26 +1233,34 @@ function PaymentDeadline({
   const isReleased = now >= releaseTimestamp;
 
   return (
-    <>
+    <div className="w-full">
       <div
-        className={`mb-6 w-full rounded border p-4 text-left ${
+        className={`w-full rounded-lg border p-4 text-left transition-colors ${
           isReleased
-            ? "border-red-200 bg-red-50 text-red-800"
-            : "border-amber-200 bg-amber-50 text-amber-900"
+            ? "border-red-200 bg-red-50/70 text-red-800"
+            : isPastPaymentDue
+              ? "border-amber-200 bg-amber-50/70 text-amber-900"
+              : "border-[#b5573a]/20 bg-[#b5573a]/5 text-[#1c1a18]"
         }`}
       >
-        <div className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase">
-          <AlarmClock className="size-4" />
-          {isReleased
-            ? t("sale.checkout.payment.expiredTitle")
-            : isPastPaymentDue
-              ? t("sale.checkout.payment.graceTitle")
-              : t("sale.checkout.payment.remainingTitle")}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#b5573a]">
+            <AlarmClock className="size-4 animate-pulse" />
+            <span>
+              {isReleased
+                ? t("sale.checkout.payment.expiredTitle")
+                : isPastPaymentDue
+                  ? t("sale.checkout.payment.graceTitle")
+                  : t("sale.checkout.payment.remainingTitle")}
+            </span>
+          </div>
+          {!isReleased && (
+            <span className="font-mono text-base font-bold tracking-wider text-[#b5573a] tabular-nums sm:text-lg">
+              {formatRemainingTime(isPastPaymentDue ? remainingGraceMs : remainingPaymentMs)}
+            </span>
+          )}
         </div>
-        <p className="mt-2 font-mono text-2xl font-semibold tabular-nums">
-          {formatRemainingTime(isPastPaymentDue ? remainingGraceMs : remainingPaymentMs)}
-        </p>
-        <p className="mt-2 text-[11px] leading-5 opacity-75">
+        <p className="mt-1.5 text-[11px] leading-relaxed text-[#1c1a18]/65">
           {isReleased
             ? t("sale.checkout.payment.releasedDescription")
             : t("sale.checkout.payment.deadlineDescription", {
@@ -1256,8 +1269,12 @@ function PaymentDeadline({
               })}
         </p>
       </div>
-      {!isReleased ? <PaymentContinuationForm paymentInitiation={paymentInitiation} /> : null}
-    </>
+      {!isReleased && paymentInitiation?.actionUrl ? (
+        <div className="mt-4">
+          <PaymentContinuationForm paymentInitiation={paymentInitiation} />
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -1273,16 +1290,17 @@ function PaymentContinuationForm({
     <form
       action={paymentInitiation.actionUrl}
       method={paymentInitiation.method.toLowerCase()}
-      className="mb-6 w-full"
+      className="w-full"
     >
       {Object.entries(paymentInitiation.fields ?? {}).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
       <Button
         type="submit"
-        className="w-full rounded-sm bg-[#8f2f20] py-3 text-xs font-bold tracking-[0.15em] text-white uppercase hover:bg-[#6f2318]"
+        className="group relative flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#8f2f20] px-6 text-xs font-bold tracking-[0.12em] text-white uppercase shadow-sm transition-all hover:bg-[#6f2318] active:scale-[0.99]"
       >
-        {t("sale.checkout.payment.continue")}
+        <span>{t("sale.checkout.payment.continue")}</span>
+        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
       </Button>
     </form>
   );
@@ -1307,12 +1325,23 @@ type OrderSuccessCardProps = {
 
 function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) {
   const reduce = useReducedMotion();
+  const [isCopied, setIsCopied] = useState(false);
+  const orderCode = completedOrder.orderCode;
+
+  const handleCopyOrderCode = useCallback(() => {
+    if (!orderCode) return;
+    void navigator.clipboard?.writeText(orderCode);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  }, [orderCode]);
+
+  const hasPaymentGateway = Boolean(completedOrder.paymentInitiation?.actionUrl);
 
   return (
     <motion.div
       initial={{
         opacity: 0,
-        transform: reduce ? "none" : "scale(0.96) translateY(8px)",
+        transform: reduce ? "none" : "scale(0.97) translateY(10px)",
       }}
       animate={{
         opacity: 1,
@@ -1322,10 +1351,10 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
         duration: reduce ? 0.25 : 0.4,
         ease: EASE_VELA,
       }}
-      className="mx-auto mt-6 w-full max-w-lg"
+      className="mx-auto w-full max-w-[480px]"
     >
-      <Card className="flex flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-12 py-12 text-center shadow-xl">
-        {/* Check icon — spring pop after card settles */}
+      <Card className="flex flex-col items-center rounded-xl border-[#1c1a18]/8 bg-white p-6 text-center shadow-lg shadow-black/[0.03] sm:p-8">
+        {/* Check icon badge */}
         <motion.div
           initial={{ opacity: 0, transform: reduce ? "none" : "scale(0.3)" }}
           animate={{ opacity: 1, transform: "scale(1)" }}
@@ -1336,77 +1365,136 @@ function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) 
                   type: "spring",
                   stiffness: 380,
                   damping: 22,
-                  delay: 0.3,
+                  delay: 0.2,
                 }
           }
-          className="mb-6"
+          className="mb-4 flex size-12 items-center justify-center rounded-full bg-[#b5573a]/10 text-[#b5573a]"
         >
-          <CheckCircle2 className="size-14 text-[#b5573a]" />
+          <CheckCircle2 className="size-7 stroke-[2.2]" />
         </motion.div>
 
-        <h1 className="mb-4 font-serif text-3xl font-light text-[#1c1a18]">
+        {/* Title & Subtitle */}
+        <h1 className="mb-1.5 font-serif text-2xl font-normal tracking-tight text-[#1c1a18] sm:text-[26px]">
           {t("checkout.successTitle")}
         </h1>
-        <p className="mb-2 text-sm leading-relaxed text-[#1c1a18]/65">
+        <p className="mb-6 max-w-xs text-xs leading-relaxed text-[#1c1a18]/65 sm:text-[13px]">
           {t("checkout.successDescription", { brand: "VELA WEAR" })}
         </p>
-        <p className="mb-2 text-xs font-semibold text-[#1c1a18]/50">
-          {t("checkout.orderCode")}:{" "}
-          <span className="font-serif text-sm tracking-wide text-black">
-            {completedOrder.orderCode}
-          </span>
-        </p>
-        <div className="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[10px] tracking-widest text-[#1c1a18]/45 uppercase">
-          <span>
-            {t("checkout.total")}:{" "}
-            <strong className="font-numeric text-[#1c1a18]">
-              {money(completedOrder.finalAmount, locale)}
-            </strong>
-          </span>
-          <span>
-            {t("checkout.payment")}:{" "}
-            <strong className="text-[#1c1a18]">
-              {completedOrder.paymentMethod === "COD"
-                ? t("checkout.cod")
-                : completedOrder.paymentMethod === "SEPAY"
-                  ? t("sale.checkout.payment.sepay")
-                  : completedOrder.paymentMethod}
-            </strong>
-          </span>
-          <span>
-            {t("checkout.status")}:{" "}
-            <strong className="text-[#1c1a18]">
-              {{
-                PENDING: t("order.status.pending"),
-                CONFIRMED: t("order.status.confirmed"),
-                PROCESSING: t("order.status.processing"),
-                SHIPPING: t("order.status.shipping"),
-                DELIVERED: t("order.status.delivered"),
-                CANCELLED: t("order.status.cancelled"),
-              }[completedOrder.status.toUpperCase()] ?? completedOrder.status}
-            </strong>
-          </span>
+
+        <div className="w-full space-y-4">
+          {/* Structured Receipt Summary Box */}
+          <div className="w-full rounded-lg border border-[#1c1a18]/8 bg-[#fdfbf7] p-4 text-left text-xs">
+            {/* Order Code Row with Copy */}
+            <div className="flex items-center justify-between border-b border-[#1c1a18]/6 pb-3">
+              <span className="text-[11px] font-medium tracking-wider text-[#1c1a18]/55 uppercase">
+                {t("checkout.orderCode")}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-xs font-bold tracking-wider text-[#1c1a18]">
+                  {completedOrder.orderCode}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyOrderCode}
+                  title={t("checkout.copyOrderCode")}
+                  className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-[#1c1a18]/60 transition-colors hover:bg-[#1c1a18]/10 hover:text-[#1c1a18]"
+                >
+                  {isCopied ? (
+                    <>
+                      <Check className="size-3 text-emerald-600" />
+                      <span className="font-medium text-emerald-600">{t("checkout.copied")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="size-3" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Key-Value Details */}
+            <div className="space-y-2.5 border-b border-[#1c1a18]/6 py-3 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[#1c1a18]/60">{t("checkout.payment")}</span>
+                <span className="font-medium text-[#1c1a18]">
+                  {completedOrder.paymentMethod === "COD"
+                    ? t("checkout.cod")
+                    : completedOrder.paymentMethod === "SEPAY"
+                      ? t("sale.checkout.payment.sepay")
+                      : completedOrder.paymentMethod}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#1c1a18]/60">{t("checkout.status")}</span>
+                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
+                  {{
+                    PENDING: t("order.status.pending"),
+                    CONFIRMED: t("order.status.confirmed"),
+                    PROCESSING: t("order.status.processing"),
+                    SHIPPING: t("order.status.shipping"),
+                    DELIVERED: t("order.status.delivered"),
+                    CANCELLED: t("order.status.cancelled"),
+                  }[completedOrder.status.toUpperCase()] ?? completedOrder.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Total Amount */}
+            <div className="flex items-center justify-between pt-3">
+              <span className="font-medium text-[#1c1a18]">{t("checkout.total")}</span>
+              <span className="font-numeric text-base font-bold text-[#b5573a]">
+                {money(completedOrder.finalAmount, locale)}
+              </span>
+            </div>
+          </div>
+
+          {/* Payment Countdown / Action Banner if applicable */}
+          {completedOrder.paymentDueAt ? (
+            <div className="w-full">
+              <PaymentDeadline
+                paymentDueAt={completedOrder.paymentDueAt}
+                reservationExpiresAt={completedOrder.reservationExpiresAt}
+                serverTime={completedOrder.serverTime}
+                paymentInitiation={completedOrder.paymentInitiation}
+              />
+            </div>
+          ) : (
+            completedOrder.paymentInitiation && (
+              <div className="w-full">
+                <PaymentContinuationForm paymentInitiation={completedOrder.paymentInitiation} />
+              </div>
+            )
+          )}
+
+          {/* Action Buttons */}
+          <div className="w-full space-y-3 pt-1">
+            <Link
+              href={`/profile/orders/${completedOrder.orderCode}`}
+              className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg px-6 text-xs font-bold tracking-[0.12em] uppercase transition-colors ${
+                hasPaymentGateway
+                  ? "border border-[#1c1a18]/15 bg-white text-[#1c1a18] shadow-2xs hover:bg-[#1c1a18]/5"
+                  : "bg-[#1c1a18] text-white shadow-sm hover:bg-[#b5573a]"
+              }`}
+            >
+              <FileText className="size-4" />
+              <span>{t("checkout.viewOrder")}</span>
+            </Link>
+
+            <Link
+              href="/"
+              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg px-6 text-xs font-semibold tracking-wider text-[#1c1a18]/60 uppercase transition-colors hover:text-[#1c1a18]"
+            >
+              <span>{t("checkout.continueShopping")}</span>
+            </Link>
+          </div>
         </div>
-        {completedOrder.paymentDueAt ? (
-          <PaymentDeadline
-            paymentDueAt={completedOrder.paymentDueAt}
-            reservationExpiresAt={completedOrder.reservationExpiresAt}
-            serverTime={completedOrder.serverTime}
-            paymentInitiation={completedOrder.paymentInitiation}
-          />
-        ) : (
-          <PaymentContinuationForm paymentInitiation={completedOrder.paymentInitiation} />
-        )}
-        <div className="mb-6 h-px w-12 bg-[#1c1a18]/10" />
-        <p className="mb-10 max-w-sm text-xs leading-relaxed font-light text-[#1c1a18]/60">
-          {t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}
-        </p>
-        <Link
-          href="/"
-          className="inline-flex w-full justify-center rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-white uppercase shadow-md transition-colors hover:bg-[#b5573a]"
-        >
-          {t("checkout.backHome")}
-        </Link>
+
+        {/* Footer delivery notification */}
+        <div className="mt-6 flex w-full items-center justify-center gap-1.5 border-t border-[#1c1a18]/6 pt-4 text-[11px] font-light text-[#1c1a18]/55">
+          <Mail className="size-3.5 shrink-0 opacity-70" />
+          <span>{t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}</span>
+        </div>
       </Card>
     </motion.div>
   );

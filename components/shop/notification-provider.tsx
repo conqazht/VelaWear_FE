@@ -105,23 +105,23 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         >
           {notification.type === "bag" ? (
             /* ADDED TO BAG NOTIFICATION (Nike / Fashion Style) */
-            <div className="bg-canvas border-hairline text-ink relative ml-auto flex w-full max-w-[340px] flex-col rounded-md border p-5 shadow-2xl">
+            <div className="relative ml-auto flex w-full max-w-[350px] flex-col rounded-2xl border border-[#1c1a18]/8 bg-white p-5 shadow-2xl shadow-black/10">
               {/* Header */}
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-700 text-white">
-                    <Check className="size-3 stroke-[3px]" />
+                  <div className="flex size-5.5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+                    <Check className="size-3.5 stroke-[3px]" />
                   </div>
-                  <h2 className="text-ink mt-0.5 font-sans text-base leading-none font-bold">
+                  <h2 className="mt-0.5 font-sans text-base leading-none font-bold text-[#1c1a18]">
                     {t("notification.addedToBag")}
                   </h2>
                 </div>
                 <button
                   onClick={closeNotification}
                   aria-label={t("notification.close")}
-                  className="text-ink/60 hover:text-primary hover:bg-surface-card flex size-7 items-center justify-center rounded-full transition-colors"
+                  className="flex size-7 items-center justify-center rounded-full text-[#1c1a18]/50 transition-colors hover:bg-[#1c1a18]/5 hover:text-[#1c1a18]"
                 >
-                  <X className="size-3.5" />
+                  <X className="size-4" />
                 </button>
               </div>
 
@@ -129,7 +129,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               <div className="flex flex-col gap-4">
                 {/* Main Product */}
                 <div className="flex items-center gap-3.5">
-                  <div className="bg-surface-card border-hairline/30 h-[90px] w-[72px] flex-shrink-0 overflow-hidden rounded-sm border">
+                  <div className="relative h-[90px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl border border-[#1c1a18]/8 bg-[#f7f4ef]">
                     <Image
                       src={notification.product.image}
                       alt={notification.product.name}
@@ -139,34 +139,35 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center text-left">
-                    <h3 className="text-ink truncate font-sans text-sm leading-tight font-semibold">
+                    <h3 className="truncate font-sans text-sm leading-tight font-semibold text-[#1c1a18]">
                       {notification.product.name}
                     </h3>
-                    <p className="text-on-surface-variant/75 mt-1 text-xs">
+                    <p className="mt-1 text-xs text-[#1c1a18]/60">
                       {getCategoryLabel(notification.product.category, locale)}
                     </p>
-                    <p className="text-on-surface-variant/75 mt-0.5 text-xs">
+                    <p className="mt-0.5 text-xs text-[#1c1a18]/60">
+                      {notification.color ? `${notification.color} · ` : ""}
                       {t("common.size")} {notification.size}
                     </p>
-                    <p className="text-ink font-numeric mt-1 font-sans text-sm font-bold">
+                    <p className="font-numeric mt-1 font-sans text-sm font-bold text-[#1c1a18]">
                       {money(notification.product.price, locale)}
                     </p>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-2 pt-1">
+                <div className="flex flex-col gap-2.5 pt-1">
                   <Link
                     href="/cart"
                     onClick={closeNotification}
-                    className="bg-canvas text-ink border-ink hover:bg-surface-card w-full rounded-sm border px-4 py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
+                    className="flex h-10.5 w-full items-center justify-center rounded-full border border-[#1c1a18]/20 bg-white px-4 text-xs font-bold tracking-wider text-[#1c1a18] uppercase transition-colors hover:border-[#1c1a18] hover:bg-[#1c1a18]/5"
                   >
                     {t("notification.viewBag", { count: itemCount })}
                   </Link>
                   <Link
                     href="/checkout"
                     onClick={closeNotification}
-                    className="bg-primary-container text-on-primary hover:bg-primary-active w-full rounded-sm px-4 py-2.5 text-center text-xs font-semibold tracking-wider uppercase transition-colors duration-200"
+                    className="flex h-10.5 w-full items-center justify-center rounded-full bg-[#b5573a] px-4 text-xs font-bold tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#8f4329]"
                   >
                     {t("notification.checkout")}
                   </Link>
@@ -175,28 +176,28 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             </div>
           ) : (
             /* ADDED TO FAVORITES NOTIFICATION (Sharp Style) */
-            <div className="bg-canvas border-hairline text-ink ml-auto flex w-full max-w-[340px] flex-col overflow-hidden rounded-md border shadow-[0_20px_40px_-15px_rgba(28,26,24,0.15)]">
+            <div className="ml-auto flex w-full max-w-[350px] flex-col overflow-hidden rounded-2xl border border-[#1c1a18]/8 bg-white shadow-2xl shadow-black/10">
               {/* Header */}
-              <div className="border-hairline bg-surface flex items-center justify-between border-b px-5 py-3">
+              <div className="flex items-center justify-between border-b border-[#1c1a18]/8 bg-white px-5 py-3.5">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 flex-shrink-0 text-emerald-600" />
-                  <h2 className="text-ink m-0 mt-0.5 font-sans text-sm font-semibold">
+                  <CheckCircle2 className="size-4.5 flex-shrink-0 text-emerald-600" />
+                  <h2 className="m-0 font-sans text-sm font-semibold text-[#1c1a18]">
                     {t("notification.addedToFavorites")}
                   </h2>
                 </div>
                 <button
                   onClick={closeNotification}
                   aria-label={t("notification.close")}
-                  className="text-on-surface-variant/70 hover:text-ink hover:bg-surface-card/50 rounded-sm p-1 transition-colors"
+                  className="flex size-7 items-center justify-center rounded-full text-[#1c1a18]/50 transition-colors hover:bg-[#1c1a18]/5 hover:text-[#1c1a18]"
                 >
-                  <X className="size-3.5" />
+                  <X className="size-4" />
                 </button>
               </div>
 
               {/* Content */}
               <div className="flex items-center gap-4 p-5 text-left">
                 {/* Product Image */}
-                <div className="bg-surface-card border-hairline/30 h-[90px] w-[72px] flex-shrink-0 overflow-hidden rounded-sm border">
+                <div className="relative h-[90px] w-[72px] flex-shrink-0 overflow-hidden rounded-xl border border-[#1c1a18]/8 bg-[#f7f4ef]">
                   <Image
                     src={notification.product.image}
                     alt={notification.product.name}
@@ -207,16 +208,17 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 </div>
                 {/* Product Details */}
                 <div className="flex min-w-0 flex-grow flex-col justify-center">
-                  <p className="text-on-surface-variant/80 mb-1 text-[9px] font-semibold tracking-widest uppercase">
+                  <p className="mb-1 text-[9px] font-semibold tracking-widest text-[#1c1a18]/60 uppercase">
                     {getCategoryLabel(notification.product.category, locale)}
                   </p>
-                  <h3 className="text-ink mb-1 truncate font-sans text-sm leading-snug font-semibold">
+                  <h3 className="mb-1 truncate font-sans text-sm leading-snug font-semibold text-[#1c1a18]">
                     {notification.product.name}
                   </h3>
-                  <p className="text-on-surface-variant/75 mb-1.5 text-xs">
+                  <p className="mb-1.5 text-xs text-[#1c1a18]/60">
+                    {notification.color ? `${notification.color} · ` : ""}
                     {t("common.size")}: {notification.size}
                   </p>
-                  <p className="text-ink font-numeric font-sans text-sm font-bold">
+                  <p className="font-numeric font-sans text-sm font-bold text-[#1c1a18]">
                     {money(notification.product.price, locale)}
                   </p>
                 </div>
@@ -229,9 +231,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     closeNotification();
                     router.push("/favorites");
                   }}
-                  className="text-on-dark hover:bg-surface-dark/95 bg-primary-container flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm border-none py-3 text-xs font-semibold tracking-wider uppercase transition-colors"
+                  className="flex h-10.5 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#1c1a18] px-4 text-xs font-bold tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#b5573a]"
                 >
-                  {t("notification.viewFavorites")}
+                  <span>{t("notification.viewFavorites")}</span>
                   <ArrowRight className="size-3.5" />
                 </button>
               </div>

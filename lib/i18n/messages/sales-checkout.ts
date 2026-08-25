@@ -41,7 +41,7 @@ export const salesCheckoutMessages = defineMessages(
     "sale.checkout.payment.releasedDescription":
       "Stock, allocation, and purchase allowance were released. A late transaction will not automatically restore the order.",
     "sale.checkout.payment.deadlineDescription":
-      "Pay before {time}. The system allows an additional {seconds} seconds to receive the payment notification before releasing resources.",
+      "Please complete payment before {time} to secure your order. Unpaid orders will expire automatically.",
     "sale.checkout.payment.continue": "Continue payment",
     "sale.checkout.error.flashSoldOut":
       "The Flash Sale allocation just sold out. Your bag has been refreshed with the latest data.",
@@ -92,7 +92,7 @@ export const salesCheckoutMessages = defineMessages(
     "sale.checkout.payment.releasedDescription":
       "Tồn kho, suất sale và lượt mua đã được nhả. Giao dịch đến muộn sẽ không tự khôi phục đơn.",
     "sale.checkout.payment.deadlineDescription":
-      "Thanh toán trước {time}. Hệ thống có thêm {seconds} giây để nhận thông báo thanh toán trước khi nhả tài nguyên.",
+      "Vui lòng thanh toán trước {time} để hoàn tất đơn hàng. Đơn hàng sẽ tự động hủy nếu quá hạn thanh toán.",
     "sale.checkout.payment.continue": "Tiếp tục thanh toán",
     "sale.checkout.error.flashSoldOut":
       "Suất Flash Sale vừa hết. Giỏ hàng đã được cập nhật theo dữ liệu mới nhất.",

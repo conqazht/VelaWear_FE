@@ -335,7 +335,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 onClick={() => setSelectedSize(size)}
                 aria-pressed={resolvedSelectedSize === size}
                 className={cn(
-                  "cursor-pointer rounded-sm border py-3 text-xs font-semibold tracking-wider transition-colors",
+                  "cursor-pointer rounded-xl border py-3 text-xs font-semibold tracking-wider transition-colors",
                   resolvedSelectedSize === size
                     ? "text-ink border-[#1c1a18] bg-[#efe7dc]"
                     : "border-hairline hover:border-ink text-ink/75",
