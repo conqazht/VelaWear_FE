@@ -195,9 +195,10 @@ describe("OrderDetailsClient self-service contract", () => {
     expect(getMyOrderStatusHistoriesMock).not.toHaveBeenCalled();
   });
 
-  it("supports reordering all items and single items from order details", async () => {
+  it("supports reordering all items and single items from finalized order details", async () => {
     const orderWithItems = {
       ...orderFor(11),
+      status: "COMPLETED",
       items: [
         {
           id: 101,
@@ -209,7 +210,7 @@ describe("OrderDetailsClient self-service contract", () => {
           price: 150000,
           quantity: 1,
           subtotal: 150000,
-          status: "PENDING",
+          status: "COMPLETED",
           image: "/images/shirt.jpg",
         },
       ],
@@ -245,5 +246,32 @@ describe("OrderDetailsClient self-service contract", () => {
     fireEvent.click(buyAgainBtn);
 
     expect(addToCartMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not show reorder buttons for in-progress orders like PENDING or SHIPPING", async () => {
+    const pendingOrder = {
+      ...orderFor(11),
+      status: "PENDING",
+      items: [
+        {
+          id: 101,
+          variantId: 55,
+          productSlug: "linen-shirt",
+          productName: "Linen Shirt",
+          price: 150000,
+          quantity: 1,
+          subtotal: 150000,
+          status: "PENDING",
+        },
+      ],
+    };
+    getMyOrderByCodeMock.mockResolvedValue(pendingOrder);
+
+    const { Wrapper } = createHarness();
+    render(<OrderDetailsClient code="ORDER-11" />, { wrapper: Wrapper });
+
+    expect(await screen.findByText("Linen Shirt")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "account.order.reorderAll" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "account.order.buyAgain" })).not.toBeInTheDocument();
   });
 });

@@ -145,6 +145,12 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   });
   const histories = historiesQuery.data?.result ?? [];
   const completedOrder = order?.status === "COMPLETED";
+  const canReorder = Boolean(
+    order &&
+      ["COMPLETED", "DELIVERED", "CANCELLED", "REFUNDED"].includes(
+        order.status.toUpperCase(),
+      ),
+  );
   const reviewedOrderItemIds = new Set(
     (reviewsQuery.data?.result ?? [])
       .map((review) => review.orderItemId)
@@ -369,7 +375,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               </span>
             </div>
           </div>
-          {order.items?.length ? (
+          {order.items?.length && canReorder ? (
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -458,14 +464,16 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                           </p>
                         </div>
                         <div className="mt-4 flex flex-wrap items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => handleReorderItem(item)}
-                            className="inline-flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 bg-white px-3 py-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:border-[#1c1a18] hover:bg-[#efe7dc]"
-                          >
-                            <RotateCcw className="size-3.5" />
-                            <span>{t("account.order.buyAgain")}</span>
-                          </button>
+                          {canReorder ? (
+                            <button
+                              type="button"
+                              onClick={() => handleReorderItem(item)}
+                              className="inline-flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 bg-white px-3 py-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:border-[#1c1a18] hover:bg-[#efe7dc]"
+                            >
+                              <RotateCcw className="size-3.5" />
+                              <span>{t("account.order.buyAgain")}</span>
+                            </button>
+                          ) : null}
 
                           {completedOrder ? (
                             reviewsQuery.isLoading && !reviewsQuery.data ? (

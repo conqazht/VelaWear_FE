@@ -87,7 +87,7 @@ describe("ProfileOrdersTab - Filters and Search", () => {
   it("filters orders when clicking a status tab", () => {
     render(<ProfileOrdersTab ordersQuery={dummyQuery} />);
 
-    const pendingBtn = screen.getAllByText("account.orders.status.pending")[1]; // button in tab bar
+    const pendingBtn = screen.getByRole("button", { name: "account.orders.status.pending" });
     fireEvent.click(pendingBtn);
 
     expect(screen.getByText("Order ORD-PENDING-01")).toBeInTheDocument();

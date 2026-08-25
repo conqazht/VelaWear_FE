@@ -96,21 +96,14 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
 
       {!ordersQuery.isLoading && orders.length > 0 && (
         <>
-          {/* Interactive Status Stats */}
+          {/* Status Stats Overview */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             {orderStats.map((stat) => {
               const percentage = Math.round((stat.count / orders.length) * 100);
-              const isSelected = selectedStatus === stat.status;
               return (
-                <button
+                <div
                   key={stat.status}
-                  type="button"
-                  onClick={() => setSelectedStatus(isSelected ? "ALL" : stat.status)}
-                  className={`border-hairline/45 rounded-sm border p-4 text-left transition-all ${
-                    isSelected
-                      ? "ring-2 ring-[#b5573a] bg-white shadow-sm"
-                      : "bg-white/65 hover:bg-white cursor-pointer"
-                  }`}
+                  className="border-hairline/45 rounded-sm border bg-white/65 p-4 text-left"
                 >
                   <div className="mb-4 flex items-center gap-2">
                     <span className={`size-2 rounded-full ${stat.dot}`} aria-hidden="true" />
@@ -124,7 +117,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
                       {percentage}%
                     </span>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
