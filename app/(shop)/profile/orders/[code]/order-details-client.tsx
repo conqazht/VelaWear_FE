@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -23,7 +24,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useCart } from "@/components/shop/cart-provider";
-import { useNotification } from "@/components/shop/notification-provider";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -112,8 +112,8 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { locale, t } = useI18n();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { addToCart } = useCart();
-  const { showAddedToBag } = useNotification();
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -174,14 +174,13 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         variantId: item.variantId ?? undefined,
       };
       addToCart(product, color || "Default", size || "Default");
-      showAddedToBag(product, size || "Default", color || "Default");
+      router.push("/checkout");
     },
-    [addToCart, showAddedToBag],
+    [addToCart, router],
   );
 
   const handleReorderAll = useCallback(() => {
     if (!order?.items?.length) return;
-    let lastItemProduct: { product: Product; size: string; color: string } | null = null;
     for (const item of order.items) {
       const [color, size] = item.variantName ? item.variantName.split(" / ") : ["Default", "M"];
       const product: Product = {
@@ -197,12 +196,9 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         variantId: item.variantId ?? undefined,
       };
       addToCart(product, color || "Default", size || "Default");
-      lastItemProduct = { product, size: size || "Default", color: color || "Default" };
     }
-    if (lastItemProduct) {
-      showAddedToBag(lastItemProduct.product, lastItemProduct.size, lastItemProduct.color);
-    }
-  }, [addToCart, order?.items, showAddedToBag]);
+    router.push("/checkout");
+  }, [addToCart, order?.items, router]);
 
   const orderCode = order?.orderCode;
   const handleCopyOrderCode = useCallback(() => {

@@ -8,14 +8,12 @@ const {
   getMyOrderByCodeMock,
   getMyOrderStatusHistoriesMock,
   pushMock,
-  showAddedToBagMock,
   useAuthMock,
 } = vi.hoisted(() => ({
   addToCartMock: vi.fn(),
   getMyOrderByCodeMock: vi.fn(),
   getMyOrderStatusHistoriesMock: vi.fn(),
   pushMock: vi.fn(),
-  showAddedToBagMock: vi.fn(),
   useAuthMock: vi.fn(),
 }));
 
@@ -30,12 +28,6 @@ vi.mock("@/components/auth/auth-provider", () => ({
 vi.mock("@/components/shop/cart-provider", () => ({
   useCart: () => ({
     addToCart: addToCartMock,
-  }),
-}));
-
-vi.mock("@/components/shop/notification-provider", () => ({
-  useNotification: () => ({
-    showAddedToBag: showAddedToBagMock,
   }),
 }));
 
@@ -236,21 +228,14 @@ describe("OrderDetailsClient self-service contract", () => {
       "White",
       "L",
     );
-    expect(showAddedToBagMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: "linen-shirt",
-        name: "Linen Shirt",
-      }),
-      "L",
-      "White",
-    );
+    expect(pushMock).toHaveBeenCalledWith("/checkout");
 
     // Buy again button on individual item
     const buyAgainBtn = screen.getByRole("button", { name: "account.order.buyAgain" });
     fireEvent.click(buyAgainBtn);
 
     expect(addToCartMock).toHaveBeenCalledTimes(2);
-    expect(showAddedToBagMock).toHaveBeenCalledTimes(2);
+    expect(pushMock).toHaveBeenCalledTimes(2);
   });
 
   it("does not show reorder buttons for in-progress orders like PENDING or SHIPPING", async () => {
