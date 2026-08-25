@@ -1,16 +1,42 @@
 import type { ReactNode } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getMyOrderByCodeMock, getMyOrderStatusHistoriesMock, useAuthMock } = vi.hoisted(() => ({
+const {
+  addToCartMock,
+  getMyOrderByCodeMock,
+  getMyOrderStatusHistoriesMock,
+  pushMock,
+  toastSuccessMock,
+  useAuthMock,
+} = vi.hoisted(() => ({
+  addToCartMock: vi.fn(),
   getMyOrderByCodeMock: vi.fn(),
   getMyOrderStatusHistoriesMock: vi.fn(),
+  pushMock: vi.fn(),
+  toastSuccessMock: vi.fn(),
   useAuthMock: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
 }));
 
 vi.mock("@/components/auth/auth-provider", () => ({
   useAuth: useAuthMock,
+}));
+
+vi.mock("@/components/shop/cart-provider", () => ({
+  useCart: () => ({
+    addToCart: addToCartMock,
+  }),
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: toastSuccessMock,
+  },
 }));
 
 vi.mock("@/components/providers/i18n-provider", () => ({
@@ -167,5 +193,57 @@ describe("OrderDetailsClient self-service contract", () => {
     const status = await screen.findByTestId("api-status");
     expect(status).toHaveAttribute("data-status", "404");
     expect(getMyOrderStatusHistoriesMock).not.toHaveBeenCalled();
+  });
+
+  it("supports reordering all items and single items from order details", async () => {
+    const orderWithItems = {
+      ...orderFor(11),
+      items: [
+        {
+          id: 101,
+          variantId: 55,
+          productSlug: "linen-shirt",
+          productName: "Linen Shirt",
+          variantName: "White / L",
+          sku: "LINEN-SHIRT-W-L",
+          price: 150000,
+          quantity: 1,
+          subtotal: 150000,
+          status: "PENDING",
+          image: "/images/shirt.jpg",
+        },
+      ],
+    };
+    getMyOrderByCodeMock.mockResolvedValue(orderWithItems);
+
+    const { Wrapper } = createHarness();
+    render(<OrderDetailsClient code="ORDER-11" />, { wrapper: Wrapper });
+
+    expect(await screen.findByText("Linen Shirt")).toBeInTheDocument();
+
+    // Reorder all button in header
+    const reorderAllBtn = screen.getByRole("button", { name: "account.order.reorderAll" });
+    fireEvent.click(reorderAllBtn);
+
+    expect(addToCartMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "linen-shirt",
+        name: "Linen Shirt",
+        price: 150000,
+        variantId: 55,
+      }),
+      "White",
+      "L",
+    );
+    expect(toastSuccessMock).toHaveBeenCalledWith(
+      "account.order.reorderSuccess",
+      expect.anything(),
+    );
+
+    // Buy again button on individual item
+    const buyAgainBtn = screen.getByRole("button", { name: "account.order.buyAgain" });
+    fireEvent.click(buyAgainBtn);
+
+    expect(addToCartMock).toHaveBeenCalledTimes(2);
   });
 });

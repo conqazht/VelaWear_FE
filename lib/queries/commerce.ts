@@ -18,6 +18,7 @@ import {
   getMyWishlists,
   updateMyAddress,
   updateMyProfile,
+  uploadMyAvatar,
   type CouponFilters,
   type CreateMyAddressRequest,
   type CreateOrderRequest,
@@ -180,6 +181,17 @@ export function useUpdateProfileMutation() {
 
   return useMutation({
     mutationFn: (request: UpdateMyProfileRequest) => updateMyProfile(request),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.root });
+    },
+  });
+}
+
+export function useUploadAvatarMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => uploadMyAvatar(file),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.auth.root });
     },

@@ -287,3 +287,15 @@ export function createReview(request: CreateReviewRequest) {
       .then(unwrapApiResponse)
   );
 }
+
+export function uploadMyAvatar(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return (
+    apiClient
+      // Axios/the browser must set the multipart boundary for FormData.
+      .put<ApiResponse<User>>("/files/avatar", formData)
+      .then(unwrapApiResponse)
+  );
+}

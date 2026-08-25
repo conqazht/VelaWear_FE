@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -17,11 +18,14 @@ import {
   MapPin,
   Package,
   Phone,
+  RotateCcw,
   ShoppingBag,
   Truck,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useCart } from "@/components/shop/cart-provider";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
@@ -42,7 +46,7 @@ import {
 import { getMyOrderByCode, getMyOrderStatusHistories } from "@/lib/api/commerce";
 import { cancelOrder } from "@/lib/checkout-api";
 import { formatDateTime } from "@/lib/i18n/format";
-import { money, resolveImageUrl } from "@/lib/vela-data";
+import { money, resolveImageUrl, type Product } from "@/lib/vela-data";
 import type { OrderItem } from "@/lib/api/types";
 import { useMyReviewsQuery } from "@/lib/queries/commerce";
 import { queryKeys } from "@/lib/queries/keys";
@@ -110,6 +114,8 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { locale, t } = useI18n();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { addToCart } = useCart();
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -147,6 +153,58 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const error = cancelMutation.error
     ? getErrorMessage(cancelMutation.error, t("account.order.cancelError"))
     : null;
+
+  const handleReorderItem = useCallback(
+    (item: OrderItem) => {
+      const [color, size] = item.variantName ? item.variantName.split(" / ") : ["Default", "M"];
+      const product: Product = {
+        id: item.productSlug || String(item.id),
+        name: item.productName,
+        price: item.price,
+        originalPrice: item.listPrice,
+        image: item.image || "/images/products/product-placeholder.webp",
+        category: "",
+        color: color || "Default",
+        size: size || "Default",
+        description: "",
+        variantId: item.variantId ?? undefined,
+      };
+      addToCart(product, color || "Default", size || "Default");
+      toast.success(t("account.order.reorderSuccess"), {
+        action: {
+          label: t("account.order.viewCart"),
+          onClick: () => router.push("/cart"),
+        },
+      });
+    },
+    [addToCart, router, t],
+  );
+
+  const handleReorderAll = useCallback(() => {
+    if (!order?.items?.length) return;
+    for (const item of order.items) {
+      const [color, size] = item.variantName ? item.variantName.split(" / ") : ["Default", "M"];
+      const product: Product = {
+        id: item.productSlug || String(item.id),
+        name: item.productName,
+        price: item.price,
+        originalPrice: item.listPrice,
+        image: item.image || "/images/products/product-placeholder.webp",
+        category: "",
+        color: color || "Default",
+        size: size || "Default",
+        description: "",
+        variantId: item.variantId ?? undefined,
+      };
+      addToCart(product, color || "Default", size || "Default");
+    }
+    toast.success(t("account.order.reorderSuccess"), {
+      action: {
+        label: t("account.order.viewCart"),
+        onClick: () => router.push("/cart"),
+      },
+    });
+  }, [addToCart, order?.items, router, t]);
 
   const orderCode = order?.orderCode;
   const handleCopyOrderCode = useCallback(() => {
@@ -311,6 +369,18 @@ export default function OrderDetailsClient({ code }: { code: string }) {
               </span>
             </div>
           </div>
+          {order.items?.length ? (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleReorderAll}
+                className="inline-flex items-center gap-2 rounded-sm bg-[#1c1a18] px-4 py-2.5 text-xs font-bold tracking-wider text-white uppercase transition-colors hover:bg-[#b5573a]"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>{t("account.order.reorderAll")}</span>
+              </button>
+            </div>
+          ) : null}
         </header>
 
         {error && (
@@ -387,9 +457,18 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                             })}
                           </p>
                         </div>
-                        {completedOrder ? (
-                          <div className="mt-4">
-                            {reviewsQuery.isLoading && !reviewsQuery.data ? (
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleReorderItem(item)}
+                            className="inline-flex items-center gap-1.5 rounded-sm border border-[#1c1a18]/20 bg-white px-3 py-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:border-[#1c1a18] hover:bg-[#efe7dc]"
+                          >
+                            <RotateCcw className="size-3.5" />
+                            <span>{t("account.order.buyAgain")}</span>
+                          </button>
+
+                          {completedOrder ? (
+                            reviewsQuery.isLoading && !reviewsQuery.data ? (
                               <span className="text-xs text-[#1c1a18]/45">
                                 {t("reviews.write.checking")}
                               </span>
@@ -416,9 +495,9 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                               >
                                 {t("reviews.write.cta")}
                               </button>
-                            )}
-                          </div>
-                        ) : null}
+                            )
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   ))}

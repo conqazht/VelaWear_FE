@@ -1,4 +1,4 @@
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
   PencilLine,
   CalendarDays,
   LayoutDashboard,
+  Loader2,
 } from "lucide-react";
 import { canAccessManagement, getUserRoleNames } from "@/lib/auth/roles";
 import {
@@ -38,7 +39,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { useUpdateProfileMutation } from "@/lib/queries/commerce";
+import { useUpdateProfileMutation, useUploadAvatarMutation } from "@/lib/queries/commerce";
+import { resolveImageUrl } from "@/lib/vela-data";
 import type { Gender, User, UserAddress } from "@/lib/api/types";
 import { formatMemberSince } from "./profile-formatters";
 import { ProfileAddressesPanel } from "./profile-addresses-panel";
@@ -66,10 +68,16 @@ export function ProfileAccountPanel({
 }: ProfileAccountPanelProps) {
   const { locale, t } = useI18n();
   const updateProfileMutation = useUpdateProfileMutation();
+  const uploadAvatarMutation = useUploadAvatarMutation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
   const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
+
+  const [avatarMessage, setAvatarMessage] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [avatarImageError, setAvatarImageError] = useState(false);
 
   const [editFormDraft, setEditForm] = useState({
     fullName: "",
@@ -122,6 +130,36 @@ export function ProfileAccountPanel({
       message?: string;
     };
     return apiError.response?.data?.message ?? apiError.message ?? t("account.profile.saveError");
+  };
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    e.target.value = "";
+    setAvatarMessage(null);
+    setAvatarError(null);
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      setAvatarError(t("account.visibility.avatarTypeError"));
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setAvatarError(t("account.visibility.avatarSizeError"));
+      return;
+    }
+
+    try {
+      await uploadAvatarMutation.mutateAsync(file);
+      await checkSession();
+      setAvatarImageError(false);
+      setAvatarMessage(t("account.visibility.avatarUploadSuccess"));
+    } catch (error) {
+      setAvatarError(getApiErrorMessage(error) || t("account.visibility.avatarUploadError"));
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -599,22 +637,54 @@ export function ProfileAccountPanel({
               </p>
 
               <div className="mb-12 flex items-center gap-5 text-left md:gap-6">
-                <div className="border-hairline text-ink relative flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full border bg-[#efe7dc] font-serif text-2xl font-light shadow-inner md:h-24 md:w-24 md:text-3xl">
-                  {user.fullName
-                    ? user.fullName
+                <div className="relative flex-shrink-0">
+                  <div className="border-hairline text-ink relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border bg-[#efe7dc] font-serif text-2xl font-light shadow-inner md:h-24 md:w-24 md:text-3xl">
+                    {user.avatar && !avatarImageError ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={resolveImageUrl(user.avatar)}
+                        alt={user.fullName || "Avatar"}
+                        className="size-full rounded-full object-cover"
+                        onError={() => setAvatarImageError(true)}
+                      />
+                    ) : user.fullName ? (
+                      user.fullName
                         .split(" ")
                         .map((n: string) => n[0])
                         .join("")
                         .substring(0, 2)
                         .toUpperCase()
-                    : "U"}
+                    ) : (
+                      "U"
+                    )}
+
+                    {uploadAvatarMutation.isPending && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white backdrop-blur-[1px]">
+                        <Loader2 className="size-6 animate-spin" />
+                      </div>
+                    )}
+                  </div>
+
                   <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadAvatarMutation.isPending}
                     aria-label={t("account.visibility.editAvatar")}
-                    className="border-hairline absolute right-0 bottom-0 flex items-center justify-center rounded-full border bg-white p-1.5 shadow-sm transition-transform hover:scale-105"
+                    className="border-hairline absolute right-0 bottom-0 flex cursor-pointer items-center justify-center rounded-full border bg-white p-1.5 shadow-sm transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PencilLine className="text-ink size-3.5" />
                   </button>
                 </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/jpg"
+                  className="sr-only"
+                  onChange={handleAvatarFileChange}
+                  disabled={uploadAvatarMutation.isPending}
+                />
+
                 <div className="flex flex-col justify-center">
                   <h3 className="text-ink mb-1 text-sm font-medium">
                     {t("account.visibility.display")}
@@ -625,6 +695,12 @@ export function ProfileAccountPanel({
                       date: formatMemberSince(user.createdAt, locale),
                     })}
                   </p>
+                  {avatarMessage && (
+                    <p className="mt-1 text-xs font-medium text-emerald-700">{avatarMessage}</p>
+                  )}
+                  {avatarError && (
+                    <p className="text-error mt-1 text-xs font-medium">{avatarError}</p>
+                  )}
                 </div>
               </div>
 

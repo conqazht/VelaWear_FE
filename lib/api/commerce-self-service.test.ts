@@ -33,6 +33,7 @@ import {
   replaceMyCartItems,
   updateMyAddress,
   updateMyProfile,
+  uploadMyAvatar,
   type CreateMyAddressRequest,
   type UpdateMyAddressRequest,
   type UpdateMyProfileRequest,
@@ -124,6 +125,17 @@ describe("customer self-service API contract", () => {
     });
     expect(putMock.mock.calls[0]?.[1]).not.toHaveProperty("avatar");
     expect(putMock.mock.calls[0]?.[1]).not.toHaveProperty("id");
+  });
+
+  it("uploads user avatar via PUT /files/avatar with FormData", async () => {
+    const file = new File(["test-image-content"], "avatar.png", { type: "image/png" });
+    await uploadMyAvatar(file);
+
+    expect(putMock).toHaveBeenCalledTimes(1);
+    expect(putMock.mock.calls[0]?.[0]).toBe("/files/avatar");
+    const sentFormData = putMock.mock.calls[0]?.[1] as FormData;
+    expect(sentFormData).toBeInstanceOf(FormData);
+    expect(sentFormData.get("file")).toBe(file);
   });
 
   it("preserves the existing cart, wishlist and review self routes", async () => {
