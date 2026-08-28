@@ -352,8 +352,11 @@ export function CheckoutPageClient() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-        <form onSubmit={onCheckoutFormSubmit} className="space-y-6 lg:col-span-7">
+      <form
+        onSubmit={onCheckoutFormSubmit}
+        className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12"
+      >
+        <div className="space-y-6 lg:col-span-7">
           {apiError && (
             <div className="border-error/20 bg-error/10 text-error flex items-start gap-2 rounded-sm border p-4 text-xs">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
@@ -399,7 +402,7 @@ export function CheckoutPageClient() {
             paymentMethod={paymentMethod}
             setPaymentMethod={setPaymentMethod}
           />
-        </form>
+        </div>
 
         <CheckoutOrderSummary
           cart={cart}
@@ -419,7 +422,7 @@ export function CheckoutPageClient() {
           displayedTotal={displayedTotal}
           isSubmitting={isSubmitting}
         />
-      </div>
+      </form>
 
       {/* Address Selection Modal */}
       <Dialog
