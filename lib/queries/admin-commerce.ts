@@ -85,6 +85,7 @@ import {
   type UpdateAdminSizeRequest,
 } from "@/lib/api/admin-commerce";
 import { invalidatePublicQueries } from "@/lib/queries/public-cache";
+import { useAdminMutation } from "@/lib/queries/admin-mutation-helper";
 
 export const adminCommerceQueryKeys = {
   root: ["admin-commerce"] as const,
@@ -123,20 +124,21 @@ export const adminCommerceQueryKeys = {
   },
   colors: {
     root: ["admin-commerce", "colors"] as const,
+    lists: ["admin-commerce", "colors", "list"] as const,
     list: (params: AdminColorListParams) => ["admin-commerce", "colors", "list", params] as const,
     detail: (id: number) => ["admin-commerce", "colors", "detail", id] as const,
   },
   sizes: {
     root: ["admin-commerce", "sizes"] as const,
+    lists: ["admin-commerce", "sizes", "list"] as const,
     list: (params: AdminSizeListParams) => ["admin-commerce", "sizes", "list", params] as const,
     detail: (id: number) => ["admin-commerce", "sizes", "detail", id] as const,
   },
-};
+} as const;
 
 const defaultCatalogOptionParams = {
   page: 1,
-  size: 2000,
-  sort: "name,asc",
+  size: 100,
 } as const;
 
 const PRODUCT_PUBLIC_AREAS = ["productLists", "productDetails", "sales"] as const;
@@ -191,36 +193,26 @@ export function useAdminProductTranslationsQuery(id?: number) {
 }
 
 export function useUpdateAdminProductTranslationsMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: ProductTranslationBatchRequest }) =>
       updateAdminProductTranslations(id, request),
-    onSuccess: async (_translations, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
-        invalidatePublicQueries(queryClient, PRODUCT_PUBLIC_AREAS),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.translations(variables.id),
-        }),
-      ]);
-    },
+    invalidateKeys: (variables) => [
+      adminCommerceQueryKeys.products.root,
+      adminCommerceQueryKeys.products.translations(variables.id),
+    ],
+    publicAreas: PRODUCT_PUBLIC_AREAS,
   });
 }
 
 export function useDeleteAdminProductTranslationMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, locale }: { id: number; locale: "en" | "vi" }) =>
       deleteAdminProductTranslation(id, locale),
-    onSuccess: async (_result, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
-        invalidatePublicQueries(queryClient, PRODUCT_PUBLIC_AREAS),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.translations(variables.id),
-        }),
-      ]);
-    },
+    invalidateKeys: (variables) => [
+      adminCommerceQueryKeys.products.root,
+      adminCommerceQueryKeys.products.translations(variables.id),
+    ],
+    publicAreas: PRODUCT_PUBLIC_AREAS,
   });
 }
 
@@ -258,89 +250,57 @@ export function useAdminCategoryTranslationsQuery(id?: number) {
 }
 
 export function useUpdateAdminCategoryTranslationsMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: CategoryTranslationBatchRequest }) =>
       updateAdminCategoryTranslations(id, request),
-    onSuccess: async (_translations, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.categories.root }),
-        invalidatePublicQueries(queryClient, CATEGORY_PUBLIC_AREAS),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.categories.translations(variables.id),
-        }),
-      ]);
-    },
+    invalidateKeys: (variables) => [
+      adminCommerceQueryKeys.categories.root,
+      adminCommerceQueryKeys.categories.translations(variables.id),
+    ],
+    publicAreas: CATEGORY_PUBLIC_AREAS,
   });
 }
 
 export function useDeleteAdminCategoryTranslationMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, locale }: { id: number; locale: "en" | "vi" }) =>
       deleteAdminCategoryTranslation(id, locale),
-    onSuccess: async (_result, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.categories.root }),
-        invalidatePublicQueries(queryClient, CATEGORY_PUBLIC_AREAS),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.categories.translations(variables.id),
-        }),
-      ]);
-    },
+    invalidateKeys: (variables) => [
+      adminCommerceQueryKeys.categories.root,
+      adminCommerceQueryKeys.categories.translations(variables.id),
+    ],
+    publicAreas: CATEGORY_PUBLIC_AREAS,
   });
 }
 
 export function useCreateAdminCategoryMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminCategoryRequest) => createAdminCategory(request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.categories.root }),
-        invalidatePublicQueries(queryClient, CATEGORY_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.categories.root],
+    publicAreas: CATEGORY_PUBLIC_AREAS,
   });
 }
 
 export function useUpdateAdminCategoryMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminCategoryRequest }) =>
       updateAdminCategory(id, request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.categories.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-        invalidatePublicQueries(queryClient, CATEGORY_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.categories.root,
+      adminCommerceQueryKeys.products.root,
+    ],
+    publicAreas: CATEGORY_PUBLIC_AREAS,
   });
 }
 
 export function useDeleteAdminCategoryMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminCategory(id),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.categories.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-        invalidatePublicQueries(queryClient, CATEGORY_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.categories.root,
+      adminCommerceQueryKeys.products.root,
+    ],
+    publicAreas: CATEGORY_PUBLIC_AREAS,
   });
 }
 
@@ -364,52 +324,30 @@ export function useAdminBrandQuery(id?: number) {
 }
 
 export function useCreateAdminBrandMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminBrandRequest) => createAdminBrand(request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: adminCommerceQueryKeys.brands.root,
-      });
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.brands.root],
   });
 }
 
 export function useUpdateAdminBrandMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminBrandRequest }) =>
       updateAdminBrand(id, request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.brands.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.brands.root,
+      adminCommerceQueryKeys.products.root,
+    ],
   });
 }
 
 export function useDeleteAdminBrandMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminBrand(id),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.brands.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.brands.root,
+      adminCommerceQueryKeys.products.root,
+    ],
   });
 }
 
@@ -433,52 +371,30 @@ export function useAdminColorQuery(id?: number) {
 }
 
 export function useCreateAdminColorMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminColorRequest) => createAdminColor(request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: adminCommerceQueryKeys.colors.root,
-      });
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.colors.root],
   });
 }
 
 export function useUpdateAdminColorMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminColorRequest }) =>
       updateAdminColor(id, request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.colors.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.colors.root,
+      adminCommerceQueryKeys.productVariants.root,
+    ],
   });
 }
 
 export function useDeleteAdminColorMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminColor(id),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.colors.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.colors.root,
+      adminCommerceQueryKeys.productVariants.root,
+    ],
   });
 }
 
@@ -502,95 +418,55 @@ export function useAdminSizeQuery(id?: number) {
 }
 
 export function useCreateAdminSizeMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminSizeRequest) => createAdminSize(request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: adminCommerceQueryKeys.sizes.root,
-      });
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.sizes.root],
   });
 }
 
 export function useUpdateAdminSizeMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminSizeRequest }) =>
       updateAdminSize(id, request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.sizes.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.sizes.root,
+      adminCommerceQueryKeys.productVariants.root,
+    ],
   });
 }
 
 export function useDeleteAdminSizeMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminSize(id),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.sizes.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.sizes.root,
+      adminCommerceQueryKeys.productVariants.root,
+    ],
   });
 }
 
 export function useCreateAdminProductMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminProductRequest) => createAdminProduct(request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
-        invalidatePublicQueries(queryClient, PRODUCT_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.products.root],
+    publicAreas: PRODUCT_PUBLIC_AREAS,
   });
 }
 
 export function useUpdateAdminProductMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminProductRequest }) =>
       updateAdminProduct(id, request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
-        invalidatePublicQueries(queryClient, PRODUCT_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.products.root],
+    publicAreas: PRODUCT_PUBLIC_AREAS,
   });
 }
 
 export function useDeleteAdminProductMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminProduct(id),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.products.root }),
-        invalidatePublicQueries(queryClient, PRODUCT_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.products.root],
+    publicAreas: PRODUCT_PUBLIC_AREAS,
   });
 }
 
@@ -611,60 +487,36 @@ export function useAdminProductVariantQuery(id?: number) {
 }
 
 export function useCreateAdminProductVariantMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminProductVariantRequest) => createAdminProductVariant(request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-        invalidatePublicQueries(queryClient, VARIANT_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.productVariants.root,
+      adminCommerceQueryKeys.products.root,
+    ],
+    publicAreas: VARIANT_PUBLIC_AREAS,
   });
 }
 
 export function useUpdateAdminProductVariantMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminProductVariantRequest }) =>
       updateAdminProductVariant(id, request),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-        invalidatePublicQueries(queryClient, VARIANT_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.productVariants.root,
+      adminCommerceQueryKeys.products.root,
+    ],
+    publicAreas: VARIANT_PUBLIC_AREAS,
   });
 }
 
 export function useDeleteAdminProductVariantMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminProductVariant(id),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.productVariants.root,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: adminCommerceQueryKeys.products.root,
-        }),
-        invalidatePublicQueries(queryClient, VARIANT_PUBLIC_AREAS),
-      ]);
-    },
+    invalidateKeys: () => [
+      adminCommerceQueryKeys.productVariants.root,
+      adminCommerceQueryKeys.products.root,
+    ],
+    publicAreas: VARIANT_PUBLIC_AREAS,
   });
 }
 
@@ -677,36 +529,24 @@ export function useAdminCouponsQuery(params: AdminCouponListParams) {
 }
 
 export function useCreateAdminCouponMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (request: CreateAdminCouponRequest) => createAdminCoupon(request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.coupons.root });
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.coupons.root],
   });
 }
 
 export function useUpdateAdminCouponMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: ({ id, request }: { id: number; request: UpdateAdminCouponRequest }) =>
       updateAdminCoupon(id, request),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.coupons.root });
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.coupons.root],
   });
 }
 
 export function useDeleteAdminCouponMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useAdminMutation({
     mutationFn: (id: number) => deleteAdminCoupon(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: adminCommerceQueryKeys.coupons.root });
-    },
+    invalidateKeys: () => [adminCommerceQueryKeys.coupons.root],
   });
 }
 

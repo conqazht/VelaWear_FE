@@ -1,58 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import type { ComponentProps, FormEvent } from "react";
+import type { FormEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import { EASE_VELA } from "@/lib/motion-tokens";
-import {
-  CheckCircle2,
-  LockKeyhole,
-  Loader2,
-  AlertTriangle,
-  Truck,
-  ShoppingBag,
-  AlarmClock,
-  RefreshCw,
-  MapPin,
-  Plus,
-  Edit2,
-  Copy,
-  Check,
-  ArrowRight,
-  FileText,
-  Mail,
-} from "lucide-react";
+import { LockKeyhole, AlertTriangle, ShoppingBag, RefreshCw, Plus, Edit2 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { FashionImage } from "@/components/shop/fashion-image";
-import { FieldLabel } from "@/components/shop/field-label";
 import { useCart } from "@/components/shop/cart-provider";
-import { money } from "@/lib/vela-data";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useMyAddressesQuery } from "@/lib/queries/commerce";
 import type { UserAddress } from "@/lib/api/types";
 import { AddressModal } from "@/components/shop/profile/address-modal";
 import { cn } from "@/lib/utils";
-import {
-  submitCheckout,
-  previewCheckout,
-  extractCheckoutError,
-  type CheckoutRequest,
-  type CheckoutPreviewRequest,
-  type CheckoutPreviewResponse,
-  type CheckoutResponse,
-  type PaymentInitiationResponse,
-} from "@/lib/checkout-api";
-import { checkoutSchema, createCheckoutSchema } from "@/lib/validations";
-import { formatDate } from "@/lib/i18n/format";
+import { createCheckoutSchema } from "@/lib/validations";
 import {
   getVietnamProvinces,
   getVietnamWards,
@@ -60,40 +24,15 @@ import {
   type VietnamWard,
 } from "@/lib/vietnam-address-api";
 import { useI18n } from "@/components/providers/i18n-provider";
-
-type CheckoutFormValues = z.infer<typeof checkoutSchema>;
-
-const CHECKOUT_DETAILS_STORAGE_PREFIX = "vela-checkout-details";
-
-let fallbackIdempotencySequence = 0;
-
-function createCheckoutIdempotencyKey() {
-  if (typeof globalThis.crypto?.randomUUID === "function") {
-    return globalThis.crypto.randomUUID();
-  }
-
-  fallbackIdempotencySequence += 1;
-  return `checkout-fallback-${fallbackIdempotencySequence}`;
-}
-
-function checkoutDetailsStorageKey(userId: number) {
-  return `${CHECKOUT_DETAILS_STORAGE_PREFIX}:${userId}`;
-}
-
-// ---------------------------------------------------------------------------
-// Payment method options
-// ---------------------------------------------------------------------------
-
-const PAYMENT_METHODS = [
-  { value: "COD" as const, disabled: false },
-  { value: "SEPAY" as const, disabled: false },
-] as const;
-
-type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+import {
+  useCheckoutSession,
+  checkoutDetailsStorageKey,
+  type CheckoutFormValues,
+  type PaymentMethodValue,
+} from "@/components/shop/checkout/use-checkout-session";
+import { CheckoutAddressSection } from "@/components/shop/checkout/checkout-address-section";
+import { CheckoutOrderSummary } from "@/components/shop/checkout/checkout-order-summary";
+import { OrderSuccessCard } from "@/components/shop/checkout/order-success-card";
 
 export function CheckoutPageClient() {
   const { locale, t } = useI18n();
@@ -104,25 +43,10 @@ export function CheckoutPageClient() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodValue>("COD");
-  const [orderCompleted, setOrderCompleted] = useState(false);
-  const [completedOrder, setCompletedOrder] = useState<CheckoutResponse | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [preview, setPreview] = useState<CheckoutPreviewResponse | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [provinces, setProvinces] = useState<VietnamProvince[]>([]);
   const [wards, setWards] = useState<VietnamWard[]>([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   const [addressApiError, setAddressApiError] = useState<string | null>(null);
-  const previewRequestIdRef = useRef(0);
-  const idempotencyRef = useRef<{
-    key: string;
-    baseSignature: string;
-    request: CheckoutRequest;
-    serverTime: string;
-  } | null>(null);
-  const checkoutSubmissionRef = useRef<Promise<void> | null>(null);
 
   const {
     register,
@@ -330,208 +254,33 @@ export function CheckoutPageClient() {
     };
   }, [selectedProvinceCode, wards, t]);
 
-  const activeItemsList = cart;
-
-  const cartSnapshotKey = useMemo(
-    () =>
-      cart
-        .map((item) => `${item.variantId ?? item.id}:${item.quantity}`)
-        .sort()
-        .join("|"),
-    [cart],
-  );
-
-  const buildPreviewRequest = useCallback(
-    (coupon: string): CheckoutPreviewRequest => {
-      return {
-        paymentMethod,
-        couponCode: coupon || undefined,
-      };
-    },
-    [paymentMethod],
-  );
-
-  const getCheckoutErrorMessage = useCallback(
-    (checkoutError: ReturnType<typeof extractCheckoutError>) => {
-      switch (checkoutError.kind) {
-        case "validation":
-          return t("checkout.error.validation");
-        case "insufficient_stock":
-          return t("checkout.error.insufficientStock");
-        case "flash_sold_out":
-          return t("sale.checkout.error.flashSoldOut");
-        case "flash_ended":
-          return t("sale.checkout.error.flashEnded");
-        case "customer_limit":
-          return t("sale.checkout.error.customerLimit");
-        case "price_changed":
-          return t("sale.checkout.error.priceChanged");
-        case "invalid_coupon":
-          return t("checkout.error.invalidCoupon");
-        case "unauthenticated":
-          return t("checkout.error.unauthenticated");
-        case "idempotency_conflict":
-          return t("sale.checkout.error.idempotencyConflict");
-        case "conflict":
-          return t("checkout.error.conflict");
-        case "unknown":
-          return t("checkout.error.unknown");
-        default:
-          return checkoutError.message;
-      }
-    },
-    [t],
-  );
-
-  const loadPreview = useCallback(
-    async (coupon = appliedCouponCode) => {
-      if (!isAuthenticated || cart.length === 0) return null;
-
-      const requestId = ++previewRequestIdRef.current;
-      setIsPreviewLoading(true);
-      setPreviewError(null);
-      try {
-        const nextPreview = await previewCheckout(buildPreviewRequest(coupon));
-        if (requestId === previewRequestIdRef.current) {
-          setPreview(nextPreview);
-          setCouponError(null);
-        }
-        return nextPreview;
-      } catch (error: unknown) {
-        const checkoutError = extractCheckoutError(error);
-        const localizedError = getCheckoutErrorMessage(checkoutError);
-        if (requestId === previewRequestIdRef.current) {
-          if (checkoutError.kind === "invalid_coupon") {
-            setCouponError(localizedError);
-          } else {
-            setPreviewError(localizedError);
-          }
-        }
-        throw error;
-      } finally {
-        if (requestId === previewRequestIdRef.current) setIsPreviewLoading(false);
-      }
-    },
-    [appliedCouponCode, buildPreviewRequest, cart.length, getCheckoutErrorMessage, isAuthenticated],
-  );
-
-  useEffect(() => {
-    if (!isAuthenticated || !cartSnapshotKey) return;
-
-    const timeoutId = window.setTimeout(() => {
-      void loadPreview().catch(() => {
-        // Lỗi được hiển thị ngay trong phần tổng tiền.
-      });
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [cartSnapshotKey, isAuthenticated, loadPreview, paymentMethod]);
-
-  // Client-side estimates for display only — server is authoritative
-  const subtotal = activeItemsList.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const localShippingEstimate = subtotal === 0 ? 0 : 30000;
-  const displayedSubtotal = preview?.subtotal ?? subtotal;
-  const displayedShippingFee = preview?.shippingFee ?? localShippingEstimate;
-  const displayedDiscount = preview?.discountAmount ?? 0;
-  const displayedTotal = preview?.finalAmount ?? subtotal + localShippingEstimate;
-
-  const performCompletePurchase = async (data: CheckoutFormValues) => {
-    setApiError(null);
-    setCouponError(null);
-    setAddressApiError(null);
-
-    const selectedProvince = provinces.find(
-      (province) => String(province.code) === data.provinceCode,
-    );
-    const selectedWard = wards.find((ward) => String(ward.code) === data.wardCode);
-
-    if (!selectedProvince || !selectedWard) {
-      setAddressApiError(t("checkout.addressRequired"));
-      return;
-    }
-
-    try {
-      const baseRequest: CheckoutRequest = {
-        receiverName: data.receiverName.trim(),
-        receiverPhone: data.phone,
-        receiverAddress: [data.address, selectedWard.name, selectedProvince.name].join(", "),
-        paymentMethod,
-        couponCode: appliedCouponCode || undefined,
-      };
-
-      const baseSignature = JSON.stringify(baseRequest);
-      let attempt = idempotencyRef.current;
-
-      if (!attempt || attempt.baseSignature !== baseSignature) {
-        // Preview ngay trước lần ghi đầu tiên để tổng tiền luôn là dữ liệu mới
-        // nhất từ DB. Nếu phản hồi checkout bị thất lạc, lần thử lại phải gửi
-        // nguyên request + Idempotency-Key cũ (không preview lại trên cart đã
-        // được server xóa sau khi tạo đơn thành công).
-        const latestPreview = await previewCheckout(buildPreviewRequest(appliedCouponCode));
-        setPreview(latestPreview);
-        attempt = {
-          key: createCheckoutIdempotencyKey(),
-          baseSignature,
-          request: {
-            ...baseRequest,
-            pricingFingerprint: latestPreview.pricingFingerprint,
-          },
-          serverTime: latestPreview.serverTime,
-        };
-        idempotencyRef.current = attempt;
-      }
-
-      const response = await submitCheckout(attempt.request, attempt.key);
-      idempotencyRef.current = null;
-      setCompletedOrder({ ...response, serverTime: attempt.serverTime });
-      setOrderCompleted(true);
-      if (user) {
-        try {
-          window.localStorage.setItem(checkoutDetailsStorageKey(user.id), JSON.stringify(data));
-        } catch {
-          // Checkout remains successful when browser storage is unavailable.
-        }
-      }
-      clearCart();
-    } catch (err: unknown) {
-      const checkoutErr = extractCheckoutError(err);
-
-      const localizedError = getCheckoutErrorMessage(checkoutErr);
-
-      if (checkoutErr.kind === "invalid_coupon") {
-        setCouponError(localizedError);
-      } else {
-        setApiError(localizedError);
-      }
-
-      if (
-        checkoutErr.status === 409 ||
-        checkoutErr.kind === "price_changed" ||
-        checkoutErr.kind === "flash_sold_out" ||
-        checkoutErr.kind === "flash_ended" ||
-        checkoutErr.kind === "customer_limit" ||
-        checkoutErr.kind === "insufficient_stock"
-      ) {
-        idempotencyRef.current = null;
-        await refreshCart().catch(() => undefined);
-        await loadPreview().catch(() => undefined);
-      }
-    }
-  };
-
-  const onCompletePurchase = (data: CheckoutFormValues) => {
-    if (checkoutSubmissionRef.current) {
-      return checkoutSubmissionRef.current;
-    }
-
-    const submission = performCompletePurchase(data).finally(() => {
-      if (checkoutSubmissionRef.current === submission) {
-        checkoutSubmissionRef.current = null;
-      }
-    });
-    checkoutSubmissionRef.current = submission;
-    return submission;
-  };
+  const {
+    orderCompleted,
+    completedOrder,
+    apiError,
+    couponError,
+    setCouponError,
+    preview,
+    previewError,
+    isPreviewLoading,
+    loadPreview,
+    onCompletePurchase,
+    displayedSubtotal,
+    displayedShippingFee,
+    displayedDiscount,
+    displayedTotal,
+  } = useCheckoutSession({
+    cart,
+    clearCart,
+    refreshCart,
+    user,
+    isAuthenticated,
+    paymentMethod,
+    appliedCouponCode,
+    provinces,
+    wards,
+    setAddressApiError,
+  });
 
   const onCheckoutFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     void handleSubmit(onCompletePurchase)(event);
@@ -567,7 +316,7 @@ export function CheckoutPageClient() {
     );
   }
 
-  if (activeItemsList.length === 0) {
+  if (cart.length === 0) {
     return (
       <div className="mx-auto flex min-h-[70vh] w-full max-w-[1800px] items-center justify-center px-6 py-24">
         <Card className="mx-auto flex max-w-md flex-col items-center rounded-md border-[#1c1a18]/5 bg-white p-8 py-10 text-center shadow-lg">
@@ -604,9 +353,9 @@ export function CheckoutPageClient() {
       </div>
 
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12">
-        <form onSubmit={onCheckoutFormSubmit} className="space-y-10 lg:col-span-7">
+        <form onSubmit={onCheckoutFormSubmit} className="space-y-6 lg:col-span-7">
           {apiError && (
-            <div className="flex items-start gap-3 rounded border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700">
+            <div className="border-error/20 bg-error/10 text-error flex items-start gap-2 rounded-sm border p-4 text-xs">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
               <span>{apiError}</span>
             </div>
@@ -628,365 +377,48 @@ export function CheckoutPageClient() {
             </div>
           )}
 
-          <Card className="space-y-8 rounded-md border-none bg-white p-6 py-6 shadow-sm">
-            <div className="space-y-3">
-              <SectionTitle number="1" title={t("checkout.contact")} />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <CheckoutInput
-                  label={t("checkout.email")}
-                  type="email"
-                  autoComplete="email"
-                  placeholder="address@domain.com"
-                  {...register("email")}
-                  error={errors.email?.message}
-                />
-                <CheckoutInput
-                  label={t("checkout.phone")}
-                  type="tel"
-                  autoComplete="tel"
-                  placeholder="09xxx xxxxx"
-                  {...register("phone")}
-                  error={errors.phone?.message}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <SectionTitle number="2" title={t("checkout.shippingAddress")} />
-                {userAddresses.length > 0 && !isManualAddressMode && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPendingAddressId(selectedAddress?.id ?? userAddresses[0]?.id ?? null);
-                      setIsAddressSelectModalOpen(true);
-                    }}
-                    className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase underline underline-offset-4 transition-colors hover:text-[#b5573a]"
-                  >
-                    <MapPin className="size-3.5" />
-                    <span>{t("checkout.changeAddress")}</span>
-                  </button>
-                )}
-                {userAddresses.length > 0 && isManualAddressMode && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsManualAddressMode(false);
-                      if (selectedAddress) {
-                        void fillFromAddress(selectedAddress, provinces);
-                      }
-                    }}
-                    className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase underline underline-offset-4 transition-colors hover:text-[#b5573a]"
-                  >
-                    <MapPin className="size-3.5" />
-                    <span>{t("checkout.useSavedAddress")}</span>
-                  </button>
-                )}
-              </div>
-
-              {userAddresses.length > 0 && !isManualAddressMode ? (
-                <div className="space-y-3">
-                  {selectedAddress ? (
-                    <div className="rounded-md border border-[#1c1a18]/20 bg-[#f7f4ef]/40 p-4 transition-all">
-                      <div className="space-y-1 text-left">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-[#1c1a18]">
-                            {selectedAddress.receiverName}
-                          </span>
-                          {selectedAddress.isDefault && (
-                            <span className="rounded bg-[#1c1a18] px-1.5 py-0.5 text-[9px] leading-none font-semibold tracking-wider text-white uppercase">
-                              {t("account.addresses.default")}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-[#1c1a18]/70">{selectedAddress.phone}</p>
-                        <p className="text-xs text-[#1c1a18]/85">{selectedAddress.addressDetail}</p>
-                        <p className="text-xs text-[#1c1a18]/60">
-                          {[selectedAddress.ward, selectedAddress.province]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setIsManualAddressMode(true)}
-                      className="cursor-pointer text-xs text-[#1c1a18]/60 underline transition-colors hover:text-[#1c1a18]"
-                    >
-                      {t("checkout.manualAddress")}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <CheckoutInput
-                    label={t("checkout.receiverName")}
-                    autoComplete="name"
-                    placeholder={t("checkout.receiverNamePlaceholder")}
-                    {...register("receiverName")}
-                    error={errors.receiverName?.message}
-                  />
-                  <CheckoutInput
-                    label={t("checkout.street")}
-                    autoComplete="street-address"
-                    placeholder={t("checkout.streetPlaceholder")}
-                    {...register("address")}
-                    error={errors.address?.message}
-                  />
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <FieldLabel htmlFor="provinceCode">{t("checkout.province")}</FieldLabel>
-                      <select
-                        id="provinceCode"
-                        autoComplete="address-level1"
-                        disabled={isLoadingProvinces}
-                        aria-invalid={!!errors.provinceCode}
-                        aria-describedby={errors.provinceCode ? "provinceCode-error" : undefined}
-                        {...register("provinceCode", {
-                          onChange: () => {
-                            setValue("wardCode", "");
-                          },
-                        })}
-                        className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <option value="">
-                          {isLoadingProvinces
-                            ? t("checkout.loadingProvinces")
-                            : t("checkout.selectProvince")}
-                        </option>
-                        {provinces.map((province) => (
-                          <option key={province.code} value={province.code}>
-                            {province.name}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.provinceCode?.message && (
-                        <p id="provinceCode-error" className="text-error text-xs">
-                          {errors.provinceCode.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <FieldLabel htmlFor="wardCode">{t("checkout.ward")}</FieldLabel>
-                      <select
-                        id="wardCode"
-                        autoComplete="address-level2"
-                        disabled={!selectedProvinceCode || isLoadingWards}
-                        aria-invalid={!!errors.wardCode}
-                        aria-describedby={errors.wardCode ? "wardCode-error" : undefined}
-                        {...register("wardCode")}
-                        className="h-11 w-full rounded-sm border border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs text-[#1c1a18] transition-colors outline-none focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/20 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <option value="">
-                          {isLoadingWards ? t("checkout.loadingWards") : t("checkout.selectWard")}
-                        </option>
-                        {wards.map((ward) => (
-                          <option key={ward.code} value={ward.code}>
-                            {ward.name}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.wardCode?.message && (
-                        <p id="wardCode-error" className="text-error text-xs">
-                          {errors.wardCode.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {addressApiError && (
-                    <div className="border-error/20 bg-error/10 text-error flex items-start gap-2 rounded-sm border p-3 text-xs">
-                      <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                      <span>{addressApiError}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <SectionTitle number="3" title={t("checkout.paymentMethod")} />
-              <div className="space-y-3">
-                {PAYMENT_METHODS.map((method) => (
-                  <label
-                    key={method.value}
-                    className={`flex cursor-pointer items-center gap-3 rounded-sm border p-4 transition-colors ${
-                      method.disabled
-                        ? "cursor-not-allowed border-[#1c1a18]/5 bg-[#f7f4ef]/20 opacity-50"
-                        : paymentMethod === method.value
-                          ? "border-[#b5573a] bg-[#b5573a]/5"
-                          : "border-[#1c1a18]/10 bg-white hover:border-[#1c1a18]/25"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value={method.value}
-                      checked={paymentMethod === method.value}
-                      onChange={() => setPaymentMethod(method.value)}
-                      disabled={method.disabled}
-                      className="size-4 accent-[#b5573a]"
-                    />
-                    <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
-                      {method.value === "COD" && <Truck className="size-4 text-[#1c1a18]/50" />}
-                      {method.value === "COD"
-                        ? t("checkout.cod")
-                        : t("sale.checkout.payment.sepay")}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </Card>
-
-          <Button
-            type="submit"
-            disabled={isSubmitting || isPreviewLoading}
-            className="h-auto w-full rounded-sm bg-[#1c1a18] py-[1.125rem] text-xs font-semibold tracking-[0.2em] text-white uppercase shadow-md hover:bg-[#b5573a] disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                {t("checkout.processing")}
-              </>
-            ) : (
-              <>
-                <LockKeyhole className="size-4" />
-                {t("checkout.complete")}
-              </>
-            )}
-          </Button>
+          <CheckoutAddressSection
+            register={register}
+            errors={errors}
+            setValue={setValue}
+            userAddresses={userAddresses}
+            selectedAddress={selectedAddress}
+            isManualAddressMode={isManualAddressMode}
+            setIsManualAddressMode={setIsManualAddressMode}
+            onOpenAddressSelectModal={() => {
+              setPendingAddressId(selectedAddress?.id ?? userAddresses[0]?.id ?? null);
+              setIsAddressSelectModalOpen(true);
+            }}
+            fillFromAddress={fillFromAddress}
+            provinces={provinces}
+            wards={wards}
+            isLoadingProvinces={isLoadingProvinces}
+            selectedProvinceCode={selectedProvinceCode}
+            isLoadingWards={isLoadingWards}
+            addressApiError={addressApiError}
+            paymentMethod={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
+          />
         </form>
 
-        <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
-          <h2 className="mb-6 font-serif text-xl font-light tracking-wide text-[#1c1a18]">
-            {t("checkout.orderSummary")}
-          </h2>
-          <div className="no-scrollbar mb-8 max-h-[280px] space-y-4 overflow-y-auto pr-1">
-            {activeItemsList.map((item) => (
-              <div key={`${item.id}-${item.size}`} className="flex items-center gap-4">
-                <div className="relative h-18 w-14 shrink-0 overflow-hidden rounded-none border border-[#1c1a18]/5 bg-[#efe7dc]">
-                  <FashionImage src={item.image} alt={item.name} />
-                </div>
-                <div className="min-w-0 flex-grow text-xs">
-                  <h4 className="truncate font-serif font-semibold text-[#1c1a18]">{item.name}</h4>
-                  <p className="mt-1 truncate text-[9px] tracking-widest text-[#1c1a18]/50 uppercase">
-                    {t("checkout.quantityShort", { count: item.quantity })} / {item.size || "—"} /{" "}
-                    {item.color || "—"}
-                  </p>
-                  {item.priceSource && item.priceSource !== "BASE" ? (
-                    <p className="mt-1 text-[9px] font-semibold tracking-wider text-[#8f4329] uppercase">
-                      {item.priceSource === "FLASH_SALE"
-                        ? t("storefront.sale.type.flash")
-                        : t("storefront.sale.type.standard")}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="text-right">
-                  {item.listPrice && item.listPrice > item.price ? (
-                    <span className="block text-[9px] text-[#1c1a18]/35 line-through">
-                      {money(item.listPrice * item.quantity, locale)}
-                    </span>
-                  ) : null}
-                  <span className="font-numeric font-serif text-xs font-semibold text-[#1c1a18]">
-                    {money(item.price * item.quantity, locale)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mb-8">
-            <div className="flex gap-2">
-              <Input
-                value={couponCode}
-                onChange={(event) => {
-                  setCouponCode(event.target.value);
-                  if (couponError) setCouponError(null);
-                }}
-                autoComplete="off"
-                placeholder={t("checkout.couponPlaceholder")}
-                className="h-10 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-3 text-xs font-semibold tracking-wider uppercase focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
-              />
-              <Button
-                type="button"
-                disabled={isPreviewLoading}
-                onClick={() => {
-                  const normalizedCoupon = couponCode.trim().toUpperCase();
-                  setCouponError(null);
-                  if (normalizedCoupon === appliedCouponCode) {
-                    void loadPreview(normalizedCoupon).catch(() => undefined);
-                  } else {
-                    // Thay đổi state sẽ kích hoạt đúng một lần preview qua effect.
-                    setAppliedCouponCode(normalizedCoupon);
-                  }
-                }}
-                className="h-10 shrink-0 rounded-sm bg-[#1c1a18] px-4 text-[10px] font-bold tracking-widest text-white uppercase hover:bg-[#b5573a]"
-              >
-                {isPreviewLoading
-                  ? t("sale.checkout.preview.checkingCoupon")
-                  : appliedCouponCode
-                    ? t("sale.checkout.preview.updateCoupon")
-                    : t("checkout.apply")}
-              </Button>
-            </div>
-            {couponError && <p className="mt-2 text-xs text-red-600">{couponError}</p>}
-            {appliedCouponCode && !couponError && (
-              <p className="mt-2 text-xs text-[#1c1a18]/50">
-                {t("sale.checkout.preview.couponVerified", {
-                  code: appliedCouponCode,
-                })}
-              </p>
-            )}
-            {activeItemsList.some((item) => item.priceSource === "FLASH_SALE") ? (
-              <p className="mt-2 text-xs leading-5 text-amber-700">
-                {t("sale.checkout.coupon.flashIneligible")}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="space-y-4 border-t border-[#1c1a18]/5 pt-6 text-xs tracking-wide">
-            <LedgerRow label={t("cart.subtotal")} value={money(displayedSubtotal, locale)} />
-            <LedgerRow
-              label={t("checkout.shipping")}
-              value={
-                displayedShippingFee === 0
-                  ? t("common.complimentary")
-                  : money(displayedShippingFee, locale)
-              }
-            />
-            {appliedCouponCode && (
-              <LedgerRow
-                label={`${t("checkout.coupon")} (${appliedCouponCode})`}
-                value={`-${money(displayedDiscount, locale)}`}
-                highlight
-              />
-            )}
-            {preview && appliedCouponCode ? (
-              <LedgerRow
-                label={t("sale.checkout.couponEligibleSubtotal")}
-                value={money(preview.couponEligibleSubtotal, locale)}
-              />
-            ) : null}
-            <Separator className="my-4 bg-[#1c1a18]/10" />
-            <div className="flex justify-between font-semibold text-[#1c1a18] md:text-base">
-              <span>{t("checkout.estimatedTotal")}</span>
-              <span className="font-numeric font-serif text-lg tracking-wider text-[#b5573a]">
-                {money(displayedTotal, locale)}
-              </span>
-            </div>
-            <p className="text-[10px] leading-relaxed text-[#1c1a18]/40">
-              {isPreviewLoading
-                ? t("sale.checkout.summary.checking")
-                : preview
-                  ? t("sale.checkout.summary.serverValidated")
-                  : t("sale.checkout.summary.clientEstimate")}
-            </p>
-          </div>
-        </Card>
+        <CheckoutOrderSummary
+          cart={cart}
+          locale={locale}
+          couponCode={couponCode}
+          setCouponCode={setCouponCode}
+          appliedCouponCode={appliedCouponCode}
+          setAppliedCouponCode={setAppliedCouponCode}
+          couponError={couponError}
+          setCouponError={setCouponError}
+          isPreviewLoading={isPreviewLoading}
+          loadPreview={loadPreview}
+          preview={preview}
+          displayedSubtotal={displayedSubtotal}
+          displayedShippingFee={displayedShippingFee}
+          displayedDiscount={displayedDiscount}
+          displayedTotal={displayedTotal}
+          isSubmitting={isSubmitting}
+        />
       </div>
 
       {/* Address Selection Modal */}
@@ -1028,7 +460,6 @@ export function CheckoutPageClient() {
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/40",
                   )}
                 >
-                  {/* Line 1: Radio + Name + Badge <---> Edit */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <div
@@ -1066,12 +497,10 @@ export function CheckoutPageClient() {
                     </button>
                   </div>
 
-                  {/* Line 2: Phone */}
                   <div className="mt-1 pl-[30px] text-left">
                     <p className="text-ink/70 text-xs leading-tight">{addr.phone}</p>
                   </div>
 
-                  {/* Line 3: Detailed Address */}
                   <div className="mt-1 pl-[30px] text-left">
                     <p
                       className="text-ink/85 truncate text-xs leading-tight"
@@ -1081,7 +510,6 @@ export function CheckoutPageClient() {
                     </p>
                   </div>
 
-                  {/* Line 4: Ward + Province */}
                   <div className="mt-0.5 pl-[30px] text-left">
                     <p
                       className="text-ink/60 truncate text-[11px] leading-tight"
@@ -1125,377 +553,5 @@ export function CheckoutPageClient() {
         addressToEdit={addressToEdit}
       />
     </div>
-  );
-}
-
-function SectionTitle({ number, title }: { number: string; title: string }) {
-  return (
-    <div className="mb-2 flex items-center gap-2">
-      <span className="flex size-5 items-center justify-center rounded-full bg-[#1c1a18] text-[11px] font-semibold text-white">
-        {number}
-      </span>
-      <h2 className="font-serif text-lg font-medium tracking-wide text-[#1c1a18]">{title}</h2>
-    </div>
-  );
-}
-
-function CheckoutInput({
-  label,
-  error,
-  id,
-  name,
-  ...props
-}: ComponentProps<typeof Input> & {
-  label: string;
-  error?: string;
-}) {
-  const inputId = id || name;
-  const errorId = inputId && error ? `${inputId}-error` : undefined;
-
-  return (
-    <div>
-      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
-      <Input
-        id={inputId}
-        name={name}
-        aria-invalid={!!error}
-        aria-describedby={errorId}
-        {...props}
-        className="h-12 rounded-sm border-[#1c1a18]/15 bg-[#f7f4ef]/30 px-4 text-sm focus-visible:border-[#b5573a] focus-visible:ring-[#b5573a]/20"
-      />
-      {error && (
-        <p id={errorId} className="text-error mt-1 text-xs">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function LedgerRow({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div
-      className={
-        highlight ? "flex justify-between text-[#b5573a]" : "flex justify-between text-[#1c1a18]/65"
-      }
-    >
-      <span>{label}</span>
-      <span className="font-semibold text-[#1c1a18]">{value}</span>
-    </div>
-  );
-}
-
-function PaymentDeadline({
-  paymentDueAt,
-  reservationExpiresAt,
-  serverTime,
-  paymentInitiation,
-}: {
-  paymentDueAt: string;
-  reservationExpiresAt?: string | null;
-  serverTime?: string | null;
-  paymentInitiation?: PaymentInitiationResponse | null;
-}) {
-  const { locale, t } = useI18n();
-  const [clockOrigin] = useState(() => {
-    const clientTime = Date.now();
-    const parsedServerTime = serverTime ? Date.parse(serverTime) : Number.NaN;
-    const serverOffset = Number.isFinite(parsedServerTime) ? parsedServerTime - clientTime : 0;
-
-    return {
-      serverOffset,
-      initialNow: clientTime + serverOffset,
-    };
-  });
-  const [now, setNow] = useState(clockOrigin.initialNow);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(
-      () => setNow(Date.now() + clockOrigin.serverOffset),
-      1_000,
-    );
-    return () => window.clearInterval(intervalId);
-  }, [clockOrigin.serverOffset]);
-
-  const dueTimestamp = Date.parse(paymentDueAt);
-  const releaseTimestamp = reservationExpiresAt ? Date.parse(reservationExpiresAt) : dueTimestamp;
-  const remainingPaymentMs = Math.max(0, dueTimestamp - now);
-  const remainingGraceMs = Math.max(0, releaseTimestamp - now);
-  const isPastPaymentDue = now >= dueTimestamp;
-  const isReleased = now >= releaseTimestamp;
-
-  return (
-    <div className="w-full">
-      <div
-        className={`w-full rounded-lg border p-4 text-left transition-colors ${
-          isReleased
-            ? "border-red-200 bg-red-50/70 text-red-800"
-            : isPastPaymentDue
-              ? "border-amber-200 bg-amber-50/70 text-amber-900"
-              : "border-[#b5573a]/20 bg-[#b5573a]/5 text-[#1c1a18]"
-        }`}
-      >
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#b5573a]">
-            <AlarmClock className="size-4 animate-pulse" />
-            <span>
-              {isReleased
-                ? t("sale.checkout.payment.expiredTitle")
-                : isPastPaymentDue
-                  ? t("sale.checkout.payment.graceTitle")
-                  : t("sale.checkout.payment.remainingTitle")}
-            </span>
-          </div>
-          {!isReleased && (
-            <span className="font-mono text-base font-bold tracking-wider text-[#b5573a] tabular-nums sm:text-lg">
-              {formatRemainingTime(isPastPaymentDue ? remainingGraceMs : remainingPaymentMs)}
-            </span>
-          )}
-        </div>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-[#1c1a18]/65">
-          {isReleased
-            ? t("sale.checkout.payment.releasedDescription")
-            : t("sale.checkout.payment.deadlineDescription", {
-                time: formatDate(dueTimestamp, locale, { timeStyle: "short" }),
-                seconds: 30,
-              })}
-        </p>
-      </div>
-      {!isReleased && paymentInitiation?.actionUrl ? (
-        <div className="mt-4">
-          <PaymentContinuationForm paymentInitiation={paymentInitiation} />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function PaymentContinuationForm({
-  paymentInitiation,
-}: {
-  paymentInitiation?: PaymentInitiationResponse | null;
-}) {
-  const { t } = useI18n();
-  if (!paymentInitiation?.actionUrl) return null;
-
-  return (
-    <form
-      action={paymentInitiation.actionUrl}
-      method={paymentInitiation.method.toLowerCase()}
-      className="w-full"
-    >
-      {Object.entries(paymentInitiation.fields ?? {}).map(([name, value]) => (
-        <input key={name} type="hidden" name={name} value={value} />
-      ))}
-      <Button
-        type="submit"
-        className="group relative flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#8f2f20] px-6 text-xs font-bold tracking-[0.12em] text-white uppercase shadow-sm transition-all hover:bg-[#6f2318] active:scale-[0.99]"
-      >
-        <span>{t("sale.checkout.payment.continue")}</span>
-        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-      </Button>
-    </form>
-  );
-}
-
-function formatRemainingTime(milliseconds: number) {
-  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1_000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-// ---------------------------------------------------------------------------
-// Order success card — animated entrance (Delight · Rare / first-time)
-// ---------------------------------------------------------------------------
-
-type OrderSuccessCardProps = {
-  completedOrder: CheckoutResponse;
-  locale: ReturnType<typeof useI18n>["locale"];
-  t: ReturnType<typeof useI18n>["t"];
-};
-
-function OrderSuccessCard({ completedOrder, locale, t }: OrderSuccessCardProps) {
-  const reduce = useReducedMotion();
-  const [isCopied, setIsCopied] = useState(false);
-  const orderCode = completedOrder.orderCode;
-
-  const handleCopyOrderCode = useCallback(() => {
-    if (!orderCode) return;
-    void navigator.clipboard?.writeText(orderCode);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  }, [orderCode]);
-
-  const hasPaymentGateway = Boolean(completedOrder.paymentInitiation?.actionUrl);
-
-  return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        transform: reduce ? "none" : "scale(0.97) translateY(10px)",
-      }}
-      animate={{
-        opacity: 1,
-        transform: "scale(1) translateY(0px)",
-      }}
-      transition={{
-        duration: reduce ? 0.25 : 0.4,
-        ease: EASE_VELA,
-      }}
-      className="mx-auto w-full max-w-[480px]"
-    >
-      <Card className="flex flex-col items-center rounded-xl border-[#1c1a18]/8 bg-white p-6 text-center shadow-lg shadow-black/[0.03] sm:p-8">
-        {/* Check icon badge */}
-        <motion.div
-          initial={{ opacity: 0, transform: reduce ? "none" : "scale(0.3)" }}
-          animate={{ opacity: 1, transform: "scale(1)" }}
-          transition={
-            reduce
-              ? { duration: 0.2, ease: "easeOut" }
-              : {
-                  type: "spring",
-                  stiffness: 380,
-                  damping: 22,
-                  delay: 0.2,
-                }
-          }
-          className="mb-4 flex size-12 items-center justify-center rounded-full bg-[#b5573a]/10 text-[#b5573a]"
-        >
-          <CheckCircle2 className="size-7 stroke-[2.2]" />
-        </motion.div>
-
-        {/* Title & Subtitle */}
-        <h1 className="mb-1.5 font-serif text-2xl font-normal tracking-tight text-[#1c1a18] sm:text-[26px]">
-          {t("checkout.successTitle")}
-        </h1>
-        <p className="mb-6 max-w-xs text-xs leading-relaxed text-[#1c1a18]/65 sm:text-[13px]">
-          {t("checkout.successDescription", { brand: "VELA WEAR" })}
-        </p>
-
-        <div className="w-full space-y-4">
-          {/* Structured Receipt Summary Box */}
-          <div className="w-full rounded-lg border border-[#1c1a18]/8 bg-[#fdfbf7] p-4 text-left text-xs">
-            {/* Order Code Row with Copy */}
-            <div className="flex items-center justify-between border-b border-[#1c1a18]/6 pb-3">
-              <span className="text-[11px] font-medium tracking-wider text-[#1c1a18]/55 uppercase">
-                {t("checkout.orderCode")}
-              </span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-mono text-xs font-bold tracking-wider text-[#1c1a18]">
-                  {completedOrder.orderCode}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopyOrderCode}
-                  title={t("checkout.copyOrderCode")}
-                  className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-[#1c1a18]/60 transition-colors hover:bg-[#1c1a18]/10 hover:text-[#1c1a18]"
-                >
-                  {isCopied ? (
-                    <>
-                      <Check className="size-3 text-emerald-600" />
-                      <span className="font-medium text-emerald-600">{t("checkout.copied")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="size-3" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Key-Value Details */}
-            <div className="space-y-2.5 border-b border-[#1c1a18]/6 py-3 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[#1c1a18]/60">{t("checkout.payment")}</span>
-                <span className="font-medium text-[#1c1a18]">
-                  {completedOrder.paymentMethod === "COD"
-                    ? t("checkout.cod")
-                    : completedOrder.paymentMethod === "SEPAY"
-                      ? t("sale.checkout.payment.sepay")
-                      : completedOrder.paymentMethod}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#1c1a18]/60">{t("checkout.status")}</span>
-                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
-                  {{
-                    PENDING: t("order.status.pending"),
-                    CONFIRMED: t("order.status.confirmed"),
-                    PROCESSING: t("order.status.processing"),
-                    SHIPPING: t("order.status.shipping"),
-                    DELIVERED: t("order.status.delivered"),
-                    CANCELLED: t("order.status.cancelled"),
-                  }[completedOrder.status.toUpperCase()] ?? completedOrder.status}
-                </span>
-              </div>
-            </div>
-
-            {/* Total Amount */}
-            <div className="flex items-center justify-between pt-3">
-              <span className="font-medium text-[#1c1a18]">{t("checkout.total")}</span>
-              <span className="font-numeric text-base font-bold text-[#b5573a]">
-                {money(completedOrder.finalAmount, locale)}
-              </span>
-            </div>
-          </div>
-
-          {/* Payment Countdown / Action Banner if applicable */}
-          {completedOrder.paymentDueAt ? (
-            <div className="w-full">
-              <PaymentDeadline
-                paymentDueAt={completedOrder.paymentDueAt}
-                reservationExpiresAt={completedOrder.reservationExpiresAt}
-                serverTime={completedOrder.serverTime}
-                paymentInitiation={completedOrder.paymentInitiation}
-              />
-            </div>
-          ) : (
-            completedOrder.paymentInitiation && (
-              <div className="w-full">
-                <PaymentContinuationForm paymentInitiation={completedOrder.paymentInitiation} />
-              </div>
-            )
-          )}
-
-          {/* Action Buttons */}
-          <div className="w-full space-y-3 pt-1">
-            <Link
-              href={`/profile/orders/${completedOrder.orderCode}`}
-              className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg px-6 text-xs font-bold tracking-[0.12em] uppercase transition-colors ${
-                hasPaymentGateway
-                  ? "border border-[#1c1a18]/15 bg-white text-[#1c1a18] shadow-2xs hover:bg-[#1c1a18]/5"
-                  : "bg-[#1c1a18] text-white shadow-sm hover:bg-[#b5573a]"
-              }`}
-            >
-              <FileText className="size-4" />
-              <span>{t("checkout.viewOrder")}</span>
-            </Link>
-
-            <Link
-              href="/"
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg px-6 text-xs font-semibold tracking-wider text-[#1c1a18]/60 uppercase transition-colors hover:text-[#1c1a18]"
-            >
-              <span>{t("checkout.continueShopping")}</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Footer delivery notification */}
-        <div className="mt-6 flex w-full items-center justify-center gap-1.5 border-t border-[#1c1a18]/6 pt-4 text-[11px] font-light text-[#1c1a18]/55">
-          <Mail className="size-3.5 shrink-0 opacity-70" />
-          <span>{t("checkout.deliveryUpdates", { name: completedOrder.receiverName })}</span>
-        </div>
-      </Card>
-    </motion.div>
   );
 }
