@@ -1,3 +1,26 @@
+## 2026-08-28 (Architecture Refactor & Seam Deepening)
+
+- **Cart Synchronization Seam (`components/shop/use-cart-sync.ts`, `cart-provider.tsx`):**
+  - Extracted pure cart reconciliation and mapping functions (`getPersistableCartItems`, `mapServerCartItems`, `indexCartByVariant`, `mergeServerCartWithLatestState`, `applyLocalizedCartCopy`) and synchronization effects into `useCartSync`.
+  - Streamlined `CartProvider` to a clean context wrapper (~50 lines).
+- **Checkout Session & Modular Presentation (`components/shop/checkout/`, `checkout-page-client.tsx`):**
+  - Extracted checkout session state, preview debouncing, 409 conflict handling, idempotency generation, and purchase submission into `useCheckoutSession`.
+  - Modularized presentation into `CheckoutAddressSection`, `CheckoutOrderSummary`, `OrderSuccessCard`, and `checkout-form-controls`.
+  - Streamlined `CheckoutPageClient` into concise layout composition (~380 lines from 1,502 lines).
+- **Admin Commerce Mutation Layer (`lib/queries/admin-mutation-helper.ts`, `admin-commerce.ts`):**
+  - Created typed `useAdminMutation` helper to reduce repetitive `invalidateQueries` and `invalidatePublicQueries` boilerplate across all standard admin entity mutations (Products, Brands, Categories, Colors, Sizes, Coupons, Translations).
+  - Maintained exact status optimistic updates and 100% type safety.
+- **Storefront Catalog Decomposition (`components/shop/collection/`, `collection-client.tsx`):**
+  - Decomposed collection UI into `CatalogFilters`, `ActiveFilters`, and `CatalogPagination` while preserving URL state restoration and rollback behavior.
+- **Verification:**
+  - `pnpm format:check`: 100% clean.
+  - `pnpm lint:fast`: 0 warnings, 0 errors in 24ms.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 errors.
+  - `pnpm test:unit`: 55/55 test files passed (221/221 unit tests).
+  - `pnpm test:e2e:smoke`: 16/16 smoke tests passed in 38.6s.
+  - `pnpm build`: 68/68 routes compiled successfully in Turbopack.
+
 ## 2026-08-16 (Address Management CRUD, Admin Layout Prerender Fix, and Auth UI Polish)
 
 - **Admin Layouts Next.js 16 Instant Segment Prerender Fix:**
