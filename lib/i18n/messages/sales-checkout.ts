@@ -20,6 +20,9 @@ export const salesCheckoutMessages = defineMessages(
     "sale.order.reservationNotice":
       "Online orders only hold stock, allocation, and purchase allowance until the time above. The system-confirmed status is authoritative.",
     "sale.payment.method.sepay": "Bank transfer via SePay",
+    "sale.payment.method.vnpay": "VNPay Payment Gateway",
+    "sale.payment.method.momo": "MoMo E-Wallet",
+    "sale.payment.method.stripe": "Credit / Debit Card (Stripe)",
     "sale.payment.status.refundPending": "Refund pending",
     "sale.checkout.preview.retry": "Try again",
     "sale.checkout.preview.checkingCoupon": "Checking",
@@ -34,7 +37,10 @@ export const salesCheckoutMessages = defineMessages(
       "The final price is checked atomically when the order is created. Adding an item to your bag does not reserve a Flash Sale allocation.",
     "sale.checkout.summary.clientEstimate":
       "This is only a browser estimate. The system will validate it again before creating the order.",
-    "sale.checkout.payment.sepay": "Bank transfer via SePay",
+    "sale.checkout.payment.sepay": "Bank transfer via SePay (VietQR)",
+    "sale.checkout.payment.vnpay": "VNPay Payment Gateway (ATM / QR)",
+    "sale.checkout.payment.momo": "MoMo E-Wallet",
+    "sale.checkout.payment.stripe": "International Cards (Visa / Mastercard)",
     "sale.checkout.payment.expiredTitle": "Reservation expired",
     "sale.checkout.payment.graceTitle": "Payment confirmation grace period",
     "sale.checkout.payment.remainingTitle": "Payment time remaining",
@@ -71,6 +77,9 @@ export const salesCheckoutMessages = defineMessages(
     "sale.order.reservationNotice":
       "Đơn online chỉ giữ tồn kho, suất sale và lượt mua đến mốc ở trên. Trạng thái do hệ thống xác nhận là trạng thái chính thức.",
     "sale.payment.method.sepay": "Chuyển khoản ngân hàng qua SePay",
+    "sale.payment.method.vnpay": "Cổng thanh toán VNPay",
+    "sale.payment.method.momo": "Ví điện tử MoMo",
+    "sale.payment.method.stripe": "Thẻ quốc tế Visa / Mastercard (Stripe)",
     "sale.payment.status.refundPending": "Đang chờ hoàn tiền",
     "sale.checkout.preview.retry": "Thử lại",
     "sale.checkout.preview.checkingCoupon": "Đang kiểm tra",
@@ -85,7 +94,10 @@ export const salesCheckoutMessages = defineMessages(
       "Giá cuối cùng vẫn được kiểm tra nguyên tử khi tạo đơn; thêm vào giỏ không giữ suất Flash Sale.",
     "sale.checkout.summary.clientEstimate":
       "Đây chỉ là ước tính trên trình duyệt. Hệ thống sẽ kiểm tra lại trước khi tạo đơn.",
-    "sale.checkout.payment.sepay": "Chuyển khoản ngân hàng qua SePay",
+    "sale.checkout.payment.sepay": "Chuyển khoản ngân hàng (VietQR)",
+    "sale.checkout.payment.vnpay": "Cổng thanh toán VNPay (ATM / QR / Thẻ nội địa)",
+    "sale.checkout.payment.momo": "Ví điện tử MoMo",
+    "sale.checkout.payment.stripe": "Thẻ quốc tế Visa / Mastercard (Stripe)",
     "sale.checkout.payment.expiredTitle": "Đã hết thời gian giữ hàng",
     "sale.checkout.payment.graceTitle": "Đang trong thời gian gia hạn xác nhận",
     "sale.checkout.payment.remainingTitle": "Thời gian thanh toán còn lại",

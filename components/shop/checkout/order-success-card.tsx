@@ -27,6 +27,20 @@ export function PaymentContinuationForm({
   const { t } = useI18n();
   if (!paymentInitiation?.actionUrl) return null;
 
+  const isGet = paymentInitiation.method.toUpperCase() === "GET";
+
+  if (isGet) {
+    return (
+      <a
+        href={paymentInitiation.actionUrl}
+        className="group relative flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#8f2f20] px-6 text-xs font-bold tracking-[0.12em] text-white uppercase shadow-sm transition-all hover:bg-[#6f2318] active:scale-[0.99]"
+      >
+        <span>{t("sale.checkout.payment.continue")}</span>
+        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+      </a>
+    );
+  }
+
   return (
     <form
       action={paymentInitiation.actionUrl}
