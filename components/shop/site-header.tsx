@@ -34,7 +34,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { NavigationMenu as BaseNavigationMenu } from "@base-ui/react/navigation-menu";
-import { money } from "@/lib/vela-data";
+import { money, resolveImageUrl } from "@/lib/vela-data";
 import { useSearchSuggestions } from "@/components/shop/use-search-suggestions";
 import { getStorefrontNavigation } from "@/lib/storefront-navigation";
 import { cn } from "@/lib/utils";
@@ -820,16 +820,25 @@ export function SiteHeader() {
                       <Link
                         href="/profile"
                         aria-label={t("storefront.nav.viewProfile")}
-                        className={`border-hairline flex size-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border bg-[#efe7dc] text-xs font-semibold text-[#1c1a18] transition-all duration-300 group-hover:border-[#b5573a] group-hover:bg-[#b5573a] group-hover:text-white`}
+                        className="border-hairline relative flex size-8 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border bg-[#efe7dc] text-xs font-semibold text-[#1c1a18] transition-all duration-300 group-hover:border-[#b5573a]"
                       >
-                        {safeUser.fullName
-                          ? safeUser.fullName
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .substring(0, 2)
-                              .toUpperCase()
-                          : "U"}
+                        {safeUser.avatar ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={resolveImageUrl(safeUser.avatar)}
+                            alt={safeUser.fullName || "User avatar"}
+                            className="size-full rounded-full object-cover"
+                          />
+                        ) : safeUser.fullName ? (
+                          safeUser.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .substring(0, 2)
+                            .toUpperCase()
+                        ) : (
+                          "U"
+                        )}
                       </Link>
 
                       {/* Invisible bridge to keep hover state active - scoped strictly to avatar circle */}

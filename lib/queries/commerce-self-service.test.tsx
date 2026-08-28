@@ -10,6 +10,7 @@ const {
   getMyOrdersMock,
   updateMyAddressMock,
   updateMyProfileMock,
+  uploadMyAvatarMock,
 } = vi.hoisted(() => ({
   createMyAddressMock: vi.fn(),
   deleteMyAddressMock: vi.fn(),
@@ -17,6 +18,7 @@ const {
   getMyOrdersMock: vi.fn(),
   updateMyAddressMock: vi.fn(),
   updateMyProfileMock: vi.fn(),
+  uploadMyAvatarMock: vi.fn(),
 }));
 
 vi.mock("@/lib/api/commerce", async (importOriginal) => {
@@ -29,6 +31,7 @@ vi.mock("@/lib/api/commerce", async (importOriginal) => {
     getMyOrders: getMyOrdersMock,
     updateMyAddress: updateMyAddressMock,
     updateMyProfile: updateMyProfileMock,
+    uploadMyAvatar: uploadMyAvatarMock,
   };
 });
 
@@ -39,6 +42,7 @@ import {
   useMyOrdersQuery,
   useUpdateMyAddressMutation,
   useUpdateProfileMutation,
+  useUploadAvatarMutation,
 } from "@/lib/queries/commerce";
 import { queryKeys } from "@/lib/queries/keys";
 
@@ -191,6 +195,23 @@ describe("customer self-service query hooks", () => {
     });
 
     expect(updateMyProfileMock).toHaveBeenCalledWith(request);
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.auth.root });
+  });
+
+  it("uploads avatar and invalidates auth root cache", async () => {
+    uploadMyAvatarMock.mockResolvedValueOnce({ id: 11, avatar: "/uploads/avatars/test.png" });
+    const { queryClient, Wrapper } = createQueryHarness();
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    const { result } = renderHook(() => useUploadAvatarMutation(), {
+      wrapper: Wrapper,
+    });
+    const file = new File(["dummy"], "avatar.png", { type: "image/png" });
+
+    await act(async () => {
+      await result.current.mutateAsync(file);
+    });
+
+    expect(uploadMyAvatarMock).toHaveBeenCalledWith(file);
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.auth.root });
   });
 });

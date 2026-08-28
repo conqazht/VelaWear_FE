@@ -55,6 +55,7 @@ vi.mock("@/lib/queries/commerce", () => ({
   useMyOrdersQuery: (...args: unknown[]) => useMyOrdersQueryMock(...args),
   useMyAddressesQuery: (...args: unknown[]) => useMyAddressesQueryMock(...args),
   useUpdateProfileMutation: () => useUpdateProfileMutationMock(),
+  useUploadAvatarMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useDeleteMyAddressMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useUpdateMyAddressMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useCreateMyAddressMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
