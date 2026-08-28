@@ -32,14 +32,16 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
-  const orders = ordersQuery.data?.result ?? [];
+  const orders = useMemo(() => ordersQuery.data?.result ?? [], [ordersQuery.data?.result]);
 
-  const orderStats = orderStatusOrder.map((status) => ({
-    status,
-    ...orderStatusMeta[status],
-    label: t(orderStatusLabelKeys[status]),
-    count: orders.filter((order) => order.status === status).length,
-  }));
+  const orderStats = useMemo(() => {
+    return orderStatusOrder.map((status) => ({
+      status,
+      ...orderStatusMeta[status],
+      label: t(orderStatusLabelKeys[status]),
+      count: orders.filter((order) => order.status === status).length,
+    }));
+  }, [orders, t]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -129,7 +131,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
               <button
                 type="button"
                 onClick={() => setSelectedStatus("ALL")}
-                className={`rounded-sm px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
                   selectedStatus === "ALL"
                     ? "bg-[#1c1a18] text-white"
                     : "bg-[#1c1a18]/5 text-[#1c1a18]/70 hover:bg-[#1c1a18]/10"
@@ -144,7 +146,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
                     key={status}
                     type="button"
                     onClick={() => setSelectedStatus(status)}
-                    className={`rounded-sm px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors cursor-pointer ${
+                    className={`cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
                       isSelected
                         ? "bg-[#1c1a18] text-white"
                         : "bg-[#1c1a18]/5 text-[#1c1a18]/70 hover:bg-[#1c1a18]/10"
@@ -158,7 +160,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
 
             {/* Search Input */}
             <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#1c1a18]/40" />
+              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#1c1a18]/40" />
               <input
                 type="text"
                 value={searchQuery}
@@ -170,7 +172,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#1c1a18]/40 hover:text-[#1c1a18] cursor-pointer"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer text-[#1c1a18]/40 hover:text-[#1c1a18]"
                   aria-label="Clear search"
                 >
                   <X className="size-3.5" />
@@ -200,7 +202,7 @@ export function ProfileOrdersTab({ ordersQuery }: ProfileOrdersTabProps) {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex items-center rounded-sm border border-[#1c1a18]/20 bg-white px-5 py-2 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:border-[#1c1a18] hover:bg-[#efe7dc] cursor-pointer"
+              className="inline-flex cursor-pointer items-center rounded-sm border border-[#1c1a18]/20 bg-white px-5 py-2 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:border-[#1c1a18] hover:bg-[#efe7dc]"
             >
               {t("account.orders.clearFilter")}
             </button>

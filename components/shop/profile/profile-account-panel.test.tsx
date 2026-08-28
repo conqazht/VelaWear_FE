@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { User } from "@/lib/api/types";
 import { ProfileAccountPanel } from "./profile-account-panel";
 
 const { mutateAsyncMock, checkSessionMock } = vi.hoisted(() => ({
@@ -44,14 +45,16 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("ProfileAccountPanel - Avatar Upload & Visibility", () => {
-  const dummyUser = {
+  const dummyUser: User = {
     id: 1,
     email: "test@example.com",
     fullName: "Cong Anh",
     birthDate: "2000-01-01",
-    gender: "MALE" as const,
+    gender: "MALE",
     avatar: null,
+    hasPassword: true,
     createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
   };
 
   const dummyAddressesQuery = {

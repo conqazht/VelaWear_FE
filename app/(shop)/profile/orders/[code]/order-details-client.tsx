@@ -145,9 +145,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   const completedOrder = order?.status === "COMPLETED";
   const canReorder = Boolean(
     order &&
-      ["COMPLETED", "DELIVERED", "CANCELLED", "REFUNDED"].includes(
-        order.status.toUpperCase(),
-      ),
+    ["COMPLETED", "DELIVERED", "CANCELLED", "REFUNDED"].includes(order.status.toUpperCase()),
   );
   const reviewedOrderItemIds = new Set(
     (reviewsQuery.data?.result ?? [])
@@ -166,7 +164,9 @@ export default function OrderDetailsClient({ code }: { code: string }) {
         name: item.productName,
         price: item.price,
         originalPrice: item.listPrice,
-        image: item.image ? resolveImageUrl(item.image) : "/images/products/product-placeholder.webp",
+        image: item.image
+          ? resolveImageUrl(item.image)
+          : "/images/products/product-placeholder.webp",
         category: "",
         color: color || "Default",
         size: size || "Default",
@@ -179,16 +179,19 @@ export default function OrderDetailsClient({ code }: { code: string }) {
     [addToCart, router],
   );
 
+  const items = order?.items;
   const handleReorderAll = useCallback(() => {
-    if (!order?.items?.length) return;
-    for (const item of order.items) {
+    if (!items?.length) return;
+    for (const item of items) {
       const [color, size] = item.variantName ? item.variantName.split(" / ") : ["Default", "M"];
       const product: Product = {
         id: item.productSlug || String(item.id),
         name: item.productName,
         price: item.price,
         originalPrice: item.listPrice,
-        image: item.image ? resolveImageUrl(item.image) : "/images/products/product-placeholder.webp",
+        image: item.image
+          ? resolveImageUrl(item.image)
+          : "/images/products/product-placeholder.webp",
         category: "",
         color: color || "Default",
         size: size || "Default",
@@ -198,7 +201,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
       addToCart(product, color || "Default", size || "Default");
     }
     router.push("/checkout");
-  }, [addToCart, order?.items, router]);
+  }, [addToCart, items, router]);
 
   const orderCode = order?.orderCode;
   const handleCopyOrderCode = useCallback(() => {

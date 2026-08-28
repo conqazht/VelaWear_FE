@@ -261,7 +261,11 @@ describe("OrderDetailsClient self-service contract", () => {
     render(<OrderDetailsClient code="ORDER-11" />, { wrapper: Wrapper });
 
     expect(await screen.findByText("Linen Shirt")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "account.order.reorderAll" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "account.order.buyAgain" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "account.order.reorderAll" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "account.order.buyAgain" }),
+    ).not.toBeInTheDocument();
   });
 });
