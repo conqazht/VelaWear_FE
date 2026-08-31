@@ -1,3 +1,59 @@
+## 2026-08-31 (Muted Espresso Palette, Theme Controls Removal & Single Light Mode)
+
+- **Muted Espresso Palette Integration (`app/globals.css`, `lib/preferences/theme.ts`):**
+  - Replaced Cobalt accent with **Muted Espresso** (`#735639` / `oklch(0.450 0.070 55)`) — rich earthy luxury complementing Storefront's Terracotta.
+  - Remapped 5 chart tokens to harmonized warm tones: Chart 1 (`#735639` Espresso), Chart 2 (`#2e8555` Sage), Chart 3 (`#c25e2e` Terracotta), Chart 4 (`#b89028` Sand), Chart 5 (`#82786e` Taupe).
+- **Header Theme Controls Removal (`app/(admin)/dashboard/layout.tsx`):**
+  - Removed `<LayoutControls />` (preferences popover) and `<ThemeSwitcher />` from header to provide a focused, single unified admin experience.
+- **Strict Light Mode Enforcement (`app/(admin)/_components/admin-theme-enforcer.tsx`, `preferences-config.ts`):**
+  - Locked Admin portal strictly to Light Mode; removed all Admin dark mode CSS variables and scoped overrides from `globals.css`.
+  - Default `theme_mode` set to `"light"`.
+- **Prototype Clean-up:**
+  - Removed temporary interactive prototype (`/prototypes/admin-colors`) after successful review and selection.
+
+## 2026-08-29 (Admin Design System Implementation & Sidebar Reorganization)
+
+- **Nordic Slate & Mineral Cobalt Color Palette (`app/globals.css`, `lib/preferences/theme.ts`):**
+  - Remapped light and dark admin CSS variables to Nordic Slate & Mineral Cobalt palette (`#f8fafc` canvas, `#ffffff` card surface, `#e2e8f0` border, `#0f172a` ink, `#2563eb` Royal Cobalt primary CTA).
+  - Remapped 5 chart color tokens (`--chart-1` to `--chart-5`) from grayscale to 5 vibrant distinct hues (Cobalt, Teal, Amber, Violet, Slate).
+  - Maintained `--radius: 0.625rem` (10px) base curve as requested by user.
+  - Added scoped CSS overrides: forced Sans-Serif font on `card-title` / `dialog-title`, crisp 1px hairline card borders + whisper shadow, uppercase sticky table headers.
+- **Sidebar Streamlining & Reorganization (`navigation/sidebar/sidebar-items.ts`, `app-sidebar.tsx`, `nav-main.tsx`):**
+  - Moved **`Dashboards`** group to the top of navigation (E-commerce as main default dashboard, Analytics, Finance, CRM).
+  - Positioned **`Management`** group second (Products, Categories, Brands, Attributes, Orders, Sales, Coupons, Users, Roles, Permissions).
+  - Positioned **`Tools`** group third (Invoice, Chat).
+  - Added `gap-1` to `SidebarMenu` to prevent adjacent active/hover pill overlap.
+  - Added scoped dark/light popover, select, and dropdown CSS overrides with subtle shadows and proper item padding.
+  - Commented out non-core SaaS template items (`Default`, `Infrastructure`, `Productivity`, `Email`, `Calendar`, `Kanban`, `Tasks`).
+  - Commented out the top `+ Quick Create` and `Mail` button action group in `nav-main.tsx` as requested.
+  - Updated brand logo link in `app-sidebar.tsx` to navigate directly to `/dashboard/ecommerce`.
+- **Reusable Status Badge Component (`app/(admin)/dashboard/_components/admin-status-badge.tsx`):**
+  - Implemented `AdminStatusBadge` with 4-tier semantic status matrix (`success`, `warning`, `danger`, `info`, `neutral`) with complete light/dark mode support.
+  - Integrated into `products-management.tsx`, `order-status-badge.tsx`, `overview-kpis.tsx`, and `analytics-kpi-strip.tsx`.
+- **Screen & Table Typography Polish (`resource-page.tsx`, `overview-kpis.tsx`, `kpi-strip.tsx`, `analytics-kpi-strip.tsx`):**
+  - Enforced `tabular-nums` on all metric cards, prices, percentages, and counters.
+  - Upgraded table header and row hover styles with smooth 100ms transitions.
+- **Verification:**
+  - `pnpm format:check`: 100% clean.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 errors.
+  - `pnpm test:unit`: 56/56 test files passed (229/229 unit tests).
+  - `pnpm build`: 68/68 static & dynamic routes compiled with 0 errors.
+
+## 2026-08-28 (Admin Design System Specification & Light Theme Architecture)
+
+- **Admin Design System Specification (`docs/ADMIN_DESIGN.md`):**
+  - Created comprehensive Design System document for Vela Wear Admin Dashboard following `stitch-design-taste`, `better-colors`, `better-ui`, `better-typography`, and `apple-design` principles.
+  - Defined Nordic Slate & Mineral Cobalt light color palette (`#f8fafc` canvas, `#ffffff` card surface, `#e2e8f0` crisp hairline border, `#0f172a` primary ink, `#2563eb` cobalt primary action) strictly separated from storefront warm-cream/terracotta palette.
+  - Specified typography architecture with `Geist Sans` UI, mandatory `tabular-nums` for numeric/monetary/SKU data, and complete ban on Serif fonts in dashboard tables.
+  - Established concentric multi-tier radii (`rounded-xl` / `rounded-lg` / `rounded-md` / `rounded-full`), tactile press micro-motion (`active:scale-[0.97]`), and explicit anti-patterns checklist.
+- **Verification:**
+  - `pnpm format:check`: 100% clean.
+  - `pnpm lint:fast`: 0 warnings, 0 errors in 33ms.
+  - `pnpm exec tsc --noEmit`: 0 errors.
+  - `pnpm test:unit`: 56/56 test files passed (229/229 unit tests).
+
 ## 2026-08-28 (Architecture Refactor & Seam Deepening)
 
 - **Cart Synchronization Seam (`components/shop/use-cart-sync.ts`, `cart-provider.tsx`):**

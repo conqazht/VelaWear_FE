@@ -6,19 +6,28 @@ import type { AdminOrderStatus, AdminPaymentStatus } from "@/lib/api/admin-order
 import { cn } from "@/lib/utils";
 
 const orderStatusClasses: Record<AdminOrderStatus, string> = {
-  PENDING: "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  CONFIRMED: "border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-300",
-  SHIPPING: "border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300",
-  COMPLETED: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  CANCELLED: "border-destructive/25 bg-destructive/10 text-destructive",
-  REFUNDED: "border-rose-500/25 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+  PENDING:
+    "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300",
+  CONFIRMED:
+    "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300",
+  SHIPPING:
+    "border-indigo-200 bg-indigo-50 text-indigo-800 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-300",
+  COMPLETED:
+    "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300",
+  CANCELLED:
+    "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-300",
+  REFUNDED:
+    "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300",
 };
 
 const paymentStatusClasses: Record<AdminPaymentStatus, string> = {
-  UNPAID: "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  PAID: "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  FAILED: "border-destructive/25 bg-destructive/10 text-destructive",
-  REFUNDED: "border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-300",
+  UNPAID:
+    "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300",
+  PAID: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300",
+  FAILED:
+    "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-300",
+  REFUNDED:
+    "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300",
 };
 
 const ORDER_STATUS_MESSAGE_KEYS = {

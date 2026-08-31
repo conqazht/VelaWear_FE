@@ -258,12 +258,15 @@ export function ResourcePage<T extends { id: number }>({
 
         <div className="overflow-x-auto">
           <Table className="min-w-[860px] **:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4">
-            <TableHeader className="[&_tr]:border-t">
+            <TableHeader className="bg-muted/60 [&_tr]:border-t">
               <TableRow className="hover:bg-transparent">
                 {columns.map((column) => (
                   <TableHead
                     key={column.key}
-                    className={cn("h-11 font-normal whitespace-nowrap", column.headerClassName)}
+                    className={cn(
+                      "text-muted-foreground h-10 text-xs font-semibold tracking-wider whitespace-nowrap uppercase",
+                      column.headerClassName,
+                    )}
                   >
                     {column.header}
                   </TableHead>
@@ -283,7 +286,10 @@ export function ResourcePage<T extends { id: number }>({
                 ))
               ) : rows.length > 0 ? (
                 rows.map((row) => (
-                  <TableRow key={row.id} className="border-border/60 hover:bg-muted/30">
+                  <TableRow
+                    key={row.id}
+                    className="border-border/40 hover:bg-muted/40 transition-colors duration-100"
+                  >
                     {columns.map((column) => (
                       <TableCell
                         key={column.key}

@@ -5,7 +5,7 @@ import { useLayoutEffect } from "react";
 import type { ThemeMode } from "@/lib/preferences/theme";
 import { applyThemeMode } from "@/lib/preferences/theme-utils";
 
-export function AdminThemeEnforcer({ themeMode }: { themeMode: ThemeMode }) {
+export function AdminThemeEnforcer(_props?: { themeMode?: ThemeMode }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
 
@@ -16,9 +16,8 @@ export function AdminThemeEnforcer({ themeMode }: { themeMode: ThemeMode }) {
       root.setAttribute("data-theme-preset", "default");
     }
 
-    // The inline script handles hard navigations. This layout effect applies
-    // the same preference during client-side transitions into the admin app.
-    applyThemeMode(themeMode);
+    // Admin portal is strictly locked to unified Light mode
+    applyThemeMode("light");
 
     return () => {
       root.removeAttribute("data-admin-theme");
@@ -29,7 +28,7 @@ export function AdminThemeEnforcer({ themeMode }: { themeMode: ThemeMode }) {
       root.classList.remove("dark", "disable-transitions");
       root.style.removeProperty("color-scheme");
     };
-  }, [themeMode]);
+  }, []);
 
   return null;
 }

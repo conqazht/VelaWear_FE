@@ -18,6 +18,10 @@ import {
   getApiErrorMessage,
   resolveAdminAssetUrl,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import {
+  AdminStatusBadge,
+  type AdminStatusVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -102,11 +106,12 @@ const PRODUCT_STATUS_MESSAGE_KEYS = {
 
 const PRODUCT_STATUSES: ProductStatus[] = ["DRAFT", "ACTIVE", "INACTIVE", "OUT_OF_STOCK"];
 
-function getStatusVariant(status: ProductStatus) {
-  if (status === "ACTIVE") return "default" as const;
-  if (status === "INACTIVE") return "destructive" as const;
-  if (status === "DRAFT") return "secondary" as const;
-  return "outline" as const;
+function getProductStatusVariant(status: ProductStatus): AdminStatusVariant {
+  if (status === "ACTIVE") return "success";
+  if (status === "INACTIVE") return "danger";
+  if (status === "DRAFT") return "neutral";
+  if (status === "OUT_OF_STOCK") return "warning";
+  return "neutral";
 }
 
 function toTranslationFormValue(translation?: ProductTranslation): ProductTranslationFormValue {
@@ -846,9 +851,9 @@ export function ProductsManagement() {
               aria-label={t("admin.commerce.translation.toggleAria", { name: product.name })}
               onCheckedChange={(checked) => toggleProductStatus(product, checked)}
             />
-            <Badge variant={getStatusVariant(product.status)}>
+            <AdminStatusBadge variant={getProductStatusVariant(product.status)}>
               {t(PRODUCT_STATUS_MESSAGE_KEYS[product.status])}
-            </Badge>
+            </AdminStatusBadge>
           </div>
         );
       },

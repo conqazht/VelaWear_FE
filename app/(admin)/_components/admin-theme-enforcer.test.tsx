@@ -22,15 +22,15 @@ describe("AdminThemeEnforcer", () => {
     vi.unstubAllGlobals();
   });
 
-  it("applies the persisted mode and removes admin theme state on unmount", () => {
-    const { unmount } = render(<AdminThemeEnforcer themeMode="dark" />);
+  it("enforces light mode on mount and cleans up admin theme state on unmount", () => {
+    const { unmount } = render(<AdminThemeEnforcer themeMode="light" />);
     const root = document.documentElement;
 
     expect(root).toHaveAttribute("data-admin-theme", "true");
     expect(root).toHaveAttribute("data-theme-preset", "default");
-    expect(root).toHaveAttribute("data-theme-mode", "dark");
-    expect(root).toHaveClass("dark");
-    expect(root.style.colorScheme).toBe("dark");
+    expect(root).toHaveAttribute("data-theme-mode", "light");
+    expect(root).not.toHaveClass("dark");
+    expect(root.style.colorScheme).toBe("light");
 
     unmount();
 
