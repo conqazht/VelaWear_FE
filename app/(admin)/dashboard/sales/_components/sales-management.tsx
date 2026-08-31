@@ -15,6 +15,7 @@ import {
   formatAdminDateTime,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import { AdminStatusBadge } from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,6 @@ import {
   usePublishAdminSaleCampaignMutation,
 } from "@/lib/queries/admin-sales";
 import type { SalesAdminManagementTranslationKey } from "@/lib/i18n/messages/sales-admin-management";
-
 import { getSaleCampaignPhase } from "../_data/sale-campaign-form";
 
 const ALL_FILTER = "ALL";
@@ -71,15 +71,15 @@ type ListAction = {
 };
 
 function phaseVariant(phase: SaleCampaignPhase) {
-  if (phase === "LIVE") return "default" as const;
-  if (phase === "UPCOMING") return "secondary" as const;
-  return "outline" as const;
+  if (phase === "LIVE") return "live" as const;
+  if (phase === "UPCOMING") return "upcoming" as const;
+  return "neutral" as const;
 }
 
 function statusVariant(status: SaleCampaignStatus) {
-  if (status === "CANCELLED") return "destructive" as const;
-  if (status === "DRAFT") return "secondary" as const;
-  return "outline" as const;
+  if (status === "CANCELLED") return "danger" as const;
+  if (status === "DRAFT") return "draft" as const;
+  return "active" as const;
 }
 
 function campaignTotals(campaign: AdminSaleCampaign) {
@@ -179,11 +179,17 @@ export function SalesManagement() {
     {
       key: "type",
       header: t("admin.sales.management.column.typeItems"),
+      headerClassName: "w-36 min-w-[140px]",
+      className: "w-36 min-w-[140px]",
       cell: (campaign) => (
         <div className="grid gap-1">
-          <Badge variant={campaign.type === "FLASH" ? "default" : "secondary"} className="w-fit">
+          <AdminStatusBadge
+            variant={campaign.type === "FLASH" ? "flash" : "standard"}
+            size="sm"
+            className="w-fit"
+          >
             {t(TYPE_LABEL_KEYS[campaign.type])}
-          </Badge>
+          </AdminStatusBadge>
           <span className="text-muted-foreground text-xs tabular-nums">
             {t("admin.sales.management.variantCount", {
               count: campaign.items.length,
@@ -195,7 +201,8 @@ export function SalesManagement() {
     {
       key: "schedule",
       header: t("admin.sales.management.column.schedule"),
-      className: "whitespace-nowrap",
+      headerClassName: "w-44 min-w-[170px] whitespace-nowrap",
+      className: "w-44 min-w-[170px] whitespace-nowrap",
       cell: (campaign) => (
         <div className="grid gap-0.5">
           <span>{formatAdminDateTime(campaign.startsAt, locale)}</span>
@@ -210,7 +217,8 @@ export function SalesManagement() {
     {
       key: "quota",
       header: t("admin.sales.management.column.flashQuota"),
-      className: "min-w-48",
+      headerClassName: "min-w-[180px]",
+      className: "min-w-[180px]",
       cell: (campaign) => {
         if (campaign.type !== "FLASH") {
           return (
@@ -242,14 +250,18 @@ export function SalesManagement() {
     {
       key: "lifecycle",
       header: t("admin.sales.management.column.lifecycle"),
+      headerClassName: "w-52 min-w-[210px] whitespace-nowrap",
+      className: "w-52 min-w-[210px] whitespace-nowrap",
       cell: (campaign) => {
         const phase = getSaleCampaignPhase(campaign);
         return (
           <div className="flex flex-wrap gap-1.5">
-            <Badge variant={statusVariant(campaign.status)}>
+            <AdminStatusBadge variant={statusVariant(campaign.status)} size="sm">
               {t(STATUS_LABEL_KEYS[campaign.status])}
-            </Badge>
-            <Badge variant={phaseVariant(phase)}>{t(PHASE_LABEL_KEYS[phase])}</Badge>
+            </AdminStatusBadge>
+            <AdminStatusBadge variant={phaseVariant(phase)} dot={phase === "LIVE"} size="sm">
+              {t(PHASE_LABEL_KEYS[phase])}
+            </AdminStatusBadge>
           </div>
         );
       },
@@ -278,6 +290,7 @@ export function SalesManagement() {
           <Button
             variant="ghost"
             size="icon-sm"
+            nativeButton={false}
             aria-label={t("admin.sales.management.action.viewAria", {
               name: campaign.name,
             })}

@@ -16,8 +16,7 @@ export function AdminThemeEnforcer({ themeMode }: { themeMode: ThemeMode }) {
       root.setAttribute("data-theme-preset", "default");
     }
 
-    // The inline script handles hard navigations. This layout effect applies
-    // the same preference during client-side transitions into the admin app.
+    // Apply active theme mode (light / dark / system)
     applyThemeMode(themeMode);
 
     return () => {

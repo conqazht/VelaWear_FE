@@ -13,6 +13,10 @@ import {
   downloadCsv,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import {
+  AdminStatusBadge,
+  getRoleBadgeVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,7 +58,7 @@ export function Roles() {
   const rolesQuery = useAdminRolesQuery({
     page,
     size: pageSize,
-    sort: "createdAt,desc",
+    sort: "id,desc",
     ...(searchValue.trim() ? { [searchField]: searchValue.trim() } : {}),
   });
   const roleDetailQuery = useAdminRoleQuery(formMode === "edit" ? activeRole?.id : undefined);
@@ -136,11 +140,13 @@ export function Roles() {
       key: "name",
       header: t("admin.commerce.roles.column.role"),
       cell: (role) => (
-        <div className="min-w-44">
-          <p className="font-medium">{role.name}</p>
-          <p className="text-muted-foreground text-xs tabular-nums">
+        <div className="flex min-w-44 items-center gap-2">
+          <AdminStatusBadge variant={getRoleBadgeVariant(role.name)} size="sm">
+            {role.name}
+          </AdminStatusBadge>
+          <span className="text-muted-foreground text-xs tabular-nums">
             {t("admin.commerce.roles.id", { id: role.id })}
-          </p>
+          </span>
         </div>
       ),
     },

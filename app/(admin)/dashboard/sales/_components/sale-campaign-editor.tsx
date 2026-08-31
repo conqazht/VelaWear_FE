@@ -162,7 +162,11 @@ export function SaleCampaignEditor({ campaignId }: { campaignId?: number }) {
             >
               <RefreshCw /> {t("admin.sales.editor.tryAgain")}
             </Button>
-            <Button variant="outline" render={<Link href="/dashboard/sales" />}>
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/dashboard/sales" />}
+            >
               {t("admin.sales.editor.backToCampaigns")}
             </Button>
           </div>
@@ -527,6 +531,7 @@ function SaleCampaignEditorForm({
           <Button
             variant="outline"
             size="icon-sm"
+            nativeButton={false}
             render={<Link href="/dashboard/sales" />}
             aria-label={t("admin.sales.editor.backAria")}
           >

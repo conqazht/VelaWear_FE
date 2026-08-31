@@ -7,12 +7,12 @@ vi.mock("@/lib/fonts/registry", () => ({
 import { PREFERENCE_DEFAULTS, parsePreference } from "@/lib/preferences/preferences-config";
 
 describe("theme preference defaults", () => {
-  it("defaults missing and invalid theme modes to system", () => {
-    expect(PREFERENCE_DEFAULTS.theme_mode).toBe("system");
-    expect(parsePreference("theme_mode", undefined)).toBe("system");
-    expect(parsePreference("theme_mode", null)).toBe("system");
-    expect(parsePreference("theme_mode", "")).toBe("system");
-    expect(parsePreference("theme_mode", "sepia")).toBe("system");
+  it("defaults missing and invalid theme modes to light", () => {
+    expect(PREFERENCE_DEFAULTS.theme_mode).toBe("light");
+    expect(parsePreference("theme_mode", undefined)).toBe("light");
+    expect(parsePreference("theme_mode", null)).toBe("light");
+    expect(parsePreference("theme_mode", "")).toBe("light");
+    expect(parsePreference("theme_mode", "sepia")).toBe("light");
   });
 
   it("preserves explicit light and dark preferences", () => {
