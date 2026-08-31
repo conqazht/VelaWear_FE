@@ -1,3 +1,11 @@
+## 2026-08-31 (Seed Test Accounts Documentation & Fullstack Test Gate Green)
+
+- **Default Test Accounts in `README.md`:**
+  - Added dedicated documentation for seed test accounts: Admin (`admin@velawear.local` / `Password123!`), Staff (`staff@velawear.local` / `Password123!`), Primary Customer (`user@velawear.local` / `Password123!`), and Secondary Customer (`linh@velawear.local` / `Password123!`).
+- **Fullstack E2E Suite Alignment (`fixtures/fullstack.ts`):**
+  - Aligned admin credential fallback to `Password123!` matching the PostgreSQL seed database.
+  - Verified 9/9 Playwright fullstack tests pass against live Spring Boot backend (including Admin category lifecycle and RBAC enforcement).
+
 ## 2026-08-31 (Admin Comprehensive Test Suite: Unit, Smoke & Fullstack)
 
 - **Admin Status Badge Unit Tests (`admin-status-badge.test.tsx`):**
