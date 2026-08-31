@@ -16,6 +16,10 @@ import {
   downloadCsv,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import {
+  AdminStatusBadge,
+  getHttpMethodVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,13 +50,6 @@ function isPermissionMethod(value: string): value is PermissionMethod {
   return PERMISSION_METHODS.some((method) => method === value);
 }
 
-function getMethodVariant(method: string) {
-  if (method === "DELETE") return "destructive" as const;
-  if (method === "GET") return "default" as const;
-  if (method === "POST") return "secondary" as const;
-  return "outline" as const;
-}
-
 function toFormValues(permission: AdminPermission): PermissionFormValues {
   return {
     name: permission.name,
@@ -78,7 +75,7 @@ export function PermissionsManagement() {
   const permissionsQuery = useAdminPermissionsQuery({
     page,
     size: pageSize,
-    sort: "updatedAt,desc",
+    sort: "id,desc",
     name: deferredSearch || undefined,
     method: methodFilter === ALL_FILTER ? undefined : methodFilter,
     module: moduleFilter === ALL_FILTER ? undefined : moduleFilter,
@@ -188,9 +185,13 @@ export function PermissionsManagement() {
       className: "min-w-80",
       cell: (permission) => (
         <div className="flex items-center gap-2">
-          <Badge variant={getMethodVariant(permission.method)} className="min-w-14 font-mono">
+          <AdminStatusBadge
+            variant={getHttpMethodVariant(permission.method)}
+            size="sm"
+            className="min-w-16 justify-center"
+          >
             {permission.method}
-          </Badge>
+          </AdminStatusBadge>
           <code className="truncate text-xs">{permission.apiPath}</code>
         </div>
       ),
@@ -198,19 +199,22 @@ export function PermissionsManagement() {
     {
       key: "module",
       header: t("admin.commerce.permissions.column.module"),
+      headerClassName: "w-32 min-w-[120px]",
+      className: "w-32 min-w-[120px]",
       cell: (permission) => <Badge variant="outline">{permission.module}</Badge>,
     },
     {
       key: "updatedAt",
       header: t("admin.commerce.common.updated"),
-      className: "whitespace-nowrap text-muted-foreground",
+      headerClassName: "w-40 min-w-[150px] whitespace-nowrap",
+      className: "w-40 min-w-[150px] whitespace-nowrap text-muted-foreground",
       cell: (permission) => formatDateTime(permission.updatedAt, locale),
     },
     {
       key: "actions",
       header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
-      headerClassName: "w-24 text-right",
-      className: "text-right",
+      headerClassName: "w-24 min-w-[90px] text-right",
+      className: "w-24 min-w-[90px] text-right",
       cell: (permission) => (
         <div className="flex justify-end gap-1">
           <Button

@@ -1,17 +1,15 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
-const THEME_CYCLE = ["light", "dark", "system"] as const;
 const THEME_LABEL_KEYS = {
   light: "admin.shell.preferences.light",
   dark: "admin.shell.preferences.dark",
-  system: "admin.shell.preferences.system",
 } as const;
 
 export function ThemeSwitcher() {
@@ -24,26 +22,27 @@ export function ThemeSwitcher() {
   );
 
   const cycleTheme = () => {
-    const currentIndex = THEME_CYCLE.indexOf(themeMode);
-    const nextTheme = THEME_CYCLE[(currentIndex + 1) % THEME_CYCLE.length];
-
-    setPreference("theme_mode", nextTheme);
+    const isDark = themeMode === "dark";
+    setPreference("theme_mode", isDark ? "light" : "dark");
   };
+
+  const isDark = themeMode === "dark";
 
   return (
     <Button
+      variant="outline"
       size="icon"
+      className="rounded-full"
       onClick={cycleTheme}
-      aria-label={t("admin.shell.theme.current", { theme: t(THEME_LABEL_KEYS[themeMode]) })}
+      aria-label={t("admin.shell.theme.current", {
+        theme: t(isDark ? THEME_LABEL_KEYS.dark : THEME_LABEL_KEYS.light),
+      })}
     >
-      {/* SYSTEM */}
-      <Monitor className="hidden [html[data-theme-mode=system]_&]:block" />
+      {/* When in dark mode, show Sun icon to switch to light */}
+      <Sun className="hidden size-4 dark:block" />
 
-      {/* DARK (resolved) */}
-      <Sun className="hidden dark:block [html[data-theme-mode=system]_&]:hidden" />
-
-      {/* LIGHT (resolved) */}
-      <Moon className="block dark:hidden [html[data-theme-mode=system]_&]:hidden" />
+      {/* When in light mode, show Moon icon to switch to dark */}
+      <Moon className="block size-4 dark:hidden" />
     </Button>
   );
 }

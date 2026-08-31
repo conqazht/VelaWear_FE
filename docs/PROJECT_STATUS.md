@@ -1,3 +1,37 @@
+## 2026-08-31 (Dark Mode Restoration, Semantic Badge Suite & Centered Modal Dialogs)
+
+- **Dark Mode Obsidian Elevation & 2-Way Switcher (`globals.css`, `theme-switcher.tsx`):**
+  - Upgraded Admin Dark Mode palette from muddy low-contrast brown to a crisp, high-contrast **Deep Obsidian / Charcoal** palette (`#111215` canvas, `#17181c` card surface, luminous golden espresso primary `#d49b56`, crisp `#f5f5f7` text, distinct hairline borders `#272930`).
+  - Streamlined `ThemeSwitcher` to a direct **2-way toggle** (`light` <-> `dark`), removing the intermediate "system" monitor state for faster, simpler switching.
+- **Centered Modal Dialog Architecture (`resource-overlays.tsx`, `components/ui/dialog.tsx`):**
+  - Replaced right slide-over `Sheet` across all Management CRUD screens (Brands, Categories, Coupons, Colors, Sizes, Roles, Users) with a centered, hardware-accelerated **Modal Dialog**.
+  - Optimized modal border curve to crisp `rounded-xl` (`12px` / `--radius: 0.625rem`) to prevent excessive rounding.
+  - Synchronized `duration-150` exit transitions with `bg-black/40` backdrop and added `html { scrollbar-gutter: stable; }` in `globals.css` to eliminate layout shift / screen flickering when closing modals.
+- **Table Stability & Column Width Locks (`categories-management.tsx`, `brands-management.tsx`, `products-management.tsx`, `coupons-management.tsx`, `sales-management.tsx`, `permissions-management.tsx`):**
+  - Standardized `AdminStatusBadge` with `size="sm"` across all screens (Products, Brands, Categories, Coupons, Roles, Sales).
+  - Added fixed minimum column widths (`headerClassName` and `className`) for `status` (`w-48 min-w-[190px]`), `actions`, `updatedAt`, `sortOrder`, and `parent` columns across all management tables so that toggling active/inactive does not cause any column or table width jitter.
+  - Changed default table query sorting from `sort: "updatedAt,desc"` to `sort: "id,desc"` to keep table rows stable in place when toggling status (preventing active items from jumping to the top).
+  - Removed refresh button dimming/jitter during silent background query revalidations.
+- **Base UI Button `nativeButton` Fix (`components/ui/button.tsx`, `sales-management.tsx`, `sale-campaign-editor.tsx`):**
+  - Automatically resolved `nativeButton: false` in `components/ui/button.tsx` when rendering non-button elements (e.g. Next.js `<Link />`), eliminating Base UI console error warnings.
+    - **Draft / Inactive / Archived:** Soft Gray Zinc (`bg-zinc-100/90 text-zinc-700 border-zinc-200/90`).
+    - **Active / Published / Paid / Delivered:** Soft Emerald (`bg-emerald-50 text-emerald-800 border-emerald-200/90`).
+    - **Live:** Glowing Emerald with pulsing indicator dot (`bg-emerald-500/10 text-emerald-700 font-semibold`).
+    - **Upcoming / Pending / Low Stock:** Warm Amber (`bg-amber-50 text-amber-800 border-amber-200/90`).
+    - **Cancelled / Out of Stock / Delete:** Crimson Rose (`bg-rose-50 text-rose-800 border-rose-200/90`).
+    - **Flash Sale:** Purple Accent (`bg-purple-50 text-purple-700 border-purple-200/90`).
+    - **Standard Sale:** Muted Espresso Accent (`bg-[#f7f3ee] text-[#735639] border-[#e8ded2]`).
+    - **Roles (Admin / Staff / User):** Indigo navy / Sky cyan / Slate neutral.
+    - **HTTP Methods:** Blue `GET`, Emerald `POST`, Amber `PUT`/`PATCH`, Crimson `DELETE`.
+  - Applied across `brands-management.tsx`, `categories-management.tsx`, `coupons-management.tsx`, `permissions-management.tsx`, `sales-management.tsx`, `users.tsx`, `roles.tsx`, and `products-management.tsx`.
+- **Verification:**
+  - `pnpm format:check`: 100% clean.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 errors.
+  - `pnpm test:unit`: 56/56 test files passed (230/230 unit tests).
+  - `pnpm build`: 68/68 static & dynamic routes compiled with 0 errors.
+
 ## 2026-08-31 (Muted Espresso Palette, Theme Controls Removal & Single Light Mode)
 
 - **Muted Espresso Palette Integration (`app/globals.css`, `lib/preferences/theme.ts`):**

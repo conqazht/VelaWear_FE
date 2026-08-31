@@ -170,8 +170,8 @@ export function ResourcePage<T extends { id: number }>({
             />
           </InputGroup>
           {onRefresh ? (
-            <Button variant="outline" size="sm" onClick={onRefresh} disabled={isFetching}>
-              <RefreshCw className={cn(isFetching && "animate-spin")} />
+            <Button variant="outline" size="sm" onClick={onRefresh}>
+              <RefreshCw className={cn(isLoading && "animate-spin")} />
               {t("admin.shell.resource.refresh")}
             </Button>
           ) : null}

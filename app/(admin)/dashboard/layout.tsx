@@ -13,7 +13,7 @@ import { AppSidebar } from "@/app/(admin)/dashboard/_components/sidebar/app-side
 // Theme controls and switcher removed — Admin uses unified light interface
 // import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
-// import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
+import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 
 export default function Layout({ children }: Readonly<{ children: ReactNode }>) {
   return (
@@ -69,6 +69,7 @@ async function DashboardLayoutContent({ children }: { children: ReactNode }) {
             </div>
             <div className="flex items-center gap-2">
               <LanguageSwitcher presentation="popover" />
+              <ThemeSwitcher />
             </div>
           </div>
         </header>

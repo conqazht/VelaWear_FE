@@ -67,16 +67,22 @@ Bảng màu Admin sử dụng thang màu **Muted Espresso & Nordic Canvas** trê
 | `--admin-primary-active` | `#4f3823`   | `oklch(0.320 0.050 55)` | Trạng thái nhấn giữ (pressed / active) của nút CTA chính.                             |
 | `--admin-primary-subtle` | `#f7f3ee`   | `oklch(0.960 0.018 55)` | Nền badge active, nền highlight của hàng dữ liệu đang chọn.                           |
 
-### 2.4. Màu Ngữ Nghĩa Trạng Thái Nghiệp Vụ (Semantic Status Matrix)
+### 2.4. Màu Ngữ Nghĩa Trạng Thái Nghiệp Vụ, Vai Trò & API (Semantic Status & Role Matrix)
 
 Mỗi trạng thái bao gồm 3 cấp độ: **Badge Solid**, **Badge Soft (Nền nhạt + Chữ đậm)** và **Border Ring**:
 
-| Trạng thái         | Nền Soft (`bg`)       | Viền (`border`) | Chữ/Icon (`text`) | Hex đại diện | Ứng dụng thực tế trong Quản trị Vela Wear                                                                         |
-| :----------------- | :-------------------- | :-------------- | :---------------- | :----------: | :---------------------------------------------------------------------------------------------------------------- |
-| **SUCCESS**        | `#ecfdf5`             | `#a7f3d0`       | `#065f46`         |  `#059669`   | Sản phẩm "Đang bán" (Active), Đơn "Đã thanh toán", Campaign "Đang chạy", Tồn kho dồi dào, Tăng trưởng dương (+%). |
-| **WARNING**        | `#fffbeb`             | `#fde68a`       | `#92400e`         |  `#d97706`   | Trạng thái "Chờ duyệt", "Sắp hết hàng" (Low stock < 5), Chiến dịch "Sắp diễn ra", Đơn "Chờ xác nhận".             |
-| **DANGER / ERROR** | `#fef2f2`             | `#fecaca`       | `#991b1b`         |  `#dc2626`   | Trạng thái "Hết hàng" (Out of stock), Đơn "Đã hủy", Lỗi xác thực form, Nút "Xóa vĩnh viễn" (Destructive Action).  |
-| **INFO / NEUTRAL** | `#f0fdf4` / `#f8fafc` | `#e2e8f0`       | `#334155`         |  `#64748b`   | Trạng thái "Bản nháp" (Draft), Sản phẩm "Ngừng kinh doanh" (Archived), Nhãn phân loại Tag SKU chung.              |
+| Nhóm / Trạng thái                | Nền Soft (`bg`)                                                                    | Viền (`border`)                                        | Chữ/Icon (`text`) | Hex đại diện | Ứng dụng thực tế trong Quản trị Vela Wear                                          |
+| :------------------------------- | :--------------------------------------------------------------------------------- | :----------------------------------------------------- | :---------------- | :----------: | :--------------------------------------------------------------------------------- |
+| **SUCCESS / ACTIVE / LIVE**      | `#ecfdf5` (emerald-50)                                                             | `#a7f3d0`                                              | `#065f46`         |  `#059669`   | Sản phẩm "Đang bán" (Active), Đơn "Đã thanh toán", Campaign "LIVE" (có dot pulse). |
+| **WARNING / UPCOMING / PENDING** | `#fffbeb` (amber-50)                                                               | `#fde68a`                                              | `#92400e`         |  `#d97706`   | Trạng thái "Chờ duyệt", "Sắp hết hàng" (Low stock), Chiến dịch "UPCOMING".         |
+| **DANGER / ERROR / CANCELLED**   | `#fef2f2` (rose-50)                                                                | `#fecaca`                                              | `#991b1b`         |  `#dc2626`   | Trạng thái "Hết hàng" (Out of stock), Đơn "Đã hủy", Method `DELETE`.               |
+| **DRAFT / INACTIVE (Xám nhạt)**  | `#f4f4f5` (zinc-100)                                                               | `#e4e4e7`                                              | `#3f3f46`         |  `#71717a`   | Trạng thái "Bản nháp" (Draft), Sản phẩm "Ngừng kinh doanh" (Inactive / Archived).  |
+| **FLASH SALE (Tím Accent)**      | `#faf5ff` (purple-50)                                                              | `#e9d5ff`                                              | `#6b21a8`         |  `#9333ea`   | Chiến dịch "FLASH SALE" độc quyền.                                                 |
+| **STANDARD SALE (Nâu Espresso)** | `#f7f3ee` (espresso-subtle)                                                        | `#e8ded2`                                              | `#735639`         |  `#735639`   | Chiến dịch "STANDARD SALE" định kỳ.                                                |
+| **ROLE ADMIN (Indigo)**          | `#eef2ff` (indigo-50)                                                              | `#c7d2fe`                                              | `#3730a3`         |  `#4f46e5`   | Quyền quản trị tối cao (Superadmin, Admin).                                        |
+| **ROLE STAFF (Sky Cyan)**        | `#f0f9ff` (sky-50)                                                                 | `#bae6fd`                                              | `#0369a1`         |  `#0284c7`   | Nhân viên vận hành, Quản lý kho (Staff, Manager).                                  |
+| **ROLE USER (Slate)**            | `#f1f5f9` (slate-100)                                                              | `#cbd5e1`                                              | `#334155`         |  `#64748b`   | Người dùng, Khách hàng thành viên (Customer, User).                                |
+| **HTTP GET / POST / PUT**        | Blue-50 (`GET`), Emerald-50 (`POST`), Amber-50 (`PUT`/`PATCH`), Rose-50 (`DELETE`) | Phân quyền API endpoints trong Permissions Management. |
 
 ### 2.5. Bảng Màu Biểu Đồ Thống Kê (Analytics & Chart Palette)
 

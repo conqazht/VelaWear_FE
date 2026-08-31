@@ -17,7 +17,10 @@ import {
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Badge } from "@/components/ui/badge";
+import {
+  AdminStatusBadge,
+  getStatusBadgeVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { getCatalogStatusToggleTarget } from "@/lib/admin-status-toggle";
@@ -45,10 +48,6 @@ const BRAND_STATUS_MESSAGE_KEYS = {
   INACTIVE: "admin.commerce.common.inactive",
 } as const;
 
-function getStatusVariant(status: AdminCatalogStatus) {
-  return status === "ACTIVE" ? ("default" as const) : ("secondary" as const);
-}
-
 function toFormValues(brand: AdminBrand): BrandFormValues {
   return {
     name: brand.name,
@@ -73,7 +72,7 @@ export function BrandsManagement() {
   const brandsQuery = useAdminBrandsQuery({
     page,
     size: pageSize,
-    sort: "updatedAt,desc",
+    sort: "id,desc",
     name: deferredSearch || undefined,
     status: statusFilter === ALL_FILTER ? undefined : (statusFilter as AdminCatalogStatus),
   });
@@ -218,6 +217,8 @@ export function BrandsManagement() {
     {
       key: "status",
       header: t("admin.commerce.common.status"),
+      headerClassName: "w-48 min-w-[190px]",
+      className: "w-48 min-w-[190px] whitespace-nowrap",
       cell: (brand) => (
         <div className="flex items-center gap-2">
           <Switch
@@ -227,23 +228,24 @@ export function BrandsManagement() {
             aria-label={t("admin.commerce.translation.toggleAria", { name: brand.name })}
             onCheckedChange={(checked) => toggleBrandStatus(brand, checked)}
           />
-          <Badge variant={getStatusVariant(brand.status)}>
+          <AdminStatusBadge variant={getStatusBadgeVariant(brand.status)} size="sm">
             {t(BRAND_STATUS_MESSAGE_KEYS[brand.status])}
-          </Badge>
+          </AdminStatusBadge>
         </div>
       ),
     },
     {
       key: "updatedAt",
       header: t("admin.commerce.common.updated"),
-      className: "whitespace-nowrap text-muted-foreground",
+      headerClassName: "w-40 min-w-[150px] whitespace-nowrap",
+      className: "w-40 min-w-[150px] whitespace-nowrap text-muted-foreground",
       cell: (brand) => formatDateTime(brand.updatedAt, locale),
     },
     {
       key: "actions",
       header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
-      headerClassName: "w-24 text-right",
-      className: "text-right",
+      headerClassName: "w-24 min-w-[90px] text-right",
+      className: "w-24 min-w-[90px] text-right",
       cell: (brand) => (
         <div className="flex justify-end gap-1">
           <Button

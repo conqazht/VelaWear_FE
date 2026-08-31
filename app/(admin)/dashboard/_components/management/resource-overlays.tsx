@@ -17,13 +17,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 type ResourceFormSheetProps = {
@@ -39,6 +39,10 @@ type ResourceFormSheetProps = {
   contentClassName?: string;
 };
 
+/**
+ * Centered Modal Dialog for Resource Creation / Editing across Admin.
+ * Replaces old right slide-over Sheet with a focused, hardware-accelerated centered modal.
+ */
 export function ResourceFormSheet({
   open,
   onOpenChange,
@@ -55,37 +59,57 @@ export function ResourceFormSheet({
   const resolvedSubmitLabel = submitLabel ?? t("admin.shell.form.saveChanges");
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className={cn("w-full gap-0 sm:max-w-xl", contentClassName)}>
-        <SheetHeader className="border-b pr-12">
-          <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
-        </SheetHeader>
-        <form className="flex min-h-0 flex-1 flex-col" onSubmit={onSubmit}>
-          <div className="flex-1 overflow-y-auto p-4">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn(
+          "border-border/80 flex max-h-[88vh] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-2xl ring-1 ring-black/5 duration-150 ease-out sm:max-w-xl md:max-w-2xl dark:ring-white/10",
+          contentClassName,
+        )}
+      >
+        <DialogHeader className="border-border/60 bg-muted/20 rounded-t-xl border-b px-6 py-4.5 pr-14 text-left">
+          <DialogTitle className="text-foreground text-base font-semibold tracking-tight">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground mt-0.5 text-xs">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+        <form className="flex min-h-0 flex-1 flex-col overflow-hidden" onSubmit={onSubmit}>
+          <div className="flex-1 overflow-y-auto px-6 py-5">
             <fieldset disabled={isPending} className="min-w-0 space-y-5 border-0 p-0">
               {children}
             </fieldset>
           </div>
-          <SheetFooter className="bg-muted/30 border-t sm:flex-row sm:justify-end">
+          <DialogFooter className="border-border/60 bg-muted/20 -mx-0 -mb-0 flex flex-row items-center justify-end gap-2.5 rounded-none rounded-b-xl border-t px-6 py-3.5 sm:justify-end">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => onOpenChange(false)}
               disabled={isPending}
+              className="text-xs font-medium transition-all duration-150 active:scale-[0.98]"
             >
               {t("admin.shell.form.cancel")}
             </Button>
-            <Button type="submit" disabled={isPending || submitDisabled}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isPending || submitDisabled}
+              className="text-xs font-semibold transition-all duration-150 active:scale-[0.98]"
+            >
               {isPending ? <Loader2 className="animate-spin" /> : null}
               {resolvedSubmitLabel}
             </Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
+
+// Alias export for clarity
+export const ResourceFormDialog = ResourceFormSheet;
+export const ResourceFormModal = ResourceFormSheet;
 
 type DeleteResourceDialogProps = {
   open: boolean;

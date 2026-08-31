@@ -22,7 +22,7 @@ describe("AdminThemeEnforcer", () => {
     vi.unstubAllGlobals();
   });
 
-  it("enforces light mode on mount and cleans up admin theme state on unmount", () => {
+  it("applies light mode on mount and cleans up admin theme state on unmount", () => {
     const { unmount } = render(<AdminThemeEnforcer themeMode="light" />);
     const root = document.documentElement;
 
@@ -39,5 +39,21 @@ describe("AdminThemeEnforcer", () => {
     expect(root).not.toHaveAttribute("data-theme-mode");
     expect(root).not.toHaveClass("dark");
     expect(root.style.colorScheme).toBe("");
+  });
+
+  it("applies dark mode when themeMode is dark", () => {
+    const { unmount } = render(<AdminThemeEnforcer themeMode="dark" />);
+    const root = document.documentElement;
+
+    expect(root).toHaveAttribute("data-admin-theme", "true");
+    expect(root).toHaveAttribute("data-theme-preset", "default");
+    expect(root).toHaveAttribute("data-theme-mode", "dark");
+    expect(root).toHaveClass("dark");
+    expect(root.style.colorScheme).toBe("dark");
+
+    unmount();
+
+    expect(root).not.toHaveAttribute("data-admin-theme");
+    expect(root).not.toHaveClass("dark");
   });
 });

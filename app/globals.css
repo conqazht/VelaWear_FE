@@ -48,7 +48,46 @@ html[data-admin-theme="true"]:not([data-theme-preset]) {
   --font-mono: var(--font-geist-mono);
 }
 
+html[data-admin-theme="true"][data-theme-preset="default"].dark,
+html[data-admin-theme="true"].dark:not([data-theme-preset]) {
+  --background: oklch(0.125 0.005 260);
+  --foreground: oklch(0.96 0.004 260);
+  --card: oklch(0.16 0.006 260);
+  --card-foreground: oklch(0.96 0.004 260);
+  --popover: oklch(0.17 0.007 260);
+  --popover-foreground: oklch(0.96 0.004 260);
+  --primary: oklch(0.65 0.095 58);
+  --primary-foreground: oklch(0.12 0.006 260);
+  --secondary: oklch(0.19 0.007 260);
+  --secondary-foreground: oklch(0.96 0.004 260);
+  --muted: oklch(0.18 0.006 260);
+  --muted-foreground: oklch(0.65 0.012 260);
+  --accent: oklch(0.2 0.012 58);
+  --accent-foreground: oklch(0.88 0.04 58);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(0.22 0.007 260);
+  --input: oklch(0.22 0.007 260);
+  --ring: oklch(0.65 0.095 58);
+  --chart-1: oklch(0.65 0.095 58);
+  --chart-2: oklch(0.65 0.1 150);
+  --chart-3: oklch(0.7 0.12 35);
+  --chart-4: oklch(0.75 0.1 85);
+  --chart-5: oklch(0.65 0.03 58);
+  --sidebar: oklch(0.14 0.005 260);
+  --sidebar-foreground: oklch(0.96 0.004 260);
+  --sidebar-primary: oklch(0.65 0.095 58);
+  --sidebar-primary-foreground: oklch(0.12 0.006 260);
+  --sidebar-accent: oklch(0.19 0.01 58);
+  --sidebar-accent-foreground: oklch(0.88 0.04 58);
+  --sidebar-border: oklch(0.2 0.006 260);
+  --sidebar-ring: oklch(0.65 0.095 58);
+}
+
 /* ── Admin Specific Scoped Overrides ── */
+html {
+  scrollbar-gutter: stable;
+}
+
 html[data-admin-theme="true"] [data-slot="card-title"],
 html[data-admin-theme="true"] [data-slot="dialog-title"] {
   font-family: var(--font-sans);
@@ -90,6 +129,10 @@ html[data-admin-theme="true"] [data-slot="table-head"] {
 
 html[data-admin-theme="true"] [data-slot="table-row"]:hover {
   background-color: oklch(0.985 0.004 240);
+}
+
+html[data-admin-theme="true"].dark [data-slot="table-row"]:hover {
+  background-color: oklch(0.18 0.006 260);
 }
 
 @custom-variant dark (&:is(.dark *));

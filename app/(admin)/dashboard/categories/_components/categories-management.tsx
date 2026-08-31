@@ -18,6 +18,10 @@ import {
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 import { useI18n } from "@/components/providers/i18n-provider";
+import {
+  AdminStatusBadge,
+  getStatusBadgeVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -66,10 +70,6 @@ const CATEGORY_STATUS_MESSAGE_KEYS = {
   ACTIVE: "admin.commerce.common.active",
   INACTIVE: "admin.commerce.common.inactive",
 } as const;
-
-function getStatusVariant(status: AdminCatalogStatus) {
-  return status === "ACTIVE" ? ("default" as const) : ("secondary" as const);
-}
 
 function toTranslationFormValue(translation?: CategoryTranslation): CategoryTranslationFormValue {
   return translation
@@ -143,7 +143,7 @@ export function CategoriesManagement() {
   const categoriesQuery = useAdminCategoriesQuery({
     page,
     size: pageSize,
-    sort: "sortOrder,asc",
+    sort: "id,desc",
     name: deferredSearch || undefined,
     status: statusFilter === ALL_FILTER ? undefined : (statusFilter as AdminCatalogStatus),
     locale,
@@ -411,7 +411,8 @@ export function CategoriesManagement() {
     {
       key: "parent",
       header: t("admin.commerce.categories.column.parent"),
-      className: "min-w-44",
+      headerClassName: "w-44 min-w-[160px]",
+      className: "w-44 min-w-[160px]",
       cell: (category) =>
         category.parentId === null ? (
           <Badge variant="outline">{t("admin.commerce.categories.topLevel")}</Badge>
@@ -425,12 +426,15 @@ export function CategoriesManagement() {
     {
       key: "sortOrder",
       header: t("admin.commerce.categories.column.sortOrder"),
-      className: "whitespace-nowrap tabular-nums",
+      headerClassName: "w-24 min-w-[90px] whitespace-nowrap",
+      className: "w-24 min-w-[90px] whitespace-nowrap tabular-nums",
       cell: (category) => category.sortOrder,
     },
     {
       key: "status",
       header: t("admin.commerce.common.status"),
+      headerClassName: "w-48 min-w-[190px]",
+      className: "w-48 min-w-[190px] whitespace-nowrap",
       cell: (category) => (
         <div className="flex items-center gap-2">
           <Switch
@@ -440,23 +444,24 @@ export function CategoriesManagement() {
             aria-label={t("admin.commerce.translation.toggleAria", { name: category.name })}
             onCheckedChange={(checked) => toggleCategoryStatus(category, checked)}
           />
-          <Badge variant={getStatusVariant(category.status)}>
+          <AdminStatusBadge variant={getStatusBadgeVariant(category.status)} size="sm">
             {t(CATEGORY_STATUS_MESSAGE_KEYS[category.status])}
-          </Badge>
+          </AdminStatusBadge>
         </div>
       ),
     },
     {
       key: "updatedAt",
       header: t("admin.commerce.common.updated"),
-      className: "whitespace-nowrap text-muted-foreground",
+      headerClassName: "w-40 min-w-[150px] whitespace-nowrap",
+      className: "w-40 min-w-[150px] whitespace-nowrap text-muted-foreground",
       cell: (category) => formatDateTime(category.updatedAt, locale),
     },
     {
       key: "actions",
       header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
-      headerClassName: "w-24 text-right",
-      className: "text-right",
+      headerClassName: "w-24 min-w-[90px] text-right",
+      className: "w-24 min-w-[90px] text-right",
       cell: (category) => (
         <div className="flex justify-end gap-1">
           <Button

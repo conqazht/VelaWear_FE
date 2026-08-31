@@ -16,6 +16,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
+import {
+  AdminStatusBadge,
+  getRoleBadgeVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,11 +76,15 @@ function RoleBadges({ user }: { user: AdminUser }) {
   return (
     <div className="flex max-w-64 flex-wrap gap-1.5">
       {user.roles.slice(0, 2).map((role) => (
-        <Badge key={role.id} variant="secondary">
+        <AdminStatusBadge key={role.id} variant={getRoleBadgeVariant(role.name)} size="sm">
           {role.name}
-        </Badge>
+        </AdminStatusBadge>
       ))}
-      {user.roles.length > 2 ? <Badge variant="outline">+{user.roles.length - 2}</Badge> : null}
+      {user.roles.length > 2 ? (
+        <AdminStatusBadge variant="neutral" size="sm">
+          +{user.roles.length - 2}
+        </AdminStatusBadge>
+      ) : null}
     </div>
   );
 }
@@ -97,7 +105,7 @@ export function Users() {
   const usersQuery = useAdminUsersQuery({
     page,
     size: pageSize,
-    sort: "createdAt,desc",
+    sort: "id,desc",
     ...(searchValue.trim() ? { [searchField]: searchValue.trim() } : {}),
     ...(gender === "ALL" ? {} : { gender }),
   });

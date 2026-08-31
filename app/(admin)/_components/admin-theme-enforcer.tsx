@@ -5,7 +5,7 @@ import { useLayoutEffect } from "react";
 import type { ThemeMode } from "@/lib/preferences/theme";
 import { applyThemeMode } from "@/lib/preferences/theme-utils";
 
-export function AdminThemeEnforcer(_props?: { themeMode?: ThemeMode }) {
+export function AdminThemeEnforcer({ themeMode }: { themeMode: ThemeMode }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
 
@@ -16,8 +16,8 @@ export function AdminThemeEnforcer(_props?: { themeMode?: ThemeMode }) {
       root.setAttribute("data-theme-preset", "default");
     }
 
-    // Admin portal is strictly locked to unified Light mode
-    applyThemeMode("light");
+    // Apply active theme mode (light / dark / system)
+    applyThemeMode(themeMode);
 
     return () => {
       root.removeAttribute("data-admin-theme");
@@ -28,7 +28,7 @@ export function AdminThemeEnforcer(_props?: { themeMode?: ThemeMode }) {
       root.classList.remove("dark", "disable-transitions");
       root.style.removeProperty("color-scheme");
     };
-  }, []);
+  }, [themeMode]);
 
   return null;
 }
