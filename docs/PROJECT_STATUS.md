@@ -1,3 +1,17 @@
+## 2026-08-31 (Admin Comprehensive Test Suite: Unit, Smoke & Fullstack)
+
+- **Admin Status Badge Unit Tests (`admin-status-badge.test.tsx`):**
+  - Added comprehensive test coverage for all 23 semantic badge variants, active/draft/live pulsing dot indicator, compact sizing (`size="sm"`), custom icons, and helper resolution functions (`getStatusBadgeVariant`, `getHttpMethodVariant`, `getRoleBadgeVariant`).
+- **Theme Switcher & Button Unit Tests (`theme-switcher.test.tsx`, `button.test.tsx`):**
+  - Verified 2-way Light <-> Dark toggle, preference store synchronization, and outline/rounded-full button styling.
+  - Verified `Button` auto-detects non-button elements (e.g. Next.js `<Link />` / custom anchors) with `nativeButton: false` with 0 console warnings.
+- **Resource Overlays Modal Unit Tests (`resource-overlays.test.tsx`):**
+  - Tested centered `ResourceFormSheet` modal dialog (title, description, child form, cancel/save actions) and `DeleteResourceDialog` alert dialog.
+- **Admin Playwright Smoke Suite (`e2e/admin-smoke.spec.ts`):**
+  - Validated admin navigation to `/dashboard/categories`, interactive 2-way theme switcher changing `data-theme-mode` & `.dark` classes on `<html>`, opening/closing centered modal dialog without layout shift or console errors (17/17 smoke cases passing).
+- **Admin Fullstack Suite (`e2e/fullstack/admin-catalog.spec.ts`, `fullstack.ts`):**
+  - Added admin session fixture (`adminSession`), tested RBAC blocking normal users from Admin category APIs, verified category creation, deterministic `sort=id,desc` listing, status toggle (`ACTIVE` <-> `INACTIVE`), and automated resource cleanup against live Spring Boot backend.
+
 ## 2026-08-31 (Dark Mode Restoration, Semantic Badge Suite & Centered Modal Dialogs)
 
 - **Dark Mode Obsidian Elevation & 2-Way Switcher (`globals.css`, `theme-switcher.tsx`):**
