@@ -3,6 +3,8 @@ import { expect, test as base, type APIRequestContext, type Response } from "@pl
 export const fullstackApiUrl = process.env.PLAYWRIGHT_API_URL ?? "http://localhost:8080/api/v1";
 export const fullstackUserEmail = process.env.E2E_USER_EMAIL ?? "user@velawear.local";
 export const fullstackUserPassword = process.env.E2E_USER_PASSWORD ?? "Password123!";
+export const fullstackAdminEmail = process.env.E2E_ADMIN_EMAIL ?? "admin@velawear.local";
+export const fullstackAdminPassword = process.env.E2E_ADMIN_PASSWORD ?? "Admin123!";
 const fullstackSecondUserEmail = process.env.E2E_SECOND_USER_EMAIL ?? "linh@velawear.local";
 const fullstackSecondUserPassword = process.env.E2E_SECOND_USER_PASSWORD ?? "Password123!";
 const variantSku = process.env.E2E_VARIANT_SKU ?? "VW-TEE-BLK-M";
@@ -55,6 +57,7 @@ type OwnershipAccounts = {
 };
 
 type FullstackFixtures = {
+  adminSession: AuthenticatedSession;
   authenticatedSession: AuthenticatedSession;
   fullstackSession: FullstackSession;
   ownershipAccounts: OwnershipAccounts;
@@ -105,6 +108,14 @@ export async function loginFullstackSecondUser(api: APIRequestContext) {
   );
 }
 
+export async function loginFullstackAdmin(api: APIRequestContext) {
+  return loginFullstackAccount(
+    api,
+    { email: fullstackAdminEmail, password: fullstackAdminPassword },
+    "Admin",
+  );
+}
+
 async function cleanupAuthenticatedSession(api: APIRequestContext, accessToken: string) {
   try {
     const logoutResponse = await api.post(`${fullstackApiUrl}/auth/logout`, {
@@ -120,6 +131,19 @@ async function cleanupAuthenticatedSession(api: APIRequestContext, accessToken: 
 }
 
 export const test = base.extend<FullstackFixtures>({
+  adminSession: async ({ context }, provide) => {
+    let cleanupAccessToken = await loginFullstackAdmin(context.request);
+
+    await provide({
+      accessToken: cleanupAccessToken,
+      setCleanupAccessToken: (accessToken) => {
+        cleanupAccessToken = accessToken;
+      },
+    });
+
+    await cleanupAuthenticatedSession(context.request, cleanupAccessToken);
+  },
+
   authenticatedSession: async ({ context }, provide) => {
     let cleanupAccessToken = await loginFullstackUser(context.request);
 
