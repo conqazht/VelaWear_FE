@@ -58,6 +58,26 @@ export const salesCheckoutMessages = defineMessages(
       "The product price just changed. Please review the total before placing your order.",
     "sale.checkout.error.idempotencyConflict":
       "This checkout request no longer matches the previous attempt. Please try again.",
+    "sale.payment.return.successTitle": "Payment Successful",
+    "sale.payment.return.successSubtitle":
+      "Your transaction has been verified. Your order is now confirmed and being prepared.",
+    "sale.payment.return.failedTitle": "Payment Incomplete",
+    "sale.payment.return.failedSubtitle":
+      "The payment was cancelled or could not be verified by the gateway.",
+    "sale.payment.return.orderCode": "Order Code",
+    "sale.payment.return.amount": "Amount Paid",
+    "sale.payment.return.provider": "Payment Gateway",
+    "sale.payment.return.transactionCode": "Transaction Ref",
+    "sale.payment.return.status": "Status",
+    "sale.payment.return.statusPaid": "Paid",
+    "sale.payment.return.statusFailed": "Unpaid / Cancelled",
+    "sale.payment.return.viewOrder": "View Order Details",
+    "sale.payment.return.retryPayment": "Retry Payment",
+    "sale.payment.return.continueShopping": "Continue Shopping",
+    "sale.payment.return.emailNotice":
+      "A confirmation receipt has been dispatched to your email address.",
+    "sale.payment.return.failureNotice":
+      "If funds were deducted from your account, please save your transaction reference and contact customer support.",
   },
   {
     "sale.cart.flashNotReserved.title": "Sản phẩm Flash trong giỏ chưa được giữ chỗ",
@@ -115,5 +135,25 @@ export const salesCheckoutMessages = defineMessages(
       "Giá sản phẩm vừa thay đổi. Vui lòng kiểm tra lại tổng tiền trước khi đặt hàng.",
     "sale.checkout.error.idempotencyConflict":
       "Yêu cầu đặt hàng này không còn khớp với lần gửi trước. Vui lòng thử lại.",
+    "sale.payment.return.successTitle": "Thanh toán thành công",
+    "sale.payment.return.successSubtitle":
+      "Giao dịch của bạn đã được xác thực thành công. Đơn hàng hiện đã được xác nhận và đang được chuẩn bị.",
+    "sale.payment.return.failedTitle": "Thanh toán chưa hoàn tất",
+    "sale.payment.return.failedSubtitle":
+      "Giao dịch thanh toán đã bị hủy hoặc không được cổng thanh toán xác thực thành công.",
+    "sale.payment.return.orderCode": "Mã đơn hàng",
+    "sale.payment.return.amount": "Số tiền đã thanh toán",
+    "sale.payment.return.provider": "Cổng thanh toán",
+    "sale.payment.return.transactionCode": "Mã giao dịch",
+    "sale.payment.return.status": "Trạng thái thanh toán",
+    "sale.payment.return.statusPaid": "Đã thanh toán",
+    "sale.payment.return.statusFailed": "Chưa thanh toán / Đã hủy",
+    "sale.payment.return.viewOrder": "Xem chi tiết đơn hàng",
+    "sale.payment.return.retryPayment": "Thử thanh toán lại",
+    "sale.payment.return.continueShopping": "Tiếp tục mua sắm",
+    "sale.payment.return.emailNotice":
+      "Biên lai xác nhận thanh toán và chi tiết đơn hàng đang được gửi tới email của bạn.",
+    "sale.payment.return.failureNotice":
+      "Nếu tài khoản của bạn đã bị trừ tiền, vui lòng lưu lại mã tham chiếu giao dịch và liên hệ với đội ngũ hỗ trợ của Vela Wear.",
   },
 );

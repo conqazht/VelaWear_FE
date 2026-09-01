@@ -14,7 +14,7 @@ export default function AdminError({
   const { t } = useI18n();
 
   return (
-    <div className="relative">
+    <div className="relative min-h-dvh w-full bg-[#11100f]">
       <LanguageSwitcher inverted presentation="popover" className="absolute top-4 right-4 z-30" />
       <AnimatedStatus
         code="500"
@@ -24,7 +24,7 @@ export default function AdminError({
         secondaryAction={{ label: t("admin.shell.error.openManagement"), href: "/dashboard/users" }}
         accent="#ff8f78"
         reference={error.digest}
-        variant="panel"
+        variant="page"
       />
     </div>
   );

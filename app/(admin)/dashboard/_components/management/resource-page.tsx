@@ -194,15 +194,16 @@ export function ResourcePage<T extends { id: number }>({
     const canRetry = errorStatus !== 403 && onRefresh;
 
     return (
-      <Card>
+      <Card className="flex min-h-[calc(100dvh-8rem)] flex-col">
         {cardHeader}
-        <CardContent className="px-4">
+        <CardContent className="flex flex-1 flex-col px-4">
           <AnimatedStatus
             code={statusScene.code}
             title={statusScene.title}
             description={statusScene.description}
             accent={statusScene.accent}
             variant="panel"
+            className="min-h-[480px] flex-1"
             primaryAction={
               canRetry
                 ? { label: t("admin.shell.resource.tryAgain"), onClick: onRefresh }
