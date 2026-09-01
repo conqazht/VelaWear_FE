@@ -18,6 +18,10 @@ import {
   getApiErrorMessage,
   resolveAdminAssetUrl,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import {
+  AdminStatusBadge,
+  type AdminStatusVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -102,11 +106,12 @@ const PRODUCT_STATUS_MESSAGE_KEYS = {
 
 const PRODUCT_STATUSES: ProductStatus[] = ["DRAFT", "ACTIVE", "INACTIVE", "OUT_OF_STOCK"];
 
-function getStatusVariant(status: ProductStatus) {
-  if (status === "ACTIVE") return "default" as const;
-  if (status === "INACTIVE") return "destructive" as const;
-  if (status === "DRAFT") return "secondary" as const;
-  return "outline" as const;
+function getProductStatusVariant(status: ProductStatus): AdminStatusVariant {
+  if (status === "ACTIVE") return "active";
+  if (status === "DRAFT") return "draft";
+  if (status === "INACTIVE") return "draft";
+  if (status === "OUT_OF_STOCK") return "danger";
+  return "neutral";
 }
 
 function toTranslationFormValue(translation?: ProductTranslation): ProductTranslationFormValue {
@@ -310,7 +315,7 @@ export function ProductsManagement() {
   const productsQuery = useAdminProductsQuery({
     page,
     size: pageSize,
-    sort: "updatedAt,desc",
+    sort: "id,desc",
     name: deferredSearch || undefined,
     global: true,
     status: statusFilter === ALL_FILTER ? undefined : (statusFilter as ProductStatus),
@@ -834,6 +839,8 @@ export function ProductsManagement() {
     {
       key: "status",
       header: t("admin.commerce.common.status"),
+      headerClassName: "w-48 min-w-[190px]",
+      className: "w-48 min-w-[190px] whitespace-nowrap",
       cell: (product) => {
         const toggle = getProductStatusToggleState(product.status);
         const disabled = toggle.disabled || statusMutation.isPending;
@@ -846,9 +853,9 @@ export function ProductsManagement() {
               aria-label={t("admin.commerce.translation.toggleAria", { name: product.name })}
               onCheckedChange={(checked) => toggleProductStatus(product, checked)}
             />
-            <Badge variant={getStatusVariant(product.status)}>
+            <AdminStatusBadge variant={getProductStatusVariant(product.status)} size="sm">
               {t(PRODUCT_STATUS_MESSAGE_KEYS[product.status])}
-            </Badge>
+            </AdminStatusBadge>
           </div>
         );
       },
@@ -856,14 +863,15 @@ export function ProductsManagement() {
     {
       key: "updatedAt",
       header: t("admin.commerce.common.updated"),
-      className: "whitespace-nowrap text-muted-foreground",
+      headerClassName: "w-40 min-w-[150px] whitespace-nowrap",
+      className: "w-40 min-w-[150px] whitespace-nowrap text-muted-foreground",
       cell: (product) => formatDateTime(product.updatedAt, locale),
     },
     {
       key: "actions",
       header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
-      headerClassName: "w-24 text-right",
-      className: "text-right",
+      headerClassName: "w-24 min-w-[90px] text-right",
+      className: "w-24 min-w-[90px] text-right",
       cell: (product) => (
         <div className="flex justify-end gap-1">
           <Button

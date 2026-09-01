@@ -61,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href="/dashboard/default" />}>
+            <SidebarMenuButton render={<Link href="/dashboard/ecommerce" />}>
               <Command />
               <span className="text-base font-semibold">{t("admin.shell.brand")}</span>
             </SidebarMenuButton>

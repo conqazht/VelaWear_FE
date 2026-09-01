@@ -3,7 +3,7 @@
 import { ArrowDownRight, ArrowUpRight, Ellipsis } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Badge } from "@/components/ui/badge";
+import { AdminStatusBadge } from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getIntlLocale } from "@/lib/i18n";
 
@@ -20,7 +20,7 @@ export function AnalyticsKpiStrip() {
   });
 
   return (
-    <div className="bg-card ring-foreground/10 overflow-hidden rounded-xl shadow-xs ring-1">
+    <div className="bg-card border-border overflow-hidden rounded-xl border shadow-[0_1px_2px_0_rgba(0,0,0,0.03)]">
       <div className="grid divide-y *:data-[slot=card]:rounded-none *:data-[slot=card]:ring-0 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-5">
         <Card>
           <CardHeader>
@@ -33,13 +33,16 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">
+              <div className="text-2xl font-bold tracking-tight tabular-nums">
                 {compactFormatter.format(213_100)}
               </div>
-              <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
-                <ArrowUpRight />
+              <AdminStatusBadge
+                variant="success"
+                size="sm"
+                icon={<ArrowUpRight className="size-3" />}
+              >
                 {percentFormatter.format(0.028)}
-              </Badge>
+              </AdminStatusBadge>
             </div>
 
             <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -65,13 +68,16 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">
+              <div className="text-2xl font-bold tracking-tight tabular-nums">
                 {compactFormatter.format(248_600)}
               </div>
-              <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
-                <ArrowUpRight />
+              <AdminStatusBadge
+                variant="success"
+                size="sm"
+                icon={<ArrowUpRight className="size-3" />}
+              >
                 {percentFormatter.format(0.021)}
-              </Badge>
+              </AdminStatusBadge>
             </div>
 
             <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -97,13 +103,16 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">
+              <div className="text-2xl font-bold tracking-tight tabular-nums">
                 {compactFormatter.format(547_900)}
               </div>
-              <Badge className="bg-destructive/10 text-destructive">
-                <ArrowDownRight />
+              <AdminStatusBadge
+                variant="danger"
+                size="sm"
+                icon={<ArrowDownRight className="size-3" />}
+              >
                 {percentFormatter.format(0.033)}
-              </Badge>
+              </AdminStatusBadge>
             </div>
 
             <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -129,13 +138,16 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">
+              <div className="text-2xl font-bold tracking-tight tabular-nums">
                 {percentFormatter.format(0.614)}
               </div>
-              <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
-                <ArrowUpRight />
+              <AdminStatusBadge
+                variant="success"
+                size="sm"
+                icon={<ArrowUpRight className="size-3" />}
+              >
                 {percentFormatter.format(0.042)}
-              </Badge>
+              </AdminStatusBadge>
             </div>
 
             <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -161,13 +173,16 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">
+              <div className="text-2xl font-bold tracking-tight tabular-nums">
                 {percentFormatter.format(0.084)}
               </div>
-              <Badge className="bg-destructive/10 text-destructive">
-                <ArrowDownRight />
+              <AdminStatusBadge
+                variant="danger"
+                size="sm"
+                icon={<ArrowDownRight className="size-3" />}
+              >
                 {percentFormatter.format(0.056)}
-              </Badge>
+              </AdminStatusBadge>
             </div>
 
             <div className="text-muted-foreground flex items-center gap-2 text-xs">

@@ -16,8 +16,11 @@ import {
   downloadCsv,
   getApiErrorMessage,
 } from "@/app/(admin)/dashboard/_components/management/resource-utils";
+import {
+  AdminStatusBadge,
+  getStatusBadgeVariant,
+} from "@/app/(admin)/dashboard/_components/admin-status-badge";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
   AdminCoupon,
@@ -56,12 +59,6 @@ const COUPON_TYPE_MESSAGE_KEYS = {
 
 const COUPON_STATUSES: CouponStatus[] = ["ACTIVE", "INACTIVE", "EXPIRED"];
 const COUPON_TYPES: CouponType[] = ["PERCENTAGE", "FIXED_AMOUNT"];
-
-function getStatusVariant(status: CouponStatus) {
-  if (status === "ACTIVE") return "default" as const;
-  if (status === "EXPIRED") return "outline" as const;
-  return "secondary" as const;
-}
 
 function formatCouponValue(coupon: AdminCoupon, locale: ReturnType<typeof useI18n>["locale"]) {
   if (coupon.type === "PERCENTAGE") {
@@ -299,17 +296,19 @@ export function CouponsManagement() {
     {
       key: "status",
       header: t("admin.commerce.common.status"),
+      headerClassName: "w-36 min-w-[140px]",
+      className: "w-36 min-w-[140px] whitespace-nowrap",
       cell: (coupon) => (
-        <Badge variant={getStatusVariant(coupon.status)}>
+        <AdminStatusBadge variant={getStatusBadgeVariant(coupon.status)} size="sm">
           {t(COUPON_STATUS_MESSAGE_KEYS[coupon.status])}
-        </Badge>
+        </AdminStatusBadge>
       ),
     },
     {
       key: "actions",
       header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
-      headerClassName: "w-24 text-right",
-      className: "text-right",
+      headerClassName: "w-24 min-w-[90px] text-right",
+      className: "w-24 min-w-[90px] text-right",
       cell: (coupon) => (
         <div className="flex justify-end gap-1">
           <Button

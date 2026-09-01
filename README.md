@@ -163,6 +163,17 @@ Các bước cài đặt để chạy dự án ở môi trường phát triển:
    pnpm build
    ```
 
+## Default Test Accounts (Dev Seed Data)
+
+Khi kết nối với Backend Spring Boot và cơ sở dữ liệu mẫu (dev seed database), bạn có thể sử dụng các tài khoản kiểm thử sau:
+
+| Vai trò / Phân quyền              | Email                  | Mật khẩu mặc định | Mục đích kiểm thử / Ghi chú                                            |
+| :-------------------------------- | :--------------------- | :---------------- | :--------------------------------------------------------------------- |
+| **Admin** (Quản trị viên)         | `admin@velawear.local` | `Password123!`    | Toàn quyền truy cập Admin Dashboard (`/dashboard/*`, `ROLE_ADMIN`)     |
+| **Staff** (Nhân viên)             | `staff@velawear.local` | `Password123!`    | Quản lý sản phẩm, đơn hàng, khách hàng (`ROLE_STAFF`)                  |
+| **Customer 1** (Khách hàng chính) | `user@velawear.local`  | `Password123!`    | Storefront shopping, giỏ hàng, checkout, profile cá nhân (`ROLE_USER`) |
+| **Customer 2** (Khách hàng phụ)   | `linh@velawear.local`  | `Password123!`    | Kiểm thử đa tài khoản, self-scoped ownership isolation (`ROLE_USER`)   |
+
 ## Available Scripts
 
 Dưới đây là các lệnh (scripts) khả dụng trong `package.json`:
@@ -193,20 +204,20 @@ Dự án thiết lập CI workflow tự động chạy trên mọi Pull Request 
 - Môi trường: pnpm 11.5.2, Node 24
 - Cài đặt dependency: `pnpm install --frozen-lockfile`
 - Format check (Fast): `pnpm fmt:check` (oxfmt Rust, kiểm tra 600+ files trong 1.2s)
-- Fast Lint (Fast): `pnpm lint:fast` (oxlint Rust, quét 520+ files trong 20ms)
+- Fast Lint (Fast): `pnpm lint:fast` (oxlint Rust, quét 540+ files trong 20ms)
 - Framework Linter: `pnpm exec eslint . --max-warnings 25`
 - Type checking: `pnpm exec tsc --noEmit`
-- Unit Test: `pnpm test:unit` (Chạy 53 files, 205 tests)
+- Unit Test: `pnpm test:unit` (Chạy 60 files, 262 tests)
 - Build: `pnpm build` (Build 68 static routes)
-- E2E Smoke Test: Playwright smoke suite (Chạy 16 cases, Next.js được tự động start)
+- E2E Smoke Test: Playwright smoke suite (Chạy 19 cases, Next.js được tự động start)
 
 ## Testing Stats
 
 Hệ thống test đảm bảo chất lượng codebase:
 
-- **Unit Testing**: 53 unit test files, 205 tests sử dụng Vitest và Testing Library (100% passed).
-- **Smoke Testing**: 16 Playwright smoke cases có thể chạy độc lập mà không cần backend (100% passed).
-- **Full-stack Testing**: Yêu cầu môi trường hoàn chỉnh bao gồm backend, PostgreSQL và Redis.
+- **Unit Testing**: 60 unit test suites, 262 tests sử dụng Vitest và Testing Library (100% passed).
+- **Smoke Testing**: 19 Playwright smoke cases có thể chạy độc lập mà không cần backend (100% passed).
+- **Full-stack Testing**: 9 Playwright full-stack test cases kiểm thử contract thật với Spring Boot backend, PostgreSQL và Redis (100% passed).
 - Chi tiết xem tại: [Hướng dẫn Playwright và CI full-stack](docs/PLAYWRIGHT_CI_VI.md)
 
 ## Documentation References

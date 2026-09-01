@@ -27,11 +27,11 @@ describe("getPreference", () => {
     expect(get).toHaveBeenCalledWith("theme_mode");
   });
 
-  it("falls back to system for an invalid theme_mode cookie", async () => {
+  it("falls back to light for an invalid theme_mode cookie", async () => {
     cookiesMock.mockResolvedValue({
       get: vi.fn(() => ({ value: "sepia" })),
     });
 
-    await expect(getPreference("theme_mode")).resolves.toBe("system");
+    await expect(getPreference("theme_mode")).resolves.toBe("light");
   });
 });

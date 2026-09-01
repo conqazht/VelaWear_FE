@@ -125,16 +125,16 @@ export function KpiStrip() {
   const revenueOverviewConfig = {
     revenue: {
       label: t("admin.dashboardsA.ecommerce.revenue"),
-      color: "var(--foreground)",
+      color: "var(--chart-1)",
     },
     profit: {
       label: t("admin.dashboardsA.ecommerce.profit"),
-      color: "var(--muted-foreground)",
+      color: "var(--chart-2)",
     },
   } satisfies ChartConfig;
 
   return (
-    <div className="bg-card ring-foreground/10 h-full overflow-hidden rounded-xl ring-1 xl:col-span-12">
+    <div className="bg-card border-border h-full overflow-hidden rounded-xl border shadow-[0_1px_2px_0_rgba(0,0,0,0.03)] xl:col-span-12">
       <div>
         <div className="grid grid-cols-1 xl:grid-cols-12">
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 xl:col-span-5 xl:border-r">
@@ -151,11 +151,11 @@ export function KpiStrip() {
                 </CardAction>
               </CardHeader>
               <CardContent>
-                <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">
+                <div className="text-sm font-medium">
+                  <span className="text-emerald-700 dark:text-emerald-300">
                     {signedPercentFormatter.format(0.158)}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground font-normal">
                     {" "}
                     {t("admin.dashboardsA.ecommerce.vsLastWeek")}
                   </span>
@@ -168,7 +168,7 @@ export function KpiStrip() {
                 <CardTitle className="text-sm font-normal">
                   {t("admin.dashboardsA.ecommerce.totalOrders")}
                 </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
+                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
                   {numberFormatter.format(379)}
                 </CardDescription>
                 <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -176,11 +176,11 @@ export function KpiStrip() {
                 </CardAction>
               </CardHeader>
               <CardContent>
-                <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">
+                <div className="text-sm font-medium">
+                  <span className="text-emerald-700 dark:text-emerald-300">
                     {signedPercentFormatter.format(0.083)}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground font-normal">
                     {" "}
                     {t("admin.dashboardsA.ecommerce.vsLastWeek")}
                   </span>
@@ -193,7 +193,7 @@ export function KpiStrip() {
                 <CardTitle className="text-sm font-normal">
                   {t("admin.dashboardsA.ecommerce.customerGrowth")}
                 </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
+                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
                   {numberFormatter.format(820)}
                 </CardDescription>
                 <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -201,11 +201,11 @@ export function KpiStrip() {
                 </CardAction>
               </CardHeader>
               <CardContent>
-                <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">
+                <div className="text-sm font-medium">
+                  <span className="text-emerald-700 dark:text-emerald-300">
                     {signedPercentFormatter.format(0.125)}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground font-normal">
                     {" "}
                     {t("admin.dashboardsA.ecommerce.vsLastMonth")}
                   </span>
@@ -218,7 +218,7 @@ export function KpiStrip() {
                 <CardTitle className="text-sm font-normal">
                   {t("admin.dashboardsA.ecommerce.averageOrder")}
                 </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
+                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
                   {currencyFormatter.format(128)}
                 </CardDescription>
                 <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -226,9 +226,11 @@ export function KpiStrip() {
                 </CardAction>
               </CardHeader>
               <CardContent>
-                <div className="text-sm">
-                  <span className="text-destructive">{currencyFormatter.format(-4.2)}</span>
-                  <span className="text-muted-foreground">
+                <div className="text-sm font-medium">
+                  <span className="text-rose-700 dark:text-rose-300">
+                    {currencyFormatter.format(-4.2)}
+                  </span>
+                  <span className="text-muted-foreground font-normal">
                     {" "}
                     {t("admin.dashboardsA.ecommerce.vsLastWeek")}
                   </span>
@@ -241,7 +243,7 @@ export function KpiStrip() {
                 <CardTitle className="text-sm font-normal">
                   {t("admin.dashboardsA.ecommerce.returnRequests")}
                 </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
+                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
                   {numberFormatter.format(18)}
                 </CardDescription>
                 <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -249,9 +251,11 @@ export function KpiStrip() {
                 </CardAction>
               </CardHeader>
               <CardContent>
-                <div className="text-sm">
-                  <span className="text-destructive">{signedPercentFormatter.format(0.006)}</span>
-                  <span className="text-muted-foreground">
+                <div className="text-sm font-medium">
+                  <span className="text-rose-700 dark:text-rose-300">
+                    {signedPercentFormatter.format(0.006)}
+                  </span>
+                  <span className="text-muted-foreground font-normal">
                     {" "}
                     {t("admin.dashboardsA.ecommerce.vsLastMonth")}
                   </span>
@@ -264,7 +268,7 @@ export function KpiStrip() {
                 <CardTitle className="text-sm font-normal">
                   {t("admin.dashboardsA.ecommerce.stockAccuracy")}
                 </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
+                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
                   {percentFormatter.format(0.97)}
                 </CardDescription>
                 <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -272,13 +276,13 @@ export function KpiStrip() {
                 </CardAction>
               </CardHeader>
               <CardContent>
-                <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">
+                <div className="text-sm font-medium">
+                  <span className="text-emerald-700 dark:text-emerald-300">
                     {t("admin.dashboardsA.ecommerce.points", {
                       value: signedNumberFormatter.format(2.4),
                     })}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground font-normal">
                     {" "}
                     {t("admin.dashboardsA.ecommerce.vsLastAudit")}
                   </span>
