@@ -19,6 +19,9 @@ export const salesCheckoutMessages = defineMessages(
       "A late payment does not automatically restore this order; it will be handled according to the current payment status.",
     "sale.order.reservationNotice":
       "Online orders only hold stock, allocation, and purchase allowance until the time above. The system-confirmed status is authoritative.",
+    "sale.order.codNoticeTitle": "Cash on delivery (COD)",
+    "sale.order.codNoticeDescription":
+      "Online advance payment is not required for this order. Please prepare cash to pay directly to the courier upon arrival.",
     "sale.payment.method.sepay": "Bank transfer via SePay",
     "sale.payment.method.vnpay": "VNPay Payment Gateway",
     "sale.payment.method.momo": "MoMo E-Wallet",
@@ -96,6 +99,9 @@ export const salesCheckoutMessages = defineMessages(
       "Thanh toán đến muộn không tự khôi phục đơn; hệ thống sẽ xử lý theo trạng thái thanh toán hiện tại.",
     "sale.order.reservationNotice":
       "Đơn online chỉ giữ tồn kho, suất sale và lượt mua đến mốc ở trên. Trạng thái do hệ thống xác nhận là trạng thái chính thức.",
+    "sale.order.codNoticeTitle": "Thanh toán khi nhận hàng (COD)",
+    "sale.order.codNoticeDescription":
+      "Đơn hàng áp dụng hình thức COD, bạn không cần thanh toán online trước. Vui lòng chuẩn bị tiền mặt để thanh toán trực tiếp cho nhân viên giao hàng khi nhận kiện hàng.",
     "sale.payment.method.sepay": "Chuyển khoản ngân hàng qua SePay",
     "sale.payment.method.vnpay": "Cổng thanh toán VNPay",
     "sale.payment.method.momo": "Ví điện tử MoMo",
