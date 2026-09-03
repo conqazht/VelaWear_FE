@@ -1,3 +1,17 @@
+## 2026-09-03 (Enable Partial Prefetching for Instant Navigations)
+
+- **Enable Next.js 16.3 Partial Prefetching (`next.config.ts`):**
+  - Activated `partialPrefetching: true` alongside `cacheComponents: true` in `nextConfig`.
+  - Replaces per-visible-link prefetch requests with a single reusable client-cached App Shell per route, reducing network overhead and delivering instant zero-latency client navigations across storefront catalog, product details, collections, and editorial lookbooks.
+- **Verification Gates:**
+  - `pnpm format:check`: 100% pass.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 type errors.
+  - `pnpm test:unit`: 61 test suites, 277 tests passed (100%).
+  - `pnpm test:e2e:smoke`: 19/19 Playwright smoke tests passed.
+  - `pnpm build`: Next.js Turbopack compiled 70 routes cleanly with Partial Prefetching enabled.
+
 ## 2026-09-03 (Lock Email Edit for Google OAuth Accounts & UX Harmonization)
 
 - **Lock Email Editing for Google OAuth Accounts (`components/shop/profile/profile-account-panel.tsx`, `components/shop/edit-email-modal.tsx`):**
