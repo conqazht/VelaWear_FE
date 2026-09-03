@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { useOtpFlow } from "@/components/auth/use-otp-flow";
@@ -10,6 +13,7 @@ import { createEmailSchema } from "@/lib/validations";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const router = useRouter();
   const { user, clearRevokedSession } = useAuth();
   const { t, locale } = useI18n();
 
@@ -52,8 +56,10 @@ export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
           newEmail,
           otpProofToken: proofToken,
         });
+        toast.success(t("account.settings.emailUpdated"));
         await clearRevokedSession();
         handleModalClose();
+        router.push("/sign-in");
       } catch (error) {
         setSubmitError(getApiErrorMessage(error));
       }
@@ -85,6 +91,10 @@ export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
   };
 
   const displayError = submitError || otpError;
+
+  if (user?.hasPassword === false) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleModalClose()}>
@@ -142,13 +152,14 @@ export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
                 type="button"
                 onClick={handleNext}
                 disabled={!isFormValid || isOtpSubmitting}
-                className={`cursor-pointer rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex items-center justify-center gap-2 rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors ${
                   isFormValid && !isOtpSubmitting
-                    ? "border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
+                    ? "cursor-pointer border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
                     : "text-ink/40 pointer-events-none cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
                 }`}
               >
-                {t("account.settings.verifyEmail")}
+                {isOtpSubmitting && <Loader2 className="size-4 animate-spin" />}
+                <span>{t("account.settings.verifyEmail")}</span>
               </button>
             </div>
           </div>

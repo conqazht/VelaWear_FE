@@ -15,6 +15,21 @@ export const formatDisplayDate = (value: string | null | undefined, locale: Loca
   return formatDate(date, locale);
 };
 
+export const formatBirthDateDisplay = (value: string | null | undefined): string => {
+  if (!value) return "";
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return `${day}/${month}/${year}`;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 export const formatMemberSince = (value: string | null | undefined, locale: Locale) => {
   if (!value) return formatDate("2026-06-01", locale, { month: "long", year: "numeric" });
   const date = new Date(value);

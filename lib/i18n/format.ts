@@ -30,7 +30,7 @@ export function formatDateTime(value: string | number | Date, locale: Locale): s
   return formatDate(value, locale, { dateStyle: "medium", timeStyle: "short" });
 }
 
-function parseDateValue(value: string | number): Date {
+export function parseDateValue(value: string | number): Date {
   if (typeof value !== "string") return new Date(value);
 
   const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);

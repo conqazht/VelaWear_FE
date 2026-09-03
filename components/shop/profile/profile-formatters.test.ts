@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getProfileTabId,
   formatDisplayDate,
+  formatBirthDateDisplay,
   formatMemberSince,
   formatAddress,
   orderStatusMeta,
@@ -36,6 +37,21 @@ describe("profile-formatters", () => {
     it("formats valid date string correctly", () => {
       const result = formatDisplayDate("2026-05-15T10:00:00Z", "vi");
       expect(result).toBeTruthy();
+    });
+  });
+
+  describe("formatBirthDateDisplay", () => {
+    it("returns empty string when value is null, undefined, or empty", () => {
+      expect(formatBirthDateDisplay(null)).toBe("");
+      expect(formatBirthDateDisplay(undefined)).toBe("");
+      expect(formatBirthDateDisplay("")).toBe("");
+      expect(formatBirthDateDisplay("invalid-date")).toBe("");
+    });
+
+    it("formats YYYY-MM-DD date strictly as dd/mm/yyyy regardless of locale", () => {
+      expect(formatBirthDateDisplay("2026-09-07")).toBe("07/09/2026");
+      expect(formatBirthDateDisplay("1995-12-25")).toBe("25/12/1995");
+      expect(formatBirthDateDisplay("2000-01-05")).toBe("05/01/2000");
     });
   });
 

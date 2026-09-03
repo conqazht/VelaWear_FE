@@ -41,6 +41,7 @@ export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
             >
               {/* Category Image */}
               <Image
+                suppressHydrationWarning
                 src={category.image}
                 alt={category.name}
                 fill
