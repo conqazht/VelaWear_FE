@@ -50,6 +50,8 @@ const PAYMENT_METHOD_MESSAGE_KEYS = {
   COD: "admin.commerce.orders.paymentMethod.cod",
   VNPAY: "admin.commerce.orders.paymentMethod.vnpay",
   MOMO: "admin.commerce.orders.paymentMethod.momo",
+  STRIPE: "admin.commerce.orders.paymentMethod.stripe",
+  SEPAY: "admin.commerce.orders.paymentMethod.sepay",
   BANK_TRANSFER: "admin.commerce.orders.paymentMethod.bankTransfer",
 } as const;
 

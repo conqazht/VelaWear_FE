@@ -9,6 +9,7 @@ export function BrandMark({ className }: { className?: string }) {
 
   return (
     <Image
+      suppressHydrationWarning
       src="/logo.png"
       alt={t("brand.logoAlt")}
       width={40}

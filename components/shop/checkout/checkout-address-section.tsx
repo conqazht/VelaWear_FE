@@ -258,7 +258,15 @@ export function CheckoutAddressSection({
               />
               <span className="flex items-center gap-2 text-sm text-[#1c1a18]">
                 {method.value === "COD" && <Truck className="size-4 text-[#1c1a18]/50" />}
-                {method.value === "COD" ? t("checkout.cod") : t("sale.checkout.payment.sepay")}
+                {method.value === "COD"
+                  ? t("checkout.cod")
+                  : method.value === "SEPAY"
+                    ? t("sale.checkout.payment.sepay")
+                    : method.value === "VNPAY"
+                      ? t("sale.checkout.payment.vnpay")
+                      : method.value === "MOMO"
+                        ? t("sale.checkout.payment.momo")
+                        : t("sale.checkout.payment.stripe")}
               </span>
             </label>
           ))}

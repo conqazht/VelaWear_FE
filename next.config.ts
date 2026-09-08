@@ -6,6 +6,7 @@ const isLoopbackApi = ["localhost", "127.0.0.1", "[::1]"].includes(apiBaseUrl.ho
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  partialPrefetching: true,
   devIndicators: false,
   images: {
     dangerouslyAllowLocalIP: process.env.NODE_ENV === "development" && isLoopbackApi,

@@ -1,7 +1,7 @@
 import apiClient from "./api-client";
 import type { ApiResponse, PriceSource, Pricing } from "./api/types";
 
-export type CheckoutPaymentMethod = "COD" | "SEPAY";
+export type CheckoutPaymentMethod = "COD" | "SEPAY" | "VNPAY" | "MOMO" | "STRIPE";
 
 export interface CheckoutRequest {
   receiverName: string;

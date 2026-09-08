@@ -196,4 +196,56 @@ describe("ProfileAccountPanel - Avatar Upload & Visibility", () => {
       expect(screen.getByText("Network Error")).toBeInTheDocument();
     });
   });
+
+  it("renders date of birth formatted strictly as dd/mm/yyyy in the account tab", () => {
+    render(
+      <ProfileAccountPanel
+        user={{ ...dummyUser, birthDate: "1998-07-24" }}
+        checkSession={checkSessionMock}
+        addressesQuery={dummyAddressesQuery}
+        activeSidebarTab="account"
+        setActiveSidebarTab={vi.fn()}
+      />,
+    );
+
+    const dobInput = screen.getByLabelText("account.profile.birthDate") as HTMLInputElement;
+    expect(dobInput).toBeInTheDocument();
+    expect(dobInput.value).toBe("24/07/1998");
+  });
+
+  it("renders edit email button and standard note for direct password accounts", () => {
+    render(
+      <ProfileAccountPanel
+        user={{ ...dummyUser, hasPassword: true }}
+        checkSession={checkSessionMock}
+        addressesQuery={dummyAddressesQuery}
+        activeSidebarTab="account"
+        setActiveSidebarTab={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("account.profile.emailSettingsNote")).toBeInTheDocument();
+    expect(screen.queryByText("account.profile.googleEmailNote")).not.toBeInTheDocument();
+    const editButtons = screen.getAllByRole("button", { name: "account.profile.edit" });
+    // Both email and password have Edit buttons
+    expect(editButtons.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("hides edit email button and displays Google email note for OAuth accounts", () => {
+    render(
+      <ProfileAccountPanel
+        user={{ ...dummyUser, hasPassword: false }}
+        checkSession={checkSessionMock}
+        addressesQuery={dummyAddressesQuery}
+        activeSidebarTab="account"
+        setActiveSidebarTab={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("account.profile.googleEmailNote")).toBeInTheDocument();
+    expect(screen.queryByText("account.profile.emailSettingsNote")).not.toBeInTheDocument();
+    const editButtons = screen.getAllByRole("button", { name: "account.profile.edit" });
+    // Only password has Edit button (to set a password), email edit button is hidden
+    expect(editButtons.length).toBe(1);
+  });
 });

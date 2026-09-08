@@ -39,6 +39,9 @@ export function checkoutDetailsStorageKey(userId: number) {
 export const PAYMENT_METHODS = [
   { value: "COD" as const, disabled: false },
   { value: "SEPAY" as const, disabled: false },
+  { value: "VNPAY" as const, disabled: false },
+  { value: "MOMO" as const, disabled: false },
+  { value: "STRIPE" as const, disabled: false },
 ] as const;
 
 export type PaymentMethodValue = (typeof PAYMENT_METHODS)[number]["value"];

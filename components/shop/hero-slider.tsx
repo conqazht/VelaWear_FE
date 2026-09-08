@@ -84,6 +84,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
         >
           {/* Background Image */}
           <Image
+            suppressHydrationWarning
             src={slides[current].image}
             alt={slides[current].title}
             fill

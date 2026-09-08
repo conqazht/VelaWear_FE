@@ -49,6 +49,7 @@ import type { OrderItem } from "@/lib/api/types";
 import { useMyReviewsQuery } from "@/lib/queries/commerce";
 import { queryKeys } from "@/lib/queries/keys";
 import { OrderReviewDialog } from "./order-review-dialog";
+import { PaymentDeadline } from "@/components/shop/checkout/order-success-card";
 
 const orderHistoryParams = { size: 100, sort: "createdAt,asc" } as const;
 
@@ -69,6 +70,7 @@ const paymentMethodKeys = {
   SEPAY: "sale.payment.method.sepay",
   VNPAY: "account.order.paymentMethod.vnpay",
   MOMO: "account.order.paymentMethod.momo",
+  STRIPE: "sale.payment.method.stripe",
   BANK_TRANSFER: "account.order.paymentMethod.bankTransfer",
 } as const;
 
@@ -247,7 +249,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
   if (isPageLoading) {
     return (
       <div className="bg-canvas text-ink min-h-screen" aria-busy="true">
-        <main className="mx-auto w-full max-w-[1280px] px-6 py-16 md:px-16">
+        <main className="mx-auto w-full max-w-[1280px] px-6 pt-[104px] pb-16 md:px-16 md:pt-[124px] md:pb-20">
           <OrderDetailsLoadingFallback />
         </main>
       </div>
@@ -307,7 +309,7 @@ export default function OrderDetailsClient({ code }: { code: string }) {
 
   return (
     <div className="bg-canvas text-ink min-h-screen">
-      <main className="mx-auto w-full max-w-[1280px] px-6 py-12 md:px-16 md:py-16">
+      <main className="mx-auto w-full max-w-[1280px] px-6 pt-[104px] pb-16 md:px-16 md:pt-[124px] md:pb-20">
         <div className="mb-6">
           <Link
             href="/profile?tab=orders"
@@ -731,6 +733,28 @@ export default function OrderDetailsClient({ code }: { code: string }) {
                     </p>
                     <p className="mt-1 pl-5 text-[11px] text-red-700/80">
                       {t("sale.order.latePaymentNotice")}
+                    </p>
+                  </div>
+                ) : order.paymentStatus !== "PAID" &&
+                  order.paymentMethod?.toUpperCase() !== "COD" &&
+                  (order.paymentDueAt || order.reservationExpiresAt) &&
+                  order.status === "PENDING" ? (
+                  <div className="mt-4 border-t border-[#1c1a18]/8 pt-4">
+                    <PaymentDeadline
+                      paymentDueAt={order.paymentDueAt ?? order.reservationExpiresAt ?? ""}
+                      reservationExpiresAt={order.reservationExpiresAt}
+                      paymentInitiation={order.paymentInitiation}
+                    />
+                  </div>
+                ) : order.paymentMethod?.toUpperCase() === "COD" &&
+                  order.paymentStatus !== "PAID" &&
+                  order.status !== "CANCELLED" ? (
+                  <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/70 p-3 text-xs leading-relaxed text-emerald-900">
+                    <p className="font-semibold text-emerald-950">
+                      {t("sale.order.codNoticeTitle")}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-emerald-800/90">
+                      {t("sale.order.codNoticeDescription")}
                     </p>
                   </div>
                 ) : order.reservationExpiresAt && order.paymentStatus !== "PAID" ? (

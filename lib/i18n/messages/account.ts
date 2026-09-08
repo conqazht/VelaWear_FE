@@ -33,6 +33,8 @@ export const accountMessages = defineMessages(
     "account.profile.emailInvalid": "Please enter a valid email address.",
     "account.profile.emailSettingsNote":
       "Email changes are handled in account settings with OTP verification.",
+    "account.profile.googleEmailNote":
+      "Your email is synchronized and verified by your Google account.",
     "account.profile.password": "Password",
     "account.profile.edit": "Edit",
     "account.profile.gender": "Gender*",
@@ -307,6 +309,8 @@ export const accountMessages = defineMessages(
     "account.profile.emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ.",
     "account.profile.emailSettingsNote":
       "Email được thay đổi trong phần cài đặt tài khoản và cần xác minh bằng OTP.",
+    "account.profile.googleEmailNote":
+      "Email được đồng bộ và xác thực bởi tài khoản Google của bạn.",
     "account.profile.password": "Mật khẩu",
     "account.profile.edit": "Chỉnh sửa",
     "account.profile.gender": "Giới tính*",

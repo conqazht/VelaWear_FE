@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { BrandMark } from "@/components/shop/brand-mark";
-import { FloatingInput } from "@/components/auth/floating-input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+  REGEXP_ONLY_DIGITS,
+} from "@/components/ui/input-otp";
 import { cn } from "@/lib/utils";
 
 interface OtpEntryProps {
@@ -52,17 +59,38 @@ export function OtpEntry({
         </div>
       )}
 
-      <FloatingInput
-        id="otpCode"
-        label={t("auth.otp.verificationCode")}
-        type="text"
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        maxLength={6}
-        value={otpCode}
-        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-        required
-      />
+      <div className="flex flex-col items-center gap-3">
+        <label
+          htmlFor="otpCode"
+          className="text-center text-xs font-semibold tracking-wider text-[#55423d] uppercase select-none"
+        >
+          {t("auth.otp.verificationCode")}
+        </label>
+        <div className="flex w-full justify-center">
+          <InputOTP
+            id="otpCode"
+            maxLength={6}
+            value={otpCode}
+            onChange={(val) => setOtpCode(val)}
+            pattern={REGEXP_ONLY_DIGITS}
+            disabled={isSubmitting}
+            autoFocus
+            aria-invalid={Boolean(error)}
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+      </div>
 
       {children}
 
@@ -87,10 +115,17 @@ export function OtpEntry({
       <div className="pt-4">
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="flex h-12 w-full cursor-pointer items-center justify-center rounded-[12px] bg-[#b5573a] text-sm font-medium tracking-wider text-white uppercase shadow-sm transition-colors hover:bg-[#8f4329] disabled:opacity-50"
+          disabled={isSubmitting || otpCode.length < 6}
+          className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-[#b5573a] text-sm font-medium tracking-wider text-white uppercase shadow-sm transition-all duration-150 ease-out hover:bg-[#8f4329] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? t("auth.otp.verifying") : resolvedActionLabel}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              <span>{t("auth.otp.verifying")}</span>
+            </>
+          ) : (
+            resolvedActionLabel
+          )}
         </button>
       </div>
     </form>

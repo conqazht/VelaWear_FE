@@ -1,3 +1,86 @@
+## 2026-09-03 (Enable Partial Prefetching for Instant Navigations)
+
+- **Enable Next.js 16.3 Partial Prefetching (`next.config.ts`):**
+  - Activated `partialPrefetching: true` alongside `cacheComponents: true` in `nextConfig`.
+  - Replaces per-visible-link prefetch requests with a single reusable client-cached App Shell per route, reducing network overhead and delivering instant zero-latency client navigations across storefront catalog, product details, collections, and editorial lookbooks.
+- **Verification Gates:**
+  - `pnpm format:check`: 100% pass.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 type errors.
+  - `pnpm test:unit`: 61 test suites, 277 tests passed (100%).
+  - `pnpm test:e2e:smoke`: 19/19 Playwright smoke tests passed.
+  - `pnpm build`: Next.js Turbopack compiled 70 routes cleanly with Partial Prefetching enabled.
+
+## 2026-09-03 (Lock Email Edit for Google OAuth Accounts & UX Harmonization)
+
+- **Lock Email Editing for Google OAuth Accounts (`components/shop/profile/profile-account-panel.tsx`, `components/shop/edit-email-modal.tsx`):**
+  - Aligned with industry best practices (Spotify, Shopee, GitHub): Accounts authenticated via Google OAuth (`user.hasPassword === false`) have their email bound to their Google identity.
+  - Hidden the "Edit" email button for OAuth accounts on the Account profile tab; replaced generic note with dedicated bilingual message: _"Email được đồng bộ và xác thực bởi tài khoản Google của bạn."_ / _"Your email is synchronized and verified by your Google account."_
+  - Added safety guard in `EditEmailModal` preventing invocation by OAuth users.
+  - Added unit test cases in `components/shop/profile/profile-account-panel.test.tsx` asserting button visibility and note text based on `user.hasPassword`.
+- **Verification Gates:**
+  - `pnpm format:check`: 100% pass.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 type errors.
+  - `pnpm test:unit`: 61 test suites, 277 tests passed (100%).
+  - `pnpm test:e2e:smoke`: 19/19 Playwright smoke tests passed.
+  - `pnpm build`: Turbopack compiled 70 routes cleanly.
+
+## 2026-09-03 (Storefront Navigation Menu Linear CSS Mask & Fluid Tab Switching Polish)
+
+- **Eliminate Navigation Menu Closing Stutter, Jitter & Tab-Switching Flash (`components/ui/navigation-menu.tsx`, `components/shop/site-header.tsx`):**
+  - **Linear CSS Mask Epiphany on Viewport (`NavigationMenuPrimitive.Viewport`)**: Addressed the papercut where sliding menu items overflowed or sharply clipped at the outer container edge. Implemented a horizontal CSS gradient mask (`mask-image: linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%)`). At rest, the menu content (padded with `p-2.5` / 10px) is 100% crisp and unmasked. During tab transitions, exiting and entering items softly dissolve into transparency at the 8px outer boundaries, eliminating abrupt knife-edge cuts, bleed-through, and rasterization flash.
+  - **Correct Inverted Activation Directions**: Fixed swapped `translate-x` signs on `NavigationMenuContent`. When moving between tabs from left to right (`activationDirection === 'left'`), the entering item glides in from `-translate-x-6` (-24px) while the exiting item smoothly departs to `translate-x-6` (+24px), rather than colliding in reverse.
+  - **Cohesive 300ms Morphing Duration**: Extended morph duration across `Positioner`, `Popup`, and `Content` from 200ms to 300ms with `--ease-vela-out` cubic-bezier easing (`[0.23, 1, 0.32, 1]`), matching Base UI and Linear benchmarks for fluid, liquid container resizing.
+  - **Scale Jump & Single Card Consolidation**: Declared `scale` in transition list (`transition-[opacity,transform,width,height,scale]`), softened scale to `scale-[0.98]`, consolidated single card surface on `Popup`, and fixed missing pointer hover bridge on `Positioner`.
+- **Verification Gates:**
+  - `pnpm format:check`: 100% pass.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 type errors.
+  - `pnpm test:unit`: 61 test suites, 275 tests passed (100%).
+  - `pnpm test:e2e:smoke`: 19/19 Playwright smoke tests passed (19/19).
+  - `pnpm build`: Turbopack compiled 70 routes cleanly.
+
+## 2026-09-03 (Fix Google OAuth Email Overwrite & Email Change UX Flow)
+
+- **Fix Google OAuth Silent Email Overwrite (`OAuth2GoogleAccountService.java`):**
+  - Resolved root cause where users who created/linked their account via Google OAuth and then changed their email inside VelaWear (e.g. to `conganhtruongw@gmail.com`) had their email silently overwritten back to their Google email (`truongconganh5575@gmail.com`) whenever they signed in with Google.
+  - Hardened `syncExistingSocialAccount` to check `emailOriginallySynced`: Google OAuth will only update `user.email` if the user never customized their email internally and the Google email itself changed.
+  - Added unit test `resolveOrCreateUser_existingSocialAccount_customUserEmail_preservesUserEmail` in `OAuth2GoogleAccountServiceTest.java`. All 9/9 backend OAuth tests pass.
+- **Email Change Frontend UX Polish (`components/shop/edit-email-modal.tsx`):**
+  - Added `toast.success(t("account.settings.emailUpdated"))` and automated redirection to `/sign-in` after successful email update so users are clearly notified that existing sessions have been revoked for security and can sign back in seamlessly.
+- **Verification Gates:**
+  - `pnpm format:check`: 100% pass.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 type errors.
+  - `pnpm test:unit`: 61 test suites, 275 tests passed (100%).
+  - `pnpm test:e2e:smoke`: 19/19 Playwright smoke tests passed.
+  - `pnpm build`: Turbopack compiled 70 routes cleanly.
+  - Backend `./mvnw test -Dtest=OAuth2GoogleAccountServiceTest`: 9/9 tests passed.
+
+## 2026-09-03 (Segmented Emil Kowalski InputOTP & Profile Date Format dd/mm/yyyy)
+
+- **Segmented Emil Kowalski InputOTP (`components/ui/input-otp.tsx`, `components/auth/otp-entry.tsx`):**
+  - Upgraded OTP entry from a single input field to a 6-digit segmented box interface powered by Emil Kowalski's `input-otp` package.
+  - Formatted into two groups of 3 individual slots separated by a tactile dash separator (`[ ][ ][ ] - [ ][ ][ ]`).
+  - Implemented Emil Kowalski design engineering principles: active box scale animation (`data-[active=true]:scale-[1.03]`), warm terracotta focus ring (`border-[#b5573a] ring-[#b5573a]/25`), smooth fake caret pulse, crisp monospace digits (`font-mono tabular-nums`), and full paste support (Ctrl+V / Cmd+V populates all 6 slots seamlessly).
+  - Submit button disables until all 6 digits are provided and displays a responsive spinner (`Loader2`) during verification.
+  - Added unit test suite `components/auth/otp-entry.test.tsx` (10/10 tests passing).
+- **Profile Date of Birth Display (`dd/mm/yyyy`):**
+  - Updated profile account tab and edit dialog to format birth date as `dd/mm/yyyy` using `formatBirthDateDisplay`.
+- **Verification Gates:**
+  - `pnpm format:check`: 100% pass.
+  - `pnpm lint:fast`: 0 warnings, 0 errors.
+  - `pnpm lint`: 0 errors.
+  - `pnpm exec tsc --noEmit`: 0 type errors.
+  - `pnpm test:unit`: 61 test suites, 275 tests passed (100%).
+  - `pnpm test:e2e:smoke`: 19/19 Playwright smoke tests passed.
+  - `pnpm build`: Next.js Turbopack compiled all 70 routes cleanly.
+
 ## 2026-08-31 (Seed Test Accounts Documentation & Fullstack Test Gate Green)
 
 - **Default Test Accounts in `README.md`:**

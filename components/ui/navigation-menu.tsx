@@ -80,11 +80,11 @@ function NavigationMenuContent({ className, ...props }: NavigationMenuPrimitive.
     <NavigationMenuPrimitive.Content
       data-slot="navigation-menu-content"
       className={cn(
-        "h-full w-auto p-1 transition-[opacity,transform,translate] duration-200 ease-out data-[instant]:transition-none",
-        "data-[ending-style]:pointer-events-none data-[ending-style]:absolute data-[ending-style]:top-0 data-[ending-style]:left-0 data-[ending-style]:opacity-0 data-[ending-style]:duration-150",
-        "data-[starting-style]:opacity-0 data-[starting-style]:duration-150",
-        "data-[activation-direction=left]:data-[ending-style]:-translate-x-3 data-[activation-direction=left]:data-[starting-style]:translate-x-3",
-        "data-[activation-direction=right]:data-[ending-style]:translate-x-3 data-[activation-direction=right]:data-[starting-style]:-translate-x-3",
+        "h-full w-auto transition-[opacity,transform,translate] duration-300 ease-[var(--ease-vela-out,ease-out)] data-[instant]:transition-none",
+        "data-[ending-style]:pointer-events-none data-[ending-style]:opacity-0",
+        "data-[starting-style]:opacity-0",
+        "data-[activation-direction=left]:data-[ending-style]:translate-x-6 data-[activation-direction=left]:data-[starting-style]:-translate-x-6",
+        "data-[activation-direction=right]:data-[ending-style]:-translate-x-6 data-[activation-direction=right]:data-[starting-style]:translate-x-6",
         "group-data-[viewport=false]/navigation-menu:bg-popover group-data-[viewport=false]/navigation-menu:text-popover-foreground group-data-[viewport=false]/navigation-menu:ring-foreground/10 group-data-[viewport=false]/navigation-menu:rounded-lg group-data-[viewport=false]/navigation-menu:shadow group-data-[viewport=false]/navigation-menu:ring-1",
         "**:data-[slot=navigation-menu-link]:focus:ring-0 **:data-[slot=navigation-menu-link]:focus:outline-none",
         className,
@@ -110,13 +110,13 @@ function NavigationMenuPositioner({
         align={align}
         alignOffset={alignOffset}
         className={cn(
-          "isolate z-50 h-[var(--positioner-height)] w-[var(--positioner-width)] max-w-[var(--available-width)] transition-[top,left,right,bottom] duration-200 ease-out data-[instant]:transition-none data-[side=bottom]:before:top-[-10px] data-[side=bottom]:before:right-0 data-[side=bottom]:before:left-0",
+          "isolate z-50 h-[var(--positioner-height)] w-[var(--positioner-width)] max-w-[var(--available-width)] transition-[top,left,right,bottom] duration-300 ease-[var(--ease-vela-out,ease-out)] before:absolute before:block before:content-[''] data-[instant]:transition-none data-[side=bottom]:before:top-[-10px] data-[side=bottom]:before:right-0 data-[side=bottom]:before:left-0 data-[side=bottom]:before:h-2.5",
           className,
         )}
         {...props}
       >
-        <NavigationMenuPrimitive.Popup className="bg-popover text-popover-foreground ring-foreground/10 relative h-[var(--popup-height)] w-[var(--popup-width)] origin-[var(--transform-origin)] rounded-lg shadow-lg ring-1 transition-[opacity,transform,width,height] duration-200 ease-out outline-none data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[instant]:transition-none data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
-          <NavigationMenuPrimitive.Viewport className="relative size-full overflow-hidden rounded-lg" />
+        <NavigationMenuPrimitive.Popup className="text-popover-foreground relative h-[var(--popup-height)] w-[var(--popup-width)] origin-[var(--transform-origin)] rounded-lg border border-[#1c1a18]/10 bg-white shadow-xl transition-[opacity,transform,width,height,scale] duration-300 ease-[var(--ease-vela-out,ease-out)] outline-none data-[ending-style]:scale-[0.98] data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[instant]:transition-none data-[starting-style]:scale-[0.98] data-[starting-style]:opacity-0">
+          <NavigationMenuPrimitive.Viewport className="relative size-full overflow-hidden rounded-lg [mask-image:linear-gradient(to_right,transparent_0,black_8px,black_calc(100%-8px),transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0,black_8px,black_calc(100%-8px),transparent_100%)]" />
         </NavigationMenuPrimitive.Popup>
       </NavigationMenuPrimitive.Positioner>
     </NavigationMenuPrimitive.Portal>

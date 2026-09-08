@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { formatDate } from "@/lib/i18n/format";
+import { parseDateValue } from "@/lib/i18n/format";
 import { createEmailSchema } from "@/lib/validations";
 import { deleteAccount } from "@/lib/api/auth";
 import { EditPasswordModal } from "@/components/shop/edit-password-modal";
@@ -42,7 +42,7 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { useUpdateProfileMutation, useUploadAvatarMutation } from "@/lib/queries/commerce";
 import { resolveImageUrl } from "@/lib/vela-data";
 import type { Gender, User, UserAddress } from "@/lib/api/types";
-import { formatMemberSince } from "./profile-formatters";
+import { formatMemberSince, formatBirthDateDisplay } from "./profile-formatters";
 import { ProfileAddressesPanel } from "./profile-addresses-panel";
 
 interface ProfileAccountPanelProps {
@@ -401,14 +401,20 @@ export function ProfileAccountPanel({
                       </p>
                     )}
                   <div className="mt-1.5 flex items-center justify-between">
-                    <p className="text-ink/45 text-xs">{t("account.profile.emailSettingsNote")}</p>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditEmailOpen(true)}
-                      className="text-ink hover:text-primary cursor-pointer text-sm font-medium underline underline-offset-4 transition-colors"
-                    >
-                      {t("account.profile.edit")}
-                    </button>
+                    <p className="text-ink/45 text-xs">
+                      {user.hasPassword === false
+                        ? t("account.profile.googleEmailNote")
+                        : t("account.profile.emailSettingsNote")}
+                    </p>
+                    {user.hasPassword !== false && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditEmailOpen(true)}
+                        className="text-ink hover:text-primary cursor-pointer text-sm font-medium underline underline-offset-4 transition-colors"
+                      >
+                        {t("account.profile.edit")}
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -500,15 +506,7 @@ export function ProfileAccountPanel({
                       type="text"
                       id="dob"
                       placeholder=""
-                      value={
-                        editForm.dob
-                          ? formatDate(editForm.dob, locale, {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            })
-                          : ""
-                      }
+                      value={formatBirthDateDisplay(editForm.dob)}
                       readOnly
                       onBlur={() => setFormTouched((prev) => ({ ...prev, dob: true }))}
                       className={`peer text-ink !h-[52px] !w-full cursor-default rounded-sm border bg-transparent px-4 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
@@ -529,7 +527,7 @@ export function ProfileAccountPanel({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={editForm.dob ? new Date(editForm.dob) : undefined}
+                          selected={editForm.dob ? parseDateValue(editForm.dob) : undefined}
                           onSelect={(date: Date | undefined) => {
                             if (date) {
                               const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;

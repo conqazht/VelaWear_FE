@@ -292,6 +292,14 @@ export type Order = {
   createdAt?: string;
   updatedAt?: string;
   items?: OrderItem[];
+  paymentInitiation?: PaymentInitiation | null;
+};
+
+export type PaymentInitiation = {
+  provider: string;
+  method: string;
+  actionUrl: string;
+  fields: Record<string, string>;
 };
 
 export type OrderItem = {

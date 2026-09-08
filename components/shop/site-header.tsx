@@ -363,7 +363,7 @@ export function SiteHeader() {
           <NavigationMenu
             align="center"
             delay={30}
-            closeDelay={50}
+            closeDelay={180}
             className="hidden max-w-none flex-1 justify-start lg:flex"
           >
             <NavigationMenuList className="gap-1 pl-3">
@@ -404,7 +404,7 @@ export function SiteHeader() {
                       <div
                         data-slot="storefront-mega-menu-panel"
                         className={cn(
-                          "flex gap-2.5 rounded-lg border border-[#1c1a18]/10 bg-white p-2.5 shadow-xl",
+                          "flex gap-2.5 p-2.5",
                           item.groups.length >= 3
                             ? "w-[min(880px,calc(100vw-48px))]"
                             : item.groups.length === 2
