@@ -14,12 +14,20 @@ export function getAccessToken(): string | null {
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  if (token) sessionExpiryRedirectStarted = false;
+  if (token) {
+    sessionExpiryRedirectStarted = false;
+    if (typeof document !== "undefined") {
+      document.cookie = "vela_session_hint=1; Path=/; SameSite=Lax";
+    }
+  }
 }
 
 export function clearLocalAuthSession() {
   authSessionGeneration += 1;
   accessToken = null;
+  if (typeof document !== "undefined") {
+    document.cookie = "vela_session_hint=; Path=/; Max-Age=0; SameSite=Lax";
+  }
 }
 
 function redirectExpiredSessionToSignIn() {

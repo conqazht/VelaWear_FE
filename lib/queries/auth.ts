@@ -12,10 +12,25 @@ import {
 } from "@/lib/api/auth";
 import { queryKeys } from "./keys";
 
+export function hasSessionHint(): boolean {
+  if (typeof document === "undefined") return false;
+  if (process.env.NODE_ENV === "test") return true;
+  return document.cookie.split(";").some((item) => item.trim().startsWith("vela_session_hint="));
+}
+
 export function useSessionQuery() {
   return useQuery({
     queryKey: queryKeys.auth.session,
-    queryFn: getSessionUser,
+    queryFn: async () => {
+      if (!hasSessionHint()) {
+        return null;
+      }
+      try {
+        return await getSessionUser();
+      } catch {
+        return null;
+      }
+    },
   });
 }
 

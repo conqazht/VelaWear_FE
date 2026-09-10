@@ -31,6 +31,12 @@ async function handleProxy(
     headers.set(key, value);
   }
 
+  // Explicitly ensure client cookies are forwarded upstream
+  const clientCookies = request.headers.get("cookie") || request.cookies.toString();
+  if (clientCookies) {
+    headers.set("cookie", clientCookies);
+  }
+
   // Forward client IP if available
   const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip");
   if (clientIp) {
@@ -89,15 +95,96 @@ async function handleProxy(
     request.nextUrl.protocol === "https:" || request.headers.get("x-forwarded-proto") === "https";
 
   for (const cookieStr of rawCookies) {
-    let formattedCookie = cookieStr;
-    // Ensure Secure attribute if on HTTPS
-    if (isHttps && !formattedCookie.toLowerCase().includes("; secure")) {
-      formattedCookie += "; Secure";
+    const parsed = parseSetCookie(cookieStr);
+    if (parsed) {
+      if (isHttps) {
+        parsed.secure = true;
+      }
+      // Ensure path covers all BFF proxy endpoints
+      if (!parsed.path || parsed.path.startsWith("/api/v1")) {
+        parsed.path = "/api/v1";
+      }
+      nextResponse.cookies.set(parsed);
+
+      if (parsed.name === "refresh_token") {
+        if (parsed.maxAge === 0 || !parsed.value) {
+          nextResponse.cookies.set({
+            name: "vela_session_hint",
+            value: "",
+            path: "/",
+            maxAge: 0,
+            sameSite: "lax",
+            secure: isHttps,
+          });
+        } else {
+          nextResponse.cookies.set({
+            name: "vela_session_hint",
+            value: "1",
+            path: "/",
+            sameSite: "lax",
+            secure: isHttps,
+            maxAge: parsed.maxAge || 259200,
+          });
+        }
+      }
+    } else {
+      let formattedCookie = cookieStr;
+      // Ensure Secure attribute if on HTTPS
+      if (isHttps && !formattedCookie.toLowerCase().includes("; secure")) {
+        formattedCookie += "; Secure";
+      }
+      nextResponse.headers.append("set-cookie", formattedCookie);
     }
-    nextResponse.headers.append("set-cookie", formattedCookie);
   }
 
   return nextResponse;
+}
+
+function parseSetCookie(cookieStr: string) {
+  const parts = cookieStr.split(";").map((p) => p.trim());
+  const [firstPart, ...attributes] = parts;
+  const equalIdx = firstPart.indexOf("=");
+  if (equalIdx === -1) return null;
+  const name = firstPart.slice(0, equalIdx).trim();
+  const value = firstPart.slice(equalIdx + 1).trim();
+
+  const options: {
+    name: string;
+    value: string;
+    path?: string;
+    maxAge?: number;
+    expires?: Date;
+    httpOnly?: boolean;
+    sameSite?: "lax" | "strict" | "none";
+    secure?: boolean;
+  } = { name, value };
+
+  for (const attr of attributes) {
+    const [attrKey, ...attrVals] = attr.split("=");
+    const key = attrKey.trim().toLowerCase();
+    const val = attrVals.join("=").trim();
+
+    if (key === "path") {
+      options.path = val;
+    } else if (key === "max-age") {
+      const parsed = parseInt(val, 10);
+      if (!isNaN(parsed)) options.maxAge = parsed;
+    } else if (key === "expires") {
+      const parsed = new Date(val);
+      if (!isNaN(parsed.getTime())) options.expires = parsed;
+    } else if (key === "httponly") {
+      options.httpOnly = true;
+    } else if (key === "secure") {
+      options.secure = true;
+    } else if (key === "samesite") {
+      const lower = val.toLowerCase();
+      if (lower === "lax" || lower === "strict" || lower === "none") {
+        options.sameSite = lower;
+      }
+    }
+  }
+
+  return options;
 }
 
 export const GET = handleProxy;
