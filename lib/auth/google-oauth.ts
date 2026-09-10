@@ -2,8 +2,6 @@
 
 import { storePostAuthRedirect } from "@/lib/auth/post-auth-redirect";
 
-const DEFAULT_BACKEND_ORIGIN = "http://localhost:8080";
-
 export function getGoogleOAuthUrl() {
   const backendOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
   return backendOrigin
