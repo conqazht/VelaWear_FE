@@ -74,4 +74,9 @@ export const queryKeys = {
     summary: (productId: number) => ["reviews", "product", productId, "summary"] as const,
     me: (params?: unknown) => ["reviews", "me", params] as const,
   },
+  notifications: {
+    root: ["notifications"] as const,
+    myList: (params?: unknown) => ["notifications", "me", "list", params] as const,
+    unreadCount: () => ["notifications", "me", "unread-count"] as const,
+  },
 };
