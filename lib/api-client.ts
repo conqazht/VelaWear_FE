@@ -31,8 +31,23 @@ function redirectExpiredSessionToSignIn() {
   window.location.replace(createSignInHref(currentPath));
 }
 
+function getClientBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // In production browser, default to relative BFF path /api/v1 to keep backend origin private
+  if (
+    typeof window !== "undefined" &&
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1"
+  ) {
+    return "/api/v1";
+  }
+  return "http://localhost:8080/api/v1";
+}
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1",
+  baseURL: getClientBaseUrl(),
   withCredentials: true,
 });
 

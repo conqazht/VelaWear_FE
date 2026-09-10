@@ -57,9 +57,17 @@ function resolveAvatarUrl(value: string | null) {
   if (!value) return undefined;
   if (/^https?:\/\//i.test(value)) return value;
   if (value.startsWith("/uploads/") || value.startsWith("uploads/")) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
-    const backendOrigin = apiUrl.replace(/\/api\/v1\/?$/, "");
-    return `${backendOrigin}/${value.replace(/^\//, "")}`;
+    const cleanPath = value.startsWith("/") ? value : `/${value}`;
+    const explicitOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
+    if (explicitOrigin) {
+      return `${explicitOrigin.replace(/\/+$/, "")}${cleanPath}`;
+    }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl && apiUrl.startsWith("http")) {
+      const backendOrigin = apiUrl.replace(/\/api\/v1\/?$/, "");
+      return `${backendOrigin}${cleanPath}`;
+    }
+    return cleanPath;
   }
   return value;
 }

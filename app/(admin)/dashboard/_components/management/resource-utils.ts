@@ -47,14 +47,24 @@ export function resolveAdminAssetUrl(value?: string | null) {
   }
 
   if (value.startsWith("/uploads/") || value.startsWith("uploads/")) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
     const cleanPath = value.startsWith("/") ? value : `/${value}`;
-
-    try {
-      return `${new URL(apiUrl).origin}${cleanPath}`;
-    } catch {
-      return `http://localhost:8080${cleanPath}`;
+    const explicitOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
+    if (explicitOrigin) {
+      try {
+        return `${new URL(explicitOrigin).origin}${cleanPath}`;
+      } catch {
+        return cleanPath;
+      }
     }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl && apiUrl.startsWith("http")) {
+      try {
+        return `${new URL(apiUrl).origin}${cleanPath}`;
+      } catch {
+        return cleanPath;
+      }
+    }
+    return cleanPath;
   }
 
   return value;

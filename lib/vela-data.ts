@@ -370,13 +370,23 @@ export function resolveImageUrl(url: string | null | undefined): string {
   }
   if (url.startsWith("/uploads/") || url.startsWith("uploads/")) {
     const cleanPath = url.startsWith("/") ? url : `/${url}`;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
-    try {
-      const parsed = new URL(apiUrl);
-      return `${parsed.origin}${cleanPath}`;
-    } catch {
-      return `http://localhost:8080${cleanPath}`;
+    const explicitOrigin = process.env.NEXT_PUBLIC_BACKEND_ORIGIN;
+    if (explicitOrigin) {
+      try {
+        return `${new URL(explicitOrigin).origin}${cleanPath}`;
+      } catch {
+        return cleanPath;
+      }
     }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl && apiUrl.startsWith("http")) {
+      try {
+        return `${new URL(apiUrl).origin}${cleanPath}`;
+      } catch {
+        return cleanPath;
+      }
+    }
+    return cleanPath;
   }
   return url;
 }

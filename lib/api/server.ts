@@ -1,6 +1,11 @@
 import type { ApiResponse } from "./types";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+export const API_BASE_URL =
+  process.env.BACKEND_API_URL ||
+  (process.env.NEXT_PUBLIC_API_URL?.startsWith("http")
+    ? process.env.NEXT_PUBLIC_API_URL
+    : undefined) ||
+  "http://localhost:8080/api/v1";
 
 type ServerFetchOptions = {
   query?: Record<string, string | number | boolean | null | undefined>;
