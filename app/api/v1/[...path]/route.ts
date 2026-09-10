@@ -32,8 +32,7 @@ async function handleProxy(
   }
 
   // Forward client IP if available
-  const clientIp =
-    request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip");
+  const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip");
   if (clientIp) {
     headers.set("x-forwarded-for", clientIp);
   }
@@ -87,8 +86,7 @@ async function handleProxy(
         : [];
 
   const isHttps =
-    request.nextUrl.protocol === "https:" ||
-    request.headers.get("x-forwarded-proto") === "https";
+    request.nextUrl.protocol === "https:" || request.headers.get("x-forwarded-proto") === "https";
 
   for (const cookieStr of rawCookies) {
     let formattedCookie = cookieStr;
