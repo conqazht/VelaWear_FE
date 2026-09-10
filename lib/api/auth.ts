@@ -1,4 +1,5 @@
 import {
+  getAccessToken,
   logoutAuthSession,
   refreshAccessTokenOnce,
   setAccessToken,
@@ -72,7 +73,9 @@ export async function getMe(): Promise<User> {
 }
 
 export async function getSessionUser(): Promise<User> {
-  await refreshSession();
+  if (!getAccessToken()) {
+    await refreshSession();
+  }
   return getMe();
 }
 
