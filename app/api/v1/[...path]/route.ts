@@ -71,13 +71,24 @@ async function handleProxy(
   }
 
   const responseHeaders = new Headers();
+  const excludedResponseHeaders = new Set([
+    "set-cookie",
+    "content-encoding",
+    "content-length",
+    "transfer-encoding",
+    "connection",
+    "keep-alive",
+  ]);
+
   response.headers.forEach((value, key) => {
-    if (key.toLowerCase() !== "set-cookie") {
+    if (!excludedResponseHeaders.has(key.toLowerCase())) {
       responseHeaders.set(key, value);
     }
   });
 
-  const nextResponse = new NextResponse(response.body, {
+  const responseBody = await response.arrayBuffer();
+
+  const nextResponse = new NextResponse(responseBody, {
     status: response.status,
     statusText: response.statusText,
     headers: responseHeaders,
