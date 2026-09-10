@@ -95,7 +95,7 @@ export function SiteHeader() {
 
   const { itemCount } = useCart();
   const { favorites } = useFavorites();
-  const { user, isAuthenticated, signOut } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, signOut } = useAuth();
   const { locale: activeLocale, t } = useI18n();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -217,6 +217,7 @@ export function SiteHeader() {
   const shouldBeTransparent = isHome && !isScrolled;
   const safeFavoritesCount = hasMounted ? favorites.length : 0;
   const safeItemCount = hasMounted ? itemCount : 0;
+  const isAuthPending = !hasMounted || isAuthLoading;
   const safeIsAuthenticated = hasMounted ? isAuthenticated : false;
   const safeUser = hasMounted ? user : null;
 
@@ -792,7 +793,17 @@ export function SiteHeader() {
 
               {/* Account Profile / Login */}
               <div className="hidden items-center gap-3 md:flex">
-                {safeIsAuthenticated && safeUser ? (
+                {isAuthPending ? (
+                  <div
+                    data-slot="skeleton"
+                    aria-hidden="true"
+                    className={`size-8 shrink-0 animate-pulse rounded-full ${
+                      shouldBeTransparent
+                        ? "border border-white/20 bg-white/20"
+                        : "border border-[#1c1a18]/10 bg-[#efe7dc]"
+                    }`}
+                  />
+                ) : safeIsAuthenticated && safeUser ? (
                   <>
                     {canAccessManagement(safeUser) && (
                       <Link
@@ -1045,7 +1056,13 @@ export function SiteHeader() {
                     </span>
                     <LanguageSwitcher />
                   </div>
-                  {safeIsAuthenticated && safeUser ? (
+                  {isAuthPending ? (
+                    <div
+                      data-slot="skeleton"
+                      aria-hidden="true"
+                      className="h-10 w-full animate-pulse rounded-sm bg-[#1c1a18]/10"
+                    />
+                  ) : safeIsAuthenticated && safeUser ? (
                     <div className="space-y-3 pt-2">
                       {canAccessManagement(safeUser) && (
                         <Link

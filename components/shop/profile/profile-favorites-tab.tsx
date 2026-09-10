@@ -60,7 +60,7 @@ export function ProfileFavoritesTab({
           </p>
           <Link
             href="/collection"
-            className="bg-primary-container text-on-primary hover:bg-primary-active inline-flex rounded-sm px-8 py-3.5 text-xs font-semibold tracking-widest uppercase shadow-sm transition-colors duration-200"
+            className="inline-flex rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-semibold tracking-widest text-white uppercase shadow-sm transition-colors duration-200 hover:bg-[#1c1a18]/90"
           >
             {t("account.favourites.explore")}
           </Link>
