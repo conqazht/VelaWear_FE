@@ -105,28 +105,6 @@ async function handleProxy(
         parsed.path = "/api/v1";
       }
       nextResponse.cookies.set(parsed);
-
-      if (parsed.name === "refresh_token") {
-        if (parsed.maxAge === 0 || !parsed.value) {
-          nextResponse.cookies.set({
-            name: "vela_session_hint",
-            value: "",
-            path: "/",
-            maxAge: 0,
-            sameSite: "lax",
-            secure: isHttps,
-          });
-        } else {
-          nextResponse.cookies.set({
-            name: "vela_session_hint",
-            value: "1",
-            path: "/",
-            sameSite: "lax",
-            secure: isHttps,
-            maxAge: parsed.maxAge || 259200,
-          });
-        }
-      }
     } else {
       let formattedCookie = cookieStr;
       // Ensure Secure attribute if on HTTPS
