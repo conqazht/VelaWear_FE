@@ -2,20 +2,14 @@
 
 import { motion } from "motion/react";
 
-import { useI18n } from "@/components/providers/i18n-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AuthLoader({
-  message,
-  mode = "authenticating",
+  mode: _mode = "authenticating",
 }: {
   message?: string;
   mode?: "authenticating" | "oauth";
 }) {
-  const { t } = useI18n();
-  const resolvedMessage =
-    message ?? t(mode === "oauth" ? "auth.oauth.completing" : "auth.loader.authenticating");
-
   return (
     <main className="relative grid min-h-[100dvh] place-items-center bg-white px-6">
       <Skeleton
@@ -47,15 +41,6 @@ export function AuthLoader({
             />
           </motion.div>
         </div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="font-numeric text-[10px] font-bold tracking-[0.2em] text-[#1c1a18]/40 uppercase"
-        >
-          {resolvedMessage}
-        </motion.p>
       </div>
     </main>
   );

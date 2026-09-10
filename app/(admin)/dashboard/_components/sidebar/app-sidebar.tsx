@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Command, Store } from "lucide-react";
+import { Store } from "lucide-react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 
@@ -62,7 +63,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link href="/dashboard/ecommerce" />}>
-              <Command />
+              <Image
+                src="/images/brand/vela-wear-logo.png"
+                alt={t("admin.shell.brand")}
+                width={20}
+                height={20}
+                className="size-5 dark:invert"
+              />
               <span className="text-base font-semibold">{t("admin.shell.brand")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
