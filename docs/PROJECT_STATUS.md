@@ -1,3 +1,15 @@
+## 2026-09-10 (Instant Login Link for Anonymous Visitors in Site Header)
+
+- **Skip avatar skeleton when no session exists (`lib/api-client.ts`, `components/auth/auth-provider.tsx`, `components/shop/site-header.tsx`):**
+  - Added a `vela-auth-session-hint` localStorage flag set on any access-token issue (login, OAuth2 exchange, refresh) and cleared on logout/session revoke.
+  - `useAuth()` now exposes `hasSessionHint`; header shows the skeleton only while a possible session is being verified (`isAuthLoading && hasSessionHint`).
+  - Fresh anonymous visitors see the Login link immediately instead of waiting for the `/auth/refresh` + `/auth/me` roundtrip (previously up to 15s timeout when backend is down). Applies to desktop header and mobile drawer.
+- **Verification Gates:**
+  - `prettier --write` on 4 touched files: unchanged (already formatted).
+  - `oxlint` on touched files: 0 warnings, 0 errors.
+  - `tsc --noEmit`: 0 type errors.
+  - `vitest run` on auth/cart/favorites provider tests: 3 suites, 15 tests passed (incl. 2 new `hasSessionHint` cases).
+
 ## 2026-09-03 (Enable Partial Prefetching for Instant Navigations)
 
 - **Enable Next.js 16.3 Partial Prefetching (`next.config.ts`):**

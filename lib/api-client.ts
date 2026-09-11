@@ -7,6 +7,37 @@ let refreshPromise: Promise<string> | null = null;
 let sessionExpiryRedirectStarted = false;
 let authSessionGeneration = 0;
 const authSessionLockName = "vela-auth-session";
+// Persistent hint that this browser has logged in and not logged out since.
+// Used to render auth UI instantly: show the login link right away when no
+// session was ever established, and reserve the avatar skeleton only for the
+// case where a session may exist and is being verified.
+const AUTH_SESSION_HINT_STORAGE_KEY = "vela-auth-session-hint";
+
+function readSessionHint(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(AUTH_SESSION_HINT_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeSessionHint(present: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    if (present) {
+      window.localStorage.setItem(AUTH_SESSION_HINT_STORAGE_KEY, "1");
+    } else {
+      window.localStorage.removeItem(AUTH_SESSION_HINT_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore storage failures (private mode, quota).
+  }
+}
+
+export function hasLocalAuthSessionHint(): boolean {
+  return readSessionHint();
+}
 
 export function getAccessToken(): string | null {
   return accessToken;
@@ -14,12 +45,18 @@ export function getAccessToken(): string | null {
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  if (token) sessionExpiryRedirectStarted = false;
+  if (token) {
+    sessionExpiryRedirectStarted = false;
+    writeSessionHint(true);
+  } else {
+    writeSessionHint(false);
+  }
 }
 
 export function clearLocalAuthSession() {
   authSessionGeneration += 1;
   accessToken = null;
+  writeSessionHint(false);
 }
 
 function redirectExpiredSessionToSignIn() {

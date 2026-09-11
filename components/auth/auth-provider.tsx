@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useLoginMutation,
@@ -11,7 +11,7 @@ import {
 import type { RegisterRequest } from "@/lib/api/auth";
 import type { User } from "@/lib/api/types";
 import { useCartStore } from "@/store/cart-store";
-import { clearLocalAuthSession } from "@/lib/api-client";
+import { clearLocalAuthSession, hasLocalAuthSessionHint } from "@/lib/api-client";
 import { queryKeys } from "@/lib/queries/keys";
 
 export type { User };
@@ -20,6 +20,12 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  /**
+   * True when this browser has logged in before and not logged out since.
+   * Lets UI show the login link instantly for fresh anonymous visitors while
+   * reserving the loading skeleton for sessions that may actually exist.
+   */
+  hasSessionHint: boolean;
   signIn: (email: string, password: string) => Promise<User>;
   register: (data: RegisterRequest) => Promise<User>;
   signOut: () => Promise<void>;
@@ -40,12 +46,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = (sessionQuery.data ?? null) as User | null;
   const isLoading = sessionQuery.isPending;
   const isAuthenticated = user !== null;
+  // Snapshot at mount: only gates the initial pending render, the verified
+  // session query result takes over afterwards.
+  const [hasSessionHint] = useState(() => hasLocalAuthSessionHint());
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       isLoading,
       isAuthenticated,
+      hasSessionHint,
       signIn: async (email, password) => {
         await loginMutation.mutateAsync({ email, password });
         const profile = await sessionQuery.refetch();
@@ -79,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isLoading,
       isAuthenticated,
+      hasSessionHint,
       loginMutation,
       logoutMutation,
       queryClient,

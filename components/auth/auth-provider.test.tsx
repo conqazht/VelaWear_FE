@@ -24,6 +24,7 @@ describe("AuthProvider", () => {
       },
     });
     vi.resetModules();
+    window.localStorage.removeItem("vela-auth-session-hint");
     useCartStore.setState({ cart: [], owner: "user:42" });
     mockLogout.mockReset();
   });
@@ -62,5 +63,18 @@ describe("AuthProvider", () => {
     expect(mockLogout).toHaveBeenCalledTimes(1);
     // Because logout rejected, releaseToAnonymous is skipped
     expect(useCartStore.getState().owner).toBe("user:42");
+  });
+
+  it("hasSessionHint is false for fresh anonymous visitors", () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    expect(result.current.hasSessionHint).toBe(false);
+  });
+
+  it("hasSessionHint is true when a previous login hint exists", () => {
+    window.localStorage.setItem("vela-auth-session-hint", "1");
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    expect(result.current.hasSessionHint).toBe(true);
   });
 });

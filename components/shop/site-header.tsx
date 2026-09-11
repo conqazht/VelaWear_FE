@@ -95,7 +95,7 @@ export function SiteHeader() {
 
   const { itemCount } = useCart();
   const { favorites } = useFavorites();
-  const { user, isAuthenticated, isLoading: isAuthLoading, signOut } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, hasSessionHint, signOut } = useAuth();
   const { locale: activeLocale, t } = useI18n();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -217,7 +217,10 @@ export function SiteHeader() {
   const shouldBeTransparent = isHome && !isScrolled;
   const safeFavoritesCount = hasMounted ? favorites.length : 0;
   const safeItemCount = hasMounted ? itemCount : 0;
-  const isAuthPending = !hasMounted || isAuthLoading;
+  // Skeleton only when a session may exist and is being verified. Fresh
+  // anonymous visitors (no session hint) get the login link immediately
+  // instead of waiting for the /auth/me roundtrip.
+  const isAuthPending = !hasMounted || (isAuthLoading && hasSessionHint);
   const safeIsAuthenticated = hasMounted ? isAuthenticated : false;
   const safeUser = hasMounted ? user : null;
 
