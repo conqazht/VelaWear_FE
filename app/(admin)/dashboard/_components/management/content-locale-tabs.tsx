@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { CircleAlert, CircleCheck } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Locale } from "@/lib/i18n";
@@ -60,11 +60,13 @@ export function ContentLocaleTabs({
       {!complete.vi ? (
         <Alert variant="destructive">
           <CircleAlert />
+          <AlertTitle className="sr-only">Notice</AlertTitle>
           <AlertDescription>{t("admin.commerce.translation.viRequired")}</AlertDescription>
         </Alert>
       ) : !complete.en ? (
         <Alert>
           <CircleAlert />
+          <AlertTitle className="sr-only">Notice</AlertTitle>
           <AlertDescription>{t("admin.commerce.translation.enOptional")}</AlertDescription>
         </Alert>
       ) : null}

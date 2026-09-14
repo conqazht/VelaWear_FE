@@ -20,11 +20,14 @@ import "./globals.css";
 
 export default function GlobalError({
   error,
+  reset,
   unstable_retry,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset?: () => void;
+  unstable_retry?: () => void;
 }) {
+  const handleRetry = reset ?? unstable_retry;
   const locale = useSyncExternalStore(
     subscribeToActiveLocale,
     readStandaloneLocale,
@@ -45,7 +48,7 @@ export default function GlobalError({
           status={500}
           title={copy["errors.global.title"]}
           description={copy["errors.global.description"]}
-          primaryAction={{ label: copy["errors.common.retry"], onClick: unstable_retry }}
+          primaryAction={{ label: copy["errors.common.retry"], onClick: handleRetry }}
           secondaryAction={{ label: copy["errors.common.home"], href: "/" }}
           reference={error.digest}
           standaloneCopy={{
@@ -86,6 +89,11 @@ export default function GlobalError({
             </div>
           }
         />
+        {handleRetry && (
+          <button type="button" onClick={handleRetry} className="sr-only">
+            Retry
+          </button>
+        )}
       </body>
     </html>
   );

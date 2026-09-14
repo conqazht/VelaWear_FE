@@ -268,9 +268,9 @@ export default function HelpCenter() {
           {/* Seamless Left Sidebar Navigation (Nike Editorial Style) */}
           <aside className="sticky top-28 hidden max-h-[calc(100vh-140px)] w-full shrink-0 overflow-y-auto pr-6 select-none lg:block lg:w-1/4">
             <div>
-              <h3 className="border-hairline/40 mb-6 border-b pb-3 font-sans text-xs font-semibold tracking-[0.15em] text-[#55423d]/60 uppercase">
+              <h2 className="border-hairline/40 mb-6 border-b pb-3 font-sans text-xs font-semibold tracking-[0.15em] text-[#55423d]/60 uppercase">
                 {isVi ? "CHỦ ĐỀ HỖ TRỢ" : "HELP TOPICS"}
-              </h3>
+              </h2>
 
               <nav className="flex flex-col gap-2">
                 {helpTopics.map((topic) => {
@@ -380,9 +380,9 @@ export default function HelpCenter() {
                 <div className="flex items-start gap-4">
                   <PackageCheck className="mt-0.5 size-6 shrink-0 text-[#b5573a]" />
                   <div>
-                    <h5 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
+                    <h4 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
                       {isVi ? "Đóng Gói Độc Quyền" : "Signature Packaging"}
-                    </h5>
+                    </h4>
                     <p className="text-xs leading-relaxed font-light text-[#55423d]/80">
                       {isVi
                         ? "Hộp sản phẩm cứng cao cấp, túi bọc trang phục vải cao cấp và giấy nến thơm giữ nguyên phom."
@@ -394,9 +394,9 @@ export default function HelpCenter() {
                 <div className="flex items-start gap-4">
                   <ShieldCheck className="mt-0.5 size-6 shrink-0 text-[#b5573a]" />
                   <div>
-                    <h5 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
+                    <h4 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
                       {isVi ? "Cam Kết 100% Chính Hãng" : "Guaranteed Authenticity"}
-                    </h5>
+                    </h4>
                     <p className="text-xs leading-relaxed font-light text-[#55423d]/80">
                       {isVi
                         ? "Mọi thiết kế đều được may may chỉn chu từ nguồn vải nhập khẩu tinh tuyển có chứng nhận nguồn gốc."
@@ -408,9 +408,9 @@ export default function HelpCenter() {
                 <div className="flex items-start gap-4">
                   <Headphones className="mt-0.5 size-6 shrink-0 text-[#b5573a]" />
                   <div>
-                    <h5 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
+                    <h4 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
                       {isVi ? "Concierge Phục Vụ 7 Ngày" : "Dedicated Concierge"}
-                    </h5>
+                    </h4>
                     <p className="text-xs leading-relaxed font-light text-[#55423d]/80">
                       {isVi
                         ? "Đội ngũ chuyên viên tư vấn phối đồ và hỗ trợ xử lý đơn hàng từ 8:30 - 22:00 tất cả các ngày."

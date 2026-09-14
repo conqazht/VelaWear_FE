@@ -138,7 +138,7 @@ export function Calendar() {
             </SelectContent>
           </Select>
           <Button>
-            <Plus />
+            <Plus data-icon="inline-start" />
             {t("admin.workflows.calendar.addEvent")}
           </Button>
         </div>

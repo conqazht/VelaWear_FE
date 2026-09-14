@@ -72,6 +72,7 @@ export function PriceRangeInputs({
           inputMode="numeric"
           min={0}
           value={minimum}
+          aria-label={t("storefront.catalog.minimum")}
           placeholder={t("storefront.catalog.minimum")}
           onChange={(event) => setMinimum(event.currentTarget.value)}
           onKeyDown={(event) => {
@@ -87,6 +88,7 @@ export function PriceRangeInputs({
           inputMode="numeric"
           min={0}
           value={maximum}
+          aria-label={t("storefront.catalog.maximum")}
           placeholder={t("storefront.catalog.maximum")}
           onChange={(event) => setMaximum(event.currentTarget.value)}
           onKeyDown={(event) => {

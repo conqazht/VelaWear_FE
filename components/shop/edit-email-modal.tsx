@@ -113,6 +113,7 @@ export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
                 <input
                   type="email"
                   id="newEmail"
+                  autoComplete="email"
                   placeholder={t("account.profile.email")}
                   value={newEmail}
                   onChange={(e) => {

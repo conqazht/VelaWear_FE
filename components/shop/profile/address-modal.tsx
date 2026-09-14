@@ -22,9 +22,20 @@ export interface AddressModalProps {
 }
 
 export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalProps) {
+  const { t } = useI18n();
+  const title = addressToEdit ? t("account.addresses.editTitle") : t("account.addresses.createTitle");
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-canvas text-ink w-full max-w-[calc(100%-2rem)] rounded-md border border-[#e4dacf] p-6 shadow-xl sm:max-w-2xl sm:p-8">
+      <DialogContent
+        aria-label={title}
+        className="bg-canvas text-ink w-full max-w-[calc(100%-2rem)] rounded-md border border-[#e4dacf] p-6 shadow-xl sm:max-w-2xl sm:p-8"
+      >
+        <DialogHeader className="mb-3 text-left">
+          <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
         {isOpen ? (
           <AddressModalForm
             key={addressToEdit?.id ?? "new"}
@@ -201,14 +212,7 @@ function AddressModalForm({
   };
 
   return (
-    <>
-      <DialogHeader className="mb-3 text-left">
-        <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight">
-          {addressToEdit ? t("account.addresses.editTitle") : t("account.addresses.createTitle")}
-        </DialogTitle>
-      </DialogHeader>
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
         {/* Receiver Full Name */}
         <div className="flex flex-col gap-1.5">
           <label
@@ -425,6 +429,5 @@ function AddressModalForm({
           </button>
         </div>
       </form>
-    </>
   );
 }

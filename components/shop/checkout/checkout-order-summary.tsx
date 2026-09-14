@@ -94,6 +94,7 @@ export function CheckoutOrderSummary({
         <div className="flex gap-2">
           <Input
             value={couponCode}
+            aria-label={t("checkout.couponPlaceholder")}
             onChange={(event) => {
               setCouponCode(event.target.value);
               if (couponError) setCouponError(null);

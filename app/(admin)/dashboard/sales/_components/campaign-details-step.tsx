@@ -65,8 +65,15 @@ export function CampaignDetailsStep({
     });
   }
 
+  const legend = t("admin.sales.editor.details.name.label") ?? "Campaign details";
+
   return (
-    <fieldset disabled={interactionDisabled} className="grid min-w-0 gap-6 border-0 p-0">
+    <fieldset
+      disabled={interactionDisabled}
+      aria-label={legend}
+      className="grid min-w-0 gap-6 border-0 p-0"
+    >
+      <legend className="sr-only">{legend}</legend>
       <div className="grid gap-5 lg:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="sale-code">{t("admin.sales.editor.details.code.label")}</FieldLabel>

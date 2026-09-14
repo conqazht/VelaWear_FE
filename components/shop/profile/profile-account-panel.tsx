@@ -679,6 +679,7 @@ export function ProfileAccountPanel({
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/jpg"
                   className="sr-only"
+                  aria-label={t("account.visibility.editAvatar")}
                   onChange={handleAvatarFileChange}
                   disabled={uploadAvatarMutation.isPending}
                 />
@@ -811,6 +812,7 @@ export function ProfileAccountPanel({
                   </div>
                   <select
                     value={locationSharing}
+                    aria-label="Location Data"
                     onChange={(e) => setLocationSharing(e.target.value)}
                     className="text-ink rounded-md border border-[#1c1a18]/20 bg-transparent px-3 py-2 text-xs focus:outline-none"
                   >

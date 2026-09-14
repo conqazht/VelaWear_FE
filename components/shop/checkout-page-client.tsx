@@ -455,41 +455,67 @@ export function CheckoutPageClient() {
               return (
                 <div
                   key={addr.id}
-                  onClick={() => setPendingAddressId(addr.id)}
                   className={cn(
-                    "cursor-pointer rounded-md border p-4 text-left transition-colors duration-150",
+                    "rounded-md border p-4 text-left transition-colors duration-150",
                     isSelected
                       ? "bg-surface-card/60 border-[#1c1a18]"
                       : "bg-surface-card/30 border-[#1c1a18]/15 hover:border-[#1c1a18]/40",
                   )}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div
-                        className={cn(
-                          "flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
-                          isSelected ? "border-[#1c1a18] bg-transparent" : "border-[#1c1a18]/30",
-                        )}
-                      >
-                        {isSelected && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
+                  <div className="flex items-start justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPendingAddressId(addr.id)}
+                      className="flex flex-1 min-w-0 cursor-pointer flex-col gap-1 text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={cn(
+                            "flex size-4.5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150",
+                            isSelected ? "border-[#1c1a18] bg-transparent" : "border-[#1c1a18]/30",
+                          )}
+                        >
+                          {isSelected && <div className="size-2.5 rounded-full bg-[#1c1a18]" />}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-ink max-w-[180px] truncate text-sm leading-none font-semibold">
+                            {addr.receiverName}
+                          </span>
+                          {addr.isDefault && (
+                            <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
+                              {t("account.addresses.default")}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="text-ink max-w-[180px] truncate text-sm leading-none font-semibold">
-                          {addr.receiverName}
-                        </span>
-                        {addr.isDefault && (
-                          <span className="inline-flex h-4.5 shrink-0 items-center rounded bg-[#1c1a18] px-2 text-[10px] leading-none font-semibold tracking-wider text-white uppercase">
-                            {t("account.addresses.default")}
-                          </span>
-                        )}
+                      <div className="mt-1 pl-[30px]">
+                        <p className="text-ink/70 text-xs leading-tight">{addr.phone}</p>
                       </div>
-                    </div>
+
+                      <div className="mt-1 pl-[30px]">
+                        <p
+                          className="text-ink/85 truncate text-xs leading-tight"
+                          title={addr.addressDetail}
+                        >
+                          {addr.addressDetail}
+                        </p>
+                      </div>
+
+                      <div className="mt-0.5 pl-[30px]">
+                        <p
+                          className="text-ink/60 truncate text-[11px] leading-tight"
+                          title={[addr.ward, addr.province].filter(Boolean).join(", ")}
+                        >
+                          {[addr.ward, addr.province].filter(Boolean).join(", ")}
+                        </p>
+                      </div>
+                    </button>
 
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         setAddressToEdit(addr);
                         setIsCreateAddressModalOpen(true);
                       }}
@@ -498,28 +524,6 @@ export function CheckoutPageClient() {
                       <Edit2 className="size-3" />
                       <span>{t("account.addresses.edit")}</span>
                     </button>
-                  </div>
-
-                  <div className="mt-1 pl-[30px] text-left">
-                    <p className="text-ink/70 text-xs leading-tight">{addr.phone}</p>
-                  </div>
-
-                  <div className="mt-1 pl-[30px] text-left">
-                    <p
-                      className="text-ink/85 truncate text-xs leading-tight"
-                      title={addr.addressDetail}
-                    >
-                      {addr.addressDetail}
-                    </p>
-                  </div>
-
-                  <div className="mt-0.5 pl-[30px] text-left">
-                    <p
-                      className="text-ink/60 truncate text-[11px] leading-tight"
-                      title={[addr.ward, addr.province].filter(Boolean).join(", ")}
-                    >
-                      {[addr.ward, addr.province].filter(Boolean).join(", ")}
-                    </p>
                   </div>
                 </div>
               );

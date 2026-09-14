@@ -103,6 +103,7 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
                 <input
                   type={showCurrentPassword ? "text" : "password"}
                   id="currentPassword"
+                  autoComplete="current-password"
                   placeholder={t("account.password.current")}
                   value={passwordForm.currentPassword}
                   onChange={(e) => {
@@ -158,6 +159,7 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
               <input
                 type={showNewPassword ? "text" : "password"}
                 id="newPassword"
+                autoComplete="new-password"
                 placeholder={t("account.password.new")}
                 value={passwordForm.newPassword}
                 onChange={(e) => {
@@ -220,6 +222,7 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 id="confirmPassword"
+                autoComplete="new-password"
                 placeholder={t("account.password.confirm")}
                 value={passwordForm.confirmPassword}
                 onChange={(e) => {

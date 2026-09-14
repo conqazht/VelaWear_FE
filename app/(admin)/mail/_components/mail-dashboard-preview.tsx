@@ -24,6 +24,7 @@ export function MailDashboardPreview() {
           variant="ghost"
           size="icon-sm"
           nativeButton={false}
+          aria-label={t("admin.communications.mail.preview.open")}
           render={
             <Link
               href="/mail"
@@ -35,6 +36,7 @@ export function MailDashboardPreview() {
           }
         >
           <ExternalLink />
+          <span className="sr-only">{t("admin.communications.mail.preview.open")}</span>
         </Button>
       </div>
 

@@ -15,11 +15,19 @@ export default function AdminLayout({ children }: Readonly<{ children: ReactNode
   return (
     <I18nCatalogProvider messages={adminMessages}>
       <TooltipProvider>
-        <Suspense fallback={null}>
+        <Suspense fallback={<AdminLayoutSkeleton />}>
           <AdminPreferencesProviders>{children}</AdminPreferencesProviders>
         </Suspense>
       </TooltipProvider>
     </I18nCatalogProvider>
+  );
+}
+
+function AdminLayoutSkeleton() {
+  return (
+    <div className="flex min-h-screen w-full items-center justify-center bg-muted/10">
+      <div className="size-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    </div>
   );
 }
 
