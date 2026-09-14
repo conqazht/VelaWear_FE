@@ -27,7 +27,7 @@ export default function GlobalError({
   reset?: () => void;
   unstable_retry?: () => void;
 }) {
-  const handleRetry = reset ?? unstable_retry;
+  const handleRetry = reset ?? unstable_retry ?? (() => window.location.reload());
   const locale = useSyncExternalStore(
     subscribeToActiveLocale,
     readStandaloneLocale,

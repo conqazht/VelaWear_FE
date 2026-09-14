@@ -59,6 +59,7 @@ export function Newsletter() {
             <input
               type="email"
               id="newsletter-email"
+              autoComplete="email"
               placeholder={t("storefront.newsletter.placeholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}

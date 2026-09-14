@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import { connection } from "next/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,17 @@ import { adminMessages } from "@/lib/i18n/messages/catalog-admin";
 import { AdminThemeEnforcer } from "./_components/admin-theme-enforcer";
 import { AdminAuthGate } from "./_components/admin-auth-gate";
 import { AdminToaster } from "./_components/admin-toaster";
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | VELA WEAR Admin",
+    default: "Admin Portal | VELA WEAR",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (

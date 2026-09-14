@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProductDetailPage } from "@/components/shop/product-detail-page";
+import { getProductById } from "@/lib/vela-data";
 
 export function generateStaticParams() {
   return [
@@ -20,12 +22,103 @@ export function generateStaticParams() {
   ];
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id: slug } = await params;
+  const product = getProductById(slug);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://velawear.com";
+
+  if (!product) {
+    return {
+      title: "Sản phẩm",
+      description: "Chi tiết sản phẩm thời trang cao cấp VELA WEAR.",
+    };
+  }
+
+  const title = product.seoTitle || `${product.name} | VELA WEAR`;
+  const description =
+    product.seoDescription ||
+    product.shortDescription ||
+    product.description ||
+    `Sản phẩm thời trang cao cấp ${product.name} tại VELA WEAR.`;
+
+  const imageUrl = product.image.startsWith("http")
+    ? product.image
+    : `${baseUrl}${product.image}`;
+
+  return {
+    title: product.name,
+    description,
+    keywords: product.seoKeywords ? product.seoKeywords.split(",") : undefined,
+    alternates: {
+      canonical: `/products/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/products/${slug}`,
+      type: "website",
+      images: [
+        {
+          url: imageUrl,
+          width: 800,
+          height: 1000,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
+
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id: slug } = await params;
+  const product = getProductById(slug);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://velawear.com";
+
+  const jsonLdProduct = product
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        image: product.image.startsWith("http")
+          ? product.image
+          : `${baseUrl}${product.image}`,
+        description: product.description,
+        brand: {
+          "@type": "Brand",
+          name: "VELA WEAR",
+        },
+        offers: {
+          "@type": "Offer",
+          price: product.price,
+          priceCurrency: "VND",
+          availability: "https://schema.org/InStock",
+          url: `${baseUrl}/products/${slug}`,
+        },
+      }
+    : null;
+
   return (
-    <Suspense fallback={<ProductDetailSkeleton />}>
-      <ProductDetailPage slug={slug} />
-    </Suspense>
+    <>
+      {jsonLdProduct && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProduct) }}
+        />
+      )}
+      <Suspense fallback={<ProductDetailSkeleton />}>
+        <ProductDetailPage slug={slug} />
+      </Suspense>
+    </>
   );
 }
 

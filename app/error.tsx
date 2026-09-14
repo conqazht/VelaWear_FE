@@ -11,7 +11,7 @@ export default function ErrorPage({
   reset?: () => void;
   unstable_retry?: () => void;
 }) {
-  const handleRetry = reset ?? unstable_retry;
+  const handleRetry = reset ?? unstable_retry ?? (() => window.location.reload());
 
   return (
     <div role="alert">

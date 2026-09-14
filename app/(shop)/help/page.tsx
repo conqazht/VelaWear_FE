@@ -216,8 +216,10 @@ export default function HelpCenter() {
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery("")}
                   className="text-on-surface-variant/50 absolute top-1/2 right-4 -translate-y-1/2 transition-colors hover:text-[#1c1a18]"
+                  aria-label={isVi ? "Xóa tìm kiếm" : "Clear search"}
                 >
                   <X className="size-4" />
                 </button>
@@ -441,9 +443,9 @@ export default function HelpCenter() {
                     <span className="mb-3 inline-block rounded-sm bg-[#b5573a]/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#b5573a] uppercase">
                       {isVi ? "Phổ biến" : "Standard"}
                     </span>
-                    <h4 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
+                    <h3 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
                       {isVi ? "Giao Hàng Tiêu Chuẩn" : "Standard Delivery"}
-                    </h4>
+                    </h3>
                     <p className="mb-4 text-xs leading-relaxed font-light text-[#55423d]/80">
                       {isVi
                         ? "Áp dụng cho mọi tỉnh thành trên toàn quốc qua đối tác bưu chính cao cấp."
@@ -463,9 +465,9 @@ export default function HelpCenter() {
                     <span className="mb-3 inline-block rounded-sm bg-[#b5573a]/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#b5573a] uppercase">
                       {isVi ? "Nội thành" : "Same Day"}
                     </span>
-                    <h4 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
+                    <h3 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
                       {isVi ? "Giao Hỏa Tốc 2H" : "Express 2-Hour Delivery"}
-                    </h4>
+                    </h3>
                     <p className="mb-4 text-xs leading-relaxed font-light text-[#55423d]/80">
                       {isVi
                         ? "Giao nhận trực tiếp trong vòng 2-4 giờ tại các quận nội thành Hà Nội & TP.HCM."
@@ -483,9 +485,9 @@ export default function HelpCenter() {
                     <span className="mb-3 inline-block rounded-sm bg-[#6f554c]/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#6f554c] uppercase">
                       {isVi ? "Quốc tế" : "Global"}
                     </span>
-                    <h4 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
+                    <h3 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
                       {isVi ? "Giao Hàng Quốc Tế" : "International Shipping"}
-                    </h4>
+                    </h3>
                     <p className="mb-4 text-xs leading-relaxed font-light text-[#55423d]/80">
                       {isVi
                         ? "Vận chuyển toàn cầu tới Đông Nam Á, Châu Âu, Mỹ qua dịch vụ DHL Express."

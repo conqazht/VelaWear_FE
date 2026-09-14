@@ -28,7 +28,7 @@ export function AccountSwitcher({
   }>;
 }) {
   const [activeUser, setActiveUser] = useState(users[0]);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   if (!activeUser) {
     return null;
@@ -48,7 +48,7 @@ export function AccountSwitcher({
       >
         {users.length === 0 ? (
           <div className="text-muted-foreground px-3 py-2 text-center text-xs">
-            {t("admin.shell.sidebar.accountSwitcher.noAccounts") ?? "No accounts available"}
+            {locale === "vi" ? "Không có tài khoản nào" : "No accounts available"}
           </div>
         ) : (
           users.map((user) => (
