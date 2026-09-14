@@ -18,7 +18,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test --grep @smoke",
     "test:e2e:smoke": "playwright test --grep @smoke --workers=1",
-    "test:e2e:fullstack": "playwright test --grep @fullstack --workers=1"
+    "test:e2e:fullstack": "playwright test --grep @fullstack --workers=1",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -74,6 +75,8 @@
     "oxlint": "^1.78.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "react-doctor": "^0.9.14",
+    "react-scan": "^0.5.7",
     "shadcn": "^4.11.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",

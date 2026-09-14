@@ -31,14 +31,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { itemCount } = useCart();
   const pathname = usePathname();
   const router = useRouter();
 
   const closeNotification = useCallback(() => {
     setIsVisible(false);
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
     // Delay setting state to null to allow fade-out transition
-    setTimeout(() => {
+    closeTimerRef.current = setTimeout(() => {
       setNotification(null);
     }, 300);
   }, []);
@@ -77,6 +81,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, []);
 
@@ -86,10 +91,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     closeNotification();
   }, [pathname, closeNotification]);
 
+  const contextValue = React.useMemo(
+    () => ({ showAddedToBag, showAddedToFavorites, closeNotification }),
+    [showAddedToBag, showAddedToFavorites, closeNotification],
+  );
+
   return (
-    <NotificationContext.Provider
-      value={{ showAddedToBag, showAddedToFavorites, closeNotification }}
-    >
+    <NotificationContext.Provider value={contextValue}>
       {children}
 
       {/* Floating Notification Panel */}

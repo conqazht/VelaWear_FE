@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { ImagePlus, Star, Trash2 } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -25,30 +25,47 @@ type OrderReviewDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+type ReviewImage = {
+  file: File;
+  url: string;
+};
+
 export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialogProps) {
   const { t } = useI18n();
   const mutation = useCreateReviewMutation();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<ReviewImage[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const imagePreviews = useMemo(
-    () => images.map((image) => ({ image, url: URL.createObjectURL(image) })),
-    [images],
-  );
+  const imagesRef = useRef(images);
 
   useEffect(() => {
-    return () => imagePreviews.forEach(({ url }) => URL.revokeObjectURL(url));
-  }, [imagePreviews]);
+    imagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.url));
+    };
+  }, []);
 
   const resetForm = () => {
     setRating(0);
     setComment("");
+    images.forEach((img) => URL.revokeObjectURL(img.url));
     setImages([]);
     setValidationError(null);
     mutation.reset();
     if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    setImages((current) => {
+      const target = current[index];
+      if (target) URL.revokeObjectURL(target.url);
+      return current.filter((_, i) => i !== index);
+    });
   };
 
   const handleImages = (event: ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +87,8 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
       return;
     }
     setValidationError(null);
-    setImages((current) => [...current, ...selected]);
+    const newItems = selected.map((file) => ({ file, url: URL.createObjectURL(file) }));
+    setImages((current) => [...current, ...newItems]);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -90,7 +108,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
         orderItemId: item.id,
         rating,
         comment,
-        images,
+        images: images.map((item) => item.file),
       });
       resetForm();
       onOpenChange(false);
@@ -181,9 +199,9 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
               {t("reviews.write.imagesHelp")}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              {imagePreviews.map(({ image, url }, index) => (
+              {images.map(({ file, url }, index) => (
                 <div
-                  key={`${image.name}-${image.lastModified}-${index}`}
+                  key={`${file.name}-${file.lastModified}-${index}`}
                   className="relative size-24 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-white"
                 >
                   <Image
@@ -196,11 +214,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setImages((current) =>
-                        current.filter((_, currentIndex) => currentIndex !== index),
-                      )
-                    }
+                    onClick={() => removeImage(index)}
                     className="absolute top-1 right-1 inline-flex size-7 items-center justify-center rounded-full bg-black/75 text-white focus-visible:outline-2 focus-visible:outline-offset-2"
                     aria-label={t("reviews.write.removeImage", { index: index + 1 })}
                   >
@@ -224,6 +238,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
               type="file"
               multiple
               accept="image/jpeg,image/png,image/webp"
+              aria-label={t("reviews.write.addImages")}
               className="sr-only"
               onChange={handleImages}
             />

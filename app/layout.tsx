@@ -22,6 +22,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" data-locale="vi" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="https://unpkg.com/react-scan/dist/auto.global.js"
+            crossOrigin="anonymous"
+            strategy="beforeInteractive"
+          />
+        )}
+      </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <Script
           id="locale-bootstrap"

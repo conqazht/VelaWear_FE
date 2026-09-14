@@ -21,7 +21,10 @@ export function useOtpFlow({ email, purpose, onVerifySuccess }: UseOtpFlowProps)
 
   useEffect(() => {
     if (cooldown > 0) {
-      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      const timer = setTimeout(
+        () => setCooldown((prev) => (prev > 0 ? prev - 1 : 0)),
+        1000,
+      );
       return () => clearTimeout(timer);
     }
   }, [cooldown]);

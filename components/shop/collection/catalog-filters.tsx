@@ -29,8 +29,8 @@ export function PriceRangeInputs({
 }) {
   const { locale, t } = useI18n();
   const copy = getCatalogCopy(locale);
-  const [minimum, setMinimum] = useState(state.minPrice?.toString() ?? "");
-  const [maximum, setMaximum] = useState(state.maxPrice?.toString() ?? "");
+  const [minimum, setMinimum] = useState(() => state.minPrice?.toString() ?? "");
+  const [maximum, setMaximum] = useState(() => state.maxPrice?.toString() ?? "");
 
   const commit = () => {
     const minPrice = minimum.trim() === "" ? undefined : Number(minimum);
