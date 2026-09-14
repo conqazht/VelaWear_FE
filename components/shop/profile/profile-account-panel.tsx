@@ -520,7 +520,7 @@ export function ProfileAccountPanel({
                     <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
                       <PopoverTrigger
                         aria-label={t("account.profile.openCalendar")}
-                        className="text-ink/70 hover:text-ink absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer rounded-sm p-1.5 transition-colors outline-none hover:bg-[#1c1a18]/5"
+                        className="text-ink/70 hover:text-ink absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer rounded-sm p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ink/20 focus-visible:ring-offset-1 hover:bg-[#1c1a18]/5"
                       >
                         <CalendarDays className="size-4" />
                       </PopoverTrigger>

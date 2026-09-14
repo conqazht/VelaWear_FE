@@ -24,6 +24,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -171,18 +172,18 @@ export function ResourcePage<T extends { id: number }>({
           </InputGroup>
           {onRefresh ? (
             <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RefreshCw className={cn(isLoading && "animate-spin")} />
+              <RefreshCw data-icon="inline-start" className={cn(isLoading && "animate-spin")} />
               {t("admin.shell.resource.refresh")}
             </Button>
           ) : null}
           {onExport ? (
             <Button variant="outline" size="sm" onClick={onExport} disabled={rows.length === 0}>
-              <Download /> {t("admin.shell.resource.exportPage")}
+              <Download data-icon="inline-start" /> {t("admin.shell.resource.exportPage")}
             </Button>
           ) : null}
           {primaryAction ? (
             <Button size="sm" onClick={primaryAction.onClick} disabled={primaryAction.disabled}>
-              <ActionIcon /> {primaryAction.label}
+              <ActionIcon data-icon="inline-start" /> {primaryAction.label}
             </Button>
           ) : null}
         </CardAction>
@@ -333,15 +334,21 @@ export function ResourcePage<T extends { id: number }>({
               value={`${pageSize}`}
               onValueChange={(value) => onPageSizeChange(Number(value))}
             >
-              <SelectTrigger size="sm" className="w-20">
+              <SelectTrigger
+                size="sm"
+                className="w-20"
+                aria-label={t("admin.shell.resource.rowsPerPage")}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent side="top">
-                {[10, 20, 30, 50].map((size) => (
-                  <SelectItem key={size} value={`${size}`}>
-                    {size}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {[10, 20, 30, 50].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
             <span className="text-muted-foreground min-w-24 text-center text-sm tabular-nums">

@@ -24,6 +24,7 @@ export function ChatDashboardPreview() {
           variant="ghost"
           size="icon-sm"
           nativeButton={false}
+          aria-label={t("admin.communications.chat.preview.open")}
           render={
             <Link
               href="/chat"
@@ -35,6 +36,7 @@ export function ChatDashboardPreview() {
           }
         >
           <ExternalLink />
+          <span className="sr-only">{t("admin.communications.chat.preview.open")}</span>
         </Button>
       </div>
 

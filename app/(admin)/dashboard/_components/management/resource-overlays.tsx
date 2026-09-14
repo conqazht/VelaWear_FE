@@ -76,7 +76,12 @@ export function ResourceFormSheet({
         </DialogHeader>
         <form className="flex min-h-0 flex-1 flex-col overflow-hidden" onSubmit={onSubmit}>
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            <fieldset disabled={isPending} className="min-w-0 space-y-5 border-0 p-0">
+            <fieldset
+              disabled={isPending}
+              aria-label={title}
+              className="min-w-0 space-y-5 border-0 p-0"
+            >
+              <legend className="sr-only">{`${title} form`}</legend>
               {children}
             </fieldset>
           </div>

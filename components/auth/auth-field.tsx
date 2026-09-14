@@ -10,6 +10,10 @@ export function AuthField({ className, trailing, ...props }: AuthFieldProps) {
   return (
     <div className="relative">
       <input
+        aria-label={
+          props["aria-label"] ||
+          (typeof props.placeholder === "string" ? props.placeholder : undefined)
+        }
         {...props}
         className={cn(
           "h-12 w-full rounded-[12px] border border-[#e3dccf] bg-[#f7f4ef] px-4 text-base text-[#1c1a18] transition-colors outline-none placeholder:text-[#55423d]/50 focus:border-[#b5573a] focus:ring-2 focus:ring-[#b5573a]/15",

@@ -15,9 +15,34 @@ import { AppSidebar } from "@/app/(admin)/dashboard/_components/sidebar/app-side
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 
+function DashboardLayoutSkeleton() {
+  return (
+    <div className="flex min-h-dvh w-full">
+      <div className="hidden md:flex w-64 border-r bg-muted/20 p-4 animate-pulse flex-col gap-4">
+        <div className="h-8 w-32 rounded bg-muted" />
+        <div className="space-y-2 pt-4">
+          <div className="h-6 w-full rounded bg-muted" />
+          <div className="h-6 w-full rounded bg-muted" />
+          <div className="h-6 w-full rounded bg-muted" />
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col">
+        <div className="h-12 border-b px-4 flex items-center justify-between animate-pulse">
+          <div className="h-5 w-24 rounded bg-muted" />
+          <div className="h-5 w-16 rounded bg-muted" />
+        </div>
+        <div className="p-6 flex-1 animate-pulse space-y-4">
+          <div className="h-8 w-48 rounded bg-muted" />
+          <div className="h-48 w-full rounded bg-muted" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Layout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<DashboardLayoutSkeleton />}>
       <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </Suspense>
   );
