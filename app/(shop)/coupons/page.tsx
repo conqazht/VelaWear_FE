@@ -11,8 +11,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Mã Giảm Giá & Ưu Đãi Mua Sắm - Vela Wear",
-    description:
-      "Khám phá các mã giảm giá và voucher khuyến mãi độc quyền toàn sàn tại Vela Wear.",
+    description: "Khám phá các mã giảm giá và voucher khuyến mãi độc quyền toàn sàn tại Vela Wear.",
     url: "/coupons",
     type: "website",
   },

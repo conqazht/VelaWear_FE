@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -18,7 +18,8 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { StorefrontApiStatus } from "@/components/errors/storefront-api-status";
 import { StorefrontStaleWarning } from "@/components/errors/storefront-stale-warning";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCouponsQuery, useMyCouponsQuery } from "@/lib/queries/commerce";
+import { createSignInHref } from "@/lib/auth/post-auth-redirect";
+import { useInfiniteCouponsQuery, useMyCouponsQuery } from "@/lib/queries/commerce";
 import type { Coupon } from "@/lib/api/types";
 import { money } from "@/lib/vela-data";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -151,9 +152,7 @@ function CouponTicketCard({ coupon, locale, isCopied, onCopy, t }: CouponTicketC
           <div className="flex items-center justify-between gap-2 text-[11px] font-medium text-[#55423d]/65">
             <p>
               {t("coupons.expires", {
-                date: coupon.endDate
-                  ? formatDate(coupon.endDate, locale)
-                  : t("coupons.noExpiry"),
+                date: coupon.endDate ? formatDate(coupon.endDate, locale) : t("coupons.noExpiry"),
               })}
             </p>
             <p className="font-numeric tabular-nums">
@@ -183,11 +182,7 @@ function CouponTicketCard({ coupon, locale, isCopied, onCopy, t }: CouponTicketC
   );
 }
 
-function GuestIncentiveBanner({
-  t,
-}: {
-  t: ReturnType<typeof useI18n>["t"];
-}) {
+function GuestIncentiveBanner({ t }: { t: ReturnType<typeof useI18n>["t"] }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-[#b5573a]/20 bg-gradient-to-r from-[#fbf8f3] via-[#f7f3ed] to-[#f4ece3] p-6 shadow-xs md:p-8">
       <div className="relative z-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
@@ -205,7 +200,7 @@ function GuestIncentiveBanner({
           </div>
         </div>
         <Link
-          href="/sign-in?returnUrl=/coupons"
+          href={createSignInHref("/coupons")}
           className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#1c1a18] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-[color,background-color,border-color,box-shadow,transform] hover:bg-[#b5573a] hover:shadow-sm active:scale-[0.98]"
         >
           <span>{t("coupons.guestBanner.signIn")}</span>
@@ -217,11 +212,7 @@ function GuestIncentiveBanner({
   );
 }
 
-function PersonalWalletGuestPrompt({
-  t,
-}: {
-  t: ReturnType<typeof useI18n>["t"];
-}) {
+function PersonalWalletGuestPrompt({ t }: { t: ReturnType<typeof useI18n>["t"] }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-[#1c1a18]/10 bg-white p-8 py-16 text-center shadow-xs md:p-14">
       <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-[#b5573a]/10 text-[#b5573a]">
@@ -234,7 +225,7 @@ function PersonalWalletGuestPrompt({
         {t("coupons.myTab.guestDescription")}
       </p>
       <Link
-        href="/sign-in?returnUrl=/coupons?tab=personal"
+        href={createSignInHref("/coupons?tab=personal")}
         className="mt-8 inline-flex items-center gap-2 rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-widest text-white uppercase transition-colors hover:bg-[#b5573a]"
       >
         <span>{t("coupons.myTab.signIn")}</span>
@@ -245,7 +236,8 @@ function PersonalWalletGuestPrompt({
 }
 
 interface PublicCouponsTabProps {
-  publicCouponsQuery: ReturnType<typeof useCouponsQuery>;
+  publicCouponsQuery: ReturnType<typeof useInfiniteCouponsQuery>;
+  publicCoupons: Coupon[];
   isAuthLoading: boolean;
   isAuthenticated: boolean;
   copiedCode: string | null;
@@ -256,6 +248,7 @@ interface PublicCouponsTabProps {
 
 function PublicCouponsTab({
   publicCouponsQuery,
+  publicCoupons,
   isAuthLoading,
   isAuthenticated,
   copiedCode,
@@ -263,13 +256,42 @@ function PublicCouponsTab({
   locale,
   t,
 }: PublicCouponsTabProps) {
-  const publicCoupons = publicCouponsQuery.data?.result ?? [];
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+  } = publicCouponsQuery;
 
-  if (publicCouponsQuery.isError && !publicCouponsQuery.data) {
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const target = observerRef.current;
+    if (!target || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  if (isError && !data) {
     return (
       <StorefrontApiStatus
-        error={publicCouponsQuery.error}
-        onRetry={() => void publicCouponsQuery.refetch()}
+        error={error}
+        onRetry={() => void refetch()}
         resourceLabel={t("coupons.resource")}
         returnHref="/collection"
         variant="route"
@@ -286,15 +308,15 @@ function PublicCouponsTab({
     >
       {!isAuthLoading && !isAuthenticated && <GuestIncentiveBanner t={t} />}
 
-      {publicCouponsQuery.isError && (
+      {isError && (
         <StorefrontStaleWarning
           resourceLabel={t("coupons.resource")}
-          onRetry={() => void publicCouponsQuery.refetch()}
-          error={publicCouponsQuery.error}
+          onRetry={() => void refetch()}
+          error={error}
         />
       )}
 
-      {publicCouponsQuery.isLoading ? (
+      {isLoading ? (
         <CouponsLoadingSkeleton />
       ) : publicCoupons.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-md border border-[#1c1a18]/5 bg-white py-24 text-center shadow-sm">
@@ -302,9 +324,7 @@ function PublicCouponsTab({
           <h2 className="mb-3 font-serif text-2xl font-light text-[#1c1a18]">
             {t("coupons.emptyTitle")}
           </h2>
-          <p className="mx-auto max-w-md text-sm text-[#1c1a18]/60">
-            {t("coupons.publicEmpty")}
-          </p>
+          <p className="mx-auto max-w-md text-sm text-[#1c1a18]/60">{t("coupons.publicEmpty")}</p>
           <Link
             href="/"
             className="mt-8 rounded-sm bg-[#1c1a18] px-8 py-3.5 text-xs font-bold tracking-widest text-white uppercase transition-colors hover:bg-[#b5573a]"
@@ -313,18 +333,31 @@ function PublicCouponsTab({
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {publicCoupons.map((coupon) => (
-            <CouponTicketCard
-              key={coupon.id}
-              coupon={coupon}
-              locale={locale}
-              isCopied={copiedCode === coupon.code}
-              onCopy={onCopy}
-              t={t}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {publicCoupons.map((coupon) => (
+              <CouponTicketCard
+                key={coupon.id}
+                coupon={coupon}
+                locale={locale}
+                isCopied={copiedCode === coupon.code}
+                onCopy={onCopy}
+                t={t}
+              />
+            ))}
+          </div>
+
+          {hasNextPage ? (
+            <div ref={observerRef} className="flex justify-center py-6" aria-hidden="true">
+              {isFetchingNextPage ? (
+                <div className="flex items-center gap-2 text-xs text-[#55423d]/65">
+                  <div className="size-4 animate-spin rounded-full border-2 border-[#b5573a] border-t-transparent" />
+                  <span>{t("coupons.loadingMore")}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );
@@ -497,10 +530,7 @@ function PersonalCouponsTab({
 
           {usageHistory.length === 0 ? (
             <div className="rounded-md border border-[#1c1a18]/5 bg-white py-14 text-center">
-              <History
-                className="mx-auto mb-4 size-9 text-[#1c1a18]/20"
-                strokeWidth={1.25}
-              />
+              <History className="mx-auto mb-4 size-9 text-[#1c1a18]/20" strokeWidth={1.25} />
               <p className="text-sm text-[#1c1a18]/55">{t("coupons.noHistory")}</p>
             </div>
           ) : (
@@ -554,8 +584,12 @@ export function CouponsClient() {
     requestedTab === "my" || requestedTab === "personal" ? "personal" : "public",
   );
 
-  const publicCouponsQuery = useCouponsQuery({ status: "ACTIVE", size: 50 });
-  const publicCoupons = publicCouponsQuery.data?.result ?? [];
+  const publicCouponsQuery = useInfiniteCouponsQuery({ status: "ACTIVE", size: 12 });
+  const publicCoupons = useMemo(
+    () => publicCouponsQuery.data?.pages.flatMap((page) => page.result) ?? [],
+    [publicCouponsQuery.data?.pages],
+  );
+  const totalPublicCoupons = publicCouponsQuery.data?.pages[0]?.meta?.total ?? publicCoupons.length;
 
   const myCouponsQuery = useMyCouponsQuery(isAuthenticated);
   const myCoupons = myCouponsQuery.data?.availableCoupons ?? [];
@@ -600,7 +634,7 @@ export function CouponsClient() {
             </h1>
             <span className="text-xs text-[#55423d]/65">
               {activeTab === "public"
-                ? t("coupons.publicCount", { count: publicCoupons.length })
+                ? t("coupons.publicCount", { count: totalPublicCoupons })
                 : isAuthenticated
                   ? t("coupons.availableCount", { count: myCoupons.length })
                   : null}
@@ -630,7 +664,7 @@ export function CouponsClient() {
               {t("coupons.tab.public")}
               {!publicCouponsQuery.isLoading && (
                 <span className="ml-2 rounded-full bg-[#1c1a18]/5 px-2.5 py-0.5 text-xs font-normal text-[#55423d]/70">
-                  {publicCoupons.length}
+                  {totalPublicCoupons}
                 </span>
               )}
             </button>
@@ -661,6 +695,7 @@ export function CouponsClient() {
         {activeTab === "public" ? (
           <PublicCouponsTab
             publicCouponsQuery={publicCouponsQuery}
+            publicCoupons={publicCoupons}
             isAuthLoading={isAuthLoading}
             isAuthenticated={isAuthenticated}
             copiedCode={copiedCode}

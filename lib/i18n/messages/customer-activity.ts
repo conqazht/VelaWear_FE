@@ -39,7 +39,9 @@ export const customerActivityMessages = defineMessages(
     "coupons.tab.public": "Storewide Coupons",
     "coupons.tab.my": "My Coupons",
     "coupons.publicCount": "Available storewide offers: {count}",
-    "coupons.publicEmpty": "No storewide coupons currently available. Check back soon for new offers.",
+    "coupons.publicEmpty":
+      "No storewide coupons currently available. Check back soon for new offers.",
+    "coupons.loadingMore": "Loading more coupons...",
     "coupons.guestBanner.title": "Unlock Exclusive Member Vouchers",
     "coupons.guestBanner.description":
       "Sign in to receive birthday gifts, VIP tier discounts, and track your total savings.",
@@ -156,6 +158,7 @@ export const customerActivityMessages = defineMessages(
     "coupons.tab.my": "Voucher của tôi",
     "coupons.publicCount": "Có {count} mã ưu đãi toàn sàn",
     "coupons.publicEmpty": "Hiện chưa có mã toàn sàn nào. Hãy quay lại sớm để nhận ưu đãi mới.",
+    "coupons.loadingMore": "Đang tải thêm mã giảm giá...",
     "coupons.guestBanner.title": "Mở khóa thêm Voucher thành viên độc quyền",
     "coupons.guestBanner.description":
       "Đăng nhập ngay để nhận voucher sinh nhật, voucher hạng VIP dành riêng cho bạn và theo dõi lịch sử tiết kiệm.",

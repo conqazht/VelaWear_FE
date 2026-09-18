@@ -4,17 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CouponsClient } from "./coupons-client";
 import type { Coupon, MyCoupons } from "@/lib/api/types";
 
-const {
-  useAuthMock,
-  useCouponsQueryMock,
-  useMyCouponsQueryMock,
-  useSearchParamsMock,
-} = vi.hoisted(() => ({
-  useAuthMock: vi.fn(),
-  useCouponsQueryMock: vi.fn(),
-  useMyCouponsQueryMock: vi.fn(),
-  useSearchParamsMock: vi.fn(),
-}));
+const { useAuthMock, useInfiniteCouponsQueryMock, useMyCouponsQueryMock, useSearchParamsMock } =
+  vi.hoisted(() => ({
+    useAuthMock: vi.fn(),
+    useInfiniteCouponsQueryMock: vi.fn(),
+    useMyCouponsQueryMock: vi.fn(),
+    useSearchParamsMock: vi.fn(),
+  }));
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => useSearchParamsMock(),
@@ -38,7 +34,7 @@ vi.mock("@/components/providers/i18n-provider", () => ({
 }));
 
 vi.mock("@/lib/queries/commerce", () => ({
-  useCouponsQuery: (params: unknown) => useCouponsQueryMock(params),
+  useInfiniteCouponsQuery: (params: unknown) => useInfiniteCouponsQueryMock(params),
   useMyCouponsQuery: (enabled: boolean) => useMyCouponsQueryMock(enabled),
 }));
 
@@ -115,12 +111,18 @@ describe("CouponsClient Component", () => {
       isAuthenticated: false,
       isLoading: false,
     });
-    useCouponsQueryMock.mockReturnValue({
-      data: { result: mockPublicCoupons, meta: { total: 2 } },
+    useInfiniteCouponsQueryMock.mockReturnValue({
+      data: {
+        pages: [{ result: mockPublicCoupons, meta: { total: 2, page: 1, pages: 1 } }],
+        pageParams: [1],
+      },
       isLoading: false,
       isError: false,
       error: null,
       refetch: vi.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
     useMyCouponsQueryMock.mockReturnValue({
       data: { availableCoupons: [], usageHistory: [] },
@@ -144,11 +146,32 @@ describe("CouponsClient Component", () => {
     expect(screen.getByText("coupons.guestBanner.title")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /coupons\.guestBanner\.signIn/i })).toHaveAttribute(
       "href",
-      "/sign-in?returnUrl=/coupons",
+      "/sign-in?redirect=%2Fcoupons",
     );
 
     expect(screen.getByText("WELCOME10")).toBeInTheDocument();
     expect(screen.getByText("FREESHIP")).toBeInTheDocument();
+  });
+
+  it("displays accurate total count from meta.total", () => {
+    useInfiniteCouponsQueryMock.mockReturnValue({
+      data: {
+        pages: [{ result: mockPublicCoupons, meta: { total: 58, page: 1, pages: 5 } }],
+        pageParams: [1],
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    });
+
+    render(<CouponsClient />);
+
+    expect(screen.getByText("coupons.publicCount:58")).toBeInTheDocument();
+    expect(screen.getByText("58")).toBeInTheDocument();
   });
 
   it("copies coupon code to clipboard on copy button click", async () => {
@@ -177,7 +200,7 @@ describe("CouponsClient Component", () => {
     expect(screen.getByText("coupons.myTab.guestTitle")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /coupons\.myTab\.signIn/i })).toHaveAttribute(
       "href",
-      "/sign-in?returnUrl=/coupons?tab=personal",
+      "/sign-in?redirect=%2Fcoupons%3Ftab%3Dpersonal",
     );
   });
 
@@ -210,18 +233,44 @@ describe("CouponsClient Component", () => {
   });
 
   it("renders empty state when there are no public coupons available", () => {
-    useCouponsQueryMock.mockReturnValue({
-      data: { result: [], meta: { total: 0 } },
+    useInfiniteCouponsQueryMock.mockReturnValue({
+      data: {
+        pages: [{ result: [], meta: { total: 0, page: 1, pages: 0 } }],
+        pageParams: [1],
+      },
       isLoading: false,
       isError: false,
       error: null,
       refetch: vi.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
     render(<CouponsClient />);
 
     expect(screen.getByText("coupons.publicEmpty")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "coupons.explore" })).toBeInTheDocument();
+  });
+
+  it("displays loading indicator when fetching next page", () => {
+    useInfiniteCouponsQueryMock.mockReturnValue({
+      data: {
+        pages: [{ result: mockPublicCoupons, meta: { total: 10, page: 1, pages: 2 } }],
+        pageParams: [1],
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      hasNextPage: true,
+      isFetchingNextPage: true,
+      fetchNextPage: vi.fn(),
+    });
+
+    render(<CouponsClient />);
+
+    expect(screen.getByText("coupons.loadingMore")).toBeInTheDocument();
   });
 
   it("respects initial ?tab=personal URL query param", () => {
