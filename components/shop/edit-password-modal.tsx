@@ -7,6 +7,7 @@ import { useI18n } from "@/components/providers/i18n-provider";
 import { changePassword } from "@/lib/auth-otp-api";
 import { PasswordRequirements } from "@/components/auth/password-requirements";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface PasswordFieldProps {
   id: string;
@@ -74,13 +75,181 @@ function PasswordField({
   );
 }
 
+function PasswordModalSubmitButton({
+  isSubmitting,
+  hasPassword,
+  canSubmit,
+  onSave,
+  t,
+}: {
+  isSubmitting: boolean;
+  hasPassword: boolean;
+  canSubmit: boolean;
+  onSave: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  return (
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={isSubmitting || !canSubmit}
+        className={cn(
+          "cursor-pointer rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors",
+          canSubmit
+            ? "border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
+            : "text-ink/40 pointer-events-none cursor-not-allowed border-[#1c1a18]/20 bg-transparent",
+        )}
+      >
+        {isSubmitting
+          ? t("account.profile.saving")
+          : hasPassword
+            ? t("account.profile.save")
+            : t("account.password.create")}
+      </button>
+    </div>
+  );
+}
+
+function getNewPasswordError(
+  touched: boolean,
+  modified: boolean,
+  value: string,
+  isStrong: boolean,
+  t: ReturnType<typeof useI18n>["t"],
+): string | null {
+  if (!touched || !modified) return null;
+  if (value.length === 0) return t("account.password.newRequired");
+  if (!isStrong) return t("account.password.strongRequirement");
+  return null;
+}
+
+function getConfirmPasswordError(
+  touched: boolean,
+  modified: boolean,
+  value: string,
+  newPass: string,
+  t: ReturnType<typeof useI18n>["t"],
+): string | null {
+  if (!touched || !modified) return null;
+  if (value.length === 0) return t("account.password.confirmRequired");
+  if (value !== newPass) return t("account.password.mismatch");
+  return null;
+}
+
+interface PasswordFormFieldsProps {
+  hasPassword: boolean;
+  passwordForm: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  };
+  passwordTouched: {
+    current: boolean;
+    new: boolean;
+    confirm: boolean;
+  };
+  passwordModified: {
+    current: boolean;
+    new: boolean;
+    confirm: boolean;
+  };
+  isStrongPassword: boolean;
+  onUpdateField: (
+    field: "currentPassword" | "newPassword" | "confirmPassword",
+    val: string,
+  ) => void;
+  onBlurField: (field: "current" | "new" | "confirm") => void;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+function PasswordFormFields({
+  hasPassword,
+  passwordForm,
+  passwordTouched,
+  passwordModified,
+  isStrongPassword,
+  onUpdateField,
+  onBlurField,
+  t,
+}: PasswordFormFieldsProps) {
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const currentHasError =
+    passwordTouched.current &&
+    passwordModified.current &&
+    passwordForm.currentPassword.length === 0;
+
+  const newPasswordError = getNewPasswordError(
+    passwordTouched.new,
+    passwordModified.new,
+    passwordForm.newPassword,
+    isStrongPassword,
+    t,
+  );
+
+  const confirmPasswordError = getConfirmPasswordError(
+    passwordTouched.confirm,
+    passwordModified.confirm,
+    passwordForm.confirmPassword,
+    passwordForm.newPassword,
+    t,
+  );
+
+  return (
+    <div className="flex flex-col gap-6">
+      {hasPassword && (
+        <PasswordField
+          id="currentPassword"
+          label={t("account.password.current")}
+          autoComplete="current-password"
+          value={passwordForm.currentPassword}
+          show={showCurrent}
+          onToggleShow={() => setShowCurrent((prev) => !prev)}
+          onChange={(e) => onUpdateField("currentPassword", e.target.value)}
+          onBlur={() => onBlurField("current")}
+          hasError={currentHasError}
+          errorMessage={t("account.password.currentRequired")}
+          t={t}
+        />
+      )}
+
+      <PasswordField
+        id="newPassword"
+        label={t("account.password.new")}
+        autoComplete="new-password"
+        value={passwordForm.newPassword}
+        show={showNew}
+        onToggleShow={() => setShowNew((prev) => !prev)}
+        onChange={(e) => onUpdateField("newPassword", e.target.value)}
+        onBlur={() => onBlurField("new")}
+        hasError={Boolean(newPasswordError)}
+        errorMessage={newPasswordError}
+        t={t}
+      />
+
+      <PasswordField
+        id="confirmPassword"
+        label={t("account.password.confirm")}
+        autoComplete="new-password"
+        value={passwordForm.confirmPassword}
+        show={showConfirm}
+        onToggleShow={() => setShowConfirm((prev) => !prev)}
+        onChange={(e) => onUpdateField("confirmPassword", e.target.value)}
+        onBlur={() => onBlurField("confirm")}
+        hasError={Boolean(confirmPasswordError)}
+        errorMessage={confirmPasswordError}
+        t={t}
+      />
+    </div>
+  );
+}
+
 export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { user, clearRevokedSession } = useAuth();
   const { t } = useI18n();
-
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -103,11 +272,15 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const hasPassword = user?.hasPassword !== false;
   const isStrongPassword =
     passwordForm.newPassword.length >= 8 &&
     /[A-Z]/.test(passwordForm.newPassword) &&
     /[a-z]/.test(passwordForm.newPassword) &&
     /\d/.test(passwordForm.newPassword);
+  const passwordsMatch = passwordForm.newPassword === passwordForm.confirmPassword;
+  const currentPasswordValid = !hasPassword || passwordForm.currentPassword.length > 0;
+  const canSubmit = isStrongPassword && passwordsMatch && currentPasswordValid;
 
   const getApiErrorMessage = (error: unknown) => {
     const apiError = error as { response?: { data?: { message?: string } }; message?: string };
@@ -124,13 +297,28 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
     onClose();
   };
 
+  const handleUpdateField = (
+    field: "currentPassword" | "newPassword" | "confirmPassword",
+    value: string,
+  ) => {
+    const key =
+      field === "currentPassword" ? "current" : field === "newPassword" ? "new" : "confirm";
+    setPasswordForm((prev) => ({ ...prev, [field]: value }));
+    setPasswordModified((prev) => ({ ...prev, [key]: true }));
+    setPasswordTouched((prev) => ({ ...prev, [key]: false }));
+  };
+
+  const handleBlurField = (field: "current" | "new" | "confirm") => {
+    setPasswordTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
   const handleSave = async () => {
     setSubmitError(null);
-    if (!isStrongPassword || passwordForm.newPassword !== passwordForm.confirmPassword) {
+    if (!isStrongPassword || !passwordsMatch) {
       setPasswordTouched({ current: true, new: true, confirm: true });
       return;
     }
-    if (user?.hasPassword !== false && passwordForm.currentPassword.length === 0) {
+    if (hasPassword && passwordForm.currentPassword.length === 0) {
       setPasswordTouched((prev) => ({ ...prev, current: true }));
       return;
     }
@@ -138,7 +326,7 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
     setIsSubmitting(true);
     try {
       await changePassword({
-        currentPassword: user?.hasPassword !== false ? passwordForm.currentPassword : undefined,
+        currentPassword: hasPassword ? passwordForm.currentPassword : undefined,
         newPassword: passwordForm.newPassword,
       });
       await clearRevokedSession();
@@ -155,129 +343,32 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
       <DialogContent className="bg-canvas text-ink max-w-[500px] rounded-sm border-[#e3dccf] p-6 shadow-2xl md:p-8">
         <DialogHeader className="mb-4 text-left">
           <DialogTitle className="text-ink font-serif text-2xl font-light tracking-tight">
-            {user?.hasPassword !== false
-              ? t("account.password.editTitle")
-              : t("account.password.createTitle")}
+            {hasPassword ? t("account.password.editTitle") : t("account.password.createTitle")}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6">
-          {user?.hasPassword !== false && (
-            <PasswordField
-              id="currentPassword"
-              label={t("account.password.current")}
-              autoComplete="current-password"
-              value={passwordForm.currentPassword}
-              show={showCurrentPassword}
-              onToggleShow={() => setShowCurrentPassword(!showCurrentPassword)}
-              onChange={(e) => {
-                setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }));
-                setPasswordModified((prev) => ({ ...prev, current: true }));
-                setPasswordTouched((prev) => ({ ...prev, current: false }));
-              }}
-              onBlur={() => setPasswordTouched((prev) => ({ ...prev, current: true }))}
-              hasError={
-                passwordTouched.current &&
-                passwordModified.current &&
-                passwordForm.currentPassword.length === 0
-              }
-              errorMessage={t("account.password.currentRequired")}
-              t={t}
-            />
-          )}
-
-          <PasswordField
-            id="newPassword"
-            label={t("account.password.new")}
-            autoComplete="new-password"
-            value={passwordForm.newPassword}
-            show={showNewPassword}
-            onToggleShow={() => setShowNewPassword(!showNewPassword)}
-            onChange={(e) => {
-              setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }));
-              setPasswordModified((prev) => ({ ...prev, new: true }));
-              setPasswordTouched((prev) => ({ ...prev, new: false }));
-            }}
-            onBlur={() => setPasswordTouched((prev) => ({ ...prev, new: true }))}
-            hasError={
-              passwordTouched.new &&
-              passwordModified.new &&
-              (passwordForm.newPassword.length === 0 || !isStrongPassword)
-            }
-            errorMessage={
-              passwordForm.newPassword.length === 0
-                ? t("account.password.newRequired")
-                : !isStrongPassword
-                  ? t("account.password.strongRequirement")
-                  : null
-            }
-            t={t}
-          />
-
-          <PasswordField
-            id="confirmPassword"
-            label={t("account.password.confirm")}
-            autoComplete="new-password"
-            value={passwordForm.confirmPassword}
-            show={showConfirmPassword}
-            onToggleShow={() => setShowConfirmPassword(!showConfirmPassword)}
-            onChange={(e) => {
-              setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }));
-              setPasswordModified((prev) => ({ ...prev, confirm: true }));
-              setPasswordTouched((prev) => ({ ...prev, confirm: false }));
-            }}
-            onBlur={() => setPasswordTouched((prev) => ({ ...prev, confirm: true }))}
-            hasError={
-              passwordTouched.confirm &&
-              passwordModified.confirm &&
-              (passwordForm.confirmPassword.length === 0 ||
-                passwordForm.confirmPassword !== passwordForm.newPassword)
-            }
-            errorMessage={
-              passwordForm.confirmPassword.length === 0
-                ? t("account.password.confirmRequired")
-                : passwordForm.confirmPassword !== passwordForm.newPassword
-                  ? t("account.password.mismatch")
-                  : null
-            }
-            t={t}
-          />
-        </div>
+        <PasswordFormFields
+          hasPassword={hasPassword}
+          passwordForm={passwordForm}
+          passwordTouched={passwordTouched}
+          passwordModified={passwordModified}
+          isStrongPassword={isStrongPassword}
+          onUpdateField={handleUpdateField}
+          onBlurField={handleBlurField}
+          t={t}
+        />
 
         <PasswordRequirements password={passwordForm.newPassword} className="mt-4 mb-4 pl-1" />
 
         {submitError && <p className="text-error mb-4 text-sm">{submitError}</p>}
 
-        <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={
-              isSubmitting ||
-              (user?.hasPassword !== false
-                ? passwordForm.currentPassword.length === 0 ||
-                  !isStrongPassword ||
-                  passwordForm.newPassword !== passwordForm.confirmPassword
-                : !isStrongPassword || passwordForm.newPassword !== passwordForm.confirmPassword)
-            }
-            className={`cursor-pointer rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors ${
-              (
-                user?.hasPassword !== false
-                  ? passwordForm.currentPassword.length > 0 &&
-                    isStrongPassword &&
-                    passwordForm.newPassword === passwordForm.confirmPassword
-                  : isStrongPassword && passwordForm.newPassword === passwordForm.confirmPassword
-              )
-                ? "border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
-                : "text-ink/40 pointer-events-none cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
-            }`}
-          >
-            {isSubmitting
-              ? t("account.profile.saving")
-              : user?.hasPassword !== false
-                ? t("account.profile.save")
-                : t("account.password.create")}
-          </button>
-        </div>
+        <PasswordModalSubmitButton
+          isSubmitting={isSubmitting}
+          hasPassword={hasPassword}
+          canSubmit={canSubmit}
+          onSave={handleSave}
+          t={t}
+        />
       </DialogContent>
     </Dialog>
   );

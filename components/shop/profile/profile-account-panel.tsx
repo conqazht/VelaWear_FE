@@ -23,7 +23,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { parseDateValue } from "@/lib/i18n/format";
-import { createEmailSchema } from "@/lib/validations";
 import { deleteAccount } from "@/lib/api/auth";
 import { EditPasswordModal } from "@/components/shop/edit-password-modal";
 import { EditEmailModal } from "@/components/shop/edit-email-modal";
@@ -90,7 +89,7 @@ function ProfileAdminBanner({ user, t }: { user: User; t: ReturnType<typeof useI
       </div>
       <Link
         href="/dashboard"
-        className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-sm bg-[#1c1a18] px-4 py-2.5 text-xs font-semibold tracking-wider text-[#f7f4ef] uppercase transition-all hover:bg-[#b5573a] active:scale-[0.97]"
+        className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-sm bg-[#1c1a18] px-4 py-2.5 text-xs font-semibold tracking-wider text-[#f7f4ef] uppercase transition-colors hover:bg-[#b5573a] active:scale-[0.97]"
       >
         <LayoutDashboard className="size-4" />
         <span>{t("common.adminDashboard")}</span>
@@ -169,43 +168,391 @@ function ProfileSidebarNav({
   );
 }
 
-function ProfileAccountTab({
-  user,
-  checkSession,
+function ProfileSecurityFields({
+  hasPassword,
+  emailNote,
+  onOpenEditEmail,
+  onOpenEditPassword,
   t,
-  locale,
 }: {
-  user: User;
-  checkSession: () => Promise<void>;
+  hasPassword?: boolean;
+  emailNote: string;
+  onOpenEditEmail: () => void;
+  onOpenEditPassword: () => void;
   t: ReturnType<typeof useI18n>["t"];
-  locale: Locale;
 }) {
-  const updateProfileMutation = useUpdateProfileMutation();
-  const router = useRouter();
-  const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
-  const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
-  const [isDeleting, startDeleteTransition] = useTransition();
+  return (
+    <>
+      <div className="mt-1.5 flex items-center justify-between">
+        <p className="text-ink/45 text-xs">{emailNote}</p>
+        {hasPassword !== false && (
+          <button
+            type="button"
+            onClick={onOpenEditEmail}
+            className="text-ink hover:text-primary cursor-pointer text-sm font-medium underline underline-offset-4 transition-colors"
+          >
+            {t("account.profile.edit")}
+          </button>
+        )}
+      </div>
 
+      <div>
+        <p className="text-ink mb-1 text-sm font-medium">{t("account.profile.password")}</p>
+        <div className="mt-2 flex items-center justify-between">
+          <p className="text-ink text-2xl tracking-widest">................</p>
+          <button
+            type="button"
+            onClick={onOpenEditPassword}
+            className="text-ink hover:text-primary cursor-pointer text-sm font-medium underline underline-offset-4 transition-colors"
+          >
+            {t("account.profile.edit")}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ProfileDeleteAccountSection({
+  onDeleteAccount,
+  isDeleting,
+  t,
+}: {
+  onDeleteAccount: () => void;
+  isDeleting: boolean;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  return (
+    <div className="flex items-center justify-between border-t border-[#1c1a18]/10 pt-8">
+      <p className="text-ink text-sm font-medium">{t("account.profile.deleteAccount")}</p>
+      <AlertDialog>
+        <AlertDialogTrigger className="border-error/30 text-error hover:bg-error/10 cursor-pointer rounded-sm border px-5 py-2.5 text-sm font-medium transition-colors">
+          {t("account.profile.deleteAccount")}
+        </AlertDialogTrigger>
+        <AlertDialogContent className="bg-canvas max-w-md rounded-md border-[#1c1a18]/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-ink font-serif text-xl font-light">
+              {t("account.profile.deleteAccountTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-ink/70">
+              {t("account.profile.deleteAccountConfirm")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="text-ink rounded-sm border-[#1c1a18]/20 hover:bg-[#1c1a18]/5">
+              {t("account.settings.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onDeleteAccount}
+              disabled={isDeleting}
+              className="bg-error hover:bg-error/90 rounded-sm border-0 text-white"
+            >
+              {isDeleting ? t("account.profile.deleting") : t("account.profile.deleteAccount")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+function ProfileFullNameField({
+  value,
+  hasError,
+  onChange,
+  onBlur,
+  t,
+}: {
+  value: string;
+  hasError: boolean;
+  onChange: (val: string) => void;
+  onBlur: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  return (
+    <div>
+      <div className="relative">
+        <input
+          type="text"
+          id="fullName"
+          placeholder={t("account.profile.fullName")}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
+            hasError ? "border-error focus:border-error" : "focus:border-ink/60 border-[#1c1a18]/20"
+          }`}
+        />
+        <label
+          htmlFor="fullName"
+          className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-[top,left,font-size,color] duration-200 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
+            hasError ? "text-error peer-focus:text-error" : "text-ink/70 peer-focus:text-ink/70"
+          }`}
+        >
+          {t("account.profile.fullName")}
+        </label>
+      </div>
+      {hasError && (
+        <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
+          {t("account.profile.fullNameRequired")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ProfileEmailField({
+  email,
+  hasPassword,
+  onOpenEditEmail,
+  onOpenEditPassword,
+  t,
+}: {
+  email: string;
+  hasPassword?: boolean;
+  onOpenEditEmail: () => void;
+  onOpenEditPassword: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  return (
+    <div>
+      <div className="relative">
+        <input
+          type="email"
+          id="email"
+          placeholder={t("account.profile.email")}
+          value={email}
+          readOnly
+          className="peer text-ink focus:border-ink/60 w-full rounded-sm border border-[#1c1a18]/20 bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none"
+        />
+        <label
+          htmlFor="email"
+          className="bg-canvas text-ink/70 peer-focus:text-ink/70 absolute -top-2 left-3 cursor-text px-1 text-xs transition-colors duration-200 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs"
+        >
+          {t("account.profile.email")}
+        </label>
+      </div>
+      <ProfileSecurityFields
+        hasPassword={hasPassword}
+        emailNote={
+          hasPassword === false
+            ? t("account.profile.googleEmailNote")
+            : t("account.profile.emailSettingsNote")
+        }
+        onOpenEditEmail={onOpenEditEmail}
+        onOpenEditPassword={onOpenEditPassword}
+        t={t}
+      />
+    </div>
+  );
+}
+
+function ProfileGenderField({
+  gender,
+  hasError,
+  genderOptions,
+  onChange,
+  onBlur,
+  t,
+}: {
+  gender: string;
+  hasError: boolean;
+  genderOptions: { value: Gender; label: string }[];
+  onChange: (val: string) => void;
+  onBlur: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <div className="relative">
+        <Select
+          value={gender}
+          onValueChange={(val) => onChange(val ?? "")}
+          onOpenChange={(open) => {
+            setIsOpen(open);
+            if (!open) {
+              onBlur();
+            }
+          }}
+        >
+          <SelectTrigger
+            id="gender"
+            className={`text-ink flex !h-[52px] !w-full items-center justify-between rounded-sm border bg-transparent px-4 text-sm transition-colors duration-500 ease-out focus:ring-0 focus:outline-none ${
+              hasError
+                ? "border-error focus:border-error"
+                : isOpen
+                  ? "border-ink/60"
+                  : "border-[#1c1a18]/20"
+            }`}
+          >
+            <SelectValue placeholder="" />
+          </SelectTrigger>
+          <SelectContent
+            alignItemWithTrigger={false}
+            className="bg-canvas border-hairline rounded-sm shadow-sm"
+          >
+            {genderOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value} className="cursor-pointer">
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <label
+          htmlFor="gender"
+          className={`bg-canvas pointer-events-none absolute left-3 px-1 transition-[top,font-size,color] duration-200 ease-out ${
+            gender === "" && !isOpen ? "top-[15px] text-sm" : "-top-2 text-xs"
+          } ${hasError ? "text-error" : "text-ink/70"}`}
+        >
+          {t("account.profile.gender")}
+        </label>
+      </div>
+      {hasError && (
+        <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
+          {t("account.profile.genderRequired")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ProfileDobField({
+  dob,
+  hasError,
+  onChange,
+  onBlur,
+  t,
+}: {
+  dob: string;
+  hasError: boolean;
+  onChange: (val: string) => void;
+  onBlur: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <div className="relative">
+        <input
+          type="text"
+          id="dob"
+          placeholder=""
+          value={formatBirthDateDisplay(dob)}
+          readOnly
+          onBlur={onBlur}
+          className={`peer text-ink !h-[52px] !w-full cursor-default rounded-sm border bg-transparent px-4 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
+            hasError
+              ? "border-error focus:border-error"
+              : isOpen
+                ? "border-ink/60"
+                : "focus:border-ink/60 border-[#1c1a18]/20"
+          }`}
+        />
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger
+            aria-label={t("account.profile.openCalendar")}
+            className="text-ink/70 hover:text-ink focus-visible:ring-ink/20 absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer rounded-sm p-1.5 transition-colors outline-none hover:bg-[#1c1a18]/5 focus-visible:ring-2 focus-visible:ring-offset-1"
+          >
+            <CalendarDays className="size-4" />
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={dob ? parseDateValue(dob) : undefined}
+              onSelect={(date: Date | undefined) => {
+                if (date) {
+                  const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                  onChange(formatted);
+                  setIsOpen(false);
+                }
+              }}
+              className="border-hairline rounded-sm shadow-sm"
+              captionLayout="dropdown"
+            />
+          </PopoverContent>
+        </Popover>
+        <label
+          htmlFor="dob"
+          className={`bg-canvas pointer-events-none absolute left-3 px-1 transition-[top,font-size,color] duration-200 ease-out ${
+            dob === "" && !isOpen ? "top-[15px] text-sm" : "-top-2 text-xs"
+          } ${hasError ? "text-error" : "text-ink/70"}`}
+        >
+          {t("account.profile.birthDate")}
+        </label>
+      </div>
+      {hasError && (
+        <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
+          {t("account.profile.birthDateRequired")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ProfileSaveActions({
+  saveError,
+  saveMessage,
+  isDirty,
+  isPending,
+  onSave,
+  t,
+}: {
+  saveError: string | null;
+  saveMessage: boolean;
+  isDirty: boolean;
+  isPending: boolean;
+  onSave: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  return (
+    <>
+      {saveError && <p className="text-error text-sm">{saveError}</p>}
+      {saveMessage && (
+        <p className="text-sm text-emerald-700">{t("account.profile.saveSuccess")}</p>
+      )}
+
+      <div className="flex justify-end border-t border-[#1c1a18]/10 pt-8">
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={!isDirty || isPending}
+          className={`rounded-sm border px-6 py-2.5 text-sm font-medium transition-colors ${
+            isDirty && !isPending
+              ? "cursor-pointer border-[#1c1a18] bg-[#1c1a18] text-white shadow-xs hover:bg-[#1c1a18]/90"
+              : "text-ink/40 cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
+          }`}
+        >
+          {isPending ? t("account.profile.saving") : t("account.profile.save")}
+        </button>
+      </div>
+    </>
+  );
+}
+
+function useProfileAccountForm(
+  user: User,
+  checkSession: () => Promise<void>,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  const updateProfileMutation = useUpdateProfileMutation();
   const [editFormDraft, setEditForm] = useState({
     fullName: "",
-    email: "",
     gender: "",
     dob: "",
   });
   const [formTouched, setFormTouched] = useState({
     fullName: false,
-    email: false,
     gender: false,
     dob: false,
   });
   const [formModified, setFormModified] = useState({
     fullName: false,
-    email: false,
     gender: false,
     dob: false,
   });
-  const [isGenderOpen, setIsGenderOpen] = useState(false);
-  const [isDobOpen, setIsDobOpen] = useState(false);
   const [profileSaveMessage, setProfileSaveMessage] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
 
@@ -216,13 +563,6 @@ function ProfileAccountTab({
     dob: formModified.dob ? editFormDraft.dob : (user.birthDate ?? ""),
   };
 
-  const genderOptions: { value: Gender; label: string }[] = [
-    { value: "MALE", label: t("account.profile.gender.male") },
-    { value: "FEMALE", label: t("account.profile.gender.female") },
-    { value: "OTHER", label: t("account.profile.gender.other") },
-  ];
-  const emailValidation = createEmailSchema(locale).safeParse(editForm.email);
-
   const isFormDirty =
     editForm.fullName.trim() !== (user.fullName || "") ||
     editForm.gender !== (user.gender || "") ||
@@ -231,12 +571,35 @@ function ProfileAccountTab({
   const isProfileFormValid =
     editForm.fullName.trim() !== "" && editForm.gender !== "" && editForm.dob.trim() !== "";
 
+  const handleUpdateFullName = (fullName: string) => {
+    setEditForm((prev) => ({ ...prev, fullName }));
+    setFormModified((prev) => ({ ...prev, fullName: true }));
+    setFormTouched((prev) => ({ ...prev, fullName: false }));
+  };
+
+  const handleUpdateGender = (gender: string) => {
+    setEditForm((prev) => ({ ...prev, gender }));
+    setFormModified((prev) => ({ ...prev, gender: true }));
+    setFormTouched((prev) => ({ ...prev, gender: false }));
+  };
+
+  const handleUpdateDob = (dob: string) => {
+    setEditForm((prev) => ({ ...prev, dob }));
+    setFormModified((prev) => ({ ...prev, dob: true }));
+    setFormTouched((prev) => ({ ...prev, dob: false }));
+  };
+
+  const handleBlur = (field: "fullName" | "gender" | "dob") => {
+    setFormTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
   const handleSaveProfile = async () => {
+    if (updateProfileMutation.isPending) return;
     setProfileSaveMessage(false);
     setProfileSaveError(null);
 
     if (!isProfileFormValid) {
-      setFormTouched({ fullName: true, email: false, gender: true, dob: true });
+      setFormTouched({ fullName: true, gender: true, dob: true });
       return;
     }
 
@@ -247,14 +610,64 @@ function ProfileAccountTab({
         gender: editForm.gender as Gender,
       });
       await checkSession();
-      setEditForm({ fullName: "", email: "", gender: "", dob: "" });
-      setFormTouched({ fullName: false, email: false, gender: false, dob: false });
-      setFormModified({ fullName: false, email: false, gender: false, dob: false });
+      setEditForm({ fullName: "", gender: "", dob: "" });
+      setFormTouched({ fullName: false, gender: false, dob: false });
+      setFormModified({ fullName: false, gender: false, dob: false });
       setProfileSaveMessage(true);
     } catch (error) {
       setProfileSaveError(getApiErrorMessage(error, t("account.profile.saveError")));
     }
   };
+
+  return {
+    editForm,
+    formTouched,
+    isFormDirty,
+    isPending: updateProfileMutation.isPending,
+    profileSaveMessage,
+    profileSaveError,
+    handleUpdateFullName,
+    handleUpdateGender,
+    handleUpdateDob,
+    handleBlur,
+    handleSaveProfile,
+  };
+}
+
+function ProfileAccountTab({
+  user,
+  checkSession,
+  t,
+}: {
+  user: User;
+  checkSession: () => Promise<void>;
+  t: ReturnType<typeof useI18n>["t"];
+  locale: Locale;
+}) {
+  const router = useRouter();
+  const [isEditPasswordOpen, setIsEditPasswordOpen] = useState(false);
+  const [isEditEmailOpen, setIsEditEmailOpen] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
+  const {
+    editForm,
+    formTouched,
+    isFormDirty,
+    isPending,
+    profileSaveMessage,
+    profileSaveError,
+    handleUpdateFullName,
+    handleUpdateGender,
+    handleUpdateDob,
+    handleBlur,
+    handleSaveProfile,
+  } = useProfileAccountForm(user, checkSession, t);
+
+  const genderOptions: { value: Gender; label: string }[] = [
+    { value: "MALE", label: t("account.profile.gender.male") },
+    { value: "FEMALE", label: t("account.profile.gender.female") },
+    { value: "OTHER", label: t("account.profile.gender.other") },
+  ];
 
   const handleDeleteAccount = () => {
     startDeleteTransition(async () => {
@@ -274,290 +687,53 @@ function ProfileAccountTab({
       </h2>
 
       <div className="flex flex-col gap-8">
-        {/* Name Input */}
-        <div>
-          <div className="relative">
-            <input
-              type="text"
-              id="fullName"
-              placeholder={t("account.profile.fullName")}
-              value={editForm.fullName}
-              onChange={(e) => {
-                setEditForm((prev) => ({ ...prev, fullName: e.target.value }));
-                setFormModified((prev) => ({ ...prev, fullName: true }));
-                setFormTouched((prev) => ({ ...prev, fullName: false }));
-              }}
-              onBlur={() => setFormTouched((prev) => ({ ...prev, fullName: true }))}
-              className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                formTouched.fullName && editForm.fullName.trim() === ""
-                  ? "border-error focus:border-error"
-                  : "focus:border-ink/60 border-[#1c1a18]/20"
-              }`}
-            />
-            <label
-              htmlFor="fullName"
-              className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
-                formTouched.fullName && editForm.fullName.trim() === ""
-                  ? "text-error peer-focus:text-error"
-                  : "text-ink/70 peer-focus:text-ink/70"
-              }`}
-            >
-              {t("account.profile.fullName")}
-            </label>
-          </div>
-          {formTouched.fullName && editForm.fullName.trim() === "" && (
-            <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
-              {t("account.profile.fullNameRequired")}
-            </p>
-          )}
-        </div>
+        <ProfileFullNameField
+          value={editForm.fullName}
+          hasError={formTouched.fullName && editForm.fullName.trim() === ""}
+          onChange={handleUpdateFullName}
+          onBlur={() => handleBlur("fullName")}
+          t={t}
+        />
 
-        {/* Email Input */}
-        <div>
-          <div className="relative">
-            <input
-              type="email"
-              id="email"
-              placeholder={t("account.profile.email")}
-              value={editForm.email}
-              readOnly
-              onChange={(e) => {
-                setEditForm((prev) => ({ ...prev, email: e.target.value }));
-                setFormModified((prev) => ({ ...prev, email: true }));
-                setFormTouched((prev) => ({ ...prev, email: false }));
-              }}
-              onBlur={() => setFormTouched((prev) => ({ ...prev, email: true }))}
-              className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                formTouched.email && formModified.email && !emailValidation.success
-                  ? "border-error focus:border-error"
-                  : "focus:border-ink/60 border-[#1c1a18]/20"
-              }`}
-            />
-            <label
-              htmlFor="email"
-              className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-200 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
-                formTouched.email && formModified.email && !emailValidation.success
-                  ? "text-error peer-focus:text-error"
-                  : "text-ink/70 peer-focus:text-ink/70"
-              }`}
-            >
-              {t("account.profile.email")}
-            </label>
-          </div>
-          {formTouched.email && formModified.email && editForm.email.trim() === "" && (
-            <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
-              {t("account.profile.emailRequired")}
-            </p>
-          )}
-          {formTouched.email &&
-            formModified.email &&
-            editForm.email.trim() !== "" &&
-            !emailValidation.success && (
-              <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
-                {t("account.profile.emailInvalid")}
-              </p>
-            )}
-          <div className="mt-1.5 flex items-center justify-between">
-            <p className="text-ink/45 text-xs">
-              {user.hasPassword === false
-                ? t("account.profile.googleEmailNote")
-                : t("account.profile.emailSettingsNote")}
-            </p>
-            {user.hasPassword !== false && (
-              <button
-                type="button"
-                onClick={() => setIsEditEmailOpen(true)}
-                className="text-ink hover:text-primary cursor-pointer text-sm font-medium underline underline-offset-4 transition-colors"
-              >
-                {t("account.profile.edit")}
-              </button>
-            )}
-          </div>
-        </div>
+        <ProfileEmailField
+          email={editForm.email}
+          hasPassword={user.hasPassword}
+          onOpenEditEmail={() => setIsEditEmailOpen(true)}
+          onOpenEditPassword={() => setIsEditPasswordOpen(true)}
+          t={t}
+        />
 
-        {/* Password block (Readonly) */}
-        <div>
-          <p className="text-ink mb-1 text-sm font-medium">{t("account.profile.password")}</p>
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-ink text-2xl tracking-widest">................</p>
-            <button
-              type="button"
-              onClick={() => setIsEditPasswordOpen(true)}
-              className="text-ink hover:text-primary cursor-pointer text-sm font-medium underline underline-offset-4 transition-colors"
-            >
-              {t("account.profile.edit")}
-            </button>
-          </div>
-        </div>
+        <ProfileGenderField
+          gender={editForm.gender}
+          hasError={formTouched.gender && editForm.gender === ""}
+          genderOptions={genderOptions}
+          onChange={handleUpdateGender}
+          onBlur={() => handleBlur("gender")}
+          t={t}
+        />
 
-        {/* Gender Input */}
-        <div>
-          <div className="relative">
-            <Select
-              value={editForm.gender}
-              onValueChange={(val) => {
-                setEditForm((prev) => ({ ...prev, gender: val ?? "" }));
-                setFormModified((prev) => ({ ...prev, gender: true }));
-                setFormTouched((prev) => ({ ...prev, gender: false }));
-              }}
-              onOpenChange={(open) => {
-                setIsGenderOpen(open);
-                if (!open) {
-                  setFormTouched((prev) => ({ ...prev, gender: true }));
-                }
-              }}
-            >
-              <SelectTrigger
-                id="gender"
-                className={`text-ink flex !h-[52px] !w-full items-center justify-between rounded-sm border bg-transparent px-4 text-sm transition-colors duration-500 ease-out focus:ring-0 focus:outline-none ${
-                  formTouched.gender && editForm.gender === ""
-                    ? "border-error focus:border-error"
-                    : isGenderOpen
-                      ? "border-ink/60"
-                      : "border-[#1c1a18]/20"
-                }`}
-              >
-                <SelectValue placeholder="" />
-              </SelectTrigger>
-              <SelectContent
-                alignItemWithTrigger={false}
-                className="bg-canvas border-hairline rounded-sm shadow-sm"
-              >
-                {genderOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="cursor-pointer">
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <label
-              htmlFor="gender"
-              className={`bg-canvas pointer-events-none absolute left-3 px-1 transition-all duration-200 ease-out ${
-                editForm.gender === "" && !isGenderOpen ? "top-[15px] text-sm" : "-top-2 text-xs"
-              } ${formTouched.gender && editForm.gender === "" ? "text-error" : "text-ink/70"}`}
-            >
-              {t("account.profile.gender")}
-            </label>
-          </div>
-          {formTouched.gender && editForm.gender === "" && (
-            <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
-              {t("account.profile.genderRequired")}
-            </p>
-          )}
-        </div>
+        <ProfileDobField
+          dob={editForm.dob}
+          hasError={formTouched.dob && editForm.dob.trim() === ""}
+          onChange={handleUpdateDob}
+          onBlur={() => handleBlur("dob")}
+          t={t}
+        />
 
-        {/* Date of Birth Input */}
-        <div>
-          <div className="relative">
-            <input
-              type="text"
-              id="dob"
-              placeholder=""
-              value={formatBirthDateDisplay(editForm.dob)}
-              readOnly
-              onBlur={() => setFormTouched((prev) => ({ ...prev, dob: true }))}
-              className={`peer text-ink !h-[52px] !w-full cursor-default rounded-sm border bg-transparent px-4 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                formTouched.dob && editForm.dob.trim() === ""
-                  ? "border-error focus:border-error"
-                  : isDobOpen
-                    ? "border-ink/60"
-                    : "focus:border-ink/60 border-[#1c1a18]/20"
-              }`}
-            />
-            <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
-              <PopoverTrigger
-                aria-label={t("account.profile.openCalendar")}
-                className="text-ink/70 hover:text-ink focus-visible:ring-ink/20 absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer rounded-sm p-1.5 transition-colors outline-none hover:bg-[#1c1a18]/5 focus-visible:ring-2 focus-visible:ring-offset-1"
-              >
-                <CalendarDays className="size-4" />
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={editForm.dob ? parseDateValue(editForm.dob) : undefined}
-                  onSelect={(date: Date | undefined) => {
-                    if (date) {
-                      const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-                      setEditForm((prev) => ({ ...prev, dob: formatted }));
-                      setFormModified((prev) => ({ ...prev, dob: true }));
-                      setFormTouched((prev) => ({ ...prev, dob: false }));
-                      setIsDobOpen(false);
-                    }
-                  }}
-                  className="border-hairline rounded-sm shadow-sm"
-                  captionLayout="dropdown"
-                />
-              </PopoverContent>
-            </Popover>
-            <label
-              htmlFor="dob"
-              className={`bg-canvas pointer-events-none absolute left-3 px-1 transition-all duration-200 ease-out ${
-                editForm.dob === "" && !isDobOpen ? "top-[15px] text-sm" : "-top-2 text-xs"
-              } ${formTouched.dob && editForm.dob.trim() === "" ? "text-error" : "text-ink/70"}`}
-            >
-              {t("account.profile.birthDate")}
-            </label>
-          </div>
-          {formTouched.dob && editForm.dob.trim() === "" && (
-            <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
-              {t("account.profile.birthDateRequired")}
-            </p>
-          )}
-        </div>
+        <ProfileDeleteAccountSection
+          onDeleteAccount={handleDeleteAccount}
+          isDeleting={isDeleting}
+          t={t}
+        />
 
-        {/* Delete Account */}
-        <div className="flex items-center justify-between border-t border-[#1c1a18]/10 pt-8">
-          <p className="text-ink text-sm font-medium">{t("account.profile.deleteAccount")}</p>
-          <AlertDialog>
-            <AlertDialogTrigger className="border-error/30 text-error hover:bg-error/10 cursor-pointer rounded-sm border px-5 py-2.5 text-sm font-medium transition-colors">
-              {t("account.profile.deleteAccount")}
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-canvas max-w-md rounded-md border-[#1c1a18]/10">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-ink font-serif text-xl font-light">
-                  {t("account.profile.deleteAccountTitle")}
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-ink/70">
-                  {t("account.profile.deleteAccountConfirm")}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="mt-6">
-                <AlertDialogCancel className="text-ink rounded-sm border-[#1c1a18]/20 hover:bg-[#1c1a18]/5">
-                  {t("account.settings.cancel")}
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAccount}
-                  disabled={isDeleting}
-                  className="bg-error hover:bg-error/90 rounded-sm border-0 text-white"
-                >
-                  {isDeleting ? t("account.profile.deleting") : t("account.profile.deleteAccount")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        {profileSaveError && <p className="text-error text-sm">{profileSaveError}</p>}
-        {profileSaveMessage && (
-          <p className="text-sm text-emerald-700">{t("account.profile.saveSuccess")}</p>
-        )}
-
-        {/* Save Button */}
-        <div className="flex justify-end border-t border-[#1c1a18]/10 pt-8">
-          <button
-            onClick={handleSaveProfile}
-            disabled={!isFormDirty || updateProfileMutation.isPending}
-            className={`rounded-sm border px-6 py-2.5 text-sm font-medium transition-colors ${
-              isFormDirty && !updateProfileMutation.isPending
-                ? "cursor-pointer border-[#1c1a18] bg-[#1c1a18] text-white shadow-xs hover:bg-[#1c1a18]/90"
-                : "text-ink/40 cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
-            }`}
-          >
-            {updateProfileMutation.isPending
-              ? t("account.profile.saving")
-              : t("account.profile.save")}
-          </button>
-        </div>
+        <ProfileSaveActions
+          saveError={profileSaveError}
+          saveMessage={profileSaveMessage}
+          isDirty={isFormDirty}
+          isPending={isPending}
+          onSave={handleSaveProfile}
+          t={t}
+        />
       </div>
 
       <EditPasswordModal isOpen={isEditPasswordOpen} onClose={() => setIsEditPasswordOpen(false)} />
@@ -695,7 +871,7 @@ function ProfileVisibilityTab({
         </h3>
         <p className="text-ink/70 mb-6 text-sm font-light">
           {t("account.visibility.reviewDescription")}{" "}
-          <button className="font-semibold underline underline-offset-4">
+          <button type="button" className="font-semibold underline underline-offset-4">
             {t("account.visibility.learnMore")}
           </button>
         </p>
@@ -709,7 +885,9 @@ function ProfileVisibilityTab({
             <span className="text-ink text-sm">{t("account.visibility.private")}</span>
             <input
               type="radio"
-              className="hidden"
+              name="reviewVisibility"
+              aria-label={t("account.visibility.private")}
+              className="sr-only"
               checked={reviewVisibility === "private"}
               onChange={() => setReviewVisibility("private")}
             />
@@ -723,7 +901,9 @@ function ProfileVisibilityTab({
             <span className="text-ink text-sm">{t("account.visibility.social")}</span>
             <input
               type="radio"
-              className="hidden"
+              name="reviewVisibility"
+              aria-label={t("account.visibility.social")}
+              className="sr-only"
               checked={reviewVisibility === "social"}
               onChange={() => setReviewVisibility("social")}
             />
@@ -751,6 +931,10 @@ function ProfileCommunicationTab({ t }: { t: ReturnType<typeof useI18n>["t"] }) 
             </p>
           </div>
           <button
+            type="button"
+            role="switch"
+            aria-checked={emailUpdates}
+            aria-label="Email Updates"
             onClick={() => setEmailUpdates(!emailUpdates)}
             className={`relative h-6 w-12 cursor-pointer rounded-full p-1 transition-colors ${emailUpdates ? "bg-[#1c1a18]" : "bg-[#1c1a18]/20"}`}
           >
@@ -786,6 +970,10 @@ function ProfilePrivacyTab({ t }: { t: ReturnType<typeof useI18n>["t"] }) {
             <p className="text-ink/60 text-xs">Personalised advertising preferences</p>
           </div>
           <button
+            type="button"
+            role="switch"
+            aria-checked={privacySettings.personalisedAds}
+            aria-label={t("account.privacy.personalisedAds")}
             onClick={() =>
               setPrivacySettings((prev) => ({
                 ...prev,

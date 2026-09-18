@@ -14,6 +14,104 @@ import {
   HelpFaqSection,
 } from "./_components/help-sections";
 
+const HELP_TOPICS_VI = [
+  { id: "overview", label: "Tổng quan" },
+  { id: "shipping", label: "Giao hàng" },
+  { id: "returns", label: "Đổi và trả hàng" },
+  { id: "size", label: "Kích cỡ và phom dáng" },
+  { id: "care", label: "Bảo quản sản phẩm" },
+  { id: "contact", label: "Liên hệ" },
+  { id: "faq", label: "Câu hỏi thường gặp" },
+];
+
+const HELP_TOPICS_EN = [
+  { id: "overview", label: "Overview" },
+  { id: "shipping", label: "Shipping" },
+  { id: "returns", label: "Returns & Exchanges" },
+  { id: "size", label: "Size & Fit" },
+  { id: "care", label: "Product Care" },
+  { id: "contact", label: "Contact Us" },
+  { id: "faq", label: "FAQs" },
+];
+
+const SEARCH_INDEX_VI = [
+  {
+    id: "shipping",
+    title: "Giao hàng & Phí vận chuyển",
+    subtitle: "Thời gian 2-4 ngày, freeship đơn từ 1.5M, hỏa tốc 2H",
+    category: "Vận chuyển",
+  },
+  {
+    id: "returns",
+    title: "Chính sách đổi trả 30 ngày",
+    subtitle: "Thu hồi tận nơi miễn phí, điều kiện tem mác, hoàn tiền 24H",
+    category: "Đổi trả",
+  },
+  {
+    id: "size",
+    title: "Hướng dẫn chọn kích cỡ (Size Guide)",
+    subtitle: "Bảng số đo 3 vòng, phom Tailored, Relaxed, Oversized",
+    category: "Kích cỡ",
+  },
+  {
+    id: "care",
+    title: "Bảo quản vải đũi Linen, Lụa & Len",
+    subtitle: "Hướng dẫn giặt tay, giặt khô và ủi hơi nước cao cấp",
+    category: "Chất liệu",
+  },
+  {
+    id: "contact",
+    title: "Hotline Concierge 1900 6886 & Store",
+    subtitle: "Tư vấn 8:30-22:00, Email concierge@velawear.com, Store Hà Nội & TP.HCM",
+    category: "Liên hệ",
+  },
+  {
+    id: "faq",
+    title: "Giải đáp các câu hỏi thường gặp",
+    subtitle: "Tổng hợp giải đáp thắc mắc về đơn hàng và sản phẩm",
+    category: "Hỏi đáp",
+  },
+];
+
+const SEARCH_INDEX_EN = [
+  {
+    id: "shipping",
+    title: "Shipping & Fees",
+    subtitle: "2-4 days, free delivery over 1.5M, 2H express",
+    category: "Delivery",
+  },
+  {
+    id: "returns",
+    title: "30-Day Return Policy",
+    subtitle: "Free doorstep pickup, tag conditions, 24H refund",
+    category: "Returns",
+  },
+  {
+    id: "size",
+    title: "Garment Size Guide",
+    subtitle: "Measurements, Tailored, Relaxed, Oversized fit",
+    category: "Sizing",
+  },
+  {
+    id: "care",
+    title: "Care for Linen, Silk & Wool",
+    subtitle: "Washing, dry cleaning, and steaming instructions",
+    category: "Fabric Care",
+  },
+  {
+    id: "contact",
+    title: "Concierge Hotline 1900 6886 & Store",
+    subtitle: "Concierge support, Email & Flagship store locations",
+    category: "Contact",
+  },
+  {
+    id: "faq",
+    title: "Frequently Asked Questions",
+    subtitle: "Quick answers to common order and product queries",
+    category: "FAQ",
+  },
+];
+
 export default function HelpCenter() {
   const { t, locale } = useI18n();
   const [activeTopic, setActiveTopic] = useState("overview");
@@ -22,67 +120,8 @@ export default function HelpCenter() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const isVi = locale === "vi";
-
-  const helpTopics = [
-    { id: "overview", label: isVi ? "Tổng quan" : "Overview" },
-    { id: "shipping", label: isVi ? "Giao hàng" : "Shipping" },
-    { id: "returns", label: isVi ? "Đổi và trả hàng" : "Returns & Exchanges" },
-    { id: "size", label: isVi ? "Kích cỡ và phom dáng" : "Size & Fit" },
-    { id: "care", label: isVi ? "Bảo quản sản phẩm" : "Product Care" },
-    { id: "contact", label: isVi ? "Liên hệ" : "Contact Us" },
-    { id: "faq", label: isVi ? "Câu hỏi thường gặp" : "FAQs" },
-  ];
-
-  const searchIndex = [
-    {
-      id: "shipping",
-      title: isVi ? "Giao hàng & Phí vận chuyển" : "Shipping & Fees",
-      subtitle: isVi
-        ? "Thời gian 2-4 ngày, freeship đơn từ 1.5M, hỏa tốc 2H"
-        : "2-4 days, free delivery over 1.5M, 2H express",
-      category: isVi ? "Vận chuyển" : "Delivery",
-    },
-    {
-      id: "returns",
-      title: isVi ? "Chính sách đổi trả 30 ngày" : "30-Day Return Policy",
-      subtitle: isVi
-        ? "Thu hồi tận nơi miễn phí, điều kiện tem mác, hoàn tiền 24H"
-        : "Free doorstep pickup, tag conditions, 24H refund",
-      category: isVi ? "Đổi trả" : "Returns",
-    },
-    {
-      id: "size",
-      title: isVi ? "Hướng dẫn chọn kích cỡ (Size Guide)" : "Garment Size Guide",
-      subtitle: isVi
-        ? "Bảng số đo 3 vòng, phom Tailored, Relaxed, Oversized"
-        : "Measurements, Tailored, Relaxed, Oversized fit",
-      category: isVi ? "Kích cỡ" : "Sizing",
-    },
-    {
-      id: "care",
-      title: isVi ? "Bảo quản vải đũi Linen, Lụa & Len" : "Care for Linen, Silk & Wool",
-      subtitle: isVi
-        ? "Hướng dẫn giặt tay, giặt khô và ủi hơi nước cao cấp"
-        : "Washing, dry cleaning, and steaming instructions",
-      category: isVi ? "Chất liệu" : "Fabric Care",
-    },
-    {
-      id: "contact",
-      title: isVi ? "Hotline Concierge 1900 6886 & Store" : "Concierge Hotline 1900 6886 & Store",
-      subtitle: isVi
-        ? "Tư vấn 8:30-22:00, Email concierge@velawear.com, Store Hà Nội & TP.HCM"
-        : "Concierge support, Email & Flagship store locations",
-      category: isVi ? "Liên hệ" : "Contact",
-    },
-    {
-      id: "faq",
-      title: isVi ? "Giải đáp các câu hỏi thường gặp" : "Frequently Asked Questions",
-      subtitle: isVi
-        ? "Tổng hợp giải đáp thắc mắc về đơn hàng và sản phẩm"
-        : "Quick answers to common order and product queries",
-      category: isVi ? "Hỏi đáp" : "FAQ",
-    },
-  ];
+  const helpTopics = isVi ? HELP_TOPICS_VI : HELP_TOPICS_EN;
+  const searchIndex = isVi ? SEARCH_INDEX_VI : SEARCH_INDEX_EN;
 
   // Scrollspy via scroll listener
   useEffect(() => {

@@ -76,7 +76,7 @@ export function HelpHeader({
 
       {/* Search Input Box */}
       <div className="relative w-full">
-        <div className="border-hairline relative w-full overflow-hidden rounded-sm border bg-white shadow-sm transition-all focus-within:border-[#b5573a]">
+        <div className="border-hairline relative w-full overflow-hidden rounded-sm border bg-white shadow-sm transition-colors focus-within:border-[#b5573a]">
           <span className="text-on-surface-variant/50 absolute top-1/2 left-4 -translate-y-1/2">
             <Search className="size-5" />
           </span>
@@ -85,7 +85,7 @@ export function HelpHeader({
             value={searchQuery}
             onFocus={() => setIsSearchFocused(true)}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border-none bg-white p-0 py-4 pr-10 pl-12 font-sans text-sm text-[#1c1a18] placeholder-[#55423d]/50 transition-all focus:outline-none"
+            className="w-full border-none bg-white p-0 py-4 pr-10 pl-12 font-sans text-sm text-[#1c1a18] placeholder-[#55423d]/50 transition-colors focus:outline-none"
             placeholder={
               isVi
                 ? "Nhập từ khóa (vd: giao hàng, đổi trả, chọn size, linen)..."
@@ -129,7 +129,7 @@ export function HelpHeader({
                       {result.subtitle}
                     </div>
                   </div>
-                  <ArrowRight className="text-on-surface-variant/40 mt-1 size-4 shrink-0 transition-all group-hover:translate-x-0.5 group-hover:text-[#b5573a]" />
+                  <ArrowRight className="text-on-surface-variant/40 mt-1 size-4 shrink-0 transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-[#b5573a]" />
                 </button>
               ))
             ) : (
@@ -172,7 +172,7 @@ export function HelpSidebar({
                 key={topic.id}
                 onClick={() => scrollToSection(topic.id)}
                 className={cn(
-                  "group flex items-center justify-between border-l-2 py-1.5 pl-4 text-left text-sm font-medium tracking-[0.03em] transition-all",
+                  "group flex items-center justify-between border-l-2 py-1.5 pl-4 text-left text-sm font-medium tracking-[0.03em] transition-colors",
                   isActive
                     ? "border-[#b5573a] font-semibold text-[#b5573a]"
                     : "border-transparent text-[#55423d]/70 hover:text-[#b5573a]",
@@ -215,7 +215,7 @@ export function HelpOverviewSection({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <button
           onClick={() => scrollToSection("shipping")}
-          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-md"
         >
           <Truck className="mb-4 size-8 text-[#b5573a] transition-transform group-hover:scale-105" />
           <h3 className="mb-2 font-serif text-xl font-medium tracking-tight text-[#1c1a18] md:text-2xl">
@@ -230,7 +230,7 @@ export function HelpOverviewSection({
 
         <button
           onClick={() => scrollToSection("returns")}
-          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-md"
         >
           <RotateCcw className="mb-4 size-8 text-[#b5573a] transition-transform group-hover:scale-105" />
           <h3 className="mb-2 font-serif text-xl font-medium tracking-tight text-[#1c1a18] md:text-2xl">
@@ -245,7 +245,7 @@ export function HelpOverviewSection({
 
         <button
           onClick={() => scrollToSection("size")}
-          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-md"
         >
           <Ruler className="mb-4 size-8 text-[#b5573a] transition-transform group-hover:scale-105" />
           <h3 className="mb-2 font-serif text-xl font-medium tracking-tight text-[#1c1a18] md:text-2xl">
@@ -260,7 +260,7 @@ export function HelpOverviewSection({
 
         <button
           onClick={() => scrollToSection("care")}
-          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="group border-hairline/40 rounded-sm border bg-white p-8 text-left transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-md"
         >
           <Sparkles className="mb-4 size-8 text-[#b5573a] transition-transform group-hover:scale-105" />
           <h3 className="mb-2 font-serif text-xl font-medium tracking-tight text-[#1c1a18] md:text-2xl">
@@ -322,7 +322,53 @@ export function HelpOverviewSection({
   );
 }
 
+const SHIPPING_CONTENT_VI = {
+  title: "Giao hàng & Vận chuyển",
+  standardBadge: "Phổ biến",
+  standardTitle: "Giao Hàng Tiêu Chuẩn",
+  standardDesc: "Áp dụng cho mọi tỉnh thành trên toàn quốc qua đối tác bưu chính cao cấp.",
+  standardTime: "Thời gian: 2 - 4 ngày",
+  standardFree: "Freeship đơn > 1.5M",
+  expressBadge: "Nội thành",
+  expressTitle: "Giao Hỏa Tốc 2H",
+  expressDesc: "Giao nhận trực tiếp trong vòng 2-4 giờ tại các quận nội thành Hà Nội & TP.HCM.",
+  expressTime: "Thời gian: 2 - 4 giờ",
+  intlBadge: "Quốc tế",
+  intlTitle: "Giao Hàng Quốc Tế",
+  intlDesc: "Vận chuyển toàn cầu tới Đông Nam Á, Châu Âu, Mỹ qua dịch vụ DHL Express.",
+  intlTime: "Thời gian: 5 - 7 ngày",
+  intlFee: "Tính theo DHL",
+  trackTitle: "Cách kiểm tra vị trí đơn hàng:",
+  trackStep1: "Đăng nhập tài khoản Vela Wear và vào trang Đơn hàng cá nhân.",
+  trackStep2: "Nhấp chọn đơn hàng cần xem và lấy mã vận đơn (VD: VELA883921).",
+  trackStep3: "Hoặc tra cứu mã vận đơn trực tiếp qua email xác nhận đã nhận hàng.",
+};
+
+const SHIPPING_CONTENT_EN = {
+  title: "Shipping & Delivery",
+  standardBadge: "Standard",
+  standardTitle: "Standard Delivery",
+  standardDesc: "Nationwide express courier service for all cities and provinces.",
+  standardTime: "Time: 2–4 days",
+  standardFree: "Free over 1.5M",
+  expressBadge: "Same Day",
+  expressTitle: "Express 2-Hour Delivery",
+  expressDesc: "Direct courier dispatch within 2-4 hours inside Hanoi & HCMC city centers.",
+  expressTime: "Time: 2–4 hours",
+  intlBadge: "Global",
+  intlTitle: "International Shipping",
+  intlDesc: "Global shipping to Asia, US, EU, and UK via DHL Express.",
+  intlTime: "Time: 5–7 days",
+  intlFee: "Calculated",
+  trackTitle: "How to track your order:",
+  trackStep1: "Log in to your account and open My Orders page.",
+  trackStep2: "Select your active order to find the tracking number.",
+  trackStep3: "Or click the direct tracking link provided in your shipment confirmation email.",
+};
+
 export function HelpShippingSection({ isVi }: { isVi: boolean }) {
+  const content = isVi ? SHIPPING_CONTENT_VI : SHIPPING_CONTENT_EN;
+
   return (
     <section
       id="shipping"
@@ -333,7 +379,7 @@ export function HelpShippingSection({ isVi }: { isVi: boolean }) {
           01
         </span>
         <h2 className="font-serif text-2xl font-light text-[#1c1a18] md:text-3xl">
-          {isVi ? "Giao hàng & Vận chuyển" : "Shipping & Delivery"}
+          {content.title}
         </h2>
       </div>
 
@@ -341,41 +387,35 @@ export function HelpShippingSection({ isVi }: { isVi: boolean }) {
         <div className="border-hairline/30 flex flex-col justify-between rounded-sm border bg-[#f9f7f4] p-6">
           <div>
             <span className="mb-3 inline-block rounded-sm bg-[#b5573a]/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#b5573a] uppercase">
-              {isVi ? "Phổ biến" : "Standard"}
+              {content.standardBadge}
             </span>
             <h3 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
-              {isVi ? "Giao Hàng Tiêu Chuẩn" : "Standard Delivery"}
+              {content.standardTitle}
             </h3>
             <p className="mb-4 text-xs leading-relaxed font-light text-[#55423d]/80">
-              {isVi
-                ? "Áp dụng cho mọi tỉnh thành trên toàn quốc qua đối tác bưu chính cao cấp."
-                : "Nationwide express courier service for all cities and provinces."}
+              {content.standardDesc}
             </p>
           </div>
           <div className="border-hairline/30 flex justify-between border-t pt-4 text-xs font-medium text-[#1c1a18]">
-            <span>{isVi ? "Thời gian: 2 - 4 ngày" : "Time: 2–4 days"}</span>
-            <span className="text-[#b5573a]">
-              {isVi ? "Freeship đơn > 1.5M" : "Free over 1.5M"}
-            </span>
+            <span>{content.standardTime}</span>
+            <span className="text-[#b5573a]">{content.standardFree}</span>
           </div>
         </div>
 
         <div className="border-hairline/30 flex flex-col justify-between rounded-sm border bg-[#f9f7f4] p-6">
           <div>
             <span className="mb-3 inline-block rounded-sm bg-[#b5573a]/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#b5573a] uppercase">
-              {isVi ? "Nội thành" : "Same Day"}
+              {content.expressBadge}
             </span>
             <h3 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
-              {isVi ? "Giao Hỏa Tốc 2H" : "Express 2-Hour Delivery"}
+              {content.expressTitle}
             </h3>
             <p className="mb-4 text-xs leading-relaxed font-light text-[#55423d]/80">
-              {isVi
-                ? "Giao nhận trực tiếp trong vòng 2-4 giờ tại các quận nội thành Hà Nội & TP.HCM."
-                : "Direct courier dispatch within 2-4 hours inside Hanoi & HCMC city centers."}
+              {content.expressDesc}
             </p>
           </div>
           <div className="border-hairline/30 flex justify-between border-t pt-4 text-xs font-medium text-[#1c1a18]">
-            <span>{isVi ? "Thời gian: 2 - 4 giờ" : "Time: 2–4 hours"}</span>
+            <span>{content.expressTime}</span>
             <span className="text-[#b5573a]">55.000 VNĐ</span>
           </div>
         </div>
@@ -383,51 +423,83 @@ export function HelpShippingSection({ isVi }: { isVi: boolean }) {
         <div className="border-hairline/30 flex flex-col justify-between rounded-sm border bg-[#f9f7f4] p-6">
           <div>
             <span className="mb-3 inline-block rounded-sm bg-[#6f554c]/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#6f554c] uppercase">
-              {isVi ? "Quốc tế" : "Global"}
+              {content.intlBadge}
             </span>
             <h3 className="mb-2 font-serif text-lg font-medium text-[#1c1a18]">
-              {isVi ? "Giao Hàng Quốc Tế" : "International Shipping"}
+              {content.intlTitle}
             </h3>
             <p className="mb-4 text-xs leading-relaxed font-light text-[#55423d]/80">
-              {isVi
-                ? "Vận chuyển toàn cầu tới Đông Nam Á, Châu Âu, Mỹ qua dịch vụ DHL Express."
-                : "Global shipping to Asia, US, EU, and UK via DHL Express."}
+              {content.intlDesc}
             </p>
           </div>
           <div className="border-hairline/30 flex justify-between border-t pt-4 text-xs font-medium text-[#1c1a18]">
-            <span>{isVi ? "Thời gian: 5 - 7 ngày" : "Time: 5–7 days"}</span>
-            <span className="text-[#6f554c]">{isVi ? "Tính theo DHL" : "Calculated"}</span>
+            <span>{content.intlTime}</span>
+            <span className="text-[#6f554c]">{content.intlFee}</span>
           </div>
         </div>
       </div>
 
       <div className="border-hairline/30 rounded-sm border bg-[#f9f7f4] p-6 text-xs leading-relaxed text-[#55423d]/85">
-        <p className="mb-2 font-medium text-[#1c1a18]">
-          {isVi ? "Cách kiểm tra vị trí đơn hàng:" : "How to track your order:"}
-        </p>
+        <p className="mb-2 font-medium text-[#1c1a18]">{content.trackTitle}</p>
         <ol className="list-decimal space-y-1 pl-4">
-          <li>
-            {isVi
-              ? "Đăng nhập tài khoản Vela Wear và vào trang Đơn hàng cá nhân."
-              : "Log in to your account and open My Orders page."}
-          </li>
-          <li>
-            {isVi
-              ? "Nhấp chọn đơn hàng cần xem và lấy mã vận đơn (VD: VELA883921)."
-              : "Select your active order to find the tracking number."}
-          </li>
-          <li>
-            {isVi
-              ? "Hoặc tra cứu mã vận đơn trực tiếp qua email xác nhận đã nhận hàng."
-              : "Or click the direct tracking link provided in your shipment confirmation email."}
-          </li>
+          <li>{content.trackStep1}</li>
+          <li>{content.trackStep2}</li>
+          <li>{content.trackStep3}</li>
         </ol>
       </div>
     </section>
   );
 }
 
+const RETURNS_CONTENT_VI = {
+  title: "Chính sách Đổi và Trả hàng",
+  lead: "Nhằm đảm bảo trải nghiệm mua sắm hoàn hảo nhất, Vela Wear áp dụng chính sách đổi trả linh hoạt trong vòng 30 ngày kể từ ngày bạn nhận được sản phẩm.",
+  step1Title: "Gửi Yêu Cầu",
+  step1Desc: "Liên hệ Concierge hoặc bấm Đổi/Trả trong mục Quản lý đơn hàng.",
+  step2Title: "Thu Hồi Tận Nơi",
+  step2Desc: "Nhân viên vận chuyển tới tận nhà nhận lại gói hàng miễn phí.",
+  step3Title: "Đổi Sản Phẩm / Hoàn Tiền",
+  step3Desc: "Nhận ngay món đồ mới đổi hoặc tiền hoàn về tài khoản trong 24h.",
+  conditionsTitle: "Điều kiện áp dụng đổi trả:",
+  conditions: [
+    "Sản phẩm còn giữ nguyên tem mác thương hiệu gốc.",
+    "Chưa qua giặt tẩy, chưa qua bẩn hay hư hỏng do tác động ngoài.",
+    "Còn đầy đủ bao bì hộp đựng và túi bọc kèm theo.",
+  ],
+  refundMethodsTitle: "Hình thức hoàn tiền:",
+  refundMethods: [
+    "Chuyển khoản trực tiếp về tài khoản ngân hàng của bạn.",
+    "Hoàn về Thẻ tín dụng/Thẻ ghi nợ (tùy theo ngân hàng phát hành).",
+    "Mã Gift Card mua sắm trực tuyến (có giá trị sử dụng vô thời hạn).",
+  ],
+};
+
+const RETURNS_CONTENT_EN = {
+  title: "Returns & Exchange Policy",
+  lead: "To ensure your total peace of mind, Vela Wear offers a seamless 30-day return and exchange policy from the delivery date.",
+  step1Title: "Request Return",
+  step1Desc: "Contact Concierge or click Return on your account dashboard.",
+  step2Title: "Courier Pickup",
+  step2Desc: "Our courier collects the parcel directly from your address free.",
+  step3Title: "Exchange / Refund",
+  step3Desc: "Receive your exchange or bank refund credited within 24–48 hours.",
+  conditionsTitle: "Eligible return conditions:",
+  conditions: [
+    "Garment retains all original brand tags intact.",
+    "Unworn, unwashed, and without perfume/stains.",
+    "Returned with original packaging box & garment bag.",
+  ],
+  refundMethodsTitle: "Refund methods:",
+  refundMethods: [
+    "Direct bank transfer within 24 hours of inspection.",
+    "Reversed to your Credit / Debit card issuer.",
+    "Store credit voucher with no expiration date.",
+  ],
+};
+
 export function HelpReturnsSection({ isVi }: { isVi: boolean }) {
+  const content = isVi ? RETURNS_CONTENT_VI : RETURNS_CONTENT_EN;
+
   return (
     <section
       id="returns"
@@ -438,15 +510,11 @@ export function HelpReturnsSection({ isVi }: { isVi: boolean }) {
           02
         </span>
         <h2 className="font-serif text-2xl font-light text-[#1c1a18] md:text-3xl">
-          {isVi ? "Chính sách Đổi và Trả hàng" : "Returns & Exchange Policy"}
+          {content.title}
         </h2>
       </div>
 
-      <p className="text-sm leading-relaxed font-light text-[#55423d]/85">
-        {isVi
-          ? "Nhằm đảm bảo trải nghiệm mua sắm hoàn hảo nhất, Vela Wear áp dụng chính sách đổi trả linh hoạt trong vòng 30 ngày kể từ ngày bạn nhận được sản phẩm."
-          : "To ensure your total peace of mind, Vela Wear offers a seamless 30-day return and exchange policy from the delivery date."}
-      </p>
+      <p className="text-sm leading-relaxed font-light text-[#55423d]/85">{content.lead}</p>
 
       {/* 3 Step Process Workflow */}
       <div className="my-2 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -456,12 +524,10 @@ export function HelpReturnsSection({ isVi }: { isVi: boolean }) {
           </div>
           <div>
             <h5 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
-              {isVi ? "Gửi Yêu Cầu" : "Request Return"}
+              {content.step1Title}
             </h5>
             <p className="text-xs leading-relaxed font-light text-[#55423d]/80">
-              {isVi
-                ? "Liên hệ Concierge hoặc bấm Đổi/Trả trong mục Quản lý đơn hàng."
-                : "Contact Concierge or click Return on your account dashboard."}
+              {content.step1Desc}
             </p>
           </div>
         </div>
@@ -472,12 +538,10 @@ export function HelpReturnsSection({ isVi }: { isVi: boolean }) {
           </div>
           <div>
             <h5 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
-              {isVi ? "Thu Hồi Tận Nơi" : "Courier Pickup"}
+              {content.step2Title}
             </h5>
             <p className="text-xs leading-relaxed font-light text-[#55423d]/80">
-              {isVi
-                ? "Nhân viên vận chuyển tới tận nhà nhận lại gói hàng miễn phí."
-                : "Our courier collects the parcel directly from your address free."}
+              {content.step2Desc}
             </p>
           </div>
         </div>
@@ -488,12 +552,10 @@ export function HelpReturnsSection({ isVi }: { isVi: boolean }) {
           </div>
           <div>
             <h5 className="mb-1 font-serif text-base font-medium text-[#1c1a18]">
-              {isVi ? "Đổi Sản Phẩm / Hoàn Tiền" : "Exchange / Refund"}
+              {content.step3Title}
             </h5>
             <p className="text-xs leading-relaxed font-light text-[#55423d]/80">
-              {isVi
-                ? "Nhận ngay món đồ mới đổi hoặc tiền hoàn về tài khoản trong 24h."
-                : "Receive your exchange or bank refund credited within 24–48 hours."}
+              {content.step3Desc}
             </p>
           </div>
         </div>
@@ -504,48 +566,24 @@ export function HelpReturnsSection({ isVi }: { isVi: boolean }) {
         <div>
           <h4 className="mb-3 flex items-center gap-2 font-serif text-base font-medium text-[#1c1a18]">
             <CheckCircle2 className="size-4 text-[#b5573a]" />
-            {isVi ? "Điều kiện áp dụng đổi trả:" : "Eligible return conditions:"}
+            {content.conditionsTitle}
           </h4>
           <ul className="list-disc space-y-2 pl-6 text-xs font-light text-[#55423d]/80">
-            <li>
-              {isVi
-                ? "Sản phẩm còn giữ nguyên tem mác thương hiệu gốc."
-                : "Garment retains all original brand tags intact."}
-            </li>
-            <li>
-              {isVi
-                ? "Chưa qua giặt tẩy, chưa qua bẩn hay hư hỏng do tác động ngoài."
-                : "Unworn, unwashed, and without perfume/stains."}
-            </li>
-            <li>
-              {isVi
-                ? "Còn đầy đủ bao bì hộp đựng và túi bọc kèm theo."
-                : "Returned with original packaging box & garment bag."}
-            </li>
+            {content.conditions.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
         </div>
 
         <div>
           <h4 className="mb-3 flex items-center gap-2 font-serif text-base font-medium text-[#1c1a18]">
             <RotateCcw className="size-4 text-[#b5573a]" />
-            {isVi ? "Hình thức hoàn tiền:" : "Refund methods:"}
+            {content.refundMethodsTitle}
           </h4>
           <ul className="list-disc space-y-2 pl-6 text-xs font-light text-[#55423d]/80">
-            <li>
-              {isVi
-                ? "Chuyển khoản trực tiếp về tài khoản ngân hàng của bạn."
-                : "Direct bank transfer within 24 hours of inspection."}
-            </li>
-            <li>
-              {isVi
-                ? "Hoàn về Thẻ tín dụng/Thẻ ghi nợ (tùy theo ngân hàng phát hành)."
-                : "Reversed to your Credit / Debit card issuer."}
-            </li>
-            <li>
-              {isVi
-                ? "Mã Gift Card mua sắm trực tuyến (có giá trị sử dụng vô thời hạn)."
-                : "Store credit voucher with no expiration date."}
-            </li>
+            {content.refundMethods.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
         </div>
       </div>
@@ -831,15 +869,16 @@ export function HelpFaqSection({
           const isOpen = openFaqIndex === index;
           return (
             <div
-              key={index}
+              key={faq.question}
               className={cn(
-                "flex flex-col overflow-hidden rounded-sm border transition-all duration-300",
+                "flex flex-col overflow-hidden rounded-sm border transition-colors duration-300",
                 isOpen
                   ? "border-[#b5573a]/30 bg-[#f9f7f4] shadow-sm"
                   : "border-hairline/40 bg-white hover:border-[#b5573a]/20",
               )}
             >
               <button
+                type="button"
                 onClick={() => toggleFaq(index)}
                 aria-expanded={isOpen}
                 className="group flex w-full items-center justify-between px-6 py-5 text-left focus:outline-none"
@@ -869,6 +908,7 @@ export function HelpFaqSection({
               {/* Smooth Fluid Framer Motion Collapse/Expand Animation */}
               <AnimatePresence initial={false}>
                 {isOpen && (
+                  /* react-doctor-disable-next-line react-doctor/no-layout-property-animation -- Height animation is required for fluid accordion collapse/expand */
                   <motion.div
                     key="content"
                     initial={{ height: 0, opacity: 0 }}

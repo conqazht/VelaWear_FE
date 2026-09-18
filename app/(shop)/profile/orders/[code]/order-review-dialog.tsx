@@ -68,14 +68,12 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
   };
 
   const removeImage = (index: number) => {
-    setImages((current) => {
-      const target = current[index];
-      if (target) {
-        URL.revokeObjectURL(target.url);
-        createdUrlsRef.current.delete(target.url);
-      }
-      return current.filter((_, i) => i !== index);
-    });
+    const target = images[index];
+    if (target) {
+      URL.revokeObjectURL(target.url);
+      createdUrlsRef.current.delete(target.url);
+    }
+    setImages((current) => current.filter((_, i) => i !== index));
   };
 
   const handleImages = (event: ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +96,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
     }
     setValidationError(null);
     const newItems: ReviewImage[] = selected.map((file, idx) => {
+      // react-doctor-disable-next-line react-doctor/no-create-object-url-without-revoke -- Object URLs are tracked in createdUrlsRef and revoked on removal, form reset, or unmount
       const url = URL.createObjectURL(file);
       createdUrlsRef.current.add(url);
       return {
