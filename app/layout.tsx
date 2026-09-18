@@ -130,13 +130,15 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebsite) }}
         />
-        {process.env.NODE_ENV === "development" && (
-          <Script
-            src="https://unpkg.com/react-scan/dist/auto.global.js"
-            crossOrigin="anonymous"
-            strategy="beforeInteractive"
-          />
-        )}
+        {process.env.NODE_ENV === "development" &&
+          !process.env.CI &&
+          process.env.NEXT_PUBLIC_IS_E2E !== "true" && (
+            <Script
+              src="https://unpkg.com/react-scan/dist/auto.global.js"
+              crossOrigin="anonymous"
+              strategy="beforeInteractive"
+            />
+          )}
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <Script
