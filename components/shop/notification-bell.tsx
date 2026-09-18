@@ -12,6 +12,7 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
 } from "@/hooks/use-notifications";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { formatRelativeTime } from "@/lib/i18n/format";
 import { EASE_VELA } from "@/lib/motion-tokens";
@@ -48,19 +49,24 @@ export function NotificationBell({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { locale, t } = useI18n();
+  const { user } = useAuth();
 
-  const { data: unreadCount = 0 } = useUnreadNotificationCountQuery();
+  const { data: unreadCount = 0 } = useUnreadNotificationCountQuery(
+    user?.id,
+    Boolean(user?.id),
+  );
   const {
     data: notificationsData,
     isLoading,
     isError,
   } = useMyNotificationsQuery(
+    user?.id,
     { size: 8, sort: "createdAt,desc" },
-    isOpen, // Only fetch list when dropdown is open or about to open
+    isOpen && Boolean(user?.id),
   );
 
-  const markAsReadMutation = useMarkNotificationAsReadMutation();
-  const markAllAsReadMutation = useMarkAllNotificationsAsReadMutation();
+  const markAsReadMutation = useMarkNotificationAsReadMutation(user?.id);
+  const markAllAsReadMutation = useMarkAllNotificationsAsReadMutation(user?.id);
 
   // Close on outside pointerdown
   useEffect(() => {

@@ -14,6 +14,13 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+vi.mock("@/components/auth/auth-provider", () => ({
+  useAuth: () => ({
+    user: { id: 1, email: "user@example.com" },
+    isAuthenticated: true,
+  }),
+}));
+
 vi.mock("@/components/providers/i18n-provider", () => ({
   useI18n: () => ({
     locale: "vi",

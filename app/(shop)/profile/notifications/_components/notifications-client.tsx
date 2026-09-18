@@ -44,13 +44,16 @@ function getNotificationIcon(type: NotificationType) {
 export function NotificationsClient() {
   const { locale, t } = useI18n();
   const router = useRouter();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const { data: unreadCount = 0 } = useUnreadNotificationCountQuery(isAuthenticated);
+  const { data: unreadCount = 0 } = useUnreadNotificationCountQuery(
+    user?.id,
+    isAuthenticated,
+  );
 
   const filterParams = {
     page: currentPage,
@@ -63,10 +66,10 @@ export function NotificationsClient() {
     data: notificationsData,
     isLoading,
     isError,
-  } = useMyNotificationsQuery(filterParams, isAuthenticated);
+  } = useMyNotificationsQuery(user?.id, filterParams, isAuthenticated);
 
-  const markAsReadMutation = useMarkNotificationAsReadMutation();
-  const markAllAsReadMutation = useMarkAllNotificationsAsReadMutation();
+  const markAsReadMutation = useMarkNotificationAsReadMutation(user?.id);
+  const markAllAsReadMutation = useMarkAllNotificationsAsReadMutation(user?.id);
 
   const notifications = notificationsData?.result ?? [];
   const meta = notificationsData?.meta;

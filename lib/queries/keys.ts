@@ -76,7 +76,9 @@ export const queryKeys = {
   },
   notifications: {
     root: ["notifications"] as const,
-    myList: (params?: unknown) => ["notifications", "me", "list", params] as const,
-    unreadCount: () => ["notifications", "me", "unread-count"] as const,
+    myList: (accountId: number | undefined, params?: unknown) =>
+      ["notifications", "me", accountId ?? "anonymous", "list", params] as const,
+    unreadCount: (accountId: number | undefined) =>
+      ["notifications", "me", accountId ?? "anonymous", "unread-count"] as const,
   },
 };
