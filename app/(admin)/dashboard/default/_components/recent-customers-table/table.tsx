@@ -162,6 +162,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
             <Input
               className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
               placeholder={t("admin.dashboardsA.default.searchCustomers")}
+              aria-label={t("admin.dashboardsA.default.searchCustomers")}
               value={searchQuery}
               onChange={(event) => {
                 table.getColumn("search")?.setFilterValue(event.target.value || undefined);

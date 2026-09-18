@@ -44,6 +44,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
           placeholder={t("admin.workflows.tasks.filterPlaceholder")}
+          aria-label={t("admin.workflows.tasks.filterPlaceholder")}
           value={searchValue}
           onChange={(event) => {
             table.getColumn("title")?.setFilterValue(event.target.value);

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { ImagePlus, Star, Trash2 } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -25,30 +25,55 @@ type OrderReviewDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+type ReviewImage = {
+  id: string;
+  file: File;
+  url: string;
+};
+
 export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialogProps) {
   const { t } = useI18n();
   const mutation = useCreateReviewMutation();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<ReviewImage[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const imagePreviews = useMemo(
-    () => images.map((image) => ({ image, url: URL.createObjectURL(image) })),
-    [images],
-  );
+  const createdUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    return () => imagePreviews.forEach(({ url }) => URL.revokeObjectURL(url));
-  }, [imagePreviews]);
+    const urls = createdUrlsRef.current;
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.clear();
+    };
+  }, []);
 
   const resetForm = () => {
     setRating(0);
     setComment("");
+    createdUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    createdUrlsRef.current.clear();
     setImages([]);
     setValidationError(null);
     mutation.reset();
     if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      resetForm();
+    }
+    onOpenChange(nextOpen);
+  };
+
+  const removeImage = (index: number) => {
+    const target = images[index];
+    if (target) {
+      URL.revokeObjectURL(target.url);
+      createdUrlsRef.current.delete(target.url);
+    }
+    setImages((current) => current.filter((_, i) => i !== index));
   };
 
   const handleImages = (event: ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +95,17 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
       return;
     }
     setValidationError(null);
-    setImages((current) => [...current, ...selected]);
+    const newItems: ReviewImage[] = selected.map((file, idx) => {
+      // react-doctor-disable-next-line react-doctor/no-create-object-url-without-revoke -- Object URLs are tracked in createdUrlsRef and revoked on removal, form reset, or unmount
+      const url = URL.createObjectURL(file);
+      createdUrlsRef.current.add(url);
+      return {
+        id: `${file.name}-${file.lastModified}-${file.size}-${Date.now()}-${idx}`,
+        file,
+        url,
+      };
+    });
+    setImages((current) => [...current, ...newItems]);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -90,7 +125,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
         orderItemId: item.id,
         rating,
         comment,
-        images,
+        images: images.map((img) => img.file),
       });
       resetForm();
       onOpenChange(false);
@@ -109,7 +144,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
     (mutation.isError ? t("reviews.write.submitError") : null);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[92dvh] max-w-[calc(100%-1rem)] overflow-y-auto rounded-none bg-[#f8f5f0] p-0 sm:max-w-xl">
         <DialogHeader className="border-b border-[#1c1a18]/10 bg-white px-6 py-6 pr-14">
           <DialogTitle className="font-serif text-2xl font-light">
@@ -181,9 +216,9 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
               {t("reviews.write.imagesHelp")}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              {imagePreviews.map(({ image, url }, index) => (
+              {images.map(({ id, url }, index) => (
                 <div
-                  key={`${image.name}-${image.lastModified}-${index}`}
+                  key={id}
                   className="relative size-24 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-white"
                 >
                   <Image
@@ -196,11 +231,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setImages((current) =>
-                        current.filter((_, currentIndex) => currentIndex !== index),
-                      )
-                    }
+                    onClick={() => removeImage(index)}
                     className="absolute top-1 right-1 inline-flex size-7 items-center justify-center rounded-full bg-black/75 text-white focus-visible:outline-2 focus-visible:outline-offset-2"
                     aria-label={t("reviews.write.removeImage", { index: index + 1 })}
                   >
@@ -224,6 +255,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
               type="file"
               multiple
               accept="image/jpeg,image/png,image/webp"
+              aria-label={t("reviews.write.addImages")}
               className="sr-only"
               onChange={handleImages}
             />
@@ -242,7 +274,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
             <button
               type="button"
               disabled={mutation.isPending}
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               className="min-h-11 border border-[#1c1a18]/20 px-6 text-xs font-bold tracking-[0.14em] uppercase disabled:opacity-50"
             >
               {t("reviews.write.cancel")}

@@ -5,13 +5,17 @@ import { motion } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AuthLoader({
-  mode: _mode = "authenticating",
+  message,
 }: {
   message?: string;
   mode?: "authenticating" | "oauth";
-}) {
+} = {}) {
   return (
-    <main className="relative grid min-h-[100dvh] place-items-center bg-white px-6">
+    <main
+      aria-label={message ?? "Authenticating"}
+      aria-busy="true"
+      className="relative grid min-h-[100dvh] place-items-center bg-white px-6"
+    >
       <Skeleton
         className="absolute top-5 right-5 z-10 size-8 rounded-full bg-[#1c1a18]/10"
         aria-hidden="true"

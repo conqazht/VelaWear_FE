@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import { connection } from "next/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,15 +12,34 @@ import { AdminThemeEnforcer } from "./_components/admin-theme-enforcer";
 import { AdminAuthGate } from "./_components/admin-auth-gate";
 import { AdminToaster } from "./_components/admin-toaster";
 
+export const metadata: Metadata = {
+  title: {
+    template: "%s | VELA WEAR Admin",
+    default: "Admin Portal | VELA WEAR",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <I18nCatalogProvider messages={adminMessages}>
       <TooltipProvider>
-        <Suspense fallback={null}>
+        <Suspense fallback={<AdminLayoutSkeleton />}>
           <AdminPreferencesProviders>{children}</AdminPreferencesProviders>
         </Suspense>
       </TooltipProvider>
     </I18nCatalogProvider>
+  );
+}
+
+function AdminLayoutSkeleton() {
+  return (
+    <div className="bg-muted/10 flex min-h-screen w-full items-center justify-center">
+      <div className="border-primary size-7 animate-spin rounded-full border-2 border-t-transparent" />
+    </div>
   );
 }
 

@@ -5,7 +5,7 @@ import {
   Calendar,
   CheckCircle2,
   Globe,
-  Link,
+  Link as LinkIcon,
   Mail,
   MapPin,
   Monitor,
@@ -84,7 +84,7 @@ export function ChatProfileDetails({ contact, onClose }: ChatProfileDetailsProps
           variant="ghost"
           aria-label={t("admin.communications.chat.profile.copyLink")}
         >
-          <Link className="size-3.5" />
+          <LinkIcon className="size-3.5" />
         </Button>
         <Button
           size="icon-sm"

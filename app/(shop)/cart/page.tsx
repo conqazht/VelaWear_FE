@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { cacheLife } from "next/cache";
 
 import { CartPageClient } from "@/components/shop/cart-page-client";
+
+export const metadata: Metadata = {
+  title: "Giỏ Hàng",
+  description: "Xem và quản lý các sản phẩm trong giỏ hàng VELA WEAR của bạn.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function Page() {
   "use cache";

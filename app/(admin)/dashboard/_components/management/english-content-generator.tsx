@@ -19,6 +19,7 @@ import { FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -95,11 +96,13 @@ export function EnglishContentGenerator({
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
-              {GEMINI_CONTENT_MODELS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {t(MODEL_LABEL_KEYS[option])}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {GEMINI_CONTENT_MODELS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {t(MODEL_LABEL_KEYS[option])}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
@@ -109,11 +112,14 @@ export function EnglishContentGenerator({
           variant="outline"
           disabled={actionDisabled}
           onClick={requestGeneration}
+          aria-live="polite"
         >
           {isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {isPending
-            ? t("admin.contentGeneration.action.pending")
-            : t("admin.contentGeneration.action.generate")}
+          {isPending ? (
+            <span role="status">{t("admin.contentGeneration.action.pending")}</span>
+          ) : (
+            t("admin.contentGeneration.action.generate")
+          )}
         </Button>
       </div>
 

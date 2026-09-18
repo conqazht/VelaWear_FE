@@ -62,7 +62,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href="/dashboard/ecommerce" />}>
+            <SidebarMenuButton
+              render={<Link href="/dashboard/ecommerce" aria-label={t("admin.shell.brand")} />}
+            >
               <Image
                 src="/images/brand/vela-wear-logo.png"
                 alt={t("admin.shell.brand")}

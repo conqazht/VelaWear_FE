@@ -29,8 +29,8 @@ export function PriceRangeInputs({
 }) {
   const { locale, t } = useI18n();
   const copy = getCatalogCopy(locale);
-  const [minimum, setMinimum] = useState(state.minPrice?.toString() ?? "");
-  const [maximum, setMaximum] = useState(state.maxPrice?.toString() ?? "");
+  const [minimum, setMinimum] = useState(() => state.minPrice?.toString() ?? "");
+  const [maximum, setMaximum] = useState(() => state.maxPrice?.toString() ?? "");
 
   const commit = () => {
     const minPrice = minimum.trim() === "" ? undefined : Number(minimum);
@@ -72,6 +72,7 @@ export function PriceRangeInputs({
           inputMode="numeric"
           min={0}
           value={minimum}
+          aria-label={t("storefront.catalog.minimum")}
           placeholder={t("storefront.catalog.minimum")}
           onChange={(event) => setMinimum(event.currentTarget.value)}
           onKeyDown={(event) => {
@@ -87,6 +88,7 @@ export function PriceRangeInputs({
           inputMode="numeric"
           min={0}
           value={maximum}
+          aria-label={t("storefront.catalog.maximum")}
           placeholder={t("storefront.catalog.maximum")}
           onChange={(event) => setMaximum(event.currentTarget.value)}
           onKeyDown={(event) => {

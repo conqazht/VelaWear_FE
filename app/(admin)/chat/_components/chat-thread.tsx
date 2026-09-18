@@ -5,7 +5,7 @@ import {
   ArrowLeft,
   Copy,
   Flag,
-  Link,
+  Link as LinkIcon,
   MoreHorizontal,
   Paperclip,
   PhoneCall,
@@ -317,7 +317,7 @@ function MessageComposer({ placeholder }: { placeholder: string }) {
             type="button"
             size="icon-sm"
           >
-            <Link />
+            <LinkIcon />
           </InputGroupButton>
           <InputGroupButton
             aria-label={t("admin.communications.chat.thread.aiAssist")}

@@ -143,6 +143,7 @@ export function OpportunitiesSection() {
               <Input
                 className="h-7 w-44 md:w-52"
                 placeholder={t("admin.dashboardsA.crm.searchDeals")}
+                aria-label={t("admin.dashboardsA.crm.searchDeals")}
                 value={searchQuery}
                 onChange={(event) => {
                   table.setGlobalFilter(event.target.value || undefined);

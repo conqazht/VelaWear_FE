@@ -28,7 +28,7 @@ export function AccountSwitcher({
   }>;
 }) {
   const [activeUser, setActiveUser] = useState(users[0]);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   if (!activeUser) {
     return null;
@@ -46,33 +46,39 @@ export function AccountSwitcher({
         align="end"
         sideOffset={4}
       >
-        {users.map((user) => (
-          <DropdownMenuItem
-            key={user.email}
-            className={cn("p-0", user.id === activeUser.id && "bg-accent/50")}
-            aria-current={user.id === activeUser.id ? "true" : undefined}
-            onClick={() => setActiveUser(user)}
-          >
-            <div className="flex w-full items-center gap-2 px-1 py-1.5">
-              <Avatar className="size-9 rounded-lg">
-                <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-              </Avatar>
-              <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs capitalize">{user.role}</span>
+        {users.length === 0 ? (
+          <div className="text-muted-foreground px-3 py-2 text-center text-xs">
+            {locale === "vi" ? "Không có tài khoản nào" : "No accounts available"}
+          </div>
+        ) : (
+          users.map((user) => (
+            <DropdownMenuItem
+              key={user.email}
+              className={cn("p-0", user.id === activeUser.id && "bg-accent/50")}
+              aria-current={user.id === activeUser.id ? "true" : undefined}
+              onClick={() => setActiveUser(user)}
+            >
+              <div className="flex w-full items-center gap-2 px-1 py-1.5">
+                <Avatar className="size-9 rounded-lg">
+                  <AvatarImage src={user.avatar || undefined} alt={user.name} />
+                  <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                </Avatar>
+                <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate text-xs capitalize">{user.role}</span>
+                </div>
+                <span
+                  className={cn(
+                    "text-primary mr-1 flex size-5 items-center justify-center rounded-full opacity-0",
+                    user.id === activeUser.id && "opacity-100",
+                  )}
+                >
+                  <Check aria-hidden="true" />
+                </span>
               </div>
-              <span
-                className={cn(
-                  "text-primary mr-1 flex size-5 items-center justify-center rounded-full opacity-0",
-                  user.id === activeUser.id && "opacity-100",
-                )}
-              >
-                <Check aria-hidden="true" />
-              </span>
-            </div>
-          </DropdownMenuItem>
-        ))}
+            </DropdownMenuItem>
+          ))
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>

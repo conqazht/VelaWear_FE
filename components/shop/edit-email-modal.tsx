@@ -12,6 +12,95 @@ import { OtpEntry } from "@/components/auth/otp-entry";
 import { createEmailSchema } from "@/lib/validations";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+interface EmailFormStepProps {
+  newEmail: string;
+  setNewEmail: (val: string) => void;
+  emailTouched: boolean;
+  setEmailTouched: (val: boolean) => void;
+  setSubmitError: (val: string | null) => void;
+  isFormValid: boolean;
+  emailValidationMessage: string | null;
+  displayError: string | null;
+  isOtpSubmitting: boolean;
+  onNext: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+function EmailFormStep({
+  newEmail,
+  setNewEmail,
+  emailTouched,
+  setEmailTouched,
+  setSubmitError,
+  isFormValid,
+  emailValidationMessage,
+  displayError,
+  isOtpSubmitting,
+  onNext,
+  t,
+}: EmailFormStepProps) {
+  return (
+    <div className="flex flex-col gap-6">
+      <p className="text-ink/70 text-sm">{t("account.profile.emailSettingsNote")}</p>
+      <div>
+        <div className="relative">
+          <input
+            type="email"
+            id="newEmail"
+            autoComplete="email"
+            placeholder={t("account.profile.email")}
+            value={newEmail}
+            onChange={(e) => {
+              setNewEmail(e.target.value);
+              setEmailTouched(true);
+              setSubmitError(null);
+            }}
+            onBlur={() => setEmailTouched(true)}
+            className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
+              emailTouched && !isFormValid
+                ? "border-error focus:border-error"
+                : "focus:border-ink/60 border-[#1c1a18]/20"
+            }`}
+          />
+          <label
+            htmlFor="newEmail"
+            className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
+              emailTouched && !isFormValid
+                ? "text-error peer-focus:text-error"
+                : "text-ink/70 peer-focus:text-ink/70"
+            }`}
+          >
+            {t("account.profile.email")}
+          </label>
+        </div>
+        {emailTouched && !isFormValid && (
+          <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
+            {emailValidationMessage}
+          </p>
+        )}
+      </div>
+
+      {displayError && <p className="text-error text-sm">{displayError}</p>}
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={!isFormValid || isOtpSubmitting}
+          className={`flex items-center justify-center gap-2 rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors ${
+            isFormValid && !isOtpSubmitting
+              ? "cursor-pointer border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
+              : "text-ink/40 pointer-events-none cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
+          }`}
+        >
+          {isOtpSubmitting && <Loader2 className="size-4 animate-spin" />}
+          <span>{t("account.settings.verifyEmail")}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter();
   const { user, clearRevokedSession } = useAuth();
@@ -106,63 +195,19 @@ export function EditEmailModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
         </DialogHeader>
 
         {!showOtpStep ? (
-          <div className="flex flex-col gap-6">
-            <p className="text-ink/70 text-sm">{t("account.profile.emailSettingsNote")}</p>
-            <div>
-              <div className="relative">
-                <input
-                  type="email"
-                  id="newEmail"
-                  placeholder={t("account.profile.email")}
-                  value={newEmail}
-                  onChange={(e) => {
-                    setNewEmail(e.target.value);
-                    setEmailTouched(true);
-                    setSubmitError(null);
-                  }}
-                  onBlur={() => setEmailTouched(true)}
-                  className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                    emailTouched && !isFormValid
-                      ? "border-error focus:border-error"
-                      : "focus:border-ink/60 border-[#1c1a18]/20"
-                  }`}
-                />
-                <label
-                  htmlFor="newEmail"
-                  className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
-                    emailTouched && !isFormValid
-                      ? "text-error peer-focus:text-error"
-                      : "text-ink/70 peer-focus:text-ink/70"
-                  }`}
-                >
-                  {t("account.profile.email")}
-                </label>
-              </div>
-              {emailTouched && !isFormValid && (
-                <p className="text-error mt-1.5 text-xs transition-opacity duration-500">
-                  {emailValidationMessage}
-                </p>
-              )}
-            </div>
-
-            {displayError && <p className="text-error text-sm">{displayError}</p>}
-
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!isFormValid || isOtpSubmitting}
-                className={`flex items-center justify-center gap-2 rounded-sm border px-8 py-2.5 text-sm font-medium transition-colors ${
-                  isFormValid && !isOtpSubmitting
-                    ? "cursor-pointer border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm hover:bg-[#1c1a18]/90"
-                    : "text-ink/40 pointer-events-none cursor-not-allowed border-[#1c1a18]/20 bg-transparent"
-                }`}
-              >
-                {isOtpSubmitting && <Loader2 className="size-4 animate-spin" />}
-                <span>{t("account.settings.verifyEmail")}</span>
-              </button>
-            </div>
-          </div>
+          <EmailFormStep
+            newEmail={newEmail}
+            setNewEmail={setNewEmail}
+            emailTouched={emailTouched}
+            setEmailTouched={setEmailTouched}
+            setSubmitError={setSubmitError}
+            isFormValid={isFormValid}
+            emailValidationMessage={emailValidationMessage}
+            displayError={displayError}
+            isOtpSubmitting={isOtpSubmitting}
+            onNext={handleNext}
+            t={t}
+          />
         ) : (
           <div className="mt-4">
             <OtpEntry

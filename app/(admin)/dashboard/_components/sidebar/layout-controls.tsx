@@ -115,7 +115,11 @@ export function LayoutControls() {
                   void onThemePresetChange(value as ThemePreset);
                 }}
               >
-                <SelectTrigger size="sm" className="w-full text-xs">
+                <SelectTrigger
+                  size="sm"
+                  className="w-full text-xs"
+                  aria-label={t("admin.shell.preferences.preset")}
+                >
                   <SelectValue
                     className="items-center"
                     placeholder={t("admin.shell.preferences.preset")}
@@ -154,7 +158,11 @@ export function LayoutControls() {
                   void onFontChange(value as FontKey);
                 }}
               >
-                <SelectTrigger size="sm" className="w-full text-xs">
+                <SelectTrigger
+                  size="sm"
+                  className="w-full text-xs"
+                  aria-label={t("admin.shell.preferences.fonts")}
+                >
                   <SelectValue placeholder={t("admin.shell.preferences.selectFont")} />
                 </SelectTrigger>
                 <SelectContent>

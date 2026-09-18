@@ -8,6 +8,11 @@
   will-change: transform, opacity;
 }
 
+.Popup:focus-visible {
+  outline: 2px solid #b5573a;
+  outline-offset: 2px;
+}
+
 .Popup[data-ending-style] {
   transform: scale(0.985) translateY(-0.25rem);
   opacity: 0;
