@@ -23,6 +23,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { canAccessManagement } from "@/lib/auth/roles";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { NotificationBell } from "@/components/shop/notification-bell";
 import { useI18n } from "@/components/providers/i18n-provider";
 import {
   NavigationMenu,
@@ -732,6 +733,11 @@ export function SiteHeader() {
                 </motion.button>
               </Link>
 
+              {/* Notification Bell */}
+              {safeIsAuthenticated && (
+                <NotificationBell shouldBeTransparent={shouldBeTransparent} iconClass={iconClass} />
+              )}
+
               {/* Wishlist Link */}
               <Link href="/favorites" className="hidden sm:inline-flex">
                 <motion.button
@@ -904,6 +910,12 @@ export function SiteHeader() {
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.reviews")}
+                          </Link>
+                          <Link
+                            href="/profile/notifications"
+                            className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
+                          >
+                            {t("notifications.title")}
                           </Link>
                           <div className="border-t border-[#1c1a18]/8" />
                           <button

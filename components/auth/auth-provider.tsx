@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register: async (data) => registerMutation.mutateAsync(data),
       signOut: async () => {
         await logoutMutation.mutateAsync();
+        queryClient.removeQueries({ queryKey: queryKeys.notifications.root });
         releaseToAnonymous();
       },
       checkSession: async () => {
@@ -81,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
           queryClient.setQueryData(queryKeys.auth.session, null);
           queryClient.removeQueries({ queryKey: queryKeys.auth.root });
+          queryClient.removeQueries({ queryKey: queryKeys.notifications.root });
           releaseToAnonymous();
         }
       },

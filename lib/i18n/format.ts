@@ -45,3 +45,26 @@ export function parseDateValue(value: string | number): Date {
     ? date
     : new Date(Number.NaN);
 }
+
+export function formatRelativeTime(value: string | number | Date, locale: Locale): string {
+  const date = value instanceof Date ? value : parseDateValue(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSeconds < 60) {
+    return locale === "vi" ? "Vừa xong" : "Just now";
+  }
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) {
+    return locale === "vi" ? `${diffMinutes} phút trước` : `${diffMinutes}m ago`;
+  }
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return locale === "vi" ? `${diffHours} giờ trước` : `${diffHours}h ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) {
+    return locale === "vi" ? `${diffDays} ngày trước` : `${diffDays}d ago`;
+  }
+  return formatDate(date, locale, { dateStyle: "short" });
+}

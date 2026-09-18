@@ -402,3 +402,31 @@ export type ReviewSummary = {
   averageRating: number;
   ratingCounts: Record<"1" | "2" | "3" | "4" | "5", number>;
 };
+
+export type NotificationType = "ORDER_UPDATE" | "PROMOTION" | "PAYMENT" | "SYSTEM";
+export type NotificationTargetType = "ORDER" | "PRODUCT" | "SALE_CAMPAIGN" | "COUPON";
+
+export type NotificationItem = {
+  id: number;
+  title: string;
+  content: string;
+  type: NotificationType;
+  targetType: NotificationTargetType | null;
+  targetId: string | null;
+  linkUrl: string | null;
+  imageUrl: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+};
+
+export type UnreadNotificationCount = {
+  unreadCount: number;
+};
+
+export type NotificationFilterParams = PageParams & {
+  isRead?: boolean;
+  type?: NotificationType;
+  createdFrom?: string;
+  createdTo?: string;
+};
