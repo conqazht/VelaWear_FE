@@ -15,6 +15,10 @@ export const metadata: Metadata = {
       "Danh sách mã giảm giá, voucher khuyến mãi độc quyền dành riêng cho khách hàng của VELA WEAR.",
     url: "/coupons",
   },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function CouponsPage() {

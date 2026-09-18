@@ -26,6 +26,7 @@ type OrderReviewDialogProps = {
 };
 
 type ReviewImage = {
+  id: string;
   file: File;
   url: string;
 };
@@ -38,32 +39,41 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
   const [images, setImages] = useState<ReviewImage[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const imagesRef = useRef(images);
+  const createdUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    imagesRef.current = images;
-  }, [images]);
-
-  useEffect(() => {
+    const urls = createdUrlsRef.current;
     return () => {
-      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.url));
+      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.clear();
     };
   }, []);
 
   const resetForm = () => {
     setRating(0);
     setComment("");
-    images.forEach((img) => URL.revokeObjectURL(img.url));
+    createdUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    createdUrlsRef.current.clear();
     setImages([]);
     setValidationError(null);
     mutation.reset();
     if (inputRef.current) inputRef.current.value = "";
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      resetForm();
+    }
+    onOpenChange(nextOpen);
+  };
+
   const removeImage = (index: number) => {
     setImages((current) => {
       const target = current[index];
-      if (target) URL.revokeObjectURL(target.url);
+      if (target) {
+        URL.revokeObjectURL(target.url);
+        createdUrlsRef.current.delete(target.url);
+      }
       return current.filter((_, i) => i !== index);
     });
   };
@@ -87,7 +97,15 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
       return;
     }
     setValidationError(null);
-    const newItems = selected.map((file) => ({ file, url: URL.createObjectURL(file) }));
+    const newItems: ReviewImage[] = selected.map((file, idx) => {
+      const url = URL.createObjectURL(file);
+      createdUrlsRef.current.add(url);
+      return {
+        id: `${file.name}-${file.lastModified}-${file.size}-${Date.now()}-${idx}`,
+        file,
+        url,
+      };
+    });
     setImages((current) => [...current, ...newItems]);
   };
 
@@ -108,7 +126,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
         orderItemId: item.id,
         rating,
         comment,
-        images: images.map((item) => item.file),
+        images: images.map((img) => img.file),
       });
       resetForm();
       onOpenChange(false);
@@ -127,7 +145,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
     (mutation.isError ? t("reviews.write.submitError") : null);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[92dvh] max-w-[calc(100%-1rem)] overflow-y-auto rounded-none bg-[#f8f5f0] p-0 sm:max-w-xl">
         <DialogHeader className="border-b border-[#1c1a18]/10 bg-white px-6 py-6 pr-14">
           <DialogTitle className="font-serif text-2xl font-light">
@@ -199,9 +217,9 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
               {t("reviews.write.imagesHelp")}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              {images.map(({ file, url }, index) => (
+              {images.map(({ id, url }, index) => (
                 <div
-                  key={`${file.name}-${file.lastModified}-${index}`}
+                  key={id}
                   className="relative size-24 overflow-hidden rounded-sm border border-[#1c1a18]/10 bg-white"
                 >
                   <Image
@@ -257,7 +275,7 @@ export function OrderReviewDialog({ item, open, onOpenChange }: OrderReviewDialo
             <button
               type="button"
               disabled={mutation.isPending}
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               className="min-h-11 border border-[#1c1a18]/20 px-6 text-xs font-bold tracking-[0.14em] uppercase disabled:opacity-50"
             >
               {t("reviews.write.cancel")}

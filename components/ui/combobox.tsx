@@ -244,7 +244,7 @@ function ComboboxChipsInput({ className, ...props }: ComboboxPrimitive.Input.Pro
     <ComboboxPrimitive.Input
       data-slot="combobox-chip-input"
       className={cn(
-        "min-w-16 flex-1 focus-visible:ring-1 focus-visible:ring-ring outline-none",
+        "focus-visible:ring-ring min-w-16 flex-1 outline-none focus-visible:ring-1",
         className,
       )}
       {...props}

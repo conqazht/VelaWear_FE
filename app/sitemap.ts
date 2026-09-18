@@ -1,7 +1,38 @@
 import type { MetadataRoute } from "next";
 import { PRODUCTS } from "@/lib/vela-data";
+import { serverApiGet } from "@/lib/api/server";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+interface CatalogProductItem {
+  id: number;
+  slug?: string;
+  updatedAt?: string;
+}
+
+interface PaginatedProductsResponse {
+  result: CatalogProductItem[];
+}
+
+async function getSitemapProducts(): Promise<Array<{ id: string | number; lastModified?: Date }>> {
+  try {
+    const data = await serverApiGet<PaginatedProductsResponse>("/products", {
+      query: { page: 1, size: 100 },
+      next: { revalidate: 3600 },
+    });
+
+    if (data?.result && Array.isArray(data.result) && data.result.length > 0) {
+      return data.result.map((item) => ({
+        id: item.slug || item.id,
+        lastModified: item.updatedAt ? new Date(item.updatedAt) : undefined,
+      }));
+    }
+  } catch {
+    // Fall back to static fixtures when offline or during build
+  }
+
+  return PRODUCTS.map((product) => ({ id: product.id }));
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://velawear.com";
   const lastModified = new Date();
 
@@ -31,12 +62,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/coupons`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
       url: `${baseUrl}/size-guide`,
       lastModified,
       changeFrequency: "monthly",
@@ -56,9 +81,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const productRoutes: MetadataRoute.Sitemap = PRODUCTS.map((product) => ({
+  const products = await getSitemapProducts();
+  const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${baseUrl}/products/${product.id}`,
-    lastModified,
+    lastModified: product.lastModified ?? lastModified,
     changeFrequency: "weekly",
     priority: 0.8,
   }));

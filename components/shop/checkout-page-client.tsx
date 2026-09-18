@@ -466,7 +466,7 @@ export function CheckoutPageClient() {
                     <button
                       type="button"
                       onClick={() => setPendingAddressId(addr.id)}
-                      className="flex flex-1 min-w-0 cursor-pointer flex-col gap-1 text-left"
+                      className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1 text-left"
                     >
                       <div className="flex items-center gap-3">
                         <div

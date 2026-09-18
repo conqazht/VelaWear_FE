@@ -86,6 +86,243 @@ type ResourcePageProps<T extends { id: number }> = {
   emptyTitle?: string;
   emptyDescription?: string;
 };
+interface StatusSceneConfig {
+  code: string;
+  title: string;
+  description: string;
+  accent: string;
+}
+
+function getStatusScene(
+  errorStatus: number | null,
+  hasUsableRows: boolean,
+  t: ReturnType<typeof useI18n>["t"],
+): StatusSceneConfig | null {
+  if (errorStatus === 403) {
+    return {
+      code: "403",
+      title: t("admin.shell.resource.forbiddenTitle"),
+      description: t("admin.shell.resource.forbiddenDescription"),
+      accent: "#ffb59f",
+    };
+  }
+  if (errorStatus === 404) {
+    return {
+      code: "404",
+      title: t("admin.shell.resource.notFoundTitle"),
+      description: t("admin.shell.resource.notFoundDescription"),
+      accent: "#f7f4ef",
+    };
+  }
+  if (errorStatus !== null && errorStatus >= 500 && !hasUsableRows) {
+    return {
+      code: String(errorStatus),
+      title: t("admin.shell.resource.serverErrorTitle"),
+      description: t("admin.shell.resource.serverErrorDescription"),
+      accent: "#ff8f78",
+    };
+  }
+  return null;
+}
+
+interface ResourceHeaderBarProps {
+  title: string;
+  description: string;
+  searchValue: string;
+  searchPlaceholder: string;
+  onSearchChange: (value: string) => void;
+  rowsCount: number;
+  isLoading?: boolean;
+  onRefresh?: () => void;
+  onExport?: () => void;
+  primaryAction?: {
+    label: string;
+    onClick: () => void;
+    icon?: LucideIcon;
+    disabled?: boolean;
+  };
+  hideActions?: boolean;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+function ResourceHeaderBar({
+  title,
+  description,
+  searchValue,
+  searchPlaceholder,
+  onSearchChange,
+  rowsCount,
+  isLoading,
+  onRefresh,
+  onExport,
+  primaryAction,
+  hideActions,
+  t,
+}: ResourceHeaderBarProps) {
+  const ActionIcon = primaryAction?.icon ?? Plus;
+
+  return (
+    <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
+      <CardTitle className="text-xl leading-none">{title}</CardTitle>
+      <CardDescription className="max-w-xl leading-snug">{description}</CardDescription>
+      {hideActions ? null : (
+        <CardAction className="col-start-1 row-start-auto flex w-full flex-wrap justify-start gap-2 justify-self-stretch md:col-start-2 md:row-span-2 md:row-start-1 md:w-auto md:flex-nowrap md:justify-end md:justify-self-end">
+          <InputGroup className="h-8 w-full md:w-64">
+            <InputGroupAddon align="inline-start">
+              <Search className="size-3.5" />
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-label={t("admin.shell.resource.search", { resource: title })}
+              className="h-8"
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(event) => onSearchChange(event.target.value)}
+            />
+          </InputGroup>
+          {onRefresh ? (
+            <Button variant="outline" size="sm" onClick={onRefresh}>
+              <RefreshCw data-icon="inline-start" className={cn(isLoading && "animate-spin")} />
+              {t("admin.shell.resource.refresh")}
+            </Button>
+          ) : null}
+          {onExport ? (
+            <Button variant="outline" size="sm" onClick={onExport} disabled={rowsCount === 0}>
+              <Download data-icon="inline-start" /> {t("admin.shell.resource.exportPage")}
+            </Button>
+          ) : null}
+          {primaryAction ? (
+            <Button size="sm" onClick={primaryAction.onClick} disabled={primaryAction.disabled}>
+              <ActionIcon data-icon="inline-start" /> {primaryAction.label}
+            </Button>
+          ) : null}
+        </CardAction>
+      )}
+    </CardHeader>
+  );
+}
+
+function ResourceStatusScene({
+  header,
+  statusScene,
+  errorStatus,
+  onRefresh,
+  t,
+}: {
+  header: React.ReactNode;
+  statusScene: StatusSceneConfig;
+  errorStatus: number | null;
+  onRefresh?: () => void;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  const canRetry = errorStatus !== 403 && onRefresh;
+
+  return (
+    <Card className="flex min-h-[calc(100dvh-8rem)] flex-col">
+      {header}
+      <CardContent className="flex flex-1 flex-col px-4">
+        <AnimatedStatus
+          code={statusScene.code}
+          title={statusScene.title}
+          description={statusScene.description}
+          accent={statusScene.accent}
+          variant="panel"
+          className="min-h-[480px] flex-1"
+          primaryAction={
+            canRetry
+              ? { label: t("admin.shell.resource.tryAgain"), onClick: onRefresh }
+              : { label: t("admin.shell.resource.backDashboard"), href: "/dashboard/default" }
+          }
+          secondaryAction={{ label: t("admin.shell.resource.returnStorefront"), href: "/" }}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ResourcePaginationBarProps {
+  total: number;
+  start: number;
+  end: number;
+  currentPage: number;
+  safePageCount: number;
+  pageSize: number;
+  isFetching?: boolean;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  numberFormatter: Intl.NumberFormat;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+function ResourcePaginationBar({
+  total,
+  start,
+  end,
+  currentPage,
+  safePageCount,
+  pageSize,
+  isFetching,
+  onPageChange,
+  onPageSizeChange,
+  numberFormatter,
+  t,
+}: ResourcePaginationBarProps) {
+  return (
+    <div className="flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="text-muted-foreground text-sm tabular-nums">
+        {t("admin.shell.resource.showing", {
+          start: numberFormatter.format(start),
+          end: numberFormatter.format(end),
+          total: numberFormatter.format(total),
+        })}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground text-sm">
+          {t("admin.shell.resource.rowsPerPage")}
+        </span>
+        <Select value={`${pageSize}`} onValueChange={(value) => onPageSizeChange(Number(value))}>
+          <SelectTrigger
+            size="sm"
+            className="w-20"
+            aria-label={t("admin.shell.resource.rowsPerPage")}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent side="top">
+            <SelectGroup>
+              {[10, 20, 30, 50].map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <span className="text-muted-foreground min-w-24 text-center text-sm tabular-nums">
+          {t("admin.shell.resource.pageOf", {
+            page: numberFormatter.format(currentPage),
+            pageCount: numberFormatter.format(safePageCount),
+          })}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage <= 1 || isFetching}
+        >
+          {t("admin.shell.resource.previous")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage >= safePageCount || isFetching}
+        >
+          {t("admin.shell.resource.next")}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function ResourcePage<T extends { id: number }>({
   title,
@@ -118,7 +355,6 @@ export function ResourcePage<T extends { id: number }>({
   );
   const resolvedEmptyTitle = emptyTitle ?? t("admin.shell.resource.emptyTitle");
   const resolvedEmptyDescription = emptyDescription ?? t("admin.shell.resource.emptyDescription");
-  const ActionIcon = primaryAction?.icon ?? Plus;
   const safePageCount = Math.max(pageCount, 1);
   const currentPage = Math.min(Math.max(page, 1), safePageCount);
   const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
@@ -128,96 +364,38 @@ export function ResourcePage<T extends { id: number }>({
     ? getApiErrorMessage(error, t("admin.shell.resource.unexpectedError"))
     : null;
   const hasUsableRows = rows.length > 0;
-  const statusScene =
-    errorStatus === 403
-      ? {
-          code: "403",
-          title: t("admin.shell.resource.forbiddenTitle"),
-          description: t("admin.shell.resource.forbiddenDescription"),
-          accent: "#ffb59f",
-        }
-      : errorStatus === 404
-        ? {
-            code: "404",
-            title: t("admin.shell.resource.notFoundTitle"),
-            description: t("admin.shell.resource.notFoundDescription"),
-            accent: "#f7f4ef",
-          }
-        : errorStatus !== null && errorStatus >= 500 && !hasUsableRows
-          ? {
-              code: String(errorStatus),
-              title: t("admin.shell.resource.serverErrorTitle"),
-              description: t("admin.shell.resource.serverErrorDescription"),
-              accent: "#ff8f78",
-            }
-          : null;
+  const statusScene = getStatusScene(errorStatus, hasUsableRows, t);
 
   const cardHeader = (
-    <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
-      <CardTitle className="text-xl leading-none">{title}</CardTitle>
-      <CardDescription className="max-w-xl leading-snug">{description}</CardDescription>
-      {statusScene ? null : (
-        <CardAction className="col-start-1 row-start-auto flex w-full flex-wrap justify-start gap-2 justify-self-stretch md:col-start-2 md:row-span-2 md:row-start-1 md:w-auto md:flex-nowrap md:justify-end md:justify-self-end">
-          <InputGroup className="h-8 w-full md:w-64">
-            <InputGroupAddon align="inline-start">
-              <Search className="size-3.5" />
-            </InputGroupAddon>
-            <InputGroupInput
-              aria-label={t("admin.shell.resource.search", { resource: title })}
-              className="h-8"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(event) => onSearchChange(event.target.value)}
-            />
-          </InputGroup>
-          {onRefresh ? (
-            <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RefreshCw data-icon="inline-start" className={cn(isLoading && "animate-spin")} />
-              {t("admin.shell.resource.refresh")}
-            </Button>
-          ) : null}
-          {onExport ? (
-            <Button variant="outline" size="sm" onClick={onExport} disabled={rows.length === 0}>
-              <Download data-icon="inline-start" /> {t("admin.shell.resource.exportPage")}
-            </Button>
-          ) : null}
-          {primaryAction ? (
-            <Button size="sm" onClick={primaryAction.onClick} disabled={primaryAction.disabled}>
-              <ActionIcon data-icon="inline-start" /> {primaryAction.label}
-            </Button>
-          ) : null}
-        </CardAction>
-      )}
-    </CardHeader>
+    <ResourceHeaderBar
+      title={title}
+      description={description}
+      searchValue={searchValue}
+      searchPlaceholder={searchPlaceholder}
+      onSearchChange={onSearchChange}
+      rowsCount={rows.length}
+      isLoading={isLoading}
+      onRefresh={onRefresh}
+      onExport={onExport}
+      primaryAction={primaryAction}
+      hideActions={Boolean(statusScene)}
+      t={t}
+    />
   );
 
   if (statusScene) {
-    const canRetry = errorStatus !== 403 && onRefresh;
-
     return (
-      <Card className="flex min-h-[calc(100dvh-8rem)] flex-col">
-        {cardHeader}
-        <CardContent className="flex flex-1 flex-col px-4">
-          <AnimatedStatus
-            code={statusScene.code}
-            title={statusScene.title}
-            description={statusScene.description}
-            accent={statusScene.accent}
-            variant="panel"
-            className="min-h-[480px] flex-1"
-            primaryAction={
-              canRetry
-                ? { label: t("admin.shell.resource.tryAgain"), onClick: onRefresh }
-                : { label: t("admin.shell.resource.backDashboard"), href: "/dashboard/default" }
-            }
-            secondaryAction={{ label: t("admin.shell.resource.returnStorefront"), href: "/" }}
-          />
-        </CardContent>
-      </Card>
+      <ResourceStatusScene
+        header={cardHeader}
+        statusScene={statusScene}
+        errorStatus={errorStatus}
+        onRefresh={onRefresh}
+        t={t}
+      />
     );
   }
 
-  const content = (
+  return (
     <Card>
       {cardHeader}
 
@@ -318,66 +496,20 @@ export function ResourcePage<T extends { id: number }>({
 
         <Separator />
 
-        <div className="flex flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-muted-foreground text-sm tabular-nums">
-            {t("admin.shell.resource.showing", {
-              start: numberFormatter.format(start),
-              end: numberFormatter.format(end),
-              total: numberFormatter.format(total),
-            })}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground text-sm">
-              {t("admin.shell.resource.rowsPerPage")}
-            </span>
-            <Select
-              value={`${pageSize}`}
-              onValueChange={(value) => onPageSizeChange(Number(value))}
-            >
-              <SelectTrigger
-                size="sm"
-                className="w-20"
-                aria-label={t("admin.shell.resource.rowsPerPage")}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent side="top">
-                <SelectGroup>
-                  {[10, 20, 30, 50].map((size) => (
-                    <SelectItem key={size} value={`${size}`}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <span className="text-muted-foreground min-w-24 text-center text-sm tabular-nums">
-              {t("admin.shell.resource.pageOf", {
-                page: numberFormatter.format(currentPage),
-                pageCount: numberFormatter.format(safePageCount),
-              })}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage <= 1 || isFetching}
-            >
-              {t("admin.shell.resource.previous")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage >= safePageCount || isFetching}
-            >
-              {t("admin.shell.resource.next")}
-            </Button>
-          </div>
-        </div>
+        <ResourcePaginationBar
+          total={total}
+          start={start}
+          end={end}
+          currentPage={currentPage}
+          safePageCount={safePageCount}
+          pageSize={pageSize}
+          isFetching={isFetching}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          numberFormatter={numberFormatter}
+          t={t}
+        />
       </CardContent>
     </Card>
   );
-
-  return content;
 }

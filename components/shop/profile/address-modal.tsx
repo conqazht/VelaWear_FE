@@ -23,7 +23,9 @@ export interface AddressModalProps {
 
 export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalProps) {
   const { t } = useI18n();
-  const title = addressToEdit ? t("account.addresses.editTitle") : t("account.addresses.createTitle");
+  const title = addressToEdit
+    ? t("account.addresses.editTitle")
+    : t("account.addresses.createTitle");
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -48,39 +50,14 @@ export function AddressModal({ isOpen, onClose, addressToEdit }: AddressModalPro
   );
 }
 
-function AddressModalForm({
-  addressToEdit,
-  onClose,
-}: {
-  addressToEdit?: UserAddress | null;
-  onClose: () => void;
-}) {
-  const { t } = useI18n();
-  const createMutation = useCreateMyAddressMutation();
-  const updateMutation = useUpdateMyAddressMutation();
-
-  const [receiverName, setReceiverName] = useState(addressToEdit?.receiverName ?? "");
-  const [phone, setPhone] = useState(addressToEdit?.phone ?? "");
+function useVietnamAddressSelector(initialProvince?: string, initialWard?: string) {
   const [provinces, setProvinces] = useState<VietnamProvince[]>([]);
   const [wards, setWards] = useState<VietnamWard[]>([]);
   const [selectedProvinceCode, setSelectedProvinceCode] = useState<string>("");
   const [selectedWardCode, setSelectedWardCode] = useState<string>("");
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   const [isLoadingWards, setIsLoadingWards] = useState(false);
-  const [addressDetail, setAddressDetail] = useState(addressToEdit?.addressDetail ?? "");
-  const [isDefault, setIsDefault] = useState(Boolean(addressToEdit?.isDefault));
 
-  const [errors, setErrors] = useState<{
-    receiverName?: string;
-    phone?: string;
-    province?: string;
-    ward?: string;
-    addressDetail?: string;
-  }>({});
-
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
-
-  // Load provinces on mount
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
@@ -91,11 +68,11 @@ function AddressModalForm({
         setProvinces(data);
         setIsLoadingProvinces(false);
 
-        if (addressToEdit?.province) {
+        if (initialProvince) {
           const matchedProvince = data.find(
             (p) =>
-              p.name.toLowerCase() === addressToEdit.province.toLowerCase() ||
-              p.codename.toLowerCase() === addressToEdit.province.toLowerCase(),
+              p.name.toLowerCase() === initialProvince.toLowerCase() ||
+              p.codename.toLowerCase() === initialProvince.toLowerCase(),
           );
           if (matchedProvince) {
             setSelectedProvinceCode(String(matchedProvince.code));
@@ -113,9 +90,8 @@ function AddressModalForm({
       active = false;
       controller.abort();
     };
-  }, [addressToEdit?.province]);
+  }, [initialProvince]);
 
-  // Load wards when province changes
   useEffect(() => {
     if (!selectedProvinceCode) {
       return;
@@ -130,11 +106,11 @@ function AddressModalForm({
         setWards(data);
         setIsLoadingWards(false);
 
-        if (addressToEdit?.ward) {
+        if (initialWard) {
           const matchedWard = data.find(
             (w) =>
-              w.name.toLowerCase() === addressToEdit.ward.toLowerCase() ||
-              w.codename.toLowerCase() === addressToEdit.ward.toLowerCase(),
+              w.name.toLowerCase() === initialWard.toLowerCase() ||
+              w.codename.toLowerCase() === initialWard.toLowerCase(),
           );
           if (matchedWard) {
             setSelectedWardCode(String(matchedWard.code));
@@ -152,7 +128,158 @@ function AddressModalForm({
       active = false;
       controller.abort();
     };
-  }, [selectedProvinceCode, addressToEdit?.ward]);
+  }, [selectedProvinceCode, initialWard]);
+
+  return {
+    provinces,
+    wards: selectedProvinceCode ? wards : [],
+    selectedProvinceCode,
+    setSelectedProvinceCode,
+    selectedWardCode,
+    setSelectedWardCode,
+    isLoadingProvinces,
+    isLoadingWards: selectedProvinceCode ? isLoadingWards : false,
+    setIsLoadingWards,
+  };
+}
+
+interface LocationSelectorProps {
+  provinces: VietnamProvince[];
+  wards: VietnamWard[];
+  selectedProvinceCode: string;
+  onProvinceChange: (code: string) => void;
+  selectedWardCode: string;
+  onWardChange: (code: string) => void;
+  isLoadingProvinces: boolean;
+  isLoadingWards: boolean;
+  provinceError?: string;
+  wardError?: string;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+function LocationSelector({
+  provinces,
+  wards,
+  selectedProvinceCode,
+  onProvinceChange,
+  selectedWardCode,
+  onWardChange,
+  isLoadingProvinces,
+  isLoadingWards,
+  provinceError,
+  wardError,
+  t,
+}: LocationSelectorProps) {
+  return (
+    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="modalProvince"
+          className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+        >
+          {t("account.addresses.province")}
+        </label>
+        <select
+          id="modalProvince"
+          value={selectedProvinceCode}
+          onChange={(e) => onProvinceChange(e.target.value)}
+          disabled={isLoadingProvinces}
+          className={cn(
+            "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:opacity-60",
+            provinceError
+              ? "border-red-500 focus:border-red-500"
+              : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+            !selectedProvinceCode && "text-[#1c1a18]/40",
+          )}
+        >
+          <option value="" className="text-[#1c1a18]/40">
+            {isLoadingProvinces
+              ? t("account.addresses.loadingProvinces")
+              : t("account.addresses.selectProvince")}
+          </option>
+          {provinces.map((province) => (
+            <option key={province.code} value={province.code} className="text-[#1c1a18]">
+              {province.name}
+            </option>
+          ))}
+        </select>
+        {provinceError && <p className="text-xs font-medium text-red-500">{provinceError}</p>}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="modalWard"
+          className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+        >
+          {t("account.addresses.ward")}
+        </label>
+        <select
+          id="modalWard"
+          value={selectedWardCode}
+          onChange={(e) => onWardChange(e.target.value)}
+          disabled={!selectedProvinceCode || isLoadingWards}
+          className={cn(
+            "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+            wardError
+              ? "border-red-500 focus:border-red-500"
+              : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+            !selectedWardCode && "text-[#1c1a18]/40",
+          )}
+        >
+          <option value="" className="text-[#1c1a18]/40">
+            {isLoadingWards
+              ? t("account.addresses.loadingWards")
+              : t("account.addresses.selectWard")}
+          </option>
+          {wards.map((ward) => (
+            <option key={ward.code} value={ward.code} className="text-[#1c1a18]">
+              {ward.name}
+            </option>
+          ))}
+        </select>
+        {wardError && <p className="text-xs font-medium text-red-500">{wardError}</p>}
+      </div>
+    </div>
+  );
+}
+
+function AddressModalForm({
+  addressToEdit,
+  onClose,
+}: {
+  addressToEdit?: UserAddress | null;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  const createMutation = useCreateMyAddressMutation();
+  const updateMutation = useUpdateMyAddressMutation();
+
+  const [receiverName, setReceiverName] = useState(addressToEdit?.receiverName ?? "");
+  const [phone, setPhone] = useState(addressToEdit?.phone ?? "");
+  const [addressDetail, setAddressDetail] = useState(addressToEdit?.addressDetail ?? "");
+  const [isDefault, setIsDefault] = useState(Boolean(addressToEdit?.isDefault));
+
+  const {
+    provinces,
+    wards,
+    selectedProvinceCode,
+    setSelectedProvinceCode,
+    selectedWardCode,
+    setSelectedWardCode,
+    isLoadingProvinces,
+    isLoadingWards,
+    setIsLoadingWards,
+  } = useVietnamAddressSelector(addressToEdit?.province, addressToEdit?.ward);
+
+  const [errors, setErrors] = useState<{
+    receiverName?: string;
+    phone?: string;
+    province?: string;
+    ward?: string;
+    addressDetail?: string;
+  }>({});
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,221 +340,164 @@ function AddressModalForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
-        {/* Receiver Full Name */}
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="modalReceiverName"
-            className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-          >
-            {t("account.addresses.receiverName")}
-          </label>
-          <input
-            id="modalReceiverName"
-            type="text"
-            value={receiverName}
-            onChange={(e) => {
-              setReceiverName(e.target.value);
-              if (errors.receiverName) {
-                setErrors((prev) => ({ ...prev, receiverName: undefined }));
-              }
-            }}
-            placeholder={t("account.addresses.receiverNamePlaceholder")}
-            className={cn(
-              "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
-              errors.receiverName
-                ? "border-red-500 focus:border-red-500"
-                : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-            )}
-          />
-          {errors.receiverName && (
-            <p className="text-xs font-medium text-red-500">{errors.receiverName}</p>
+      {/* Receiver Full Name */}
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="modalReceiverName"
+          className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+        >
+          {t("account.addresses.receiverName")}
+        </label>
+        <input
+          id="modalReceiverName"
+          type="text"
+          value={receiverName}
+          onChange={(e) => {
+            setReceiverName(e.target.value);
+            if (errors.receiverName) {
+              setErrors((prev) => ({ ...prev, receiverName: undefined }));
+            }
+          }}
+          placeholder={t("account.addresses.receiverNamePlaceholder")}
+          className={cn(
+            "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
+            errors.receiverName
+              ? "border-red-500 focus:border-red-500"
+              : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
           )}
-        </div>
+        />
+        {errors.receiverName && (
+          <p className="text-xs font-medium text-red-500">{errors.receiverName}</p>
+        )}
+      </div>
 
-        {/* Phone */}
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="modalPhone"
-            className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-          >
-            {t("account.addresses.phone")}
-          </label>
-          <input
-            id="modalPhone"
-            type="tel"
-            value={phone}
-            onChange={(e) => {
-              setPhone(e.target.value);
-              if (errors.phone) {
-                setErrors((prev) => ({ ...prev, phone: undefined }));
-              }
-            }}
-            placeholder={t("account.addresses.phonePlaceholder")}
-            className={cn(
-              "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
-              errors.phone
-                ? "border-red-500 focus:border-red-500"
-                : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-            )}
-          />
-          {errors.phone && <p className="text-xs font-medium text-red-500">{errors.phone}</p>}
-        </div>
-
-        {/* Province & Ward API Selects */}
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-          {/* Province / City Select */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="modalProvince"
-              className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-            >
-              {t("account.addresses.province")}
-            </label>
-            <select
-              id="modalProvince"
-              value={selectedProvinceCode}
-              onChange={(e) => {
-                setSelectedProvinceCode(e.target.value);
-                setSelectedWardCode("");
-                if (errors.province) {
-                  setErrors((prev) => ({ ...prev, province: undefined }));
-                }
-              }}
-              disabled={isLoadingProvinces}
-              className={cn(
-                "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:opacity-60",
-                errors.province
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-                !selectedProvinceCode && "text-[#1c1a18]/40",
-              )}
-            >
-              <option value="" className="text-[#1c1a18]/40">
-                {isLoadingProvinces
-                  ? t("account.addresses.loadingProvinces")
-                  : t("account.addresses.selectProvince")}
-              </option>
-              {provinces.map((province) => (
-                <option key={province.code} value={province.code} className="text-[#1c1a18]">
-                  {province.name}
-                </option>
-              ))}
-            </select>
-            {errors.province && (
-              <p className="text-xs font-medium text-red-500">{errors.province}</p>
-            )}
-          </div>
-
-          {/* Ward / District Select */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="modalWard"
-              className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-            >
-              {t("account.addresses.ward")}
-            </label>
-            <select
-              id="modalWard"
-              value={selectedWardCode}
-              onChange={(e) => {
-                setSelectedWardCode(e.target.value);
-                if (errors.ward) {
-                  setErrors((prev) => ({ ...prev, ward: undefined }));
-                }
-              }}
-              disabled={!selectedProvinceCode || isLoadingWards}
-              className={cn(
-                "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60",
-                errors.ward
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-                !selectedWardCode && "text-[#1c1a18]/40",
-              )}
-            >
-              <option value="" className="text-[#1c1a18]/40">
-                {isLoadingWards
-                  ? t("account.addresses.loadingWards")
-                  : t("account.addresses.selectWard")}
-              </option>
-              {wards.map((ward) => (
-                <option key={ward.code} value={ward.code} className="text-[#1c1a18]">
-                  {ward.name}
-                </option>
-              ))}
-            </select>
-            {errors.ward && <p className="text-xs font-medium text-red-500">{errors.ward}</p>}
-          </div>
-        </div>
-
-        {/* Detailed Street Address */}
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="modalAddressDetail"
-            className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
-          >
-            {t("account.addresses.addressDetail")}
-          </label>
-          <textarea
-            id="modalAddressDetail"
-            rows={2}
-            value={addressDetail}
-            onChange={(e) => {
-              setAddressDetail(e.target.value);
-              if (errors.addressDetail) {
-                setErrors((prev) => ({ ...prev, addressDetail: undefined }));
-              }
-            }}
-            placeholder={t("account.addresses.addressDetailPlaceholder")}
-            className={cn(
-              "w-full resize-none rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
-              errors.addressDetail
-                ? "border-red-500 focus:border-red-500"
-                : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
-            )}
-          />
-          {errors.addressDetail && (
-            <p className="text-xs font-medium text-red-500">{errors.addressDetail}</p>
+      {/* Phone */}
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="modalPhone"
+          className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+        >
+          {t("account.addresses.phone")}
+        </label>
+        <input
+          id="modalPhone"
+          type="tel"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            if (errors.phone) {
+              setErrors((prev) => ({ ...prev, phone: undefined }));
+            }
+          }}
+          placeholder={t("account.addresses.phonePlaceholder")}
+          className={cn(
+            "w-full rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
+            errors.phone
+              ? "border-red-500 focus:border-red-500"
+              : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
           )}
-        </div>
+        />
+        {errors.phone && <p className="text-xs font-medium text-red-500">{errors.phone}</p>}
+      </div>
 
-        {/* Default Switch */}
-        <div className="mt-1 flex items-center gap-3">
-          <Checkbox
-            id="modalIsDefault"
-            checked={isDefault}
-            onCheckedChange={(checked) => setIsDefault(!!checked)}
-            className="size-4.5 rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
-          />
-          <label
-            htmlFor="modalIsDefault"
-            className="cursor-pointer text-xs font-medium text-[#55423d] select-none sm:text-sm"
-          >
-            {t("account.addresses.setDefault")}
-          </label>
-        </div>
+      {/* Province & Ward API Selects */}
+      <LocationSelector
+        provinces={provinces}
+        wards={wards}
+        selectedProvinceCode={selectedProvinceCode}
+        onProvinceChange={(code) => {
+          setSelectedProvinceCode(code);
+          setSelectedWardCode("");
+          if (code) {
+            setIsLoadingWards(true);
+          }
+          if (errors.province) {
+            setErrors((prev) => ({ ...prev, province: undefined }));
+          }
+        }}
+        selectedWardCode={selectedWardCode}
+        onWardChange={(code) => {
+          setSelectedWardCode(code);
+          if (errors.ward) {
+            setErrors((prev) => ({ ...prev, ward: undefined }));
+          }
+        }}
+        isLoadingProvinces={isLoadingProvinces}
+        isLoadingWards={isLoadingWards}
+        provinceError={errors.province}
+        wardError={errors.ward}
+        t={t}
+      />
 
-        {/* Actions */}
-        <div className="mt-4 flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="cursor-pointer rounded-sm border border-[#1c1a18]/20 bg-transparent px-5 py-2.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-black/5 disabled:opacity-50"
-          >
-            {t("account.addresses.cancel")}
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex min-w-[130px] cursor-pointer items-center justify-center rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-6 py-2.5 text-xs font-semibold tracking-wider whitespace-nowrap text-white uppercase shadow-sm transition-colors hover:border-[#b5573a] hover:bg-[#b5573a] disabled:opacity-50"
-          >
-            {isSubmitting
-              ? t("account.addresses.saving")
-              : addressToEdit
-                ? t("account.addresses.save")
-                : t("account.addresses.addNew")}
-          </button>
-        </div>
-      </form>
+      {/* Detailed Street Address */}
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="modalAddressDetail"
+          className="text-xs font-semibold tracking-wider text-[#1c1a18]/80 uppercase"
+        >
+          {t("account.addresses.addressDetail")}
+        </label>
+        <textarea
+          id="modalAddressDetail"
+          rows={2}
+          value={addressDetail}
+          onChange={(e) => {
+            setAddressDetail(e.target.value);
+            if (errors.addressDetail) {
+              setErrors((prev) => ({ ...prev, addressDetail: undefined }));
+            }
+          }}
+          placeholder={t("account.addresses.addressDetailPlaceholder")}
+          className={cn(
+            "w-full resize-none rounded-sm border bg-white/70 px-3.5 py-2.5 text-sm text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/40 focus:bg-white focus:outline-none",
+            errors.addressDetail
+              ? "border-red-500 focus:border-red-500"
+              : "border-[#1c1a18]/20 focus:border-[#1c1a18]",
+          )}
+        />
+        {errors.addressDetail && (
+          <p className="text-xs font-medium text-red-500">{errors.addressDetail}</p>
+        )}
+      </div>
+
+      {/* Default Switch */}
+      <div className="mt-1 flex items-center gap-3">
+        <Checkbox
+          id="modalIsDefault"
+          checked={isDefault}
+          onCheckedChange={(checked) => setIsDefault(!!checked)}
+          className="size-4.5 rounded-[4px] border-[#1c1a18]/30 data-checked:border-[#b5573a] data-checked:bg-[#b5573a]"
+        />
+        <label
+          htmlFor="modalIsDefault"
+          className="cursor-pointer text-xs font-medium text-[#55423d] select-none sm:text-sm"
+        >
+          {t("account.addresses.setDefault")}
+        </label>
+      </div>
+
+      {/* Actions */}
+      <div className="mt-4 flex items-center justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isSubmitting}
+          className="cursor-pointer rounded-sm border border-[#1c1a18]/20 bg-transparent px-5 py-2.5 text-xs font-semibold tracking-wider text-[#1c1a18] uppercase transition-colors hover:bg-black/5 disabled:opacity-50"
+        >
+          {t("account.addresses.cancel")}
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex min-w-[130px] cursor-pointer items-center justify-center rounded-sm border border-[#1c1a18] bg-[#1c1a18] px-6 py-2.5 text-xs font-semibold tracking-wider whitespace-nowrap text-white uppercase shadow-sm transition-colors hover:border-[#b5573a] hover:bg-[#b5573a] disabled:opacity-50"
+        >
+          {isSubmitting
+            ? t("account.addresses.saving")
+            : addressToEdit
+              ? t("account.addresses.save")
+              : t("account.addresses.addNew")}
+        </button>
+      </div>
+    </form>
   );
 }

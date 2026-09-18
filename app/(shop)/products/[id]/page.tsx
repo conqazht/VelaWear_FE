@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ProductDetailPage } from "@/components/shop/product-detail-page";
-import { getProductById } from "@/lib/vela-data";
+import { getProductById, mapBackendProduct, type Product } from "@/lib/vela-data";
+import { serverApiGet } from "@/lib/api/server";
 
 export function generateStaticParams() {
   return [
@@ -22,13 +23,29 @@ export function generateStaticParams() {
   ];
 }
 
+async function getAuthoritativeProduct(slug: string): Promise<Product | null> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = await serverApiGet<any>(`/products/slug/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 300 },
+    });
+    if (data) {
+      return mapBackendProduct(data);
+    }
+  } catch {
+    // Fall back to static fixtures when offline or during build
+  }
+
+  return getProductById(slug) ?? null;
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id: slug } = await params;
-  const product = getProductById(slug);
+  const product = await getAuthoritativeProduct(slug);
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://velawear.com";
 
   if (!product) {
@@ -45,9 +62,7 @@ export async function generateMetadata({
     product.description ||
     `Sản phẩm thời trang cao cấp ${product.name} tại VELA WEAR.`;
 
-  const imageUrl = product.image.startsWith("http")
-    ? product.image
-    : `${baseUrl}${product.image}`;
+  const imageUrl = product.image.startsWith("http") ? product.image : `${baseUrl}${product.image}`;
 
   return {
     title: product.name,
@@ -81,7 +96,7 @@ export async function generateMetadata({
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id: slug } = await params;
-  const product = getProductById(slug);
+  const product = await getAuthoritativeProduct(slug);
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://velawear.com";
 
   const jsonLdProduct = product
@@ -89,9 +104,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         "@context": "https://schema.org",
         "@type": "Product",
         name: product.name,
-        image: product.image.startsWith("http")
-          ? product.image
-          : `${baseUrl}${product.image}`,
+        image: product.image.startsWith("http") ? product.image : `${baseUrl}${product.image}`,
         description: product.description,
         brand: {
           "@type": "Brand",

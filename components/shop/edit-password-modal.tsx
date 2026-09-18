@@ -8,6 +8,72 @@ import { changePassword } from "@/lib/auth-otp-api";
 import { PasswordRequirements } from "@/components/auth/password-requirements";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+interface PasswordFieldProps {
+  id: string;
+  label: string;
+  autoComplete: string;
+  value: string;
+  show: boolean;
+  onToggleShow: () => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur: () => void;
+  hasError: boolean;
+  errorMessage?: string | null;
+  t: ReturnType<typeof useI18n>["t"];
+}
+
+function PasswordField({
+  id,
+  label,
+  autoComplete,
+  value,
+  show,
+  onToggleShow,
+  onChange,
+  onBlur,
+  hasError,
+  errorMessage,
+  t,
+}: PasswordFieldProps) {
+  return (
+    <div>
+      <div className="relative">
+        <input
+          type={show ? "text" : "password"}
+          id={id}
+          autoComplete={autoComplete}
+          placeholder={label}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 pr-12 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
+            hasError ? "border-error focus:border-error" : "focus:border-ink/60 border-[#1c1a18]/20"
+          }`}
+        />
+        <label
+          htmlFor={id}
+          className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
+            hasError ? "text-error peer-focus:text-error" : "text-ink/70 peer-focus:text-ink/70"
+          }`}
+        >
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={onToggleShow}
+          aria-label={t(show ? "auth.common.hidePassword" : "auth.common.showPassword")}
+          className="text-ink/45 hover:text-ink absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer p-1.5 transition-colors"
+        >
+          {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+      {hasError && errorMessage && (
+        <p className="text-error mt-1.5 text-xs transition-opacity duration-300">{errorMessage}</p>
+      )}
+    </div>
+  );
+}
+
 export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { user, clearRevokedSession } = useAuth();
   const { t } = useI18n();
@@ -96,190 +162,86 @@ export function EditPasswordModal({ isOpen, onClose }: { isOpen: boolean; onClos
         </DialogHeader>
 
         <div className="flex flex-col gap-6">
-          {/* Current Password */}
           {user?.hasPassword !== false && (
-            <div>
-              <div className="relative">
-                <input
-                  type={showCurrentPassword ? "text" : "password"}
-                  id="currentPassword"
-                  autoComplete="current-password"
-                  placeholder={t("account.password.current")}
-                  value={passwordForm.currentPassword}
-                  onChange={(e) => {
-                    setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }));
-                    setPasswordModified((prev) => ({ ...prev, current: true }));
-                    setPasswordTouched((prev) => ({ ...prev, current: false }));
-                  }}
-                  onBlur={() => setPasswordTouched((prev) => ({ ...prev, current: true }))}
-                  className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 pr-12 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                    passwordTouched.current &&
-                    passwordModified.current &&
-                    passwordForm.currentPassword.length === 0
-                      ? "border-error focus:border-error"
-                      : "focus:border-ink/60 border-[#1c1a18]/20"
-                  }`}
-                />
-                <label
-                  htmlFor="currentPassword"
-                  className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
-                    passwordTouched.current &&
-                    passwordModified.current &&
-                    passwordForm.currentPassword.length === 0
-                      ? "text-error peer-focus:text-error"
-                      : "text-ink/70 peer-focus:text-ink/70"
-                  }`}
-                >
-                  {t("account.password.current")}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  aria-label={t(
-                    showCurrentPassword ? "auth.common.hidePassword" : "auth.common.showPassword",
-                  )}
-                  className="text-ink/45 hover:text-ink absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer p-1.5 transition-colors"
-                >
-                  {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-              {passwordTouched.current &&
+            <PasswordField
+              id="currentPassword"
+              label={t("account.password.current")}
+              autoComplete="current-password"
+              value={passwordForm.currentPassword}
+              show={showCurrentPassword}
+              onToggleShow={() => setShowCurrentPassword(!showCurrentPassword)}
+              onChange={(e) => {
+                setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }));
+                setPasswordModified((prev) => ({ ...prev, current: true }));
+                setPasswordTouched((prev) => ({ ...prev, current: false }));
+              }}
+              onBlur={() => setPasswordTouched((prev) => ({ ...prev, current: true }))}
+              hasError={
+                passwordTouched.current &&
                 passwordModified.current &&
-                passwordForm.currentPassword.length === 0 && (
-                  <p className="text-error mt-1.5 text-xs transition-opacity duration-300">
-                    {t("account.password.currentRequired")}
-                  </p>
-                )}
-            </div>
+                passwordForm.currentPassword.length === 0
+              }
+              errorMessage={t("account.password.currentRequired")}
+              t={t}
+            />
           )}
 
-          {/* New Password */}
-          <div>
-            <div className="relative">
-              <input
-                type={showNewPassword ? "text" : "password"}
-                id="newPassword"
-                autoComplete="new-password"
-                placeholder={t("account.password.new")}
-                value={passwordForm.newPassword}
-                onChange={(e) => {
-                  setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }));
-                  setPasswordModified((prev) => ({ ...prev, new: true }));
-                  setPasswordTouched((prev) => ({ ...prev, new: false }));
-                }}
-                onBlur={() => setPasswordTouched((prev) => ({ ...prev, new: true }))}
-                className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 pr-12 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                  passwordTouched.new &&
-                  passwordModified.new &&
-                  (passwordForm.newPassword.length === 0 || !isStrongPassword)
-                    ? "border-error focus:border-error"
-                    : "focus:border-ink/60 border-[#1c1a18]/20"
-                }`}
-              />
-              <label
-                htmlFor="newPassword"
-                className={`bg-canvas absolute -top-2 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:left-3 peer-focus:text-xs ${
-                  passwordTouched.new &&
-                  passwordModified.new &&
-                  (passwordForm.newPassword.length === 0 || !isStrongPassword)
-                    ? "text-error peer-focus:text-error"
-                    : "text-ink/70 peer-focus:text-ink/70"
-                }`}
-              >
-                {t("account.password.new")}
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                aria-label={t(
-                  showNewPassword ? "auth.common.hidePassword" : "auth.common.showPassword",
-                )}
-                className="text-ink/45 hover:text-ink absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer p-1.5 transition-colors"
-              >
-                {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
-            </div>
-            {passwordTouched.new &&
+          <PasswordField
+            id="newPassword"
+            label={t("account.password.new")}
+            autoComplete="new-password"
+            value={passwordForm.newPassword}
+            show={showNewPassword}
+            onToggleShow={() => setShowNewPassword(!showNewPassword)}
+            onChange={(e) => {
+              setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }));
+              setPasswordModified((prev) => ({ ...prev, new: true }));
+              setPasswordTouched((prev) => ({ ...prev, new: false }));
+            }}
+            onBlur={() => setPasswordTouched((prev) => ({ ...prev, new: true }))}
+            hasError={
+              passwordTouched.new &&
               passwordModified.new &&
-              passwordForm.newPassword.length === 0 && (
-                <p className="text-error mt-1.5 text-xs transition-opacity duration-300">
-                  {t("account.password.newRequired")}
-                </p>
-              )}
-            {passwordTouched.new &&
-              passwordModified.new &&
-              passwordForm.newPassword.length > 0 &&
-              !isStrongPassword && (
-                <p className="text-error mt-1.5 text-xs transition-opacity duration-300">
-                  {t("account.password.strongRequirement")}
-                </p>
-              )}
-          </div>
+              (passwordForm.newPassword.length === 0 || !isStrongPassword)
+            }
+            errorMessage={
+              passwordForm.newPassword.length === 0
+                ? t("account.password.newRequired")
+                : !isStrongPassword
+                  ? t("account.password.strongRequirement")
+                  : null
+            }
+            t={t}
+          />
 
-          {/* Confirm Password */}
-          <div>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                autoComplete="new-password"
-                placeholder={t("account.password.confirm")}
-                value={passwordForm.confirmPassword}
-                onChange={(e) => {
-                  setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }));
-                  setPasswordModified((prev) => ({ ...prev, confirm: true }));
-                  setPasswordTouched((prev) => ({ ...prev, confirm: false }));
-                }}
-                onBlur={() => setPasswordTouched((prev) => ({ ...prev, confirm: true }))}
-                className={`peer text-ink w-full rounded-sm border bg-transparent px-4 py-3.5 pr-12 text-sm placeholder-transparent transition-colors duration-500 ease-out focus:outline-none ${
-                  passwordTouched.confirm &&
-                  passwordModified.confirm &&
-                  (passwordForm.confirmPassword.length === 0 ||
-                    passwordForm.confirmPassword !== passwordForm.newPassword)
-                    ? "border-error focus:border-error"
-                    : "focus:border-ink/60 border-[#1c1a18]/20"
-                }`}
-              />
-              <label
-                htmlFor="confirmPassword"
-                className={`bg-canvas absolute -top-2.5 left-3 cursor-text px-1 text-xs transition-all duration-300 ease-out peer-placeholder-shown:top-3.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs ${
-                  passwordTouched.confirm &&
-                  passwordModified.confirm &&
-                  (passwordForm.confirmPassword.length === 0 ||
-                    passwordForm.confirmPassword !== passwordForm.newPassword)
-                    ? "text-error peer-focus:text-error"
-                    : "text-ink/70 peer-focus:text-ink/70"
-                }`}
-              >
-                {t("account.password.confirm")}
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={t(
-                  showConfirmPassword ? "auth.common.hidePassword" : "auth.common.showPassword",
-                )}
-                className="text-ink/45 hover:text-ink absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer p-1.5 transition-colors"
-              >
-                {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
-            </div>
-            {passwordTouched.confirm &&
+          <PasswordField
+            id="confirmPassword"
+            label={t("account.password.confirm")}
+            autoComplete="new-password"
+            value={passwordForm.confirmPassword}
+            show={showConfirmPassword}
+            onToggleShow={() => setShowConfirmPassword(!showConfirmPassword)}
+            onChange={(e) => {
+              setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }));
+              setPasswordModified((prev) => ({ ...prev, confirm: true }));
+              setPasswordTouched((prev) => ({ ...prev, confirm: false }));
+            }}
+            onBlur={() => setPasswordTouched((prev) => ({ ...prev, confirm: true }))}
+            hasError={
+              passwordTouched.confirm &&
               passwordModified.confirm &&
-              passwordForm.confirmPassword.length > 0 &&
-              passwordForm.confirmPassword !== passwordForm.newPassword && (
-                <p className="text-error mt-1.5 text-xs transition-opacity duration-300">
-                  {t("account.password.mismatch")}
-                </p>
-              )}
-            {passwordTouched.confirm &&
-              passwordModified.confirm &&
-              passwordForm.confirmPassword.length === 0 && (
-                <p className="text-error mt-1.5 text-xs transition-opacity duration-300">
-                  {t("account.password.confirmRequired")}
-                </p>
-              )}
-          </div>
+              (passwordForm.confirmPassword.length === 0 ||
+                passwordForm.confirmPassword !== passwordForm.newPassword)
+            }
+            errorMessage={
+              passwordForm.confirmPassword.length === 0
+                ? t("account.password.confirmRequired")
+                : passwordForm.confirmPassword !== passwordForm.newPassword
+                  ? t("account.password.mismatch")
+                  : null
+            }
+            t={t}
+          />
         </div>
 
         <PasswordRequirements password={passwordForm.newPassword} className="mt-4 mb-4 pl-1" />
