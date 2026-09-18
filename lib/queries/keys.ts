@@ -31,6 +31,7 @@ export const queryKeys = {
   coupons: {
     root: ["coupons"] as const,
     list: (params?: unknown) => ["coupons", params] as const,
+    infinite: (params?: unknown) => ["coupons", "infinite", params] as const,
     my: ["coupons", "me"] as const,
   },
   orders: {
