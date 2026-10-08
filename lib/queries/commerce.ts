@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createOrder,
   createPayment,
@@ -55,6 +55,20 @@ export function useCouponsQuery(params: CouponFilters = {}, enabled = true) {
   return useQuery({
     queryKey: queryKeys.coupons.list(params),
     queryFn: () => getCoupons(params),
+    enabled,
+  });
+}
+
+export function useInfiniteCouponsQuery(params: CouponFilters = {}, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.coupons.infinite(params),
+    queryFn: ({ pageParam = 1 }) => getCoupons({ ...params, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const meta = lastPage?.meta;
+      if (!meta) return undefined;
+      return meta.page < meta.pages ? meta.page + 1 : undefined;
+    },
     enabled,
   });
 }

@@ -1,29 +1,25 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CouponsClient } from "./coupons-client";
+import { CouponsClient, CouponsPageLoading } from "./coupons-client";
 
 export const metadata: Metadata = {
-  title: "Mã Ưu Đãi & Khuyến Mãi Đặc Quyền",
+  title: "Mã Giảm Giá | Voucher Ưu Đãi Toàn Sàn - Vela Wear",
   description:
-    "Danh sách mã giảm giá, voucher khuyến mãi độc quyền dành riêng cho khách hàng của VELA WEAR.",
+    "Khám phá các mã giảm giá và voucher khuyến mãi độc quyền toàn sàn tại Vela Wear. Đăng nhập để nhận thêm ưu đãi cá nhân và theo dõi lịch sử tiết kiệm.",
   alternates: {
     canonical: "/coupons",
   },
   openGraph: {
-    title: "Mã Ưu Đãi & Khuyến Mãi Đặc Quyền | VELA WEAR",
-    description:
-      "Danh sách mã giảm giá, voucher khuyến mãi độc quyền dành riêng cho khách hàng của VELA WEAR.",
+    title: "Mã Giảm Giá & Ưu Đãi Mua Sắm - Vela Wear",
+    description: "Khám phá các mã giảm giá và voucher khuyến mãi độc quyền toàn sàn tại Vela Wear.",
     url: "/coupons",
-  },
-  robots: {
-    index: false,
-    follow: false,
+    type: "website",
   },
 };
 
 export default function CouponsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f7f4ef]" />}>
+    <Suspense fallback={<CouponsPageLoading />}>
       <CouponsClient />
     </Suspense>
   );
