@@ -29,14 +29,14 @@ interface NotificationBellProps {
 function getNotificationIcon(type: NotificationType) {
   switch (type) {
     case "ORDER_UPDATE":
-      return <Truck className="size-4 text-[#b5573a]" />;
+      return <Truck className="text-primary size-4" />;
     case "PROMOTION":
-      return <Sparkles className="size-4 text-[#c47355]" />;
+      return <Sparkles className="text-primary/85 size-4" />;
     case "PAYMENT":
-      return <CreditCard className="size-4 text-[#2e7d32]" />;
+      return <CreditCard className="size-4 text-emerald-600 dark:text-emerald-400" />;
     case "SYSTEM":
     default:
-      return <Info className="size-4 text-[#8a857c]" />;
+      return <Info className="text-muted-foreground size-4" />;
   }
 }
 
@@ -51,10 +51,7 @@ export function NotificationBell({
   const { locale, t } = useI18n();
   const { user } = useAuth();
 
-  const { data: unreadCount = 0 } = useUnreadNotificationCountQuery(
-    user?.id,
-    Boolean(user?.id),
-  );
+  const { data: unreadCount = 0 } = useUnreadNotificationCountQuery(user?.id, Boolean(user?.id));
   const {
     data: notificationsData,
     isLoading,
@@ -85,8 +82,8 @@ export function NotificationBell({
   const notifications = notificationsData?.result ?? [];
 
   const defaultIconClass = shouldBeTransparent
-    ? "text-[#efe7dc] hover:text-[#ffb59f]"
-    : "text-[#1c1a18] hover:text-[#b5573a]";
+    ? "text-primary-foreground/90 hover:text-primary-foreground"
+    : "text-foreground hover:text-primary";
 
   const effectiveIconClass = iconClass || defaultIconClass;
 
@@ -130,7 +127,7 @@ export function NotificationBell({
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute top-0 right-0 flex h-4.5 min-w-4.5 items-center justify-center rounded-full border border-[#f7f4ef] bg-[#b5573a] px-1 text-[9px] font-bold text-white shadow-xs"
+            className="border-background bg-primary text-primary-foreground absolute top-0 right-0 flex h-4.5 min-w-4.5 items-center justify-center rounded-full border px-1 text-[9px] font-bold shadow-xs"
           >
             {unreadCount > 99 ? "99+" : unreadCount}
           </motion.span>
@@ -144,16 +141,16 @@ export function NotificationBell({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: EASE_VELA }}
-            className="absolute top-11 right-0 z-50 w-80 overflow-hidden rounded-xl border border-[#1c1a18]/10 bg-white shadow-[0_12px_40px_rgba(28,26,24,0.12)] sm:w-96"
+            className="border-border bg-popover text-popover-foreground absolute top-11 right-0 z-50 w-80 overflow-hidden rounded-xl border shadow-xl sm:w-96"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#1c1a18]/10 bg-[#f7f4ef]/80 px-4 py-3">
+            <div className="border-border bg-muted/60 flex items-center justify-between border-b px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="font-sans text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
+                <span className="text-foreground font-sans text-xs font-bold tracking-wider uppercase">
                   {t("notifications.title")}
                 </span>
                 {unreadCount > 0 && (
-                  <span className="rounded-full bg-[#b5573a]/10 px-2 py-0.5 text-[10px] font-semibold text-[#b5573a]">
+                  <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[10px] font-semibold">
                     {unreadCount}
                   </span>
                 )}
@@ -164,7 +161,7 @@ export function NotificationBell({
                   type="button"
                   onClick={handleMarkAllRead}
                   disabled={markAllAsReadMutation.isPending}
-                  className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-[#b5573a] transition-colors hover:text-[#903e26] disabled:opacity-50"
+                  className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium transition-colors disabled:opacity-50"
                   title={t("notifications.markAllRead")}
                 >
                   <CheckCheck className="size-3.5" />
@@ -174,32 +171,32 @@ export function NotificationBell({
             </div>
 
             {/* Notification List */}
-            <div className="max-h-[380px] divide-y divide-[#1c1a18]/5 overflow-y-auto">
+            <div className="divide-border/60 max-h-[380px] divide-y overflow-y-auto">
               {isLoading ? (
                 <div className="space-y-3 p-4">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="flex animate-pulse gap-3">
-                      <div className="size-10 shrink-0 rounded-full bg-[#1c1a18]/5" />
+                      <div className="bg-muted size-10 shrink-0 rounded-full" />
                       <div className="flex-1 space-y-1.5">
-                        <div className="h-3 w-3/4 rounded bg-[#1c1a18]/10" />
-                        <div className="h-2.5 w-full rounded bg-[#1c1a18]/5" />
+                        <div className="bg-muted-foreground/20 h-3 w-3/4 rounded" />
+                        <div className="bg-muted h-2.5 w-full rounded" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : isError ? (
-                <div className="px-4 py-8 text-center text-xs text-[#8a857c]">
+                <div className="text-muted-foreground px-4 py-8 text-center text-xs">
                   {t("notifications.error")}
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-                  <div className="mb-2 flex size-12 items-center justify-center rounded-full bg-[#f7f4ef] text-[#8a857c]">
+                  <div className="bg-muted text-muted-foreground mb-2 flex size-12 items-center justify-center rounded-full">
                     <Bell className="size-5 opacity-60" />
                   </div>
-                  <p className="text-xs font-semibold text-[#1c1a18]">
+                  <p className="text-foreground text-xs font-semibold">
                     {t("notifications.emptyTitle")}
                   </p>
-                  <p className="mt-1 max-w-[220px] text-[11px] text-[#8a857c]">
+                  <p className="text-muted-foreground mt-1 max-w-[220px] text-[11px]">
                     {t("notifications.emptyDescription")}
                   </p>
                 </div>
@@ -212,14 +209,14 @@ export function NotificationBell({
                     className={cn(
                       "group flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors",
                       item.isRead
-                        ? "bg-white hover:bg-[#f7f4ef]/60"
-                        : "bg-[#fdfaf7] hover:bg-[#f7f4ef]",
+                        ? "bg-popover hover:bg-muted/40"
+                        : "bg-muted/20 hover:bg-muted/50",
                     )}
                   >
                     {/* Thumbnail or Type Icon */}
                     <div className="relative mt-0.5 shrink-0">
                       {item.imageUrl ? (
-                        <div className="size-10 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white">
+                        <div className="border-border bg-card size-10 overflow-hidden rounded-md border">
                           <Image
                             src={resolveImageUrl(item.imageUrl)}
                             alt=""
@@ -229,7 +226,7 @@ export function NotificationBell({
                           />
                         </div>
                       ) : (
-                        <div className="flex size-9 items-center justify-center rounded-full border border-[#1c1a18]/5 bg-[#efe7dc]/80">
+                        <div className="border-border/60 bg-muted flex size-9 items-center justify-center rounded-full border">
                           {getNotificationIcon(item.type)}
                         </div>
                       )}
@@ -242,25 +239,25 @@ export function NotificationBell({
                           className={cn(
                             "truncate text-xs",
                             item.isRead
-                              ? "font-medium text-[#1c1a18]/90"
-                              : "font-bold text-[#1c1a18]",
+                              ? "text-popover-foreground/85 font-medium"
+                              : "text-popover-foreground font-bold",
                           )}
                         >
                           {item.title}
                         </p>
                         {!item.isRead && (
                           <span
-                            className="size-2 shrink-0 rounded-full bg-[#b5573a]"
+                            className="bg-primary size-2 shrink-0 rounded-full"
                             aria-label={t("notifications.unread")}
                           />
                         )}
                       </div>
 
-                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#1c1a18]/70">
+                      <p className="text-popover-foreground/75 mt-0.5 line-clamp-2 text-[11px] leading-relaxed">
                         {item.content}
                       </p>
 
-                      <p className="mt-1.5 text-[10px] text-[#8a857c]">
+                      <p className="text-muted-foreground mt-1.5 text-[10px]">
                         {formatRelativeTime(item.createdAt, locale)}
                       </p>
                     </div>
@@ -270,14 +267,14 @@ export function NotificationBell({
             </div>
 
             {/* Footer */}
-            <div className="border-t border-[#1c1a18]/10 bg-[#f7f4ef]/50 px-4 py-2.5 text-center">
+            <div className="border-border bg-muted/40 border-t px-4 py-2.5 text-center">
               <Link
                 href="/profile/notifications"
                 onClick={() => setIsOpen(false)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1c1a18] transition-colors hover:text-[#b5573a]"
+                className="text-foreground hover:text-primary inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
               >
                 <span>{t("notifications.viewAll")}</span>
-                <ExternalLink className="size-3 text-[#8a857c]" />
+                <ExternalLink className="text-muted-foreground size-3" />
               </Link>
             </div>
           </motion.div>

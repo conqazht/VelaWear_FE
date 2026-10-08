@@ -45,10 +45,7 @@ export function useMarkNotificationAsReadMutation(accountId?: number) {
       const previousCount = queryClient.getQueryData<number>(unreadKey);
 
       if (typeof previousCount === "number") {
-        queryClient.setQueryData<number>(
-          unreadKey,
-          Math.max(0, previousCount - 1),
-        );
+        queryClient.setQueryData<number>(unreadKey, Math.max(0, previousCount - 1));
       }
 
       return { previousCount };
