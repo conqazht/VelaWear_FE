@@ -351,6 +351,8 @@ export type UserAddress = {
   isDefault: boolean;
 };
 
+export type CustomerTier = "STANDARD" | "SILVER" | "GOLD" | "DIAMOND";
+
 export type Coupon = {
   id: number;
   code: string;
@@ -363,6 +365,7 @@ export type Coupon = {
   startDate?: string | null;
   endDate?: string | null;
   status: "ACTIVE" | "INACTIVE" | "EXPIRED" | string;
+  minTier?: CustomerTier | string;
 };
 
 export type CouponUsage = {
@@ -375,6 +378,13 @@ export type CouponUsage = {
 };
 
 export type MyCoupons = {
+  membershipTier?: CustomerTier;
+  tierLabel?: string;
+  tierSpentAmount?: number;
+  nextTier?: CustomerTier | null;
+  nextTierLabel?: string | null;
+  amountToNextTier?: number;
+  cycleDays?: number;
   availableCoupons: Coupon[];
   usageHistory: CouponUsage[];
 };

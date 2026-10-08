@@ -2,15 +2,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CouponsClient } from "./coupons-client";
-import type { Coupon, MyCoupons } from "@/lib/api/types";
+import type { MyCoupons } from "@/lib/api/types";
 
-const { useAuthMock, useInfiniteCouponsQueryMock, useMyCouponsQueryMock, useSearchParamsMock } =
-  vi.hoisted(() => ({
-    useAuthMock: vi.fn(),
-    useInfiniteCouponsQueryMock: vi.fn(),
-    useMyCouponsQueryMock: vi.fn(),
-    useSearchParamsMock: vi.fn(),
-  }));
+const { useAuthMock, useMyCouponsQueryMock, useSearchParamsMock } = vi.hoisted(() => ({
+  useAuthMock: vi.fn(),
+  useMyCouponsQueryMock: vi.fn(),
+  useSearchParamsMock: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => useSearchParamsMock(),
@@ -25,62 +23,70 @@ vi.mock("@/components/providers/i18n-provider", () => ({
     locale: "vi",
     t: (key: string, params?: Record<string, unknown>) => {
       if (params && "count" in params) return `${key}:${params.count}`;
+      if (params && "amount" in params && "tier" in params)
+        return `${key}:${params.amount}:${params.tier}`;
       if (params && "amount" in params) return `${key}:${params.amount}`;
       if (params && "code" in params) return `${key}:${params.code}`;
-      if (params && "percentage" in params) return `${key}:${params.percentage}`;
+      if (params && "tier" in params) return `${key}:${params.tier}`;
       return key;
     },
   }),
 }));
 
 vi.mock("@/lib/queries/commerce", () => ({
-  useInfiniteCouponsQuery: (params: unknown) => useInfiniteCouponsQueryMock(params),
   useMyCouponsQuery: (enabled: boolean) => useMyCouponsQueryMock(enabled),
 }));
 
-const mockPublicCoupons: Coupon[] = [
-  {
-    id: 1,
-    code: "WELCOME10",
-    type: "PERCENTAGE",
-    value: 10,
-    minOrderAmount: 200000,
-    maxDiscount: 50000,
-    usedCount: 5,
-    usageLimit: 100,
-    startDate: "2026-01-01T00:00:00Z",
-    endDate: "2026-12-31T23:59:59Z",
-    status: "ACTIVE",
-  },
-  {
-    id: 2,
-    code: "FREESHIP",
-    type: "FIXED_AMOUNT",
-    value: 30000,
-    minOrderAmount: 300000,
-    maxDiscount: null,
-    usedCount: 10,
-    usageLimit: null,
-    startDate: "2026-01-01T00:00:00Z",
-    endDate: null,
-    status: "ACTIVE",
-  },
-];
-
-const mockMyCouponsData: MyCoupons = {
+const mockMemberCouponsData: MyCoupons = {
+  membershipTier: "SILVER",
+  tierLabel: "Bạc",
+  tierSpentAmount: 2500000,
+  nextTier: "GOLD",
+  nextTierLabel: "Vàng",
+  amountToNextTier: 2500000,
+  cycleDays: 180,
   availableCoupons: [
     {
-      id: 3,
-      code: "VIPMEMBER20",
+      id: 1,
+      code: "WELCOME10",
       type: "PERCENTAGE",
-      value: 20,
-      minOrderAmount: 500000,
-      maxDiscount: 100000,
-      usedCount: 0,
-      usageLimit: 1,
+      value: 10,
+      minOrderAmount: 200000,
+      maxDiscount: 50000,
+      usedCount: 5,
+      usageLimit: 100,
       startDate: "2026-01-01T00:00:00Z",
       endDate: "2026-12-31T23:59:59Z",
       status: "ACTIVE",
+      minTier: "STANDARD",
+    },
+    {
+      id: 2,
+      code: "VIPSILVER10",
+      type: "PERCENTAGE",
+      value: 10,
+      minOrderAmount: 300000,
+      maxDiscount: 100000,
+      usedCount: 1,
+      usageLimit: 50,
+      startDate: "2026-01-01T00:00:00Z",
+      endDate: "2026-12-31T23:59:59Z",
+      status: "ACTIVE",
+      minTier: "SILVER",
+    },
+    {
+      id: 3,
+      code: "VIPDIAMOND20",
+      type: "PERCENTAGE",
+      value: 20,
+      minOrderAmount: 1000000,
+      maxDiscount: 300000,
+      usedCount: 0,
+      usageLimit: 10,
+      startDate: "2026-01-01T00:00:00Z",
+      endDate: "2026-12-31T23:59:59Z",
+      status: "ACTIVE",
+      minTier: "DIAMOND",
     },
   ],
   usageHistory: [
@@ -102,79 +108,65 @@ const mockMyCouponsData: MyCoupons = {
   ],
 };
 
-describe("CouponsClient Component", () => {
+describe("CouponsClient Component - Member Gate & VIP Tiers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useSearchParamsMock.mockReturnValue(new URLSearchParams());
-    useAuthMock.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
-    useInfiniteCouponsQueryMock.mockReturnValue({
-      data: {
-        pages: [{ result: mockPublicCoupons, meta: { total: 2, page: 1, pages: 1 } }],
-        pageParams: [1],
-      },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-      hasNextPage: false,
-      isFetchingNextPage: false,
-      fetchNextPage: vi.fn(),
-    });
-    useMyCouponsQueryMock.mockReturnValue({
-      data: { availableCoupons: [], usageHistory: [] },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("renders public storewide coupons and guest banner for unauthenticated visitors", () => {
-    render(<CouponsClient />);
-
-    expect(screen.getByRole("tab", { name: /coupons\.tab\.public/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /coupons\.tab\.my/i })).toBeInTheDocument();
-
-    expect(screen.getByText("coupons.guestBanner.title")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /coupons\.guestBanner\.signIn/i })).toHaveAttribute(
-      "href",
-      "/sign-in?redirect=%2Fcoupons",
-    );
-
-    expect(screen.getByText("WELCOME10")).toBeInTheDocument();
-    expect(screen.getByText("FREESHIP")).toBeInTheDocument();
-  });
-
-  it("displays accurate total count from meta.total", () => {
-    useInfiniteCouponsQueryMock.mockReturnValue({
-      data: {
-        pages: [{ result: mockPublicCoupons, meta: { total: 58, page: 1, pages: 5 } }],
-        pageParams: [1],
-      },
+  it("renders member lock gate with sign-in and register CTAs for unauthenticated visitors", () => {
+    useAuthMock.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
       isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-      hasNextPage: true,
-      isFetchingNextPage: false,
-      fetchNextPage: vi.fn(),
+    });
+    useMyCouponsQueryMock.mockReturnValue({
+      data: null,
+      isLoading: false,
     });
 
     render(<CouponsClient />);
 
-    expect(screen.getByText("coupons.publicCount:58")).toBeInTheDocument();
-    expect(screen.getByText("58")).toBeInTheDocument();
+    expect(screen.getByText("coupons.lock.title")).toBeInTheDocument();
+    expect(screen.getByText("coupons.lock.description")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /coupons\.lock\.signIn/i })).toHaveAttribute(
+      "href",
+      "/sign-in?redirect=%2Fcoupons",
+    );
+    expect(screen.getByRole("link", { name: /coupons\.lock\.register/i })).toHaveAttribute(
+      "href",
+      "/register",
+    );
   });
 
-  it("copies coupon code to clipboard on copy button click", async () => {
+  it("renders authenticated member's tier progress banner and statistics", () => {
+    useAuthMock.mockReturnValue({
+      user: { id: 10, email: "vip@example.com", fullName: "Vip User" },
+      isAuthenticated: true,
+      isLoading: false,
+    });
+    useMyCouponsQueryMock.mockReturnValue({
+      data: mockMemberCouponsData,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<CouponsClient />);
+
+    expect(screen.getByText(/coupons\.tier\.current/i)).toBeInTheDocument();
+    expect(screen.getByText(/coupons\.tier\.next/i)).toBeInTheDocument();
+    expect(screen.getByText("coupons.stat.available")).toBeInTheDocument();
+    expect(screen.getByText("coupons.stat.used")).toBeInTheDocument();
+    expect(screen.getByText("coupons.stat.saved")).toBeInTheDocument();
+  });
+
+  it("allows eligible tier to copy code and marks higher tier as locked", async () => {
     const writeTextMock = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, {
       clipboard: {
@@ -182,36 +174,43 @@ describe("CouponsClient Component", () => {
       },
     });
 
+    useAuthMock.mockReturnValue({
+      user: { id: 10, email: "vip@example.com", fullName: "Vip User" },
+      isAuthenticated: true,
+      isLoading: false,
+    });
+    useMyCouponsQueryMock.mockReturnValue({
+      data: mockMemberCouponsData,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
     render(<CouponsClient />);
 
+    // User is SILVER: can copy WELCOME10 (STANDARD) and VIPSILVER10 (SILVER)
+    expect(screen.getByText("WELCOME10")).toBeInTheDocument();
+    expect(screen.getByText("VIPSILVER10")).toBeInTheDocument();
+
+    // User is SILVER: VIPDIAMOND20 requires DIAMOND -> shows locked
+    expect(screen.getByText("coupons.tier.locked:coupons.tier.diamond")).toBeInTheDocument();
+
     const copyButtons = screen.getAllByRole("button", { name: /coupons\.copyCode/i });
-    expect(copyButtons.length).toBeGreaterThan(0);
+    expect(copyButtons.length).toBe(2);
 
     fireEvent.click(copyButtons[0]);
     expect(writeTextMock).toHaveBeenCalledWith("WELCOME10");
   });
 
-  it("prompts guest users to sign in when clicking the personal tab", () => {
-    render(<CouponsClient />);
-
-    const personalTab = screen.getByRole("tab", { name: /coupons\.tab\.my/i });
-    fireEvent.click(personalTab);
-
-    expect(screen.getByText("coupons.myTab.guestTitle")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /coupons\.myTab\.signIn/i })).toHaveAttribute(
-      "href",
-      "/sign-in?redirect=%2Fcoupons%3Ftab%3Dpersonal",
-    );
-  });
-
-  it("renders authenticated member's voucher wallet, statistics, and usage history", () => {
+  it("filters coupons by tab selection (VIP vs Storewide vs History)", () => {
     useAuthMock.mockReturnValue({
-      user: { id: 10, email: "user@example.com", fullName: "Test User" },
+      user: { id: 10, email: "vip@example.com", fullName: "Vip User" },
       isAuthenticated: true,
       isLoading: false,
     });
     useMyCouponsQueryMock.mockReturnValue({
-      data: mockMyCouponsData,
+      data: mockMemberCouponsData,
       isLoading: false,
       isError: false,
       error: null,
@@ -220,68 +219,18 @@ describe("CouponsClient Component", () => {
 
     render(<CouponsClient />);
 
-    const personalTab = screen.getByRole("tab", { name: /coupons\.tab\.my/i });
-    fireEvent.click(personalTab);
+    // Click VIP tab
+    const vipTab = screen.getByRole("tab", { name: /coupons\.tab\.vip/i });
+    fireEvent.click(vipTab);
 
-    expect(screen.getByText("coupons.stat.available")).toBeInTheDocument();
-    expect(screen.getByText("coupons.stat.used")).toBeInTheDocument();
-    expect(screen.getByText("coupons.stat.saved")).toBeInTheDocument();
-    expect(screen.getByText("coupons.stat.expiring")).toBeInTheDocument();
+    expect(screen.getByText("VIPSILVER10")).toBeInTheDocument();
+    expect(screen.getByText("VIPDIAMOND20")).toBeInTheDocument();
+    expect(screen.queryByText("WELCOME10")).not.toBeInTheDocument();
 
-    expect(screen.getByText("VIPMEMBER20")).toBeInTheDocument();
+    // Click History tab
+    const historyTab = screen.getByRole("tab", { name: /coupons\.history/i });
+    fireEvent.click(historyTab);
+
     expect(screen.getByText("ORD-999", { exact: false })).toBeInTheDocument();
-  });
-
-  it("renders empty state when there are no public coupons available", () => {
-    useInfiniteCouponsQueryMock.mockReturnValue({
-      data: {
-        pages: [{ result: [], meta: { total: 0, page: 1, pages: 0 } }],
-        pageParams: [1],
-      },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-      hasNextPage: false,
-      isFetchingNextPage: false,
-      fetchNextPage: vi.fn(),
-    });
-
-    render(<CouponsClient />);
-
-    expect(screen.getByText("coupons.publicEmpty")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "coupons.explore" })).toBeInTheDocument();
-  });
-
-  it("displays loading indicator when fetching next page", () => {
-    useInfiniteCouponsQueryMock.mockReturnValue({
-      data: {
-        pages: [{ result: mockPublicCoupons, meta: { total: 10, page: 1, pages: 2 } }],
-        pageParams: [1],
-      },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-      hasNextPage: true,
-      isFetchingNextPage: true,
-      fetchNextPage: vi.fn(),
-    });
-
-    render(<CouponsClient />);
-
-    expect(screen.getByText("coupons.loadingMore")).toBeInTheDocument();
-  });
-
-  it("respects initial ?tab=personal URL query param", () => {
-    useSearchParamsMock.mockReturnValue(new URLSearchParams("tab=personal"));
-
-    render(<CouponsClient />);
-
-    expect(screen.getByRole("tab", { name: /coupons\.tab\.my/i })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    expect(screen.getByText("coupons.myTab.guestTitle")).toBeInTheDocument();
   });
 });
