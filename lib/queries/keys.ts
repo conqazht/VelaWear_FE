@@ -74,4 +74,11 @@ export const queryKeys = {
     summary: (productId: number) => ["reviews", "product", productId, "summary"] as const,
     me: (params?: unknown) => ["reviews", "me", params] as const,
   },
+  notifications: {
+    root: ["notifications"] as const,
+    myList: (accountId: number | undefined, params?: unknown) =>
+      ["notifications", "me", accountId ?? "anonymous", "list", params] as const,
+    unreadCount: (accountId: number | undefined) =>
+      ["notifications", "me", accountId ?? "anonymous", "unread-count"] as const,
+  },
 };
