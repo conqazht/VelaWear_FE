@@ -5,4 +5,3 @@ export const orderFilters = ["ALL", "PENDING", "SHIPPING", "COMPLETED", "CANCELL
 export type OrderFilter = (typeof orderFilters)[number];
 
 export type OrderRow = RecentOrderSummary;
-

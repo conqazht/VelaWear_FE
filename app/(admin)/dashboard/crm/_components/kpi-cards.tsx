@@ -28,13 +28,13 @@ export function KpiCards({ kpis }: KpiCardsProps) {
       {/* 1. Tổng khách hàng */}
       <Card className="border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="font-medium text-sm text-muted-foreground">
+          <CardTitle className="text-muted-foreground text-sm font-medium">
             {locale === "vi" ? "Tổng khách hàng" : "Total Customers"}
           </CardTitle>
-          <Users className="size-4 text-muted-foreground" />
+          <Users className="text-muted-foreground size-4" />
         </CardHeader>
         <CardContent className="space-y-1">
-          <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums">
+          <div className="text-2xl font-bold tracking-tight tabular-nums sm:text-3xl">
             {formatNumber(totalCustomers, locale)}
           </div>
           <p className="text-muted-foreground text-xs">
@@ -48,20 +48,17 @@ export function KpiCards({ kpis }: KpiCardsProps) {
       {/* 2. Khách hàng mới trong kỳ */}
       <Card className="border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="font-medium text-sm text-muted-foreground">
+          <CardTitle className="text-muted-foreground text-sm font-medium">
             {locale === "vi" ? "Khách hàng mới" : "New Customers"}
           </CardTitle>
-          <UserCheck className="size-4 text-muted-foreground" />
+          <UserCheck className="text-muted-foreground size-4" />
         </CardHeader>
         <CardContent className="space-y-1">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums text-emerald-600 dark:text-emerald-400">
+            <div className="text-2xl font-bold tracking-tight text-emerald-600 tabular-nums sm:text-3xl dark:text-emerald-400">
               {formatNumber(newCustomers, locale)}
             </div>
-            <AdminStatusBadge
-              variant={newCustomersChange >= 0 ? "success" : "danger"}
-              size="sm"
-            >
+            <AdminStatusBadge variant={newCustomersChange >= 0 ? "success" : "danger"} size="sm">
               {newCustomersChange >= 0 ? `+${newCustomersChange}%` : `${newCustomersChange}%`}
             </AdminStatusBadge>
           </div>
@@ -74,14 +71,14 @@ export function KpiCards({ kpis }: KpiCardsProps) {
       {/* 3. Tỷ lệ mua lặp lại (Repeat Purchase Rate) */}
       <Card className="border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="font-medium text-sm text-muted-foreground">
+          <CardTitle className="text-muted-foreground text-sm font-medium">
             {locale === "vi" ? "Tỷ lệ mua lặp lại" : "Repeat Purchase Rate"}
           </CardTitle>
-          <Repeat className="size-4 text-muted-foreground" />
+          <Repeat className="text-muted-foreground size-4" />
         </CardHeader>
         <CardContent className="space-y-1">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums text-blue-600 dark:text-blue-400">
+            <div className="text-2xl font-bold tracking-tight text-blue-600 tabular-nums sm:text-3xl dark:text-blue-400">
               {repeatPurchaseRate}%
             </div>
             <AdminStatusBadge variant="neutral" size="sm">
@@ -101,13 +98,13 @@ export function KpiCards({ kpis }: KpiCardsProps) {
       {/* 4. Chi tiêu trung bình / khách hàng */}
       <Card className="border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="font-medium text-sm text-muted-foreground">
+          <CardTitle className="text-muted-foreground text-sm font-medium">
             {locale === "vi" ? "Chi tiêu trung bình / Khách" : "Avg Spend / Customer"}
           </CardTitle>
-          <Award className="size-4 text-muted-foreground" />
+          <Award className="text-muted-foreground size-4" />
         </CardHeader>
         <CardContent className="space-y-1">
-          <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums text-indigo-600 dark:text-indigo-400">
+          <div className="text-2xl font-bold tracking-tight text-indigo-600 tabular-nums sm:text-3xl dark:text-indigo-400">
             {formatCurrency(averageCustomerSpend, locale)}
           </div>
           <p className="text-muted-foreground text-xs">

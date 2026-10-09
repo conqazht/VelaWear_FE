@@ -61,10 +61,7 @@ export function CrmDashboard() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select
-            value={period}
-            onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}
-          >
+          <Select value={period} onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}>
             <SelectTrigger className="w-48" id="crm-period" size="sm">
               <SelectValue />
             </SelectTrigger>

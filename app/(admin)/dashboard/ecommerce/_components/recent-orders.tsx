@@ -57,12 +57,18 @@ type RecentOrdersProps = {
   recentOrders?: RecentOrderSummary[];
 };
 
-export function RecentOrders({ recentOrders = [] }: RecentOrdersProps) {
+export const RecentOrders = React.memo(function RecentOrders({
+  recentOrders = [],
+}: RecentOrdersProps) {
   const { locale, t } = useI18n();
   const [selectedOrder, setSelectedOrder] = React.useState<RecentOrderSummary | null>(null);
 
+  const handleSelectOrder = React.useCallback((order: RecentOrderSummary) => {
+    setSelectedOrder(order);
+  }, []);
+
   const columns = useRecentOrdersColumns({
-    onSelectOrder: (order) => setSelectedOrder(order),
+    onSelectOrder: handleSelectOrder,
   });
 
   const filterLabels: Record<OrderFilter, string> = {
@@ -246,7 +252,7 @@ export function RecentOrders({ recentOrders = [] }: RecentOrdersProps) {
                 ) : (
                   <TableRow>
                     <TableCell
-                      className="h-24 text-center text-muted-foreground"
+                      className="text-muted-foreground h-24 text-center"
                       colSpan={table.getVisibleLeafColumns().length}
                     >
                       {t("admin.dashboardsA.ecommerce.noOrders")}
@@ -305,7 +311,9 @@ export function RecentOrders({ recentOrders = [] }: RecentOrdersProps) {
                 ) : null}
                 <PaginationItem>
                   <PaginationNext
-                    className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : undefined}
+                    className={
+                      !table.getCanNextPage() ? "pointer-events-none opacity-50" : undefined
+                    }
                     href="#"
                     onClick={(event) => {
                       preventPaginationNavigation(event);
@@ -331,4 +339,4 @@ export function RecentOrders({ recentOrders = [] }: RecentOrdersProps) {
       />
     </>
   );
-}
+});

@@ -4,7 +4,7 @@ import * as React from "react";
 import { Label, Pie, PieChart } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -27,44 +27,59 @@ const statusColors: Record<string, string> = {
   FAILED: "var(--chart-3)",
 };
 
-export function BalanceDistributionCard({ paymentStatuses = [] }: BalanceDistributionCardProps) {
+export const BalanceDistributionCard = React.memo(function BalanceDistributionCard({
+  paymentStatuses = [],
+}: BalanceDistributionCardProps) {
   const { locale, t } = useI18n();
 
-  const totalAmount = paymentStatuses.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  const totalAmount = React.useMemo(
+    () => paymentStatuses.reduce((acc, curr) => acc + curr.totalAmount, 0),
+    [paymentStatuses],
+  );
 
-  const chartData = paymentStatuses.map((item) => {
-    const label = ["PAID", "UNPAID", "REFUNDED", "FAILED"].includes(item.status)
-      ? getPaymentStatusLabel(item.status as AdminPaymentStatus, t)
-      : item.status;
-    return {
-      status: item.status,
-      label,
-      amount: item.totalAmount,
-      count: item.count,
-      percentage: item.percentage,
-      fill: statusColors[item.status] || "var(--chart-1)",
-    };
-  });
+  const chartData = React.useMemo(() => {
+    return paymentStatuses.map((item) => {
+      const label = ["PAID", "UNPAID", "REFUNDED", "FAILED"].includes(item.status)
+        ? getPaymentStatusLabel(item.status as AdminPaymentStatus, t)
+        : item.status;
+      return {
+        status: item.status,
+        label,
+        amount: item.totalAmount,
+        count: item.count,
+        percentage: item.percentage,
+        fill: statusColors[item.status] || "var(--chart-1)",
+      };
+    });
+  }, [paymentStatuses, t]);
 
-  const chartConfig = {
-    amount: { label: locale === "vi" ? "Số tiền" : "Amount" },
-    PAID: { color: statusColors.PAID, label: "Đã thanh toán" },
-    UNPAID: { color: statusColors.UNPAID, label: "Chưa thanh toán" },
-    REFUNDED: { color: statusColors.REFUNDED, label: "Hoàn tiền" },
-    FAILED: { color: statusColors.FAILED, label: "Thất bại" },
-  } satisfies ChartConfig;
+  const chartConfig = React.useMemo<ChartConfig>(
+    () => ({
+      amount: { label: locale === "vi" ? "Số tiền" : "Amount" },
+      PAID: { color: statusColors.PAID, label: "Đã thanh toán" },
+      UNPAID: { color: statusColors.UNPAID, label: "Chưa thanh toán" },
+      REFUNDED: { color: statusColors.REFUNDED, label: "Hoàn tiền" },
+      FAILED: { color: statusColors.FAILED, label: "Thất bại" },
+    }),
+    [locale],
+  );
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-sm text-muted-foreground">
+        <CardTitle className="text-base font-semibold">
           {locale === "vi" ? "Tỷ lệ trạng thái thanh toán" : "Payment Status Distribution"}
         </CardTitle>
+        <CardDescription className="text-xs">
+          {locale === "vi"
+            ? "Phân bổ dòng tiền theo trạng thái đã thu, chưa thu và hoàn trả"
+            : "Breakdown of total cashflow by current payment settlement status"}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="grid items-center gap-4 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
         {paymentStatuses.length === 0 ? (
-          <div className="col-span-2 py-8 text-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground col-span-2 py-8 text-center text-sm">
             {locale === "vi" ? "Chưa có dữ liệu thanh toán" : "No payment data"}
           </div>
         ) : (
@@ -134,11 +149,11 @@ export function BalanceDistributionCard({ paymentStatuses = [] }: BalanceDistrib
                         {item.label} ({formatNumber(item.count, locale)})
                       </p>
                     </div>
-                    <p className="font-semibold text-sm tabular-nums text-foreground">
+                    <p className="text-foreground text-sm font-semibold tabular-nums">
                       {formatCurrency(item.amount, locale)}
                     </p>
                   </div>
-                  <div className="font-medium text-xs tabular-nums text-muted-foreground">
+                  <div className="text-muted-foreground text-xs font-medium tabular-nums">
                     {item.percentage}%
                   </div>
                 </div>
@@ -149,4 +164,4 @@ export function BalanceDistributionCard({ paymentStatuses = [] }: BalanceDistrib
       </CardContent>
     </Card>
   );
-}
+});

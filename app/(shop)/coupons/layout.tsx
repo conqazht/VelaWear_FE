@@ -5,6 +5,8 @@ import {
   PersonalizedRouteBoundary,
 } from "@/components/shop/cached-shop-chrome";
 
+export const instant = false;
+
 export default function CouponsLayout({ children }: { children: ReactNode }) {
   return (
     <>

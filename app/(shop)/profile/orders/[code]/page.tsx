@@ -5,8 +5,7 @@ export function generateStaticParams() {
   return [{ code: "VW-9824-BKL" }];
 }
 
-export default async function Page({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
+export default function Page({ params }: { params: Promise<{ code: string }> }) {
   return (
     <Suspense
       fallback={
@@ -15,7 +14,12 @@ export default async function Page({ params }: { params: Promise<{ code: string 
         </div>
       }
     >
-      <OrderDetailsClient code={code} />
+      <OrderDetailsContent params={params} />
     </Suspense>
   );
+}
+
+async function OrderDetailsContent({ params }: { params: Promise<{ code: string }> }) {
+  const { code } = await params;
+  return <OrderDetailsClient code={code} />;
 }

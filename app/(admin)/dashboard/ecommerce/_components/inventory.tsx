@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight, PackageCheck, PackageX, TriangleAlert } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
@@ -24,7 +25,7 @@ type InventoryProps = {
 
 const gaugeSegmentCount = 32;
 
-export function Inventory({ inventory }: InventoryProps) {
+export const Inventory = React.memo(function Inventory({ inventory }: InventoryProps) {
   const { locale, t } = useI18n();
 
   const total = inventory?.totalVariants ?? 0;
@@ -38,56 +39,92 @@ export function Inventory({ inventory }: InventoryProps) {
   const inStockSegments = total > 0 ? Math.round((inStock / total) * gaugeSegmentCount) : 0;
   const lowStockSegments = total > 0 ? Math.round((lowStock / total) * gaugeSegmentCount) : 0;
 
-  const gaugeSegments = Array.from({ length: gaugeSegmentCount }, (_, index) => {
-    let status = "out-of-stock";
-    if (index < inStockSegments) {
-      status = "in-stock";
-    } else if (index < inStockSegments + lowStockSegments) {
-      status = "low-stock";
-    }
-    return {
-      fill: `var(--color-${status})`,
-      id: `segment-${index + 1}`,
-      status,
-      value: 1,
-    };
-  });
+  const gaugeSegments = React.useMemo(() => {
+    return Array.from({ length: gaugeSegmentCount }, (_, index) => {
+      let status = "out-of-stock";
+      if (index < inStockSegments) {
+        status = "in-stock";
+      } else if (index < inStockSegments + lowStockSegments) {
+        status = "low-stock";
+      }
+      return {
+        fill: `var(--color-${status})`,
+        id: `segment-${index + 1}`,
+        status,
+        value: 1,
+      };
+    });
+  }, [inStockSegments, lowStockSegments]);
 
-  const chartConfig = {
-    "in-stock": {
-      label: t("admin.dashboardsA.ecommerce.inStock"),
-      color: "var(--chart-2)",
-    },
-    "low-stock": {
-      label: t("admin.dashboardsA.ecommerce.lowStock"),
-      color: "var(--chart-1)",
-    },
-    "out-of-stock": {
-      label: t("admin.dashboardsA.ecommerce.outOfStock"),
-      color: "var(--destructive)",
-    },
-  } satisfies ChartConfig;
+  const chartConfig = React.useMemo<ChartConfig>(
+    () => ({
+      "in-stock": {
+        label: t("admin.dashboardsA.ecommerce.inStock"),
+        color: "var(--chart-2)",
+      },
+      "low-stock": {
+        label: t("admin.dashboardsA.ecommerce.lowStock"),
+        color: "var(--chart-1)",
+      },
+      "out-of-stock": {
+        label: t("admin.dashboardsA.ecommerce.outOfStock"),
+        color: "var(--destructive)",
+      },
+    }),
+    [t],
+  );
 
-  const inventorySummary = [
-    {
-      icon: PackageCheck,
-      label: t("admin.dashboardsA.ecommerce.inStock"),
-      value: inStock,
-      color: "text-emerald-600 dark:text-emerald-400",
+  const inventorySummary = React.useMemo(
+    () => [
+      {
+        icon: PackageCheck,
+        label: t("admin.dashboardsA.ecommerce.inStock"),
+        value: inStock,
+        color: "text-emerald-600 dark:text-emerald-400",
+      },
+      {
+        icon: TriangleAlert,
+        label: t("admin.dashboardsA.ecommerce.lowStock"),
+        value: lowStock,
+        color: "text-amber-600 dark:text-amber-400",
+      },
+      {
+        icon: PackageX,
+        label: t("admin.dashboardsA.ecommerce.out"),
+        value: outOfStock,
+        color: "text-rose-600 dark:text-rose-400",
+      },
+    ],
+    [inStock, lowStock, outOfStock, t],
+  );
+
+  const renderLabel = React.useCallback(
+    (props: React.ComponentProps<typeof Label>) => {
+      const viewBox = props.viewBox;
+      if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+        return (
+          <text textAnchor="middle" x={viewBox.cx} y={viewBox.cy}>
+            <tspan
+              className="fill-foreground text-2xl font-bold tabular-nums"
+              x={viewBox.cx}
+              y={(viewBox.cy || 0) + 22}
+            >
+              {availableLabel}
+            </tspan>
+            <tspan
+              className="fill-muted-foreground text-xs"
+              x={viewBox.cx}
+              y={(viewBox.cy || 0) + 38}
+            >
+              {t("admin.dashboardsA.ecommerce.available")}
+            </tspan>
+          </text>
+        );
+      }
+      return null;
     },
-    {
-      icon: TriangleAlert,
-      label: t("admin.dashboardsA.ecommerce.lowStock"),
-      value: lowStock,
-      color: "text-amber-600 dark:text-amber-400",
-    },
-    {
-      icon: PackageX,
-      label: t("admin.dashboardsA.ecommerce.out"),
-      value: outOfStock,
-      color: "text-rose-600 dark:text-rose-400",
-    },
-  ];
+    [availableLabel, t],
+  );
 
   return (
     <Card className="h-full">
@@ -119,36 +156,14 @@ export function Inventory({ inventory }: InventoryProps) {
               dataKey="value"
               endAngle={0}
               innerRadius={80}
+              isAnimationActive={false}
               outerRadius={110}
               paddingAngle={2}
               startAngle={180}
               stroke="var(--card)"
               strokeWidth={1}
             >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text textAnchor="middle" x={viewBox.cx} y={viewBox.cy}>
-                        <tspan
-                          className="fill-foreground text-2xl font-bold tabular-nums"
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 22}
-                        >
-                          {availableLabel}
-                        </tspan>
-                        <tspan
-                          className="fill-muted-foreground text-xs"
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 38}
-                        >
-                          {t("admin.dashboardsA.ecommerce.available")}
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
+              <Label content={renderLabel} />
             </Pie>
           </PieChart>
         </ChartContainer>
@@ -169,4 +184,4 @@ export function Inventory({ inventory }: InventoryProps) {
       </CardContent>
     </Card>
   );
-}
+});

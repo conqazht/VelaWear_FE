@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const instant = false;
+
 export default function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <I18nCatalogProvider messages={adminMessages}>

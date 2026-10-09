@@ -107,6 +107,11 @@ export function SiteHeader() {
   const [searchHistory, setSearchHistory] = useState<string[]>(readSearchHistory);
   const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
   const [searchPathname, setSearchPathname] = useState(pathname);
+  const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [user?.avatar]);
 
   // Scroll state
   const [isScrolled, setIsScrolled] = useState(false);
@@ -842,12 +847,13 @@ export function SiteHeader() {
                         aria-label={t("storefront.nav.viewProfile")}
                         className="border-hairline relative flex size-8 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border bg-[#efe7dc] text-xs font-semibold text-[#1c1a18] transition-all duration-300 group-hover:border-[#b5573a]"
                       >
-                        {safeUser.avatar ? (
+                        {safeUser.avatar && !avatarError ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={resolveImageUrl(safeUser.avatar)}
                             alt={safeUser.fullName || "User avatar"}
                             className="size-full rounded-full object-cover"
+                            onError={() => setAvatarError(true)}
                           />
                         ) : safeUser.fullName ? (
                           safeUser.fullName

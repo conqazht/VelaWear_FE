@@ -182,4 +182,3 @@ export async function getAdminCrmDashboard(
 ): Promise<CrmDashboardResponse> {
   return apiGet<CrmDashboardResponse>(`/admin/dashboard/crm?period=${period}`);
 }
-

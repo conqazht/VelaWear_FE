@@ -28,6 +28,10 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   );
 }
 
+const DefaultSelectChevron = (
+  <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />
+);
+
 function SelectTrigger({
   className,
   size = "default",
@@ -47,9 +51,7 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon
-        render={<ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />}
-      />
+      <SelectPrimitive.Icon render={DefaultSelectChevron} />
     </SelectPrimitive.Trigger>
   );
 }

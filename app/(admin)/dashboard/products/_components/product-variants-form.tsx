@@ -1,6 +1,6 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
+import { useCallback, memo, type Dispatch, type SetStateAction } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -84,62 +84,77 @@ export function ProductVariantsForm({
 }: ProductVariantsFormProps) {
   const { t } = useI18n();
 
-  function updateVariant<Key extends keyof ProductVariantFormValue>(
-    index: number,
-    key: Key,
-    value: ProductVariantFormValue[Key],
-  ) {
-    onChange(
-      variants.map((variant, itemIndex) =>
-        itemIndex === index ? { ...variant, [key]: value } : variant,
-      ),
-    );
-  }
-
-  function addVariant() {
-    onChange([...variants, createEmptyProductVariant(`new-${Date.now()}-${variants.length}`)]);
-  }
-
-  function removeVariant(index: number) {
-    onChange(variants.filter((_, itemIndex) => itemIndex !== index));
-  }
-
-  async function togglePersistedStatus(index: number, checked: boolean) {
-    const variant = variants[index];
-    if (!variant.id || !onPersistedStatusToggle) return;
-    const previousStatus = variant.status;
-    const status = getVariantStatusToggleTarget(variant.status, checked);
-    if (!status) return;
-    onChange((current) =>
-      current.map((item) => (item.id === variant.id ? { ...item, status } : item)),
-    );
-    try {
-      await onPersistedStatusToggle(variant.id, status);
-    } catch {
+  const updateVariant = useCallback(
+    <Key extends keyof ProductVariantFormValue>(
+      index: number,
+      key: Key,
+      value: ProductVariantFormValue[Key],
+    ) => {
       onChange((current) =>
-        current.map((item) =>
-          item.id === variant.id && item.status === status
-            ? { ...item, status: previousStatus }
-            : item,
+        current.map((variant, itemIndex) =>
+          itemIndex === index ? { ...variant, [key]: value } : variant,
         ),
       );
-    }
-  }
+    },
+    [onChange],
+  );
 
-  function updateStock(index: number, value: string) {
-    const stock = Number(value);
-    onChange(
-      variants.map((variant, itemIndex) => {
-        if (itemIndex !== index) return variant;
-        let status = variant.status;
-        if (Number.isInteger(stock) && stock >= 0) {
-          if (stock === 0 && status === "ACTIVE") status = "OUT_OF_STOCK";
-          if (stock > 0 && status === "OUT_OF_STOCK") status = "ACTIVE";
-        }
-        return { ...variant, stockQuantity: value, status };
-      }),
-    );
-  }
+  const addVariant = useCallback(() => {
+    onChange((current) => [
+      ...current,
+      createEmptyProductVariant(`new-${Date.now()}-${current.length}`),
+    ]);
+  }, [onChange]);
+
+  const removeVariant = useCallback(
+    (index: number) => {
+      onChange((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    },
+    [onChange],
+  );
+
+  const togglePersistedStatus = useCallback(
+    async (index: number, checked: boolean) => {
+      const variant = variants[index];
+      if (!variant?.id || !onPersistedStatusToggle) return;
+      const previousStatus = variant.status;
+      const status = getVariantStatusToggleTarget(variant.status, checked);
+      if (!status) return;
+      onChange((current) =>
+        current.map((item) => (item.id === variant.id ? { ...item, status } : item)),
+      );
+      try {
+        await onPersistedStatusToggle(variant.id, status);
+      } catch {
+        onChange((current) =>
+          current.map((item) =>
+            item.id === variant.id && item.status === status
+              ? { ...item, status: previousStatus }
+              : item,
+          ),
+        );
+      }
+    },
+    [variants, onPersistedStatusToggle, onChange],
+  );
+
+  const updateStock = useCallback(
+    (index: number, value: string) => {
+      const stock = Number(value);
+      onChange((current) =>
+        current.map((variant, itemIndex) => {
+          if (itemIndex !== index) return variant;
+          let status = variant.status;
+          if (Number.isInteger(stock) && stock >= 0) {
+            if (stock === 0 && status === "ACTIVE") status = "OUT_OF_STOCK";
+            if (stock > 0 && status === "OUT_OF_STOCK") status = "ACTIVE";
+          }
+          return { ...variant, stockQuantity: value, status };
+        }),
+      );
+    },
+    [onChange],
+  );
 
   return (
     <div className="space-y-4">
@@ -164,172 +179,20 @@ export function ProductVariantsForm({
 
       <div className="space-y-4">
         {variants.map((variant, index) => (
-          <section key={variant.key} className="bg-muted/10 rounded-lg border p-4">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium">
-                  {t("admin.commerce.products.variants.label", { number: index + 1 })}
-                </p>
-                {variant.id ? (
-                  <p className="text-muted-foreground text-xs">
-                    {t("admin.commerce.products.variants.id", { id: variant.id })}
-                  </p>
-                ) : null}
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t("admin.commerce.products.variants.remove", { number: index + 1 })}
-                disabled={variants.length === 1}
-                onClick={() => removeVariant(index)}
-              >
-                <Trash2 />
-              </Button>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Field className="md:col-span-2">
-                <FieldLabel htmlFor={`variant-${variant.key}-sku`}>
-                  {t("admin.commerce.products.variants.sku")}
-                </FieldLabel>
-                <Input
-                  id={`variant-${variant.key}-sku`}
-                  value={variant.sku}
-                  onChange={(event) => updateVariant(index, "sku", event.target.value)}
-                  maxLength={100}
-                  placeholder="VELA-BLAZER-BLK-M"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-color`}>
-                  {t("admin.commerce.products.variants.color")}
-                </FieldLabel>
-                <Select
-                  value={variant.colorId || NONE}
-                  onValueChange={(value) =>
-                    updateVariant(index, "colorId", value === NONE ? "" : (value ?? ""))
-                  }
-                  disabled={isCatalogLoading}
-                >
-                  <SelectTrigger id={`variant-${variant.key}-color`} className="w-full">
-                    <SelectValue placeholder={t("admin.commerce.products.variants.noColor")} />
-                  </SelectTrigger>
-                  <SelectContent align="start" alignItemWithTrigger={false}>
-                    <SelectItem value={NONE}>
-                      {t("admin.commerce.products.variants.noColor")}
-                    </SelectItem>
-                    {colors.map((color) => (
-                      <SelectItem key={color.id} value={String(color.id)}>
-                        {color.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-size`}>
-                  {t("admin.commerce.products.variants.size")}
-                </FieldLabel>
-                <Select
-                  value={variant.sizeId || NONE}
-                  onValueChange={(value) =>
-                    updateVariant(index, "sizeId", value === NONE ? "" : (value ?? ""))
-                  }
-                  disabled={isCatalogLoading}
-                >
-                  <SelectTrigger id={`variant-${variant.key}-size`} className="w-full">
-                    <SelectValue placeholder={t("admin.commerce.products.variants.noSize")} />
-                  </SelectTrigger>
-                  <SelectContent align="start" alignItemWithTrigger={false}>
-                    <SelectItem value={NONE}>
-                      {t("admin.commerce.products.variants.noSize")}
-                    </SelectItem>
-                    {sizes.map((size) => (
-                      <SelectItem key={size.id} value={String(size.id)}>
-                        {size.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-price`}>
-                  {t("admin.commerce.products.variants.price")}
-                </FieldLabel>
-                <Input
-                  id={`variant-${variant.key}-price`}
-                  type="number"
-                  min="0"
-                  step="1000"
-                  inputMode="decimal"
-                  value={variant.price}
-                  onChange={(event) => updateVariant(index, "price", event.target.value)}
-                  placeholder="0"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-stock`}>
-                  {t("admin.commerce.products.variants.stock")}
-                </FieldLabel>
-                <Input
-                  id={`variant-${variant.key}-stock`}
-                  type="number"
-                  min="0"
-                  step="1"
-                  inputMode="numeric"
-                  value={variant.stockQuantity}
-                  onChange={(event) => updateStock(index, event.target.value)}
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor={`variant-${variant.key}-status`}>
-                  {t("admin.commerce.products.variants.status")}
-                </FieldLabel>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    size="sm"
-                    checked={getVariantStatusToggleState(variant.status).checked}
-                    disabled={
-                      !variant.id ||
-                      getVariantStatusToggleState(variant.status).disabled ||
-                      (pendingStatusVariantId !== null && pendingStatusVariantId !== undefined)
-                    }
-                    aria-label={t("admin.commerce.translation.toggleAria", { name: variant.sku })}
-                    onCheckedChange={(checked) => void togglePersistedStatus(index, checked)}
-                  />
-                  <span className="text-muted-foreground text-xs">
-                    {t(VARIANT_STATUS_MESSAGE_KEYS[variant.status])}
-                  </span>
-                </div>
-                <Select
-                  value={variant.status}
-                  onValueChange={(value) =>
-                    updateVariant(index, "status", value as ProductVariantStatus)
-                  }
-                >
-                  <SelectTrigger id={`variant-${variant.key}-status`} className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent align="start" alignItemWithTrigger={false}>
-                    {VARIANT_STATUSES.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {t(VARIANT_STATUS_MESSAGE_KEYS[status])}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-          </section>
+          <ProductVariantItem
+            key={variant.key}
+            variant={variant}
+            index={index}
+            totalVariants={variants.length}
+            colors={colors}
+            sizes={sizes}
+            isCatalogLoading={isCatalogLoading}
+            pendingStatusVariantId={pendingStatusVariantId}
+            onUpdate={updateVariant}
+            onRemove={removeVariant}
+            onToggleStatus={togglePersistedStatus}
+            onUpdateStock={updateStock}
+          />
         ))}
       </div>
 
@@ -337,3 +200,200 @@ export function ProductVariantsForm({
     </div>
   );
 }
+
+type ProductVariantItemProps = {
+  variant: ProductVariantFormValue;
+  index: number;
+  totalVariants: number;
+  colors: AdminCatalogOption[];
+  sizes: AdminCatalogOption[];
+  isCatalogLoading: boolean;
+  pendingStatusVariantId?: number | null;
+  onUpdate: <Key extends keyof ProductVariantFormValue>(
+    index: number,
+    key: Key,
+    value: ProductVariantFormValue[Key],
+  ) => void;
+  onRemove: (index: number) => void;
+  onToggleStatus: (index: number, checked: boolean) => void;
+  onUpdateStock: (index: number, value: string) => void;
+};
+
+const ProductVariantItem = memo(function ProductVariantItem({
+  variant,
+  index,
+  totalVariants,
+  colors,
+  sizes,
+  isCatalogLoading,
+  pendingStatusVariantId,
+  onUpdate,
+  onRemove,
+  onToggleStatus,
+  onUpdateStock,
+}: ProductVariantItemProps) {
+  const { t } = useI18n();
+
+  return (
+    <section className="bg-muted/10 rounded-lg border p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium">
+            {t("admin.commerce.products.variants.label", { number: index + 1 })}
+          </p>
+          {variant.id ? (
+            <p className="text-muted-foreground text-xs">
+              {t("admin.commerce.products.variants.id", { id: variant.id })}
+            </p>
+          ) : null}
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t("admin.commerce.products.variants.remove", { number: index + 1 })}
+          disabled={totalVariants === 1}
+          onClick={() => onRemove(index)}
+        >
+          <Trash2 />
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Field className="md:col-span-2">
+          <FieldLabel htmlFor={`variant-${variant.key}-sku`}>
+            {t("admin.commerce.products.variants.sku")}
+          </FieldLabel>
+          <Input
+            id={`variant-${variant.key}-sku`}
+            value={variant.sku}
+            onChange={(event) => onUpdate(index, "sku", event.target.value)}
+            maxLength={100}
+            placeholder="VELA-BLAZER-BLK-M"
+            required
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`variant-${variant.key}-color`}>
+            {t("admin.commerce.products.variants.color")}
+          </FieldLabel>
+          <Select
+            value={variant.colorId || NONE}
+            onValueChange={(value) =>
+              onUpdate(index, "colorId", value === NONE ? "" : (value ?? ""))
+            }
+            disabled={isCatalogLoading}
+          >
+            <SelectTrigger id={`variant-${variant.key}-color`} className="w-full">
+              <SelectValue placeholder={t("admin.commerce.products.variants.noColor")} />
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value={NONE}>{t("admin.commerce.products.variants.noColor")}</SelectItem>
+              {colors.map((color) => (
+                <SelectItem key={color.id} value={String(color.id)}>
+                  {color.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`variant-${variant.key}-size`}>
+            {t("admin.commerce.products.variants.size")}
+          </FieldLabel>
+          <Select
+            value={variant.sizeId || NONE}
+            onValueChange={(value) =>
+              onUpdate(index, "sizeId", value === NONE ? "" : (value ?? ""))
+            }
+            disabled={isCatalogLoading}
+          >
+            <SelectTrigger id={`variant-${variant.key}-size`} className="w-full">
+              <SelectValue placeholder={t("admin.commerce.products.variants.noSize")} />
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value={NONE}>{t("admin.commerce.products.variants.noSize")}</SelectItem>
+              {sizes.map((size) => (
+                <SelectItem key={size.id} value={String(size.id)}>
+                  {size.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`variant-${variant.key}-price`}>
+            {t("admin.commerce.products.variants.price")}
+          </FieldLabel>
+          <Input
+            id={`variant-${variant.key}-price`}
+            type="number"
+            min="0"
+            step="1000"
+            inputMode="decimal"
+            value={variant.price}
+            onChange={(event) => onUpdate(index, "price", event.target.value)}
+            placeholder="0"
+            required
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`variant-${variant.key}-stock`}>
+            {t("admin.commerce.products.variants.stock")}
+          </FieldLabel>
+          <Input
+            id={`variant-${variant.key}-stock`}
+            type="number"
+            min="0"
+            step="1"
+            inputMode="numeric"
+            value={variant.stockQuantity}
+            onChange={(event) => onUpdateStock(index, event.target.value)}
+            required
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`variant-${variant.key}-status`}>
+            {t("admin.commerce.products.variants.status")}
+          </FieldLabel>
+          <div className="flex items-center gap-2">
+            <Switch
+              size="sm"
+              checked={getVariantStatusToggleState(variant.status).checked}
+              disabled={
+                !variant.id ||
+                getVariantStatusToggleState(variant.status).disabled ||
+                (pendingStatusVariantId !== null && pendingStatusVariantId !== undefined)
+              }
+              aria-label={t("admin.commerce.translation.toggleAria", { name: variant.sku })}
+              onCheckedChange={(checked) => void onToggleStatus(index, checked)}
+            />
+            <span className="text-muted-foreground text-xs">
+              {t(VARIANT_STATUS_MESSAGE_KEYS[variant.status])}
+            </span>
+          </div>
+          <Select
+            value={variant.status}
+            onValueChange={(value) => onUpdate(index, "status", value as ProductVariantStatus)}
+          >
+            <SelectTrigger id={`variant-${variant.key}-status`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              {VARIANT_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(VARIANT_STATUS_MESSAGE_KEYS[status])}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
+    </section>
+  );
+});

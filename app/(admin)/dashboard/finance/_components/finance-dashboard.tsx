@@ -48,7 +48,10 @@ export function FinanceDashboard() {
     }));
 
     if (exportRows.length > 0) {
-      downloadCsv(`finance-cashflow-${period}-${new Date().toISOString().slice(0, 10)}.csv`, exportRows);
+      downloadCsv(
+        `finance-cashflow-${period}-${new Date().toISOString().slice(0, 10)}.csv`,
+        exportRows,
+      );
     }
   };
 
@@ -63,10 +66,7 @@ export function FinanceDashboard() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select
-            value={period}
-            onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}
-          >
+          <Select value={period} onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}>
             <SelectTrigger className="w-48" id="finance-period" size="sm">
               <SelectValue />
             </SelectTrigger>
@@ -104,27 +104,35 @@ export function FinanceDashboard() {
             onClick={handleExportCsv}
             disabled={!data || (data.cashflowChart || []).length === 0}
           >
-            <Download className="size-4 mr-1.5" />
+            <Download className="mr-1.5 size-4" />
             {locale === "vi" ? "Xuất dữ liệu" : "Export"}
           </Button>
         </div>
       </div>
 
       <div className="flex flex-col gap-6">
+        {/* Row 1: 4 Compact KPI Cards */}
         <OverviewKpis kpis={data?.kpis} />
 
-        <IncomeBreakdown paymentMethods={data?.paymentMethods} />
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-          <div className="xl:col-span-7">
+        {/* Row 2: Cashflow Trend Chart (7 cols) + Payment Status Donut (5 cols) */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-7">
             <TransactionsOverviewCard cashflowChart={data?.cashflowChart} />
           </div>
-          <div className="xl:col-span-5">
+          <div className="lg:col-span-5">
             <BalanceDistributionCard paymentStatuses={data?.paymentStatuses} />
           </div>
         </div>
 
-        <UpcomingTransactions recentTransactions={data?.recentTransactions} />
+        {/* Row 3: Payment Method Gateways (5 cols) + Recent Payment Transactions (7 cols) */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <IncomeBreakdown paymentMethods={data?.paymentMethods} />
+          </div>
+          <div className="lg:col-span-7">
+            <UpcomingTransactions recentTransactions={data?.recentTransactions} />
+          </div>
+        </div>
       </div>
     </div>
   );

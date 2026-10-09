@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight, Package } from "lucide-react";
 
@@ -21,16 +22,16 @@ type TopProductsProps = {
   topProducts?: TopProductSummary[];
 };
 
-export function TopProducts({ topProducts = [] }: TopProductsProps) {
+export const TopProducts = React.memo(function TopProducts({ topProducts = [] }: TopProductsProps) {
   const { locale, t } = useI18n();
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-sm font-normal text-muted-foreground">
+        <CardTitle className="text-muted-foreground text-sm font-normal">
           {t("admin.dashboardsA.ecommerce.topProducts")}
         </CardTitle>
-        <CardDescription className="text-xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+        <CardDescription className="text-foreground text-xl leading-none font-bold tracking-tight tabular-nums">
           {locale === "vi" ? "Sản phẩm bán chạy nhất" : "Top Best Sellers"}
         </CardDescription>
         <CardAction>
@@ -48,8 +49,11 @@ export function TopProducts({ topProducts = [] }: TopProductsProps) {
         {topProducts.length > 0 ? (
           <div className="flex flex-col divide-y">
             {topProducts.map((product, idx) => (
-              <div key={product.productName + idx} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                <div className="flex items-center gap-3 min-w-0">
+              <div
+                key={product.productName + idx}
+                className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+              >
+                <div className="flex min-w-0 items-center gap-3">
                   <Avatar className="size-9 rounded-md border">
                     <AvatarImage
                       src={resolveAdminAssetUrl(product.image) ?? undefined}
@@ -61,12 +65,12 @@ export function TopProducts({ topProducts = [] }: TopProductsProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">
+                    <p className="text-foreground truncate text-sm font-medium">
                       {product.productName}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {locale === "vi" ? "Đã bán: " : "Sold: "}
-                      <span className="font-semibold text-foreground">
+                      <span className="text-foreground font-semibold">
                         {formatNumber(product.soldQuantity, locale)}
                       </span>
                     </p>
@@ -74,10 +78,10 @@ export function TopProducts({ topProducts = [] }: TopProductsProps) {
                 </div>
 
                 <div className="text-right text-xs">
-                  <p className="font-mono font-semibold text-foreground">
+                  <p className="text-foreground font-mono font-semibold">
                     {formatCurrency(product.totalRevenue, locale)}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-muted-foreground text-[11px]">
                     {locale === "vi" ? "Doanh thu" : "Revenue"}
                   </p>
                 </div>
@@ -85,12 +89,12 @@ export function TopProducts({ topProducts = [] }: TopProductsProps) {
             ))}
           </div>
         ) : (
-          <div className="flex h-44 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
-            <Package className="size-6 text-muted-foreground/60" />
+          <div className="text-muted-foreground flex h-44 flex-col items-center justify-center gap-2 text-center text-sm">
+            <Package className="text-muted-foreground/60 size-6" />
             <p>{locale === "vi" ? "Chưa có dữ liệu bán hàng" : "No sales data recorded yet"}</p>
           </div>
         )}
       </CardContent>
     </Card>
   );
-}
+});

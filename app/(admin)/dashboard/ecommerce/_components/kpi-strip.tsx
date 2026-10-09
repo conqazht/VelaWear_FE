@@ -1,8 +1,8 @@
 "use client";
 
+import * as React from "react";
 import {
   DollarSign,
-  PackageCheck,
   ReceiptText,
   RotateCcw,
   ShoppingBag,
@@ -28,27 +28,28 @@ import {
 } from "@/components/ui/chart";
 import type { DashboardKpiSummary, RevenueChartPoint } from "@/lib/api/admin-dashboard";
 import { formatCurrency, formatNumber } from "@/lib/i18n/format";
-import { getIntlLocale } from "@/lib/i18n";
 
 type KpiStripProps = {
   kpis?: DashboardKpiSummary;
   revenueChart?: RevenueChartPoint[];
 };
 
-export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
+export const KpiStrip = React.memo(function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
   const { locale, t } = useI18n();
-  const intlLocale = getIntlLocale(locale);
 
-  const revenueOverviewConfig = {
-    revenue: {
-      label: t("admin.dashboardsA.ecommerce.revenue"),
-      color: "var(--chart-1)",
-    },
-    orders: {
-      label: t("admin.dashboardsA.ecommerce.totalOrders"),
-      color: "var(--chart-2)",
-    },
-  } satisfies ChartConfig;
+  const revenueOverviewConfig = React.useMemo<ChartConfig>(
+    () => ({
+      revenue: {
+        label: t("admin.dashboardsA.ecommerce.revenue"),
+        color: "var(--chart-1)",
+      },
+      orders: {
+        label: t("admin.dashboardsA.ecommerce.totalOrders"),
+        color: "var(--chart-2)",
+      },
+    }),
+    [t],
+  );
 
   // Fallbacks if data not yet loaded
   const grossSales = kpis?.grossSales ?? 0;
@@ -60,11 +61,15 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
   const cancellationsCount = kpis?.cancellationsCount ?? 0;
   const cancellationRate = kpis?.cancellationRate ?? 0;
 
-  const chartData = revenueChart.map((point) => ({
-    period: point.date,
-    revenue: point.revenue,
-    orders: point.orderCount,
-  }));
+  const chartData = React.useMemo(
+    () =>
+      revenueChart.map((point) => ({
+        period: point.date,
+        revenue: point.revenue,
+        orders: point.orderCount,
+      })),
+    [revenueChart],
+  );
 
   return (
     <div className="bg-card border-border h-full overflow-hidden rounded-xl border shadow-[0_1px_2px_0_rgba(0,0,0,0.03)] xl:col-span-12">
@@ -76,7 +81,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <CardTitle className="text-sm font-normal">
                 {t("admin.dashboardsA.ecommerce.totalSales")}
               </CardTitle>
-              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+              <CardDescription className="text-foreground text-2xl leading-none font-bold tracking-tight tabular-nums sm:text-3xl">
                 {formatCurrency(grossSales, locale)}
               </CardDescription>
               <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -87,8 +92,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
                 {grossSalesChange >= 0 ? (
                   <span className="flex items-center text-emerald-700 dark:text-emerald-400">
-                    <TrendingUp className="mr-0.5 size-3.5" />
-                    +{grossSalesChange}%
+                    <TrendingUp className="mr-0.5 size-3.5" />+{grossSalesChange}%
                   </span>
                 ) : (
                   <span className="flex items-center text-rose-700 dark:text-rose-400">
@@ -109,7 +113,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <CardTitle className="text-sm font-normal">
                 {t("admin.dashboardsA.ecommerce.totalOrders")}
               </CardTitle>
-              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+              <CardDescription className="text-foreground text-2xl leading-none font-bold tracking-tight tabular-nums sm:text-3xl">
                 {formatNumber(totalOrders, locale)}
               </CardDescription>
               <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -120,8 +124,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
                 {totalOrdersChange >= 0 ? (
                   <span className="flex items-center text-emerald-700 dark:text-emerald-400">
-                    <TrendingUp className="mr-0.5 size-3.5" />
-                    +{totalOrdersChange}%
+                    <TrendingUp className="mr-0.5 size-3.5" />+{totalOrdersChange}%
                   </span>
                 ) : (
                   <span className="flex items-center text-rose-700 dark:text-rose-400">
@@ -142,7 +145,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <CardTitle className="text-sm font-normal">
                 {t("admin.dashboardsA.ecommerce.averageOrder")}
               </CardTitle>
-              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+              <CardDescription className="text-foreground text-2xl leading-none font-bold tracking-tight tabular-nums sm:text-3xl">
                 {formatCurrency(averageOrderValue, locale)}
               </CardDescription>
               <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -153,8 +156,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
                 {aovChange >= 0 ? (
                   <span className="flex items-center text-emerald-700 dark:text-emerald-400">
-                    <TrendingUp className="mr-0.5 size-3.5" />
-                    +{aovChange}%
+                    <TrendingUp className="mr-0.5 size-3.5" />+{aovChange}%
                   </span>
                 ) : (
                   <span className="flex items-center text-rose-700 dark:text-rose-400">
@@ -175,7 +177,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
               <CardTitle className="text-sm font-normal">
                 {locale === "vi" ? "Đơn hủy / Hoàn" : "Cancellations"}
               </CardTitle>
-              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+              <CardDescription className="text-foreground text-2xl leading-none font-bold tracking-tight tabular-nums sm:text-3xl">
                 {formatNumber(cancellationsCount, locale)}
               </CardDescription>
               <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
@@ -184,9 +186,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
-                <span className="text-amber-700 dark:text-amber-400">
-                  {cancellationRate}%
-                </span>
+                <span className="text-amber-700 dark:text-amber-400">{cancellationRate}%</span>
                 <span className="text-muted-foreground font-normal">
                   {locale === "vi" ? "tỷ lệ hủy đơn" : "cancellation rate"}
                 </span>
@@ -232,7 +232,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
                         formatter={(val, name) => (
                           <div className="flex items-center justify-between gap-4 font-mono">
                             <span className="text-muted-foreground">{String(name)}</span>
-                            <span className="font-semibold text-foreground">
+                            <span className="text-foreground font-semibold">
                               {name === t("admin.dashboardsA.ecommerce.revenue")
                                 ? formatCurrency(Number(val), locale)
                                 : formatNumber(Number(val), locale)}
@@ -264,7 +264,7 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
                 </ComposedChart>
               </ChartContainer>
             ) : (
-              <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground flex h-64 items-center justify-center text-sm">
                 {locale === "vi" ? "Chưa có dữ liệu biểu đồ" : "No chart data available"}
               </div>
             )}
@@ -273,4 +273,4 @@ export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
       </div>
     </div>
   );
-}
+});

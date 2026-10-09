@@ -44,7 +44,9 @@ export function useRecentOrdersColumns({
       cell: ({ row }) => (
         <div className="w-10">
           <Checkbox
-            aria-label={t("admin.dashboardsA.ecommerce.selectOrder", { id: row.original.orderCode })}
+            aria-label={t("admin.dashboardsA.ecommerce.selectOrder", {
+              id: row.original.orderCode,
+            })}
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
           />
@@ -60,7 +62,7 @@ export function useRecentOrdersColumns({
         <div className="flex flex-col gap-0.5">
           <button
             type="button"
-            className="text-left font-medium text-foreground hover:underline cursor-pointer"
+            className="text-foreground cursor-pointer text-left font-medium hover:underline"
             onClick={() => onSelectOrder?.(row.original)}
           >
             #{row.original.orderCode}
@@ -74,9 +76,11 @@ export function useRecentOrdersColumns({
       accessorKey: "customerName",
       header: t("admin.dashboardsA.ecommerce.customer"),
       cell: ({ row }) => (
-        <div className="flex flex-col gap-0.5 max-w-[200px]">
-          <span className="font-medium text-foreground truncate">{row.original.customerName}</span>
-          <span className="text-muted-foreground text-xs truncate">{row.original.customerEmail}</span>
+        <div className="flex max-w-[200px] flex-col gap-0.5">
+          <span className="text-foreground truncate font-medium">{row.original.customerName}</span>
+          <span className="text-muted-foreground truncate text-xs">
+            {row.original.customerEmail}
+          </span>
         </div>
       ),
     },
@@ -144,7 +148,7 @@ export function useRecentOrdersColumns({
               <DropdownMenuLabel>{t("admin.dashboardsA.ecommerce.orderActions")}</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => onSelectOrder?.(row.original)}>
-                  <Eye className="size-4 mr-2" />
+                  <Eye className="mr-2 size-4" />
                   {t("admin.dashboardsA.ecommerce.viewOrder")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -157,7 +161,7 @@ export function useRecentOrdersColumns({
                     );
                   }}
                 >
-                  <Copy className="size-4 mr-2" />
+                  <Copy className="mr-2 size-4" />
                   {t("admin.dashboardsA.ecommerce.copyOrderId")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>

@@ -6,7 +6,14 @@ import { ArrowUpRight, CreditCard, ChevronRight } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Item,
   ItemActions,
@@ -29,33 +36,50 @@ type UpcomingTransactionsProps = {
   recentTransactions?: RecentPaymentTransaction[];
 };
 
-export function UpcomingTransactions({ recentTransactions = [] }: UpcomingTransactionsProps) {
+export const UpcomingTransactions = React.memo(function UpcomingTransactions({
+  recentTransactions = [],
+}: UpcomingTransactionsProps) {
   const { locale, t } = useI18n();
-  const [selectedOrder, setSelectedOrder] = React.useState<{ id: number; orderCode: string } | null>(null);
+  const [selectedOrder, setSelectedOrder] = React.useState<{
+    id: number;
+    orderCode: string;
+  } | null>(null);
 
   return (
     <>
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="font-normal text-sm text-muted-foreground">
-            {locale === "vi" ? "Giao dịch thanh toán gần nhất" : "Recent Payment Transactions"}
-          </CardTitle>
-          <CardAction>
-            <Button
-              aria-label={t("admin.dashboardsA.ecommerce.openOrders")}
-              size="icon-sm"
-              variant="outline"
-              render={
-                <Link href="/dashboard/orders" title={locale === "vi" ? "Xem tất cả đơn hàng" : "View all orders"}>
-                  <ArrowUpRight className="size-4" />
-                </Link>
-              }
-            />
-          </CardAction>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-semibold">
+                {locale === "vi" ? "Giao dịch thanh toán gần nhất" : "Recent Payment Transactions"}
+              </CardTitle>
+              <CardDescription className="text-xs">
+                {locale === "vi"
+                  ? "10 đơn hàng thanh toán phát sinh mới nhất (click để xem chi tiết / in hóa đơn)"
+                  : "Latest 10 order payment transactions (click to view details or print invoice)"}
+              </CardDescription>
+            </div>
+            <CardAction>
+              <Button
+                aria-label={t("admin.dashboardsA.ecommerce.openOrders")}
+                size="icon-sm"
+                variant="outline"
+                render={
+                  <Link
+                    href="/dashboard/orders"
+                    title={locale === "vi" ? "Xem tất cả đơn hàng" : "View all orders"}
+                  >
+                    <ArrowUpRight className="size-4" />
+                  </Link>
+                }
+              />
+            </CardAction>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {recentTransactions.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center text-sm">
               {locale === "vi" ? "Chưa có giao dịch gần đây" : "No recent transactions"}
             </div>
           ) : (
@@ -65,19 +89,17 @@ export function UpcomingTransactions({ recentTransactions = [] }: UpcomingTransa
                   key={tx.orderId}
                   variant="outline"
                   size="sm"
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="hover:bg-muted/50 cursor-pointer transition-colors"
                   onClick={() => setSelectedOrder({ id: tx.orderId, orderCode: tx.orderCode })}
                 >
                   <ItemMedia>
-                    <div className="bg-background grid size-9 place-items-center rounded-md border text-muted-foreground">
+                    <div className="bg-background text-muted-foreground grid size-9 place-items-center rounded-md border">
                       <CreditCard className="size-4" />
                     </div>
                   </ItemMedia>
                   <ItemContent>
                     <div className="flex items-center gap-2">
-                      <ItemTitle className="font-medium text-foreground">
-                        #{tx.orderCode}
-                      </ItemTitle>
+                      <ItemTitle className="text-foreground font-medium">#{tx.orderCode}</ItemTitle>
                       <PaymentStatusBadge status={tx.paymentStatus as AdminPaymentStatus} />
                     </div>
                     <ItemDescription className="text-xs">
@@ -86,7 +108,7 @@ export function UpcomingTransactions({ recentTransactions = [] }: UpcomingTransa
                     </ItemDescription>
                   </ItemContent>
                   <ItemActions className="flex items-center gap-2">
-                    <span className="font-semibold text-sm tabular-nums text-foreground">
+                    <span className="text-foreground text-sm font-semibold tabular-nums">
                       {formatCurrency(tx.finalAmount, locale)}
                     </span>
                     <ChevronRight className="text-muted-foreground size-4" />
@@ -108,4 +130,4 @@ export function UpcomingTransactions({ recentTransactions = [] }: UpcomingTransa
       />
     </>
   );
-}
+});

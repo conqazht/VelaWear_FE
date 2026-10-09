@@ -1,9 +1,10 @@
 "use client";
 
+import * as React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -11,48 +12,60 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import type { CashflowChartPoint } from "@/lib/api/admin-dashboard";
-import { formatCurrency, formatDate } from "@/lib/i18n/format";
+import { formatCurrency } from "@/lib/i18n/format";
 
 type TransactionsOverviewCardProps = {
   cashflowChart?: CashflowChartPoint[];
 };
 
-export function TransactionsOverviewCard({ cashflowChart = [] }: TransactionsOverviewCardProps) {
-  const { locale, t } = useI18n();
+export const TransactionsOverviewCard = React.memo(function TransactionsOverviewCard({
+  cashflowChart = [],
+}: TransactionsOverviewCardProps) {
+  const { locale } = useI18n();
 
-  const formatTooltipCurrency = (value: number | string) =>
-    formatCurrency(Number(value), locale);
+  const formatTooltipCurrency = React.useCallback(
+    (value: number | string) => formatCurrency(Number(value), locale),
+    [locale],
+  );
 
-  const chartConfig = {
-    collectedAmount: {
-      color: "var(--chart-2)",
-      label: locale === "vi" ? "Thực thu" : "Collected",
-    },
-    pendingAmount: {
-      color: "var(--chart-4)",
-      label: locale === "vi" ? "Chờ thu (Pending)" : "Pending",
-    },
-    refundedAmount: {
-      color: "var(--chart-5)",
-      label: locale === "vi" ? "Hoàn trả" : "Refunded",
-    },
-  } satisfies ChartConfig;
+  const chartConfig = React.useMemo<ChartConfig>(
+    () => ({
+      collectedAmount: {
+        color: "var(--chart-2)",
+        label: locale === "vi" ? "Thực thu" : "Collected",
+      },
+      pendingAmount: {
+        color: "var(--chart-4)",
+        label: locale === "vi" ? "Chờ thu (Pending)" : "Pending",
+      },
+      refundedAmount: {
+        color: "var(--chart-5)",
+        label: locale === "vi" ? "Hoàn trả" : "Refunded",
+      },
+    }),
+    [locale],
+  );
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-sm text-muted-foreground">
+        <CardTitle className="text-base font-semibold">
           {locale === "vi" ? "Biến động dòng tiền theo ngày" : "Daily Cashflow Movements"}
         </CardTitle>
+        <CardDescription className="text-xs">
+          {locale === "vi"
+            ? "Theo dõi dòng tiền thực thu, chờ xử lý và hoàn trả theo ngày"
+            : "Monitor collected revenue, pending cashflow, and refunds over time"}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
         {cashflowChart.length === 0 ? (
-          <div className="flex h-50 items-center justify-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex h-56 items-center justify-center text-sm">
             {locale === "vi" ? "Chưa có dữ liệu dòng tiền" : "No cashflow data available"}
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-56 w-full">
+          <ChartContainer config={chartConfig} className="h-64 w-full">
             <LineChart
               accessibilityLayer
               data={cashflowChart}
@@ -64,7 +77,7 @@ export function TransactionsOverviewCard({ cashflowChart = [] }: TransactionsOve
                 dataKey="date"
                 tickFormatter={(val: string) => {
                   try {
-                    const [y, m, d] = val.split("-");
+                    const [, m, d] = val.split("-");
                     return `${d}/${m}`;
                   } catch {
                     return val;
@@ -74,13 +87,7 @@ export function TransactionsOverviewCard({ cashflowChart = [] }: TransactionsOve
                 tickMargin={10}
                 tick={{ fontSize: 12 }}
               />
-              <YAxis
-                hide
-                axisLine={false}
-                tickLine={false}
-                tickMargin={10}
-                tick={{ fontSize: 12 }}
-              />
+              <YAxis hide axisLine={false} tickLine={false} />
               <ChartTooltip
                 cursor={false}
                 content={({ active, payload, label }) => (
@@ -132,4 +139,4 @@ export function TransactionsOverviewCard({ cashflowChart = [] }: TransactionsOve
       </CardContent>
     </Card>
   );
-}
+});

@@ -94,7 +94,15 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<ProductDetailSkeleton />}>
+      <ProductDetailContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ProductDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id: slug } = await params;
   const product = await getAuthoritativeProduct(slug);
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://velawear.com";
@@ -128,9 +136,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProduct) }}
         />
       )}
-      <Suspense fallback={<ProductDetailSkeleton />}>
-        <ProductDetailPage slug={slug} />
-      </Suspense>
+      <ProductDetailPage slug={slug} />
     </>
   );
 }

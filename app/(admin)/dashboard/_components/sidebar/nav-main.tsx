@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -88,21 +89,30 @@ export function NavMain({ items }: NavMainProps) {
   const path = usePathname();
   const { t } = useI18n();
 
-  const isItemActive = (item: NavMainItem) => {
-    if (hasSubItems(item)) {
+  const isItemActive = React.useCallback(
+    (item: NavMainItem) => {
+      if (hasSubItems(item)) {
+        return item.subItems.some((sub) => path.startsWith(sub.url));
+      }
+
+      return path === item.url;
+    },
+    [path],
+  );
+
+  const isSubItemActive = React.useCallback(
+    (url: string) => {
+      return path === url;
+    },
+    [path],
+  );
+
+  const isSubmenuOpen = React.useCallback(
+    (item: NavMainParentItem) => {
       return item.subItems.some((sub) => path.startsWith(sub.url));
-    }
-
-    return path === item.url;
-  };
-
-  const isSubItemActive = (url: string) => {
-    return path === url;
-  };
-
-  const isSubmenuOpen = (item: NavMainParentItem) => {
-    return item.subItems.some((sub) => path.startsWith(sub.url));
-  };
+    },
+    [path],
+  );
 
   return (
     <>
@@ -157,7 +167,12 @@ export function NavMain({ items }: NavMainProps) {
   );
 }
 
-function NavItem({ item, isItemActive, isSubItemActive, isSubmenuOpen }: NavItemProps) {
+const NavItem = React.memo(function NavItem({
+  item,
+  isItemActive,
+  isSubItemActive,
+  isSubmenuOpen,
+}: NavItemProps) {
   const { state, isMobile } = useSidebar();
   const isCollapsedDesktop = state === "collapsed" && !isMobile;
 
@@ -192,9 +207,13 @@ function NavItem({ item, isItemActive, isSubItemActive, isSubmenuOpen }: NavItem
       isSubItemActive={isSubItemActive}
     />
   );
-}
+});
 
-function NavLinkItem({ item, isActive, showIconFallback }: NavLinkItemProps) {
+const NavLinkItem = React.memo(function NavLinkItem({
+  item,
+  isActive,
+  showIconFallback,
+}: NavLinkItemProps) {
   const { t } = useI18n();
   const title = t(item.titleKey);
 
@@ -218,7 +237,7 @@ function NavLinkItem({ item, isActive, showIconFallback }: NavLinkItemProps) {
       <NavItemBadge badge={item.badge} />
     </SidebarMenuItem>
   );
-}
+});
 
 function NavLinkIcon({ item, showFallback }: NavLinkIconProps) {
   const Icon = item.icon;
@@ -235,7 +254,11 @@ function NavLinkIcon({ item, showFallback }: NavLinkIconProps) {
   return null;
 }
 
-function NavDropdownItem({ item, isActive, isSubItemActive }: NavDropdownItemProps) {
+const NavDropdownItem = React.memo(function NavDropdownItem({
+  item,
+  isActive,
+  isSubItemActive,
+}: NavDropdownItemProps) {
   const Icon = item.icon;
   const { t } = useI18n();
   const title = t(item.titleKey);
@@ -282,9 +305,9 @@ function NavDropdownItem({ item, isActive, isSubItemActive }: NavDropdownItemPro
       </DropdownMenu>
     </SidebarMenuItem>
   );
-}
+});
 
-function NavCollapsibleItem({
+const NavCollapsibleItem = React.memo(function NavCollapsibleItem({
   item,
   isActive,
   defaultOpen,
@@ -346,7 +369,7 @@ function NavCollapsibleItem({
       </CollapsibleContent>
     </Collapsible>
   );
-}
+});
 
 function NavItemBadge({ badge }: { badge?: NavBadge }) {
   const { t } = useI18n();

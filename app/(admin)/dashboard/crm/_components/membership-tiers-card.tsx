@@ -30,19 +30,22 @@ const TIER_META: Record<
   },
   SILVER: {
     icon: ShieldCheck,
-    badgeClass: "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200",
+    badgeClass:
+      "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200",
     indicatorClass: "*:data-[slot='progress-indicator']:bg-slate-500",
     criteria: "≥ 2M đ",
   },
   GOLD: {
     icon: Sparkles,
-    badgeClass: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-200",
+    badgeClass:
+      "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-200",
     indicatorClass: "*:data-[slot='progress-indicator']:bg-amber-500",
     criteria: "≥ 5M đ",
   },
   DIAMOND: {
     icon: Crown,
-    badgeClass: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-200",
+    badgeClass:
+      "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-200",
     indicatorClass: "*:data-[slot='progress-indicator']:bg-purple-500",
     criteria: "≥ 10M đ",
   },
@@ -54,7 +57,7 @@ export function MembershipTiersCard({ tiers = [] }: MembershipTiersCardProps) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-semibold text-base">
+        <CardTitle className="text-base font-semibold">
           {locale === "vi" ? "Phân hạng hội viên" : "Membership Tiers"}
         </CardTitle>
         <CardDescription className="text-xs">
@@ -65,7 +68,7 @@ export function MembershipTiersCard({ tiers = [] }: MembershipTiersCardProps) {
       </CardHeader>
       <CardContent>
         {tiers.length === 0 ? (
-          <div className="flex h-56 items-center justify-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex h-56 items-center justify-center text-sm">
             {locale === "vi" ? "Chưa có dữ liệu hội viên" : "No membership tier data"}
           </div>
         ) : (
@@ -78,7 +81,10 @@ export function MembershipTiersCard({ tiers = [] }: MembershipTiersCardProps) {
                 <div key={tier.tier} className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={`gap-1 px-2 py-0.5 text-xs ${meta.badgeClass}`}>
+                      <Badge
+                        variant="outline"
+                        className={`gap-1 px-2 py-0.5 text-xs ${meta.badgeClass}`}
+                      >
                         <Icon className="size-3" />
                         <span>{tier.label}</span>
                       </Badge>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Printer } from "lucide-react";
 
 import {
   ResourcePage,
@@ -24,6 +24,7 @@ import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
 import { useAdminOrdersQuery } from "@/lib/queries/admin-orders";
 
 import { OrderDetailsSheet } from "./order-details-sheet";
+import { OrderInvoiceDialog } from "./order-invoice-dialog";
 import {
   getOrderStatusLabel,
   getPaymentMethodLabel,
@@ -45,6 +46,7 @@ export function OrdersManagement() {
   const [status, setStatus] = useState<OrderStatusFilter>("ALL");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatusFilter>("ALL");
   const [selectedOrder, setSelectedOrder] = useState<OrderSelection | null>(null);
+  const [invoiceOrder, setInvoiceOrder] = useState<AdminOrder | null>(null);
   const deferredSearch = useDeferredValue(search.trim());
 
   const queryFilters: AdminOrderFilters = {
@@ -135,14 +137,25 @@ export function OrdersManagement() {
       header: <span className="sr-only">{t("admin.commerce.common.actions")}</span>,
       className: "text-right",
       cell: (order) => (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("admin.commerce.orders.view", { code: order.orderCode })}
-          onClick={() => setSelectedOrder({ id: order.id, orderCode: order.orderCode })}
-        >
-          <Eye />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title={locale === "vi" ? "In hóa đơn" : "Print Invoice"}
+            aria-label={locale === "vi" ? "In hóa đơn" : "Print Invoice"}
+            onClick={() => setInvoiceOrder(order)}
+          >
+            <Printer className="text-muted-foreground hover:text-foreground size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("admin.commerce.orders.view", { code: order.orderCode })}
+            onClick={() => setSelectedOrder({ id: order.id, orderCode: order.orderCode })}
+          >
+            <Eye className="size-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -244,6 +257,16 @@ export function OrdersManagement() {
           if (!open) setSelectedOrder(null);
         }}
       />
+
+      {invoiceOrder ? (
+        <OrderInvoiceDialog
+          order={invoiceOrder}
+          open={invoiceOrder !== null}
+          onOpenChange={(open) => {
+            if (!open) setInvoiceOrder(null);
+          }}
+        />
+      ) : null}
     </>
   );
 }

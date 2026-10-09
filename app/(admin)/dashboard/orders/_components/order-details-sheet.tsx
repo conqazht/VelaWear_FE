@@ -158,101 +158,97 @@ export function OrderDetailsSheet({
   return (
     <>
       <ResourceFormSheet
-      open={open}
-      onOpenChange={handleOpenChange}
-      title={
-        orderCode
-          ? t("admin.commerce.orders.details.titleCode", { code: orderCode })
-          : t("admin.commerce.orders.details.title")
-      }
-      description={t("admin.commerce.orders.details.description")}
-      onSubmit={handleSubmit}
-      isPending={orderQuery.isLoading || updateMutation.isPending}
-      submitLabel={t("admin.commerce.orders.details.save")}
-    >
-      {orderQuery.isLoading ? <OrderDetailsSkeleton /> : null}
+        open={open}
+        onOpenChange={handleOpenChange}
+        title={
+          orderCode
+            ? t("admin.commerce.orders.details.titleCode", { code: orderCode })
+            : t("admin.commerce.orders.details.title")
+        }
+        description={t("admin.commerce.orders.details.description")}
+        onSubmit={handleSubmit}
+        isPending={orderQuery.isLoading || updateMutation.isPending}
+        submitLabel={t("admin.commerce.orders.details.save")}
+      >
+        {orderQuery.isLoading ? <OrderDetailsSkeleton /> : null}
 
-      {orderQuery.isError ? (
-        <Alert variant="destructive">
-          <AlertTitle>{t("admin.commerce.orders.details.loadError")}</AlertTitle>
-          <AlertDescription className="space-y-3">
-            <p>{getApiErrorMessage(orderQuery.error)}</p>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => void orderQuery.refetch()}
-            >
-              {t("admin.commerce.orders.details.tryAgain")}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
-      {updateMutation.isError ? (
-        <Alert variant="destructive">
-          <AlertTitle>{t("admin.commerce.orders.details.saveError")}</AlertTitle>
-          <AlertDescription>{getApiErrorMessage(updateMutation.error)}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      {order && currentDraft ? (
-        <>
-          <Alert>
-            <AlertTitle>{t("admin.commerce.orders.details.workflowTitle")}</AlertTitle>
-            <AlertDescription>
-              {t("admin.commerce.orders.details.workflowDescription")}
+        {orderQuery.isError ? (
+          <Alert variant="destructive">
+            <AlertTitle>{t("admin.commerce.orders.details.loadError")}</AlertTitle>
+            <AlertDescription className="space-y-3">
+              <p>{getApiErrorMessage(orderQuery.error)}</p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => void orderQuery.refetch()}
+              >
+                {t("admin.commerce.orders.details.tryAgain")}
+              </Button>
             </AlertDescription>
           </Alert>
-          <section className="grid gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="order-status">
-                {t("admin.commerce.orders.details.orderStatus")}
-              </FieldLabel>
-              <Select
-                value={currentDraft.status}
-                onValueChange={(value) => {
-                  if (isOrderStatus(value)) updateDraft({ status: value });
-                }}
-              >
-                <SelectTrigger id="order-status" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="start" alignItemWithTrigger={false}>
-                  {availableOrderStatuses.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {getOrderStatusLabel(status, t)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+        ) : null}
 
-            <Field>
-              <FieldLabel>{t("admin.commerce.orders.details.paymentStatus")}</FieldLabel>
-              <div className="flex h-9 items-center rounded-md border px-3">
-                <PaymentStatusBadge status={order.paymentStatus} />
-              </div>
-              <p className="text-muted-foreground text-xs">
-                {t("admin.commerce.orders.details.paymentReadonly")}
-              </p>
-            </Field>
-          </section>
+        {updateMutation.isError ? (
+          <Alert variant="destructive">
+            <AlertTitle>{t("admin.commerce.orders.details.saveError")}</AlertTitle>
+            <AlertDescription>{getApiErrorMessage(updateMutation.error)}</AlertDescription>
+          </Alert>
+        ) : null}
 
-          <OrderOverview order={order} onOpenInvoice={() => setIsInvoiceOpen(true)} />
-          <OrderItems order={order} />
-          <OrderTotals order={order} />
-          <OrderHistory order={order} query={historyQuery} />
-        </>
+        {order && currentDraft ? (
+          <>
+            <Alert>
+              <AlertTitle>{t("admin.commerce.orders.details.workflowTitle")}</AlertTitle>
+              <AlertDescription>
+                {t("admin.commerce.orders.details.workflowDescription")}
+              </AlertDescription>
+            </Alert>
+            <section className="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="order-status">
+                  {t("admin.commerce.orders.details.orderStatus")}
+                </FieldLabel>
+                <Select
+                  value={currentDraft.status}
+                  onValueChange={(value) => {
+                    if (isOrderStatus(value)) updateDraft({ status: value });
+                  }}
+                >
+                  <SelectTrigger id="order-status" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="start" alignItemWithTrigger={false}>
+                    {availableOrderStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {getOrderStatusLabel(status, t)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <Field>
+                <FieldLabel>{t("admin.commerce.orders.details.paymentStatus")}</FieldLabel>
+                <div className="flex h-9 items-center rounded-md border px-3">
+                  <PaymentStatusBadge status={order.paymentStatus} />
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  {t("admin.commerce.orders.details.paymentReadonly")}
+                </p>
+              </Field>
+            </section>
+
+            <OrderOverview order={order} onOpenInvoice={() => setIsInvoiceOpen(true)} />
+            <OrderItems order={order} />
+            <OrderTotals order={order} />
+            <OrderHistory order={order} query={historyQuery} />
+          </>
+        ) : null}
+      </ResourceFormSheet>
+      {order ? (
+        <OrderInvoiceDialog order={order} open={isInvoiceOpen} onOpenChange={setIsInvoiceOpen} />
       ) : null}
-    </ResourceFormSheet>
-    {order ? (
-      <OrderInvoiceDialog
-        order={order}
-        open={isInvoiceOpen}
-        onOpenChange={setIsInvoiceOpen}
-      />
-    ) : null}
     </>
   );
 }

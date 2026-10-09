@@ -39,8 +39,10 @@ export function CustomerGrowthChart({ data = [] }: CustomerGrowthChartProps) {
       <CardHeader>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="font-semibold text-base">
-              {locale === "vi" ? "Tăng trưởng khách hàng & Đơn hàng" : "Customer Growth & Order Volume"}
+            <CardTitle className="text-base font-semibold">
+              {locale === "vi"
+                ? "Tăng trưởng khách hàng & Đơn hàng"
+                : "Customer Growth & Order Volume"}
             </CardTitle>
             <CardDescription className="text-xs">
               {locale === "vi"
@@ -48,13 +50,17 @@ export function CustomerGrowthChart({ data = [] }: CustomerGrowthChartProps) {
                 : "Daily comparison between new customer registrations and order volume"}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-4 text-xs">
             <div>
-              <span className="font-semibold text-foreground">{formatNumber(totalNewCustomers, locale)}</span>{" "}
+              <span className="text-foreground font-semibold">
+                {formatNumber(totalNewCustomers, locale)}
+              </span>{" "}
               {locale === "vi" ? "khách mới" : "new users"}
             </div>
             <div>
-              <span className="font-semibold text-foreground">{formatNumber(totalOrders, locale)}</span>{" "}
+              <span className="text-foreground font-semibold">
+                {formatNumber(totalOrders, locale)}
+              </span>{" "}
               {locale === "vi" ? "đơn hàng" : "orders"}
             </div>
           </div>
@@ -62,7 +68,7 @@ export function CustomerGrowthChart({ data = [] }: CustomerGrowthChartProps) {
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="flex h-56 items-center justify-center text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex h-56 items-center justify-center text-sm">
             {locale === "vi" ? "Chưa có dữ liệu tăng trưởng" : "No growth data available"}
           </div>
         ) : (

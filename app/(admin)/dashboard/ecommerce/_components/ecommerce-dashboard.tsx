@@ -47,10 +47,7 @@ export function EcommerceDashboard() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select
-            value={period}
-            onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}
-          >
+          <Select value={period} onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}>
             <SelectTrigger className="w-48" id="ecommerce-period" size="sm">
               <SelectValue />
             </SelectTrigger>
