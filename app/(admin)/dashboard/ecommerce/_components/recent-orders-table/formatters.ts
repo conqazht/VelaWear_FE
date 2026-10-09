@@ -5,16 +5,12 @@ import type { OrderFilter } from "./schema";
 export function formatOrderCount(filter: OrderFilter, count: number) {
   const orderLabel = count === 1 ? "order" : "orders";
 
-  if (filter === "All") {
+  if (filter === "ALL") {
     return `${count.toLocaleString()} ${orderLabel}`;
   }
 
-  if (filter === "Needs action") {
-    return `${count.toLocaleString()} ${orderLabel} need action`;
-  }
-
-  if (filter === "Returns") {
-    return `${count.toLocaleString()} ${count === 1 ? "return" : "returns"}`;
+  if (filter === "PENDING") {
+    return `${count.toLocaleString()} pending ${orderLabel}`;
   }
 
   return `${count.toLocaleString()} ${filter.toLowerCase()} ${orderLabel}`;

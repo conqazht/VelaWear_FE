@@ -1,12 +1,12 @@
 "use client";
 
-import { addDays, set } from "date-fns";
-import { ChevronRight, Zap } from "lucide-react";
-import { siClaude, siLinear, siResend } from "simple-icons";
+import * as React from "react";
+import Link from "next/link";
+import { ArrowUpRight, CreditCard, ChevronRight } from "lucide-react";
 
-import { SimpleIcon } from "@/components/simple-icon";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Item,
   ItemActions,
@@ -16,76 +16,96 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { formatCurrency, formatDate } from "@/lib/i18n/format";
+import { OrderDetailsSheet } from "@/app/(admin)/dashboard/orders/_components/order-details-sheet";
+import {
+  PaymentStatusBadge,
+  getPaymentMethodLabel,
+} from "@/app/(admin)/dashboard/orders/_components/order-status-badge";
+import type { AdminPaymentStatus } from "@/lib/api/admin-orders";
+import type { RecentPaymentTransaction } from "@/lib/api/admin-dashboard";
+import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
 
-const transactions = [
-  {
-    id: 1,
-    titleKey: "admin.finance.bills.claude",
-    date: set(addDays(new Date("2024-04-15T12:00:00Z"), 2), { hours: 14, minutes: 45 }),
-    icon: siClaude,
-  },
-  {
-    id: 2,
-    titleKey: "admin.finance.bills.resend",
-    date: set(addDays(new Date("2024-04-15T12:00:00Z"), 4), { hours: 7, minutes: 0 }),
-    icon: siResend,
-  },
-  {
-    id: 3,
-    titleKey: "admin.finance.bills.linear",
-    date: set(addDays(new Date("2024-04-15T12:00:00Z"), 10), { hours: 7, minutes: 0 }),
-    icon: siLinear,
-  },
-] as const;
+type UpcomingTransactionsProps = {
+  recentTransactions?: RecentPaymentTransaction[];
+};
 
-export function UpcomingTransactions() {
+export function UpcomingTransactions({ recentTransactions = [] }: UpcomingTransactionsProps) {
   const { locale, t } = useI18n();
+  const [selectedOrder, setSelectedOrder] = React.useState<{ id: number; orderCode: string } | null>(null);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-normal">{t("admin.finance.bills.title")}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 className="flex items-baseline text-3xl leading-none tracking-tight">
-              <span className="font-normal">{formatCurrency(1245, locale, "USD")}</span>
-            </h2>
-            <p className="text-muted-foreground text-sm leading-none">
-              {t("admin.finance.bills.due", { count: transactions.length })}
-            </p>
-          </div>
-          <div className="border-border bg-muted/70 flex w-max items-center gap-2 rounded-md border px-2 py-1.5 text-sm">
-            <Zap className="fill-primary text-primary size-4" aria-hidden="true" />
-            <span className="text-muted-foreground">
-              {t("admin.finance.bills.autopay", { amount: formatCurrency(145, locale, "USD") })}
-            </span>
-          </div>
-        </div>
+    <>
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="font-normal text-sm text-muted-foreground">
+            {locale === "vi" ? "Giao dịch thanh toán gần nhất" : "Recent Payment Transactions"}
+          </CardTitle>
+          <CardAction>
+            <Button
+              aria-label={t("admin.dashboardsA.ecommerce.openOrders")}
+              size="icon-sm"
+              variant="outline"
+              render={
+                <Link href="/dashboard/orders" title={locale === "vi" ? "Xem tất cả đơn hàng" : "View all orders"}>
+                  <ArrowUpRight className="size-4" />
+                </Link>
+              }
+            />
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {recentTransactions.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              {locale === "vi" ? "Chưa có giao dịch gần đây" : "No recent transactions"}
+            </div>
+          ) : (
+            <ItemGroup className="gap-2">
+              {recentTransactions.map((tx) => (
+                <Item
+                  key={tx.orderId}
+                  variant="outline"
+                  size="sm"
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setSelectedOrder({ id: tx.orderId, orderCode: tx.orderCode })}
+                >
+                  <ItemMedia>
+                    <div className="bg-background grid size-9 place-items-center rounded-md border text-muted-foreground">
+                      <CreditCard className="size-4" />
+                    </div>
+                  </ItemMedia>
+                  <ItemContent>
+                    <div className="flex items-center gap-2">
+                      <ItemTitle className="font-medium text-foreground">
+                        #{tx.orderCode}
+                      </ItemTitle>
+                      <PaymentStatusBadge status={tx.paymentStatus as AdminPaymentStatus} />
+                    </div>
+                    <ItemDescription className="text-xs">
+                      {tx.customerName} • {getPaymentMethodLabel(tx.paymentMethod, t)} •{" "}
+                      {formatDateTime(tx.createdAt, locale)}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions className="flex items-center gap-2">
+                    <span className="font-semibold text-sm tabular-nums text-foreground">
+                      {formatCurrency(tx.finalAmount, locale)}
+                    </span>
+                    <ChevronRight className="text-muted-foreground size-4" />
+                  </ItemActions>
+                </Item>
+              ))}
+            </ItemGroup>
+          )}
+        </CardContent>
+      </Card>
 
-        <ItemGroup>
-          {transactions.map((transaction) => (
-            <Item key={transaction.id} variant="outline" size="xs">
-              <ItemMedia>
-                <div className="bg-background grid size-9 place-items-center rounded-md border">
-                  <SimpleIcon icon={transaction.icon} />
-                </div>
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>{t(transaction.titleKey)}</ItemTitle>
-                <ItemDescription>
-                  {formatDate(transaction.date, locale, { dateStyle: "long", timeStyle: "short" })}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                <ChevronRight className="text-muted-foreground size-5" />
-              </ItemActions>
-            </Item>
-          ))}
-        </ItemGroup>
-      </CardContent>
-    </Card>
+      <OrderDetailsSheet
+        orderId={selectedOrder?.id}
+        orderCode={selectedOrder?.orderCode}
+        open={selectedOrder !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedOrder(null);
+        }}
+      />
+    </>
   );
 }

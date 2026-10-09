@@ -1,6 +1,6 @@
 import type { User } from "@/lib/api/types";
 
-export const ADMIN_HOME_PATH = "/dashboard/default";
+export const ADMIN_HOME_PATH = "/dashboard/ecommerce";
 
 export const MANAGEMENT_ROLE_NAMES = ["ADMIN", "MANAGER", "STAFF"] as const;
 

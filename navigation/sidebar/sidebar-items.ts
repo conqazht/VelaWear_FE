@@ -4,15 +4,13 @@ import {
   ChartBar,
   ClipboardList,
   FolderTree,
-  Gauge,
   KeyRound,
+  LayoutDashboard,
   Lock,
   type LucideIcon,
   MessageSquare,
   Package,
   Palette,
-  ReceiptText,
-  ShoppingBag,
   Tags,
   TicketPercent,
   Users,
@@ -67,13 +65,7 @@ export const sidebarItems: NavGroup[] = [
         id: "ecommerce",
         titleKey: "admin.shell.navigation.ecommerce",
         url: "/dashboard/ecommerce",
-        icon: ShoppingBag,
-      },
-      {
-        id: "analytics",
-        titleKey: "admin.shell.navigation.analytics",
-        url: "/dashboard/analytics",
-        icon: Gauge,
+        icon: LayoutDashboard,
       },
       {
         id: "finance",
@@ -87,27 +79,6 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/crm",
         icon: ChartBar,
       },
-      /* Non-core template items commented out for fashion e-commerce focus:
-      {
-        id: "default",
-        titleKey: "admin.shell.navigation.default",
-        url: "/dashboard/default",
-        icon: LayoutDashboard,
-      },
-      {
-        id: "productivity",
-        titleKey: "admin.shell.navigation.productivity",
-        url: "/dashboard/productivity",
-        icon: ListTodo,
-      },
-      {
-        id: "infrastructure",
-        titleKey: "admin.shell.navigation.infrastructure",
-        url: "/dashboard/infrastructure",
-        icon: Server,
-        badge: "new",
-      },
-      */
     ],
   },
   {
@@ -181,44 +152,11 @@ export const sidebarItems: NavGroup[] = [
     labelKey: "admin.shell.navigation.tools",
     items: [
       {
-        id: "invoice",
-        titleKey: "admin.shell.navigation.invoice",
-        url: "/dashboard/invoice",
-        icon: ReceiptText,
-      },
-      {
         id: "chat",
         titleKey: "admin.shell.navigation.chat",
         url: "/dashboard/chat",
         icon: MessageSquare,
       },
-      /* Non-core template items commented out for fashion e-commerce focus:
-      {
-        id: "email",
-        titleKey: "admin.shell.navigation.email",
-        url: "/dashboard/mail",
-        icon: Mail,
-      },
-      {
-        id: "calendar",
-        titleKey: "admin.shell.navigation.calendar",
-        url: "/dashboard/calendar",
-        icon: Calendar,
-      },
-      {
-        id: "kanban",
-        titleKey: "admin.shell.navigation.kanban",
-        url: "/dashboard/kanban",
-        icon: Kanban,
-      },
-      {
-        id: "tasks",
-        titleKey: "admin.shell.navigation.tasks",
-        url: "/dashboard/tasks",
-        icon: CheckSquare,
-        badge: "new",
-      },
-      */
     ],
   },
 ];

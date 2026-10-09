@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  ArrowUpRight,
   DollarSign,
   PackageCheck,
   ReceiptText,
   RotateCcw,
   ShoppingBag,
-  Users,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 import { Area, Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "recharts";
 
@@ -26,374 +26,250 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import type { DashboardKpiSummary, RevenueChartPoint } from "@/lib/api/admin-dashboard";
+import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 import { getIntlLocale } from "@/lib/i18n";
 
-const revenueBucketRanges = ["01-05", "06-10", "11-15", "16-20", "21-25", "26-31"] as const;
-const profitMultipliers = [0.24, 0.28, 0.26] as const;
+type KpiStripProps = {
+  kpis?: DashboardKpiSummary;
+  revenueChart?: RevenueChartPoint[];
+};
 
-const revenueBucketValues = [
-  [4820, 5150, 5060, 5520, 5990, 6880],
-  [5140, 5360, 5520, 5860, 6120, 6720],
-  [4920, 4680, 5150, 5360, 5720, 6150],
-  [5480, 5920, 5660, 6180, 6340, 6660],
-  [5840, 6220, 6480, 6110, 6680, 7230],
-  [6280, 6740, 6960, 7120, 6780, 7240],
-  [6820, 7240, 7680, 7410, 7920, 7810],
-  [6040, 6420, 6150, 6860, 7080, 7090],
-  [5860, 6120, 6340, 6080, 6620, 6900],
-  [6520, 6840, 7060, 7420, 7160, 8280],
-  [6980, 7320, 7640, 7160, 8040, 8620],
-  [6900, 7400, 8100, 8600, 8200, 9360],
-] as const;
-
-function getRollingRevenueBuckets() {
-  const currentMonth = new Date("2024-04-15T12:00:00Z");
-  currentMonth.setDate(1);
-
-  return revenueBucketValues.map((values, index) => {
-    const monthDate = new Date(currentMonth);
-    monthDate.setMonth(currentMonth.getMonth() - (revenueBucketValues.length - 1 - index));
-
-    return {
-      month: monthDate.toISOString(),
-      values,
-    };
-  });
-}
-
-const revenueOverviewData = getRollingRevenueBuckets().flatMap(({ month, values }) =>
-  values.map((revenue, index) => ({
-    period: `${month}|${revenueBucketRanges[index]}`,
-    profit: Math.round(revenue * profitMultipliers[index % profitMultipliers.length]),
-    revenue,
-  })),
-);
-
-function formatMonthTick(value: string, locale: string) {
-  const [month, range] = value.split("|");
-
-  if (range !== "11-15") return "";
-
-  return new Intl.DateTimeFormat(locale, { month: "short", year: "2-digit" }).format(
-    new Date(month),
-  );
-}
-
-function formatTooltipLabel(value: string, locale: string) {
-  const [monthValue, range] = value.split("|");
-  const month = new Date(monthValue);
-  const [start, end] = String(range).split("-");
-  const lastDayOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-  const startDate = new Date(month.getFullYear(), month.getMonth(), Number(start));
-  const endDate = new Date(
-    month.getFullYear(),
-    month.getMonth(),
-    Math.min(Number(end), lastDayOfMonth),
-  );
-
-  const shortDateFormatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
-  const endDateFormatter = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
-  return `${shortDateFormatter.format(startDate)} – ${endDateFormatter.format(endDate)}`;
-}
-
-export function KpiStrip() {
+export function KpiStrip({ kpis, revenueChart = [] }: KpiStripProps) {
   const { locale, t } = useI18n();
   const intlLocale = getIntlLocale(locale);
-  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
-    currency: "USD",
-    style: "currency",
-  });
-  const numberFormatter = new Intl.NumberFormat(intlLocale);
-  const percentFormatter = new Intl.NumberFormat(intlLocale, {
-    maximumFractionDigits: 1,
-    style: "percent",
-  });
-  const signedPercentFormatter = new Intl.NumberFormat(intlLocale, {
-    maximumFractionDigits: 1,
-    signDisplay: "always",
-    style: "percent",
-  });
-  const signedNumberFormatter = new Intl.NumberFormat(intlLocale, {
-    maximumFractionDigits: 1,
-    signDisplay: "always",
-  });
+
   const revenueOverviewConfig = {
     revenue: {
       label: t("admin.dashboardsA.ecommerce.revenue"),
       color: "var(--chart-1)",
     },
-    profit: {
-      label: t("admin.dashboardsA.ecommerce.profit"),
+    orders: {
+      label: t("admin.dashboardsA.ecommerce.totalOrders"),
       color: "var(--chart-2)",
     },
   } satisfies ChartConfig;
 
+  // Fallbacks if data not yet loaded
+  const grossSales = kpis?.grossSales ?? 0;
+  const grossSalesChange = kpis?.grossSalesChangePercentage ?? 0;
+  const totalOrders = kpis?.totalOrders ?? 0;
+  const totalOrdersChange = kpis?.totalOrdersChangePercentage ?? 0;
+  const averageOrderValue = kpis?.averageOrderValue ?? 0;
+  const aovChange = kpis?.aovChangePercentage ?? 0;
+  const cancellationsCount = kpis?.cancellationsCount ?? 0;
+  const cancellationRate = kpis?.cancellationRate ?? 0;
+
+  const chartData = revenueChart.map((point) => ({
+    period: point.date,
+    revenue: point.revenue,
+    orders: point.orderCount,
+  }));
+
   return (
     <div className="bg-card border-border h-full overflow-hidden rounded-xl border shadow-[0_1px_2px_0_rgba(0,0,0,0.03)] xl:col-span-12">
-      <div>
-        <div className="grid grid-cols-1 xl:grid-cols-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 xl:col-span-5 xl:border-r">
-            <Card className="border-border h-full rounded-none border-0 border-b ring-0 md:border-r">
-              <CardHeader>
-                <CardTitle className="text-sm font-normal">
-                  {t("admin.dashboardsA.ecommerce.totalSales")}
-                </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none tracking-tight tabular-nums">
-                  {currencyFormatter.format(48_560)}
-                </CardDescription>
-                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
-                  <DollarSign className="text-foreground size-3" />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm font-medium">
-                  <span className="text-emerald-700 dark:text-emerald-300">
-                    {signedPercentFormatter.format(0.158)}
-                  </span>
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {t("admin.dashboardsA.ecommerce.vsLastWeek")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border h-full rounded-none border-0 border-b ring-0">
-              <CardHeader>
-                <CardTitle className="text-sm font-normal">
-                  {t("admin.dashboardsA.ecommerce.totalOrders")}
-                </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
-                  {numberFormatter.format(379)}
-                </CardDescription>
-                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
-                  <ShoppingBag className="text-foreground size-3" />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm font-medium">
-                  <span className="text-emerald-700 dark:text-emerald-300">
-                    {signedPercentFormatter.format(0.083)}
-                  </span>
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {t("admin.dashboardsA.ecommerce.vsLastWeek")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border h-full rounded-none border-0 border-b ring-0 md:border-r">
-              <CardHeader>
-                <CardTitle className="text-sm font-normal">
-                  {t("admin.dashboardsA.ecommerce.customerGrowth")}
-                </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
-                  {numberFormatter.format(820)}
-                </CardDescription>
-                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
-                  <Users className="text-foreground size-3" />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm font-medium">
-                  <span className="text-emerald-700 dark:text-emerald-300">
-                    {signedPercentFormatter.format(0.125)}
-                  </span>
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {t("admin.dashboardsA.ecommerce.vsLastMonth")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border h-full rounded-none border-0 border-b ring-0">
-              <CardHeader>
-                <CardTitle className="text-sm font-normal">
-                  {t("admin.dashboardsA.ecommerce.averageOrder")}
-                </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
-                  {currencyFormatter.format(128)}
-                </CardDescription>
-                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
-                  <ReceiptText className="text-foreground size-3" />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm font-medium">
-                  <span className="text-rose-700 dark:text-rose-300">
-                    {currencyFormatter.format(-4.2)}
-                  </span>
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {t("admin.dashboardsA.ecommerce.vsLastWeek")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border h-full rounded-none border-0 border-b ring-0 md:border-r md:border-b-0">
-              <CardHeader>
-                <CardTitle className="text-sm font-normal">
-                  {t("admin.dashboardsA.ecommerce.returnRequests")}
-                </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
-                  {numberFormatter.format(18)}
-                </CardDescription>
-                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
-                  <RotateCcw className="text-foreground size-3" />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm font-medium">
-                  <span className="text-rose-700 dark:text-rose-300">
-                    {signedPercentFormatter.format(0.006)}
-                  </span>
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {t("admin.dashboardsA.ecommerce.vsLastMonth")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="h-full rounded-none border-0 ring-0">
-              <CardHeader>
-                <CardTitle className="text-sm font-normal">
-                  {t("admin.dashboardsA.ecommerce.stockAccuracy")}
-                </CardTitle>
-                <CardDescription className="text-foreground text-3xl leading-none font-bold tracking-tight tabular-nums">
-                  {percentFormatter.format(0.97)}
-                </CardDescription>
-                <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
-                  <PackageCheck className="text-foreground size-3" />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm font-medium">
-                  <span className="text-emerald-700 dark:text-emerald-300">
-                    {t("admin.dashboardsA.ecommerce.points", {
-                      value: signedNumberFormatter.format(2.4),
-                    })}
-                  </span>
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {t("admin.dashboardsA.ecommerce.vsLastAudit")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="h-full rounded-none border-0 ring-0 xl:col-span-7">
+      <div className="grid grid-cols-1 xl:grid-cols-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-rows-2 xl:col-span-5 xl:border-r">
+          {/* 1. Gross Sales */}
+          <Card className="border-border h-full rounded-none border-0 border-b ring-0 sm:border-r">
             <CardHeader>
-              <CardTitle className="font-normal">
-                {t("admin.dashboardsA.ecommerce.salesOverview")}
+              <CardTitle className="text-sm font-normal">
+                {t("admin.dashboardsA.ecommerce.totalSales")}
               </CardTitle>
-              <CardAction>
-                <ArrowUpRight className="size-4" />
+              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+                {formatCurrency(grossSales, locale)}
+              </CardDescription>
+              <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                <DollarSign className="text-foreground size-3" />
               </CardAction>
             </CardHeader>
-
             <CardContent>
-              <ChartContainer config={revenueOverviewConfig} className="h-74 w-full">
-                <ComposedChart
-                  accessibilityLayer
-                  data={revenueOverviewData}
-                  margin={{ bottom: 0, left: 0, right: 0, top: 0 }}
-                >
-                  <defs>
-                    <filter id="sales-line-glow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="4" result="blur" />
-                      <feFlood floodColor="var(--color-revenue)" floodOpacity="0.35" />
-                      <feComposite in2="blur" operator="in" />
-                      <feMerge>
-                        <feMergeNode />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <CartesianGrid yAxisId="profit" vertical={false} />
-                  <XAxis
-                    dataKey="period"
-                    axisLine={false}
-                    height={30}
-                    interval={0}
-                    minTickGap={0}
-                    tick={{ fontSize: 10 }}
-                    tickLine={false}
-                    tickMargin={8}
-                    tickFormatter={(value) => formatMonthTick(String(value), intlLocale)}
-                  />
-                  <YAxis yAxisId="revenue" hide domain={[3000, 10_000]} />
-                  <YAxis yAxisId="profit" hide domain={[0, 6000]} />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        className="w-40"
-                        labelFormatter={(value) => formatTooltipLabel(String(value), intlLocale)}
-                        formatter={(value, name, item) => (
-                          <>
-                            <div
-                              className="size-2.5 shrink-0 rounded-[2px]"
-                              style={{
-                                backgroundColor: item.color,
-                              }}
-                            />
-                            <div className="flex flex-1 items-center justify-between leading-none">
-                              <span className="text-muted-foreground">{String(name ?? "")}</span>
-                              <span className="text-foreground font-mono font-medium tabular-nums">
-                                {typeof value === "number"
-                                  ? currencyFormatter.format(value)
-                                  : String(value ?? "")}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                      />
-                    }
-                    cursor={{
-                      stroke: "var(--border)",
-                      strokeDasharray: "4 4",
-                    }}
-                  />
-                  <Bar
-                    yAxisId="profit"
-                    barSize={4}
-                    dataKey="profit"
-                    fill="var(--color-profit)"
-                    name={t("admin.dashboardsA.ecommerce.profit")}
-                    opacity={0.18}
-                    radius={[6, 6, 0, 0]}
-                  />
-                  <Area
-                    yAxisId="revenue"
-                    dataKey="revenue"
-                    fill="none"
-                    filter="url(#sales-line-glow)"
-                    name={t("admin.dashboardsA.ecommerce.revenue")}
-                    stroke="var(--color-revenue)"
-                    strokeWidth={1.8}
-                    type="linear"
-                    activeDot={{
-                      r: 4,
-                      fill: "var(--background)",
-                      stroke: "var(--color-revenue)",
-                      strokeWidth: 2,
-                    }}
-                    dot={false}
-                  />
-                </ComposedChart>
-              </ChartContainer>
+              <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
+                {grossSalesChange >= 0 ? (
+                  <span className="flex items-center text-emerald-700 dark:text-emerald-400">
+                    <TrendingUp className="mr-0.5 size-3.5" />
+                    +{grossSalesChange}%
+                  </span>
+                ) : (
+                  <span className="flex items-center text-rose-700 dark:text-rose-400">
+                    <TrendingDown className="mr-0.5 size-3.5" />
+                    {grossSalesChange}%
+                  </span>
+                )}
+                <span className="text-muted-foreground font-normal">
+                  {locale === "vi" ? "so với kỳ trước" : "vs previous period"}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 2. Total Orders */}
+          <Card className="border-border h-full rounded-none border-0 border-b ring-0">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal">
+                {t("admin.dashboardsA.ecommerce.totalOrders")}
+              </CardTitle>
+              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+                {formatNumber(totalOrders, locale)}
+              </CardDescription>
+              <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                <ShoppingBag className="text-foreground size-3" />
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
+                {totalOrdersChange >= 0 ? (
+                  <span className="flex items-center text-emerald-700 dark:text-emerald-400">
+                    <TrendingUp className="mr-0.5 size-3.5" />
+                    +{totalOrdersChange}%
+                  </span>
+                ) : (
+                  <span className="flex items-center text-rose-700 dark:text-rose-400">
+                    <TrendingDown className="mr-0.5 size-3.5" />
+                    {totalOrdersChange}%
+                  </span>
+                )}
+                <span className="text-muted-foreground font-normal">
+                  {locale === "vi" ? "so với kỳ trước" : "vs previous period"}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 3. Average Order Value */}
+          <Card className="border-border h-full rounded-none border-0 border-b ring-0 sm:border-r sm:border-b-0">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal">
+                {t("admin.dashboardsA.ecommerce.averageOrder")}
+              </CardTitle>
+              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+                {formatCurrency(averageOrderValue, locale)}
+              </CardDescription>
+              <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                <ReceiptText className="text-foreground size-3" />
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
+                {aovChange >= 0 ? (
+                  <span className="flex items-center text-emerald-700 dark:text-emerald-400">
+                    <TrendingUp className="mr-0.5 size-3.5" />
+                    +{aovChange}%
+                  </span>
+                ) : (
+                  <span className="flex items-center text-rose-700 dark:text-rose-400">
+                    <TrendingDown className="mr-0.5 size-3.5" />
+                    {aovChange}%
+                  </span>
+                )}
+                <span className="text-muted-foreground font-normal">
+                  {locale === "vi" ? "so với kỳ trước" : "vs previous period"}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 4. Cancellations / Returns */}
+          <Card className="border-border h-full rounded-none border-0 ring-0">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal">
+                {locale === "vi" ? "Đơn hủy / Hoàn" : "Cancellations"}
+              </CardTitle>
+              <CardDescription className="text-foreground text-2xl font-bold leading-none tracking-tight tabular-nums sm:text-3xl">
+                {formatNumber(cancellationsCount, locale)}
+              </CardDescription>
+              <CardAction className="bg-muted grid size-6 place-items-center rounded-sm">
+                <RotateCcw className="text-foreground size-3" />
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
+                <span className="text-amber-700 dark:text-amber-400">
+                  {cancellationRate}%
+                </span>
+                <span className="text-muted-foreground font-normal">
+                  {locale === "vi" ? "tỷ lệ hủy đơn" : "cancellation rate"}
+                </span>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Right side: Revenue Chart */}
+        <Card className="h-full rounded-none border-0 ring-0 xl:col-span-7">
+          <CardHeader>
+            <CardTitle className="font-medium">
+              {t("admin.dashboardsA.ecommerce.salesOverview")}
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            {chartData.length > 0 ? (
+              <ChartContainer config={revenueOverviewConfig} className="h-64 w-full sm:h-72">
+                <ComposedChart
+                  accessibilityLayer
+                  data={chartData}
+                  margin={{ bottom: 0, left: 10, right: 10, top: 10 }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="period"
+                    axisLine={false}
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    tickMargin={8}
+                    tickFormatter={(val) => {
+                      if (!val) return "";
+                      const parts = String(val).split("-");
+                      return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : String(val);
+                    }}
+                  />
+                  <YAxis hide yAxisId="rev" />
+                  <YAxis hide yAxisId="orders" orientation="right" />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(val, name) => (
+                          <div className="flex items-center justify-between gap-4 font-mono">
+                            <span className="text-muted-foreground">{String(name)}</span>
+                            <span className="font-semibold text-foreground">
+                              {name === t("admin.dashboardsA.ecommerce.revenue")
+                                ? formatCurrency(Number(val), locale)
+                                : formatNumber(Number(val), locale)}
+                            </span>
+                          </div>
+                        )}
+                      />
+                    }
+                  />
+                  <Bar
+                    yAxisId="orders"
+                    dataKey="orders"
+                    name={t("admin.dashboardsA.ecommerce.totalOrders")}
+                    fill="var(--color-orders)"
+                    opacity={0.3}
+                    barSize={12}
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Area
+                    yAxisId="rev"
+                    type="monotone"
+                    dataKey="revenue"
+                    name={t("admin.dashboardsA.ecommerce.revenue")}
+                    stroke="var(--color-revenue)"
+                    strokeWidth={2}
+                    fill="var(--color-revenue)"
+                    fillOpacity={0.15}
+                  />
+                </ComposedChart>
+              </ChartContainer>
+            ) : (
+              <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+                {locale === "vi" ? "Chưa có dữ liệu biểu đồ" : "No chart data available"}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

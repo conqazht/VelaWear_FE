@@ -15,20 +15,19 @@ import {
 } from "@/components/ui/select";
 import { getIntlLocale } from "@/lib/i18n";
 import type { AdminDashboardPeriod } from "@/lib/api/admin-dashboard";
-import { useAdminFinanceDashboardQuery } from "@/lib/queries/admin-dashboard";
+import { useAdminCrmDashboardQuery } from "@/lib/queries/admin-dashboard";
 import { downloadCsv } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 
-import { BalanceDistributionCard } from "./balance-distribution-card";
-import { IncomeBreakdown } from "./income-breakdown";
-import { OverviewKpis } from "./overview-kpis";
-import { TransactionsOverviewCard } from "./transactions-overview-card";
-import { UpcomingTransactions } from "./upcoming-transactions";
+import { CustomerGrowthChart } from "./customer-growth-chart";
+import { KpiCards } from "./kpi-cards";
+import { MembershipTiersCard } from "./membership-tiers-card";
+import { TopCustomersCard } from "./top-customers-card";
 
-export function FinanceDashboard() {
+export function CrmDashboard() {
   const { locale, t } = useI18n();
   const [period, setPeriod] = useState<AdminDashboardPeriod>("this-month");
 
-  const { data, isFetching, refetch } = useAdminFinanceDashboardQuery(period);
+  const { data, isFetching, refetch } = useAdminCrmDashboardQuery(period);
 
   const formattedDate = new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "numeric",
@@ -40,15 +39,14 @@ export function FinanceDashboard() {
   const handleExportCsv = () => {
     if (!data) return;
 
-    const exportRows = (data.cashflowChart || []).map((point) => ({
+    const exportRows = (data.customerGrowthChart || []).map((point) => ({
       [locale === "vi" ? "Ngày" : "Date"]: point.date,
-      [locale === "vi" ? "Thực thu" : "Collected"]: point.collectedAmount,
-      [locale === "vi" ? "Chờ thu" : "Pending"]: point.pendingAmount,
-      [locale === "vi" ? "Hoàn trả" : "Refunded"]: point.refundedAmount,
+      [locale === "vi" ? "Khách mới" : "New Customers"]: point.newCustomersCount,
+      [locale === "vi" ? "Đơn hàng" : "Orders"]: point.activeOrdersCount,
     }));
 
     if (exportRows.length > 0) {
-      downloadCsv(`finance-cashflow-${period}-${new Date().toISOString().slice(0, 10)}.csv`, exportRows);
+      downloadCsv(`crm-growth-${period}-${new Date().toISOString().slice(0, 10)}.csv`, exportRows);
     }
   };
 
@@ -57,7 +55,7 @@ export function FinanceDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">
-            {locale === "vi" ? "Báo cáo thanh toán & Dòng tiền" : "Payments & Cashflow"}
+            {locale === "vi" ? "Báo cáo khách hàng & Phân khúc" : "Customer Insights & CRM"}
           </h1>
           <p className="text-muted-foreground text-sm capitalize">{formattedDate}</p>
         </div>
@@ -67,7 +65,7 @@ export function FinanceDashboard() {
             value={period}
             onValueChange={(val) => setPeriod(val as AdminDashboardPeriod)}
           >
-            <SelectTrigger className="w-48" id="finance-period" size="sm">
+            <SelectTrigger className="w-48" id="crm-period" size="sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -102,30 +100,26 @@ export function FinanceDashboard() {
             size="sm"
             variant="outline"
             onClick={handleExportCsv}
-            disabled={!data || (data.cashflowChart || []).length === 0}
+            disabled={!data || (data.customerGrowthChart || []).length === 0}
           >
-            <Download className="size-4 mr-1.5" />
+            <Download className="mr-1.5 size-4" />
             {locale === "vi" ? "Xuất dữ liệu" : "Export"}
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-6">
-        <OverviewKpis kpis={data?.kpis} />
+      <KpiCards kpis={data?.kpis} />
 
-        <IncomeBreakdown paymentMethods={data?.paymentMethods} />
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-          <div className="xl:col-span-7">
-            <TransactionsOverviewCard cashflowChart={data?.cashflowChart} />
-          </div>
-          <div className="xl:col-span-5">
-            <BalanceDistributionCard paymentStatuses={data?.paymentStatuses} />
-          </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-7 xl:col-span-8">
+          <CustomerGrowthChart data={data?.customerGrowthChart} />
         </div>
-
-        <UpcomingTransactions recentTransactions={data?.recentTransactions} />
+        <div className="lg:col-span-5 xl:col-span-4">
+          <MembershipTiersCard tiers={data?.membershipTiers} />
+        </div>
       </div>
+
+      <TopCustomersCard customers={data?.topCustomers} />
     </div>
   );
 }

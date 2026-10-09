@@ -230,7 +230,7 @@ function ResourceStatusScene({
           primaryAction={
             canRetry
               ? { label: t("admin.shell.resource.tryAgain"), onClick: onRefresh }
-              : { label: t("admin.shell.resource.backDashboard"), href: "/dashboard/default" }
+              : { label: t("admin.shell.resource.backDashboard"), href: "/dashboard/ecommerce" }
           }
           secondaryAction={{ label: t("admin.shell.resource.returnStorefront"), href: "/" }}
         />

@@ -2,8 +2,10 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { History, Mail, MapPin, Package, Phone, UserRound } from "lucide-react";
+import { History, Mail, MapPin, Package, Phone, Printer, UserRound } from "lucide-react";
 import { toast } from "sonner";
+
+import { OrderInvoiceDialog } from "./order-invoice-dialog";
 
 import { ResourceFormSheet } from "@/app/(admin)/dashboard/_components/management/resource-overlays";
 import {
@@ -92,6 +94,7 @@ export function OrderDetailsSheet({
 }: OrderDetailsSheetProps) {
   const { t } = useI18n();
   const [draft, setDraft] = useState<OrderDraft | null>(null);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const orderQuery = useAdminOrderQuery(orderId, open);
   const historyQuery = useAdminOrderStatusHistoriesQuery(orderId, HISTORY_FILTERS, open);
   const updateMutation = useUpdateAdminOrderMutation();
@@ -153,7 +156,8 @@ export function OrderDetailsSheet({
   }
 
   return (
-    <ResourceFormSheet
+    <>
+      <ResourceFormSheet
       open={open}
       onOpenChange={handleOpenChange}
       title={
@@ -235,28 +239,56 @@ export function OrderDetailsSheet({
             </Field>
           </section>
 
-          <OrderOverview order={order} />
+          <OrderOverview order={order} onOpenInvoice={() => setIsInvoiceOpen(true)} />
           <OrderItems order={order} />
           <OrderTotals order={order} />
           <OrderHistory order={order} query={historyQuery} />
         </>
       ) : null}
     </ResourceFormSheet>
+    {order ? (
+      <OrderInvoiceDialog
+        order={order}
+        open={isInvoiceOpen}
+        onOpenChange={setIsInvoiceOpen}
+      />
+    ) : null}
+    </>
   );
 }
 
-function OrderOverview({ order }: { order: AdminOrder }) {
+function OrderOverview({
+  order,
+  onOpenInvoice,
+}: {
+  order: AdminOrder;
+  onOpenInvoice?: () => void;
+}) {
   const { locale, t } = useI18n();
 
   return (
     <section className="space-y-3">
-      <div>
-        <h3 className="font-medium">{t("admin.commerce.orders.overview.title")}</h3>
-        <p className="text-muted-foreground text-sm">
-          {t("admin.commerce.orders.overview.placed", {
-            date: formatDateTime(order.createdAt, locale),
-          })}
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="font-medium">{t("admin.commerce.orders.overview.title")}</h3>
+          <p className="text-muted-foreground text-sm">
+            {t("admin.commerce.orders.overview.placed", {
+              date: formatDateTime(order.createdAt, locale),
+            })}
+          </p>
+        </div>
+        {onOpenInvoice ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onOpenInvoice}
+            className="gap-1.5 text-xs"
+          >
+            <Printer className="size-3.5" />
+            {locale === "vi" ? "In hóa đơn" : "Print Invoice"}
+          </Button>
+        ) : null}
       </div>
       <div className="grid gap-3 rounded-lg border p-4 text-sm">
         <DetailLine

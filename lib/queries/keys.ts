@@ -82,4 +82,10 @@ export const queryKeys = {
     unreadCount: (accountId: number | undefined) =>
       ["notifications", "me", accountId ?? "anonymous", "unread-count"] as const,
   },
+  adminDashboard: {
+    root: ["admin-dashboard"] as const,
+    ecommerce: (period: string) => ["admin-dashboard", "ecommerce", period] as const,
+    finance: (period: string) => ["admin-dashboard", "finance", period] as const,
+    crm: (period: string) => ["admin-dashboard", "crm", period] as const,
+  },
 };

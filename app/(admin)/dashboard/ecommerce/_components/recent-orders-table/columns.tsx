@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { Copy, Eye, MoreHorizontal } from "lucide-react";
+import { toast } from "sonner";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -13,98 +13,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getIntlLocale } from "@/lib/i18n";
+import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
+import type { AdminOrderStatus, AdminPaymentStatus } from "@/lib/api/admin-orders";
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "@/app/(admin)/dashboard/orders/_components/order-status-badge";
 
 import type { OrderRow } from "./schema";
 
-function PaymentBadge({ label, status }: { label: string; status: OrderRow["payment"] }) {
-  if (status === "Paid") {
-    return (
-      <Badge
-        className="border-green-700/25 text-green-700 dark:border-green-300/25 dark:text-green-300"
-        variant="outline"
-      >
-        <span className="size-1.5 rounded-full bg-current" />
-        {label}
-      </Badge>
-    );
-  }
-
-  if (status === "Refunded") {
-    return (
-      <Badge variant="destructive">
-        <span className="size-1.5 rounded-full bg-current" />
-        {label}
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge
-      className="border-yellow-700/25 text-yellow-700 dark:border-yellow-300/25 dark:text-yellow-300"
-      variant="outline"
-    >
-      <span className="size-1.5 rounded-full bg-current" />
-      {label}
-    </Badge>
-  );
-}
-
-function FulfillmentBadge({ label, status }: { label: string; status: OrderRow["fulfillment"] }) {
-  if (status === "Fulfilled") {
-    return (
-      <Badge
-        className="border-green-700/25 text-green-700 dark:border-green-300/25 dark:text-green-300"
-        variant="outline"
-      >
-        <span className="size-1.5 rounded-full bg-current" />
-        {label}
-      </Badge>
-    );
-  }
-
-  if (status === "Returned") {
-    return (
-      <Badge variant="destructive">
-        <span className="size-1.5 rounded-full bg-current" />
-        {label}
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge variant="destructive">
-      <span className="size-1.5 rounded-full bg-current" />
-      {label}
-    </Badge>
-  );
-}
-
-export function useRecentOrdersColumns(): ColumnDef<OrderRow>[] {
+export function useRecentOrdersColumns({
+  onSelectOrder,
+}: {
+  onSelectOrder?: (order: OrderRow) => void;
+} = {}): ColumnDef<OrderRow>[] {
   const { locale, t } = useI18n();
-  const intlLocale = getIntlLocale(locale);
-  const numberFormatter = new Intl.NumberFormat(intlLocale);
-  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
-    currency: "USD",
-    style: "currency",
-  });
-  const dateFormatter = new Intl.DateTimeFormat(intlLocale, {
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-  const paymentLabels = {
-    Paid: t("admin.dashboardsA.common.paid"),
-    Pending: t("admin.dashboardsA.common.pending"),
-    Refunded: t("admin.dashboardsA.common.refunded"),
-  };
-  const fulfillmentLabels = {
-    Fulfilled: t("admin.dashboardsA.common.fulfilled"),
-    Returned: t("admin.dashboardsA.common.returned"),
-    Unfulfilled: t("admin.dashboardsA.common.unfulfilled"),
-  };
 
   return [
     {
@@ -121,7 +44,7 @@ export function useRecentOrdersColumns(): ColumnDef<OrderRow>[] {
       cell: ({ row }) => (
         <div className="w-10">
           <Checkbox
-            aria-label={t("admin.dashboardsA.ecommerce.selectOrder", { id: row.original.id })}
+            aria-label={t("admin.dashboardsA.ecommerce.selectOrder", { id: row.original.orderCode })}
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
           />
@@ -131,81 +54,70 @@ export function useRecentOrdersColumns(): ColumnDef<OrderRow>[] {
       enableSorting: false,
     },
     {
-      accessorKey: "id",
+      accessorKey: "orderCode",
       header: t("admin.dashboardsA.ecommerce.order"),
       cell: ({ row }) => (
         <div className="flex flex-col gap-0.5">
-          <div className="leading-none font-medium">{row.original.id}</div>
-          <div className="text-muted-foreground text-xs">
-            {(() => {
-              const count = Number.parseInt(row.original.items, 10);
-              const key =
-                count === 1
-                  ? "admin.dashboardsA.ecommerce.item"
-                  : "admin.dashboardsA.ecommerce.items";
-              return t(key, { count: numberFormatter.format(count) });
-            })()}
-          </div>
+          <button
+            type="button"
+            className="text-left font-medium text-foreground hover:underline cursor-pointer"
+            onClick={() => onSelectOrder?.(row.original)}
+          >
+            #{row.original.orderCode}
+          </button>
+          <div className="text-muted-foreground text-xs">{row.original.paymentMethod || "COD"}</div>
         </div>
       ),
       enableHiding: false,
     },
     {
-      accessorKey: "customer",
+      accessorKey: "customerName",
       header: t("admin.dashboardsA.ecommerce.customer"),
+      cell: ({ row }) => (
+        <div className="flex flex-col gap-0.5 max-w-[200px]">
+          <span className="font-medium text-foreground truncate">{row.original.customerName}</span>
+          <span className="text-muted-foreground text-xs truncate">{row.original.customerEmail}</span>
+        </div>
+      ),
     },
     {
       id: "statusSummary",
+      accessorKey: "status",
       header: t("admin.dashboardsA.common.status"),
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <PaymentBadge label={paymentLabels[row.original.payment]} status={row.original.payment} />
-          <FulfillmentBadge
-            label={fulfillmentLabels[row.original.fulfillment]}
-            status={row.original.fulfillment}
-          />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <OrderStatusBadge status={row.original.status as AdminOrderStatus} />
+          <PaymentStatusBadge status={row.original.paymentStatus as AdminPaymentStatus} />
         </div>
       ),
       filterFn: (row, _columnId, value) => {
-        if (value === "Needs action") {
-          return (
-            row.original.payment === "Pending" ||
-            row.original.payment === "Refunded" ||
-            row.original.fulfillment === "Unfulfilled" ||
-            row.original.fulfillment === "Returned"
-          );
+        if (!value || value === "ALL") return true;
+        if (value === "PENDING") return row.original.status === "PENDING";
+        if (value === "SHIPPING") {
+          return row.original.status === "SHIPPING" || row.original.status === "CONFIRMED";
         }
-
-        if (value === "Unfulfilled") {
-          return row.original.fulfillment === "Unfulfilled";
+        if (value === "COMPLETED") return row.original.status === "COMPLETED";
+        if (value === "CANCELLED") {
+          return row.original.status === "CANCELLED" || row.original.status === "REFUNDED";
         }
-
-        if (value === "Unpaid") {
-          return row.original.payment === "Pending";
-        }
-
-        if (value === "Returns") {
-          return row.original.payment === "Refunded" || row.original.fulfillment === "Returned";
-        }
-
         return true;
       },
     },
     {
-      accessorKey: "total",
-      header: () => <div className="w-28">{t("admin.dashboardsA.ecommerce.total")}</div>,
+      accessorKey: "totalAmount",
+      header: () => <div className="w-28 text-right">{t("admin.dashboardsA.ecommerce.total")}</div>,
       cell: ({ row }) => (
-        <div className="w-28 tabular-nums">
-          {currencyFormatter.format(Number(row.original.total.replace(/[^0-9.-]/g, "")))}
+        <div className="w-28 text-right font-medium tabular-nums">
+          {formatCurrency(row.original.totalAmount, locale)}
         </div>
       ),
     },
     {
-      accessorKey: "date",
-      header: () => <div className="w-44">{t("admin.dashboardsA.ecommerce.date")}</div>,
+      accessorKey: "createdAt",
+      header: () => <div className="w-40">{t("admin.dashboardsA.ecommerce.date")}</div>,
       cell: ({ row }) => (
-        <div className="text-muted-foreground w-44">
-          {dateFormatter.format(new Date(row.original.date))}
+        <div className="text-muted-foreground w-40 text-xs tabular-nums">
+          {formatDateTime(row.original.createdAt, locale)}
         </div>
       ),
     },
@@ -214,7 +126,7 @@ export function useRecentOrdersColumns(): ColumnDef<OrderRow>[] {
       header: () => (
         <div className="flex w-full justify-end">{t("admin.dashboardsA.ecommerce.actions")}</div>
       ),
-      cell: () => (
+      cell: ({ row }) => (
         <div className="flex w-full justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -228,14 +140,26 @@ export function useRecentOrdersColumns(): ColumnDef<OrderRow>[] {
             >
               <MoreHorizontal />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuLabel>{t("admin.dashboardsA.ecommerce.orderActions")}</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <DropdownMenuItem>{t("admin.dashboardsA.ecommerce.viewOrder")}</DropdownMenuItem>
-                <DropdownMenuItem>
-                  {t("admin.dashboardsA.ecommerce.contactCustomer")}
+                <DropdownMenuItem onClick={() => onSelectOrder?.(row.original)}>
+                  <Eye className="size-4 mr-2" />
+                  {t("admin.dashboardsA.ecommerce.viewOrder")}
                 </DropdownMenuItem>
-                <DropdownMenuItem>{t("admin.dashboardsA.ecommerce.copyOrderId")}</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    void navigator.clipboard.writeText(row.original.orderCode);
+                    toast.success(
+                      locale === "vi"
+                        ? `Đã sao chép mã đơn #${row.original.orderCode}`
+                        : `Copied order #${row.original.orderCode}`,
+                    );
+                  }}
+                >
+                  <Copy className="size-4 mr-2" />
+                  {t("admin.dashboardsA.ecommerce.copyOrderId")}
+                </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>

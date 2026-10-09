@@ -18,7 +18,7 @@ export function DashboardNotFoundContent() {
         }}
         secondaryAction={{
           label: t("admin.shell.notFound.dashboardHome"),
-          href: "/dashboard/default",
+          href: "/dashboard/ecommerce",
         }}
         accent="#f7f4ef"
         variant="panel"

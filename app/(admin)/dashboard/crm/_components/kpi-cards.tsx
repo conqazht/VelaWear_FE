@@ -1,154 +1,122 @@
 "use client";
 
-import { ArrowUpRight, TrendingDown, TrendingUp } from "lucide-react";
+import { Award, Repeat, UserCheck, Users } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardAction, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { getIntlLocale } from "@/lib/i18n";
+import { AdminStatusBadge } from "@/app/(admin)/dashboard/_components/admin-status-badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CrmKpiSummary } from "@/lib/api/admin-dashboard";
+import { formatCurrency, formatNumber } from "@/lib/i18n/format";
 
-export function KpiCards() {
-  const { locale, t } = useI18n();
-  const intlLocale = getIntlLocale(locale);
-  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
-    currency: "USD",
-    maximumFractionDigits: 0,
-    style: "currency",
-  });
-  const numberFormatter = new Intl.NumberFormat(intlLocale);
-  const percentFormatter = new Intl.NumberFormat(intlLocale, {
-    maximumFractionDigits: 1,
-    style: "percent",
-  });
-  const signedPercentFormatter = new Intl.NumberFormat(intlLocale, {
-    maximumFractionDigits: 1,
-    signDisplay: "always",
-    style: "percent",
-  });
+type KpiCardsProps = {
+  kpis?: CrmKpiSummary;
+};
+
+export function KpiCards({ kpis }: KpiCardsProps) {
+  const { locale } = useI18n();
+
+  const totalCustomers = kpis?.totalCustomers ?? 0;
+  const newCustomers = kpis?.newCustomers ?? 0;
+  const newCustomersChange = kpis?.newCustomersChangePercentage ?? 0;
+  const activeBuyers = kpis?.activeBuyers ?? 0;
+  const repeatCustomerCount = kpis?.repeatCustomerCount ?? 0;
+  const repeatPurchaseRate = kpis?.repeatPurchaseRate ?? 0;
+  const averageCustomerSpend = kpis?.averageCustomerSpend ?? 0;
 
   return (
-    <section className="space-y-5">
-      <div className="space-y-1">
-        <h2 className="text-3xl tracking-tight">{t("admin.dashboardsA.crm.pipelineOverview")}</h2>
-        <p className="text-muted-foreground text-sm">
-          {t("admin.dashboardsA.crm.pipelineDescription")}
-        </p>
-      </div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* 1. Tổng khách hàng */}
+      <Card className="border-border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="font-medium text-sm text-muted-foreground">
+            {locale === "vi" ? "Tổng khách hàng" : "Total Customers"}
+          </CardTitle>
+          <Users className="size-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums">
+            {formatNumber(totalCustomers, locale)}
+          </div>
+          <p className="text-muted-foreground text-xs">
+            {locale === "vi"
+              ? `${formatNumber(activeBuyers, locale)} khách hàng đã phát sinh đơn`
+              : `${formatNumber(activeBuyers, locale)} active buyers with orders`}
+          </p>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("admin.dashboardsA.crm.leadPipelineValue")}</CardDescription>
-            <CardAction>
-              <ArrowUpRight className="size-4" />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl leading-none tracking-tight">
-                {currencyFormatter.format(284_500)}
-              </span>
-
-              <Badge
-                variant="outline"
-                className="border-green-200 bg-green-500/10 text-green-700 dark:border-green-900/40 dark:bg-green-500/15 dark:text-green-300"
-              >
-                <TrendingUp />
-                {signedPercentFormatter.format(0.12)}
-              </Badge>
+      {/* 2. Khách hàng mới trong kỳ */}
+      <Card className="border-border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="font-medium text-sm text-muted-foreground">
+            {locale === "vi" ? "Khách hàng mới" : "New Customers"}
+          </CardTitle>
+          <UserCheck className="size-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums text-emerald-600 dark:text-emerald-400">
+              {formatNumber(newCustomers, locale)}
             </div>
-            <p className="text-sm">
-              <span className="text-foreground font-medium">
-                {currencyFormatter.format(254_200)}
-              </span>{" "}
-              <span className="text-muted-foreground">{t("admin.dashboardsA.crm.lastMonth")}</span>
-            </p>
-          </CardContent>
-        </Card>
+            <AdminStatusBadge
+              variant={newCustomersChange >= 0 ? "success" : "danger"}
+              size="sm"
+            >
+              {newCustomersChange >= 0 ? `+${newCustomersChange}%` : `${newCustomersChange}%`}
+            </AdminStatusBadge>
+          </div>
+          <p className="text-muted-foreground text-xs">
+            {locale === "vi" ? "Đăng ký tài khoản trong kỳ này" : "New accounts in this period"}
+          </p>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("admin.dashboardsA.crm.qualifiedLeadRate")}</CardDescription>
-            <CardAction>
-              <ArrowUpRight className="size-4" />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl leading-none tracking-tight">
-                {percentFormatter.format(0.284)}
-              </span>
-
-              <Badge
-                variant="outline"
-                className="border-destructive/20 bg-destructive/10 text-destructive"
-              >
-                <TrendingDown />
-                {signedPercentFormatter.format(-0.025)}
-              </Badge>
+      {/* 3. Tỷ lệ mua lặp lại (Repeat Purchase Rate) */}
+      <Card className="border-border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="font-medium text-sm text-muted-foreground">
+            {locale === "vi" ? "Tỷ lệ mua lặp lại" : "Repeat Purchase Rate"}
+          </CardTitle>
+          <Repeat className="size-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums text-blue-600 dark:text-blue-400">
+              {repeatPurchaseRate}%
             </div>
-            <p className="text-sm">
-              <span className="text-foreground font-medium">{percentFormatter.format(0.309)}</span>{" "}
-              <span className="text-muted-foreground">{t("admin.dashboardsA.crm.lastMonth")}</span>
-            </p>
-          </CardContent>
-        </Card>
+            <AdminStatusBadge variant="neutral" size="sm">
+              {locale === "vi"
+                ? `${formatNumber(repeatCustomerCount, locale)} khách mua ≥2 đơn`
+                : `${formatNumber(repeatCustomerCount, locale)} repeat buyers`}
+            </AdminStatusBadge>
+          </div>
+          <p className="text-muted-foreground text-xs">
+            {locale === "vi"
+              ? "Tỷ lệ người mua quay lại mua hàng"
+              : "Percentage of buyers returning for more orders"}
+          </p>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("admin.dashboardsA.crm.openOpportunities")}</CardDescription>
-            <CardAction>
-              <ArrowUpRight className="size-4" />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl leading-none tracking-tight">
-                {numberFormatter.format(42)}
-              </span>
-
-              <Badge
-                variant="outline"
-                className="border-green-200 bg-green-500/10 text-green-700 dark:border-green-900/40 dark:bg-green-500/15 dark:text-green-300"
-              >
-                <TrendingUp />+{numberFormatter.format(7)}
-              </Badge>
-            </div>
-            <p className="text-sm">
-              <span className="text-foreground font-medium">{numberFormatter.format(35)}</span>{" "}
-              <span className="text-muted-foreground">{t("admin.dashboardsA.crm.lastMonth")}</span>
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardDescription>{t("admin.dashboardsA.crm.leadToDealRate")}</CardDescription>
-            <CardAction>
-              <ArrowUpRight className="size-4" />
-            </CardAction>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl leading-none tracking-tight">
-                {percentFormatter.format(0.181)}
-              </span>
-
-              <Badge
-                variant="outline"
-                className="border-green-200 bg-green-500/10 text-green-700 dark:border-green-900/40 dark:bg-green-500/15 dark:text-green-300"
-              >
-                <TrendingUp />
-                {signedPercentFormatter.format(0.016)}
-              </Badge>
-            </div>
-            <p className="text-sm">
-              <span className="text-foreground font-medium">{percentFormatter.format(0.165)}</span>{" "}
-              <span className="text-muted-foreground">{t("admin.dashboardsA.crm.lastMonth")}</span>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+      {/* 4. Chi tiêu trung bình / khách hàng */}
+      <Card className="border-border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="font-medium text-sm text-muted-foreground">
+            {locale === "vi" ? "Chi tiêu trung bình / Khách" : "Avg Spend / Customer"}
+          </CardTitle>
+          <Award className="size-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <div className="text-2xl font-bold tracking-tight sm:text-3xl tabular-nums text-indigo-600 dark:text-indigo-400">
+            {formatCurrency(averageCustomerSpend, locale)}
+          </div>
+          <p className="text-muted-foreground text-xs">
+            {locale === "vi"
+              ? "Doanh số bình quân tính trên người mua"
+              : "Average revenue generated per buyer"}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

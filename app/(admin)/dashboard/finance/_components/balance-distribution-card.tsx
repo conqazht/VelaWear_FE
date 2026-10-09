@@ -1,195 +1,151 @@
 "use client";
 
 import * as React from "react";
-
 import { Label, Pie, PieChart } from "recharts";
 
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import type { PaymentStatusSummary } from "@/lib/api/admin-dashboard";
 import { formatCurrency, formatNumber } from "@/lib/i18n/format";
+import { getPaymentStatusLabel } from "@/app/(admin)/dashboard/orders/_components/order-status-badge";
+import type { AdminPaymentStatus } from "@/lib/api/admin-orders";
 
-type BalanceKey = "investment" | "main" | "reserve" | "savings";
-
-const balanceData: {
-  amount: number;
-  key: BalanceKey;
-  percentage: number;
-}[] = [
-  {
-    amount: 122_540,
-    key: "main",
-    percentage: 52.2,
-  },
-  {
-    amount: 48_320,
-    key: "savings",
-    percentage: 20.6,
-  },
-  {
-    amount: 36_780,
-    key: "investment",
-    percentage: 15.7,
-  },
-  {
-    amount: 27_256,
-    key: "reserve",
-    percentage: 11.5,
-  },
-];
-
-const balanceColors: Record<BalanceKey, string> = {
-  investment: "var(--chart-1)",
-  main: "var(--chart-2)",
-  reserve: "var(--chart-3)",
-  savings: "var(--chart-4)",
+type BalanceDistributionCardProps = {
+  paymentStatuses?: PaymentStatusSummary[];
 };
 
-const currencies = ["EUR", "GBP", "USD"] as const;
+const statusColors: Record<string, string> = {
+  PAID: "var(--chart-2)",
+  UNPAID: "var(--chart-4)",
+  REFUNDED: "var(--chart-5)",
+  FAILED: "var(--chart-3)",
+};
 
-type Currency = (typeof currencies)[number];
-
-const totalBalance = balanceData.reduce((total, item) => total + item.amount, 0);
-
-export function BalanceDistributionCard() {
+export function BalanceDistributionCard({ paymentStatuses = [] }: BalanceDistributionCardProps) {
   const { locale, t } = useI18n();
-  const [currency, setCurrency] = React.useState<Currency>("USD");
-  const accountLabels = {
-    investment: t("admin.finance.allocation.investment"),
-    main: t("admin.finance.allocation.main"),
-    reserve: t("admin.finance.allocation.reserve"),
-    savings: t("admin.finance.allocation.savings"),
-  } satisfies Record<BalanceKey, string>;
+
+  const totalAmount = paymentStatuses.reduce((acc, curr) => acc + curr.totalAmount, 0);
+
+  const chartData = paymentStatuses.map((item) => {
+    const label = ["PAID", "UNPAID", "REFUNDED", "FAILED"].includes(item.status)
+      ? getPaymentStatusLabel(item.status as AdminPaymentStatus, t)
+      : item.status;
+    return {
+      status: item.status,
+      label,
+      amount: item.totalAmount,
+      count: item.count,
+      percentage: item.percentage,
+      fill: statusColors[item.status] || "var(--chart-1)",
+    };
+  });
+
   const chartConfig = {
-    amount: { label: t("admin.finance.allocation.balance") },
-    investment: { color: balanceColors.investment, label: accountLabels.investment },
-    main: { color: balanceColors.main, label: accountLabels.main },
-    reserve: { color: balanceColors.reserve, label: accountLabels.reserve },
-    savings: { color: balanceColors.savings, label: accountLabels.savings },
+    amount: { label: locale === "vi" ? "Số tiền" : "Amount" },
+    PAID: { color: statusColors.PAID, label: "Đã thanh toán" },
+    UNPAID: { color: statusColors.UNPAID, label: "Chưa thanh toán" },
+    REFUNDED: { color: statusColors.REFUNDED, label: "Hoàn tiền" },
+    FAILED: { color: statusColors.FAILED, label: "Thất bại" },
   } satisfies ChartConfig;
-  const chartData = balanceData.map((item) => ({
-    ...item,
-    account: accountLabels[item.key],
-    fill: balanceColors[item.key],
-  }));
-  const currencyLabels: Record<Currency, string> = {
-    EUR: t("admin.finance.currency.eur"),
-    GBP: t("admin.finance.currency.gbp"),
-    USD: t("admin.finance.currency.usd"),
-  };
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">{t("admin.finance.allocation.title")}</CardTitle>
-        <CardAction>
-          <Select onValueChange={(value) => setCurrency(value as Currency)} value={currency}>
-            <SelectTrigger className="w-36" size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {currencies.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {currencyLabels[value]}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </CardAction>
+        <CardTitle className="font-normal text-sm text-muted-foreground">
+          {locale === "vi" ? "Tỷ lệ trạng thái thanh toán" : "Payment Status Distribution"}
+        </CardTitle>
       </CardHeader>
 
       <CardContent className="grid items-center gap-4 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square h-50">
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel className="w-52" nameKey="account" />}
-            />
-            <Pie
-              cornerRadius={6}
-              data={chartData}
-              dataKey="amount"
-              innerRadius={65}
-              nameKey="account"
-              outerRadius={90}
-              paddingAngle={2}
-              strokeWidth={5}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (!(viewBox && "cx" in viewBox && "cy" in viewBox)) {
-                    return null;
-                  }
+        {paymentStatuses.length === 0 ? (
+          <div className="col-span-2 py-8 text-center text-sm text-muted-foreground">
+            {locale === "vi" ? "Chưa có dữ liệu thanh toán" : "No payment data"}
+          </div>
+        ) : (
+          <>
+            <ChartContainer config={chartConfig} className="mx-auto aspect-square h-50">
+              <PieChart>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel className="w-52" nameKey="label" />}
+                />
+                <Pie
+                  cornerRadius={6}
+                  data={chartData}
+                  dataKey="amount"
+                  innerRadius={60}
+                  nameKey="label"
+                  outerRadius={85}
+                  paddingAngle={2}
+                  strokeWidth={4}
+                >
+                  <Label
+                    content={({ viewBox }) => {
+                      if (!(viewBox && "cx" in viewBox && "cy" in viewBox)) {
+                        return null;
+                      }
 
-                  return (
-                    <text
-                      dominantBaseline="middle"
-                      textAnchor="middle"
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                    >
-                      <tspan
-                        className="fill-muted-foreground text-xs"
-                        x={viewBox.cx}
-                        y={(viewBox.cy ?? 0) - 8}
-                      >
-                        {t("admin.finance.allocation.total")}
-                      </tspan>
-                      <tspan
-                        className="fill-foreground font-heading text-lg font-medium tabular-nums"
-                        x={viewBox.cx}
-                        y={(viewBox.cy ?? 0) + 14}
-                      >
-                        {formatCurrency(totalBalance, locale, currency)}
-                      </tspan>
-                    </text>
-                  );
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-
-        <div className="flex min-w-0 flex-col gap-3">
-          {chartData.map((item) => (
-            <div className="grid grid-cols-[1fr_auto] items-end gap-3" key={item.key}>
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-1">
-                  <span
-                    aria-hidden="true"
-                    className="h-2 w-1 rounded-full"
-                    style={{ backgroundColor: item.fill }}
+                      return (
+                        <text
+                          dominantBaseline="middle"
+                          textAnchor="middle"
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                        >
+                          <tspan
+                            className="fill-muted-foreground text-xs"
+                            x={viewBox.cx}
+                            y={(viewBox.cy ?? 0) - 8}
+                          >
+                            {locale === "vi" ? "Tổng cộng" : "Total"}
+                          </tspan>
+                          <tspan
+                            className="fill-foreground font-heading text-base font-semibold tabular-nums"
+                            x={viewBox.cx}
+                            y={(viewBox.cy ?? 0) + 14}
+                          >
+                            {formatCurrency(totalAmount, locale)}
+                          </tspan>
+                        </text>
+                      );
+                    }}
                   />
-                  <p className="text-muted-foreground truncate text-xs">{item.account}</p>
+                </Pie>
+              </PieChart>
+            </ChartContainer>
+
+            <div className="flex min-w-0 flex-col gap-3">
+              {chartData.map((item) => (
+                <div className="grid grid-cols-[1fr_auto] items-end gap-3" key={item.status}>
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                      <span
+                        aria-hidden="true"
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: item.fill }}
+                      />
+                      <p className="text-muted-foreground truncate text-xs font-medium">
+                        {item.label} ({formatNumber(item.count, locale)})
+                      </p>
+                    </div>
+                    <p className="font-semibold text-sm tabular-nums text-foreground">
+                      {formatCurrency(item.amount, locale)}
+                    </p>
+                  </div>
+                  <div className="font-medium text-xs tabular-nums text-muted-foreground">
+                    {item.percentage}%
+                  </div>
                 </div>
-                <p className="font-medium tabular-nums">
-                  {formatCurrency(item.amount, locale, currency)}
-                </p>
-              </div>
-              <div className="font-medium tabular-nums">
-                {formatNumber(item.percentage / 100, locale, {
-                  style: "percent",
-                  maximumFractionDigits: 1,
-                })}
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

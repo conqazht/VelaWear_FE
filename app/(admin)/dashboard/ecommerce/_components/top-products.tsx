@@ -1,8 +1,10 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Package } from "lucide-react";
 
 import { useI18n } from "@/components/providers/i18n-provider";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardAction,
@@ -11,143 +13,83 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { getIntlLocale } from "@/lib/i18n";
+import type { TopProductSummary } from "@/lib/api/admin-dashboard";
+import { formatCurrency, formatNumber } from "@/lib/i18n/format";
+import { resolveAdminAssetUrl } from "@/app/(admin)/dashboard/_components/management/resource-utils";
 
-const categories = [
-  {
-    name: "Apparel",
-    share: 44,
-    color: "var(--chart-3)",
-  },
-  {
-    name: "Accessories",
-    share: 32,
-    color: "var(--chart-2)",
-  },
-  {
-    name: "Home",
-    share: 24,
-    color: "var(--chart-1)",
-  },
-] as const;
+type TopProductsProps = {
+  topProducts?: TopProductSummary[];
+};
 
-const products = [
-  {
-    name: "Linen Overshirt",
-    category: "Apparel",
-    share: 0.31,
-    sales: 14_820,
-  },
-  {
-    name: "Everyday Tote",
-    category: "Accessories",
-    share: 0.24,
-    sales: 11_460,
-  },
-  {
-    name: "Ceramic Planter",
-    category: "Home",
-    share: 0.18,
-    sales: 8930,
-  },
-] as const;
-
-export function TopProducts() {
+export function TopProducts({ topProducts = [] }: TopProductsProps) {
   const { locale, t } = useI18n();
-  const intlLocale = getIntlLocale(locale);
-  const currencyFormatter = new Intl.NumberFormat(intlLocale, {
-    currency: "USD",
-    maximumFractionDigits: 0,
-    style: "currency",
-  });
-  const percentFormatter = new Intl.NumberFormat(intlLocale, { style: "percent" });
-  const categoryLabels: Record<string, string> = {
-    Accessories: t("admin.dashboardsA.ecommerce.accessories"),
-    Apparel: t("admin.dashboardsA.ecommerce.apparel"),
-    Home: t("admin.dashboardsA.ecommerce.home"),
-  };
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-muted-foreground text-sm font-normal">
+        <CardTitle className="text-sm font-normal text-muted-foreground">
           {t("admin.dashboardsA.ecommerce.topProducts")}
         </CardTitle>
-        <CardDescription className="text-foreground text-xl leading-none tracking-tight tabular-nums">
-          {t("admin.dashboardsA.ecommerce.salesShare", { percent: percentFormatter.format(0.73) })}
+        <CardDescription className="text-xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+          {locale === "vi" ? "Sản phẩm bán chạy nhất" : "Top Best Sellers"}
         </CardDescription>
         <CardAction>
-          <ArrowUpRight className="size-4" />
+          <Link
+            href="/dashboard/products"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            title={locale === "vi" ? "Xem tất cả sản phẩm" : "View all products"}
+          >
+            <ArrowUpRight className="size-4" />
+          </Link>
         </CardAction>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <div
-            aria-label={t("admin.dashboardsA.ecommerce.salesByCategory")}
-            className="bg-muted flex h-2 gap-1 overflow-hidden"
-            role="img"
-          >
-            {categories.map((category) => (
-              <div
-                aria-hidden="true"
-                key={category.name}
-                className="rounded-md"
-                style={{
-                  backgroundColor: category.color,
-                  width: `${category.share}%`,
-                }}
-              />
-            ))}
-          </div>
+        {topProducts.length > 0 ? (
+          <div className="flex flex-col divide-y">
+            {topProducts.map((product, idx) => (
+              <div key={product.productName + idx} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar className="size-9 rounded-md border">
+                    <AvatarImage
+                      src={resolveAdminAssetUrl(product.image) ?? undefined}
+                      alt={product.productName}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="rounded-md text-xs">
+                      {product.productName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {product.productName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {locale === "vi" ? "Đã bán: " : "Sold: "}
+                      <span className="font-semibold text-foreground">
+                        {formatNumber(product.soldQuantity, locale)}
+                      </span>
+                    </p>
+                  </div>
+                </div>
 
-          <div className="flex flex-wrap gap-4">
-            {categories.map((category) => (
-              <div className="flex items-center gap-1" key={category.name}>
-                <span
-                  aria-hidden="true"
-                  className="size-2 rounded-full"
-                  style={{ backgroundColor: category.color }}
-                />
-                <span className="text-muted-foreground text-xs">
-                  {categoryLabels[category.name] ?? category.name}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-3">
-          <div className="text-muted-foreground text-xs">
-            {t("admin.dashboardsA.ecommerce.products")}
-          </div>
-          <div className="text-muted-foreground text-xs">
-            {t("admin.dashboardsA.ecommerce.share")}
-          </div>
-          <div className="text-muted-foreground text-xs">
-            {t("admin.dashboardsA.ecommerce.sales")}
-          </div>
-
-          {products.map((product) => (
-            <div className="contents text-sm" key={product.name}>
-              <div className="min-w-0">
-                <div className="truncate font-medium">{product.name}</div>
-                <div className="text-muted-foreground text-xs">
-                  {categoryLabels[product.category] ?? product.category}
+                <div className="text-right text-xs">
+                  <p className="font-mono font-semibold text-foreground">
+                    {formatCurrency(product.totalRevenue, locale)}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {locale === "vi" ? "Doanh thu" : "Revenue"}
+                  </p>
                 </div>
               </div>
-              <div className="text-muted-foreground self-center tabular-nums">
-                {percentFormatter.format(product.share)}
-              </div>
-              <div className="self-center font-medium tabular-nums">
-                {currencyFormatter.format(product.sales)}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-44 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <Package className="size-6 text-muted-foreground/60" />
+            <p>{locale === "vi" ? "Chưa có dữ liệu bán hàng" : "No sales data recorded yet"}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
