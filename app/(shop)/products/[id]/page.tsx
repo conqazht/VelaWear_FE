@@ -133,7 +133,9 @@ async function ProductDetailContent({ params }: { params: Promise<{ id: string }
       {jsonLdProduct && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProduct) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLdProduct).replace(/</g, "\\u003c"),
+          }}
         />
       )}
       <ProductDetailPage slug={slug} />

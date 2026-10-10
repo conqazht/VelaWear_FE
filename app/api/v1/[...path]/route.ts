@@ -60,11 +60,11 @@ async function handleProxy(
       redirect: "manual",
     });
   } catch (error) {
+    console.error("Proxy error: Failed to reach backend service", error);
     return NextResponse.json(
       {
         statusCode: 502,
         message: "Bad Gateway: Failed to reach backend service",
-        error: error instanceof Error ? error.message : String(error),
       },
       { status: 502 },
     );
