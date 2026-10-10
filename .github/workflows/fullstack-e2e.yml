@@ -118,15 +118,13 @@ jobs:
           # Không để credential checkout tồn tại trong git config của runner.
           persist-credentials: false
 
-      # GITHUB_TOKEN của FE không đọc được private repo BE, nên checkout thứ hai dùng
-      # fine-grained PAT chỉ có Contents: read cho VelaWear_BE. Secret được lưu ở FE.
+      # Repo VelaWear_BE là public, có thể checkout trực tiếp không cần PAT token.
       - name: Check out backend
         uses: actions/checkout@v7
         with:
           repository: conqazht/VelaWear_BE
           path: backend
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.backend_ref || 'main' }}
-          token: ${{ secrets.CROSS_REPO_READ_TOKEN }}
           persist-credentials: false
 
       # Ghi SHA đã resolve vào Job Summary để một lỗi E2E luôn truy ngược được
