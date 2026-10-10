@@ -12,7 +12,7 @@ import {
 } from "@/lib/api/auth";
 import { queryKeys } from "./keys";
 
-export function useSessionQuery() {
+export function useSessionQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: async () => {
@@ -22,6 +22,7 @@ export function useSessionQuery() {
         return null;
       }
     },
+    enabled,
   });
 }
 

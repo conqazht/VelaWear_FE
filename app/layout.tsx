@@ -8,6 +8,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import Script from "next/script";
 
 import { LOCALE_BOOTSTRAP_SCRIPT, LOCALE_COOKIE_KEY, parseLocale } from "@/lib/i18n";
+import { AUTH_SESSION_HINT_COOKIE_KEY } from "@/lib/api-client";
 import "./globals.css";
 
 function getSafeBaseUrl(): URL {
@@ -148,11 +149,12 @@ export default function RootLayout({
 async function LocalizedAppProviders({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const initialLocale = parseLocale(cookieStore.get(LOCALE_COOKIE_KEY)?.value);
+  const initialHasSessionHint = cookieStore.get(AUTH_SESSION_HINT_COOKIE_KEY)?.value === "1";
 
   return (
     <QueryProvider>
       <I18nProvider initialLocale={initialLocale}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider initialHasSessionHint={initialHasSessionHint}>{children}</AuthProvider>
       </I18nProvider>
     </QueryProvider>
   );

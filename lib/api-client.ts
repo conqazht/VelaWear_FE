@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getActiveLocale } from "./i18n";
 import { createSignInHref } from "./auth/post-auth-redirect";
+import { deleteClientCookie, getClientCookie, setClientCookie } from "./cookie.client";
 
 let accessToken: string | null = null;
 let refreshPromise: Promise<string> | null = null;
@@ -11,12 +12,16 @@ const authSessionLockName = "vela-auth-session";
 // Used to render auth UI instantly: show the login link right away when no
 // session was ever established, and reserve the avatar skeleton only for the
 // case where a session may exist and is being verified.
-const AUTH_SESSION_HINT_STORAGE_KEY = "vela-auth-session-hint";
+export const AUTH_SESSION_HINT_COOKIE_KEY = "vela-auth-session-hint";
+export const AUTH_SESSION_HINT_STORAGE_KEY = "vela-auth-session-hint";
 
 function readSessionHint(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return window.localStorage.getItem(AUTH_SESSION_HINT_STORAGE_KEY) === "1";
+    return (
+      window.localStorage.getItem(AUTH_SESSION_HINT_STORAGE_KEY) === "1" ||
+      getClientCookie(AUTH_SESSION_HINT_COOKIE_KEY) === "1"
+    );
   } catch {
     return false;
   }
@@ -27,8 +32,10 @@ function writeSessionHint(present: boolean) {
   try {
     if (present) {
       window.localStorage.setItem(AUTH_SESSION_HINT_STORAGE_KEY, "1");
+      setClientCookie(AUTH_SESSION_HINT_COOKIE_KEY, "1", 30);
     } else {
       window.localStorage.removeItem(AUTH_SESSION_HINT_STORAGE_KEY);
+      deleteClientCookie(AUTH_SESSION_HINT_COOKIE_KEY);
     }
   } catch {
     // Ignore storage failures (private mode, quota).

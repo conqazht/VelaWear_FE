@@ -323,9 +323,9 @@ export function SiteHeader() {
   // Skeleton only when a session may exist and is being verified. Fresh
   // anonymous visitors (no session hint) get the login link immediately
   // instead of waiting for the /auth/me roundtrip.
-  const isAuthPending = !hasMounted || (isAuthLoading && hasSessionHint);
-  const safeIsAuthenticated = hasMounted ? isAuthenticated : false;
-  const safeUser = hasMounted ? user : null;
+  const isAuthPending = hasSessionHint ? !hasMounted || isAuthLoading : false;
+  const safeIsAuthenticated = hasSessionHint && hasMounted ? isAuthenticated : false;
+  const safeUser = hasSessionHint && hasMounted ? user : null;
 
   const textClass = shouldBeTransparent ? "text-[#efe7dc]" : "text-[#1c1a18] hover:text-[#b5573a]";
 

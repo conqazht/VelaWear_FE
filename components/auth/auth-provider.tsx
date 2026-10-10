@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useLoginMutation,
@@ -35,8 +35,20 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const sessionQuery = useSessionQuery();
+interface AuthProviderProps {
+  children: React.ReactNode;
+  initialHasSessionHint?: boolean;
+}
+
+export function AuthProvider({ children, initialHasSessionHint }: AuthProviderProps) {
+  const [hasSessionHint, setHasSessionHint] = useState(() => {
+    if (typeof initialHasSessionHint === "boolean") {
+      return initialHasSessionHint;
+    }
+    return hasLocalAuthSessionHint();
+  });
+
+  const sessionQuery = useSessionQuery(hasSessionHint);
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
@@ -44,11 +56,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const releaseToAnonymous = useCartStore((state) => state.releaseToAnonymous);
 
   const user = (sessionQuery.data ?? null) as User | null;
-  const isLoading = sessionQuery.isPending;
+  const isLoading = hasSessionHint && sessionQuery.isPending;
   const isAuthenticated = user !== null;
-  // Snapshot at mount: only gates the initial pending render, the verified
-  // session query result takes over afterwards.
-  const [hasSessionHint] = useState(() => hasLocalAuthSessionHint());
+
+  useEffect(() => {
+    if (hasSessionHint && sessionQuery.isSuccess && sessionQuery.data === null) {
+      clearLocalAuthSession();
+      setHasSessionHint(false);
+    }
+  }, [hasSessionHint, sessionQuery.isSuccess, sessionQuery.data]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -58,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hasSessionHint,
       signIn: async (email, password) => {
         await loginMutation.mutateAsync({ email, password });
+        setHasSessionHint(true);
         const profile = await sessionQuery.refetch();
 
         if (!profile.data) {
@@ -69,14 +86,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register: async (data) => registerMutation.mutateAsync(data),
       signOut: async () => {
         await logoutMutation.mutateAsync();
+        setHasSessionHint(false);
         queryClient.removeQueries({ queryKey: queryKeys.notifications.root });
         releaseToAnonymous();
       },
       checkSession: async () => {
+        setHasSessionHint(true);
         await sessionQuery.refetch();
       },
       clearRevokedSession: async () => {
         clearLocalAuthSession();
+        setHasSessionHint(false);
         try {
           await queryClient.cancelQueries({ queryKey: queryKeys.auth.root });
         } finally {

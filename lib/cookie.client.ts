@@ -3,16 +3,19 @@
 // Server actions handle cookie updates on the server side.
 
 function writeClientCookie(serializedCookie: string) {
+  if (typeof document === "undefined") return;
   // biome-ignore lint/suspicious/noDocumentCookie: This project still uses document.cookie for broad browser support.
   document.cookie = serializedCookie;
 }
 
 export function setClientCookie(key: string, value: string, days = 7) {
+  if (typeof document === "undefined") return;
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  writeClientCookie(`${key}=${value}; expires=${expires}; path=/`);
+  writeClientCookie(`${key}=${value}; expires=${expires}; path=/; SameSite=Lax`);
 }
 
 export function getClientCookie(key: string) {
+  if (typeof document === "undefined") return undefined;
   return document.cookie
     .split("; ")
     .find((row) => row.startsWith(`${key}=`))
@@ -20,5 +23,6 @@ export function getClientCookie(key: string) {
 }
 
 export function deleteClientCookie(key: string) {
-  writeClientCookie(`${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`);
+  if (typeof document === "undefined") return;
+  writeClientCookie(`${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`);
 }

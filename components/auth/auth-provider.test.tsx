@@ -69,12 +69,33 @@ describe("AuthProvider", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     expect(result.current.hasSessionHint).toBe(false);
+    expect(result.current.isLoading).toBe(false);
   });
 
-  it("hasSessionHint is true when a previous login hint exists", () => {
+  it("hasSessionHint is true when initialHasSessionHint prop is true", () => {
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider initialHasSessionHint={true}>{children}</AuthProvider>
+        </QueryClientProvider>
+      ),
+    });
+
+    expect(result.current.hasSessionHint).toBe(true);
+  });
+
+  it("hasSessionHint is true when a previous login hint exists in localStorage", () => {
     window.localStorage.setItem("vela-auth-session-hint", "1");
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     expect(result.current.hasSessionHint).toBe(true);
+  });
+
+  it("hasSessionHint is true when a previous login hint exists in cookie", () => {
+    document.cookie = "vela-auth-session-hint=1; path=/";
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    expect(result.current.hasSessionHint).toBe(true);
+    document.cookie = "vela-auth-session-hint=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
   });
 });
