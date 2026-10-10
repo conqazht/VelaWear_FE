@@ -348,7 +348,7 @@ export function SiteHeader() {
     ? isScrolled
       ? "w-full max-w-[1800px] flex items-center justify-between rounded-full bg-white/20 border border-white/30 shadow-[0_12px_40px_rgba(28,26,24,0.06)] px-6 py-3 transition-all duration-500"
       : "w-full max-w-[1800px] flex items-center justify-between rounded-none bg-transparent border-b border-transparent px-4 md:px-8 py-2 transition-all duration-500"
-    : "w-full max-w-[1800px] h-full flex items-center justify-between px-6 md:px-16 mx-auto";
+    : "w-full max-w-[1800px] h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 mx-auto";
 
   const burgerClass = shouldBeTransparent
     ? "text-[#efe7dc] hover:text-[#ffb59f]"
@@ -475,7 +475,7 @@ export function SiteHeader() {
             closeDelay={220}
             className="hidden max-w-none flex-1 justify-start lg:flex"
           >
-            <NavigationMenuList className="gap-1 pl-3">
+            <NavigationMenuList className="gap-0.5 pl-1 xl:gap-1 xl:pl-3">
               {navigationItems.map((item) =>
                 item.groups ? (
                   <NavigationMenuItem
@@ -488,7 +488,7 @@ export function SiteHeader() {
                       render={<Link href={item.href} onClick={closeNavMenu} />}
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2.5 py-0 hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-open:bg-transparent data-popup-open:bg-transparent",
+                        "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2 py-0 hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-open:bg-transparent data-popup-open:bg-transparent xl:px-2.5",
                         textClass,
                       )}
                     >
@@ -586,7 +586,7 @@ export function SiteHeader() {
                   <NavigationMenuLink
                     key={item.label}
                     render={<Link href={item.href} onClick={closeNavMenu} />}
-                    className={cn(navigationMenuTriggerStyle(), "group/nav")}
+                    className={cn(navigationMenuTriggerStyle(), "group/nav px-2 xl:px-2.5")}
                   >
                     <span className={`relative inline-flex items-center ${textClass}`}>
                       <span className="relative pb-0.5">
@@ -601,11 +601,11 @@ export function SiteHeader() {
           </NavigationMenu>
 
           {/* Right side items */}
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-3 lg:gap-3 xl:gap-5">
             {/* Desktop Search bar */}
             <div
               ref={searchBoxRef}
-              className="relative hidden w-52 transition-all duration-300 focus-within:w-68 lg:block"
+              className="relative hidden w-40 transition-all duration-300 focus-within:w-60 lg:block xl:w-52 xl:focus-within:w-68"
             >
               <form
                 onSubmit={handleSearchSubmit}
@@ -943,7 +943,7 @@ export function SiteHeader() {
                       {/* Wide invisible bridge spanning the full dropdown width (192px) to prevent losing hover on diagonal mouse movements */}
                       <div
                         aria-hidden="true"
-                        className="pointer-events-auto absolute top-7 right-0 -left-40 h-5 bg-transparent"
+                        className="pointer-events-auto absolute top-8 right-0 -left-40 h-4 bg-transparent"
                       />
 
                       {/* Dropdown Menu */}
