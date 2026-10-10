@@ -48,7 +48,7 @@ export function AuthProvider({ children, initialHasSessionHint }: AuthProviderPr
     return hasLocalAuthSessionHint();
   });
 
-  const sessionQuery = useSessionQuery(hintState);
+  const sessionQuery = useSessionQuery();
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
@@ -56,9 +56,10 @@ export function AuthProvider({ children, initialHasSessionHint }: AuthProviderPr
   const releaseToAnonymous = useCartStore((state) => state.releaseToAnonymous);
 
   const user = (sessionQuery.data ?? null) as User | null;
-  const hasSessionHint = hintState && !(sessionQuery.isSuccess && sessionQuery.data === null);
-  const isLoading = hasSessionHint && sessionQuery.isPending;
+  const isLoading = sessionQuery.isPending;
   const isAuthenticated = user !== null;
+  const hasSessionHint =
+    (user !== null || hintState) && !(sessionQuery.isSuccess && sessionQuery.data === null);
 
   const value = useMemo<AuthContextValue>(
     () => ({

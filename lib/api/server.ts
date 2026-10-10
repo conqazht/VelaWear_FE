@@ -11,6 +11,7 @@ type ServerFetchOptions = {
   query?: Record<string, string | number | boolean | null | undefined>;
   next?: NextFetchRequestConfig;
   cache?: RequestCache;
+  signal?: AbortSignal;
 };
 
 function buildUrl(path: string, query?: ServerFetchOptions["query"]) {
@@ -29,6 +30,7 @@ export async function serverApiGet<T>(path: string, options: ServerFetchOptions 
   const response = await fetch(buildUrl(path, options.query), {
     cache: options.cache,
     next: options.next ?? { revalidate: 300 },
+    signal: options.signal ?? AbortSignal.timeout(3000),
   });
 
   if (!response.ok) {

@@ -69,7 +69,6 @@ describe("AuthProvider", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     expect(result.current.hasSessionHint).toBe(false);
-    expect(result.current.isLoading).toBe(false);
   });
 
   it("hasSessionHint is true when initialHasSessionHint prop is true", () => {

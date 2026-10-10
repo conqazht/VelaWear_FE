@@ -13,7 +13,7 @@ import {
 import { clearLocalAuthSession } from "@/lib/api-client";
 import { queryKeys } from "./keys";
 
-export function useSessionQuery(enabled = true) {
+export function useSessionQuery() {
   return useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: async () => {
@@ -24,7 +24,6 @@ export function useSessionQuery(enabled = true) {
         return null;
       }
     },
-    enabled,
   });
 }
 
