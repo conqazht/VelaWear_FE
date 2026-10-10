@@ -295,7 +295,11 @@ export function SiteHeader() {
 
   useEffect(() => {
     const handleWindowLeave = (e: MouseEvent) => {
-      if (!e.relatedTarget && !(e as unknown as { toElement?: unknown }).toElement && activeNavMenuRef.current !== null) {
+      if (
+        !e.relatedTarget &&
+        !(e as unknown as { toElement?: unknown }).toElement &&
+        activeNavMenuRef.current !== null
+      ) {
         setActiveNavMenu(null);
       }
     };
@@ -474,15 +478,14 @@ export function SiteHeader() {
             <NavigationMenuList className="gap-1 pl-3">
               {navigationItems.map((item) =>
                 item.groups ? (
-                  <NavigationMenuItem key={item.label} value={item.label} className="flex items-center">
+                  <NavigationMenuItem
+                    key={item.label}
+                    value={item.label}
+                    className="flex items-center"
+                  >
                     <NavigationMenuTrigger
                       nativeButton={false}
-                      render={
-                        <Link
-                          href={item.href}
-                          onClick={closeNavMenu}
-                        />
-                      }
+                      render={<Link href={item.href} onClick={closeNavMenu} />}
                       className={cn(
                         navigationMenuTriggerStyle(),
                         "group/nav flex h-10 items-center gap-1 border-none bg-transparent px-2.5 py-0 hover:bg-transparent focus:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none data-open:bg-transparent data-popup-open:bg-transparent",
@@ -531,12 +534,7 @@ export function SiteHeader() {
                             </p>
                           </div>
                           <BaseNavigationMenu.Link
-                            render={
-                              <Link
-                                href={item.href}
-                                onClick={closeNavMenu}
-                              />
-                            }
+                            render={<Link href={item.href} onClick={closeNavMenu} />}
                             className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold tracking-[0.13em] text-[#b5573a] uppercase transition-colors hover:text-[#8f4329] focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2 focus-visible:outline-none"
                           >
                             <span className="max-w-[10rem] leading-4">{item.ctaLabel}</span>
@@ -567,12 +565,7 @@ export function SiteHeader() {
                                 {group.items.map((sub) => (
                                   <NavigationMenuLink
                                     key={`${sub.label}-${sub.href}`}
-                                    render={
-                                      <Link
-                                        href={sub.href}
-                                        onClick={closeNavMenu}
-                                      />
-                                    }
+                                    render={<Link href={sub.href} onClick={closeNavMenu} />}
                                     className="group/item flex min-h-9 items-center justify-between rounded-lg px-2.5 py-1.5 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#b5573a] focus-visible:bg-[#f4eee6] focus-visible:text-[#b5573a] focus-visible:outline-none"
                                   >
                                     <span>{sub.label}</span>
@@ -592,12 +585,7 @@ export function SiteHeader() {
                 ) : (
                   <NavigationMenuLink
                     key={item.label}
-                    render={
-                      <Link
-                        href={item.href}
-                        onClick={closeNavMenu}
-                      />
-                    }
+                    render={<Link href={item.href} onClick={closeNavMenu} />}
                     className={cn(navigationMenuTriggerStyle(), "group/nav")}
                   >
                     <span className={`relative inline-flex items-center ${textClass}`}>
@@ -955,13 +943,13 @@ export function SiteHeader() {
                       {/* Wide invisible bridge spanning the full dropdown width (192px) to prevent losing hover on diagonal mouse movements */}
                       <div
                         aria-hidden="true"
-                        className="pointer-events-auto absolute -left-40 right-0 top-7 h-5 bg-transparent"
+                        className="pointer-events-auto absolute top-7 right-0 -left-40 h-5 bg-transparent"
                       />
 
                       {/* Dropdown Menu */}
                       <div
                         className={cn(
-                          "absolute top-11 right-0 z-50 w-48 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-lg transition-all duration-200 before:absolute before:-top-3.5 before:inset-x-0 before:h-4 before:content-[''] group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100",
+                          "absolute top-11 right-0 z-50 w-48 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-lg transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100 before:absolute before:inset-x-0 before:-top-3.5 before:h-4 before:content-['']",
                           isAccountMenuOpen
                             ? "pointer-events-auto visible opacity-100"
                             : "pointer-events-none invisible opacity-0",

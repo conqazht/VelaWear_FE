@@ -110,7 +110,7 @@ function NavigationMenuPositioner({
         align={align}
         alignOffset={alignOffset}
         className={cn(
-          "isolate z-50 h-[var(--positioner-height)] w-[var(--positioner-width)] max-w-[var(--available-width)] transition-[top,left,right,bottom] duration-300 ease-[var(--ease-vela-out,ease-out)] before:absolute before:block before:content-[''] data-[instant]:transition-none data-[side=bottom]:before:-top-3.5 data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:h-4",
+          "isolate z-50 h-[var(--positioner-height)] w-[var(--positioner-width)] max-w-[var(--available-width)] transition-[top,left,right,bottom] duration-300 ease-[var(--ease-vela-out,ease-out)] before:absolute before:block before:content-[''] data-[instant]:transition-none data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:-top-3.5 data-[side=bottom]:before:h-4",
           className,
         )}
         {...props}
