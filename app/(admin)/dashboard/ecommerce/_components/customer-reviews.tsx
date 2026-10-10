@@ -86,12 +86,12 @@ export const CustomerReviews = React.memo(function CustomerReviews({
                     </p>
                   ) : null}
                   <p className="text-muted-foreground mt-2 line-clamp-3 min-h-[4em] text-xs leading-relaxed italic">
-                    "
+                    &ldquo;
                     {currentReview.comment ||
                       (locale === "vi"
                         ? "Đánh giá chất lượng sản phẩm tốt!"
                         : "Great product quality!")}
-                    "
+                    &rdquo;
                   </p>
                 </div>
               </div>

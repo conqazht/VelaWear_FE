@@ -498,8 +498,14 @@ export function CouponsClient() {
 
   const myCouponsQuery = useMyCouponsQuery(isAuthenticated);
   const myCouponsData = myCouponsQuery.data;
-  const availableCoupons = myCouponsData?.availableCoupons ?? [];
-  const usageHistory = myCouponsData?.usageHistory ?? [];
+  const availableCoupons = useMemo(
+    () => myCouponsData?.availableCoupons ?? [],
+    [myCouponsData?.availableCoupons],
+  );
+  const usageHistory = useMemo(
+    () => myCouponsData?.usageHistory ?? [],
+    [myCouponsData?.usageHistory],
+  );
   const userTier = myCouponsData?.membershipTier ?? "STANDARD";
 
   const totalSaved = useMemo(
