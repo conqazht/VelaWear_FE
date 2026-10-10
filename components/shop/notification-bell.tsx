@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { Bell, CheckCheck, CreditCard, ExternalLink, Info, Sparkles, Truck } from "lucide-react";
+import { ArrowRight, Bell, CheckCheck, CreditCard, Info, Sparkles, Truck } from "lucide-react";
 import {
   useMyNotificationsQuery,
   useUnreadNotificationCountQuery,
@@ -65,7 +65,7 @@ export function NotificationBell({
   const markAsReadMutation = useMarkNotificationAsReadMutation(user?.id);
   const markAllAsReadMutation = useMarkAllNotificationsAsReadMutation(user?.id);
 
-  // Close on outside pointerdown
+  // Close on outside pointerdown or Escape key
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -73,9 +73,19 @@ export function NotificationBell({
       }
     }
 
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
     if (isOpen) {
       document.addEventListener("pointerdown", handlePointerDown);
-      return () => document.removeEventListener("pointerdown", handlePointerDown);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("pointerdown", handlePointerDown);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
     }
   }, [isOpen]);
 
@@ -141,7 +151,7 @@ export function NotificationBell({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: EASE_VELA }}
-            className="border-border bg-popover text-popover-foreground absolute top-11 right-0 z-50 w-80 overflow-hidden rounded-xl border shadow-xl sm:w-96"
+            className="border-border bg-popover text-popover-foreground absolute top-11 right-0 z-50 w-80 overflow-hidden rounded-2xl border shadow-xl sm:w-96"
           >
             {/* Header */}
             <div className="border-border bg-muted/60 flex items-center justify-between border-b px-4 py-3">
@@ -271,10 +281,10 @@ export function NotificationBell({
               <Link
                 href="/profile/notifications"
                 onClick={() => setIsOpen(false)}
-                className="text-foreground hover:text-primary inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
+                className="group/all text-foreground hover:text-primary inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
               >
                 <span>{t("notifications.viewAll")}</span>
-                <ExternalLink className="text-muted-foreground size-3" />
+                <ArrowRight className="text-muted-foreground size-3 transition-transform group-hover/all:translate-x-0.5" />
               </Link>
             </div>
           </motion.div>

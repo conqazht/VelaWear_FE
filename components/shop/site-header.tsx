@@ -102,16 +102,76 @@ export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [mobileExpandedItem, setMobileExpandedItem] = useState<string | null>(null);
+  const [activeNavMenu, setActiveNavMenu] = useState<string | null>(null);
+  const activeNavMenuRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeNavMenuRef.current = activeNavMenu;
+  }, [activeNavMenu]);
   const [searchQuery, setSearchQuery] = useState("");
   const searchSuggestions = useSearchSuggestions(searchQuery, activeLocale);
   const [searchHistory, setSearchHistory] = useState<string[]>(readSearchHistory);
   const [isSearchSuggestionsOpen, setIsSearchSuggestionsOpen] = useState(false);
   const [searchPathname, setSearchPathname] = useState(pathname);
   const [avatarError, setAvatarError] = useState(false);
+  const [prevAvatar, setPrevAvatar] = useState(user?.avatar);
+
+  if (user?.avatar !== prevAvatar) {
+    setPrevAvatar(user?.avatar);
+    setAvatarError(false);
+  }
+
+  // Account menu hover state with debounce grace period to solve diagonal mouse movement dropoff
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+  const accountMenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleAccountMouseEnter = () => {
+    if (accountMenuTimerRef.current) {
+      clearTimeout(accountMenuTimerRef.current);
+      accountMenuTimerRef.current = null;
+    }
+    setIsAccountMenuOpen(true);
+  };
+
+  const handleAccountMouseLeave = () => {
+    if (accountMenuTimerRef.current) {
+      clearTimeout(accountMenuTimerRef.current);
+    }
+    accountMenuTimerRef.current = setTimeout(() => {
+      setIsAccountMenuOpen(false);
+    }, 200);
+  };
 
   useEffect(() => {
-    setAvatarError(false);
-  }, [user?.avatar]);
+    return () => {
+      if (accountMenuTimerRef.current) {
+        clearTimeout(accountMenuTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAccountMenuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isAccountMenuOpen]);
 
   // Scroll state
   const [isScrolled, setIsScrolled] = useState(false);
@@ -121,12 +181,21 @@ export function SiteHeader() {
   const searchBoxRef = useRef<HTMLDivElement | null>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);
 
+  const closeNavMenu = () => {
+    setActiveNavMenu(null);
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
   if (searchPathname !== pathname) {
     setSearchPathname(pathname);
     setSearchQuery("");
     setIsSearchSuggestionsOpen(false);
     setIsMobileSearchOpen(false);
     setIsMobileMenuOpen(false);
+    setActiveNavMenu(null);
+    setIsAccountMenuOpen(false);
   }
 
   async function handleLogout() {
@@ -143,6 +212,10 @@ export function SiteHeader() {
 
   useEffect(() => {
     const handleScroll = () => {
+      if (activeNavMenuRef.current !== null) {
+        setActiveNavMenu(null);
+      }
+
       const currentScrollY = window.scrollY;
       const scrollDelta = currentScrollY - lastScrollY.current;
 
@@ -218,6 +291,26 @@ export function SiteHeader() {
 
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    const handleWindowLeave = (e: MouseEvent) => {
+      if (!e.relatedTarget && !(e as unknown as { toElement?: unknown }).toElement && activeNavMenuRef.current !== null) {
+        setActiveNavMenu(null);
+      }
+    };
+    const handleWindowBlur = () => {
+      if (activeNavMenuRef.current !== null) {
+        setActiveNavMenu(null);
+      }
+    };
+
+    document.documentElement.addEventListener("mouseleave", handleWindowLeave);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      document.documentElement.removeEventListener("mouseleave", handleWindowLeave);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
   }, []);
 
   const shouldBeTransparent = isHome && !isScrolled;
@@ -372,24 +465,22 @@ export function SiteHeader() {
 
           <NavigationMenu
             align="center"
-            delay={30}
-            closeDelay={180}
+            value={activeNavMenu}
+            onValueChange={(val) => setActiveNavMenu(val as string | null)}
+            delay={160}
+            closeDelay={220}
             className="hidden max-w-none flex-1 justify-start lg:flex"
           >
             <NavigationMenuList className="gap-1 pl-3">
               {navigationItems.map((item) =>
                 item.groups ? (
-                  <NavigationMenuItem key={item.label} className="flex items-center">
+                  <NavigationMenuItem key={item.label} value={item.label} className="flex items-center">
                     <NavigationMenuTrigger
                       nativeButton={false}
                       render={
                         <Link
                           href={item.href}
-                          onClick={() => {
-                            if (document.activeElement instanceof HTMLElement) {
-                              document.activeElement.blur();
-                            }
-                          }}
+                          onClick={closeNavMenu}
                         />
                       }
                       className={cn(
@@ -443,11 +534,7 @@ export function SiteHeader() {
                             render={
                               <Link
                                 href={item.href}
-                                onClick={() => {
-                                  if (document.activeElement instanceof HTMLElement) {
-                                    document.activeElement.blur();
-                                  }
-                                }}
+                                onClick={closeNavMenu}
                               />
                             }
                             className="group/cta relative z-10 mt-6 flex items-center justify-between gap-3 border-t border-[#b5573a]/20 pt-4 text-[11px] font-semibold tracking-[0.13em] text-[#b5573a] uppercase transition-colors hover:text-[#8f4329] focus-visible:ring-2 focus-visible:ring-[#b5573a] focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -483,11 +570,7 @@ export function SiteHeader() {
                                     render={
                                       <Link
                                         href={sub.href}
-                                        onClick={() => {
-                                          if (document.activeElement instanceof HTMLElement) {
-                                            document.activeElement.blur();
-                                          }
-                                        }}
+                                        onClick={closeNavMenu}
                                       />
                                     }
                                     className="group/item flex min-h-9 items-center justify-between rounded-lg px-2.5 py-1.5 text-sm text-[#1c1a18]/80 transition-colors hover:bg-[#f4eee6] hover:text-[#b5573a] focus-visible:bg-[#f4eee6] focus-visible:text-[#b5573a] focus-visible:outline-none"
@@ -512,11 +595,7 @@ export function SiteHeader() {
                     render={
                       <Link
                         href={item.href}
-                        onClick={() => {
-                          if (document.activeElement instanceof HTMLElement) {
-                            document.activeElement.blur();
-                          }
-                        }}
+                        onClick={closeNavMenu}
                       />
                     }
                     className={cn(navigationMenuTriggerStyle(), "group/nav")}
@@ -841,10 +920,16 @@ export function SiteHeader() {
                         </motion.button>
                       </Link>
                     )}
-                    <div className="group relative">
+                    <div
+                      ref={accountMenuRef}
+                      className="group relative"
+                      onMouseEnter={handleAccountMouseEnter}
+                      onMouseLeave={handleAccountMouseLeave}
+                    >
                       <Link
                         href="/profile"
                         aria-label={t("storefront.nav.viewProfile")}
+                        onClick={() => setIsAccountMenuOpen(false)}
                         className="border-hairline relative flex size-8 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border bg-[#efe7dc] text-xs font-semibold text-[#1c1a18] transition-all duration-300 group-hover:border-[#b5573a]"
                       >
                         {safeUser.avatar && !avatarError ? (
@@ -867,11 +952,21 @@ export function SiteHeader() {
                         )}
                       </Link>
 
-                      {/* Invisible bridge to keep hover state active - scoped strictly to avatar circle */}
-                      <div className="absolute inset-x-0 top-8 h-4 bg-transparent" />
+                      {/* Wide invisible bridge spanning the full dropdown width (192px) to prevent losing hover on diagonal mouse movements */}
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-auto absolute -left-40 right-0 top-7 h-5 bg-transparent"
+                      />
 
                       {/* Dropdown Menu */}
-                      <div className="pointer-events-none invisible absolute top-11 right-0 z-50 w-48 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white opacity-0 shadow-lg transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
+                      <div
+                        className={cn(
+                          "absolute top-11 right-0 z-50 w-48 overflow-hidden rounded-md border border-[#1c1a18]/10 bg-white shadow-lg transition-all duration-200 before:absolute before:-top-3.5 before:inset-x-0 before:h-4 before:content-[''] group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100",
+                          isAccountMenuOpen
+                            ? "pointer-events-auto visible opacity-100"
+                            : "pointer-events-none invisible opacity-0",
+                        )}
+                      >
                         <div className="bg-canvas/40 flex items-center justify-between border-b border-[#1c1a18]/10 px-4 py-3">
                           <span className="font-sans text-xs font-bold tracking-wider text-[#1c1a18] uppercase">
                             {t("storefront.nav.account")}
@@ -881,6 +976,7 @@ export function SiteHeader() {
                           {canAccessManagement(safeUser) && (
                             <Link
                               href="/dashboard"
+                              onClick={() => setIsAccountMenuOpen(false)}
                               className="flex items-center gap-2 border-b border-[#1c1a18]/10 px-4 py-2.5 text-[13px] font-semibold text-[#1c1a18] transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                             >
                               <Shield className="size-3.5 text-[#b5573a]" />
@@ -889,43 +985,52 @@ export function SiteHeader() {
                           )}
                           <Link
                             href="/profile"
+                            onClick={() => setIsAccountMenuOpen(false)}
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.profile")}
                           </Link>
                           <Link
                             href="/profile?tab=orders"
+                            onClick={() => setIsAccountMenuOpen(false)}
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.orders")}
                           </Link>
                           <Link
                             href="/profile?tab=favourites"
+                            onClick={() => setIsAccountMenuOpen(false)}
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.favourites")}
                           </Link>
                           <Link
                             href="/coupons"
+                            onClick={() => setIsAccountMenuOpen(false)}
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.coupons")}
                           </Link>
                           <Link
                             href="/reviews"
+                            onClick={() => setIsAccountMenuOpen(false)}
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.reviews")}
                           </Link>
                           <Link
                             href="/profile/notifications"
+                            onClick={() => setIsAccountMenuOpen(false)}
                             className="px-4 py-2 text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("notifications.title")}
                           </Link>
                           <div className="border-t border-[#1c1a18]/8" />
                           <button
-                            onClick={handleLogout}
+                            onClick={() => {
+                              setIsAccountMenuOpen(false);
+                              handleLogout();
+                            }}
                             className="w-full cursor-pointer px-4 py-2 text-left text-[13px] font-medium text-[#1c1a18]/80 transition-colors hover:bg-[#efe7dc] hover:text-[#b5573a]"
                           >
                             {t("storefront.nav.logOut")}

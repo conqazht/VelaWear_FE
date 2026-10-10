@@ -83,7 +83,7 @@ export function NotificationsClient() {
 
   if (isAuthLoading) {
     return (
-      <div className="bg-background min-h-screen px-4 py-12 md:px-12">
+      <div className="bg-background min-h-screen px-4 pt-[104px] pb-16 sm:px-6 md:px-12 md:pt-[124px]">
         <div className="mx-auto max-w-4xl space-y-6">
           <div className="bg-foreground/10 h-8 w-48 animate-pulse rounded" />
           <div className="border-border bg-card h-64 animate-pulse rounded-xl border shadow-xs" />
@@ -94,7 +94,7 @@ export function NotificationsClient() {
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-background flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+      <div className="bg-background flex min-h-[70vh] flex-col items-center justify-center px-4 pt-[104px] pb-16 text-center sm:px-6 md:pt-[124px]">
         <div className="bg-muted text-primary mb-4 flex size-14 items-center justify-center rounded-full">
           <Bell className="size-6" />
         </div>
@@ -111,7 +111,7 @@ export function NotificationsClient() {
   }
 
   return (
-    <div className="bg-background min-h-screen px-4 py-10 sm:px-6 md:px-12 md:py-16">
+    <div className="bg-background min-h-screen px-4 pt-[104px] pb-16 sm:px-6 md:px-12 md:pt-[124px] md:pb-24">
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumb / Top Bar */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
