@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useLoginMutation,
@@ -41,14 +41,14 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, initialHasSessionHint }: AuthProviderProps) {
-  const [hasSessionHint, setHasSessionHint] = useState(() => {
+  const [hintState, setHintState] = useState(() => {
     if (typeof initialHasSessionHint === "boolean") {
       return initialHasSessionHint;
     }
     return hasLocalAuthSessionHint();
   });
 
-  const sessionQuery = useSessionQuery(hasSessionHint);
+  const sessionQuery = useSessionQuery(hintState);
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
   const logoutMutation = useLogoutMutation();
@@ -56,15 +56,9 @@ export function AuthProvider({ children, initialHasSessionHint }: AuthProviderPr
   const releaseToAnonymous = useCartStore((state) => state.releaseToAnonymous);
 
   const user = (sessionQuery.data ?? null) as User | null;
+  const hasSessionHint = hintState && !(sessionQuery.isSuccess && sessionQuery.data === null);
   const isLoading = hasSessionHint && sessionQuery.isPending;
   const isAuthenticated = user !== null;
-
-  useEffect(() => {
-    if (hasSessionHint && sessionQuery.isSuccess && sessionQuery.data === null) {
-      clearLocalAuthSession();
-      setHasSessionHint(false);
-    }
-  }, [hasSessionHint, sessionQuery.isSuccess, sessionQuery.data]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -74,7 +68,7 @@ export function AuthProvider({ children, initialHasSessionHint }: AuthProviderPr
       hasSessionHint,
       signIn: async (email, password) => {
         await loginMutation.mutateAsync({ email, password });
-        setHasSessionHint(true);
+        setHintState(true);
         const profile = await sessionQuery.refetch();
 
         if (!profile.data) {
@@ -86,17 +80,17 @@ export function AuthProvider({ children, initialHasSessionHint }: AuthProviderPr
       register: async (data) => registerMutation.mutateAsync(data),
       signOut: async () => {
         await logoutMutation.mutateAsync();
-        setHasSessionHint(false);
+        setHintState(false);
         queryClient.removeQueries({ queryKey: queryKeys.notifications.root });
         releaseToAnonymous();
       },
       checkSession: async () => {
-        setHasSessionHint(true);
+        setHintState(true);
         await sessionQuery.refetch();
       },
       clearRevokedSession: async () => {
         clearLocalAuthSession();
-        setHasSessionHint(false);
+        setHintState(false);
         try {
           await queryClient.cancelQueries({ queryKey: queryKeys.auth.root });
         } finally {

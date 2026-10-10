@@ -10,6 +10,7 @@ import {
   type LoginRequest,
   type RegisterRequest,
 } from "@/lib/api/auth";
+import { clearLocalAuthSession } from "@/lib/api-client";
 import { queryKeys } from "./keys";
 
 export function useSessionQuery(enabled = true) {
@@ -19,6 +20,7 @@ export function useSessionQuery(enabled = true) {
       try {
         return await getSessionUser();
       } catch {
+        clearLocalAuthSession();
         return null;
       }
     },
