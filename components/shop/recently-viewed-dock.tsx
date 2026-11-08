@@ -96,7 +96,7 @@ export function RecentlyViewedDock() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="group relative flex items-center gap-3 rounded-xl border border-transparent bg-[#fbf9f5] p-2 transition-all hover:border-[#efe7dc] hover:bg-white hover:shadow-xs"
+                  className="group relative flex items-center gap-3 rounded-xl border border-transparent bg-[#fbf9f5] p-2 transition-[border-color,background-color,box-shadow] hover:border-[#efe7dc] hover:bg-white hover:shadow-xs"
                 >
                   <Link
                     href={`/products/${item.id}`}

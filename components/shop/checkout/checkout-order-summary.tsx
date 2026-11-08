@@ -32,6 +32,33 @@ export interface CheckoutOrderSummaryProps {
   isSubmitting: boolean;
 }
 
+function GiftSummaryBanner({
+  giftOptions,
+}: {
+  giftOptions: ReturnType<typeof useGiftOptions>["options"];
+}) {
+  const { t } = useI18n();
+  if (!giftOptions?.enabled) return null;
+
+  return (
+    <div className="mb-6 rounded-xl border border-[#d4af37]/40 bg-[#fbf9f5] p-3.5 text-xs shadow-2xs">
+      <div className="flex items-center gap-2 font-semibold text-[#1c1a18]">
+        <Gift className="size-4 text-[#b5573a]" />
+        <span>
+          {giftOptions.boxType === "signature"
+            ? t("giftCustomizer.signatureBox")
+            : t("giftCustomizer.ecoBox")}
+        </span>
+      </div>
+      {giftOptions.includeCard && giftOptions.cardMessage && (
+        <p className="mt-1.5 pl-6 font-serif text-[11px] text-[#1c1a18]/70 italic">
+          &ldquo;{giftOptions.cardMessage}&rdquo;
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function CheckoutOrderSummary({
   cart,
   locale,
@@ -92,23 +119,7 @@ export function CheckoutOrderSummary({
         ))}
       </div>
 
-      {giftOptions?.enabled && (
-        <div className="mb-6 rounded-xl border border-[#d4af37]/40 bg-[#fbf9f5] p-3.5 text-xs shadow-2xs">
-          <div className="flex items-center gap-2 font-semibold text-[#1c1a18]">
-            <Gift className="size-4 text-[#b5573a]" />
-            <span>
-              {giftOptions.boxType === "signature"
-                ? t("giftCustomizer.signatureBox")
-                : t("giftCustomizer.ecoBox")}
-            </span>
-          </div>
-          {giftOptions.includeCard && giftOptions.cardMessage && (
-            <p className="mt-1.5 pl-6 font-serif text-[11px] text-[#1c1a18]/70 italic">
-              &ldquo;{giftOptions.cardMessage}&rdquo;
-            </p>
-          )}
-        </div>
-      )}
+      <GiftSummaryBanner giftOptions={giftOptions} />
 
       <div className="mb-8">
         <div className="flex gap-2">

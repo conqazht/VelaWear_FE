@@ -212,7 +212,7 @@ function QuickViewDialogContent({
             <Button
               type="button"
               onClick={handleAddToCart}
-              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-all hover:bg-[#b5573a] active:scale-[0.98]"
+              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-[background-color,transform] hover:bg-[#b5573a] active:scale-[0.98]"
             >
               <ShoppingBag className="size-4" />
               {t("quickView.addToBag")}
