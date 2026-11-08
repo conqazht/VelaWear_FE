@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { EASE_VELA } from "@/lib/motion-tokens";
@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FashionImage } from "@/components/shop/fashion-image";
 import { ProductReviewsSection } from "@/components/shop/product-reviews-section";
+import { SocialProofPill } from "@/components/shop/social-proof-pill";
 import { useCart } from "@/components/shop/cart-provider";
 import { useFavorites } from "@/components/shop/favorites-provider";
 import { useNotification } from "@/components/shop/notification-provider";
+import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { getCategoryLabel, money, Product } from "@/lib/vela-data";
 import { cn } from "@/lib/utils";
@@ -34,7 +36,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { showAddedToBag } = useNotification();
+  const { addProduct } = useRecentlyViewed();
   const { locale: activeLocale, t } = useI18n();
+
+  useEffect(() => {
+    if (product) {
+      addProduct(product);
+    }
+  }, [product, addProduct]);
   const reduceMotion = useReducedMotion();
   const favorited =
     product.realId !== undefined ? isFavorite(String(product.realId)) : isFavorite(product.id);
@@ -349,6 +358,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
         {/* CTA BUTTONS */}
         <div className="flex flex-col gap-3">
+          <SocialProofPill
+            productId={product.id}
+            stockQuantity={activeVariant?.stockQuantity}
+            className="mb-1"
+          />
           <Button
             type="button"
             disabled={unavailable}

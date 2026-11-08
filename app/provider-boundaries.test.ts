@@ -31,6 +31,7 @@ test("shop providers should not be consumed outside shop routes", () => {
     path.join("components", "shop", "home-product-card.tsx"),
     path.join("components", "shop", "notification-provider.tsx"),
     path.join("components", "shop", "product-detail-client.tsx"),
+    path.join("components", "shop", "quick-view-dialog.tsx"),
     path.join("components", "shop", "site-header.tsx"),
   ].map((p) => p.replace(/\\/g, "/"));
 

@@ -20,6 +20,7 @@ type ProductCardShellProps = {
   imageOverlay?: ReactNode;
   imageClassName?: string;
   footerAction?: ReactNode;
+  quickViewAction?: ReactNode;
 };
 
 export function ProductCardShell({
@@ -35,6 +36,7 @@ export function ProductCardShell({
   imageOverlay,
   imageClassName,
   footerAction,
+  quickViewAction,
 }: ProductCardShellProps) {
   return (
     <Card className="group relative h-full gap-0 overflow-hidden rounded-xl border-transparent bg-white p-0 shadow-2xs transition-shadow hover:shadow-md">
@@ -51,6 +53,11 @@ export function ProductCardShell({
           ) : null}
         </Link>
         {imageAction ? <div className="absolute top-4 right-4 z-20">{imageAction}</div> : null}
+        {quickViewAction ? (
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20 flex translate-y-1.5 justify-center opacity-0 transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+            {quickViewAction}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex flex-grow flex-col items-start px-4 pt-5 pb-6 text-left">

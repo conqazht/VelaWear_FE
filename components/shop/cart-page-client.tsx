@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { AlertTriangle, ArrowRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { FashionImage } from "@/components/shop/fashion-image";
 import { useCart } from "@/components/shop/cart-provider";
 import { money } from "@/lib/vela-data";
 import { RelatedProducts } from "@/components/shop/related-products";
+import { GiftCustomizer } from "@/components/shop/gift-customizer";
 import { useCartStore } from "@/store/cart-store";
 import { useI18n } from "@/components/providers/i18n-provider";
 
@@ -138,10 +139,7 @@ export function CartPageClient() {
               </div>
             </div>
 
-            <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-[#f7f4ef] p-3.5 text-[10px] leading-relaxed text-[#1c1a18]/65">
-              <Tag className="mt-0.5 size-4 shrink-0 text-[#b5573a]" />
-              <span>{t("cart.giftPackaging")}</span>
-            </div>
+            <GiftCustomizer className="mt-6" />
 
             <Link
               href="/checkout"

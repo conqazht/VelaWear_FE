@@ -1,6 +1,6 @@
 "use client";
 
-import { LockKeyhole, Loader2 } from "lucide-react";
+import { LockKeyhole, Loader2, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import type { CheckoutPreviewResponse } from "@/lib/checkout-api";
 import type { Locale } from "@/lib/i18n";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { LedgerRow } from "@/components/shop/checkout/checkout-form-controls";
+import { useGiftOptions } from "@/hooks/use-gift-options";
 
 export interface CheckoutOrderSummaryProps {
   cart: CartItem[];
@@ -50,6 +51,7 @@ export function CheckoutOrderSummary({
   isSubmitting,
 }: CheckoutOrderSummaryProps) {
   const { t } = useI18n();
+  const { options: giftOptions } = useGiftOptions();
 
   return (
     <Card className="rounded-md border-[#1c1a18]/5 bg-white p-8 py-8 shadow-sm lg:col-span-5">
@@ -89,6 +91,24 @@ export function CheckoutOrderSummary({
           </div>
         ))}
       </div>
+
+      {giftOptions?.enabled && (
+        <div className="mb-6 rounded-xl border border-[#d4af37]/40 bg-[#fbf9f5] p-3.5 text-xs shadow-2xs">
+          <div className="flex items-center gap-2 font-semibold text-[#1c1a18]">
+            <Gift className="size-4 text-[#b5573a]" />
+            <span>
+              {giftOptions.boxType === "signature"
+                ? t("giftCustomizer.signatureBox")
+                : t("giftCustomizer.ecoBox")}
+            </span>
+          </div>
+          {giftOptions.includeCard && giftOptions.cardMessage && (
+            <p className="mt-1.5 pl-6 font-serif text-[11px] text-[#1c1a18]/70 italic">
+              &ldquo;{giftOptions.cardMessage}&rdquo;
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="mb-8">
         <div className="flex gap-2">
