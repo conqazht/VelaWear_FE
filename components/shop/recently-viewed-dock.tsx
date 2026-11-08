@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Clock3, X, Trash2, ArrowUpRight } from "lucide-react";
@@ -14,26 +14,55 @@ export function RecentlyViewedDock() {
   const { locale, t } = useI18n();
   const { items, isLoaded, removeProduct, clearAll } = useRecentlyViewed();
   const [isOpen, setIsOpen] = useState(false);
+  const dockRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
+
+  // Close on outside pointerdown or Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   // Don't render until client loaded, or if empty and closed
   if (!isLoaded || items.length === 0) return null;
 
   return (
-    <div className="fixed right-5 bottom-6 z-40">
-      {/* Floating Toggle Button */}
+    <div ref={dockRef} className="fixed right-5 bottom-6 z-40 flex items-end justify-end">
+      {/* Floating Toggle Button & Expanded Floating Drawer */}
       <AnimatePresence>
-        {!isOpen && (
+        {!isOpen ? (
           <motion.button
+            key="dock-trigger-button"
             type="button"
-            initial={{ scale: shouldReduceMotion ? 1 : 0.8, opacity: 0, y: 10 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: shouldReduceMotion ? 1 : 0.8, opacity: 0, y: 10 }}
+            initial={{ scale: shouldReduceMotion ? 1 : 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: shouldReduceMotion ? 1 : 0.85, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2.5 rounded-full border border-white/15 bg-[#1c1a18]/90 px-4 py-2.5 text-xs font-semibold tracking-wider text-[#f7f4ef] uppercase shadow-xl backdrop-blur-md transition-colors hover:bg-[#b5573a]"
+            className="flex origin-bottom-right items-center gap-2.5 rounded-full border border-white/15 bg-[#1c1a18]/90 px-4 py-2.5 text-xs font-semibold tracking-wider text-[#f7f4ef] uppercase shadow-xl backdrop-blur-md transition-colors hover:bg-[#b5573a]"
             aria-label={t("recentlyViewed.dockLabel")}
+            aria-expanded={false}
+            aria-controls="recently-viewed-panel"
           >
             <Clock3 className="size-4 text-[#d4af37]" />
             <span>{t("recentlyViewed.dockLabel")}</span>
@@ -41,26 +70,25 @@ export function RecentlyViewedDock() {
               {items.length}
             </span>
           </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* Expanded Floating Drawer */}
-      <AnimatePresence>
-        {isOpen && (
+        ) : (
           <motion.div
+            key="dock-drawer-panel"
+            id="recently-viewed-panel"
+            role="region"
+            aria-label={t("recentlyViewed.title")}
             initial={{
               opacity: 0,
-              y: shouldReduceMotion ? 0 : 20,
+              y: shouldReduceMotion ? 0 : 12,
               scale: shouldReduceMotion ? 1 : 0.96,
             }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{
               opacity: 0,
-              y: shouldReduceMotion ? 0 : 20,
+              y: shouldReduceMotion ? 0 : 12,
               scale: shouldReduceMotion ? 1 : 0.96,
             }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="w-[90vw] max-w-[360px] overflow-hidden rounded-2xl border border-[#efe7dc] bg-white/95 shadow-2xl backdrop-blur-xl sm:max-w-[400px]"
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute right-0 bottom-0 w-[90vw] max-w-[360px] origin-bottom-right overflow-hidden rounded-2xl border border-[#efe7dc] bg-white/95 shadow-2xl backdrop-blur-xl sm:max-w-[400px]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#efe7dc] px-4 py-3.5">
@@ -73,7 +101,10 @@ export function RecentlyViewedDock() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={clearAll}
+                  onClick={() => {
+                    clearAll();
+                    setIsOpen(false);
+                  }}
                   className="flex items-center gap-1 text-[11px] font-medium text-[#1c1a18]/50 transition-colors hover:text-[#b5573a]"
                   title={t("recentlyViewed.clear")}
                 >
