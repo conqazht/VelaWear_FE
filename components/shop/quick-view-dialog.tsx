@@ -88,7 +88,7 @@ function QuickViewDialogContent({
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 z-30 flex size-9 items-center justify-center rounded-full bg-white/90 text-[#1c1a18] shadow-md backdrop-blur-md transition-all duration-150 hover:bg-[#1c1a18] hover:text-white active:scale-90"
+          className="absolute top-4 right-4 z-30 flex size-9 items-center justify-center rounded-full bg-white/90 text-[#1c1a18] shadow-md backdrop-blur-md transition-[background-color,color,transform] duration-150 hover:bg-[#1c1a18] hover:text-white active:scale-90"
           aria-label="Close"
         >
           <X className="size-4" />
@@ -196,7 +196,7 @@ function QuickViewDialogContent({
                       type="button"
                       onClick={() => setSelectedSize(size)}
                       className={cn(
-                        "flex h-10 items-center justify-center rounded-lg border text-xs font-semibold transition-all duration-150 active:scale-95",
+                        "flex h-10 items-center justify-center rounded-lg border text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-95",
                         isSelected
                           ? "border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm"
                           : "border-[#efe7dc] bg-[#fbf9f5] text-[#1c1a18] hover:border-[#1c1a18]/40 hover:bg-white",
@@ -215,7 +215,7 @@ function QuickViewDialogContent({
             <Button
               type="button"
               onClick={handleAddToCart}
-              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-all duration-150 hover:bg-[#b5573a] active:scale-[0.98]"
+              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-[background-color,transform] duration-150 hover:bg-[#b5573a] active:scale-[0.98]"
             >
               <ShoppingBag className="size-4" />
               {t("quickView.addToBag")}

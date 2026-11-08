@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Gift, Sparkles, Check, PenTool, Sparkle } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
@@ -113,7 +112,7 @@ function GiftCardPreview({ options }: { options: GiftOptions }) {
 
   return (
     <div className="relative mt-3 overflow-hidden rounded-xl border border-[#d4af37]/40 bg-gradient-to-b from-[#fdfbf7] to-[#f7f3eb] p-5 shadow-xs">
-      {/* Decorative seal & watermark */}
+      {/* Decorative watermark */}
       <div className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full bg-[#d4af37]/10 blur-xl" />
 
       {/* Header Pill */}
@@ -154,7 +153,6 @@ function GiftCardPreview({ options }: { options: GiftOptions }) {
 
 function GiftCardSection({ options, updateOptions }: SubcomponentProps) {
   const { t } = useI18n();
-  const shouldReduceMotion = useReducedMotion();
 
   return (
     <div className="space-y-3 pt-2">
@@ -171,18 +169,16 @@ function GiftCardSection({ options, updateOptions }: SubcomponentProps) {
         </div>
       </label>
 
-      <AnimatePresence initial={false}>
-        {options.includeCard && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.25,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="overflow-hidden"
-          >
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          options.includeCard
+            ? "grid-template-rows-[1fr] opacity-100"
+            : "grid-template-rows-[0fr] pointer-events-none opacity-0",
+        )}
+      >
+        <div className="overflow-hidden">
+          {options.includeCard && (
             <div className="space-y-3.5 pt-1 sm:pl-6">
               <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 <div>
@@ -246,16 +242,15 @@ function GiftCardSection({ options, updateOptions }: SubcomponentProps) {
 
               <GiftCardPreview options={options} />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 export function GiftCustomizer({ className = "" }: { className?: string }) {
   const { t } = useI18n();
-  const shouldReduceMotion = useReducedMotion();
   const { options, updateOptions, isLoaded } = useGiftOptions();
 
   if (!isLoaded) return null;
@@ -288,25 +283,23 @@ export function GiftCustomizer({ className = "" }: { className?: string }) {
       </label>
 
       {/* Expanded Gift Customization Drawer */}
-      <AnimatePresence initial={false}>
-        {options.enabled && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.28,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="overflow-hidden"
-          >
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          options.enabled
+            ? "grid-template-rows-[1fr] opacity-100"
+            : "grid-template-rows-[0fr] pointer-events-none opacity-0",
+        )}
+      >
+        <div className="overflow-hidden">
+          {options.enabled && (
             <div className="mt-5 space-y-5 border-t border-[#efe7dc] pt-5">
               <GiftBoxSelector options={options} updateOptions={updateOptions} />
               <GiftCardSection options={options} updateOptions={updateOptions} />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
