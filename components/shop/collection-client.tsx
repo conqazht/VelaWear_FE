@@ -39,6 +39,8 @@ import {
 import { CatalogFilters } from "@/components/shop/collection/catalog-filters";
 import { ActiveFilters } from "@/components/shop/collection/active-filters";
 import { CatalogPagination } from "@/components/shop/collection/catalog-pagination";
+import { QuickViewDialog } from "@/components/shop/quick-view-dialog";
+import type { Product } from "@/lib/vela-data";
 
 export type { CatalogMode, CatalogRollback };
 
@@ -60,6 +62,7 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [mobileDraft, setMobileDraft] = useState<CatalogUrlState>(EMPTY_CATALOG_URL_STATE);
   const [priceError, setPriceError] = useState<string | null>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
   const state = useMemo(() => parseCatalogUrlState(searchParams), [searchParams]);
   const serializedState = serializeCatalogUrlState(state);
@@ -322,7 +325,7 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
                     ease: [0.16, 1, 0.3, 1],
                   }}
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} onQuickView={setQuickViewProduct} />
                 </motion.div>
               ))}
             </ProductGrid>
@@ -447,6 +450,12 @@ export function CollectionClient({ mode = "collection" }: { mode?: CatalogMode }
           </>
         )}
       </AnimatePresence>
+
+      <QuickViewDialog
+        product={quickViewProduct}
+        open={!!quickViewProduct}
+        onOpenChange={(open) => !open && setQuickViewProduct(null)}
+      />
     </div>
   );
 }
