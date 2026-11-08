@@ -54,7 +54,7 @@ export function ProductCardShell({
         </Link>
         {imageAction ? <div className="absolute top-4 right-4 z-20">{imageAction}</div> : null}
         {quickViewAction ? (
-          <div className="pointer-events-none absolute inset-x-4 bottom-3.5 z-20 flex translate-y-2 scale-95 justify-center opacity-0 transition-[opacity,transform] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100">
+          <div className="pointer-events-none absolute inset-x-4 bottom-3.5 z-20 flex translate-y-3 opacity-0 transition-[opacity,translate] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
             {quickViewAction}
           </div>
         ) : null}

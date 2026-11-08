@@ -38,9 +38,9 @@ export function ProductCard({ product, imageAction, footerAction, onQuickView }:
               e.stopPropagation();
               onQuickView(product);
             }}
-            className="group/btn flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-white/70 bg-white/92 px-4 py-2.5 text-[11px] font-semibold tracking-widest text-[#1c1a18] uppercase shadow-md backdrop-blur-md transition-[background-color,color,border-color,transform,box-shadow] duration-200 ease-out hover:border-[#1c1a18] hover:bg-[#1c1a18] hover:text-[#f7f4ef] hover:shadow-lg active:scale-95"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-stone-200/80 bg-white/95 px-4 py-2.5 text-[11px] font-semibold tracking-widest text-[#1c1a18] uppercase shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-[background-color,color,border-color,box-shadow,transform] duration-200 ease-out hover:border-[#1c1a18] hover:bg-[#1c1a18] hover:text-[#f7f4ef] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] active:scale-[0.98]"
           >
-            <Eye className="size-3.5 transition-transform duration-200 group-hover/btn:scale-110" />
+            <Eye className="size-3.5 shrink-0 stroke-[2]" />
             <span>{t("quickView.button")}</span>
           </button>
         ) : undefined
