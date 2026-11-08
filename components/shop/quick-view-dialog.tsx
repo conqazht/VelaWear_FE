@@ -74,39 +74,42 @@ function QuickViewDialogContent({
   };
 
   return (
-    <DialogContent className="max-h-[92vh] w-[95vw] max-w-4xl overflow-y-auto rounded-2xl border-none bg-white p-0 shadow-2xl md:overflow-hidden">
+    <DialogContent
+      showCloseButton={false}
+      className="max-h-[90vh] w-[95vw] overflow-hidden rounded-2xl border-none bg-white p-0 shadow-2xl focus:outline-none sm:max-w-3xl md:max-w-4xl lg:max-w-5xl"
+    >
       <DialogTitle className="sr-only">
         {t("quickView.title")} - {product.name}
       </DialogTitle>
       <DialogDescription className="sr-only">{t("quickView.viewDetails")}</DialogDescription>
 
-      <div className="relative grid grid-cols-1 md:grid-cols-12">
+      <div className="relative grid grid-cols-1 md:h-[620px] md:grid-cols-12">
         {/* Close button */}
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 z-30 flex size-9 items-center justify-center rounded-full bg-white/80 text-[#1c1a18] shadow-sm backdrop-blur-md transition-colors hover:bg-[#1c1a18] hover:text-white"
+          className="absolute top-4 right-4 z-30 flex size-9 items-center justify-center rounded-full bg-white/90 text-[#1c1a18] shadow-md backdrop-blur-md transition-all duration-150 hover:bg-[#1c1a18] hover:text-white active:scale-90"
           aria-label="Close"
         >
           <X className="size-4" />
         </button>
 
         {/* Left Column: Product Image */}
-        <div className="relative aspect-[3/4] bg-[#efe7dc] md:col-span-6 md:aspect-auto md:h-full">
+        <div className="relative aspect-[3/4] overflow-hidden bg-[#f6f2ec] md:col-span-6 md:aspect-auto md:h-full">
           <FashionImage
             src={activeImage || product.image}
             alt={product.name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-500 ease-out"
           />
           {product.badge ? (
-            <Badge className="absolute top-4 left-4 rounded-full bg-[#1c1a18] px-3 py-1 text-[10px] font-bold tracking-widest text-[#f7f4ef] uppercase">
+            <Badge className="absolute top-4 left-4 z-10 rounded-full bg-[#1c1a18] px-3 py-1 text-[10px] font-bold tracking-widest text-[#f7f4ef] uppercase">
               {product.badge}
             </Badge>
           ) : null}
         </div>
 
         {/* Right Column: Product Info & Actions */}
-        <div className="flex flex-col justify-between p-6 sm:p-8 md:col-span-6">
+        <div className="flex flex-col justify-between p-6 sm:p-8 md:col-span-6 md:overflow-y-auto">
           <div>
             <span className="text-[11px] font-medium tracking-[0.2em] text-[#1c1a18]/60 uppercase">
               {getCategoryLabel(product.category, locale)}
@@ -157,7 +160,7 @@ function QuickViewDialogContent({
                           }
                         }}
                         className={cn(
-                          "relative size-8 rounded-full border border-stone-200 transition-all",
+                          "relative size-8 rounded-full border border-stone-200 transition-transform duration-150 active:scale-90",
                           swatchClass,
                           isSelected && "ring-2 ring-[#1c1a18] ring-offset-2",
                         )}
@@ -193,10 +196,10 @@ function QuickViewDialogContent({
                       type="button"
                       onClick={() => setSelectedSize(size)}
                       className={cn(
-                        "flex h-10 items-center justify-center rounded-lg border text-xs font-semibold transition-all",
+                        "flex h-10 items-center justify-center rounded-lg border text-xs font-semibold transition-all duration-150 active:scale-95",
                         isSelected
                           ? "border-[#1c1a18] bg-[#1c1a18] text-white shadow-sm"
-                          : "border-[#efe7dc] bg-[#fbf9f5] text-[#1c1a18] hover:border-[#1c1a18]/40",
+                          : "border-[#efe7dc] bg-[#fbf9f5] text-[#1c1a18] hover:border-[#1c1a18]/40 hover:bg-white",
                       )}
                     >
                       {size}
@@ -212,7 +215,7 @@ function QuickViewDialogContent({
             <Button
               type="button"
               onClick={handleAddToCart}
-              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-[background-color,transform] hover:bg-[#b5573a] active:scale-[0.98]"
+              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-[#1c1a18] text-xs font-semibold tracking-widest text-white uppercase shadow-md transition-all duration-150 hover:bg-[#b5573a] active:scale-[0.98]"
             >
               <ShoppingBag className="size-4" />
               {t("quickView.addToBag")}
@@ -222,10 +225,10 @@ function QuickViewDialogContent({
               <Link
                 href={`/products/${product.id}`}
                 onClick={() => onOpenChange(false)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#b5573a] uppercase hover:underline"
+                className="group inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#b5573a] uppercase hover:underline"
               >
                 {t("quickView.viewDetails")}
-                <ArrowRight className="size-3.5" />
+                <ArrowRight className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>
