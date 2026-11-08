@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Gift, Sparkles, Check, PenTool, Sparkle } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
@@ -171,78 +172,76 @@ function GiftCardSection({ options, updateOptions }: SubcomponentProps) {
 
       <div
         className={cn(
-          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          options.includeCard
-            ? "grid-template-rows-[1fr] opacity-100"
-            : "grid-template-rows-[0fr] pointer-events-none opacity-0",
+          "accordion-drawer",
+          options.includeCard ? "accordion-drawer-open" : "accordion-drawer-closed",
         )}
+        aria-hidden={!options.includeCard}
+        inert={!options.includeCard ? true : undefined}
       >
-        <div className="overflow-hidden">
-          {options.includeCard && (
-            <div className="space-y-3.5 pt-1 sm:pl-6">
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="gift-card-to"
-                    className="block text-[11px] font-medium text-[#1c1a18]/70"
-                  >
-                    {t("giftCustomizer.cardTo")}
-                  </label>
-                  <input
-                    id="gift-card-to"
-                    type="text"
-                    value={options.cardTo}
-                    onChange={(e) => updateOptions({ cardTo: e.target.value })}
-                    placeholder={t("giftCustomizer.cardToPlaceholder")}
-                    className="mt-1 w-full rounded-lg border border-[#efe7dc] bg-[#fbf9f5] px-3 py-2 text-xs text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/30 focus:border-[#b5573a] focus:bg-white focus:outline-hidden"
-                    maxLength={40}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="gift-card-from"
-                    className="block text-[11px] font-medium text-[#1c1a18]/70"
-                  >
-                    {t("giftCustomizer.cardFrom")}
-                  </label>
-                  <input
-                    id="gift-card-from"
-                    type="text"
-                    value={options.cardFrom}
-                    onChange={(e) => updateOptions({ cardFrom: e.target.value })}
-                    placeholder={t("giftCustomizer.cardFromPlaceholder")}
-                    className="mt-1 w-full rounded-lg border border-[#efe7dc] bg-[#fbf9f5] px-3 py-2 text-xs text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/30 focus:border-[#b5573a] focus:bg-white focus:outline-hidden"
-                    maxLength={40}
-                  />
-                </div>
-              </div>
-
+        <div className="min-h-0 overflow-hidden">
+          <div className="space-y-3.5 pt-1 sm:pl-6">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div>
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="gift-card-message"
-                    className="block text-[11px] font-medium text-[#1c1a18]/70"
-                  >
-                    {t("giftCustomizer.cardMessage")}
-                  </label>
-                  <span className="text-[10px] text-[#1c1a18]/40">
-                    {options.cardMessage.length}/150
-                  </span>
-                </div>
-                <textarea
-                  id="gift-card-message"
-                  rows={2}
-                  value={options.cardMessage}
-                  onChange={(e) => updateOptions({ cardMessage: e.target.value })}
-                  placeholder={t("giftCustomizer.cardMessagePlaceholder")}
-                  maxLength={150}
-                  className="mt-1 w-full resize-none rounded-lg border border-[#efe7dc] bg-[#fbf9f5] px-3 py-2 text-xs text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/30 focus:border-[#b5573a] focus:bg-white focus:outline-hidden"
+                <label
+                  htmlFor="gift-card-to"
+                  className="block text-[11px] font-medium text-[#1c1a18]/70"
+                >
+                  {t("giftCustomizer.cardTo")}
+                </label>
+                <input
+                  id="gift-card-to"
+                  type="text"
+                  value={options.cardTo}
+                  onChange={(e) => updateOptions({ cardTo: e.target.value })}
+                  placeholder={t("giftCustomizer.cardToPlaceholder")}
+                  className="mt-1 w-full rounded-lg border border-[#efe7dc] bg-[#fbf9f5] px-3 py-2 text-xs text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/30 focus:border-[#b5573a] focus:bg-white focus:outline-hidden"
+                  maxLength={40}
                 />
               </div>
-
-              <GiftCardPreview options={options} />
+              <div>
+                <label
+                  htmlFor="gift-card-from"
+                  className="block text-[11px] font-medium text-[#1c1a18]/70"
+                >
+                  {t("giftCustomizer.cardFrom")}
+                </label>
+                <input
+                  id="gift-card-from"
+                  type="text"
+                  value={options.cardFrom}
+                  onChange={(e) => updateOptions({ cardFrom: e.target.value })}
+                  placeholder={t("giftCustomizer.cardFromPlaceholder")}
+                  className="mt-1 w-full rounded-lg border border-[#efe7dc] bg-[#fbf9f5] px-3 py-2 text-xs text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/30 focus:border-[#b5573a] focus:bg-white focus:outline-hidden"
+                  maxLength={40}
+                />
+              </div>
             </div>
-          )}
+
+            <div>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="gift-card-message"
+                  className="block text-[11px] font-medium text-[#1c1a18]/70"
+                >
+                  {t("giftCustomizer.cardMessage")}
+                </label>
+                <span className="text-[10px] text-[#1c1a18]/40">
+                  {options.cardMessage.length}/150
+                </span>
+              </div>
+              <textarea
+                id="gift-card-message"
+                rows={2}
+                value={options.cardMessage}
+                onChange={(e) => updateOptions({ cardMessage: e.target.value })}
+                placeholder={t("giftCustomizer.cardMessagePlaceholder")}
+                maxLength={150}
+                className="mt-1 w-full resize-none rounded-lg border border-[#efe7dc] bg-[#fbf9f5] px-3 py-2 text-xs text-[#1c1a18] transition-colors placeholder:text-[#1c1a18]/30 focus:border-[#b5573a] focus:bg-white focus:outline-hidden"
+              />
+            </div>
+
+            <GiftCardPreview options={options} />
+          </div>
         </div>
       </div>
     </div>
@@ -252,6 +251,8 @@ function GiftCardSection({ options, updateOptions }: SubcomponentProps) {
 export function GiftCustomizer({ className = "" }: { className?: string }) {
   const { t } = useI18n();
   const { options, updateOptions, isLoaded } = useGiftOptions();
+  const [hasEverOpened, setHasEverOpened] = useState(options.enabled);
+  const isDrawerMounted = options.enabled || hasEverOpened;
 
   if (!isLoaded) return null;
 
@@ -268,7 +269,10 @@ export function GiftCustomizer({ className = "" }: { className?: string }) {
         <input
           type="checkbox"
           checked={options.enabled}
-          onChange={(e) => updateOptions({ enabled: e.target.checked })}
+          onChange={(e) => {
+            setHasEverOpened(true);
+            updateOptions({ enabled: e.target.checked });
+          }}
           className="mt-0.5 size-4 cursor-pointer rounded-sm border-[#1c1a18]/30 text-[#b5573a] accent-[#b5573a]"
         />
         <div className="flex-1">
@@ -283,23 +287,23 @@ export function GiftCustomizer({ className = "" }: { className?: string }) {
       </label>
 
       {/* Expanded Gift Customization Drawer */}
-      <div
-        className={cn(
-          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          options.enabled
-            ? "grid-template-rows-[1fr] opacity-100"
-            : "grid-template-rows-[0fr] pointer-events-none opacity-0",
-        )}
-      >
-        <div className="overflow-hidden">
-          {options.enabled && (
+      {isDrawerMounted && (
+        <div
+          className={cn(
+            "accordion-drawer",
+            options.enabled ? "accordion-drawer-open" : "accordion-drawer-closed",
+          )}
+          aria-hidden={!options.enabled}
+          inert={!options.enabled ? true : undefined}
+        >
+          <div className="min-h-0 overflow-hidden">
             <div className="mt-5 space-y-5 border-t border-[#efe7dc] pt-5">
               <GiftBoxSelector options={options} updateOptions={updateOptions} />
               <GiftCardSection options={options} updateOptions={updateOptions} />
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
